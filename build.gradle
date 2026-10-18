@@ -2,7 +2,7 @@ plugins {
     id 'eclipse'
     id 'idea'
     id 'maven-publish'
-    id 'net.minecraftforge.gradle' version '[5.1,6.0)'
+    id 'net.minecraftforge.gradle' version '5.1.77'
 }
 
 group = 'br.com.petrickfaria.minemon'
@@ -25,6 +25,9 @@ def speciesAssetRoots = [
     'assets/minemon/licenses/pokemon/'
 ]
 processResources {
+    doLast {
+        exec { commandLine 'python3', 'tools/prepare_runtime_assets.py', destinationDir.absolutePath }
+    }
     exclude { details ->
         def root = speciesAssetRoots.find { details.path.startsWith(it) }
         if (root == null) return false
@@ -44,6 +47,7 @@ minecraft {
         }
         client { property 'forge.enabledGameTestNamespaces', 'minemon' }
         server { args '--nogui' }
+        gameTestServer { property 'forge.enabledGameTestNamespaces', 'minemon' }
     }
 }
 
@@ -55,10 +59,13 @@ repositories {
 
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+    testImplementation 'junit:junit:4.13.2'
     implementation fg.deobf('software.bernie.geckolib:geckolib-forge-1.19:3.1.40')
 }
 
 jar {
+    exclude 'br/com/petrickfaria/minemon/gametest/**'
+    exclude 'data/minemon/structures/test_arena.nbt'
     from('ASSET_LICENSES.md') {
         into 'META-INF'
     }
