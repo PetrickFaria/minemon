@@ -26,7 +26,8 @@ public final class CompanionTests {
   FakePlayer p=new FakePlayer(h.getLevel(),new GameProfile(UUID.randomUUID(),"MinemonTester")) {
    @Override public boolean isInvulnerableTo(DamageSource source) { return false; }
   };
-  p.setGameMode(GameType.SURVIVAL);
+  h.getLevel().getServer().setDifficulty(net.minecraft.world.Difficulty.NORMAL,true);
+  p.setGameMode(GameType.SURVIVAL);p.tickCount=100;
   BlockPos pos=h.absolutePos(new BlockPos(7,1,5));
   p.moveTo(pos.getX()+0.5,pos.getY(),pos.getZ()+0.5,0,0);
   h.getLevel().addNewPlayer(p);
@@ -69,7 +70,20 @@ public final class CompanionTests {
   MinemonCreature b=spawn(h);FakePlayer p=player(h);b.tame(p);b.setOrderedToSit(true);
   CompoundTag tag=new CompoundTag();b.saveWithoutId(tag);MinemonCreature restored=ModEntities.BULBASAUR.get().create(h.getLevel());restored.load(tag);
   check(h,restored.isTame()&&p.getUUID().equals(restored.getOwnerUUID())&&restored.isOrderedToSit(),"Taming UUID and sit order must survive NBT reload");
-  var start=b.position();
-  h.runAfterDelay(40,()->{check(h,b.position().distanceToSqr(start)<1,"Sitting creature must stay in place");p.discard();h.succeed();});
+  h.runAfterDelay(20,()->{var start=b.position();h.runAfterDelay(30,()->{double dx=b.getX()-start.x,dz=b.getZ()-start.z;check(h,dx*dx+dz*dz<0.25,"Sitting creature must stay in place");p.discard();h.succeed();});});
  }
+ @GameTest(template="test_arena",timeoutTicks=100)
+ public static void registeredSpeciesSpawnPersistAndHaveEggs(GameTestHelper h) {
+  for(var entry:ModEntities.SPECIES.entrySet()) {
+   MinemonCreature b=entry.getValue().get().create(h.getLevel());
+   check(h,b!=null,"Entity creation failed: "+entry.getKey());
+   var egg=(net.minecraft.world.item.SpawnEggItem)br.com.petrickfaria.minemon.registry.ModItems.EGGS.get(entry.getKey()).get();
+   check(h,egg.getType(null)==entry.getValue().get(),"Wrong spawn egg mapping: "+entry.getKey());
+   b.setOwnerUUID(UUID.randomUUID());b.setTame(true);b.setOrderedToSit(true);CompoundTag tag=new CompoundTag();b.saveWithoutId(tag);
+   MinemonCreature restored=entry.getValue().get().create(h.getLevel());restored.load(tag);
+   check(h,restored.isTame()&&restored.isOrderedToSit()&&b.getOwnerUUID().equals(restored.getOwnerUUID()),"Persistence failed: "+entry.getKey());
+  }
+  h.succeed();
+ }
+
 }

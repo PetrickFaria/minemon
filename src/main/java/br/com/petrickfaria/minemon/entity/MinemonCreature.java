@@ -47,6 +47,9 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     private int wildUnreachableTicks;
     private int blinkCooldownTicks;
     private boolean blinkPending;
+    private int attackAnimationTicks;
+    private int attackSequence;
+    private int playedAttackSequence;
 
     public MinemonCreature(EntityType<? extends TamableAnimal> type, Level level) {
         super(type, level);
@@ -66,6 +69,11 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
                 .add(Attributes.FOLLOW_RANGE, 24.0D);
     }
 
+    public static AttributeSupplier.Builder createAttributes(SpeciesDefinitions.Definition d) {
+        return createAttributes().add(Attributes.MAX_HEALTH,d.health()).add(Attributes.ATTACK_DAMAGE,d.attack()).add(Attributes.MOVEMENT_SPEED,d.speed()).add(Attributes.FLYING_SPEED,0.4D);
+    }
+    public boolean isFlyingSpecies() { return false; }
+
     @Override
     public AgeableMob getBreedOffspring(ServerLevel level, AgeableMob partner) {
         return (AgeableMob) this.getType().create(level);
@@ -76,8 +84,8 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         this.goalSelector.addGoal(0, new FloatGoal(this));
         this.goalSelector.addGoal(1, new SitWhenOrderedToGoal(this));
         this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.2D, true));
-        this.goalSelector.addGoal(3, new FollowOwnerGoal(this, 1.0D, 10.0F, 2.0F, false));
-        this.goalSelector.addGoal(4, new RandomStrollGoal(this, 0.8D));
+        this.goalSelector.addGoal(3, new FollowOwnerGoal(this, 1.0D, 10.0F, 2.0F, this.isFlyingSpecies()));
+        this.goalSelector.addGoal(4, this.isFlyingSpecies() ? new net.minecraft.world.entity.ai.goal.WaterAvoidingRandomFlyingGoal(this, 0.8D) : new RandomStrollGoal(this, 0.8D));
         this.goalSelector.addGoal(5, new LookAtPlayerGoal(this, Player.class, 8.0F));
         this.goalSelector.addGoal(6, new RandomLookAroundGoal(this));
 
@@ -168,6 +176,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     public void tick() {
         super.tick();
         if (this.level.isClientSide) {
+            if (this.attackAnimationTicks > 0) this.attackAnimationTicks--;
             if (this.blinkCooldownTicks > 0) this.blinkCooldownTicks--;
             if (this.blinkCooldownTicks == 0) {
                 this.blinkPending = true;
@@ -212,8 +221,16 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     }
 
     @Override
+    public boolean doHurtTarget(net.minecraft.world.entity.Entity target) {
+        boolean hit=super.doHurtTarget(target);
+        if(hit && !this.level.isClientSide) this.level.broadcastEntityEvent(this,(byte)61);
+        return hit;
+    }
+
+    @Override
     public void handleEntityEvent(byte id) {
-        if (id == 7) this.level.addParticle(net.minecraft.core.particles.ParticleTypes.HEART,
+        if (id == 61) { this.attackAnimationTicks=16; this.attackSequence++; }
+        else if (id == 7) this.level.addParticle(net.minecraft.core.particles.ParticleTypes.HEART,
                 this.getX(), this.getY() + 0.5D, this.getZ(), 0.0D, 0.1D, 0.0D);
         else if (id == 6) this.level.addParticle(net.minecraft.core.particles.ParticleTypes.SMOKE,
                 this.getX(), this.getY() + 0.5D, this.getZ(), 0.0D, 0.1D, 0.0D);
@@ -231,20 +248,28 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         String slug = this.getSpeciesSlug();
         String clip;
         boolean loop = true;
+        var definition=SpeciesDefinitions.get(slug);
+        String attack=SpeciesAssetIndex.clip(slug,"physical_attack","physical");
+        if(attack==null) attack=SpeciesAssetIndex.clip(slug,"attack","attack");
         if (this.isDeadOrDying()) {
             clip = SpeciesAssetIndex.clip(slug, "faint", "ground_idle");
             loop = false;
+        } else if (this.attackAnimationTicks>0 && attack!=null) {
+            clip=attack;loop=false;
+            if(this.playedAttackSequence!=this.attackSequence){controller.markNeedsReload();this.playedAttackSequence=this.attackSequence;}
         } else if (this.isMoving(event)) {
-            clip = SpeciesAssetIndex.clip(slug, "ground_walk", "ground_idle");
+            clip = definition.walk();
+            String run=SpeciesAssetIndex.clip(slug,"ground_run","run");
+            if(!this.isFlyingSpecies() && run!=null && this.getDeltaMovement().horizontalDistanceSqr()>0.01D) clip=run;
         } else {
-            clip = SpeciesAssetIndex.clip(slug, "ground_idle", "idle");
+            clip = definition.idle();
         }
         if (clip != null) controller.setAnimation(new AnimationBuilder().addAnimation(clip, loop));
         return PlayState.CONTINUE;
     }
 
     private boolean isMoving(AnimationEvent<?> event) {
-        return event.isMoving() || this.getDeltaMovement().horizontalDistanceSqr() > 0.0004D;
+        return !this.isOrderedToSit() && (event.isMoving() || this.getDeltaMovement().horizontalDistanceSqr() > 0.0004D || (this.getX()-this.xo)*(this.getX()-this.xo)+(this.getZ()-this.zo)*(this.getZ()-this.zo)>0.0001D);
     }
 
     private <E extends IAnimatable> PlayState blinkPredicate(AnimationEvent<E> event) {

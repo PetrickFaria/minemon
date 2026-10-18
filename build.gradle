@@ -24,6 +24,9 @@ def speciesAssetRoots = [
     'assets/minemon/sounds/pokemon/',
     'assets/minemon/licenses/pokemon/'
 ]
+def runtimeManifestFile = file('src/main/resources/data/minemon/runtime_species.json')
+def runtimeDefinitions = runtimeManifestFile.exists() ? new groovy.json.JsonSlurper().parse(runtimeManifestFile) : []
+def runtimeAssetFiles = runtimeDefinitions.collectMany { d -> [d.model,d.texture,d.animation] + d.sounds + d.licenses }.toSet()
 processResources {
     doLast {
         exec { commandLine 'python3', 'tools/prepare_runtime_assets.py', destinationDir.absolutePath }
@@ -31,6 +34,7 @@ processResources {
     exclude { details ->
         def root = speciesAssetRoots.find { details.path.startsWith(it) }
         if (root == null) return false
+        if (!runtimeAssetFiles.isEmpty()) return !runtimeAssetFiles.contains(details.path)
         def relative = details.path.substring(root.length())
         def species = relative.tokenize('/').find()
         return species == null || !runtimeSpecies.contains(species)
@@ -45,7 +49,10 @@ minecraft {
             property 'forge.logging.console.level', 'info'
             mods { minemon { source sourceSets.main } }
         }
-        client { property 'forge.enabledGameTestNamespaces', 'minemon' }
+        client {
+            property 'forge.enabledGameTestNamespaces', 'minemon'
+            property 'minemon.clientSmokeTest', project.hasProperty('clientSmokeTest').toString()
+        }
         server { args '--nogui' }
         gameTestServer { property 'forge.enabledGameTestNamespaces', 'minemon' }
     }

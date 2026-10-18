@@ -11,7 +11,7 @@ import net.minecraftforge.fml.common.Mod;
 public final class ClientEvents {
     @SubscribeEvent
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
-        event.registerEntityRenderer(ModEntities.BULBASAUR.get(), MinemonRenderer::new);
+        for (var type : ModEntities.SPECIES.values()) event.registerEntityRenderer(type.get(), MinemonRenderer::new);
     }
 
     private ClientEvents() {}

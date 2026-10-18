@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Validate the generated catalog and every resource path it references."""
+import sys
 import json
 import struct
 from pathlib import Path
@@ -50,44 +51,9 @@ if pack_meta.get("pack", {}).get("pack_format") != 9:
     raise SystemExit("pack.mcmeta must use resource pack format 9 for Minecraft 1.19.2")
 print(f"Bulbasaur: {len(geometry['minecraft:geometry'][0]['bones'])} bones; {len(animations)} animation clips; spawn egg and pack.mcmeta valid")
 
-# The source tree intentionally keeps the full extracted asset library, while the
-# runtime JAR includes only entities actually registered in this milestone.
-properties = {}
-for line in (root / "gradle.properties").read_text(encoding="utf-8").splitlines():
-    if "=" in line and not line.lstrip().startswith("#"):
-        key, value = line.split("=", 1)
-        properties[key.strip()] = value.strip()
-runtime_species = {slug.strip().lower() for slug in properties.get("runtime_species", "").split(",") if slug.strip()}
-catalog_species = {species["slug"]: species for species in catalog}
-if not runtime_species or not runtime_species.issubset(catalog_species):
-    raise SystemExit(f"Invalid runtime_species list: {sorted(runtime_species)}")
-for slug in runtime_species:
-    species = catalog_species[slug]
-    animation_paths = species["resources"].get("animations", [])
-    model_paths = species["resources"].get("models", [])
-    if not animation_paths or not model_paths:
-        raise SystemExit(f"Runtime species {slug} must declare model and animation resources")
-    model_data = json.loads((resources / model_paths[0]).read_text(encoding="utf-8"))
-    model_geometries = model_data.get("minecraft:geometry", [])
-    geometry_bones = {bone["name"] for part in model_geometries for bone in part.get("bones", [])}
-    for path in animation_paths:
-        data = json.loads((resources / path).read_text(encoding="utf-8"))
-        for animation_name, animation in data.get("animations", {}).items():
-            for bone in animation.get("bones", {}):
-                if bone not in geometry_bones:
-                    raise SystemExit(f"{slug} animation {animation_name} references missing model bone {bone}")
-            for field in ("particle_effects", "sound_effects"):
-                events = animation.get(field)
-                if events is None:
-                    continue
-                if not isinstance(events, dict) or any(not isinstance(event, dict) for event in events.values()):
-                    raise SystemExit(f"{path}: {animation_name}.{field} is not compatible with GeckoLib 3.1.40")
-    if slug == "bulbasaur":
-        actual_clips = {name.rsplit(".", 1)[-1] for name in animations}
-        missing_clips = set(species.get("animationClips", [])) - actual_clips
-        if missing_clips:
-            raise SystemExit(f"Bulbasaur catalog references missing animation clips: {sorted(missing_clips)}")
-print(f"Runtime species: {', '.join(sorted(runtime_species))}; animation bones and GeckoLib event tracks validated")
+# Runtime validation uses the explicitly selected model/animation pair.
+import subprocess
+subprocess.run([sys.executable, str(root/'tools/verify_runtime.py')],check=True)
 shared = json.loads((resources / "data/minemon/shared_resources.json").read_text(encoding="utf-8"))
 for entry in shared:
     if not (resources / entry["resource"]).is_file():

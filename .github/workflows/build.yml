@@ -27,7 +27,11 @@ jobs:
         run: |
           mkdir -p run
           echo eula=true > run/eula.txt
-          timeout 180s ./gradlew --no-daemon runGameTestServer
+          timeout 360s ./gradlew --no-daemon runGameTestServer
+      - name: Launch Minecraft client and validate GeckoLib cache
+        run: |
+          timeout 300s xvfb-run -a ./gradlew --no-daemon runClient -PclientSmokeTest
+          test -f run/client-validation.txt
       - name: Verify executable mod JAR contents
         shell: bash
         run: |
@@ -42,12 +46,7 @@ jobs:
           jar tf "$jar_file" | grep -Fx 'assets/minemon/textures/pokemon/bulbasaur/bulbasaur.png'
           jar tf "$jar_file" | grep -Fx 'assets/minemon/animations/bulbasaur/bulbasaur.animation.json'
           jar tf "$jar_file" | grep -Fx 'assets/minemon/models/item/bulbasaur_spawn_egg.json'
-          unexpected_species_assets="$(jar tf "$jar_file" | grep -E '^assets/minemon/(geo|animations|textures/pokemon|sounds/pokemon|licenses/pokemon)/' | grep -v '/$' | grep -v '/bulbasaur/' || true)"
-          if [ -n "$unexpected_species_assets" ]; then
-            printf '%s\n' "$unexpected_species_assets"
-            echo 'JAR contains resources for species not enabled in runtime_species.' >&2
-            exit 1
-          fi
+          python3 tools/verify_runtime.py "$jar_file"
           unzip -p "$jar_file" META-INF/mods.toml | grep -F 'modId="minemon"'
           unzip -p "$jar_file" META-INF/mods.toml | grep -F 'versionRange="[1.19.2,1.20)"'
           unzip -p "$jar_file" META-INF/mods.toml | grep -F 'modId="geckolib3"'
@@ -71,6 +70,8 @@ jobs:
           name: minemon-test-diagnostics
           path: |
             run/logs/
+            run/client-validation.txt
+            run/screenshots/
             build/test-results/
             build/diagnostics/
           retention-days: 7

@@ -1,0 +1,1092 @@
+[
+  {
+    "slug": "bulbasaur",
+    "accepted": true,
+    "reason": null,
+    "issues": [],
+    "definition": {
+      "slug": "bulbasaur",
+      "name": "Bulbasaur",
+      "model": "assets/minemon/geo/bulbasaur/bulbasaur.geo.json",
+      "texture": "assets/minemon/textures/pokemon/bulbasaur/bulbasaur.png",
+      "animation": "assets/minemon/animations/bulbasaur/bulbasaur.animation.json",
+      "mode": "ground",
+      "scale": 0.8,
+      "width": 0.6,
+      "height": 0.8,
+      "health": 22.5,
+      "attack": 4.083333333333333,
+      "speed": 0.245,
+      "clips": {
+        "ground_idle": "animation.bulbasaur.ground_idle",
+        "ground_walk": "animation.bulbasaur.ground_walk",
+        "sleep": "animation.bulbasaur.sleep",
+        "faint": "animation.bulbasaur.faint",
+        "blink": "animation.bulbasaur.blink",
+        "cry": "animation.bulbasaur.cry",
+        "render": "animation.bulbasaur.render"
+      },
+      "idle": "animation.bulbasaur.ground_idle",
+      "walk": "animation.bulbasaur.ground_walk",
+      "excluded_clips": [],
+      "sounds": [
+        "assets/minemon/sounds/pokemon/bulbasaur/bulbasaur_ambient.ogg",
+        "assets/minemon/sounds/pokemon/bulbasaur/bulbasaur_cry.ogg",
+        "assets/minemon/sounds/pokemon/bulbasaur/bulbasaur_cry001.ogg",
+        "assets/minemon/sounds/pokemon/bulbasaur/bulbasaur_cry002.ogg"
+      ],
+      "licenses": [
+        "assets/minemon/licenses/pokemon/bulbasaur/model-license.txt"
+      ]
+    }
+  },
+  {
+    "slug": "pikachu",
+    "accepted": true,
+    "reason": null,
+    "issues": [],
+    "definition": {
+      "slug": "pikachu",
+      "name": "Pikachu",
+      "model": "assets/minemon/geo/pikachu/pikachu_male.geo.json",
+      "texture": "assets/minemon/textures/pokemon/pikachu/pikachu.png",
+      "animation": "assets/minemon/animations/pikachu/pikachu.animation.json",
+      "mode": "ground",
+      "scale": 0.5,
+      "width": 0.7,
+      "height": 1.3,
+      "health": 20,
+      "attack": 4.583333333333333,
+      "speed": 0.29,
+      "clips": {
+        "ground_idle": "animation.pikachu.ground_idle",
+        "ground_walk": "animation.pikachu.ground_walk",
+        "sleep": "animation.pikachu.sleep",
+        "battle_idle": "animation.pikachu.battle_idle",
+        "shoulder_right": "animation.pikachu.shoulder_right",
+        "shoulder_left": "animation.pikachu.shoulder_left",
+        "blink": "animation.pikachu.blink",
+        "cry": "animation.pikachu.cry",
+        "render": "animation.pikachu.render"
+      },
+      "idle": "animation.pikachu.ground_idle",
+      "walk": "animation.pikachu.ground_walk",
+      "excluded_clips": [],
+      "sounds": [
+        "assets/minemon/sounds/pokemon/pikachu/pikachu_ambient.ogg",
+        "assets/minemon/sounds/pokemon/pikachu/pikachu_cry.ogg"
+      ],
+      "licenses": [
+        "assets/minemon/licenses/pokemon/pikachu/model-license.txt"
+      ]
+    }
+  },
+  {
+    "slug": "charmander",
+    "accepted": true,
+    "reason": null,
+    "issues": [],
+    "definition": {
+      "slug": "charmander",
+      "name": "Charmander",
+      "model": "assets/minemon/geo/charmander/charmander.geo.json",
+      "texture": "assets/minemon/textures/pokemon/charmander/charmander.png",
+      "animation": "assets/minemon/animations/charmander/charmander.animation.json",
+      "mode": "ground",
+      "scale": 0.7,
+      "width": 0.7,
+      "height": 1.1,
+      "health": 20,
+      "attack": 4.333333333333333,
+      "speed": 0.265,
+      "clips": {
+        "ground_idle": "animation.charmander.ground_idle",
+        "ground_walk": "animation.charmander.ground_walk",
+        "special_attack": "animation.charmander.special_attack",
+        "physical_attack": "animation.charmander.physical_attack",
+        "faint": "animation.charmander.faint",
+        "sleep": "animation.charmander.sleep",
+        "damage": "animation.charmander.damage",
+        "blink": "animation.charmander.blink",
+        "ground_pulse1": "animation.charmander.ground_pulse1",
+        "cry": "animation.charmander.cry",
+        "render": "animation.charmander.render"
+      },
+      "idle": "animation.charmander.ground_idle",
+      "walk": "animation.charmander.ground_walk",
+      "excluded_clips": [],
+      "sounds": [
+        "assets/minemon/sounds/pokemon/charmander/charmander_ambient.ogg",
+        "assets/minemon/sounds/pokemon/charmander/charmander_cry.ogg"
+      ],
+      "licenses": [
+        "assets/minemon/licenses/pokemon/charmander/model-license.txt"
+      ]
+    }
+  },
+  {
+    "slug": "squirtle",
+    "accepted": true,
+    "reason": null,
+    "issues": [],
+    "definition": {
+      "slug": "squirtle",
+      "name": "Squirtle",
+      "model": "assets/minemon/geo/squirtle/squirtle.geo.json",
+      "texture": "assets/minemon/textures/pokemon/squirtle/squirtle.png",
+      "animation": "assets/minemon/animations/squirtle/squirtle.animation.json",
+      "mode": "ground",
+      "scale": 0.7,
+      "width": 0.6,
+      "height": 1.2,
+      "health": 22.0,
+      "attack": 4.0,
+      "speed": 0.243,
+      "clips": {
+        "ground_idle": "animation.squirtle.ground_idle",
+        "battle_idle": "animation.squirtle.battle_idle",
+        "ground_walk": "animation.squirtle.ground_walk",
+        "ground_run": "animation.squirtle.ground_run",
+        "water_idle": "animation.squirtle.water_idle",
+        "water_swim": "animation.squirtle.water_swim",
+        "surfacewater_idle": "animation.squirtle.surfacewater_idle",
+        "surfacewater_swim": "animation.squirtle.surfacewater_swim",
+        "sleep": "animation.squirtle.sleep",
+        "blink": "animation.squirtle.blink",
+        "cry": "animation.squirtle.cry",
+        "faint": "animation.squirtle.faint",
+        "shoulder_left": "animation.squirtle.shoulder_left",
+        "shoulder_right": "animation.squirtle.shoulder_right",
+        "quirk_ground_idle": "animation.squirtle.quirk_ground_idle",
+        "quirk_water": "animation.squirtle.quirk_water",
+        "physical": "animation.squirtle.physical",
+        "special": "animation.squirtle.special",
+        "status": "animation.squirtle.status",
+        "recoil": "animation.squirtle.recoil"
+      },
+      "idle": "animation.squirtle.ground_idle",
+      "walk": "animation.squirtle.ground_walk",
+      "excluded_clips": [],
+      "sounds": [
+        "assets/minemon/sounds/pokemon/squirtle/squirtle_ambient.ogg",
+        "assets/minemon/sounds/pokemon/squirtle/squirtle_cry.ogg"
+      ],
+      "licenses": [
+        "assets/minemon/licenses/pokemon/squirtle/model-license.txt"
+      ]
+    }
+  },
+  {
+    "slug": "jolteon",
+    "accepted": true,
+    "reason": null,
+    "issues": [],
+    "definition": {
+      "slug": "jolteon",
+      "name": "Jolteon",
+      "model": "assets/minemon/geo/jolteon/jolteon.geo.json",
+      "texture": "assets/minemon/textures/pokemon/jolteon/jolteon.png",
+      "animation": "assets/minemon/animations/jolteon/jolteon.animation.json",
+      "mode": "ground",
+      "scale": 0.8,
+      "width": 0.9,
+      "height": 1,
+      "health": 32.5,
+      "attack": 5.416666666666667,
+      "speed": 0.33,
+      "clips": {
+        "ground_idle": "animation.jolteon.ground_idle",
+        "ground_walk": "animation.jolteon.ground_walk",
+        "ground_run": "animation.jolteon.ground_run",
+        "blink": "animation.jolteon.blink",
+        "render": "animation.jolteon.render"
+      },
+      "idle": "animation.jolteon.ground_idle",
+      "walk": "animation.jolteon.ground_walk",
+      "excluded_clips": [
+        "animation.jolteon.cry"
+      ],
+      "sounds": [
+        "assets/minemon/sounds/pokemon/jolteon/jolteon_ambient.ogg",
+        "assets/minemon/sounds/pokemon/jolteon/jolteon_cry.ogg"
+      ],
+      "licenses": [
+        "assets/minemon/licenses/pokemon/jolteon/model-license.txt"
+      ]
+    }
+  },
+  {
+    "slug": "charizard",
+    "accepted": true,
+    "reason": null,
+    "issues": [],
+    "definition": {
+      "slug": "charizard",
+      "name": "Charizard",
+      "model": "assets/minemon/geo/charizard/charizard.geo.json",
+      "texture": "assets/minemon/textures/pokemon/charizard/charizard.png",
+      "animation": "assets/minemon/animations/charizard/charizard.animation.json",
+      "mode": "ground",
+      "scale": 1.35,
+      "width": 1,
+      "height": 2.1,
+      "health": 39.0,
+      "attack": 7.0,
+      "speed": 0.3,
+      "clips": {
+        "ground_idle": "animation.charizard.ground_idle",
+        "ground_walk": "animation.charizard.ground_walk",
+        "battle_idle": "animation.charizard.battle_idle",
+        "physical": "animation.charizard.physical",
+        "special": "animation.charizard.special",
+        "status": "animation.charizard.status",
+        "recoil": "animation.charizard.recoil",
+        "air_idle": "animation.charizard.air_idle",
+        "air_fly": "animation.charizard.air_fly",
+        "sleep": "animation.charizard.sleep",
+        "faint": "animation.charizard.faint",
+        "blink": "animation.charizard.blink",
+        "cry": "animation.charizard.cry",
+        "render": "animation.charizard.render"
+      },
+      "idle": "animation.charizard.ground_idle",
+      "walk": "animation.charizard.ground_walk",
+      "excluded_clips": [],
+      "sounds": [
+        "assets/minemon/sounds/pokemon/charizard/charizard_ambient.ogg",
+        "assets/minemon/sounds/pokemon/charizard/charizard_cry.ogg"
+      ],
+      "licenses": [
+        "assets/minemon/licenses/pokemon/charizard/model-license.txt"
+      ]
+    }
+  },
+  {
+    "slug": "blastoise",
+    "accepted": true,
+    "reason": null,
+    "issues": [],
+    "definition": {
+      "slug": "blastoise",
+      "name": "Blastoise",
+      "model": "assets/minemon/geo/blastoise/blastoise.geo.json",
+      "texture": "assets/minemon/textures/pokemon/blastoise/blastoise.png",
+      "animation": "assets/minemon/animations/blastoise/blastoise.animation.json",
+      "mode": "ground",
+      "scale": 0.9,
+      "width": 1.8,
+      "height": 3.0,
+      "health": 39.5,
+      "attack": 6.916666666666667,
+      "speed": 0.278,
+      "clips": {
+        "ground_idle": "animation.blastoise.ground_idle",
+        "battle_idle": "animation.blastoise.battle_idle",
+        "ground_walk": "animation.blastoise.ground_walk",
+        "ground_run": "animation.blastoise.ground_run",
+        "water_idle": "animation.blastoise.water_idle",
+        "water_swim": "animation.blastoise.water_swim",
+        "surfacewater_idle": "animation.blastoise.surfacewater_idle",
+        "surfacewater_swim": "animation.blastoise.surfacewater_swim",
+        "sleep": "animation.blastoise.sleep",
+        "blink": "animation.blastoise.blink",
+        "cry": "animation.blastoise.cry",
+        "faint": "animation.blastoise.faint",
+        "quirk_ground_idle": "animation.blastoise.quirk_ground_idle",
+        "quirk_battle_idle": "animation.blastoise.quirk_battle_idle",
+        "quirk_battle_idle2": "animation.blastoise.quirk_battle_idle2",
+        "physical": "animation.blastoise.physical",
+        "special": "animation.blastoise.special",
+        "status": "animation.blastoise.status",
+        "recoil": "animation.blastoise.recoil"
+      },
+      "idle": "animation.blastoise.ground_idle",
+      "walk": "animation.blastoise.ground_walk",
+      "excluded_clips": [],
+      "sounds": [
+        "assets/minemon/sounds/pokemon/blastoise/blastoise_ambient.ogg",
+        "assets/minemon/sounds/pokemon/blastoise/blastoise_cry.ogg"
+      ],
+      "licenses": [
+        "assets/minemon/licenses/pokemon/blastoise/model-license.txt"
+      ]
+    }
+  },
+  {
+    "slug": "ivysaur",
+    "accepted": true,
+    "reason": null,
+    "issues": [],
+    "definition": {
+      "slug": "ivysaur",
+      "name": "Ivysaur",
+      "model": "assets/minemon/geo/ivysaur/ivysaur.geo.json",
+      "texture": "assets/minemon/textures/pokemon/ivysaur/ivysaur.png",
+      "animation": "assets/minemon/animations/ivysaur/ivysaur.animation.json",
+      "mode": "ground",
+      "scale": 1,
+      "width": 0.7,
+      "height": 1,
+      "health": 30.0,
+      "attack": 5.166666666666667,
+      "speed": 0.26,
+      "clips": {
+        "ground_idle": "animation.ivysaur.ground_idle",
+        "ground_walk": "animation.ivysaur.ground_walk",
+        "sleep": "animation.ivysaur.sleep",
+        "faint": "animation.ivysaur.faint",
+        "blink": "animation.ivysaur.blink",
+        "cry": "animation.ivysaur.cry",
+        "render": "animation.ivysaur.render"
+      },
+      "idle": "animation.ivysaur.ground_idle",
+      "walk": "animation.ivysaur.ground_walk",
+      "excluded_clips": [],
+      "sounds": [
+        "assets/minemon/sounds/pokemon/ivysaur/ivysaur_ambient.ogg",
+        "assets/minemon/sounds/pokemon/ivysaur/ivysaur_cry.ogg"
+      ],
+      "licenses": [
+        "assets/minemon/licenses/pokemon/ivysaur/model-license.txt"
+      ]
+    }
+  },
+  {
+    "slug": "gastly",
+    "accepted": false,
+    "reason": "Incompatible arrays of particle events in the original base and shiny animations.",
+    "issues": [
+      "animation.gastly.ground_idle incompatible particle_effects",
+      "animation.gastly.ground_walk incompatible particle_effects",
+      "animation.gastly.sleep incompatible particle_effects"
+    ],
+    "definition": {
+      "slug": "gastly",
+      "name": "Gastly",
+      "model": "assets/minemon/geo/gastly/gastly.geo.json",
+      "texture": "assets/minemon/textures/pokemon/gastly/gastly.png",
+      "animation": "assets/minemon/animations/gastly/gastly.animation.json",
+      "mode": "ground",
+      "scale": 1.7,
+      "width": 0.4,
+      "height": 0.4,
+      "health": 20,
+      "attack": 3,
+      "speed": 0.28,
+      "clips": {
+        "ground_idle": "animation.gastly.ground_idle",
+        "ground_walk": "animation.gastly.ground_walk",
+        "sleep": "animation.gastly.sleep",
+        "blink": "animation.gastly.blink"
+      },
+      "idle": "animation.gastly.ground_idle",
+      "walk": "animation.gastly.ground_walk",
+      "excluded_clips": [],
+      "sounds": [
+        "assets/minemon/sounds/pokemon/gastly/gastly_ambient.ogg",
+        "assets/minemon/sounds/pokemon/gastly/gastly_cry.ogg"
+      ],
+      "licenses": [
+        "assets/minemon/licenses/pokemon/gastly/model-license.txt"
+      ]
+    }
+  },
+  {
+    "slug": "haunter",
+    "accepted": true,
+    "reason": null,
+    "issues": [],
+    "definition": {
+      "slug": "haunter",
+      "name": "Haunter",
+      "model": "assets/minemon/geo/haunter/haunter.geo.json",
+      "texture": "assets/minemon/textures/pokemon/haunter/haunter.png",
+      "animation": "assets/minemon/animations/haunter/haunter.animation.json",
+      "mode": "flying",
+      "scale": 1.2,
+      "width": 1.1,
+      "height": 1.4,
+      "health": 22.5,
+      "attack": 4.166666666666667,
+      "speed": 0.295,
+      "clips": {
+        "ground_idle": "animation.haunter.ground_idle",
+        "mouth_closed": "animation.haunter.mouth_closed",
+        "blink": "animation.haunter.blink",
+        "cry": "animation.haunter.cry"
+      },
+      "idle": "animation.haunter.ground_idle",
+      "walk": "animation.haunter.ground_idle",
+      "excluded_clips": [],
+      "sounds": [
+        "assets/minemon/sounds/pokemon/haunter/haunter_ambient.ogg",
+        "assets/minemon/sounds/pokemon/haunter/haunter_cry.ogg"
+      ],
+      "licenses": [
+        "assets/minemon/licenses/pokemon/haunter/model-license.txt"
+      ]
+    }
+  },
+  {
+    "slug": "gengar",
+    "accepted": true,
+    "reason": null,
+    "issues": [],
+    "definition": {
+      "slug": "gengar",
+      "name": "Gengar",
+      "model": "assets/minemon/geo/gengar/gengar.geo.json",
+      "texture": "assets/minemon/textures/pokemon/gengar/gengar.png",
+      "animation": "assets/minemon/animations/gengar/gengar.animation.json",
+      "mode": "flying",
+      "scale": 0.95,
+      "width": 1.3,
+      "height": 1.6,
+      "health": 30.0,
+      "attack": 5.416666666666667,
+      "speed": 0.31,
+      "clips": {
+        "ground_idle": "animation.gengar.ground_idle",
+        "air_idle": "animation.gengar.air_idle",
+        "air_fly": "animation.gengar.air_fly",
+        "blink": "animation.gengar.blink",
+        "cry": "animation.gengar.cry"
+      },
+      "idle": "animation.gengar.air_idle",
+      "walk": "animation.gengar.air_fly",
+      "excluded_clips": [],
+      "sounds": [
+        "assets/minemon/sounds/pokemon/gengar/gengar_ambient.ogg",
+        "assets/minemon/sounds/pokemon/gengar/gengar_cry.ogg"
+      ],
+      "licenses": [
+        "assets/minemon/licenses/pokemon/gengar/model-license.txt"
+      ]
+    }
+  },
+  {
+    "slug": "shellder",
+    "accepted": false,
+    "reason": "Only an idle animation; aquatic navigation and locomotion not validated.",
+    "issues": [
+      "No validated idle/locomotion mapping"
+    ],
+    "definition": {
+      "slug": "shellder",
+      "name": "Shellder",
+      "model": "assets/minemon/geo/shellder/shellder.geo.json",
+      "texture": "assets/minemon/textures/pokemon/shellder/shellder.png",
+      "animation": "assets/minemon/animations/shellder/shellder.animation.json",
+      "mode": "ground",
+      "scale": 0.8,
+      "width": 0.6,
+      "height": 0.5,
+      "health": 20,
+      "attack": 5.416666666666667,
+      "speed": 0.24,
+      "clips": {
+        "ground_idle": "animation.shellder.ground_idle"
+      },
+      "idle": "animation.shellder.ground_idle",
+      "walk": null,
+      "excluded_clips": [],
+      "sounds": [
+        "assets/minemon/sounds/pokemon/shellder/shellder_ambient.ogg",
+        "assets/minemon/sounds/pokemon/shellder/shellder_cry.ogg"
+      ],
+      "licenses": [
+        "assets/minemon/licenses/pokemon/shellder/model-license.txt"
+      ]
+    }
+  },
+  {
+    "slug": "cloyster",
+    "accepted": false,
+    "reason": "Only an idle animation; aquatic navigation and locomotion not validated.",
+    "issues": [
+      "No validated idle/locomotion mapping"
+    ],
+    "definition": {
+      "slug": "cloyster",
+      "name": "Cloyster",
+      "model": "assets/minemon/geo/cloyster/cloyster.geo.json",
+      "texture": "assets/minemon/textures/pokemon/cloyster/cloyster.png",
+      "animation": "assets/minemon/animations/cloyster/cloyster.animation.json",
+      "mode": "ground",
+      "scale": 1,
+      "width": 1,
+      "height": 1.1,
+      "health": 25.0,
+      "attack": 7.916666666666667,
+      "speed": 0.27,
+      "clips": {
+        "ground_idle": "animation.cloyster.ground_idle"
+      },
+      "idle": "animation.cloyster.ground_idle",
+      "walk": null,
+      "excluded_clips": [],
+      "sounds": [
+        "assets/minemon/sounds/pokemon/cloyster/cloyster_ambient.ogg",
+        "assets/minemon/sounds/pokemon/cloyster/cloyster_cry.ogg"
+      ],
+      "licenses": [
+        "assets/minemon/licenses/pokemon/cloyster/model-license.txt"
+      ]
+    }
+  },
+  {
+    "slug": "psyduck",
+    "accepted": true,
+    "reason": null,
+    "issues": [],
+    "definition": {
+      "slug": "psyduck",
+      "name": "Psyduck",
+      "model": "assets/minemon/geo/psyduck/psyduck.geo.json",
+      "texture": "assets/minemon/textures/pokemon/psyduck/psyduck.png",
+      "animation": "assets/minemon/animations/psyduck/psyduck.animation.json",
+      "mode": "ground",
+      "scale": 0.8,
+      "width": 0.8,
+      "height": 1.0,
+      "health": 25.0,
+      "attack": 4.333333333333333,
+      "speed": 0.255,
+      "clips": {
+        "ground_idle": "animation.psyduck.ground_idle",
+        "water_idle": "animation.psyduck.water_idle",
+        "ground_walk": "animation.psyduck.ground_walk",
+        "water_swim": "animation.psyduck.water_swim",
+        "faint": "animation.psyduck.faint",
+        "sleep": "animation.psyduck.sleep",
+        "awooga": "animation.psyduck.awooga",
+        "render": "animation.psyduck.render",
+        "blink": "animation.psyduck.blink",
+        "cry": "animation.psyduck.cry"
+      },
+      "idle": "animation.psyduck.ground_idle",
+      "walk": "animation.psyduck.ground_walk",
+      "excluded_clips": [],
+      "sounds": [
+        "assets/minemon/sounds/pokemon/psyduck/psyduck_ambient.ogg",
+        "assets/minemon/sounds/pokemon/psyduck/psyduck_cry.ogg"
+      ],
+      "licenses": [
+        "assets/minemon/licenses/pokemon/psyduck/model-license.txt"
+      ]
+    }
+  },
+  {
+    "slug": "hitmonlee",
+    "accepted": true,
+    "reason": null,
+    "issues": [],
+    "definition": {
+      "slug": "hitmonlee",
+      "name": "Hitmonlee",
+      "model": "assets/minemon/geo/hitmonlee/hitmonlee.geo.json",
+      "texture": "assets/minemon/textures/pokemon/hitmonlee/hitmonlee.png",
+      "animation": "assets/minemon/animations/hitmonlee/hitmonlee.animation.json",
+      "mode": "ground",
+      "scale": 1.2,
+      "width": 0.6,
+      "height": 1.45,
+      "health": 25.0,
+      "attack": 10.0,
+      "speed": 0.287,
+      "clips": {
+        "ground_idle": "animation.hitmonlee.ground_idle",
+        "ground_walk": "animation.hitmonlee.ground_walk",
+        "battle_idle": "animation.hitmonlee.battle_idle",
+        "sleep": "animation.hitmonlee.sleep",
+        "faint": "animation.hitmonlee.faint",
+        "blink": "animation.hitmonlee.blink",
+        "cry": "animation.hitmonlee.cry",
+        "pose": "animation.hitmonlee.pose"
+      },
+      "idle": "animation.hitmonlee.ground_idle",
+      "walk": "animation.hitmonlee.ground_walk",
+      "excluded_clips": [],
+      "sounds": [
+        "assets/minemon/sounds/pokemon/hitmonlee/hitmonlee_ambient.ogg",
+        "assets/minemon/sounds/pokemon/hitmonlee/hitmonlee_cry.ogg"
+      ],
+      "licenses": [
+        "assets/minemon/licenses/pokemon/hitmonlee/model-license.txt"
+      ]
+    }
+  },
+  {
+    "slug": "mew",
+    "accepted": true,
+    "reason": null,
+    "issues": [],
+    "definition": {
+      "slug": "mew",
+      "name": "Mew",
+      "model": "assets/minemon/geo/mew/mew.geo.json",
+      "texture": "assets/minemon/textures/pokemon/mew/mew.png",
+      "animation": "assets/minemon/animations/mew/mew.animation.json",
+      "mode": "flying",
+      "scale": 0.5,
+      "width": 0.6,
+      "height": 1,
+      "health": 50.0,
+      "attack": 8.333333333333334,
+      "speed": 0.3,
+      "clips": {
+        "ground_idle": "animation.mew.ground_idle",
+        "ground_walk": "animation.mew.ground_walk",
+        "blink": "animation.mew.blink"
+      },
+      "idle": "animation.mew.ground_idle",
+      "walk": "animation.mew.ground_walk",
+      "excluded_clips": [],
+      "sounds": [
+        "assets/minemon/sounds/pokemon/mew/mew_ambient.ogg",
+        "assets/minemon/sounds/pokemon/mew/mew_cry.ogg"
+      ],
+      "licenses": [
+        "assets/minemon/licenses/pokemon/mew/model-license.txt"
+      ]
+    }
+  },
+  {
+    "slug": "mewtwo",
+    "accepted": false,
+    "reason": "Multiple animation channels reference bones absent from the available model.",
+    "issues": [
+      "animation.mewtwo.ground_idle missing bones finger,finger2,finger3,finger4,finger5,finger6,leftarm,leftforearm,lefthand,rightarm,rightforearm,righthand",
+      "animation.mewtwo.air_idle missing bones finger,finger2,finger3,finger4,finger5,finger6,leftarm,leftfoot,leftforearm,lefthand,leftknee,leftleg,rightarm,rightfoot,rightforearm,righthand,rightknee,rightleg",
+      "animation.mewtwo.air_fly missing bones finger,finger2,finger3,finger4,finger5,finger6,leftarm,leftfoot,leftforearm,lefthand,leftknee,leftleg,rightarm,rightfoot,rightforearm,righthand,rightknee,rightleg",
+      "No validated idle/locomotion mapping"
+    ],
+    "definition": {
+      "slug": "mewtwo",
+      "name": "Mewtwo",
+      "model": "assets/minemon/geo/mewtwo/mewtwo.geo.json",
+      "texture": "assets/minemon/textures/pokemon/mewtwo/mewtwo.png",
+      "animation": "assets/minemon/animations/mewtwo/mewtwo.animation.json",
+      "mode": "ground",
+      "scale": 1.2,
+      "width": 0.75,
+      "height": 1.7,
+      "health": 53.0,
+      "attack": 9.166666666666666,
+      "speed": 0.33,
+      "clips": {
+        "ground_idle": "animation.mewtwo.ground_idle",
+        "air_idle": "animation.mewtwo.air_idle",
+        "air_fly": "animation.mewtwo.air_fly",
+        "blink": "animation.mewtwo.blink"
+      },
+      "idle": "animation.mewtwo.ground_idle",
+      "walk": null,
+      "excluded_clips": [],
+      "sounds": [
+        "assets/minemon/sounds/pokemon/mewtwo/mewtwo_ambient.ogg",
+        "assets/minemon/sounds/pokemon/mewtwo/mewtwo_cry.ogg"
+      ],
+      "licenses": [
+        "assets/minemon/licenses/pokemon/mewtwo/model-license.txt"
+      ]
+    }
+  },
+  {
+    "slug": "wartortle",
+    "accepted": true,
+    "reason": null,
+    "issues": [],
+    "definition": {
+      "slug": "wartortle",
+      "name": "Wartortle",
+      "model": "assets/minemon/geo/wartortle/wartortle.geo.json",
+      "texture": "assets/minemon/textures/pokemon/wartortle/wartortle.png",
+      "animation": "assets/minemon/animations/wartortle/wartortle.animation.json",
+      "mode": "ground",
+      "scale": 0.75,
+      "width": 0.8,
+      "height": 1.3,
+      "health": 29.5,
+      "attack": 5.25,
+      "speed": 0.258,
+      "clips": {
+        "ground_idle": "animation.wartortle.ground_idle",
+        "battle_idle": "animation.wartortle.battle_idle",
+        "ground_walk": "animation.wartortle.ground_walk",
+        "ground_run": "animation.wartortle.ground_run",
+        "water_idle": "animation.wartortle.water_idle",
+        "water_swim": "animation.wartortle.water_swim",
+        "surfacewater_idle": "animation.wartortle.surfacewater_idle",
+        "surfacewater_swim": "animation.wartortle.surfacewater_swim",
+        "sleep": "animation.wartortle.sleep",
+        "cry": "animation.wartortle.cry",
+        "blink": "animation.wartortle.blink",
+        "faint": "animation.wartortle.faint",
+        "quirk_idle": "animation.wartortle.quirk_idle",
+        "physical": "animation.wartortle.physical",
+        "special": "animation.wartortle.special",
+        "status": "animation.wartortle.status",
+        "recoil": "animation.wartortle.recoil"
+      },
+      "idle": "animation.wartortle.ground_idle",
+      "walk": "animation.wartortle.ground_walk",
+      "excluded_clips": [],
+      "sounds": [
+        "assets/minemon/sounds/pokemon/wartortle/wartortle_ambient.ogg",
+        "assets/minemon/sounds/pokemon/wartortle/wartortle_cry.ogg"
+      ],
+      "licenses": [
+        "assets/minemon/licenses/pokemon/wartortle/model-license.txt"
+      ]
+    }
+  },
+  {
+    "slug": "arbok",
+    "accepted": true,
+    "reason": null,
+    "issues": [],
+    "definition": {
+      "slug": "arbok",
+      "name": "Arbok",
+      "model": "assets/minemon/geo/arbok/arbok.geo.json",
+      "texture": "assets/minemon/textures/pokemon/arbok/arbok.png",
+      "animation": "assets/minemon/animations/arbok/arbok.animation.json",
+      "mode": "ground",
+      "scale": 1,
+      "width": 1,
+      "height": 1.8,
+      "health": 30.0,
+      "attack": 7.916666666666667,
+      "speed": 0.28,
+      "clips": {
+        "ground_idle": "animation.arbok.ground_idle",
+        "ground_walk": "animation.arbok.ground_walk",
+        "summary_idle": "animation.arbok.summary_idle",
+        "tongue_flick": "animation.arbok.tongue_flick",
+        "faint": "animation.arbok.faint",
+        "sleep": "animation.arbok.sleep",
+        "blink": "animation.arbok.blink",
+        "cry": "animation.arbok.cry"
+      },
+      "idle": "animation.arbok.ground_idle",
+      "walk": "animation.arbok.ground_walk",
+      "excluded_clips": [],
+      "sounds": [
+        "assets/minemon/sounds/pokemon/arbok/arbok_ambient.ogg",
+        "assets/minemon/sounds/pokemon/arbok/arbok_cry.ogg"
+      ],
+      "licenses": [
+        "assets/minemon/licenses/pokemon/arbok/model-license.txt"
+      ]
+    }
+  },
+  {
+    "slug": "nidoking",
+    "accepted": false,
+    "reason": "Available file has idle/blink/cry but no verified locomotion clip.",
+    "issues": [
+      "No validated idle/locomotion mapping"
+    ],
+    "definition": {
+      "slug": "nidoking",
+      "name": "Nidoking",
+      "model": "assets/minemon/geo/nidoking/nidoking.geo.json",
+      "texture": "assets/minemon/textures/pokemon/nidoking/nidoking.png",
+      "animation": "assets/minemon/animations/nidoking/nidoking.animation.json",
+      "mode": "ground",
+      "scale": 1.2,
+      "width": 1.2,
+      "height": 1.8,
+      "health": 40.5,
+      "attack": 8.5,
+      "speed": 0.285,
+      "clips": {
+        "ground_idle": "animation.nidoking.ground_idle",
+        "blink": "animation.nidoking.blink",
+        "cry": "animation.nidoking.cry"
+      },
+      "idle": "animation.nidoking.ground_idle",
+      "walk": null,
+      "excluded_clips": [],
+      "sounds": [
+        "assets/minemon/sounds/pokemon/nidoking/nidoking_ambient.ogg",
+        "assets/minemon/sounds/pokemon/nidoking/nidoking_cry.ogg"
+      ],
+      "licenses": [
+        "assets/minemon/licenses/pokemon/nidoking/model-license.txt"
+      ]
+    }
+  },
+  {
+    "slug": "growlithe",
+    "accepted": false,
+    "reason": "Available file has experimental test clips; no verified walking clip.",
+    "issues": [
+      "No validated idle/locomotion mapping"
+    ],
+    "definition": {
+      "slug": "growlithe",
+      "name": "Growlithe",
+      "model": "assets/minemon/geo/growlithe/growlithe.geo.json",
+      "texture": "assets/minemon/textures/pokemon/growlithe/growlithe.png",
+      "animation": "assets/minemon/animations/growlithe/growlithe.animation.json",
+      "mode": "ground",
+      "scale": 0.75,
+      "width": 1.1,
+      "height": 1.15,
+      "health": 27.5,
+      "attack": 5.833333333333333,
+      "speed": 0.26,
+      "clips": {
+        "test": "animation.growlithe.test",
+        "test2": "animation.growlithe.test2",
+        "test3": "animation.growlithe.test3",
+        "idle": "animation.growlithe.idle",
+        "blink": "animation.growlithe.blink",
+        "cry": "animation.growlithe.cry"
+      },
+      "idle": "animation.growlithe.idle",
+      "walk": null,
+      "excluded_clips": [],
+      "sounds": [
+        "assets/minemon/sounds/pokemon/growlithe/growlithe_ambient.ogg",
+        "assets/minemon/sounds/pokemon/growlithe/growlithe_cry.ogg"
+      ],
+      "licenses": [
+        "assets/minemon/licenses/pokemon/growlithe/model-license.txt"
+      ]
+    }
+  },
+  {
+    "slug": "arcanine",
+    "accepted": false,
+    "reason": "Available file has experimental test clips; no verified walking clip.",
+    "issues": [
+      "No validated idle/locomotion mapping"
+    ],
+    "definition": {
+      "slug": "arcanine",
+      "name": "Arcanine",
+      "model": "assets/minemon/geo/arcanine/arcanine.geo.json",
+      "texture": "assets/minemon/textures/pokemon/arcanine/arcanine.png",
+      "animation": "assets/minemon/animations/arcanine/arcanine.animation.json",
+      "mode": "ground",
+      "scale": 1.1,
+      "width": 1.2,
+      "height": 1.7,
+      "health": 45.0,
+      "attack": 9.166666666666666,
+      "speed": 0.295,
+      "clips": {
+        "idle": "animation.arcanine.idle",
+        "test": "animation.arcanine.test",
+        "test2": "animation.arcanine.test2",
+        "blink": "animation.arcanine.blink",
+        "cry": "animation.arcanine.cry"
+      },
+      "idle": "animation.arcanine.idle",
+      "walk": null,
+      "excluded_clips": [],
+      "sounds": [
+        "assets/minemon/sounds/pokemon/arcanine/arcanine_ambient.ogg",
+        "assets/minemon/sounds/pokemon/arcanine/arcanine_cry.ogg"
+      ],
+      "licenses": [
+        "assets/minemon/licenses/pokemon/arcanine/model-license.txt"
+      ]
+    }
+  },
+  {
+    "slug": "golem",
+    "accepted": false,
+    "reason": "Available file has test/blink/cry; no verified locomotion clip.",
+    "issues": [
+      "No validated idle/locomotion mapping"
+    ],
+    "definition": {
+      "slug": "golem",
+      "name": "Golem",
+      "model": "assets/minemon/geo/golem/golem.geo.json",
+      "texture": "assets/minemon/textures/pokemon/golem/golem.png",
+      "animation": "assets/minemon/animations/golem/golem.animation.json",
+      "mode": "ground",
+      "scale": 1.1,
+      "width": 1,
+      "height": 1.3,
+      "health": 40.0,
+      "attack": 10.0,
+      "speed": 0.245,
+      "clips": {
+        "test": "animation.golem.test",
+        "blink": "animation.golem.blink",
+        "cry": "animation.golem.cry"
+      },
+      "idle": null,
+      "walk": null,
+      "excluded_clips": [],
+      "sounds": [
+        "assets/minemon/sounds/pokemon/golem/golem_ambient.ogg",
+        "assets/minemon/sounds/pokemon/golem/golem_cry.ogg"
+      ],
+      "licenses": [
+        "assets/minemon/licenses/pokemon/golem/model-license.txt"
+      ]
+    }
+  },
+  {
+    "slug": "onix",
+    "accepted": true,
+    "reason": null,
+    "issues": [],
+    "definition": {
+      "slug": "onix",
+      "name": "Onix",
+      "model": "assets/minemon/geo/onix/onix.geo.json",
+      "texture": "assets/minemon/textures/pokemon/onix/onix.png",
+      "animation": "assets/minemon/animations/onix/onix.animation.json",
+      "mode": "ground",
+      "scale": 2,
+      "width": 1.3,
+      "height": 2.5,
+      "health": 20,
+      "attack": 3.75,
+      "speed": 0.27,
+      "clips": {
+        "ground_idle": "animation.onix.ground_idle",
+        "ground_walk": "animation.onix.ground_walk",
+        "battle_idle": "animation.onix.battle_idle",
+        "boulder_rotation": "animation.onix.boulder_rotation",
+        "slow_boulder_rotation": "animation.onix.slow_boulder_rotation",
+        "cry": "animation.onix.cry",
+        "blink": "animation.onix.blink",
+        "sleep": "animation.onix.sleep",
+        "faint": "animation.onix.faint",
+        "summary_idle": "animation.onix.summary_idle"
+      },
+      "idle": "animation.onix.ground_idle",
+      "walk": "animation.onix.ground_walk",
+      "excluded_clips": [],
+      "sounds": [
+        "assets/minemon/sounds/pokemon/onix/onix_ambient.ogg",
+        "assets/minemon/sounds/pokemon/onix/onix_cry.ogg"
+      ],
+      "licenses": [
+        "assets/minemon/licenses/pokemon/onix/model-license.txt"
+      ]
+    }
+  },
+  {
+    "slug": "scyther",
+    "accepted": true,
+    "reason": null,
+    "issues": [],
+    "definition": {
+      "slug": "scyther",
+      "name": "Scyther",
+      "model": "assets/minemon/geo/scyther/scyther_male.geo.json",
+      "texture": "assets/minemon/textures/pokemon/scyther/scyther.png",
+      "animation": "assets/minemon/animations/scyther/scyther.animation.json",
+      "mode": "flying",
+      "scale": 0.8,
+      "width": 0.9,
+      "height": 2,
+      "health": 35.0,
+      "attack": 9.166666666666666,
+      "speed": 0.305,
+      "clips": {
+        "pose": "animation.scyther.pose",
+        "ground_idle": "animation.scyther.ground_idle",
+        "air_idle": "animation.scyther.air_idle",
+        "blink": "animation.scyther.blink",
+        "cry": "animation.scyther.cry"
+      },
+      "idle": "animation.scyther.air_idle",
+      "walk": "animation.scyther.air_idle",
+      "excluded_clips": [],
+      "sounds": [
+        "assets/minemon/sounds/pokemon/scyther/scyther_ambient.ogg",
+        "assets/minemon/sounds/pokemon/scyther/scyther_cry.ogg"
+      ],
+      "licenses": [
+        "assets/minemon/licenses/pokemon/scyther/model-license.txt"
+      ]
+    }
+  },
+  {
+    "slug": "electabuzz",
+    "accepted": true,
+    "reason": null,
+    "issues": [],
+    "definition": {
+      "slug": "electabuzz",
+      "name": "Electabuzz",
+      "model": "assets/minemon/geo/electabuzz/electabuzz.geo.json",
+      "texture": "assets/minemon/textures/pokemon/electabuzz/electabuzz.png",
+      "animation": "assets/minemon/animations/electabuzz/electabuzz.animation.json",
+      "mode": "ground",
+      "scale": 0.9,
+      "width": 0.7,
+      "height": 1.5,
+      "health": 32.5,
+      "attack": 6.916666666666667,
+      "speed": 0.305,
+      "clips": {
+        "ground_idle": "animation.electabuzz.ground_idle",
+        "ground_walk": "animation.electabuzz.ground_walk",
+        "battle_idle": "animation.electabuzz.battle_idle",
+        "sleep": "animation.electabuzz.sleep",
+        "blink": "animation.electabuzz.blink",
+        "ambient_sleep": "animation.electabuzz.ambient_sleep",
+        "new": "animation.electabuzz.new",
+        "faint_WIP": "animation.electabuzz.faint_WIP",
+        "cry": "animation.electabuzz.cry"
+      },
+      "idle": "animation.electabuzz.ground_idle",
+      "walk": "animation.electabuzz.ground_walk",
+      "excluded_clips": [],
+      "sounds": [
+        "assets/minemon/sounds/pokemon/electabuzz/electabuzz_ambient.ogg",
+        "assets/minemon/sounds/pokemon/electabuzz/electabuzz_cry.ogg"
+      ],
+      "licenses": [
+        "assets/minemon/licenses/pokemon/electabuzz/model-license.txt"
+      ]
+    }
+  },
+  {
+    "slug": "zapdos",
+    "accepted": true,
+    "reason": null,
+    "issues": [],
+    "definition": {
+      "slug": "zapdos",
+      "name": "Zapdos",
+      "model": "assets/minemon/geo/zapdos/zapdos.geo.json",
+      "texture": "assets/minemon/textures/pokemon/zapdos/zapdos.png",
+      "animation": "assets/minemon/animations/zapdos/zapdos.animation.json",
+      "mode": "flying",
+      "scale": 1.5,
+      "width": 1.2,
+      "height": 1.6,
+      "health": 45.0,
+      "attack": 7.5,
+      "speed": 0.3,
+      "clips": {
+        "ground_idle": "animation.zapdos.ground_idle",
+        "air_idle": "animation.zapdos.air_idle",
+        "air_fly": "animation.zapdos.air_fly"
+      },
+      "idle": "animation.zapdos.air_idle",
+      "walk": "animation.zapdos.air_fly",
+      "excluded_clips": [],
+      "sounds": [
+        "assets/minemon/sounds/pokemon/zapdos/zapdos_ambient.ogg",
+        "assets/minemon/sounds/pokemon/zapdos/zapdos_cry.ogg"
+      ],
+      "licenses": [
+        "assets/minemon/licenses/pokemon/zapdos/model-license.txt"
+      ]
+    }
+  }
+]
