@@ -113,4 +113,24 @@ public final class CompanionTests {
   h.runAfterDelay(100,()->{check(h,b.distanceTo(p)<initial-2,"Companion must approach its owner"+state(b,p));p.discard();h.succeed();});
  }
 
+ @GameTest(template="test_arena",timeoutTicks=100)
+ public static void creativePlayersRemainProtected(GameTestHelper h) {
+  MinemonCreature b=spawn(h);ServerPlayer p=player(h);p.setGameMode(GameType.CREATIVE);
+  check(h,!b.canAttack(p),"Creative player must retain vanilla target protection");b.hurt(DamageSource.playerAttack(p),1);
+  h.runAfterDelay(40,()->{check(h,b.getTarget()==null,"Creative aggressor must not create a combat target");p.discard();h.succeed();});
+ }
+ @GameTest(template="test_arena",timeoutTicks=180)
+ public static void wildRetaliatesAgainstAnotherMinemon(GameTestHelper h) {
+  MinemonCreature b=spawn(h);MinemonCreature attacker=h.spawn(ModEntities.BULBASAUR.get(),new BlockPos(8,1,5));attacker.setNoAi(true);float health=attacker.getHealth();
+  b.hurt(DamageSource.mobAttack(attacker),1);
+  h.runAfterDelay(100,()->{check(h,attacker.getHealth()<health,"Wild Minemon must retaliate against a provoking Minemon");h.succeed();});
+ }
+ @GameTest(template="test_arena",timeoutTicks=460)
+ public static void wildAggressionActuallyExpires(GameTestHelper h) {
+  MinemonCreature b=spawn(h);b.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED).setBaseValue(0);
+  Cow c=h.spawn(EntityType.COW,new BlockPos(11,1,5));c.setNoAi(true);b.hurt(DamageSource.mobAttack(c),1);
+  check(h,b.getTarget()==c,"Initial provocation must acquire target");
+  h.runAfterDelay(430,()->{check(h,b.getTarget()==null,"Expired aggression must not be reacquired by HurtByTargetGoal");h.succeed();});
+ }
+
 }

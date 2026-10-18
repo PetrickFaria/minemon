@@ -93,7 +93,14 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         // their owner and assist against the owner's current target.
         this.targetSelector.addGoal(1, new OwnerHurtByTargetGoal(this));
         this.targetSelector.addGoal(2, new OwnerHurtTargetGoal(this));
-        this.targetSelector.addGoal(3, new HurtByTargetGoal(this));
+        this.targetSelector.addGoal(3, new HurtByTargetGoal(this) {
+            @Override public boolean canUse() {
+                return (MinemonCreature.this.isTame() || MinemonCreature.this.wildAggressionTicks > 0) && super.canUse();
+            }
+            @Override public boolean canContinueToUse() {
+                return (MinemonCreature.this.isTame() || MinemonCreature.this.wildAggressionTicks > 0) && super.canContinueToUse();
+            }
+        });
     }
 
     @Override
@@ -110,7 +117,6 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         if (target instanceof MinemonCreature other) {
             UUID ownerId = this.getOwnerUUID();
             UUID otherOwnerId = other.getOwnerUUID();
-            if (ownerId == null && otherOwnerId == null) return false;
             if (ownerId != null && ownerId.equals(otherOwnerId)) return false;
         }
         return super.canAttack(target);
