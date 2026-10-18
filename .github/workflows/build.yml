@@ -4,15 +4,12 @@ on:
   pull_request:
   workflow_dispatch:
 permissions:
-  contents: write
+  contents: read
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Expand and commit source tree on bootstrap commit
-        if: ${{ !hashFiles('build.gradle') }}
-        run: python3 .bootstrap/expand.py
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -20,6 +17,8 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - name: Verify extracted project resources
         run: python3 tools/verify_project.py
+      - name: Ensure Gradle Wrapper is executable
+        run: chmod +x gradlew
       - name: Build and run tests
         run: ./gradlew --no-daemon clean test build
       - name: Verify executable mod JAR contents
