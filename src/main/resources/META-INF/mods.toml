@@ -1,0 +1,27 @@
+modLoader="javafml"
+loaderVersion="[43,)"
+license="See ASSET_LICENSES.md; bundled assets are CC BY-NC 3.0"
+[[mods]]
+modId="minemon"
+version="1.0.0"
+displayName="Minemon"
+authors="PetrickFaria"
+description='''A standalone creature companion framework for Minecraft 1.19.2.'''
+[[dependencies.minemon]]
+modId="forge"
+mandatory=true
+versionRange="[43.5.0,44)"
+ordering="NONE"
+side="BOTH"
+[[dependencies.minemon]]
+modId="minecraft"
+mandatory=true
+versionRange="[1.19.2,1.20)"
+ordering="NONE"
+side="BOTH"
+[[dependencies.minemon]]
+modId="geckolib3"
+mandatory=true
+versionRange="[3.1.40,)"
+ordering="AFTER"
+side="BOTH"

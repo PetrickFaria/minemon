@@ -24,7 +24,7 @@ Bulbasaur has the source clips `ground_idle`, `ground_walk`, `sleep`, `faint`, `
 
 ## Build
 
-Requirements: Java 17, Gradle 7.5.1, network access to the Forge and GeckoLib Maven repositories. ForgeGradle is configured in the 5.1 line (`[5.1,6.0)`). GeckoLib 3.1.40 for Forge 1.19.2 is the only additional runtime mod dependency. Cobblemon is not required at runtime.
+Requirements: Java 17 and network access to the Forge and GeckoLib Maven repositories. The checked-in Gradle Wrapper pins Gradle 7.5.1 and verifies the official distribution checksum. ForgeGradle is configured in the 5.1 line (`[5.1,6.0)`). GeckoLib 3.1.40 for Forge 1.19.2 is the only additional runtime mod dependency. Cobblemon is not required at runtime.
 
 From this directory, run:
 
@@ -32,7 +32,7 @@ From this directory, run:
 ./gradlew build
 ```
 
-Expected output name: `build/libs/Minemon-1.19.2-1.0.0.jar`. The current source checkout does not include the Gradle Wrapper files and this environment has no Gradle installation, so a local compilation cannot currently run. The GitHub Actions workflow bootstraps the standard Gradle 7.5.1 Wrapper on its runner, runs the resource verifier and `clean build`, then uploads the JAR as an artifact. A run requires this project to be pushed to a repository with Actions enabled.
+Expected output name: `build/libs/Minemon-1.19.2-1.0.0.jar`. The GitHub Actions workflow uses the checked-in wrapper, runs the resource verifier and `clean test build`, verifies the compiled JAR metadata and Bulbasaur assets, then uploads the JAR as an artifact.
 
 To regenerate the local resource bundle from the original JAR:
 

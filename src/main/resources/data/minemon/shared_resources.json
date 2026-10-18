@@ -1,0 +1,42 @@
+[
+  {
+    "source": "assets/cobblemon/bedrock/pokemon/models/substitute.geo.json",
+    "resource": "assets/minemon/geo/shared/substitute.geo.json"
+  },
+  {
+    "source": "assets/cobblemon/textures/pokemon/substitute.png",
+    "resource": "assets/minemon/textures/pokemon/substitute.png"
+  },
+  {
+    "source": "assets/cobblemon/textures/pokemon/substitute_shiny.png",
+    "resource": "assets/minemon/textures/pokemon/substitute_shiny.png"
+  },
+  {
+    "source": "assets/cobblemon/bedrock/pokemon/animations/special/particle_dummy.animation.json",
+    "resource": "assets/minemon/animations/special/particle_dummy.animation.json"
+  },
+  {
+    "source": "assets/cobblemon/bedrock/pokemon/animations/special/particles.animation.json",
+    "resource": "assets/minemon/animations/special/particles.animation.json"
+  },
+  {
+    "source": "assets/cobblemon/sounds/pokemon/evolution_notification.ogg",
+    "resource": "assets/minemon/sounds/pokemon/evolution_notification.ogg"
+  },
+  {
+    "source": "assets/cobblemon/sounds/pokemon/evolving.ogg",
+    "resource": "assets/minemon/sounds/pokemon/evolving.ogg"
+  },
+  {
+    "source": "assets/cobblemon/sounds/pokemon/eiscueice/eiscueice_ambient.ogg",
+    "resource": "assets/minemon/sounds/pokemon/eiscueice/eiscueice_ambient.ogg"
+  },
+  {
+    "source": "assets/cobblemon/sounds/pokemon/eiscueice/eiscueice_cry.ogg",
+    "resource": "assets/minemon/sounds/pokemon/eiscueice/eiscueice_cry.ogg"
+  },
+  {
+    "source": "assets/cobblemon/bedrock/pokemon/models/license",
+    "resource": "assets/minemon/licenses/shared/model-license.txt"
+  }
+]
