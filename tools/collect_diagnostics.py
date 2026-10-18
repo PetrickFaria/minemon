@@ -9,12 +9,9 @@ for path in (Path.home()/'.gradle/caches/forge_gradle').rglob('*sources*.jar'):
  except Exception:pass
 
 import subprocess
-for path in (Path.home()/'.gradle/caches/forge_gradle').rglob('*.jar'):
- try:
-  with zipfile.ZipFile(path) as z:
-   if 'net/minecraft/world/entity/animal/Animal.class' not in z.namelist():continue
-  for cls in ['net.minecraft.world.entity.animal.Animal','net.minecraft.world.entity.TamableAnimal','net.minecraft.world.entity.Mob','net.minecraft.world.entity.ai.goal.MeleeAttackGoal','net.minecraft.client.Minecraft','net.minecraft.client.gui.screens.worldselection.WorldOpenFlows']:
-   result=subprocess.run(['javap','-c','-p','-classpath',str(path),cls],text=True,capture_output=True)
-   (out/(cls.rsplit('.',1)[-1]+'.bytecode.txt')).write_text(result.stdout)
-  # Keep inspecting: prefer the named development jar when present.
- except Exception: pass
+for path in (Path.home()/'.gradle/caches/forge_gradle/minecraft_user_repo').rglob('*mapped_official_1.19.2.jar'):
+ if path.name.endswith('-sources.jar'):continue
+ for cls in ['net.minecraft.world.entity.animal.Animal','net.minecraft.world.entity.TamableAnimal','net.minecraft.world.entity.Mob','net.minecraft.world.entity.LivingEntity','net.minecraft.server.level.ServerPlayer','net.minecraft.world.entity.ai.goal.target.OwnerHurtByTargetGoal','net.minecraft.world.entity.ai.goal.target.TargetGoal']:
+  result=subprocess.run(['javap','-c','-p','-classpath',str(path),cls],text=True,capture_output=True)
+  (out/(cls.rsplit('.',1)[-1]+'.bytecode.txt')).write_text(result.stdout)
+ break
