@@ -20,7 +20,7 @@ public class MolangCompatibilityTest {
   var walk=root.getAsJsonObject("animations").getAsJsonObject("animation.bulbasaur.ground_walk");
   assertEquals("GeckoLib 3.1.40 requires a finite duration in every clip",4.0,walk.get("animation_length").getAsDouble(),0.0);
   var loaded=software.bernie.geckolib3.util.json.JsonAnimationUtils.deserializeJsonToAnimation(new java.util.AbstractMap.SimpleImmutableEntry<String,com.google.gson.JsonElement>("animation.bulbasaur.ground_walk",walk),new MolangParser());
-  assertEquals("Runtime loop duration must match the GeckoLib-compatible fallback",4.0,loaded.animationLength,0.0);
+  assertEquals("GeckoLib stores the four-second runtime fallback as ticks",80.0,loaded.animationLength,0.0);
   var bones=walk.getAsJsonObject("bones");
   String leg=bones.getAsJsonObject("leg_front_right").getAsJsonArray("rotation").get(0).getAsString();
   assertFalse(leg.contains("q.anim_time"));
