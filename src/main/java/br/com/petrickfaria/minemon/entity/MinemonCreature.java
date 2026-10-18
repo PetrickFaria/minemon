@@ -102,12 +102,6 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     }
 
     @Override
-    public boolean canAttackType(EntityType<?> type) {
-        // Animal excludes PLAYER by default; target acquisition is still retaliation-only.
-        return type == EntityType.PLAYER || super.canAttackType(type);
-    }
-
-    @Override
     public boolean canAttack(LivingEntity target) {
         if (target == null || target == this || this.isOwnerEntity(target)) return false;
         // Ordered sitting companions may defend themselves or their owner at close

@@ -12,21 +12,23 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.Cow;
 import net.minecraft.world.level.GameType;
 import net.minecraftforge.common.util.FakePlayer;
-import net.minecraftforge.common.util.FakePlayerFactory;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.gametest.GameTestHolder;
 import net.minecraftforge.gametest.PrefixGameTestTemplate;
 @GameTestHolder("minemon")
 @PrefixGameTestTemplate(false)
 public final class CompanionTests {
  private static void check(GameTestHelper h,boolean condition,String message) { if (!condition) h.fail(message); }
- private static String state(MinemonCreature b, net.minecraft.world.entity.LivingEntity target) { return " target="+b.getTarget()+" canAttack="+b.canAttack(target)+" dist="+b.distanceTo(target)+" pos="+b.position()+" targetPos="+target.position()+" alive="+target.isAlive()+" health="+target.getHealth()+" owner="+b.getOwner()+" sit="+b.isInSittingPose()+" navDone="+b.getNavigation().isDone(); }
+ private static String state(MinemonCreature b, net.minecraft.world.entity.LivingEntity target) { return " target="+b.getTarget()+" canAttack="+b.canAttack(target)+" dist="+b.distanceTo(target)+" pos="+b.position()+" targetPos="+target.position()+" alive="+target.isAlive()+" health="+target.getHealth()+" owner="+b.getOwner()+" ownerVictim="+(b.getOwner()==null?null:b.getOwner().getLastHurtMob())+" sit="+b.isInSittingPose()+" navDone="+b.getNavigation().isDone(); }
+ private static void floor(GameTestHelper h) { for(int x=0;x<16;x++)for(int z=0;z<16;z++)h.setBlock(new BlockPos(x,0,z),net.minecraft.world.level.block.Blocks.STONE); }
  private static MinemonCreature spawn(GameTestHelper h) {
+  floor(h);
   return h.spawn(ModEntities.BULBASAUR.get(),new BlockPos(5,1,5));
  }
- private static FakePlayer player(GameTestHelper h) {
-  FakePlayer p=new FakePlayer(h.getLevel(),new GameProfile(UUID.randomUUID(),"MinemonTester")) {
-   @Override public boolean isInvulnerableTo(DamageSource source) { return false; }
-  };
+ private static ServerPlayer player(GameTestHelper h) {
+  floor(h);
+  ServerPlayer p=new ServerPlayer(h.getLevel().getServer(),h.getLevel(),new GameProfile(UUID.randomUUID(),"MinemonTester"));
+  p.connection=new FakePlayer(h.getLevel(),new GameProfile(UUID.randomUUID(),"DummyConnection")).connection;
   h.getLevel().getServer().setDifficulty(net.minecraft.world.Difficulty.NORMAL,true);
   p.setGameMode(GameType.SURVIVAL);p.tickCount=100;
   BlockPos pos=h.absolutePos(new BlockPos(7,1,5));
@@ -34,15 +36,15 @@ public final class CompanionTests {
   h.getLevel().addNewPlayer(p);
   return p;
  }
- @GameTest(template="test_arena",timeoutTicks=180)
+ @GameTest(template="test_arena",timeoutTicks=300)
  public static void wildRetaliatesAgainstPlayer(GameTestHelper h) {
-  MinemonCreature b=spawn(h); FakePlayer p=player(h);float health=p.getHealth();
-  check(h,b.canAttackType(EntityType.PLAYER),"Animal player target restriction must be overridden");
-  check(h,b.hurt(DamageSource.playerAttack(p),1),"Hit must be accepted");
+  MinemonCreature b=spawn(h); ServerPlayer p=player(h);float health=p.getHealth();
+  check(h,b.canAttackType(EntityType.PLAYER),"Player entity type must be a valid retaliation target");
+  h.runAfterDelay(80,()->{check(h,b.hurt(DamageSource.playerAttack(p),1),"Hit must be accepted");
   check(h,b.getTarget()==p,"Player aggressor must become target");
-  h.runAfterDelay(100,()->{check(h,p.getHealth()<health,"Melee AI must actually damage the player"+state(b,p));p.discard();h.succeed();});
+  h.runAfterDelay(100,()->{check(h,p.getHealth()<health,"Melee AI must actually damage the player"+state(b,p));p.discard();h.succeed();});});
  }
- @GameTest(template="test_arena",timeoutTicks=180)
+ @GameTest(template="test_arena",timeoutTicks=300)
  public static void wildRetaliatesAgainstCreature(GameTestHelper h) {
   MinemonCreature b=spawn(h);Cow c=h.spawn(EntityType.COW,new BlockPos(8,1,5));c.setNoAi(true);float health=c.getHealth();
   b.hurt(DamageSource.mobAttack(c),1);
@@ -53,22 +55,22 @@ public final class CompanionTests {
   MinemonCreature b=spawn(h);h.spawn(EntityType.COW,new BlockPos(7,1,5));
   h.runAfterDelay(40,()->{check(h,b.getTarget()==null,"Unprovoked creature must remain peaceful");h.succeed();});
  }
- @GameTest(template="test_arena",timeoutTicks=180)
+ @GameTest(template="test_arena",timeoutTicks=300)
  public static void ownerProtectedAndAssisted(GameTestHelper h) {
-  MinemonCreature b=spawn(h);FakePlayer p=player(h);b.tame(p);b.setOrderedToSit(false);
-  b.hurt(DamageSource.playerAttack(p),1);check(h,b.getTarget()!=p,"Never retaliate against owner");
-  Cow c=h.spawn(EntityType.COW,new BlockPos(8,1,5));c.setNoAi(true);p.attack(c);float health=c.getHealth();
-  h.runAfterDelay(100,()->{check(h,c.getHealth()<health,"Owner attack assistance must damage target"+state(b,c));p.discard();h.succeed();});
+  MinemonCreature b=spawn(h);ServerPlayer p=player(h);b.tame(p);b.setOrderedToSit(false);
+  h.runAfterDelay(80,()->{b.hurt(DamageSource.playerAttack(p),1);check(h,b.getTarget()!=p,"Never retaliate against owner");
+  Cow c=h.spawn(EntityType.COW,new BlockPos(8,1,5));c.setNoAi(true);p.attack(c);check(h,p.getLastHurtMob()==c,"Owner attack must record its victim");float health=c.getHealth();
+  h.runAfterDelay(100,()->{check(h,c.getHealth()<health,"Owner attack assistance must damage target"+state(b,c));p.discard();h.succeed();});});
  }
- @GameTest(template="test_arena",timeoutTicks=180)
+ @GameTest(template="test_arena",timeoutTicks=300)
  public static void ownerDefense(GameTestHelper h) {
-  MinemonCreature b=spawn(h);FakePlayer p=player(h);b.tame(p);b.setOrderedToSit(false);
-  Cow c=h.spawn(EntityType.COW,new BlockPos(8,1,5));c.setNoAi(true);float health=c.getHealth();p.hurt(DamageSource.mobAttack(c),1);
-  h.runAfterDelay(100,()->{check(h,c.getHealth()<health,"Companion must defend attacked owner"+state(b,c));p.discard();h.succeed();});
+  MinemonCreature b=spawn(h);ServerPlayer p=player(h);b.tame(p);b.setOrderedToSit(false);
+  Cow c=h.spawn(EntityType.COW,new BlockPos(8,1,5));c.setNoAi(true);float health=c.getHealth();h.runAfterDelay(80,()->{check(h,p.hurt(DamageSource.mobAttack(c),1),"Owner must accept damage after spawn protection");
+  h.runAfterDelay(100,()->{check(h,c.getHealth()<health,"Companion must defend attacked owner"+state(b,c));p.discard();h.succeed();});});
  }
  @GameTest(template="test_arena",timeoutTicks=100)
  public static void sitAndPersistence(GameTestHelper h) {
-  MinemonCreature b=spawn(h);FakePlayer p=player(h);b.tame(p);b.setOrderedToSit(true);
+  MinemonCreature b=spawn(h);ServerPlayer p=player(h);b.tame(p);b.setOrderedToSit(true);
   CompoundTag tag=new CompoundTag();b.saveWithoutId(tag);MinemonCreature restored=ModEntities.BULBASAUR.get().create(h.getLevel());restored.load(tag);
   check(h,restored.isTame()&&p.getUUID().equals(restored.getOwnerUUID())&&restored.isOrderedToSit(),"Taming UUID and sit order must survive NBT reload");
   h.runAfterDelay(20,()->{var start=b.position();h.runAfterDelay(30,()->{double dx=b.getX()-start.x,dz=b.getZ()-start.z;check(h,dx*dx+dz*dz<0.25,"Sitting creature must stay in place");p.discard();h.succeed();});});
@@ -85,6 +87,30 @@ public final class CompanionTests {
    check(h,restored.isTame()&&restored.isOrderedToSit()&&b.getOwnerUUID().equals(restored.getOwnerUUID()),"Persistence failed: "+entry.getKey());
   }
   h.succeed();
+ }
+
+ @GameTest(template="test_arena",timeoutTicks=100)
+ public static void boneTamingAndSitCommands(GameTestHelper h) {
+  MinemonCreature b=spawn(h);ServerPlayer p=player(h);
+  int previous=br.com.petrickfaria.minemon.config.MinemonConfig.TAME_CHANCE_PERCENT.get();
+  try {
+   br.com.petrickfaria.minemon.config.MinemonConfig.TAME_CHANCE_PERCENT.set(100);
+   p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.BONE,2));
+   b.mobInteract(p,net.minecraft.world.InteractionHand.MAIN_HAND);
+   check(h,b.isTame()&&p.getUUID().equals(b.getOwnerUUID())&&b.isOrderedToSit(),"Bone interaction must tame, assign owner and sit");
+   check(h,p.getMainHandItem().getCount()==1,"Survival taming must consume one bone");
+   p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,net.minecraft.world.item.ItemStack.EMPTY);
+   b.mobInteract(p,net.minecraft.world.InteractionHand.MAIN_HAND);check(h,!b.isOrderedToSit(),"Owner must be able to order standing");
+   b.mobInteract(p,net.minecraft.world.InteractionHand.MAIN_HAND);check(h,b.isOrderedToSit(),"Owner must be able to order sitting");
+  }finally {br.com.petrickfaria.minemon.config.MinemonConfig.TAME_CHANCE_PERCENT.set(previous);p.discard();}
+  h.succeed();
+ }
+ @GameTest(template="test_arena",timeoutTicks=300)
+ public static void followsOwner(GameTestHelper h) {
+  MinemonCreature b=h.spawn(ModEntities.BULBASAUR.get(),new BlockPos(2,1,5));ServerPlayer p=player(h);
+  BlockPos pos=h.absolutePos(new BlockPos(14,1,5));p.moveTo(pos.getX()+.5,pos.getY(),pos.getZ()+.5,0,0);b.tame(p);b.setOrderedToSit(false);
+  float initial=b.distanceTo(p);
+  h.runAfterDelay(100,()->{check(h,b.distanceTo(p)<initial-2,"Companion must approach its owner"+state(b,p));p.discard();h.succeed();});
  }
 
 }

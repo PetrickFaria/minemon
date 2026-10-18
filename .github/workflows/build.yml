@@ -33,7 +33,7 @@ jobs:
         if: ${{ !cancelled() && steps.compile.outcome == 'success' }}
         run: |
           python3 tools/prepare_client_world.py
-          timeout 420s xvfb-run -a ./gradlew --no-daemon runClient -PclientSmokeTest
+          timeout 420s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest
           grep -F 'PASS WORLD' run/client-validation.txt
       - name: Verify executable mod JAR contents
         shell: bash

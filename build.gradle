@@ -47,6 +47,7 @@ minecraft {
     runs {
         configureEach {
             workingDirectory project.file('run')
+            jvmArgs '-Xmx2G'
             property 'forge.logging.console.level', 'info'
             mods { minemon { source sourceSets.main } }
         }
