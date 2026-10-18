@@ -32,6 +32,7 @@ processResources {
         exec { commandLine 'python3', 'tools/prepare_runtime_assets.py', destinationDir.absolutePath }
     }
     exclude { details ->
+        if (details.isDirectory()) return false
         def root = speciesAssetRoots.find { details.path.startsWith(it) }
         if (root == null) return false
         if (!runtimeAssetFiles.isEmpty()) return !runtimeAssetFiles.contains(details.path)
