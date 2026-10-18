@@ -71,6 +71,10 @@ for p in (root/'assets/minemon/animations').rglob('*.animation.json'):
   # Files in the processed resource tree keep the normal assets/minemon root.
   model=root/'assets/minemon'/definition['model'].removeprefix('assets/minemon/')
   if model.exists():build_runtime_clips(data,json.loads(model.read_text()),definition)
+ # GeckoLib 3.1.40 dereferences this field while parsing every clip, including
+ # expression-only looping clips. Keep the source untouched and add a runtime fallback.
+ for animation in data.get('animations',{}).values():
+  if 'animation_length' not in animation:animation['animation_length']=4.0
  p.write_text(json.dumps(data,ensure_ascii=False,indent=2)+'\n')
  count+=1
 print('GeckoLib 3 runtime animations prepared:',count)
