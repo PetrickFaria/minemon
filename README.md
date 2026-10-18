@@ -41,7 +41,7 @@ python tools_extract_assets.py /path/to/Cobblemon-forge-1.5.2+1.20.1.jar
 python tools/verify_project.py
 ```
 
-The extraction command is only a development tool. It copies data assets and their available model notices, not Cobblemon bytecode. Read [ASSET_LICENSES.md](ASSET_LICENSES.md) before sharing any build containing those assets.
+The extraction command is only a development tool. It copies data assets and their available model notices, not Cobblemon bytecode. The JAR carries the notice at `META-INF/ASSET_LICENSES.md`. Read [ASSET_LICENSES.md](ASSET_LICENSES.md) before sharing any build containing those assets.
 
 ## Next implementation work
 

@@ -19,6 +19,8 @@ jobs:
         run: python3 tools/verify_project.py
       - name: Ensure Gradle Wrapper is executable
         run: chmod +x gradlew
+      - name: Report resolved ForgeGradle version
+        run: ./gradlew --no-daemon buildEnvironment
       - name: Build and run tests
         run: ./gradlew --no-daemon clean test build
       - name: Verify executable mod JAR contents
@@ -27,6 +29,7 @@ jobs:
           set -euo pipefail
           jar_file="$(find build/libs -maxdepth 1 -type f -name 'Minemon-1.19.2-*.jar' ! -name '*sources*' -print -quit)"
           test -n "$jar_file"
+          jar tf "$jar_file" | grep -Fx 'META-INF/ASSET_LICENSES.md'
           jar tf "$jar_file" | grep -Fx 'br/com/petrickfaria/minemon/Minemon.class'
           jar tf "$jar_file" | grep -Fx 'data/minemon/species_catalog.json'
           jar tf "$jar_file" | grep -Fx 'assets/minemon/geo/bulbasaur/bulbasaur.geo.json'
@@ -35,6 +38,7 @@ jobs:
           unzip -p "$jar_file" META-INF/mods.toml | grep -F 'modId="minemon"'
           unzip -p "$jar_file" META-INF/mods.toml | grep -F 'versionRange="[1.19.2,1.20)"'
           unzip -p "$jar_file" META-INF/mods.toml | grep -F 'modId="geckolib3"'
+          unzip -p "$jar_file" META-INF/ASSET_LICENSES.md | grep -F 'CC BY-NC 3.0'
       - name: Upload Minemon JAR
         uses: actions/upload-artifact@v4
         with:

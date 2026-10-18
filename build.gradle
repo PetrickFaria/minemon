@@ -36,6 +36,9 @@ dependencies {
 }
 
 jar {
+    from('ASSET_LICENSES.md') {
+        into 'META-INF'
+    }
     manifest { attributes([
         'Specification-Title': 'Minemon',
         'Specification-Vendor': 'PetrickFaria',
