@@ -15,17 +15,9 @@ import net.minecraftforge.common.util.FakePlayer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.gametest.GameTestHolder;
 import net.minecraftforge.gametest.PrefixGameTestTemplate;
-@net.minecraftforge.fml.common.Mod.EventBusSubscriber(modid="minemon")
 @GameTestHolder("minemon")
 @PrefixGameTestTemplate(false)
 public final class CompanionTests {
- private static final java.util.Set<ServerPlayer> TEST_PLAYERS=new java.util.HashSet<>();
- @net.minecraftforge.eventbus.api.SubscribeEvent public static void tickPlayers(net.minecraftforge.event.TickEvent.ServerTickEvent event) {
-  if(event.phase!=net.minecraftforge.event.TickEvent.Phase.END)return;
-  TEST_PLAYERS.removeIf(net.minecraft.world.entity.Entity::isRemoved);
-  // A disconnected dummy transport has no connection tick to call ServerPlayer.doTick.
-  for(ServerPlayer p:TEST_PLAYERS)p.doTick();
- }
  private static void check(GameTestHelper h,boolean condition,String message) { if (!condition) h.fail(message); }
  private static String state(MinemonCreature b, net.minecraft.world.entity.LivingEntity target) { return " target="+b.getTarget()+" canAttack="+b.canAttack(target)+" dist="+b.distanceTo(target)+" pos="+b.position()+" targetPos="+target.position()+" alive="+target.isAlive()+" health="+target.getHealth()+" owner="+b.getOwner()+" ownerVictim="+(b.getOwner()==null?null:b.getOwner().getLastHurtMob())+" sit="+b.isInSittingPose()+" navDone="+b.getNavigation().isDone(); }
  private static void floor(GameTestHelper h) { for(int x=0;x<16;x++)for(int z=0;z<16;z++)h.setBlock(new BlockPos(x,0,z),net.minecraft.world.level.block.Blocks.STONE); }
@@ -41,7 +33,7 @@ public final class CompanionTests {
   p.setGameMode(GameType.SURVIVAL);p.tickCount=100;
   BlockPos pos=h.absolutePos(new BlockPos(7,1,5));
   p.moveTo(pos.getX()+0.5,pos.getY(),pos.getZ()+0.5,0,0);
-  h.getLevel().addNewPlayer(p);TEST_PLAYERS.add(p);
+  h.getLevel().addNewPlayer(p);
   return p;
  }
  @GameTest(template="test_arena",timeoutTicks=300)

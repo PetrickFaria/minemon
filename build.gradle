@@ -48,6 +48,7 @@ minecraft {
         configureEach {
             workingDirectory project.file('run')
             jvmArgs '-Xmx2G'
+            forceExit false
             property 'forge.logging.console.level', 'info'
             mods { minemon { source sourceSets.main } }
         }
