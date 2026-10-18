@@ -27,7 +27,7 @@ public final class CompanionTests {
   for(ServerPlayer p:TEST_PLAYERS)p.doTick();
  }
  private static void check(GameTestHelper h,boolean condition,String message) { if (!condition) h.fail(message); }
- private static String state(MinemonCreature b, net.minecraft.world.entity.LivingEntity target) { return " target="+b.getTarget()+" canAttack="+b.canAttack(target)+" dist="+b.distanceTo(target)+" pos="+b.position()+" targetPos="+target.position()+" alive="+target.isAlive()+" health="+target.getHealth()+" owner="+b.getOwner()+" ownerVictim="+(b.getOwner()==null?null:b.getOwner().getLastHurtMob())+" ownerAttacker="+(b.getOwner()==null?null:b.getOwner().getLastHurtByMob())+" ownerStamp="+(b.getOwner()==null?-1:b.getOwner().getLastHurtByMobTimestamp())+" orderedSit="+b.isOrderedToSit()+" sit="+b.isInSittingPose()+" navDone="+b.getNavigation().isDone(); }
+ private static String state(MinemonCreature b, net.minecraft.world.entity.LivingEntity target) { return " bAlive="+b.isAlive()+" bRemoved="+b.isRemoved()+" target="+b.getTarget()+" canAttack="+b.canAttack(target)+" dist="+b.distanceTo(target)+" pos="+b.position()+" targetPos="+target.position()+" alive="+target.isAlive()+" health="+target.getHealth()+" owner="+b.getOwner()+" ownerVictim="+(b.getOwner()==null?null:b.getOwner().getLastHurtMob())+" ownerAttacker="+(b.getOwner()==null?null:b.getOwner().getLastHurtByMob())+" ownerStamp="+(b.getOwner()==null?-1:b.getOwner().getLastHurtByMobTimestamp())+" orderedSit="+b.isOrderedToSit()+" sit="+b.isInSittingPose()+" navDone="+b.getNavigation().isDone(); }
  private static void floor(GameTestHelper h) { for(int x=0;x<16;x++)for(int z=0;z<16;z++)h.setBlock(new BlockPos(x,0,z),net.minecraft.world.level.block.Blocks.STONE); }
  private static MinemonCreature spawn(GameTestHelper h) {
   floor(h);
@@ -48,7 +48,7 @@ public final class CompanionTests {
  public static void wildRetaliatesAgainstPlayer(GameTestHelper h) {
   MinemonCreature b=spawn(h); ServerPlayer p=player(h);float health=p.getHealth();
   check(h,b.canAttackType(EntityType.PLAYER),"Player entity type must be a valid retaliation target");
-  h.runAfterDelay(80,()->{check(h,b.hurt(DamageSource.playerAttack(p),1),"Hit must be accepted");
+  b.setNoAi(true);h.runAfterDelay(80,()->{b.setNoAi(false);b.getNavigation().stop();check(h,b.hurt(DamageSource.playerAttack(p),1),"Hit must be accepted");
   check(h,b.getTarget()==p,"Player aggressor must become target");
   h.runAfterDelay(100,()->{check(h,p.getHealth()<health,"Melee AI must actually damage the player"+state(b,p));p.discard();h.succeed();});});
  }
@@ -66,14 +66,14 @@ public final class CompanionTests {
  @GameTest(template="test_arena",timeoutTicks=300)
  public static void ownerProtectedAndAssisted(GameTestHelper h) {
   MinemonCreature b=spawn(h);ServerPlayer p=player(h);b.tame(p);b.setOrderedToSit(false);
-  h.runAfterDelay(80,()->{b.hurt(DamageSource.playerAttack(p),1);check(h,b.getTarget()!=p,"Never retaliate against owner");
+  b.setNoAi(true);h.runAfterDelay(80,()->{b.setNoAi(false);b.getNavigation().stop();b.hurt(DamageSource.playerAttack(p),1);check(h,b.getTarget()!=p,"Never retaliate against owner");
   Cow c=h.spawn(EntityType.COW,new BlockPos(8,1,5));c.setNoAi(true);p.attack(c);check(h,p.getLastHurtMob()==c,"Owner attack must record its victim");float health=c.getHealth();
   h.runAfterDelay(100,()->{check(h,c.getHealth()<health,"Owner attack assistance must damage target"+state(b,c));p.discard();h.succeed();});});
  }
  @GameTest(template="test_arena",timeoutTicks=300)
  public static void ownerDefense(GameTestHelper h) {
   MinemonCreature b=spawn(h);ServerPlayer p=player(h);b.tame(p);b.setOrderedToSit(false);
-  Cow c=h.spawn(EntityType.COW,new BlockPos(8,1,5));c.setNoAi(true);float health=c.getHealth();h.runAfterDelay(80,()->{check(h,p.hurt(DamageSource.mobAttack(c),1),"Owner must accept damage after spawn protection");
+  Cow c=h.spawn(EntityType.COW,new BlockPos(8,1,5));c.setNoAi(true);float health=c.getHealth();b.setNoAi(true);h.runAfterDelay(80,()->{b.setNoAi(false);b.getNavigation().stop();check(h,p.hurt(DamageSource.mobAttack(c),1),"Owner must accept damage after spawn protection");
   System.out.println("MINEMON DEFENSE AFTER HIT "+state(b,c)+" goalCanUse="+new net.minecraft.world.entity.ai.goal.target.OwnerHurtByTargetGoal(b).canUse()+" sight="+b.getSensing().hasLineOfSight(c)+" wants="+b.wantsToAttack(c,p));
   h.runAfterDelay(5,()->System.out.println("MINEMON DEFENSE AFTER 5 TICKS "+state(b,c)));
   h.runAfterDelay(100,()->{check(h,c.getHealth()<health,"Companion must defend attacked owner"+state(b,c));p.discard();h.succeed();});});

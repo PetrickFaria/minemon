@@ -25,6 +25,14 @@ public final class ClientSmokeTest {
  private static volatile UUID testEntity;
  private static float minLeg=Float.MAX_VALUE,maxLeg=-Float.MAX_VALUE,minBody=Float.MAX_VALUE,maxBody=-Float.MAX_VALUE;
  private static volatile boolean combatPassed;
+ private static volatile int combatHits;
+ private static final java.util.Map<String,java.util.List<String>> modelBones=new java.util.HashMap<>();
+ private static final java.util.Map<String,float[]> motionRanges=new java.util.HashMap<>();
+ private static final java.util.Set<String> walkedSpecies=new java.util.HashSet<>();
+ @SubscribeEvent public static void actualDamage(net.minecraftforge.event.entity.living.LivingDamageEvent event) {
+  if(Boolean.getBoolean("minemon.clientSmokeTest") && event.getAmount()>0 && event.getEntity() instanceof net.minecraft.server.level.ServerPlayer
+     && event.getSource().getEntity() instanceof MinemonCreature b && b.getUUID().equals(testEntity))combatHits++;
+ }
  private static int direction=1;
  private static final java.util.Set<String> renderedSpecies=java.util.concurrent.ConcurrentHashMap.newKeySet();
  private static final java.util.List<String> species=new java.util.ArrayList<>(SpeciesDefinitions.ALL.keySet());
@@ -35,6 +43,10 @@ public final class ClientSmokeTest {
    if(!opened && mc.screen instanceof TitleScreen && ++titleTicks==20) {
     for(var d:SpeciesDefinitions.ALL.values()) {
      var geo=new ResourceLocation("minemon",d.model().substring("assets/minemon/".length()));var anim=new ResourceLocation("minemon",d.animation().substring("assets/minemon/".length()));
+     try(var stream=ClientSmokeTest.class.getResourceAsStream("/"+d.model())) {
+      var json=com.google.gson.JsonParser.parseReader(new java.io.InputStreamReader(stream)).getAsJsonObject();var names=new java.util.ArrayList<String>();
+      for(var geometry:json.getAsJsonArray("minecraft:geometry"))for(var bone:geometry.getAsJsonObject().getAsJsonArray("bones"))names.add(bone.getAsJsonObject().get("name").getAsString());modelBones.put(d.slug(),names);
+     }
      if(!GeckoLibCache.getInstance().getGeoModels().containsKey(geo)||!GeckoLibCache.getInstance().getAnimations().containsKey(anim))throw new IllegalStateException("GeckoLib did not parse "+d.slug());
     }
     Files.writeString(Path.of("client-validation.txt"),"PASS MENU: Minecraft reached TitleScreen; every registered model/animation parsed by GeckoLib.\n");
@@ -48,7 +60,17 @@ public final class ClientSmokeTest {
     if(!invoked)throw new IllegalStateException("Could not locate WorldOpenFlows.loadLevel");
     MinemonRenderer.validationObserver=(entity,model)->{
      if(mc.getResourceManager().getResource(model.getTextureResource(entity)).isEmpty())throw new IllegalStateException("Missing rendered texture "+entity.getSpeciesSlug());
-     renderedSpecies.add(entity.getSpeciesSlug());
+     String slug=entity.getSpeciesSlug();renderedSpecies.add(slug);
+     double dx=entity.getX()-entity.xo,dz=entity.getZ()-entity.zo;
+     if(dx*dx+dz*dz>0.0001) {
+      walkedSpecies.add(slug);
+      for(String name:modelBones.get(slug)) {
+       if(name.contains("eye")||name.contains("mouth")||name.contains("jaw"))continue;
+       var bone=model.getAnimationProcessor().getBone(name);float[] values={bone.getRotationX(),bone.getRotationY(),bone.getRotationZ(),bone.getPositionX(),bone.getPositionY(),bone.getPositionZ()};
+       var range=motionRanges.computeIfAbsent(slug+":"+name,k->{var r=new float[12];java.util.Arrays.fill(r,0,6,Float.MAX_VALUE);java.util.Arrays.fill(r,6,12,-Float.MAX_VALUE);return r;});
+       for(int axis=0;axis<6;axis++){range[axis]=Math.min(range[axis],values[axis]);range[axis+6]=Math.max(range[axis+6],values[axis]);}
+      }
+     }
      if(testEntity==null||!entity.getUUID().equals(testEntity)||worldTicks<110||worldTicks>220)return;
      var leg=model.getAnimationProcessor().getBone("leg_front_right");var body=model.getAnimationProcessor().getBone("body");
      minLeg=Math.min(minLeg,leg.getRotationX());maxLeg=Math.max(maxLeg,leg.getRotationX());minBody=Math.min(minBody,body.getPositionY());maxBody=Math.max(maxBody,body.getPositionY());frames++;
@@ -79,22 +101,30 @@ public final class ClientSmokeTest {
    }
    if(worldTicks==350)mc.getSingleplayerServer().execute(()->{
     var player=mc.getSingleplayerServer().getPlayerList().getPlayers().get(0);var wild=(MinemonCreature)mc.getSingleplayerServer().overworld().getEntity(testEntity);
-    combatPassed=player.getHealth()<20&&player.isAlive();
+    combatPassed=combatHits>0&&player.getHealth()<20&&player.isAlive();
     if(!combatPassed)throw new IllegalStateException("Connected Survival player did not receive retaliation damage; health="+player.getHealth()+" target="+wild.getTarget());
-    try{Files.writeString(Path.of("client-validation.txt"),"PASS COMBAT: connected Survival player received melee retaliation; health="+player.getHealth()+"\n",StandardOpenOption.APPEND);}catch(java.io.IOException e){throw new RuntimeException(e);}
-    player.setGameMode(GameType.CREATIVE);player.setHealth(20);
+    try{Files.writeString(Path.of("client-validation.txt"),"PASS COMBAT: connected Survival player received melee retaliation; damage events="+combatHits+" health="+player.getHealth()+"\n",StandardOpenOption.APPEND);}catch(java.io.IOException e){throw new RuntimeException(e);}
+    player.setGameMode(GameType.CREATIVE);player.setHealth(20);player.teleportTo(mc.getSingleplayerServer().overworld(),0,101,0,0,12);player.fallDistance=0;
    });
    if(worldTicks>=360 && worldTicks<360+species.size()*40 && (worldTicks-360)%40==0) {
     String slug=species.get((worldTicks-360)/40);
     mc.getSingleplayerServer().execute(()->{
      var level=mc.getSingleplayerServer().overworld();var previous=level.getEntity(testEntity);if(previous!=null)previous.discard();
-     var next=ModEntities.SPECIES.get(slug).get().create(level);next.moveTo(0,101,4,180,0);next.setNoAi(true);level.addFreshEntity(next);testEntity=next.getUUID();
+     var next=ModEntities.SPECIES.get(slug).get().create(level);next.moveTo(0,101,4,180,0);next.setNoAi(false);level.addFreshEntity(next);testEntity=next.getUUID();
     });
    }
+   if(worldTicks>=360 && worldTicks<360+species.size()*40)mc.getSingleplayerServer().execute(()->{
+    var current=(MinemonCreature)mc.getSingleplayerServer().overworld().getEntity(testEntity);if(current!=null)current.getNavigation().moveTo(2,101,4,1);
+   });
    if(worldTicks>=380 && worldTicks<360+species.size()*40 && (worldTicks-380)%40==0)Screenshot.grab(mc.gameDirectory,mc.getMainRenderTarget(),message->{});
    if(worldTicks==360+species.size()*40) {
     if(!combatPassed)throw new IllegalStateException("Survival combat check did not pass");
     if(!renderedSpecies.containsAll(species))throw new IllegalStateException("Some species were not rendered: expected="+species+" actual="+renderedSpecies);
+    for(String slug:species) {
+     boolean bodyMoved=motionRanges.entrySet().stream().filter(e->e.getKey().startsWith(slug+":")).anyMatch(e->{for(int axis=0;axis<6;axis++)if(e.getValue()[axis+6]-e.getValue()[axis]>0.0001)return true;return false;});
+     if(!walkedSpecies.contains(slug)||!bodyMoved)throw new IllegalStateException("No animated locomotion rendered for "+slug);
+    }
+    Files.writeString(Path.of("client-validation.txt"),"PASS LOCOMOTION: every registered species moved and had changing body bone transforms.\n",StandardOpenOption.APPEND);
     Files.writeString(Path.of("client-validation.txt"),"PASS ROSTER: every registered species rendered with its texture in a world: "+renderedSpecies+"\n",StandardOpenOption.APPEND);
     mc.stop();
    }

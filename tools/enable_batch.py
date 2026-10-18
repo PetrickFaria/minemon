@@ -3,6 +3,7 @@ from pathlib import Path
 from PIL import Image
 from audit_candidates import audit,ROOT,R
 rows={r['slug']:r for r in audit()};slugs=sys.argv[1:];defs=[]
+if not slugs or slugs[0]!='bulbasaur' or len(set(slugs))!=len(slugs):raise SystemExit('Keep Bulbasaur first and list each species exactly once')
 for slug in slugs:
  row=rows[slug]
  if not row['accepted']:raise SystemExit(slug+': '+row['reason'])

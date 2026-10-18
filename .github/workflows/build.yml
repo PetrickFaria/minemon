@@ -48,6 +48,9 @@ jobs:
           python3 tools/prepare_client_world.py
           timeout 420s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest
           grep -F 'PASS WORLD' run/client-validation.txt
+          grep -F 'PASS COMBAT' run/client-validation.txt
+          grep -F 'PASS LOCOMOTION' run/client-validation.txt
+          grep -F 'PASS ROSTER' run/client-validation.txt
       - name: Verify executable mod JAR contents
         shell: bash
         run: |
@@ -72,7 +75,7 @@ jobs:
       - name: Upload Minemon JAR
         uses: actions/upload-artifact@v4
         with:
-          name: Minemon-1.19.2-1.0.0
+          name: Minemon-1.19.2-1.1.0
           path: build/libs/Minemon-1.19.2-*.jar
           if-no-files-found: error
           retention-days: 14

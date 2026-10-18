@@ -1,4 +1,4 @@
-import json,struct,sys,zipfile,re
+import json,struct,sys,zipfile,re,math
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1];R=ROOT/'src/main/resources'
 def validate(read,definitions,prepared=False):
@@ -18,6 +18,8 @@ def validate(read,definitions,prepared=False):
     if v.get('animation_length',0)<=0:raise ValueError(name+' zero duration')
   for name in d['clips'].values():
    if name not in a:raise ValueError('Missing referenced clip '+name)
+  attack=next((d['clips'][n] for n in ('physical_attack','physical','attack') if n in d['clips']),None)
+  if attack and d.get('attackTicks')!=math.ceil(a[attack].get('animation_length',4)*20):raise ValueError('Attack duration mismatch '+d['slug'])
   if d['idle'] not in a or d['walk'] not in a:raise ValueError('Missing state clip '+d['slug'])
   tex=read(d['texture']);dims=struct.unpack('>II',tex[16:24]);desc=g['minecraft:geometry'][0]['description']
   if dims!=(desc['texture_width'],desc['texture_height']):raise ValueError('UV dimensions '+d['slug'])

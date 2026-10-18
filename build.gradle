@@ -28,6 +28,7 @@ def runtimeManifestFile = file('src/main/resources/data/minemon/runtime_species.
 def runtimeDefinitions = runtimeManifestFile.exists() ? new groovy.json.JsonSlurper().parse(runtimeManifestFile) : []
 def runtimeAssetFiles = runtimeDefinitions.collectMany { d -> [d.model,d.texture,d.animation] + d.sounds + d.licenses }.toSet()
 processResources {
+    includeEmptyDirs = false
     doLast {
         exec { commandLine 'python3', 'tools/prepare_runtime_assets.py', destinationDir.absolutePath }
     }

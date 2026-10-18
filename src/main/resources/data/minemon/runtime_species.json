@@ -23,6 +23,7 @@
     },
     "idle": "animation.bulbasaur.ground_idle",
     "walk": "animation.bulbasaur.ground_walk",
+    "attackTicks": 0,
     "excluded_clips": [],
     "sounds": [
       "assets/minemon/sounds/pokemon/bulbasaur/bulbasaur_ambient.ogg",
@@ -35,5 +36,204 @@
     ],
     "eggBase": 8632155,
     "eggSpots": 15001284
+  },
+  {
+    "slug": "pikachu",
+    "name": "Pikachu",
+    "model": "assets/minemon/geo/pikachu/pikachu_male.geo.json",
+    "texture": "assets/minemon/textures/pokemon/pikachu/pikachu.png",
+    "animation": "assets/minemon/animations/pikachu/pikachu.animation.json",
+    "mode": "ground",
+    "scale": 0.5,
+    "width": 0.7,
+    "height": 1.3,
+    "health": 20,
+    "attack": 4.583333333333333,
+    "speed": 0.29,
+    "clips": {
+      "ground_idle": "animation.pikachu.ground_idle",
+      "ground_walk": "animation.pikachu.ground_walk",
+      "sleep": "animation.pikachu.sleep",
+      "battle_idle": "animation.pikachu.battle_idle",
+      "shoulder_right": "animation.pikachu.shoulder_right",
+      "shoulder_left": "animation.pikachu.shoulder_left",
+      "blink": "animation.pikachu.blink",
+      "cry": "animation.pikachu.cry",
+      "render": "animation.pikachu.render"
+    },
+    "idle": "animation.pikachu.ground_idle",
+    "walk": "animation.pikachu.ground_walk",
+    "attackTicks": 0,
+    "excluded_clips": [],
+    "sounds": [
+      "assets/minemon/sounds/pokemon/pikachu/pikachu_ambient.ogg",
+      "assets/minemon/sounds/pokemon/pikachu/pikachu_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/pikachu/model-license.txt"
+    ],
+    "eggBase": 15847491,
+    "eggSpots": 14989371
+  },
+  {
+    "slug": "charmander",
+    "name": "Charmander",
+    "model": "assets/minemon/geo/charmander/charmander.geo.json",
+    "texture": "assets/minemon/textures/pokemon/charmander/charmander.png",
+    "animation": "assets/minemon/animations/charmander/charmander.animation.json",
+    "mode": "ground",
+    "scale": 0.7,
+    "width": 0.7,
+    "height": 1.1,
+    "health": 20,
+    "attack": 4.333333333333333,
+    "speed": 0.265,
+    "clips": {
+      "ground_idle": "animation.charmander.ground_idle",
+      "ground_walk": "animation.charmander.ground_walk",
+      "special_attack": "animation.charmander.special_attack",
+      "physical_attack": "animation.charmander.physical_attack",
+      "faint": "animation.charmander.faint",
+      "sleep": "animation.charmander.sleep",
+      "damage": "animation.charmander.damage",
+      "blink": "animation.charmander.blink",
+      "ground_pulse1": "animation.charmander.ground_pulse1",
+      "cry": "animation.charmander.cry",
+      "render": "animation.charmander.render"
+    },
+    "idle": "animation.charmander.ground_idle",
+    "walk": "animation.charmander.ground_walk",
+    "attackTicks": 68,
+    "excluded_clips": [],
+    "sounds": [
+      "assets/minemon/sounds/pokemon/charmander/charmander_ambient.ogg",
+      "assets/minemon/sounds/pokemon/charmander/charmander_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/charmander/model-license.txt"
+    ],
+    "eggBase": 12273186,
+    "eggSpots": 11285276
+  },
+  {
+    "slug": "squirtle",
+    "name": "Squirtle",
+    "model": "assets/minemon/geo/squirtle/squirtle.geo.json",
+    "texture": "assets/minemon/textures/pokemon/squirtle/squirtle.png",
+    "animation": "assets/minemon/animations/squirtle/squirtle.animation.json",
+    "mode": "ground",
+    "scale": 0.7,
+    "width": 0.6,
+    "height": 1.2,
+    "health": 22.0,
+    "attack": 4.0,
+    "speed": 0.243,
+    "clips": {
+      "ground_idle": "animation.squirtle.ground_idle",
+      "battle_idle": "animation.squirtle.battle_idle",
+      "ground_walk": "animation.squirtle.ground_walk",
+      "ground_run": "animation.squirtle.ground_run",
+      "water_idle": "animation.squirtle.water_idle",
+      "water_swim": "animation.squirtle.water_swim",
+      "surfacewater_idle": "animation.squirtle.surfacewater_idle",
+      "surfacewater_swim": "animation.squirtle.surfacewater_swim",
+      "sleep": "animation.squirtle.sleep",
+      "blink": "animation.squirtle.blink",
+      "cry": "animation.squirtle.cry",
+      "faint": "animation.squirtle.faint",
+      "shoulder_left": "animation.squirtle.shoulder_left",
+      "shoulder_right": "animation.squirtle.shoulder_right",
+      "quirk_ground_idle": "animation.squirtle.quirk_ground_idle",
+      "quirk_water": "animation.squirtle.quirk_water",
+      "physical": "animation.squirtle.physical",
+      "special": "animation.squirtle.special",
+      "status": "animation.squirtle.status",
+      "recoil": "animation.squirtle.recoil"
+    },
+    "idle": "animation.squirtle.ground_idle",
+    "walk": "animation.squirtle.ground_walk",
+    "attackTicks": 60,
+    "excluded_clips": [],
+    "sounds": [
+      "assets/minemon/sounds/pokemon/squirtle/squirtle_ambient.ogg",
+      "assets/minemon/sounds/pokemon/squirtle/squirtle_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/squirtle/model-license.txt"
+    ],
+    "eggBase": 4691355,
+    "eggSpots": 6729654
+  },
+  {
+    "slug": "jolteon",
+    "name": "Jolteon",
+    "model": "assets/minemon/geo/jolteon/jolteon.geo.json",
+    "texture": "assets/minemon/textures/pokemon/jolteon/jolteon.png",
+    "animation": "assets/minemon/animations/jolteon/jolteon.animation.json",
+    "mode": "ground",
+    "scale": 0.8,
+    "width": 0.9,
+    "height": 1,
+    "health": 32.5,
+    "attack": 5.416666666666667,
+    "speed": 0.33,
+    "clips": {
+      "ground_idle": "animation.jolteon.ground_idle",
+      "ground_walk": "animation.jolteon.ground_walk",
+      "ground_run": "animation.jolteon.ground_run",
+      "blink": "animation.jolteon.blink",
+      "render": "animation.jolteon.render"
+    },
+    "idle": "animation.jolteon.ground_idle",
+    "walk": "animation.jolteon.ground_walk",
+    "attackTicks": 0,
+    "excluded_clips": [
+      "animation.jolteon.cry"
+    ],
+    "sounds": [
+      "assets/minemon/sounds/pokemon/jolteon/jolteon_ambient.ogg",
+      "assets/minemon/sounds/pokemon/jolteon/jolteon_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/jolteon/model-license.txt"
+    ],
+    "eggBase": 15055937,
+    "eggSpots": 13078067
+  },
+  {
+    "slug": "ivysaur",
+    "name": "Ivysaur",
+    "model": "assets/minemon/geo/ivysaur/ivysaur.geo.json",
+    "texture": "assets/minemon/textures/pokemon/ivysaur/ivysaur.png",
+    "animation": "assets/minemon/animations/ivysaur/ivysaur.animation.json",
+    "mode": "ground",
+    "scale": 1,
+    "width": 0.7,
+    "height": 1,
+    "health": 30.0,
+    "attack": 5.166666666666667,
+    "speed": 0.26,
+    "clips": {
+      "ground_idle": "animation.ivysaur.ground_idle",
+      "ground_walk": "animation.ivysaur.ground_walk",
+      "sleep": "animation.ivysaur.sleep",
+      "faint": "animation.ivysaur.faint",
+      "blink": "animation.ivysaur.blink",
+      "cry": "animation.ivysaur.cry",
+      "render": "animation.ivysaur.render"
+    },
+    "idle": "animation.ivysaur.ground_idle",
+    "walk": "animation.ivysaur.ground_walk",
+    "attackTicks": 0,
+    "excluded_clips": [],
+    "sounds": [
+      "assets/minemon/sounds/pokemon/ivysaur/ivysaur_ambient.ogg",
+      "assets/minemon/sounds/pokemon/ivysaur/ivysaur_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/ivysaur/model-license.txt"
+    ],
+    "eggBase": 3631483,
+    "eggSpots": 4095370
   }
 ]

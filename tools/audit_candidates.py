@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import json,re,struct
+import json,re,struct,math
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1];R=ROOT/'src/main/resources'
 CAT={s['slug']:s for s in json.loads((R/'data/minemon/species_catalog.json').read_text())}
@@ -30,6 +30,8 @@ def audit():
   png=(R/texture).read_bytes();dims=struct.unpack('>II',png[16:24]);desc=gd['minecraft:geometry'][0]['description']
   if dims!=(desc['texture_width'],desc['texture_height']):issues.append('UV texture dimensions mismatch')
   clips={n.rsplit('.',1)[-1]:n for n in ad['animations'] if n not in excluded_clips}
+  attack_clip=next((clips[n] for n in ('physical_attack','physical','attack') if n in clips),None)
+  attack_ticks=math.ceil(ad['animations'][attack_clip].get('animation_length',4)*20) if attack_clip else 0
   mode='flying' if slug in FLYING else 'ground'
   idle=next((clips[n] for n in (('air_idle','ground_idle','idle') if mode=='flying' else ('ground_idle','idle')) if n in clips),None)
   walk=next((clips[n] for n in (('air_fly','ground_walk','air_idle','ground_idle') if mode=='flying' else ('ground_walk','walk')) if n in clips),None)
@@ -37,7 +39,7 @@ def audit():
   elif not re.search(r'(?:q|query)\.anim_time',json.dumps(ad['animations'][walk])) and not any(isinstance(channel,dict) and len(channel)>1 for bone in ad['animations'][walk].get('bones',{}).values() for channel in bone.values()):issues.append('Locomotion clip is a static pose')
   reason=EXCLUSIONS.get(slug)
   if issues and not reason:reason='; '.join(issues)
-  d=dict(slug=slug,name=s['name'],model=model,texture=texture,animation=animation,mode=mode,scale=s.get('baseScale',1),width=s['hitbox']['width'],height=s['hitbox']['height'],health=max(20,s['baseStats']['hp']/2),attack=max(3,s['baseStats']['attack']/12),speed=round(min(.35,.20+s['baseStats']['speed']/1000),3),clips=clips,idle=idle,walk=walk,excluded_clips=excluded_clips,sounds=res['sounds'],licenses=res['licenses'])
+  d=dict(slug=slug,name=s['name'],model=model,texture=texture,animation=animation,mode=mode,scale=s.get('baseScale',1),width=s['hitbox']['width'],height=s['hitbox']['height'],health=max(20,s['baseStats']['hp']/2),attack=max(3,s['baseStats']['attack']/12),speed=round(min(.35,.20+s['baseStats']['speed']/1000),3),clips=clips,idle=idle,walk=walk,attackTicks=attack_ticks,excluded_clips=excluded_clips,sounds=res['sounds'],licenses=res['licenses'])
   results.append(dict(slug=slug,accepted=not bool(reason),reason=reason,issues=issues,definition=d))
  return results
 if __name__=='__main__':

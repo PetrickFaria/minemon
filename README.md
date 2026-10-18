@@ -1,56 +1,40 @@
-# Minemon 1.0.0 — project structure milestone
+# Minemon
 
-Independent Forge mod project for Minecraft Java 1.19.2, Forge 43.5.0, Java 17, mod ID `minemon`.
+Minecraft Java 1.19.2 · Forge 43.5.0 · Java 17 · GeckoLib 3.1.40 · mod ID `minemon`.
 
-## Current milestone
+The source preserves the existing 1,025-entry catalog and extracted artwork. Only species explicitly listed in `data/minemon/runtime_species.json` and `gradle.properties` are registered or packaged. Catalog entries are not playable entity registrations. No Cobblemon classes or runtime dependency are included.
 
-This project now has the Forge/Gradle structure, config, creative tab, a shared wolf-like tamable entity, spawn egg, GeckoLib renderer/model, and a Bulbasaur reference registration. It also contains a generated species catalog for 1,025 species records and extracted resource assets under the `minemon` namespace. The asset extraction process does not copy Cobblemon classes or make Cobblemon a runtime dependency.
+## Build and validation
 
-The registry currently contains **one entity and one spawn egg: Bulbasaur**. The other asset files and catalog records are staged for later registration and validation; they are not yet playable Minemon. The catalog has 633 source records marked implemented, while 627 have model, texture, and animation files associated. Presence in the catalog is not proof of working rendering.
-
-## Behavior implemented in shared entity
-
-- Wild creatures do not acquire targets unless hurt.
-- Bone interaction attempts taming using configurable `tameChancePercent` (default 33%) and consumes one bone outside Creative mode.
-- Successful taming stores the vanilla owner UUID, orders the creature to sit, and displays hearts; failure displays smoke.
-- Owner interaction toggles sitting. Owner protection and owner attack assistance use vanilla tame goals.
-- A wild creature retaliates only against the entity that hurt it, with a 20-second aggression window, a 24-block chase limit, and a timeout when its path remains blocked. It has no passive target-acquisition goal.
-- Tamed creatures follow their owner; vanilla `FollowOwnerGoal` provides its standard safe-position teleport behavior when far away.
-- Sitting blocks follow and distant combat movement. Owner UUID checks prevent the creature from selecting its owner, including while resolving an unloaded owner entity.
-- Same-owner Minemon creatures, and untamed Minemon creatures, will not attack one another through the retaliation/assist logic.
-- Owner, sitting state, and health persistence use `TamableAnimal`'s built-in entity save data.
-
-## Current animation limitations
-
-Bulbasaur has the source clips `ground_idle`, `ground_walk`, `sleep`, `faint`, `blink`, `cry`, and `render`. The renderer selects idle, walk, faint, and occasional blinks using separate controllers; movement detection combines GeckoLib's moving state with horizontal velocity. There is no dedicated run, attack, or sit clip. The sleep clip puts Bulbasaur in a lying pose, so sitting uses the idle animation rather than incorrectly mapping sleep to a sit pose. No in-game visual validation has been performed yet.
-
-The source tree retains the full extracted resource set and the 1,025-entry catalog. `runtime_species=bulbasaur` controls which species-specific model, animation, texture, sound, and license files enter the JAR. GeckoLib 3.1.40 scans animation resources across the loaded namespace; excluding unregistered species also prevents their unsupported animation event formats from breaking the runtime resource reload. Add a species to this property only when its entity is registered and its animation event data passes the verifier.
-
-## Build
-
-Requirements: Java 17 and network access to the Forge and GeckoLib Maven repositories. The checked-in Gradle Wrapper pins Gradle 7.5.1 and verifies the official distribution checksum. ForgeGradle is configured in the 5.1 line (`[5.1,6.0)`). GeckoLib 3.1.40 for Forge 1.19.2 is the only additional runtime mod dependency. Cobblemon is not required at runtime.
-
-From this directory, run:
+Use the checked-in Gradle 7.5.1 Wrapper and ForgeGradle 5.1.77:
 
 ```bash
-./gradlew build
+python3 tools/verify_project.py
+./gradlew clean test build
+./gradlew runGameTestServer
+python3 tools/verify_runtime.py build/libs/Minemon-1.19.2-1.1.0.jar
 ```
 
-Expected output name: `build/libs/Minemon-1.19.2-1.0.0.jar`. The GitHub Actions workflow uses the checked-in wrapper, runs the resource and GeckoLib compatibility verifier and `clean test build`, verifies the compiled JAR metadata and registered species' assets, then uploads the JAR as an artifact. The Gradle `test` task has no Java test sources yet; behavior and animation still require a Minecraft client test.
+The workflow runs JUnit against GeckoLib's actual Molang parser, Minecraft server GameTests, and an Xvfb Minecraft client. The client test checks the title screen, GeckoLib's loaded models/animations, and actual rendered Bulbasaur bone movement in a world. Diagnostic artifacts contain test results, client/server logs and screenshots. Validation code and test structures are excluded from the distributable JAR. See `VALIDATION.md` for results and remaining manual checks.
 
-To regenerate the local resource bundle from the original JAR:
+## Shared companion behavior
 
-```bash
-python tools_extract_assets.py /path/to/Cobblemon-forge-1.5.2+1.20.1.jar
-python tools/verify_project.py
-```
+- Bone interaction uses the existing configurable taming probability, consumes one bone outside Creative, assigns the vanilla owner UUID and orders sitting.
+- Owner interaction toggles sitting. Vanilla owner defense, owner attack assistance and follow/teleport goals remain in place.
+- Wild creatures have no spontaneous target-selection goal. Retaliation expires after 20 seconds, excessive chase distance or prolonged unreachable navigation.
+- Owner UUID checks prevent friendly retaliation. Sitting blocks following and distant attack movement. Vanilla NBT stores taming, owner and sitting state.
+- Survival or Adventure mode is required to validate player retaliation. Creative and Spectator players remain protected by Minecraft's normal targeting rules.
 
-The extraction command is only a development tool. It copies data assets and their available model notices, not Cobblemon bytecode. The JAR carries the notice at `META-INF/ASSET_LICENSES.md`. Read [ASSET_LICENSES.md](ASSET_LICENSES.md) before sharing any build containing those assets.
+## Animation compatibility
 
-## Next implementation work
+Original animation files remain untouched in source. During resource processing, runtime copies normalize the Bedrock `q.anim_time` alias to GeckoLib 3's `query.anim_time` and provide explicit lengths for expression-only loops. Model, texture and animation paths are chosen explicitly per species. A secondary blink controller is kept separate from body locomotion and stops during movement/attacks. Physical attack clips, when present, are triggered only after a successful melee hit.
 
-1. Compile and launch the Bulbasaur fixture in a Forge 1.19.2 client.
-2. Verify geometry, texture, animation clip names and scale in-game; adjust renderer and clip selection.
-3. Validate taming, sitting, following, owner defense, persistence, and teleport positions in a test world.
-4. Expand entity and spawn egg registration to the remaining supported species, then add species-specific attributes and natural spawn data.
-5. Add species-aware animation mapping and sound integration. Keep species without valid model/animation data out of the completed list.
+Bulbasaur contains `ground_idle`, `ground_walk`, `sleep`, `faint`, `blink`, `cry` and `render`. It has no dedicated run, physical attack or sitting animation. Walking is reused at higher speed; sitting uses idle. Sleep is a lying pose and is not mislabeled as sitting. No nonexistent clips or replacement generic animations are introduced.
+
+`tools/audit_candidates.py` records model/animation bone matching, event structure, UV dimensions and actual animated locomotion. Optional Jolteon cry has invalid bone references and is omitted only from the prepared runtime copy; the original source is preserved. Species with unsupported events, missing bones, only static poses or unvalidated locomotion remain unregistered.
+
+## Assets and future species
+
+Read [ASSET_LICENSES.md](ASSET_LICENSES.md). Artwork credit: Cobblemon Assets contributors, CC BY-NC 3.0; noncommercial use only, with retained notices and attribution. Pokémon trademarks are separate.
+
+To enable an audited batch, run `python3 tools/enable_batch.py` with the complete intended species list, then validate, compile, run the server/client tests and inspect the JAR before enabling another batch. This generates explicit runtime definitions, egg models and translations without extracting or rewriting the original asset library. Original extraction tools remain available for provenance; this correction does not rerun extraction.

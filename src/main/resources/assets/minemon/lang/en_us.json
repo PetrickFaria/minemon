@@ -1,5 +1,15 @@
 {
   "itemGroup.minemon": "Minemon",
   "entity.minemon.bulbasaur": "Bulbasaur",
-  "item.minemon.bulbasaur_spawn_egg": "Bulbasaur Spawn Egg"
+  "item.minemon.bulbasaur_spawn_egg": "Spawn Egg: Bulbasaur",
+  "entity.minemon.pikachu": "Pikachu",
+  "item.minemon.pikachu_spawn_egg": "Spawn Egg: Pikachu",
+  "entity.minemon.charmander": "Charmander",
+  "item.minemon.charmander_spawn_egg": "Spawn Egg: Charmander",
+  "entity.minemon.squirtle": "Squirtle",
+  "item.minemon.squirtle_spawn_egg": "Spawn Egg: Squirtle",
+  "entity.minemon.jolteon": "Jolteon",
+  "item.minemon.jolteon_spawn_egg": "Spawn Egg: Jolteon",
+  "entity.minemon.ivysaur": "Ivysaur",
+  "item.minemon.ivysaur_spawn_egg": "Spawn Egg: Ivysaur"
 }

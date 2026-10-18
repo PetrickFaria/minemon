@@ -229,7 +229,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
 
     @Override
     public void handleEntityEvent(byte id) {
-        if (id == 61) { this.attackAnimationTicks=16; this.attackSequence++; }
+        if (id == 61) { this.attackAnimationTicks=SpeciesDefinitions.get(this.getSpeciesSlug()).attackTicks(); this.attackSequence++; }
         else if (id == 7) this.level.addParticle(net.minecraft.core.particles.ParticleTypes.HEART,
                 this.getX(), this.getY() + 0.5D, this.getZ(), 0.0D, 0.1D, 0.0D);
         else if (id == 6) this.level.addParticle(net.minecraft.core.particles.ParticleTypes.SMOKE,

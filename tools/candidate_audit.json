@@ -28,6 +28,7 @@
       },
       "idle": "animation.bulbasaur.ground_idle",
       "walk": "animation.bulbasaur.ground_walk",
+      "attackTicks": 0,
       "excluded_clips": [],
       "sounds": [
         "assets/minemon/sounds/pokemon/bulbasaur/bulbasaur_ambient.ogg",
@@ -71,6 +72,7 @@
       },
       "idle": "animation.pikachu.ground_idle",
       "walk": "animation.pikachu.ground_walk",
+      "attackTicks": 0,
       "excluded_clips": [],
       "sounds": [
         "assets/minemon/sounds/pokemon/pikachu/pikachu_ambient.ogg",
@@ -114,6 +116,7 @@
       },
       "idle": "animation.charmander.ground_idle",
       "walk": "animation.charmander.ground_walk",
+      "attackTicks": 68,
       "excluded_clips": [],
       "sounds": [
         "assets/minemon/sounds/pokemon/charmander/charmander_ambient.ogg",
@@ -166,6 +169,7 @@
       },
       "idle": "animation.squirtle.ground_idle",
       "walk": "animation.squirtle.ground_walk",
+      "attackTicks": 60,
       "excluded_clips": [],
       "sounds": [
         "assets/minemon/sounds/pokemon/squirtle/squirtle_ambient.ogg",
@@ -203,6 +207,7 @@
       },
       "idle": "animation.jolteon.ground_idle",
       "walk": "animation.jolteon.ground_walk",
+      "attackTicks": 0,
       "excluded_clips": [
         "animation.jolteon.cry"
       ],
@@ -251,6 +256,7 @@
       },
       "idle": "animation.charizard.ground_idle",
       "walk": "animation.charizard.ground_walk",
+      "attackTicks": 60,
       "excluded_clips": [],
       "sounds": [
         "assets/minemon/sounds/pokemon/charizard/charizard_ambient.ogg",
@@ -302,6 +308,7 @@
       },
       "idle": "animation.blastoise.ground_idle",
       "walk": "animation.blastoise.ground_walk",
+      "attackTicks": 60,
       "excluded_clips": [],
       "sounds": [
         "assets/minemon/sounds/pokemon/blastoise/blastoise_ambient.ogg",
@@ -341,6 +348,7 @@
       },
       "idle": "animation.ivysaur.ground_idle",
       "walk": "animation.ivysaur.ground_walk",
+      "attackTicks": 0,
       "excluded_clips": [],
       "sounds": [
         "assets/minemon/sounds/pokemon/ivysaur/ivysaur_ambient.ogg",
@@ -381,6 +389,7 @@
       },
       "idle": "animation.gastly.ground_idle",
       "walk": "animation.gastly.ground_walk",
+      "attackTicks": 0,
       "excluded_clips": [],
       "sounds": [
         "assets/minemon/sounds/pokemon/gastly/gastly_ambient.ogg",
@@ -419,6 +428,7 @@
       },
       "idle": "animation.haunter.ground_idle",
       "walk": "animation.haunter.ground_idle",
+      "attackTicks": 0,
       "excluded_clips": [],
       "sounds": [
         "assets/minemon/sounds/pokemon/haunter/haunter_ambient.ogg",
@@ -458,6 +468,7 @@
       },
       "idle": "animation.gengar.air_idle",
       "walk": "animation.gengar.air_fly",
+      "attackTicks": 0,
       "excluded_clips": [],
       "sounds": [
         "assets/minemon/sounds/pokemon/gengar/gengar_ambient.ogg",
@@ -493,6 +504,7 @@
       },
       "idle": "animation.shellder.ground_idle",
       "walk": null,
+      "attackTicks": 0,
       "excluded_clips": [],
       "sounds": [
         "assets/minemon/sounds/pokemon/shellder/shellder_ambient.ogg",
@@ -528,6 +540,7 @@
       },
       "idle": "animation.cloyster.ground_idle",
       "walk": null,
+      "attackTicks": 0,
       "excluded_clips": [],
       "sounds": [
         "assets/minemon/sounds/pokemon/cloyster/cloyster_ambient.ogg",
@@ -570,6 +583,7 @@
       },
       "idle": "animation.psyduck.ground_idle",
       "walk": "animation.psyduck.ground_walk",
+      "attackTicks": 0,
       "excluded_clips": [],
       "sounds": [
         "assets/minemon/sounds/pokemon/psyduck/psyduck_ambient.ogg",
@@ -610,6 +624,7 @@
       },
       "idle": "animation.hitmonlee.ground_idle",
       "walk": "animation.hitmonlee.ground_walk",
+      "attackTicks": 0,
       "excluded_clips": [],
       "sounds": [
         "assets/minemon/sounds/pokemon/hitmonlee/hitmonlee_ambient.ogg",
@@ -647,6 +662,7 @@
       },
       "idle": "animation.mew.ground_idle",
       "walk": "animation.mew.ground_walk",
+      "attackTicks": 0,
       "excluded_clips": [],
       "sounds": [
         "assets/minemon/sounds/pokemon/mew/mew_ambient.ogg",
@@ -688,6 +704,7 @@
       },
       "idle": "animation.mewtwo.ground_idle",
       "walk": null,
+      "attackTicks": 0,
       "excluded_clips": [],
       "sounds": [
         "assets/minemon/sounds/pokemon/mewtwo/mewtwo_ambient.ogg",
@@ -737,6 +754,7 @@
       },
       "idle": "animation.wartortle.ground_idle",
       "walk": "animation.wartortle.ground_walk",
+      "attackTicks": 60,
       "excluded_clips": [],
       "sounds": [
         "assets/minemon/sounds/pokemon/wartortle/wartortle_ambient.ogg",
@@ -777,6 +795,7 @@
       },
       "idle": "animation.arbok.ground_idle",
       "walk": "animation.arbok.ground_walk",
+      "attackTicks": 0,
       "excluded_clips": [],
       "sounds": [
         "assets/minemon/sounds/pokemon/arbok/arbok_ambient.ogg",
@@ -814,6 +833,7 @@
       },
       "idle": "animation.nidoking.ground_idle",
       "walk": null,
+      "attackTicks": 0,
       "excluded_clips": [],
       "sounds": [
         "assets/minemon/sounds/pokemon/nidoking/nidoking_ambient.ogg",
@@ -854,6 +874,7 @@
       },
       "idle": "animation.growlithe.idle",
       "walk": null,
+      "attackTicks": 0,
       "excluded_clips": [],
       "sounds": [
         "assets/minemon/sounds/pokemon/growlithe/growlithe_ambient.ogg",
@@ -893,6 +914,7 @@
       },
       "idle": "animation.arcanine.idle",
       "walk": null,
+      "attackTicks": 0,
       "excluded_clips": [],
       "sounds": [
         "assets/minemon/sounds/pokemon/arcanine/arcanine_ambient.ogg",
@@ -930,6 +952,7 @@
       },
       "idle": null,
       "walk": null,
+      "attackTicks": 0,
       "excluded_clips": [],
       "sounds": [
         "assets/minemon/sounds/pokemon/golem/golem_ambient.ogg",
@@ -972,6 +995,7 @@
       },
       "idle": "animation.onix.ground_idle",
       "walk": "animation.onix.ground_walk",
+      "attackTicks": 0,
       "excluded_clips": [],
       "sounds": [
         "assets/minemon/sounds/pokemon/onix/onix_ambient.ogg",
@@ -1011,6 +1035,7 @@
       },
       "idle": "animation.scyther.air_idle",
       "walk": "animation.scyther.air_idle",
+      "attackTicks": 0,
       "excluded_clips": [],
       "sounds": [
         "assets/minemon/sounds/pokemon/scyther/scyther_ambient.ogg",
@@ -1052,6 +1077,7 @@
       },
       "idle": "animation.electabuzz.ground_idle",
       "walk": "animation.electabuzz.ground_walk",
+      "attackTicks": 0,
       "excluded_clips": [],
       "sounds": [
         "assets/minemon/sounds/pokemon/electabuzz/electabuzz_ambient.ogg",
@@ -1089,6 +1115,7 @@
       },
       "idle": "animation.zapdos.air_idle",
       "walk": "animation.zapdos.air_fly",
+      "attackTicks": 0,
       "excluded_clips": [],
       "sounds": [
         "assets/minemon/sounds/pokemon/zapdos/zapdos_ambient.ogg",
