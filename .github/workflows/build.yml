@@ -30,8 +30,9 @@ jobs:
           timeout 360s ./gradlew --no-daemon runGameTestServer
       - name: Launch Minecraft client and validate GeckoLib cache
         run: |
-          timeout 300s xvfb-run -a ./gradlew --no-daemon runClient -PclientSmokeTest
-          test -f run/client-validation.txt
+          python3 tools/prepare_client_world.py
+          timeout 420s xvfb-run -a ./gradlew --no-daemon runClient -PclientSmokeTest
+          grep -F 'PASS WORLD' run/client-validation.txt
       - name: Verify executable mod JAR contents
         shell: bash
         run: |

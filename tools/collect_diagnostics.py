@@ -13,8 +13,8 @@ for path in (Path.home()/'.gradle/caches/forge_gradle').rglob('*.jar'):
  try:
   with zipfile.ZipFile(path) as z:
    if 'net/minecraft/world/entity/animal/Animal.class' not in z.namelist():continue
-  for cls in ['net.minecraft.world.entity.animal.Animal','net.minecraft.world.entity.TamableAnimal','net.minecraft.world.entity.Mob']:
+  for cls in ['net.minecraft.world.entity.animal.Animal','net.minecraft.world.entity.TamableAnimal','net.minecraft.world.entity.Mob','net.minecraft.world.entity.ai.goal.MeleeAttackGoal','net.minecraft.client.Minecraft','net.minecraft.client.gui.screens.worldselection.WorldOpenFlows']:
    result=subprocess.run(['javap','-c','-p','-classpath',str(path),cls],text=True,capture_output=True)
    (out/(cls.rsplit('.',1)[-1]+'.bytecode.txt')).write_text(result.stdout)
-  break
+  # Keep inspecting: prefer the named development jar when present.
  except Exception: pass

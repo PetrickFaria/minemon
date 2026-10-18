@@ -13,4 +13,21 @@ public class MolangCompatibilityTest {
   assertEquals("Unbound q alias stays zero",0.0,alias.get(),0.0001);
   assertTrue("Canonical animation clock must move the bone", Math.abs(nativeExpr.get()-start)>0.5);
  }
+ @Test public void preparedBulbasaurBodyAndLegChannelsAdvance() throws Exception {
+  var stream=getClass().getResourceAsStream("/assets/minemon/animations/bulbasaur/bulbasaur.animation.json");
+  assertNotNull(stream);
+  var root=com.google.gson.JsonParser.parseReader(new java.io.InputStreamReader(stream,java.nio.charset.StandardCharsets.UTF_8)).getAsJsonObject();
+  var walk=root.getAsJsonObject("animations").getAsJsonObject("animation.bulbasaur.ground_walk");
+  assertTrue(walk.get("animation_length").getAsDouble()>0);
+  var bones=walk.getAsJsonObject("bones");
+  String leg=bones.getAsJsonObject("leg_front_right").getAsJsonArray("rotation").get(0).getAsString();
+  assertFalse(leg.contains("q.anim_time"));
+  MolangParser parser=new MolangParser();var expression=parser.parseExpression(leg);
+  parser.setValue("query.anim_time",0.0);double first=expression.get();
+  parser.setValue("query.anim_time",0.125);assertTrue("Leg channel must visibly change",Math.abs(expression.get()-first)>10.0);
+  var body=parser.parseExpression(bones.getAsJsonObject("body").getAsJsonArray("position").get(1).getAsString());
+  parser.setValue("query.anim_time",0.0);first=body.get();
+  parser.setValue("query.anim_time",0.125);assertTrue("Body channel must change",Math.abs(body.get()-first)>0.1);
+ }
+
 }

@@ -19,6 +19,7 @@ import net.minecraftforge.gametest.PrefixGameTestTemplate;
 @PrefixGameTestTemplate(false)
 public final class CompanionTests {
  private static void check(GameTestHelper h,boolean condition,String message) { if (!condition) h.fail(message); }
+ private static String state(MinemonCreature b, net.minecraft.world.entity.LivingEntity target) { return " target="+b.getTarget()+" canAttack="+b.canAttack(target)+" dist="+b.distanceTo(target)+" pos="+b.position()+" targetPos="+target.position()+" alive="+target.isAlive()+" health="+target.getHealth()+" owner="+b.getOwner()+" sit="+b.isInSittingPose()+" navDone="+b.getNavigation().isDone(); }
  private static MinemonCreature spawn(GameTestHelper h) {
   return h.spawn(ModEntities.BULBASAUR.get(),new BlockPos(5,1,5));
  }
@@ -39,7 +40,7 @@ public final class CompanionTests {
   check(h,b.canAttackType(EntityType.PLAYER),"Animal player target restriction must be overridden");
   check(h,b.hurt(DamageSource.playerAttack(p),1),"Hit must be accepted");
   check(h,b.getTarget()==p,"Player aggressor must become target");
-  h.runAfterDelay(100,()->{check(h,p.getHealth()<health,"Melee AI must actually damage the player");p.discard();h.succeed();});
+  h.runAfterDelay(100,()->{check(h,p.getHealth()<health,"Melee AI must actually damage the player"+state(b,p));p.discard();h.succeed();});
  }
  @GameTest(template="test_arena",timeoutTicks=180)
  public static void wildRetaliatesAgainstCreature(GameTestHelper h) {
@@ -57,13 +58,13 @@ public final class CompanionTests {
   MinemonCreature b=spawn(h);FakePlayer p=player(h);b.tame(p);b.setOrderedToSit(false);
   b.hurt(DamageSource.playerAttack(p),1);check(h,b.getTarget()!=p,"Never retaliate against owner");
   Cow c=h.spawn(EntityType.COW,new BlockPos(8,1,5));c.setNoAi(true);p.attack(c);float health=c.getHealth();
-  h.runAfterDelay(100,()->{check(h,c.getHealth()<health,"Owner attack assistance must damage target");p.discard();h.succeed();});
+  h.runAfterDelay(100,()->{check(h,c.getHealth()<health,"Owner attack assistance must damage target"+state(b,c));p.discard();h.succeed();});
  }
  @GameTest(template="test_arena",timeoutTicks=180)
  public static void ownerDefense(GameTestHelper h) {
   MinemonCreature b=spawn(h);FakePlayer p=player(h);b.tame(p);b.setOrderedToSit(false);
   Cow c=h.spawn(EntityType.COW,new BlockPos(8,1,5));c.setNoAi(true);float health=c.getHealth();p.hurt(DamageSource.mobAttack(c),1);
-  h.runAfterDelay(100,()->{check(h,c.getHealth()<health,"Companion must defend attacked owner");p.discard();h.succeed();});
+  h.runAfterDelay(100,()->{check(h,c.getHealth()<health,"Companion must defend attacked owner"+state(b,c));p.discard();h.succeed();});
  }
  @GameTest(template="test_arena",timeoutTicks=100)
  public static void sitAndPersistence(GameTestHelper h) {
