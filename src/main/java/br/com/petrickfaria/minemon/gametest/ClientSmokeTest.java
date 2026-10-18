@@ -30,6 +30,7 @@ public final class ClientSmokeTest {
  private static final java.util.Map<String,java.util.List<String>> modelBones=new java.util.HashMap<>();
  private static final java.util.Map<String,float[]> motionRanges=new java.util.HashMap<>();
  private static final java.util.Set<String> walkedSpecies=new java.util.HashSet<>();
+ private static final java.util.Map<String,net.minecraft.world.phys.Vec3> lastRenderedPositions=new java.util.HashMap<>();
  @SubscribeEvent public static void actualDamage(net.minecraftforge.event.entity.living.LivingDamageEvent event) {
   if(Boolean.getBoolean("minemon.clientSmokeTest") && event.getAmount()>0 && event.getEntity() instanceof net.minecraft.server.level.ServerPlayer
      && event.getSource().getEntity() instanceof MinemonCreature b && b.getUUID().equals(testEntity))combatHits++;
@@ -62,8 +63,8 @@ public final class ClientSmokeTest {
     MinemonRenderer.validationObserver=(entity,model)->{
      if(mc.getResourceManager().getResource(model.getTextureResource(entity)).isEmpty())throw new IllegalStateException("Missing rendered texture "+entity.getSpeciesSlug());
      String slug=entity.getSpeciesSlug();renderedSpecies.add(slug);
-     double dx=entity.getX()-entity.xo,dz=entity.getZ()-entity.zo;
-     if(dx*dx+dz*dz>0.0001) {
+     var position=entity.position();var previous=lastRenderedPositions.put(slug,position);
+     if(previous!=null&&previous.distanceToSqr(position)>0.0001D) {
       walkedSpecies.add(slug);
       for(String name:modelBones.get(slug)) {
        if(name.contains("eye")||name.contains("mouth")||name.contains("jaw"))continue;
