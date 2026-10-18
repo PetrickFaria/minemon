@@ -13,7 +13,6 @@ java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 minecraft {
     mappings channel: 'official', version: minecraft_version
-    copyIdeResources = true
     runs {
         configureEach {
             workingDirectory project.file('run')
@@ -26,6 +25,8 @@ minecraft {
 }
 
 repositories {
+    maven { name = 'Forge'; url = 'https://maven.minecraftforge.net/' }
+    mavenCentral()
     maven { name = 'GeckoLib'; url = 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/' }
 }
 
