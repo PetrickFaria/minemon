@@ -790,7 +790,7 @@
   {
     "slug": "nidoking",
     "accepted": false,
-    "reason": "Available file has idle/blink/cry but no verified locomotion clip.",
+    "reason": "Available idle is a static pose; blink/cry do not provide locomotion.",
     "issues": [
       "No validated idle/locomotion mapping"
     ],
@@ -827,7 +827,7 @@
   {
     "slug": "growlithe",
     "accepted": false,
-    "reason": "Available file has experimental test clips; no verified walking clip.",
+    "reason": "Available test/idle clips contain static poses, not an animated walking cycle.",
     "issues": [
       "No validated idle/locomotion mapping"
     ],
@@ -867,7 +867,7 @@
   {
     "slug": "arcanine",
     "accepted": false,
-    "reason": "Available file has experimental test clips; no verified walking clip.",
+    "reason": "Available test/idle clips contain static poses, not an animated walking cycle.",
     "issues": [
       "No validated idle/locomotion mapping"
     ],
@@ -906,7 +906,7 @@
   {
     "slug": "golem",
     "accepted": false,
-    "reason": "Available file has test/blink/cry; no verified locomotion clip.",
+    "reason": "Available test clip is a static pose; blink/cry do not provide locomotion.",
     "issues": [
       "No validated idle/locomotion mapping"
     ],

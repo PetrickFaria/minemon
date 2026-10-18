@@ -29,6 +29,14 @@ jobs:
           mkdir -p run
           echo eula=true > run/eula.txt
           timeout 360s ./gradlew --no-daemon runGameTestServer
+      - name: Upload server behavior logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: minemon-server-tests
+          path: run/logs/
+          if-no-files-found: ignore
+          retention-days: 7
       - name: Launch Minecraft client and validate GeckoLib cache
         if: ${{ !cancelled() && steps.compile.outcome == 'success' }}
         run: |

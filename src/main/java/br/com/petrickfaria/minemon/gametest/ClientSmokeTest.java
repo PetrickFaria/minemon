@@ -24,7 +24,10 @@ public final class ClientSmokeTest {
  private static int worldTicks,titleTicks,frames;
  private static volatile UUID testEntity;
  private static float minLeg=Float.MAX_VALUE,maxLeg=-Float.MAX_VALUE,minBody=Float.MAX_VALUE,maxBody=-Float.MAX_VALUE;
+ private static volatile boolean combatPassed;
  private static int direction=1;
+ private static final java.util.Set<String> renderedSpecies=java.util.concurrent.ConcurrentHashMap.newKeySet();
+ private static final java.util.List<String> species=new java.util.ArrayList<>(SpeciesDefinitions.ALL.keySet());
  @SubscribeEvent public static void tick(TickEvent.ClientTickEvent event) {
   if(!Boolean.getBoolean("minemon.clientSmokeTest")||event.phase!=TickEvent.Phase.END)return;
   Minecraft mc=Minecraft.getInstance();
@@ -44,6 +47,8 @@ public final class ClientSmokeTest {
     }
     if(!invoked)throw new IllegalStateException("Could not locate WorldOpenFlows.loadLevel");
     MinemonRenderer.validationObserver=(entity,model)->{
+     if(mc.getResourceManager().getResource(model.getTextureResource(entity)).isEmpty())throw new IllegalStateException("Missing rendered texture "+entity.getSpeciesSlug());
+     renderedSpecies.add(entity.getSpeciesSlug());
      if(testEntity==null||!entity.getUUID().equals(testEntity)||worldTicks<110||worldTicks>220)return;
      var leg=model.getAnimationProcessor().getBone("leg_front_right");var body=model.getAnimationProcessor().getBone("body");
      minLeg=Math.min(minLeg,leg.getRotationX());maxLeg=Math.max(maxLeg,leg.getRotationX());minBody=Math.min(minBody,body.getPositionY());maxBody=Math.max(maxBody,body.getPositionY());frames++;
@@ -66,6 +71,31 @@ public final class ClientSmokeTest {
    if(worldTicks==250){
     if(frames<10||maxLeg-minLeg<0.1F||maxBody-minBody<0.01F)throw new IllegalStateException("Rendered body animation did not advance: frames="+frames+" leg="+(maxLeg-minLeg)+" body="+(maxBody-minBody));
     Files.writeString(Path.of("client-validation.txt"),"PASS WORLD: Bulbasaur rendered in a Minecraft world; frames="+frames+" leg rotation range="+(maxLeg-minLeg)+" body position range="+(maxBody-minBody)+"\n",StandardOpenOption.APPEND);
+    mc.getSingleplayerServer().execute(()->{
+     var level=mc.getSingleplayerServer().overworld();var old=level.getEntity(testEntity);if(old!=null)old.discard();
+     var player=mc.getSingleplayerServer().getPlayerList().getPlayers().get(0);player.teleportTo(level,0,101,0,0,12);player.setGameMode(GameType.SURVIVAL);player.setHealth(20);player.getFoodData().setFoodLevel(0);
+     var wild=ModEntities.BULBASAUR.get().create(level);wild.moveTo(0,101,1.5,180,0);level.addFreshEntity(wild);testEntity=wild.getUUID();wild.hurt(net.minecraft.world.damagesource.DamageSource.playerAttack(player),1);
+    });
+   }
+   if(worldTicks==350)mc.getSingleplayerServer().execute(()->{
+    var player=mc.getSingleplayerServer().getPlayerList().getPlayers().get(0);var wild=(MinemonCreature)mc.getSingleplayerServer().overworld().getEntity(testEntity);
+    combatPassed=player.getHealth()<20&&player.isAlive();
+    if(!combatPassed)throw new IllegalStateException("Connected Survival player did not receive retaliation damage; health="+player.getHealth()+" target="+wild.getTarget());
+    try{Files.writeString(Path.of("client-validation.txt"),"PASS COMBAT: connected Survival player received melee retaliation; health="+player.getHealth()+"\n",StandardOpenOption.APPEND);}catch(java.io.IOException e){throw new RuntimeException(e);}
+    player.setGameMode(GameType.CREATIVE);player.setHealth(20);
+   });
+   if(worldTicks>=360 && worldTicks<360+species.size()*40 && (worldTicks-360)%40==0) {
+    String slug=species.get((worldTicks-360)/40);
+    mc.getSingleplayerServer().execute(()->{
+     var level=mc.getSingleplayerServer().overworld();var previous=level.getEntity(testEntity);if(previous!=null)previous.discard();
+     var next=ModEntities.SPECIES.get(slug).get().create(level);next.moveTo(0,101,4,180,0);next.setNoAi(true);level.addFreshEntity(next);testEntity=next.getUUID();
+    });
+   }
+   if(worldTicks>=380 && worldTicks<360+species.size()*40 && (worldTicks-380)%40==0)Screenshot.grab(mc.gameDirectory,mc.getMainRenderTarget(),message->{});
+   if(worldTicks==360+species.size()*40) {
+    if(!combatPassed)throw new IllegalStateException("Survival combat check did not pass");
+    if(!renderedSpecies.containsAll(species))throw new IllegalStateException("Some species were not rendered: expected="+species+" actual="+renderedSpecies);
+    Files.writeString(Path.of("client-validation.txt"),"PASS ROSTER: every registered species rendered with its texture in a world: "+renderedSpecies+"\n",StandardOpenOption.APPEND);
     mc.stop();
    }
   }catch(Exception e){throw new IllegalStateException("Minemon client validation failed",e);}
