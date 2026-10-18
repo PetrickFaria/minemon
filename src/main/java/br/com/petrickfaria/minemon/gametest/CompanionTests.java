@@ -27,7 +27,7 @@ public final class CompanionTests {
  }
  private static ServerPlayer player(GameTestHelper h) {
   floor(h);
-  ServerPlayer p=new ServerPlayer(h.getLevel().getServer(),h.getLevel(),new GameProfile(UUID.randomUUID(),"MinemonTester"));
+  ServerPlayer p=new ServerPlayer(h.getLevel().getServer(),h.getLevel(),new GameProfile(UUID.randomUUID(),"MinemonTester"),null);
   p.connection=new FakePlayer(h.getLevel(),new GameProfile(UUID.randomUUID(),"DummyConnection")).connection;
   h.getLevel().getServer().setDifficulty(net.minecraft.world.Difficulty.NORMAL,true);
   p.setGameMode(GameType.SURVIVAL);p.tickCount=100;
