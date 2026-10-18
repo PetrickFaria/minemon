@@ -393,9 +393,11 @@
   },
   {
     "slug": "haunter",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Available locomotion/flight clips contain only static poses; no animated body or wing motion.",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "slug": "haunter",
       "name": "Haunter",
@@ -429,9 +431,11 @@
   },
   {
     "slug": "gengar",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Available locomotion/flight clips contain only static poses; no animated body or wing motion.",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "slug": "gengar",
       "name": "Gengar",
@@ -618,9 +622,11 @@
   },
   {
     "slug": "mew",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Available locomotion/flight clips contain only static poses; no animated body or wing motion.",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "slug": "mew",
       "name": "Mew",
@@ -978,9 +984,11 @@
   },
   {
     "slug": "scyther",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Available locomotion/flight clips contain only static poses; no animated body or wing motion.",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "slug": "scyther",
       "name": "Scyther",
@@ -1056,9 +1064,11 @@
   },
   {
     "slug": "zapdos",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Available locomotion/flight clips contain only static poses; no animated body or wing motion.",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "slug": "zapdos",
       "name": "Zapdos",

@@ -87,3 +87,8 @@ jar {
 }
 
 jar.finalizedBy('reobfJar')
+
+test {
+    dependsOn processResources
+    systemProperty 'minemon.testResources', processResources.destinationDir.absolutePath
+}

@@ -5,7 +5,7 @@ ROOT=Path(__file__).resolve().parents[1];R=ROOT/'src/main/resources'
 CAT={s['slug']:s for s in json.loads((R/'data/minemon/species_catalog.json').read_text())}
 CANDIDATES='bulbasaur pikachu charmander squirtle jolteon charizard blastoise ivysaur gastly haunter gengar shellder cloyster psyduck hitmonlee mew mewtwo wartortle arbok nidoking growlithe arcanine golem onix scyther electabuzz zapdos'.split()
 FLYING={'haunter','gengar','mew','scyther','zapdos'}
-EXCLUSIONS={'gastly':'Incompatible arrays of particle events in the original base and shiny animations.','mewtwo':'Multiple animation channels reference bones absent from the available model.','shellder':'Only an idle animation; aquatic navigation and locomotion not validated.','cloyster':'Only an idle animation; aquatic navigation and locomotion not validated.','nidoking':'Available file has idle/blink/cry but no verified locomotion clip.','growlithe':'Available file has experimental test clips; no verified walking clip.','arcanine':'Available file has experimental test clips; no verified walking clip.','golem':'Available file has test/blink/cry; no verified locomotion clip.'}
+EXCLUSIONS={'gastly':'Incompatible arrays of particle events in the original base and shiny animations.','mewtwo':'Multiple animation channels reference bones absent from the available model.','shellder':'Only an idle animation; aquatic navigation and locomotion not validated.','cloyster':'Only an idle animation; aquatic navigation and locomotion not validated.','nidoking':'Available file has idle/blink/cry but no verified locomotion clip.','growlithe':'Available file has experimental test clips; no verified walking clip.','arcanine':'Available file has experimental test clips; no verified walking clip.','golem':'Available file has test/blink/cry; no verified locomotion clip.',**{s:'Available locomotion/flight clips contain only static poses; no animated body or wing motion.' for s in ('haunter','gengar','mew','scyther','zapdos')}}
 def audit():
  results=[]
  for slug in CANDIDATES:
@@ -34,6 +34,7 @@ def audit():
   idle=next((clips[n] for n in (('air_idle','ground_idle','idle') if mode=='flying' else ('ground_idle','idle')) if n in clips),None)
   walk=next((clips[n] for n in (('air_fly','ground_walk','air_idle','ground_idle') if mode=='flying' else ('ground_walk','walk')) if n in clips),None)
   if not idle or not walk:issues.append('No validated idle/locomotion mapping')
+  elif not re.search(r'(?:q|query)\.anim_time',json.dumps(ad['animations'][walk])) and not any(isinstance(channel,dict) and len(channel)>1 for bone in ad['animations'][walk].get('bones',{}).values() for channel in bone.values()):issues.append('Locomotion clip is a static pose')
   reason=EXCLUSIONS.get(slug)
   if issues and not reason:reason='; '.join(issues)
   d=dict(slug=slug,name=s['name'],model=model,texture=texture,animation=animation,mode=mode,scale=s.get('baseScale',1),width=s['hitbox']['width'],height=s['hitbox']['height'],health=max(20,s['baseStats']['hp']/2),attack=max(3,s['baseStats']['attack']/12),speed=round(min(.35,.20+s['baseStats']['speed']/1000),3),clips=clips,idle=idle,walk=walk,excluded_clips=excluded_clips,sounds=res['sounds'],licenses=res['licenses'])
