@@ -23,6 +23,7 @@ public final class ClientSmokeTest {
  private static boolean opened,setup;
  private static int worldTicks,titleTicks,frames;
  private static volatile UUID testEntity;
+ private static volatile int initialEntityId;
  private static float minLeg=Float.MAX_VALUE,maxLeg=-Float.MAX_VALUE,minBody=Float.MAX_VALUE,maxBody=-Float.MAX_VALUE;
  private static volatile boolean combatPassed;
  private static volatile int combatHits;
@@ -77,15 +78,16 @@ public final class ClientSmokeTest {
     };
    }
    if(mc.level==null||mc.player==null||mc.getSingleplayerServer()==null)return;
-   worldTicks++;
    if(!setup) {
     setup=true;mc.getSingleplayerServer().execute(()->{
      var level=mc.getSingleplayerServer().overworld();level.setDayTime(1000);level.getGameRules().getRule(GameRules.RULE_DOMOBSPAWNING).set(false,mc.getSingleplayerServer());
      for(int x=-8;x<=8;x++)for(int z=-5;z<=12;z++)level.setBlockAndUpdate(new BlockPos(x,100,z),Blocks.STONE.defaultBlockState());
      var player=mc.getSingleplayerServer().getPlayerList().getPlayers().get(0);player.setGameMode(GameType.CREATIVE);player.teleportTo(level,0,101,0,0,12);
-     var b=ModEntities.BULBASAUR.get().create(level);b.moveTo(0,101,4,180,0);b.tame(player);b.setOrderedToSit(false);b.setNoAi(true);level.addFreshEntity(b);testEntity=b.getUUID();
+     var b=ModEntities.BULBASAUR.get().create(level);b.moveTo(0,101,4,180,0);b.tame(player);b.setOrderedToSit(false);b.setNoAi(true);level.addFreshEntity(b);testEntity=b.getUUID();initialEntityId=b.getId();
     });
    }
+   if(mc.screen!=null || (worldTicks==0 && (initialEntityId==0 || mc.level.getEntity(initialEntityId)==null || mc.player.getY()<100)))return;
+   worldTicks++;
    if(worldTicks==70||worldTicks==170)Screenshot.grab(mc.gameDirectory,mc.getMainRenderTarget(),message->{});
    if(worldTicks>=100&&worldTicks<=220)mc.getSingleplayerServer().execute(()->{
     var b=(MinemonCreature)mc.getSingleplayerServer().overworld().getEntity(testEntity);if(b!=null){b.setNoAi(false);if(b.getX()>2.5)direction=-1;if(b.getX()< -2.5)direction=1;b.getNavigation().moveTo(direction*3,101,4,1);}
