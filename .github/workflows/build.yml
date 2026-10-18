@@ -1,0 +1,45 @@
+name: Build Minemon
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Expand and commit source tree on bootstrap commit
+        if: ${{ !hashFiles('build.gradle') }}
+        run: python3 .bootstrap/expand.py
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Verify extracted project resources
+        run: python3 tools/verify_project.py
+      - name: Build and run tests
+        run: ./gradlew --no-daemon clean test build
+      - name: Verify executable mod JAR contents
+        shell: bash
+        run: |
+          set -euo pipefail
+          jar_file="$(find build/libs -maxdepth 1 -type f -name 'Minemon-1.19.2-*.jar' ! -name '*sources*' -print -quit)"
+          test -n "$jar_file"
+          jar tf "$jar_file" | grep -Fx 'br/com/petrickfaria/minemon/Minemon.class'
+          jar tf "$jar_file" | grep -Fx 'data/minemon/species_catalog.json'
+          jar tf "$jar_file" | grep -Fx 'assets/minemon/geo/bulbasaur/bulbasaur.geo.json'
+          jar tf "$jar_file" | grep -Fx 'assets/minemon/textures/pokemon/bulbasaur/bulbasaur.png'
+          jar tf "$jar_file" | grep -Fx 'assets/minemon/animations/bulbasaur/bulbasaur.animation.json'
+          unzip -p "$jar_file" META-INF/mods.toml | grep -F 'modId="minemon"'
+          unzip -p "$jar_file" META-INF/mods.toml | grep -F 'versionRange="[1.19.2,1.20)"'
+          unzip -p "$jar_file" META-INF/mods.toml | grep -F 'modId="geckolib3"'
+      - name: Upload Minemon JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: Minemon-1.19.2-1.0.0
+          path: build/libs/Minemon-1.19.2-*.jar
+          if-no-files-found: error
+          retention-days: 14
