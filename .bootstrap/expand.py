@@ -27,7 +27,7 @@ with tempfile.TemporaryDirectory() as temp:
     source = Path(temp) / 'Minemon'
     if not (source / 'build.gradle').is_file():
         raise SystemExit('The source archive did not contain the Minemon project')
-    shutil.copytree(source, repo, dirs_exist_ok=True)
+    # Preserve the already-running bootstrap workflow. The token can push project files but cannot update workflow files.\nshutil.copytree(source, repo, dirs_exist_ok=True, ignore=shutil.ignore_patterns('build.yml'))
 shutil.rmtree(repo / '.bootstrap')
 subprocess.run(['git', 'config', 'user.name', 'github-actions[bot]'], check=True)
 subprocess.run(['git', 'config', 'user.email', '41898282+github-actions[bot]@users.noreply.github.com'], check=True)
