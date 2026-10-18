@@ -11,5 +11,11 @@
   "entity.minemon.jolteon": "Jolteon",
   "item.minemon.jolteon_spawn_egg": "Ovo de invocação de Jolteon",
   "entity.minemon.ivysaur": "Ivysaur",
-  "item.minemon.ivysaur_spawn_egg": "Ovo de invocação de Ivysaur"
+  "item.minemon.ivysaur_spawn_egg": "Ovo de invocação de Ivysaur",
+  "entity.minemon.charizard": "Charizard",
+  "item.minemon.charizard_spawn_egg": "Ovo de invocação de Charizard",
+  "entity.minemon.psyduck": "Psyduck",
+  "item.minemon.psyduck_spawn_egg": "Ovo de invocação de Psyduck",
+  "entity.minemon.hitmonlee": "Hitmonlee",
+  "item.minemon.hitmonlee_spawn_egg": "Ovo de invocação de Hitmonlee"
 }

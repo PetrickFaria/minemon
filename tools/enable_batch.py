@@ -10,6 +10,14 @@ for slug in slugs:
  d=row['definition'];im=Image.open(R/d['texture']).convert('RGBA');colors=im.getcolors(im.width*im.height);colors=sorted(((n,c) for n,c in colors if c[3]>128),reverse=True)
  chosen=[c for n,c in colors if max(c[:3])-min(c[:3])>20][:2] or [colors[0][1]]*2
  d['eggBase']=int.from_bytes(bytes(chosen[0][:3]),'big');d['eggSpots']=int.from_bytes(bytes(chosen[-1][:3]),'big')
+ # Give the shared renderer explicit six-state aliases. Missing clips are generated
+ # in the processed runtime copy from this species' own geometry/idle/walk channels.
+ clips=d['clips']; prefix='animation.'+slug+'.minemon_'
+ if not any(k in clips for k in ('ground_run','run')): clips['ground_run']=prefix+'run'
+ if 'sit' not in clips: clips['sit']=prefix+'sit'
+ if 'sleep' not in clips: clips['sleep']=prefix+'sleep'
+ if not any(k in clips for k in ('physical_attack','physical','attack')):
+  clips['physical_attack']=prefix+'physical_attack';d['attackTicks']=12
  if slug=='bulbasaur':d.update(scale=1,width=.8,height=.8,health=20,attack=3,speed=.25,eggBase=0x83B75B,eggSpots=0xE4E6C4)
  defs.append(d)
  p=R/f'assets/minemon/models/item/{slug}_spawn_egg.json';p.parent.mkdir(parents=True,exist_ok=True);p.write_text(json.dumps({'parent':'minecraft:item/template_spawn_egg'},indent=2)+'\n')

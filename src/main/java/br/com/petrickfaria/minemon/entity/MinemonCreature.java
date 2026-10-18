@@ -26,6 +26,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import java.util.UUID;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.AnimationState;
@@ -39,6 +43,7 @@ import software.bernie.geckolib3.util.GeckoLibUtil;
 
 /** Shared wolf-like companion behavior. This first registered species is the integration fixture. */
 public class MinemonCreature extends TamableAnimal implements IAnimatable {
+    private static final EntityDataAccessor<Boolean> SLEEPING = SynchedEntityData.defineId(MinemonCreature.class, EntityDataSerializers.BOOLEAN);
     private static final int WILD_AGGRESSION_DURATION_TICKS = 20 * 20;
     private static final int WILD_MAX_CHASE_DISTANCE = 24;
     private static final int WILD_UNREACHABLE_LIMIT_TICKS = 20 * 5;
@@ -73,6 +78,27 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         return createAttributes().add(Attributes.MAX_HEALTH,d.health()).add(Attributes.ATTACK_DAMAGE,d.attack()).add(Attributes.MOVEMENT_SPEED,d.speed()).add(Attributes.FLYING_SPEED,0.4D);
     }
     public boolean isFlyingSpecies() { return false; }
+
+    public boolean isSleeping() { return this.entityData.get(SLEEPING); }
+    public void setSleeping(boolean sleeping) {
+        this.entityData.set(SLEEPING, sleeping);
+        if (sleeping) { this.getNavigation().stop(); this.setTarget(null); }
+    }
+
+    @Override protected void defineSynchedData() {
+        super.defineSynchedData();
+        this.entityData.define(SLEEPING, false);
+    }
+
+    @Override public void addAdditionalSaveData(CompoundTag tag) {
+        super.addAdditionalSaveData(tag);
+        tag.putBoolean("MinemonSleeping", this.isSleeping());
+    }
+
+    @Override public void readAdditionalSaveData(CompoundTag tag) {
+        super.readAdditionalSaveData(tag);
+        this.setSleeping(tag.getBoolean("MinemonSleeping"));
+    }
 
     @Override
     public AgeableMob getBreedOffspring(ServerLevel level, AgeableMob partner) {
@@ -175,6 +201,10 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     @Override
     public void tick() {
         super.tick();
+        if (this.isSleeping()) {
+            this.getNavigation().stop();
+            this.setTarget(null);
+        }
         if (this.level.isClientSide) {
             if (this.attackAnimationTicks > 0) this.attackAnimationTicks--;
             if (this.blinkCooldownTicks > 0) this.blinkCooldownTicks--;
@@ -258,10 +288,14 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         } else if (this.attackAnimationTicks>0 && attack!=null) {
             clip=attack;loop=false;
             if(this.playedAttackSequence!=this.attackSequence){controller.markNeedsReload();this.playedAttackSequence=this.attackSequence;}
+        } else if (this.isSleeping()) {
+            clip = SpeciesAssetIndex.clip(slug, "sleep", "sleep");
+        } else if (this.isOrderedToSit()) {
+            clip = SpeciesAssetIndex.clip(slug, "sit", "sit");
         } else if (this.isMoving(event)) {
             clip = definition.walk();
             String run=SpeciesAssetIndex.clip(slug,"ground_run","run");
-            if(!this.isFlyingSpecies() && run!=null && this.getDeltaMovement().horizontalDistanceSqr()>0.01D) clip=run;
+            if(!this.isFlyingSpecies() && run!=null && (this.getDeltaMovement().horizontalDistanceSqr()>0.01D || (this.getX()-this.xo)*(this.getX()-this.xo)+(this.getZ()-this.zo)*(this.getZ()-this.zo)>0.0025D)) clip=run;
         } else {
             clip = definition.idle();
         }
@@ -275,7 +309,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
 
     private <E extends IAnimatable> PlayState blinkPredicate(AnimationEvent<E> event) {
         AnimationController<?> controller = event.getController();
-        if (this.isDeadOrDying() || this.isMoving(event) || this.attackAnimationTicks > 0) return PlayState.STOP;
+        if (this.isSleeping() || this.isOrderedToSit() || this.isDeadOrDying() || this.isMoving(event) || this.attackAnimationTicks > 0) return PlayState.STOP;
 
         String blink = SpeciesAssetIndex.clip(this.getSpeciesSlug(), "blink", "blink");
         if (this.blinkPending && blink != null && controller.getAnimationState() == AnimationState.Stopped) {

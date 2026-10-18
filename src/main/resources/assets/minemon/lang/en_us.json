@@ -11,5 +11,11 @@
   "entity.minemon.jolteon": "Jolteon",
   "item.minemon.jolteon_spawn_egg": "Spawn Egg: Jolteon",
   "entity.minemon.ivysaur": "Ivysaur",
-  "item.minemon.ivysaur_spawn_egg": "Spawn Egg: Ivysaur"
+  "item.minemon.ivysaur_spawn_egg": "Spawn Egg: Ivysaur",
+  "entity.minemon.charizard": "Charizard",
+  "item.minemon.charizard_spawn_egg": "Spawn Egg: Charizard",
+  "entity.minemon.psyduck": "Psyduck",
+  "item.minemon.psyduck_spawn_egg": "Spawn Egg: Psyduck",
+  "entity.minemon.hitmonlee": "Hitmonlee",
+  "item.minemon.hitmonlee_spawn_egg": "Spawn Egg: Hitmonlee"
 }

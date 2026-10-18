@@ -75,7 +75,7 @@ jobs:
       - name: Upload Minemon JAR
         uses: actions/upload-artifact@v4
         with:
-          name: Minemon-1.19.2-1.1.0
+          name: Minemon-1.19.2-1.2.0
           path: build/libs/Minemon-1.19.2-*.jar
           if-no-files-found: error
           retention-days: 14

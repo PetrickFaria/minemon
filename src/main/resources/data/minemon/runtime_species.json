@@ -19,11 +19,14 @@
       "faint": "animation.bulbasaur.faint",
       "blink": "animation.bulbasaur.blink",
       "cry": "animation.bulbasaur.cry",
-      "render": "animation.bulbasaur.render"
+      "render": "animation.bulbasaur.render",
+      "ground_run": "animation.bulbasaur.minemon_run",
+      "sit": "animation.bulbasaur.minemon_sit",
+      "physical_attack": "animation.bulbasaur.minemon_physical_attack"
     },
     "idle": "animation.bulbasaur.ground_idle",
     "walk": "animation.bulbasaur.ground_walk",
-    "attackTicks": 0,
+    "attackTicks": 12,
     "excluded_clips": [],
     "sounds": [
       "assets/minemon/sounds/pokemon/bulbasaur/bulbasaur_ambient.ogg",
@@ -59,11 +62,14 @@
       "shoulder_left": "animation.pikachu.shoulder_left",
       "blink": "animation.pikachu.blink",
       "cry": "animation.pikachu.cry",
-      "render": "animation.pikachu.render"
+      "render": "animation.pikachu.render",
+      "ground_run": "animation.pikachu.minemon_run",
+      "sit": "animation.pikachu.minemon_sit",
+      "physical_attack": "animation.pikachu.minemon_physical_attack"
     },
     "idle": "animation.pikachu.ground_idle",
     "walk": "animation.pikachu.ground_walk",
-    "attackTicks": 0,
+    "attackTicks": 12,
     "excluded_clips": [],
     "sounds": [
       "assets/minemon/sounds/pokemon/pikachu/pikachu_ambient.ogg",
@@ -99,7 +105,9 @@
       "blink": "animation.charmander.blink",
       "ground_pulse1": "animation.charmander.ground_pulse1",
       "cry": "animation.charmander.cry",
-      "render": "animation.charmander.render"
+      "render": "animation.charmander.render",
+      "ground_run": "animation.charmander.minemon_run",
+      "sit": "animation.charmander.minemon_sit"
     },
     "idle": "animation.charmander.ground_idle",
     "walk": "animation.charmander.ground_walk",
@@ -148,7 +156,8 @@
       "physical": "animation.squirtle.physical",
       "special": "animation.squirtle.special",
       "status": "animation.squirtle.status",
-      "recoil": "animation.squirtle.recoil"
+      "recoil": "animation.squirtle.recoil",
+      "sit": "animation.squirtle.minemon_sit"
     },
     "idle": "animation.squirtle.ground_idle",
     "walk": "animation.squirtle.ground_walk",
@@ -182,11 +191,14 @@
       "ground_walk": "animation.jolteon.ground_walk",
       "ground_run": "animation.jolteon.ground_run",
       "blink": "animation.jolteon.blink",
-      "render": "animation.jolteon.render"
+      "render": "animation.jolteon.render",
+      "sit": "animation.jolteon.minemon_sit",
+      "sleep": "animation.jolteon.minemon_sleep",
+      "physical_attack": "animation.jolteon.minemon_physical_attack"
     },
     "idle": "animation.jolteon.ground_idle",
     "walk": "animation.jolteon.ground_walk",
-    "attackTicks": 0,
+    "attackTicks": 12,
     "excluded_clips": [
       "animation.jolteon.cry"
     ],
@@ -220,11 +232,14 @@
       "faint": "animation.ivysaur.faint",
       "blink": "animation.ivysaur.blink",
       "cry": "animation.ivysaur.cry",
-      "render": "animation.ivysaur.render"
+      "render": "animation.ivysaur.render",
+      "ground_run": "animation.ivysaur.minemon_run",
+      "sit": "animation.ivysaur.minemon_sit",
+      "physical_attack": "animation.ivysaur.minemon_physical_attack"
     },
     "idle": "animation.ivysaur.ground_idle",
     "walk": "animation.ivysaur.ground_walk",
-    "attackTicks": 0,
+    "attackTicks": 12,
     "excluded_clips": [],
     "sounds": [
       "assets/minemon/sounds/pokemon/ivysaur/ivysaur_ambient.ogg",
@@ -235,5 +250,132 @@
     ],
     "eggBase": 3631483,
     "eggSpots": 4095370
+  },
+  {
+    "slug": "charizard",
+    "name": "Charizard",
+    "model": "assets/minemon/geo/charizard/charizard.geo.json",
+    "texture": "assets/minemon/textures/pokemon/charizard/charizard.png",
+    "animation": "assets/minemon/animations/charizard/charizard.animation.json",
+    "mode": "ground",
+    "scale": 1.35,
+    "width": 1,
+    "height": 2.1,
+    "health": 39.0,
+    "attack": 7.0,
+    "speed": 0.3,
+    "clips": {
+      "ground_idle": "animation.charizard.ground_idle",
+      "ground_walk": "animation.charizard.ground_walk",
+      "battle_idle": "animation.charizard.battle_idle",
+      "physical": "animation.charizard.physical",
+      "special": "animation.charizard.special",
+      "status": "animation.charizard.status",
+      "recoil": "animation.charizard.recoil",
+      "air_idle": "animation.charizard.air_idle",
+      "air_fly": "animation.charizard.air_fly",
+      "sleep": "animation.charizard.sleep",
+      "faint": "animation.charizard.faint",
+      "blink": "animation.charizard.blink",
+      "cry": "animation.charizard.cry",
+      "render": "animation.charizard.render",
+      "ground_run": "animation.charizard.minemon_run",
+      "sit": "animation.charizard.minemon_sit"
+    },
+    "idle": "animation.charizard.ground_idle",
+    "walk": "animation.charizard.ground_walk",
+    "attackTicks": 60,
+    "excluded_clips": [],
+    "sounds": [
+      "assets/minemon/sounds/pokemon/charizard/charizard_ambient.ogg",
+      "assets/minemon/sounds/pokemon/charizard/charizard_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/charizard/model-license.txt"
+    ],
+    "eggBase": 11220748,
+    "eggSpots": 12208655
+  },
+  {
+    "slug": "psyduck",
+    "name": "Psyduck",
+    "model": "assets/minemon/geo/psyduck/psyduck.geo.json",
+    "texture": "assets/minemon/textures/pokemon/psyduck/psyduck.png",
+    "animation": "assets/minemon/animations/psyduck/psyduck.animation.json",
+    "mode": "ground",
+    "scale": 0.8,
+    "width": 0.8,
+    "height": 1.0,
+    "health": 25.0,
+    "attack": 4.333333333333333,
+    "speed": 0.255,
+    "clips": {
+      "ground_idle": "animation.psyduck.ground_idle",
+      "water_idle": "animation.psyduck.water_idle",
+      "ground_walk": "animation.psyduck.ground_walk",
+      "water_swim": "animation.psyduck.water_swim",
+      "faint": "animation.psyduck.faint",
+      "sleep": "animation.psyduck.sleep",
+      "awooga": "animation.psyduck.awooga",
+      "render": "animation.psyduck.render",
+      "blink": "animation.psyduck.blink",
+      "cry": "animation.psyduck.cry",
+      "ground_run": "animation.psyduck.minemon_run",
+      "sit": "animation.psyduck.minemon_sit",
+      "physical_attack": "animation.psyduck.minemon_physical_attack"
+    },
+    "idle": "animation.psyduck.ground_idle",
+    "walk": "animation.psyduck.ground_walk",
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "sounds": [
+      "assets/minemon/sounds/pokemon/psyduck/psyduck_ambient.ogg",
+      "assets/minemon/sounds/pokemon/psyduck/psyduck_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/psyduck/model-license.txt"
+    ],
+    "eggBase": 14457691,
+    "eggSpots": 13469266
+  },
+  {
+    "slug": "hitmonlee",
+    "name": "Hitmonlee",
+    "model": "assets/minemon/geo/hitmonlee/hitmonlee.geo.json",
+    "texture": "assets/minemon/textures/pokemon/hitmonlee/hitmonlee.png",
+    "animation": "assets/minemon/animations/hitmonlee/hitmonlee.animation.json",
+    "mode": "ground",
+    "scale": 1.2,
+    "width": 0.6,
+    "height": 1.45,
+    "health": 25.0,
+    "attack": 10.0,
+    "speed": 0.287,
+    "clips": {
+      "ground_idle": "animation.hitmonlee.ground_idle",
+      "ground_walk": "animation.hitmonlee.ground_walk",
+      "battle_idle": "animation.hitmonlee.battle_idle",
+      "sleep": "animation.hitmonlee.sleep",
+      "faint": "animation.hitmonlee.faint",
+      "blink": "animation.hitmonlee.blink",
+      "cry": "animation.hitmonlee.cry",
+      "pose": "animation.hitmonlee.pose",
+      "ground_run": "animation.hitmonlee.minemon_run",
+      "sit": "animation.hitmonlee.minemon_sit",
+      "physical_attack": "animation.hitmonlee.minemon_physical_attack"
+    },
+    "idle": "animation.hitmonlee.ground_idle",
+    "walk": "animation.hitmonlee.ground_walk",
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "sounds": [
+      "assets/minemon/sounds/pokemon/hitmonlee/hitmonlee_ambient.ogg",
+      "assets/minemon/sounds/pokemon/hitmonlee/hitmonlee_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/hitmonlee/model-license.txt"
+    ],
+    "eggBase": 12423541,
+    "eggSpots": 13411458
   }
 ]

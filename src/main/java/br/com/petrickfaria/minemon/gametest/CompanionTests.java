@@ -80,9 +80,9 @@ public final class CompanionTests {
  }
  @GameTest(template="test_arena",timeoutTicks=100)
  public static void sitAndPersistence(GameTestHelper h) {
-  MinemonCreature b=spawn(h);ServerPlayer p=player(h);b.tame(p);b.setOrderedToSit(true);
+  MinemonCreature b=spawn(h);ServerPlayer p=player(h);b.tame(p);b.setOrderedToSit(true);b.setSleeping(true);
   CompoundTag tag=new CompoundTag();b.saveWithoutId(tag);MinemonCreature restored=ModEntities.BULBASAUR.get().create(h.getLevel());restored.load(tag);
-  check(h,restored.isTame()&&p.getUUID().equals(restored.getOwnerUUID())&&restored.isOrderedToSit(),"Taming UUID and sit order must survive NBT reload");
+  check(h,restored.isTame()&&p.getUUID().equals(restored.getOwnerUUID())&&restored.isOrderedToSit()&&restored.isSleeping(),"Taming UUID, sit order and sleep state must survive NBT reload");
   h.runAfterDelay(20,()->{var start=b.position();h.runAfterDelay(30,()->{double dx=b.getX()-start.x,dz=b.getZ()-start.z;check(h,dx*dx+dz*dz<0.25,"Sitting creature must stay in place");p.discard();h.succeed();});});
  }
  @GameTest(template="test_arena",timeoutTicks=100)
@@ -92,9 +92,9 @@ public final class CompanionTests {
    check(h,b!=null,"Entity creation failed: "+entry.getKey());
    var egg=(net.minecraft.world.item.SpawnEggItem)br.com.petrickfaria.minemon.registry.ModItems.EGGS.get(entry.getKey()).get();
    check(h,egg.getType(null)==entry.getValue().get(),"Wrong spawn egg mapping: "+entry.getKey());
-   b.setOwnerUUID(UUID.randomUUID());b.setTame(true);b.setOrderedToSit(true);CompoundTag tag=new CompoundTag();b.saveWithoutId(tag);
+   b.setOwnerUUID(UUID.randomUUID());b.setTame(true);b.setOrderedToSit(true);b.setSleeping(true);CompoundTag tag=new CompoundTag();b.saveWithoutId(tag);
    MinemonCreature restored=entry.getValue().get().create(h.getLevel());restored.load(tag);
-   check(h,restored.isTame()&&restored.isOrderedToSit()&&b.getOwnerUUID().equals(restored.getOwnerUUID()),"Persistence failed: "+entry.getKey());
+   check(h,restored.isTame()&&restored.isOrderedToSit()&&restored.isSleeping()&&b.getOwnerUUID().equals(restored.getOwnerUUID()),"Persistence failed: "+entry.getKey());
   }
   h.succeed();
  }

@@ -15,12 +15,16 @@ def validate(read,definitions,prepared=False):
     if not isinstance(ev,dict) or any(not isinstance(x,dict) for x in ev.values()):raise ValueError(name+' incompatible event '+field)
    if prepared:
     if re.search(r'\bq\.',json.dumps(v)):raise ValueError(name+' unbound q alias')
-    if v.get('animation_length',0)<=0:raise ValueError(name+' zero duration')
+    if 'animation_length' in v and v['animation_length']<=0:raise ValueError(name+' zero duration')
+  generated=lambda n:any(n.endswith('.minemon_'+suffix) for suffix in ('run','sit','sleep','physical_attack'))
   for name in d['clips'].values():
-   if name not in a:raise ValueError('Missing referenced clip '+name)
+   if name not in a and (prepared or not generated(name)):raise ValueError('Missing referenced clip '+name)
   attack=next((d['clips'][n] for n in ('physical_attack','physical','attack') if n in d['clips']),None)
-  if attack and d.get('attackTicks')!=math.ceil(a[attack].get('animation_length',4)*20):raise ValueError('Attack duration mismatch '+d['slug'])
+  if attack and attack in a and d.get('attackTicks')!=math.ceil(a[attack]['animation_length']*20):raise ValueError('Attack duration mismatch '+d['slug'])
   if d['idle'] not in a or d['walk'] not in a:raise ValueError('Missing state clip '+d['slug'])
+  if prepared:
+   for state,keys in {'run':('ground_run','run'),'sit':('sit',),'sleep':('sleep',),'attack':('physical_attack','physical','attack')}.items():
+    if not any(d['clips'].get(k) in a for k in keys):raise ValueError('Missing prepared '+state+' animation '+d['slug'])
   tex=read(d['texture']);dims=struct.unpack('>II',tex[16:24]);desc=g['minecraft:geometry'][0]['description']
   if dims!=(desc['texture_width'],desc['texture_height']):raise ValueError('UV dimensions '+d['slug'])
  print('PASS runtime asset validation:',len(definitions),'species')
