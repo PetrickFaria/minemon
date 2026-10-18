@@ -274,7 +274,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
 
     private <E extends IAnimatable> PlayState blinkPredicate(AnimationEvent<E> event) {
         AnimationController<?> controller = event.getController();
-        if (this.isDeadOrDying() || this.isMoving(event)) return PlayState.STOP;
+        if (this.isDeadOrDying() || this.isMoving(event) || this.attackAnimationTicks > 0) return PlayState.STOP;
 
         String blink = SpeciesAssetIndex.clip(this.getSpeciesSlug(), "blink", "blink");
         if (this.blinkPending && blink != null && controller.getAnimationState() == AnimationState.Stopped) {

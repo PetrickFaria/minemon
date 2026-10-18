@@ -22,6 +22,7 @@ jobs:
       - name: Report resolved ForgeGradle version
         run: ./gradlew --no-daemon buildEnvironment
       - name: Build and run tests
+        id: compile
         run: ./gradlew --no-daemon clean test build
       - name: Run Minecraft server behavior tests
         run: |
@@ -29,6 +30,7 @@ jobs:
           echo eula=true > run/eula.txt
           timeout 360s ./gradlew --no-daemon runGameTestServer
       - name: Launch Minecraft client and validate GeckoLib cache
+        if: ${{ !cancelled() && steps.compile.outcome == 'success' }}
         run: |
           python3 tools/prepare_client_world.py
           timeout 420s xvfb-run -a ./gradlew --no-daemon runClient -PclientSmokeTest
