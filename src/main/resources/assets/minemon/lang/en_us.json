@@ -17,5 +17,11 @@
   "entity.minemon.psyduck": "Psyduck",
   "item.minemon.psyduck_spawn_egg": "Spawn Egg: Psyduck",
   "entity.minemon.hitmonlee": "Hitmonlee",
-  "item.minemon.hitmonlee_spawn_egg": "Spawn Egg: Hitmonlee"
+  "item.minemon.hitmonlee_spawn_egg": "Spawn Egg: Hitmonlee",
+  "entity.minemon.blastoise": "Blastoise",
+  "item.minemon.blastoise_spawn_egg": "Spawn Egg: Blastoise",
+  "entity.minemon.wartortle": "Wartortle",
+  "item.minemon.wartortle_spawn_egg": "Spawn Egg: Wartortle",
+  "entity.minemon.arbok": "Arbok",
+  "item.minemon.arbok_spawn_egg": "Spawn Egg: Arbok"
 }

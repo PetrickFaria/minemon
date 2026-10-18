@@ -377,5 +377,141 @@
     ],
     "eggBase": 12423541,
     "eggSpots": 13411458
+  },
+  {
+    "slug": "blastoise",
+    "name": "Blastoise",
+    "model": "assets/minemon/geo/blastoise/blastoise.geo.json",
+    "texture": "assets/minemon/textures/pokemon/blastoise/blastoise.png",
+    "animation": "assets/minemon/animations/blastoise/blastoise.animation.json",
+    "mode": "ground",
+    "scale": 0.9,
+    "width": 1.8,
+    "height": 3.0,
+    "health": 39.5,
+    "attack": 6.916666666666667,
+    "speed": 0.278,
+    "clips": {
+      "ground_idle": "animation.blastoise.ground_idle",
+      "battle_idle": "animation.blastoise.battle_idle",
+      "ground_walk": "animation.blastoise.ground_walk",
+      "ground_run": "animation.blastoise.ground_run",
+      "water_idle": "animation.blastoise.water_idle",
+      "water_swim": "animation.blastoise.water_swim",
+      "surfacewater_idle": "animation.blastoise.surfacewater_idle",
+      "surfacewater_swim": "animation.blastoise.surfacewater_swim",
+      "sleep": "animation.blastoise.sleep",
+      "blink": "animation.blastoise.blink",
+      "cry": "animation.blastoise.cry",
+      "faint": "animation.blastoise.faint",
+      "quirk_ground_idle": "animation.blastoise.quirk_ground_idle",
+      "quirk_battle_idle": "animation.blastoise.quirk_battle_idle",
+      "quirk_battle_idle2": "animation.blastoise.quirk_battle_idle2",
+      "physical": "animation.blastoise.physical",
+      "special": "animation.blastoise.special",
+      "status": "animation.blastoise.status",
+      "recoil": "animation.blastoise.recoil",
+      "sit": "animation.blastoise.minemon_sit"
+    },
+    "idle": "animation.blastoise.ground_idle",
+    "walk": "animation.blastoise.ground_walk",
+    "attackTicks": 60,
+    "excluded_clips": [],
+    "sounds": [
+      "assets/minemon/sounds/pokemon/blastoise/blastoise_ambient.ogg",
+      "assets/minemon/sounds/pokemon/blastoise/blastoise_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/blastoise/model-license.txt"
+    ],
+    "eggBase": 7490354,
+    "eggSpots": 11175275
+  },
+  {
+    "slug": "wartortle",
+    "name": "Wartortle",
+    "model": "assets/minemon/geo/wartortle/wartortle.geo.json",
+    "texture": "assets/minemon/textures/pokemon/wartortle/wartortle.png",
+    "animation": "assets/minemon/animations/wartortle/wartortle.animation.json",
+    "mode": "ground",
+    "scale": 0.75,
+    "width": 0.8,
+    "height": 1.3,
+    "health": 29.5,
+    "attack": 5.25,
+    "speed": 0.258,
+    "clips": {
+      "ground_idle": "animation.wartortle.ground_idle",
+      "battle_idle": "animation.wartortle.battle_idle",
+      "ground_walk": "animation.wartortle.ground_walk",
+      "ground_run": "animation.wartortle.ground_run",
+      "water_idle": "animation.wartortle.water_idle",
+      "water_swim": "animation.wartortle.water_swim",
+      "surfacewater_idle": "animation.wartortle.surfacewater_idle",
+      "surfacewater_swim": "animation.wartortle.surfacewater_swim",
+      "sleep": "animation.wartortle.sleep",
+      "cry": "animation.wartortle.cry",
+      "blink": "animation.wartortle.blink",
+      "faint": "animation.wartortle.faint",
+      "quirk_idle": "animation.wartortle.quirk_idle",
+      "physical": "animation.wartortle.physical",
+      "special": "animation.wartortle.special",
+      "status": "animation.wartortle.status",
+      "recoil": "animation.wartortle.recoil",
+      "sit": "animation.wartortle.minemon_sit"
+    },
+    "idle": "animation.wartortle.ground_idle",
+    "walk": "animation.wartortle.ground_walk",
+    "attackTicks": 60,
+    "excluded_clips": [],
+    "sounds": [
+      "assets/minemon/sounds/pokemon/wartortle/wartortle_ambient.ogg",
+      "assets/minemon/sounds/pokemon/wartortle/wartortle_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/wartortle/model-license.txt"
+    ],
+    "eggBase": 5266850,
+    "eggSpots": 5794993
+  },
+  {
+    "slug": "arbok",
+    "name": "Arbok",
+    "model": "assets/minemon/geo/arbok/arbok.geo.json",
+    "texture": "assets/minemon/textures/pokemon/arbok/arbok.png",
+    "animation": "assets/minemon/animations/arbok/arbok.animation.json",
+    "mode": "ground",
+    "scale": 1,
+    "width": 1,
+    "height": 1.8,
+    "health": 30.0,
+    "attack": 7.916666666666667,
+    "speed": 0.28,
+    "clips": {
+      "ground_idle": "animation.arbok.ground_idle",
+      "ground_walk": "animation.arbok.ground_walk",
+      "summary_idle": "animation.arbok.summary_idle",
+      "tongue_flick": "animation.arbok.tongue_flick",
+      "faint": "animation.arbok.faint",
+      "sleep": "animation.arbok.sleep",
+      "blink": "animation.arbok.blink",
+      "cry": "animation.arbok.cry",
+      "ground_run": "animation.arbok.minemon_run",
+      "sit": "animation.arbok.minemon_sit",
+      "physical_attack": "animation.arbok.minemon_physical_attack"
+    },
+    "idle": "animation.arbok.ground_idle",
+    "walk": "animation.arbok.ground_walk",
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "sounds": [
+      "assets/minemon/sounds/pokemon/arbok/arbok_ambient.ogg",
+      "assets/minemon/sounds/pokemon/arbok/arbok_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/arbok/model-license.txt"
+    ],
+    "eggBase": 10847438,
+    "eggSpots": 8216240
   }
 ]

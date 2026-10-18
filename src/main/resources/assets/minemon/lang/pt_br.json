@@ -17,5 +17,11 @@
   "entity.minemon.psyduck": "Psyduck",
   "item.minemon.psyduck_spawn_egg": "Ovo de invocação de Psyduck",
   "entity.minemon.hitmonlee": "Hitmonlee",
-  "item.minemon.hitmonlee_spawn_egg": "Ovo de invocação de Hitmonlee"
+  "item.minemon.hitmonlee_spawn_egg": "Ovo de invocação de Hitmonlee",
+  "entity.minemon.blastoise": "Blastoise",
+  "item.minemon.blastoise_spawn_egg": "Ovo de invocação de Blastoise",
+  "entity.minemon.wartortle": "Wartortle",
+  "item.minemon.wartortle_spawn_egg": "Ovo de invocação de Wartortle",
+  "entity.minemon.arbok": "Arbok",
+  "item.minemon.arbok_spawn_egg": "Ovo de invocação de Arbok"
 }
