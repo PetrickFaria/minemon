@@ -30,6 +30,25 @@ for path in pngs:
     if path.read_bytes()[:8] != b"\x89PNG\r\n\x1a\n":
         raise SystemExit(f"Invalid PNG header: {path}")
 print(f"Valid JSON models/animations: {len(json_assets)}; PNG files: {len(pngs)}")
+bulbasaur = next((s for s in catalog if s["slug"] == "bulbasaur"), None)
+if bulbasaur is None or not bulbasaur["implementedInSource"]:
+    raise SystemExit("Bulbasaur must remain the registered validation species")
+geometry_path = resources / "assets/minemon/geo/bulbasaur/bulbasaur.geo.json"
+geometry = json.loads(geometry_path.read_text(encoding="utf-8"))
+if not geometry.get("minecraft:geometry") or not geometry["minecraft:geometry"][0].get("bones"):
+    raise SystemExit("Bulbasaur geo JSON has no GeckoLib-compatible geometry/bones")
+animation_path = resources / "assets/minemon/animations/bulbasaur/bulbasaur.animation.json"
+animations = json.loads(animation_path.read_text(encoding="utf-8")).get("animations", {})
+if not animations:
+    raise SystemExit("Bulbasaur animation JSON contains no animation clips")
+egg_model_path = resources / "assets/minemon/models/item/bulbasaur_spawn_egg.json"
+egg_model = json.loads(egg_model_path.read_text(encoding="utf-8"))
+if egg_model.get("parent") != "minecraft:item/template_spawn_egg":
+    raise SystemExit("Bulbasaur spawn egg must use Minecraft's spawn egg item template")
+pack_meta = json.loads((resources / "pack.mcmeta").read_text(encoding="utf-8"))
+if pack_meta.get("pack", {}).get("pack_format") != 9:
+    raise SystemExit("pack.mcmeta must use resource pack format 9 for Minecraft 1.19.2")
+print(f"Bulbasaur: {len(geometry['minecraft:geometry'][0]['bones'])} bones; {len(animations)} animation clips; spawn egg and pack.mcmeta valid")
 shared = json.loads((resources / "data/minemon/shared_resources.json").read_text(encoding="utf-8"))
 for entry in shared:
     if not (resources / entry["resource"]).is_file():

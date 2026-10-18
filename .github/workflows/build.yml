@@ -30,15 +30,19 @@ jobs:
           jar_file="$(find build/libs -maxdepth 1 -type f -name 'Minemon-1.19.2-*.jar' ! -name '*sources*' -print -quit)"
           test -n "$jar_file"
           jar tf "$jar_file" | grep -Fx 'META-INF/ASSET_LICENSES.md'
+          jar tf "$jar_file" | grep -Fx 'pack.mcmeta'
           jar tf "$jar_file" | grep -Fx 'br/com/petrickfaria/minemon/Minemon.class'
           jar tf "$jar_file" | grep -Fx 'data/minemon/species_catalog.json'
           jar tf "$jar_file" | grep -Fx 'assets/minemon/geo/bulbasaur/bulbasaur.geo.json'
           jar tf "$jar_file" | grep -Fx 'assets/minemon/textures/pokemon/bulbasaur/bulbasaur.png'
           jar tf "$jar_file" | grep -Fx 'assets/minemon/animations/bulbasaur/bulbasaur.animation.json'
+          jar tf "$jar_file" | grep -Fx 'assets/minemon/models/item/bulbasaur_spawn_egg.json'
           unzip -p "$jar_file" META-INF/mods.toml | grep -F 'modId="minemon"'
           unzip -p "$jar_file" META-INF/mods.toml | grep -F 'versionRange="[1.19.2,1.20)"'
           unzip -p "$jar_file" META-INF/mods.toml | grep -F 'modId="geckolib3"'
           unzip -p "$jar_file" META-INF/ASSET_LICENSES.md | grep -F 'CC BY-NC 3.0'
+          unzip -p "$jar_file" assets/minemon/models/item/bulbasaur_spawn_egg.json | grep -F 'minecraft:item/template_spawn_egg'
+          unzip -p "$jar_file" pack.mcmeta | grep -F '"pack_format": 9'
       - name: Upload Minemon JAR
         uses: actions/upload-artifact@v4
         with:

@@ -8,12 +8,16 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import software.bernie.geckolib3.GeckoLib;
 
 @Mod(Minemon.MOD_ID)
 public final class Minemon {
     public static final String MOD_ID = "minemon";
 
     public Minemon() {
+        // Registers GeckoLib's resource reload listener and model cache. Without this,
+        // AnimatedGeoModel can resolve the resource location but finds no parsed geo model.
+        GeckoLib.initialize();
         IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
         ModEntities.ENTITIES.register(bus);
         ModItems.ITEMS.register(bus);
