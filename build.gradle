@@ -11,6 +11,29 @@ base { archivesName = 'Minemon-1.19.2' }
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
+def runtimeSpecies = (findProperty('runtime_species') ?: 'bulbasaur')
+        .toString().split(',').collect { it.trim().toLowerCase(Locale.ROOT) }.findAll { !it.isEmpty() }
+
+// GeckoLib 3 indexes animation JSON from every namespace during resource reload.
+// Keep non-registered species' extracted assets in source, but out of the runtime
+// JAR so unimplemented/unsupported event tracks cannot break Bulbasaur's cache.
+def speciesAssetRoots = [
+    'assets/minemon/geo/',
+    'assets/minemon/animations/',
+    'assets/minemon/textures/pokemon/',
+    'assets/minemon/sounds/pokemon/',
+    'assets/minemon/licenses/pokemon/'
+]
+processResources {
+    exclude { details ->
+        def root = speciesAssetRoots.find { details.path.startsWith(it) }
+        if (root == null) return false
+        def relative = details.path.substring(root.length())
+        def species = relative.tokenize('/').find()
+        return species == null || !runtimeSpecies.contains(species)
+    }
+}
+
 minecraft {
     mappings channel: 'official', version: minecraft_version
     runs {

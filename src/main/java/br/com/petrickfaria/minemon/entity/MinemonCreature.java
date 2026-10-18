@@ -1,9 +1,6 @@
 package br.com.petrickfaria.minemon.entity;
 
 import br.com.petrickfaria.minemon.config.MinemonConfig;
-import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.network.syncher.EntityDataSerializers;
-import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -29,9 +26,11 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.server.level.ServerLevel;
+import java.util.UUID;
 import software.bernie.geckolib3.core.IAnimatable;
 import software.bernie.geckolib3.core.PlayState;
 import software.bernie.geckolib3.core.builder.AnimationBuilder;
+import software.bernie.geckolib3.core.controller.AnimationState;
 import software.bernie.geckolib3.core.controller.AnimationController;
 import software.bernie.geckolib3.core.event.predicate.AnimationEvent;
 import software.bernie.geckolib3.core.manager.AnimationData;
@@ -40,12 +39,18 @@ import software.bernie.geckolib3.util.GeckoLibUtil;
 
 /** Shared wolf-like companion behavior. This first registered species is the integration fixture. */
 public class MinemonCreature extends TamableAnimal implements IAnimatable {
-    private static final EntityDataAccessor<Boolean> ATTACKING =
-            SynchedEntityData.defineId(MinemonCreature.class, EntityDataSerializers.BOOLEAN);
+    private static final int WILD_AGGRESSION_DURATION_TICKS = 20 * 20;
+    private static final int WILD_MAX_CHASE_DISTANCE = 24;
+    private static final int WILD_UNREACHABLE_LIMIT_TICKS = 20 * 5;
     private final AnimationFactory animationFactory = GeckoLibUtil.createFactory(this);
+    private int wildAggressionTicks;
+    private int wildUnreachableTicks;
+    private int blinkCooldownTicks;
+    private boolean blinkPending;
 
     public MinemonCreature(EntityType<? extends TamableAnimal> type, Level level) {
         super(type, level);
+        this.blinkCooldownTicks = 80 + this.getRandom().nextInt(120);
     }
 
     public String getSpeciesSlug() {
@@ -64,12 +69,6 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     @Override
     public AgeableMob getBreedOffspring(ServerLevel level, AgeableMob partner) {
         return (AgeableMob) this.getType().create(level);
-    }
-
-    @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(ATTACKING, false);
     }
 
     @Override
@@ -96,12 +95,22 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
 
     @Override
     public boolean canAttack(LivingEntity target) {
-        if (target == this.getOwner()) return false;
+        if (target == null || target == this || this.isOwnerEntity(target)) return false;
+        // Ordered sitting companions may defend themselves or their owner at close
+        // range, but must not start walking after a distant target.
+        if (this.isTame() && this.isOrderedToSit() && target.distanceToSqr(this) > 16.0D) return false;
         if (target instanceof MinemonCreature other) {
-            if (this.getOwnerUUID() == null && other.getOwnerUUID() == null) return false;
-            if (this.getOwnerUUID() != null && this.getOwnerUUID().equals(other.getOwnerUUID())) return false;
+            UUID ownerId = this.getOwnerUUID();
+            UUID otherOwnerId = other.getOwnerUUID();
+            if (ownerId == null && otherOwnerId == null) return false;
+            if (ownerId != null && ownerId.equals(otherOwnerId)) return false;
         }
         return super.canAttack(target);
+    }
+
+    private boolean isOwnerEntity(LivingEntity target) {
+        UUID ownerId = this.getOwnerUUID();
+        return ownerId != null && ownerId.equals(target.getUUID());
     }
 
     @Override
@@ -138,9 +147,13 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     @Override
     public boolean hurt(DamageSource source, float amount) {
         boolean hurt = super.hurt(source, amount);
-        if (hurt && source.getEntity() instanceof LivingEntity attacker && this.canAttack(attacker)) {
+        if (hurt && !this.level.isClientSide && source.getEntity() instanceof LivingEntity attacker
+                && this.canAttack(attacker)) {
             this.setTarget(attacker);
-            this.entityData.set(ATTACKING, true);
+            if (!this.isTame()) {
+                this.wildAggressionTicks = WILD_AGGRESSION_DURATION_TICKS;
+                this.wildUnreachableTicks = 0;
+            }
         }
         return hurt;
     }
@@ -148,7 +161,48 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     @Override
     public void tick() {
         super.tick();
-        if (this.getTarget() == null || !this.getTarget().isAlive()) this.entityData.set(ATTACKING, false);
+        if (this.level.isClientSide) {
+            if (this.blinkCooldownTicks > 0) this.blinkCooldownTicks--;
+            if (this.blinkCooldownTicks == 0) {
+                this.blinkPending = true;
+                this.blinkCooldownTicks = 80 + this.getRandom().nextInt(120);
+            }
+        } else {
+            this.tickWildAggression();
+        }
+    }
+
+    private void tickWildAggression() {
+        if (this.isTame()) {
+            this.wildAggressionTicks = 0;
+            this.wildUnreachableTicks = 0;
+            return;
+        }
+        if (this.wildAggressionTicks <= 0) return;
+
+        LivingEntity target = this.getTarget();
+        if (target == null || !target.isAlive() || target.isRemoved()
+                || target.distanceToSqr(this) > (double) WILD_MAX_CHASE_DISTANCE * WILD_MAX_CHASE_DISTANCE) {
+            this.endWildAggression();
+            return;
+        }
+
+        this.wildAggressionTicks--;
+        if (this.getNavigation().isDone() && target.distanceToSqr(this) > 16.0D) {
+            this.wildUnreachableTicks++;
+        } else {
+            this.wildUnreachableTicks = 0;
+        }
+        if (this.wildAggressionTicks <= 0 || this.wildUnreachableTicks >= WILD_UNREACHABLE_LIMIT_TICKS) {
+            this.endWildAggression();
+        }
+    }
+
+    private void endWildAggression() {
+        this.wildAggressionTicks = 0;
+        this.wildUnreachableTicks = 0;
+        this.setTarget(null);
+        this.getNavigation().stop();
     }
 
     @Override
@@ -163,6 +217,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     @Override
     public void registerControllers(AnimationData data) {
         data.addAnimationController(new AnimationController<>(this, "movement", 4, this::animationPredicate));
+        data.addAnimationController(new AnimationController<>(this, "blink", 0, this::blinkPredicate));
     }
 
     private <E extends IAnimatable> PlayState animationPredicate(AnimationEvent<E> event) {
@@ -173,12 +228,29 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         if (this.isDeadOrDying()) {
             clip = SpeciesAssetIndex.clip(slug, "faint", "ground_idle");
             loop = false;
-        } else if (event.isMoving() || this.entityData.get(ATTACKING)) {
+        } else if (this.isMoving(event)) {
             clip = SpeciesAssetIndex.clip(slug, "ground_walk", "ground_idle");
         } else {
             clip = SpeciesAssetIndex.clip(slug, "ground_idle", "idle");
         }
         if (clip != null) controller.setAnimation(new AnimationBuilder().addAnimation(clip, loop));
+        return PlayState.CONTINUE;
+    }
+
+    private boolean isMoving(AnimationEvent<?> event) {
+        return event.isMoving() || this.getDeltaMovement().horizontalDistanceSqr() > 0.0004D;
+    }
+
+    private <E extends IAnimatable> PlayState blinkPredicate(AnimationEvent<E> event) {
+        AnimationController<?> controller = event.getController();
+        if (this.isDeadOrDying() || this.isMoving(event)) return PlayState.STOP;
+
+        String blink = SpeciesAssetIndex.clip(this.getSpeciesSlug(), "blink", "blink");
+        if (this.blinkPending && blink != null && controller.getAnimationState() == AnimationState.Stopped) {
+            controller.markNeedsReload();
+            controller.setAnimation(new AnimationBuilder().addAnimation(blink, false));
+            this.blinkPending = false;
+        }
         return PlayState.CONTINUE;
     }
 

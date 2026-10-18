@@ -37,6 +37,12 @@ jobs:
           jar tf "$jar_file" | grep -Fx 'assets/minemon/textures/pokemon/bulbasaur/bulbasaur.png'
           jar tf "$jar_file" | grep -Fx 'assets/minemon/animations/bulbasaur/bulbasaur.animation.json'
           jar tf "$jar_file" | grep -Fx 'assets/minemon/models/item/bulbasaur_spawn_egg.json'
+          unexpected_species_assets="$(jar tf "$jar_file" | grep -E '^assets/minemon/(geo|animations|textures/pokemon|sounds/pokemon|licenses/pokemon)/' | grep -v '/bulbasaur/' || true)"
+          if [ -n "$unexpected_species_assets" ]; then
+            printf '%s\n' "$unexpected_species_assets"
+            echo 'JAR contains resources for species not enabled in runtime_species.' >&2
+            exit 1
+          fi
           unzip -p "$jar_file" META-INF/mods.toml | grep -F 'modId="minemon"'
           unzip -p "$jar_file" META-INF/mods.toml | grep -F 'versionRange="[1.19.2,1.20)"'
           unzip -p "$jar_file" META-INF/mods.toml | grep -F 'modId="geckolib3"'
