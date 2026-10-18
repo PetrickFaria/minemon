@@ -116,7 +116,14 @@ public final class ClientSmokeTest {
     });
    }
    if(worldTicks>=360 && worldTicks<360+species.size()*40)mc.getSingleplayerServer().execute(()->{
-    var current=(MinemonCreature)mc.getSingleplayerServer().overworld().getEntity(testEntity);if(current!=null)current.getNavigation().moveTo(2,101,4,1);
+    var current=(MinemonCreature)mc.getSingleplayerServer().overworld().getEntity(testEntity);
+    if(current!=null){
+     // Drive a short, controlled displacement so larger collision boxes cannot make this
+     // render-only animation check depend on pathfinding success. Navigation has its own tests.
+     current.setNoAi(true);current.getNavigation().stop();
+     if(current.getX()>2.5)direction=-1;if(current.getX()<-2.5)direction=1;
+     current.moveTo(current.getX()+direction*0.08,current.getY(),current.getZ(),current.getYRot(),current.getXRot());
+    }
    });
    if(worldTicks>=380 && worldTicks<360+species.size()*40 && (worldTicks-380)%40==0)Screenshot.grab(mc.gameDirectory,mc.getMainRenderTarget(),message->{});
    if(worldTicks==360+species.size()*40) {
@@ -124,7 +131,7 @@ public final class ClientSmokeTest {
     if(!renderedSpecies.containsAll(species))throw new IllegalStateException("Some species were not rendered: expected="+species+" actual="+renderedSpecies);
     for(String slug:species) {
      boolean bodyMoved=motionRanges.entrySet().stream().filter(e->e.getKey().startsWith(slug+":")).anyMatch(e->{for(int axis=0;axis<6;axis++)if(e.getValue()[axis+6]-e.getValue()[axis]>0.0001)return true;return false;});
-     if(!walkedSpecies.contains(slug)||!bodyMoved)throw new IllegalStateException("No animated locomotion rendered for "+slug);
+     if(!walkedSpecies.contains(slug)||!bodyMoved)throw new IllegalStateException("No animated locomotion rendered for "+slug+"; displacement="+walkedSpecies.contains(slug)+" bodyChanged="+bodyMoved);
     }
     Files.writeString(Path.of("client-validation.txt"),"PASS LOCOMOTION: every registered species moved and had changing body bone transforms.\n",StandardOpenOption.APPEND);
     Files.writeString(Path.of("client-validation.txt"),"PASS ROSTER: every registered species rendered with its texture in a world: "+renderedSpecies+"\n",StandardOpenOption.APPEND);
