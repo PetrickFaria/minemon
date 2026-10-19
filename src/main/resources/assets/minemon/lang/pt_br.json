@@ -247,5 +247,15 @@
   "entity.minemon_gen1.victreebel": "Victreebel",
   "item.minemon_gen1.victreebel_spawn_egg": "Ovo de invocação de Victreebel",
   "entity.minemon_gen1.graveler": "Graveler",
-  "item.minemon_gen1.graveler_spawn_egg": "Ovo de invocação de Graveler"
+  "item.minemon_gen1.graveler_spawn_egg": "Ovo de invocação de Graveler",
+  "entity.minemon_gen1.golem": "Golem",
+  "item.minemon_gen1.golem_spawn_egg": "Ovo de invocação de Golem",
+  "entity.minemon_gen1.seel": "Seel",
+  "item.minemon_gen1.seel_spawn_egg": "Ovo de invocação de Seel",
+  "entity.minemon_gen1.dewgong": "Dewgong",
+  "item.minemon_gen1.dewgong_spawn_egg": "Ovo de invocação de Dewgong",
+  "entity.minemon_gen1.grimer": "Grimer",
+  "item.minemon_gen1.grimer_spawn_egg": "Ovo de invocação de Grimer",
+  "entity.minemon_gen1.muk": "Muk",
+  "item.minemon_gen1.muk_spawn_egg": "Ovo de invocação de Muk"
 }

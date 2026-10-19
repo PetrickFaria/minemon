@@ -247,5 +247,15 @@
   "entity.minemon_gen1.victreebel": "Victreebel",
   "item.minemon_gen1.victreebel_spawn_egg": "Spawn Egg: Victreebel",
   "entity.minemon_gen1.graveler": "Graveler",
-  "item.minemon_gen1.graveler_spawn_egg": "Spawn Egg: Graveler"
+  "item.minemon_gen1.graveler_spawn_egg": "Spawn Egg: Graveler",
+  "entity.minemon_gen1.golem": "Golem",
+  "item.minemon_gen1.golem_spawn_egg": "Spawn Egg: Golem",
+  "entity.minemon_gen1.seel": "Seel",
+  "item.minemon_gen1.seel_spawn_egg": "Spawn Egg: Seel",
+  "entity.minemon_gen1.dewgong": "Dewgong",
+  "item.minemon_gen1.dewgong_spawn_egg": "Spawn Egg: Dewgong",
+  "entity.minemon_gen1.grimer": "Grimer",
+  "item.minemon_gen1.grimer_spawn_egg": "Spawn Egg: Grimer",
+  "entity.minemon_gen1.muk": "Muk",
+  "item.minemon_gen1.muk_spawn_egg": "Spawn Egg: Muk"
 }

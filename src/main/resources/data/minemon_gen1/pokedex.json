@@ -453,7 +453,7 @@
     "nationalPokedexNumber": 76,
     "slug": "golem",
     "name": "Golem",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 77,
@@ -513,25 +513,25 @@
     "nationalPokedexNumber": 86,
     "slug": "seel",
     "name": "Seel",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 87,
     "slug": "dewgong",
     "name": "Dewgong",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 88,
     "slug": "grimer",
     "name": "Grimer",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 89,
     "slug": "muk",
     "name": "Muk",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 90,

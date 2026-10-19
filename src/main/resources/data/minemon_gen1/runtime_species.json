@@ -3178,6 +3178,46 @@
     "eggSpots": 8551532
   },
   {
+    "nationalPokedexNumber": 76,
+    "slug": "golem",
+    "name": "Golem",
+    "model": "assets/minemon/geo/golem/golem.geo.json",
+    "texture": "assets/minemon/textures/pokemon/golem/golem.png",
+    "animation": "assets/minemon/animations/golem/golem.animation.json",
+    "mode": "ground",
+    "scale": 1.1,
+    "width": 1,
+    "height": 1.3,
+    "health": 40.0,
+    "attack": 10.0,
+    "speed": 0.245,
+    "clips": {
+      "test": "animation.golem.test",
+      "blink": "animation.golem.blink",
+      "cry": "animation.golem.cry",
+      "ground_run": "animation.golem.minemon_run",
+      "sit": "animation.golem.minemon_sit",
+      "sleep": "animation.golem.minemon_sleep",
+      "physical_attack": "animation.golem.minemon_physical_attack"
+    },
+    "idle": "animation.golem.blink",
+    "walk": "animation.golem.blink",
+    "movement_fallback": "static",
+    "generated_static_animation": false,
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "stripped_bones": {},
+    "sounds": [
+      "assets/minemon/sounds/pokemon/golem/golem_ambient.ogg",
+      "assets/minemon/sounds/pokemon/golem/golem_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/golem/model-license.txt"
+    ],
+    "eggBase": 11767929,
+    "eggSpots": 10780779
+  },
+  {
     "nationalPokedexNumber": 77,
     "slug": "ponyta",
     "name": "Ponyta",
@@ -3633,6 +3673,168 @@
     ],
     "eggBase": 12421970,
     "eggSpots": 11236424
+  },
+  {
+    "nationalPokedexNumber": 86,
+    "slug": "seel",
+    "name": "Seel",
+    "model": "assets/minemon/geo/seel/seel.geo.json",
+    "texture": "assets/minemon/textures/pokemon/seel/seel.png",
+    "animation": "assets/minemon/animations/seel/seel.animation.json",
+    "mode": "ground",
+    "scale": 1,
+    "width": 0.9,
+    "height": 0.5,
+    "health": 32.5,
+    "attack": 3.75,
+    "speed": 0.245,
+    "clips": {
+      "ground_idle": "animation.seel.ground_idle",
+      "water_idle": "animation.seel.water_idle",
+      "water_swim": "animation.seel.water_swim",
+      "cry": "animation.seel.cry",
+      "ground_run": "animation.seel.minemon_run",
+      "sit": "animation.seel.minemon_sit",
+      "sleep": "animation.seel.minemon_sleep",
+      "physical_attack": "animation.seel.minemon_physical_attack"
+    },
+    "idle": "animation.seel.ground_idle",
+    "walk": "animation.seel.ground_idle",
+    "movement_fallback": "static",
+    "generated_static_animation": false,
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "stripped_bones": {},
+    "sounds": [
+      "assets/minemon/sounds/pokemon/seel/seel_ambient.ogg",
+      "assets/minemon/sounds/pokemon/seel/seel_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/seel/model-license.txt"
+    ],
+    "eggBase": 13482654,
+    "eggSpots": 12823442
+  },
+  {
+    "nationalPokedexNumber": 87,
+    "slug": "dewgong",
+    "name": "Dewgong",
+    "model": "assets/minemon/geo/dewgong/dewgong.geo.json",
+    "texture": "assets/minemon/textures/pokemon/dewgong/dewgong.png",
+    "animation": "assets/minemon/animations/dewgong/dewgong.animation.json",
+    "mode": "ground",
+    "scale": 2,
+    "width": 0.9,
+    "height": 0.5,
+    "health": 45.0,
+    "attack": 5.833333333333333,
+    "speed": 0.27,
+    "clips": {
+      "ground_idle": "animation.dewgong.ground_idle",
+      "water_idle": "animation.dewgong.water_idle",
+      "water_swim": "animation.dewgong.water_swim",
+      "cry": "animation.dewgong.cry",
+      "ground_run": "animation.dewgong.minemon_run",
+      "sit": "animation.dewgong.minemon_sit",
+      "sleep": "animation.dewgong.minemon_sleep",
+      "physical_attack": "animation.dewgong.minemon_physical_attack"
+    },
+    "idle": "animation.dewgong.ground_idle",
+    "walk": "animation.dewgong.ground_idle",
+    "movement_fallback": "static",
+    "generated_static_animation": false,
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "stripped_bones": {},
+    "sounds": [
+      "assets/minemon/sounds/pokemon/dewgong/dewgong_ambient.ogg",
+      "assets/minemon/sounds/pokemon/dewgong/dewgong_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/dewgong/model-license.txt"
+    ],
+    "eggBase": 12105912,
+    "eggSpots": 12105912
+  },
+  {
+    "nationalPokedexNumber": 88,
+    "slug": "grimer",
+    "name": "Grimer",
+    "model": "assets/minemon/geo/grimer/grimer.geo.json",
+    "texture": "assets/minemon/textures/pokemon/grimer/grimer.png",
+    "animation": "assets/minemon/animations/grimer/grimer.animation.json",
+    "mode": "ground",
+    "scale": 1,
+    "width": 1,
+    "height": 1.2,
+    "health": 40.0,
+    "attack": 6.666666666666667,
+    "speed": 0.225,
+    "clips": {
+      "ground_idle": "animation.grimer.ground_idle",
+      "blink": "animation.grimer.blink",
+      "cry": "animation.grimer.cry",
+      "ground_run": "animation.grimer.minemon_run",
+      "sit": "animation.grimer.minemon_sit",
+      "sleep": "animation.grimer.minemon_sleep",
+      "physical_attack": "animation.grimer.minemon_physical_attack"
+    },
+    "idle": "animation.grimer.ground_idle",
+    "walk": "animation.grimer.ground_idle",
+    "movement_fallback": "static",
+    "generated_static_animation": false,
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "stripped_bones": {},
+    "sounds": [
+      "assets/minemon/sounds/pokemon/grimer/grimer_ambient.ogg",
+      "assets/minemon/sounds/pokemon/grimer/grimer_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/grimer/model-license.txt"
+    ],
+    "eggBase": 8550548,
+    "eggSpots": 9799587
+  },
+  {
+    "nationalPokedexNumber": 89,
+    "slug": "muk",
+    "name": "Muk",
+    "model": "assets/minemon/geo/muk/muk.geo.json",
+    "texture": "assets/minemon/textures/pokemon/muk/muk.png",
+    "animation": "assets/minemon/animations/muk/muk.animation.json",
+    "mode": "ground",
+    "scale": 1.4,
+    "width": 1.4,
+    "height": 1,
+    "health": 52.5,
+    "attack": 8.75,
+    "speed": 0.25,
+    "clips": {
+      "ground_idle": "animation.muk.ground_idle",
+      "blink": "animation.muk.blink",
+      "cry": "animation.muk.cry",
+      "ground_run": "animation.muk.minemon_run",
+      "sit": "animation.muk.minemon_sit",
+      "sleep": "animation.muk.minemon_sleep",
+      "physical_attack": "animation.muk.minemon_physical_attack"
+    },
+    "idle": "animation.muk.ground_idle",
+    "walk": "animation.muk.ground_idle",
+    "movement_fallback": "static",
+    "generated_static_animation": false,
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "stripped_bones": {},
+    "sounds": [
+      "assets/minemon/sounds/pokemon/muk/muk_ambient.ogg",
+      "assets/minemon/sounds/pokemon/muk/muk_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/muk/model-license.txt"
+    ],
+    "eggBase": 10983090,
+    "eggSpots": 8550548
   },
   {
     "nationalPokedexNumber": 92,
