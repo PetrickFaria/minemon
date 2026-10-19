@@ -148,8 +148,13 @@ public final class ClientSmokeTest {
      current.setNoAi(true);current.getNavigation().stop();
      if(current.getX()>2.5)direction=-1;if(current.getX()<-2.5)direction=1;
      int phase=(worldTicks-360)%SPECIES_TEST_WINDOW;
-     double step=(current.getSpeciesSlug().equals("charmander")||current.getSpeciesSlug().equals("charmeleon")||current.getSpeciesSlug().equals("charizard"))&&phase>=30?0.08:0.04;
+     boolean fireStarterRun=(current.getSpeciesSlug().equals("charmander")||current.getSpeciesSlug().equals("charmeleon")||current.getSpeciesSlug().equals("charizard"))&&phase>=30;
+     double step=fireStarterRun?0.08:0.04;
+     double animationVelocity=fireStarterRun?0.11:0.05;
      current.moveTo(current.getX()+direction*step,current.getY(),current.getZ(),current.getYRot(),current.getXRot());
+     // Preserve a real horizontal movement signal for the GeckoLib predicate as
+     // well as visible displacement; moveTo alone can be a teleport to the entity.
+     current.setDeltaMovement(direction*animationVelocity,0,0);
     }
    });
    if(worldTicks>=380 && worldTicks<360+species.size()*SPECIES_TEST_WINDOW && (worldTicks-380)%SPECIES_TEST_WINDOW==0)Screenshot.grab(mc.gameDirectory,mc.getMainRenderTarget(),message->{});
