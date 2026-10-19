@@ -16,7 +16,9 @@ def validate(read,definitions,prepared=False,packed=False):
    a.pop(name,None)
   for name,v in a.items():
    missing=set(v.get('bones',{}))-bone_names
-   if missing:raise ValueError(name+' missing bones '+str(missing))
+   approved_to_strip=set(d.get('stripped_bones',{}).get(name,[]))
+   if prepared and missing:raise ValueError(name+' missing bones '+str(missing))
+   if not prepared and missing!=approved_to_strip:raise ValueError(name+' missing bones '+str(missing)+' (audit allows only '+str(approved_to_strip)+')')
    for field in ('particle_effects','sound_effects'):
     ev=v.get(field,{})
     valid_event_value=lambda x:isinstance(x,dict) or (not prepared and isinstance(x,list) and all(isinstance(item,dict) for item in x))

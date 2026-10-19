@@ -187,6 +187,13 @@ for p in (root/'assets/minemon_gen1/animations').rglob('*.animation.json'):
  definition=definitions.get(str(p.relative_to(root)),{})
  for name in definition.get('excluded_clips',[]): data.get('animations',{}).pop(name,None)
  if definition:
+  # Some source clips contain channels for bones omitted from the selected
+  # model variant. Remove only those channels in the copied runtime resource;
+  # keep the original animation file and all valid animated bones intact.
+  for clip_name,missing_bones in definition.get('stripped_bones',{}).items():
+   clip=data.get('animations',{}).get(clip_name,{})
+   channels=clip.get('bones',{})
+   for bone in missing_bones: channels.pop(bone,None)
   # Files in the processed resource tree keep the normal assets/minemon root.
   model=root/'assets/minemon_gen1'/definition['model'].removeprefix('assets/minemon/')
   if model.exists():build_runtime_clips(data,json.loads(model.read_text()),definition)
