@@ -55,6 +55,8 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     private int attackAnimationTicks;
     private int attackSequence;
     private int playedAttackSequence;
+    // Client-only diagnostic sample used by the automated locomotion smoke test.
+    private String selectedAnimationForValidation;
 
     public MinemonCreature(EntityType<? extends TamableAnimal> type, Level level) {
         super(type, level);
@@ -300,8 +302,11 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
             clip = definition.idle();
         }
         if (clip != null) controller.setAnimation(new AnimationBuilder().addAnimation(clip, loop));
+        if (Boolean.getBoolean("minemon.clientSmokeTest")) this.selectedAnimationForValidation = clip;
         return PlayState.CONTINUE;
     }
+
+    public String getSelectedAnimationForValidation() { return this.selectedAnimationForValidation; }
 
     private boolean isMoving(AnimationEvent<?> event) {
         return !this.isOrderedToSit() && (event.isMoving() || this.getDeltaMovement().horizontalDistanceSqr() > 0.0004D || (this.getX()-this.xo)*(this.getX()-this.xo)+(this.getZ()-this.zo)*(this.getZ()-this.zo)>0.0001D);

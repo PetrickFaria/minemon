@@ -43,7 +43,23 @@ public final class ClientSmokeTest {
  private static final int COMBAT_VALIDATION_TICK=BULBASAUR_VALIDATION_TICK+100;
  private static final int SPECIES_START_TICK=COMBAT_VALIDATION_TICK+10;
  private static final java.util.Set<String> renderedSpecies=java.util.concurrent.ConcurrentHashMap.newKeySet();
- private static final java.util.List<String> species=new java.util.ArrayList<>(SpeciesDefinitions.ALL.keySet());
+ private static final java.util.List<String> species=SpeciesDefinitions.ALL.values().stream()
+   .sorted(java.util.Comparator.comparingInt(SpeciesDefinitions.Definition::nationalPokedexNumber))
+   .map(SpeciesDefinitions.Definition::slug).toList();
+  // Profiles use exact joints from each selected model skeleton, not one global bone-name list.
+  private static final java.util.Map<String,java.util.List<String>> ARTICULATION_PROFILES=java.util.Map.ofEntries(
+   java.util.Map.entry("bulbasaur",java.util.List.of("leg_front_right","leg_front_left","leg_back_right","leg_back_left")),
+   java.util.Map.entry("pikachu",java.util.List.of("leg_right","leg_left")),
+   java.util.Map.entry("caterpie",java.util.List.of("body_segment","body_segment2")),
+   java.util.Map.entry("hitmonlee",java.util.List.of("leg_left","leg_right")),
+   java.util.Map.entry("onix",java.util.List.of("segment1","segment7","segment14")),
+   java.util.Map.entry("psyduck",java.util.List.of("foot_left","foot_right")),
+   java.util.Map.entry("jolteon",java.util.List.of("leg_front_right","leg_front_left","leg_back_right","leg_back_left")),
+   java.util.Map.entry("nidorina",java.util.List.of("left_leg","right_leg")),
+   java.util.Map.entry("meowth",java.util.List.of("leg_left","leg_right"))
+  );
+  private static final java.util.Map<String,java.util.Map<String,float[]>> articulationRanges=new java.util.HashMap<>();
+  private static final java.util.Map<String,java.util.Map<String,java.util.Set<String>>> articulationClips=new java.util.HashMap<>();
  @SubscribeEvent public static void tick(TickEvent.ClientTickEvent event) {
   if(!Boolean.getBoolean("minemon.clientSmokeTest")||event.phase!=TickEvent.Phase.END)return;
   Minecraft mc=Minecraft.getInstance();
@@ -88,10 +104,12 @@ public final class ClientSmokeTest {
       if(slug.equals("charmander")||slug.equals("charmeleon")||slug.equals("charizard")) {
        var left=model.getAnimationProcessor().getBone("arm_left");var right=model.getAnimationProcessor().getBone("arm_right");
        int phase=Math.floorMod(worldTicks-SPECIES_START_TICK,SPECIES_TEST_WINDOW);
-       int mode=phase>=30?2:0;
-       var range=fireStarterArmRanges.computeIfAbsent(slug,k->new float[4]);
-       range[mode]=Math.max(range[mode],Math.abs(left.getRotationZ()));
-       range[mode+1]=Math.max(range[mode+1],Math.abs(right.getRotationZ()));
+       int mode=phase>=39&&phase<=50?2:(phase>=12&&phase<=25?0:-1);
+       if(mode>=0){
+        var range=fireStarterArmRanges.computeIfAbsent(slug,k->new float[4]);
+        range[mode]=Math.max(range[mode],Math.abs(left.getRotationZ()));
+        range[mode+1]=Math.max(range[mode+1],Math.abs(right.getRotationZ()));
+       }
       }
       for(String name:modelBones.get(slug)) {
        if(name.contains("eye")||name.contains("mouth")||name.contains("jaw"))continue;
@@ -100,6 +118,20 @@ public final class ClientSmokeTest {
        for(int axis=0;axis<6;axis++){range[axis]=Math.min(range[axis],values[axis]);range[axis+6]=Math.max(range[axis+6],values[axis]);}
       }
      }
+      if(worldTicks>=SPECIES_START_TICK && worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW && ARTICULATION_PROFILES.containsKey(slug)) {
+       int phase=Math.floorMod(worldTicks-SPECIES_START_TICK,SPECIES_TEST_WINDOW);
+       String state=locomotionState(phase);
+       articulationClips.computeIfAbsent(slug,k->new java.util.HashMap<>())
+        .computeIfAbsent(state,k->new java.util.HashSet<>()).add(entity.getSelectedAnimationForValidation());
+       var perSpecies=articulationRanges.computeIfAbsent(slug,k->new java.util.HashMap<>());
+       for(String joint:ARTICULATION_PROFILES.get(slug)) {
+        var bone=model.getAnimationProcessor().getBone(joint);
+        if(bone==null)throw new IllegalStateException("Locomotion profile references missing bone "+slug+":"+joint);
+        float[] values={bone.getRotationX(),bone.getRotationY(),bone.getRotationZ(),bone.getPositionX(),bone.getPositionY(),bone.getPositionZ()};
+        var range=perSpecies.computeIfAbsent(state+":"+joint,k->{var v=new float[12];java.util.Arrays.fill(v,0,6,Float.MAX_VALUE);java.util.Arrays.fill(v,6,12,-Float.MAX_VALUE);return v;});
+        for(int axis=0;axis<6;axis++){range[axis]=Math.min(range[axis],values[axis]);range[axis+6]=Math.max(range[axis+6],values[axis]);}
+       }
+      }
      if(testEntity==null||!entity.getUUID().equals(testEntity)||worldTicks<110||worldTicks>=BULBASAUR_VALIDATION_TICK)return;
      var leg=model.getAnimationProcessor().getBone("leg_front_right");var body=model.getAnimationProcessor().getBone("body");
      minLeg=Math.min(minLeg,leg.getRotationX());maxLeg=Math.max(maxLeg,leg.getRotationX());minBody=Math.min(minBody,body.getPositionY());maxBody=Math.max(maxBody,body.getPositionY());frames++;
@@ -154,15 +186,25 @@ public final class ClientSmokeTest {
      // render-only animation check depend on pathfinding success. Navigation has its own tests.
      current.setNoAi(true);current.getNavigation().stop();
      if(current.getX()>2.5)direction=-1;if(current.getX()<-2.5)direction=1;
-     int phase=(worldTicks-360)%SPECIES_TEST_WINDOW;
-     boolean fireStarterRun=(current.getSpeciesSlug().equals("charmander")||current.getSpeciesSlug().equals("charmeleon")||current.getSpeciesSlug().equals("charizard"))&&phase>=30;
-     double step=fireStarterRun?0.08:0.04;
-     double animationVelocity=fireStarterRun?0.11:0.05;
-     current.moveTo(current.getX()+direction*step,current.getY(),current.getZ(),current.getYRot(),current.getXRot());
-     // Preserve a real horizontal movement signal for the GeckoLib predicate as
-     // well as visible displacement; moveTo alone can be a teleport to the entity.
-     current.setDeltaMovement(direction*animationVelocity,0,0);
-     current.hasImpulse=true;
+     int phase=Math.floorMod(worldTicks-SPECIES_START_TICK,SPECIES_TEST_WINDOW);
+     double animationVelocity;
+     if(phase<8 || phase>=56) animationVelocity=0.0D;                         // idle
+     else if(phase<12) animationVelocity=(phase-7)*0.0125D;                    // walk start
+     else if(phase<26) animationVelocity=0.05D;                               // steady walk
+     else if(phase<30) animationVelocity=(29-phase)*0.0125D;                   // walk deceleration
+     else if(phase<35) animationVelocity=0.0D;                                // idle return
+     else if(phase<39) animationVelocity=(phase-34)*0.03D;                     // run transition
+     else if(phase<51) animationVelocity=0.12D;                               // steady run
+     else animationVelocity=Math.max(0.0D,(56-phase)*0.024D);                 // run deceleration
+     if(animationVelocity>0.0D){
+      double step=animationVelocity<0.08D?0.04D:0.08D;
+      current.moveTo(current.getX()+direction*step,current.getY(),current.getZ(),current.getYRot(),current.getXRot());
+      current.setDeltaMovement(direction*animationVelocity,0,0);
+      current.hasImpulse=true;
+     } else {
+      current.setDeltaMovement(0,0,0);
+      current.getNavigation().stop();
+     }
     }
    });
    if(worldTicks>=SPECIES_START_TICK+20 && worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW && (worldTicks-(SPECIES_START_TICK+20))%SPECIES_TEST_WINDOW==0)Screenshot.grab(mc.gameDirectory,mc.getMainRenderTarget(),message->{});
@@ -182,11 +224,72 @@ public final class ClientSmokeTest {
      if(arms==null||arms[0]<0.35F||arms[1]<0.35F||arms[2]<0.35F||arms[3]<0.35F)
       throw new IllegalStateException("Fire-starter arms remained near T-pose during walk/run for "+slug+"; arm rotations="+java.util.Arrays.toString(arms));
     }
+    validateArticulationProfiles();
     Files.writeString(Path.of("client-validation.txt"),"PASS LOCOMOTION: every registered species moved and had changing body bone transforms.\n",StandardOpenOption.APPEND);
     Files.writeString(Path.of("client-validation.txt"),"PASS FIRE-STARTER ARMS: Charmander, Charmeleon and Charizard kept both arm bones lowered during walk and run.\n",StandardOpenOption.APPEND);
     Files.writeString(Path.of("client-validation.txt"),"PASS ROSTER: every registered species rendered with its texture in a world: "+renderedSpecies+"\n",StandardOpenOption.APPEND);
     mc.stop();
    }
+  private static String locomotionState(int phase) {
+   if(phase<8)return "IDLE_INITIAL";
+   if(phase<12)return "WALK_START";
+   if(phase<26)return "WALK_STEADY";
+   if(phase<30)return "WALK_DECEL";
+   if(phase<35)return "IDLE_RETURN";
+   if(phase<39)return "RUN_START";
+   if(phase<51)return "RUN_STEADY";
+   if(phase<56)return "RUN_DECEL";
+   return "IDLE_FINAL";
+  }
+  private static boolean hasSelectedClip(String slug,String state,String clip) {
+   return clip!=null && articulationClips.getOrDefault(slug,java.util.Map.of()).getOrDefault(state,java.util.Set.of()).contains(clip);
+  }
+  private static int movingJointCount(String slug,String state) {
+   int moved=0;
+   for(String joint:ARTICULATION_PROFILES.getOrDefault(slug,java.util.List.of())) {
+    float[] range=articulationRanges.getOrDefault(slug,java.util.Map.of()).get(state+":"+joint);
+    if(range==null)continue;
+    for(int axis=0;axis<6;axis++)if(range[axis+6]-range[axis]>(axis<3?0.02F:0.05F)){moved++;break;}
+   }
+   return moved;
+  }
+  private static void validateArticulationProfiles() throws java.io.IOException {
+   StringBuilder report=new StringBuilder();
+   int passed=0,knownFallbacks=0;
+   for(var entry:ARTICULATION_PROFILES.entrySet()) {
+    String slug=entry.getKey();
+    var definition=SpeciesDefinitions.get(slug);
+    if(definition==null)throw new IllegalStateException("Missing test profile species "+slug);
+    String fallback=definition.movementFallback();
+    if("static".equals(fallback)||"idle".equals(fallback)) {
+     String expected=definition.walk();
+     if(!hasSelectedClip(slug,"WALK_STEADY",expected))throw new IllegalStateException("Fallback classification did not match selected walk clip for "+slug);
+     knownFallbacks++;
+     report.append("EXPECTED GAP ").append(slug).append(": fallback=").append(fallback)
+       .append("; selected walk=").append(expected).append("; no gait pass claimed.\n");
+     continue;
+    }
+    String walk=definition.walk();
+    String run=SpeciesAssetIndex.clip(slug,"ground_run","run");
+    String idle=definition.idle();
+    if(!hasSelectedClip(slug,"IDLE_INITIAL",idle)||!hasSelectedClip(slug,"IDLE_FINAL",idle)||!hasSelectedClip(slug,"IDLE_RETURN",idle))
+     throw new IllegalStateException("Idle state selection did not return to expected clip for "+slug);
+    if(!hasSelectedClip(slug,"WALK_STEADY",walk)||!hasSelectedClip(slug,"WALK_START",walk))
+     throw new IllegalStateException("Walk state selection failed for "+slug+" expected="+walk+" states="+articulationClips.get(slug));
+    if(run!=null&&!hasSelectedClip(slug,"RUN_STEADY",run))
+     throw new IllegalStateException("Run state selection failed for "+slug+" expected="+run+" states="+articulationClips.get(slug));
+    int walkJoints=movingJointCount(slug,"WALK_STEADY");
+    int runJoints=movingJointCount(slug,"RUN_STEADY");
+    int minimum=java.util.Set.of("bulbasaur","pikachu","hitmonlee","jolteon").contains(slug)?2:1;
+    if(walkJoints<minimum||runJoints<minimum)
+     throw new IllegalStateException("Relevant locomotion joints did not animate for "+slug+" walk="+walkJoints+" run="+runJoints+" required="+minimum);
+    passed++;
+    report.append("PASS ").append(slug).append(": idle/walk/run/idle clips selected; profile joints changed walk=")
+      .append(walkJoints).append(" run=").append(runJoints).append("; transition samples=")
+      .append(articulationClips.get(slug)).append(".\n");
+   }
+   Files.writeString(Path.of("client-validation.txt"),"ARTICULATION PROFILES: passed="+passed+" expected fallback gaps="+knownFallbacks+" profiles="+ARTICULATION_PROFILES.size()+"; other species remain unverified by limb-specific profiles.\n"+report,StandardOpenOption.APPEND);
+  }
   }catch(Exception e){throw new IllegalStateException("Minemon client validation failed",e);}
  }
 }
