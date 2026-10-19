@@ -154,11 +154,12 @@ def prepare_tail_flame(root,d):
  if fire is None:raise ValueError(slug+' model has no animated fire bone')
  # Replace the original zero-width / invalid-UV planes with two crossed thin
  # sprites. Both remain children of the animated tail-tip fire bone.
- y0,z0={'charmander':(5.7,15.0),'charmeleon':(8.25,17.5),'charizard':(7.75,36.5)}[slug]
+ y0,z0={'charmander':(5.7,15.5),'charmeleon':(8.25,18.0),'charizard':(7.75,37.5)}[slug]
  def plane(origin,size,faces):
   return {'origin':origin,'size':size,'uv':{face:{'uv':[x,y],'uv_size':[fw,fh]} for face in faces}}
- fire['cubes']=[plane([-fw/2,y0,z0],[fw,fh,0.2],('north','south')),
-                plane([-0.1,y0,z0-fw/2],[0.2,fh,fw],('east','west'))]
+ all_sides=('north','south','east','west')
+ fire['cubes']=[plane([-fw/2,y0,z0-1],[fw,fh,2],all_sides+('up','down')),
+                plane([-1,y0,z0-fw/2],[2,fh,fw],all_sides+('up','down'))]
  model.write_text(json.dumps(geo,ensure_ascii=False,indent=2)+'\n')
  texture.write_bytes(encode_png_rgba(new_w,h,rows))
 for p in (root/'assets/minemon_gen1/animations').rglob('*.animation.json'):
