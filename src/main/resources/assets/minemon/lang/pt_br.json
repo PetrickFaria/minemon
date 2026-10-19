@@ -151,5 +151,9 @@
   "entity.minemon_gen1.snorlax": "Snorlax",
   "item.minemon_gen1.snorlax_spawn_egg": "Ovo de invocação de Snorlax",
   "entity.minemon_gen1.dratini": "Dratini",
-  "item.minemon_gen1.dratini_spawn_egg": "Ovo de invocação de Dratini"
+  "item.minemon_gen1.dratini_spawn_egg": "Ovo de invocação de Dratini",
+  "entity.minemon_gen1.dragonair": "Dragonair",
+  "item.minemon_gen1.dragonair_spawn_egg": "Ovo de invocação de Dragonair",
+  "entity.minemon_gen1.dragonite": "Dragonite",
+  "item.minemon_gen1.dragonite_spawn_egg": "Ovo de invocação de Dragonite"
 }

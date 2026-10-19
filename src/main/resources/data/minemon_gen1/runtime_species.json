@@ -3082,5 +3082,95 @@
     ],
     "eggBase": 7176160,
     "eggSpots": 7968497
+  },
+  {
+    "nationalPokedexNumber": 148,
+    "slug": "dragonair",
+    "name": "Dragonair",
+    "model": "assets/minemon/geo/dragonair/dragonair.geo.json",
+    "texture": "assets/minemon/textures/pokemon/dragonair/dragonair.png",
+    "animation": "assets/minemon/animations/dragonair/dragonair.animation.json",
+    "mode": "ground",
+    "scale": 0.9,
+    "width": 1.1,
+    "height": 2,
+    "health": 30.5,
+    "attack": 7.0,
+    "speed": 0.27,
+    "clips": {
+      "ground_idle": "animation.dragonair.ground_idle",
+      "ground_walk": "animation.dragonair.ground_walk",
+      "ground_run": "animation.dragonair.ground_run",
+      "battle_idle": "animation.dragonair.battle_idle",
+      "water_idle": "animation.dragonair.water_idle",
+      "water_swim": "animation.dragonair.water_swim",
+      "surfacewater_idle": "animation.dragonair.surfacewater_idle",
+      "surfacewater_swim": "animation.dragonair.surfacewater_swim",
+      "sleep": "animation.dragonair.sleep",
+      "water_sleep": "animation.dragonair.water_sleep",
+      "cry": "animation.dragonair.cry",
+      "blink": "animation.dragonair.blink",
+      "new": "animation.dragonair.new",
+      "sit": "animation.dragonair.minemon_sit",
+      "physical_attack": "animation.dragonair.minemon_physical_attack"
+    },
+    "idle": "animation.dragonair.ground_idle",
+    "walk": "animation.dragonair.ground_walk",
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "sounds": [
+      "assets/minemon/sounds/pokemon/dragonair/dragonair_ambient.ogg",
+      "assets/minemon/sounds/pokemon/dragonair/dragonair_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/dragonair/model-license.txt"
+    ],
+    "eggBase": 5799911,
+    "eggSpots": 6658801
+  },
+  {
+    "nationalPokedexNumber": 149,
+    "slug": "dragonite",
+    "name": "Dragonite",
+    "model": "assets/minemon/geo/dragonite/dragonite.geo.json",
+    "texture": "assets/minemon/textures/pokemon/dragonite/dragonite.png",
+    "animation": "assets/minemon/animations/dragonite/dragonite.animation.json",
+    "mode": "flying",
+    "scale": 0.9,
+    "width": 1.5,
+    "height": 3.2,
+    "health": 45.5,
+    "attack": 11.166666666666666,
+    "speed": 0.28,
+    "clips": {
+      "ground_idle": "animation.dragonite.ground_idle",
+      "battle_idle": "animation.dragonite.battle_idle",
+      "ground_walk": "animation.dragonite.ground_walk",
+      "sleep": "animation.dragonite.sleep",
+      "air_idle": "animation.dragonite.air_idle",
+      "air_fly": "animation.dragonite.air_fly",
+      "water_idle": "animation.dragonite.water_idle",
+      "water_swim": "animation.dragonite.water_swim",
+      "surfacewater_idle": "animation.dragonite.surfacewater_idle",
+      "surfacewater_swim": "animation.dragonite.surfacewater_swim",
+      "blink": "animation.dragonite.blink",
+      "cry": "animation.dragonite.cry",
+      "ground_run": "animation.dragonite.minemon_run",
+      "sit": "animation.dragonite.minemon_sit",
+      "physical_attack": "animation.dragonite.minemon_physical_attack"
+    },
+    "idle": "animation.dragonite.air_idle",
+    "walk": "animation.dragonite.air_fly",
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "sounds": [
+      "assets/minemon/sounds/pokemon/dragonite/dragonite_ambient.ogg",
+      "assets/minemon/sounds/pokemon/dragonite/dragonite_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/dragonite/model-license.txt"
+    ],
+    "eggBase": 15505731,
+    "eggSpots": 16166731
   }
 ]

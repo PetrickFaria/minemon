@@ -151,5 +151,9 @@
   "entity.minemon_gen1.snorlax": "Snorlax",
   "item.minemon_gen1.snorlax_spawn_egg": "Spawn Egg: Snorlax",
   "entity.minemon_gen1.dratini": "Dratini",
-  "item.minemon_gen1.dratini_spawn_egg": "Spawn Egg: Dratini"
+  "item.minemon_gen1.dratini_spawn_egg": "Spawn Egg: Dratini",
+  "entity.minemon_gen1.dragonair": "Dragonair",
+  "item.minemon_gen1.dragonair_spawn_egg": "Spawn Egg: Dragonair",
+  "entity.minemon_gen1.dragonite": "Dragonite",
+  "item.minemon_gen1.dragonite_spawn_egg": "Spawn Egg: Dragonite"
 }

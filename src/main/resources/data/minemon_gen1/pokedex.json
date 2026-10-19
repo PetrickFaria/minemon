@@ -885,13 +885,13 @@
     "nationalPokedexNumber": 148,
     "slug": "dragonair",
     "name": "Dragonair",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 149,
     "slug": "dragonite",
     "name": "Dragonite",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 150,
