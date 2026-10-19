@@ -603,7 +603,7 @@
     "nationalPokedexNumber": 101,
     "slug": "electrode",
     "name": "Electrode",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 102,
