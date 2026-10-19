@@ -441,6 +441,47 @@
     "eggSpots": 5872698
   },
   {
+    "nationalPokedexNumber": 11,
+    "slug": "metapod",
+    "name": "Metapod",
+    "model": "assets/minemon/geo/metapod/metapod.geo.json",
+    "texture": "assets/minemon/textures/pokemon/metapod/metapod.png",
+    "animation": "assets/minemon/animations/metapod/metapod.animation.json",
+    "mode": "ground",
+    "scale": 0.8,
+    "width": 0.8,
+    "height": 0.8,
+    "health": 25.0,
+    "attack": 3,
+    "speed": 0.23,
+    "clips": {
+      "ground_idle": "animation.metapod.ground_idle",
+      "sleep": "animation.metapod.sleep",
+      "faint": "animation.metapod.faint",
+      "blink": "animation.metapod.blink",
+      "cry": "animation.metapod.cry",
+      "render": "animation.metapod.render",
+      "ground_run": "animation.metapod.minemon_run",
+      "sit": "animation.metapod.minemon_sit",
+      "physical_attack": "animation.metapod.minemon_physical_attack"
+    },
+    "idle": "animation.metapod.ground_idle",
+    "walk": "animation.metapod.ground_idle",
+    "movement_fallback": "idle",
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "stripped_bones": {},
+    "sounds": [
+      "assets/minemon/sounds/pokemon/metapod/metapod_ambient.ogg",
+      "assets/minemon/sounds/pokemon/metapod/metapod_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/metapod/model-license.txt"
+    ],
+    "eggBase": 6197051,
+    "eggSpots": 5210162
+  },
+  {
     "nationalPokedexNumber": 12,
     "slug": "butterfree",
     "name": "Butterfree",
@@ -520,6 +561,46 @@
     ],
     "eggBase": 13861936,
     "eggSpots": 11229980
+  },
+  {
+    "nationalPokedexNumber": 14,
+    "slug": "kakuna",
+    "name": "Kakuna",
+    "model": "assets/minemon/geo/kakuna/kakuna.geo.json",
+    "texture": "assets/minemon/textures/pokemon/kakuna/kakuna.png",
+    "animation": "assets/minemon/animations/kakuna/kakuna.animation.json",
+    "mode": "ground",
+    "scale": 1,
+    "width": 0.5,
+    "height": 0.9,
+    "health": 22.5,
+    "attack": 3,
+    "speed": 0.235,
+    "clips": {
+      "ground_idle": "animation.kakuna.ground_idle",
+      "sleep": "animation.kakuna.sleep",
+      "faint": "animation.kakuna.faint",
+      "cry": "animation.kakuna.cry",
+      "render": "animation.kakuna.render",
+      "ground_run": "animation.kakuna.minemon_run",
+      "sit": "animation.kakuna.minemon_sit",
+      "physical_attack": "animation.kakuna.minemon_physical_attack"
+    },
+    "idle": "animation.kakuna.ground_idle",
+    "walk": "animation.kakuna.ground_idle",
+    "movement_fallback": "idle",
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "stripped_bones": {},
+    "sounds": [
+      "assets/minemon/sounds/pokemon/kakuna/kakuna_ambient.ogg",
+      "assets/minemon/sounds/pokemon/kakuna/kakuna_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/kakuna/model-license.txt"
+    ],
+    "eggBase": 13543226,
+    "eggSpots": 12554547
   },
   {
     "nationalPokedexNumber": 15,
@@ -788,6 +869,47 @@
     "eggSpots": 8671525
   },
   {
+    "nationalPokedexNumber": 23,
+    "slug": "ekans",
+    "name": "Ekans",
+    "model": "assets/minemon/geo/ekans/ekans.geo.json",
+    "texture": "assets/minemon/textures/pokemon/ekans/ekans.png",
+    "animation": "assets/minemon/animations/ekans/ekans.animation.json",
+    "mode": "ground",
+    "scale": 0.8,
+    "width": 1.7,
+    "height": 0.4,
+    "health": 20,
+    "attack": 5.0,
+    "speed": 0.255,
+    "clips": {
+      "ground_idle": "animation.ekans.ground_idle",
+      "summary_idle": "animation.ekans.summary_idle",
+      "faint": "animation.ekans.faint",
+      "sleep": "animation.ekans.sleep",
+      "cry": "animation.ekans.cry",
+      "blink": "animation.ekans.blink",
+      "ground_run": "animation.ekans.minemon_run",
+      "sit": "animation.ekans.minemon_sit",
+      "physical_attack": "animation.ekans.minemon_physical_attack"
+    },
+    "idle": "animation.ekans.ground_idle",
+    "walk": "animation.ekans.ground_idle",
+    "movement_fallback": "idle",
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "stripped_bones": {},
+    "sounds": [
+      "assets/minemon/sounds/pokemon/ekans/ekans_ambient.ogg",
+      "assets/minemon/sounds/pokemon/ekans/ekans_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/ekans/model-license.txt"
+    ],
+    "eggBase": 13133745,
+    "eggSpots": 12147369
+  },
+  {
     "slug": "arbok",
     "name": "Arbok",
     "model": "assets/minemon/geo/arbok/arbok.geo.json",
@@ -1000,6 +1122,49 @@
     ],
     "eggBase": 11761730,
     "eggSpots": 13607250
+  },
+  {
+    "nationalPokedexNumber": 33,
+    "slug": "nidorino",
+    "name": "Nidorino",
+    "model": "assets/minemon/geo/nidorino/nidorino.geo.json",
+    "texture": "assets/minemon/textures/pokemon/nidorino/nidorino.png",
+    "animation": "assets/minemon/animations/nidorino/nidorino.animation.json",
+    "mode": "ground",
+    "scale": 1,
+    "width": 1,
+    "height": 0.9,
+    "health": 30.5,
+    "attack": 6.0,
+    "speed": 0.265,
+    "clips": {
+      "ground_idle": "animation.nidorino.ground_idle",
+      "blink": "animation.nidorino.blink",
+      "ground_run": "animation.nidorino.minemon_run",
+      "sit": "animation.nidorino.minemon_sit",
+      "sleep": "animation.nidorino.minemon_sleep",
+      "physical_attack": "animation.nidorino.minemon_physical_attack"
+    },
+    "idle": "animation.nidorino.ground_idle",
+    "walk": "animation.nidorino.ground_idle",
+    "movement_fallback": "idle",
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "stripped_bones": {
+      "animation.nidorino.ground_idle": [
+        "ear_left",
+        "ear_right"
+      ]
+    },
+    "sounds": [
+      "assets/minemon/sounds/pokemon/nidorino/nidorino_ambient.ogg",
+      "assets/minemon/sounds/pokemon/nidorino/nidorino_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/nidorino/model-license.txt"
+    ],
+    "eggBase": 10446754,
+    "eggSpots": 9460627
   },
   {
     "nationalPokedexNumber": 35,
@@ -2070,6 +2235,48 @@
     ],
     "eggBase": 7768486,
     "eggSpots": 8558514
+  },
+  {
+    "nationalPokedexNumber": 72,
+    "slug": "tentacool",
+    "name": "Tentacool",
+    "model": "assets/minemon/geo/tentacool/tentacool.geo.json",
+    "texture": "assets/minemon/textures/pokemon/tentacool/tentacool.png",
+    "animation": "assets/minemon/animations/tentacool/tentacool.animation.json",
+    "mode": "ground",
+    "scale": 0.8,
+    "width": 0.8,
+    "height": 2.1,
+    "health": 20,
+    "attack": 3.3333333333333335,
+    "speed": 0.27,
+    "clips": {
+      "render": "animation.tentacool.render",
+      "water_idle": "animation.tentacool.water_idle",
+      "water_swim": "animation.tentacool.water_swim",
+      "water_sleep": "animation.tentacool.water_sleep",
+      "ground_idle": "animation.tentacool.ground_idle",
+      "sleep": "animation.tentacool.sleep",
+      "blink": "animation.tentacool.blink",
+      "ground_run": "animation.tentacool.minemon_run",
+      "sit": "animation.tentacool.minemon_sit",
+      "physical_attack": "animation.tentacool.minemon_physical_attack"
+    },
+    "idle": "animation.tentacool.ground_idle",
+    "walk": "animation.tentacool.ground_idle",
+    "movement_fallback": "idle",
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "stripped_bones": {},
+    "sounds": [
+      "assets/minemon/sounds/pokemon/tentacool/tentacool_ambient.ogg",
+      "assets/minemon/sounds/pokemon/tentacool/tentacool_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/tentacool/model-license.txt"
+    ],
+    "eggBase": 4881843,
+    "eggSpots": 5542594
   },
   {
     "nationalPokedexNumber": 74,

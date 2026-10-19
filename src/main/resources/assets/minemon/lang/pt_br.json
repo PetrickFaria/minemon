@@ -193,5 +193,15 @@
   "entity.minemon_gen1.drowzee": "Drowzee",
   "item.minemon_gen1.drowzee_spawn_egg": "Ovo de invocação de Drowzee",
   "entity.minemon_gen1.kabuto": "Kabuto",
-  "item.minemon_gen1.kabuto_spawn_egg": "Ovo de invocação de Kabuto"
+  "item.minemon_gen1.kabuto_spawn_egg": "Ovo de invocação de Kabuto",
+  "entity.minemon_gen1.metapod": "Metapod",
+  "item.minemon_gen1.metapod_spawn_egg": "Ovo de invocação de Metapod",
+  "entity.minemon_gen1.kakuna": "Kakuna",
+  "item.minemon_gen1.kakuna_spawn_egg": "Ovo de invocação de Kakuna",
+  "entity.minemon_gen1.ekans": "Ekans",
+  "item.minemon_gen1.ekans_spawn_egg": "Ovo de invocação de Ekans",
+  "entity.minemon_gen1.nidorino": "Nidorino",
+  "item.minemon_gen1.nidorino_spawn_egg": "Ovo de invocação de Nidorino",
+  "entity.minemon_gen1.tentacool": "Tentacool",
+  "item.minemon_gen1.tentacool_spawn_egg": "Ovo de invocação de Tentacool"
 }

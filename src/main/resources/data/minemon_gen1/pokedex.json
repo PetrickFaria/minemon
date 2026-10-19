@@ -63,7 +63,7 @@
     "nationalPokedexNumber": 11,
     "slug": "metapod",
     "name": "Metapod",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 12,
@@ -81,7 +81,7 @@
     "nationalPokedexNumber": 14,
     "slug": "kakuna",
     "name": "Kakuna",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 15,
@@ -135,7 +135,7 @@
     "nationalPokedexNumber": 23,
     "slug": "ekans",
     "name": "Ekans",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 24,
@@ -195,7 +195,7 @@
     "nationalPokedexNumber": 33,
     "slug": "nidorino",
     "name": "Nidorino",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 34,
@@ -429,7 +429,7 @@
     "nationalPokedexNumber": 72,
     "slug": "tentacool",
     "name": "Tentacool",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 73,
