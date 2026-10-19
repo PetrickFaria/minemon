@@ -115,5 +115,13 @@
   "entity.minemon_gen1.farfetchd": "Farfetch’d",
   "item.minemon_gen1.farfetchd_spawn_egg": "Spawn Egg: Farfetch’d",
   "entity.minemon_gen1.doduo": "Doduo",
-  "item.minemon_gen1.doduo_spawn_egg": "Spawn Egg: Doduo"
+  "item.minemon_gen1.doduo_spawn_egg": "Spawn Egg: Doduo",
+  "entity.minemon_gen1.koffing": "Koffing",
+  "item.minemon_gen1.koffing_spawn_egg": "Spawn Egg: Koffing",
+  "entity.minemon_gen1.horsea": "Horsea",
+  "item.minemon_gen1.horsea_spawn_egg": "Spawn Egg: Horsea",
+  "entity.minemon_gen1.seadra": "Seadra",
+  "item.minemon_gen1.seadra_spawn_egg": "Spawn Egg: Seadra",
+  "entity.minemon_gen1.staryu": "Staryu",
+  "item.minemon_gen1.staryu_spawn_egg": "Spawn Egg: Staryu"
 }

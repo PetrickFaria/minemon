@@ -2191,6 +2191,45 @@
     "eggSpots": 16024700
   },
   {
+    "nationalPokedexNumber": 109,
+    "slug": "koffing",
+    "name": "Koffing",
+    "model": "assets/minemon/geo/koffing/koffing.geo.json",
+    "texture": "assets/minemon/textures/pokemon/koffing/koffing.png",
+    "animation": "assets/minemon/animations/koffing/koffing.animation.json",
+    "mode": "flying",
+    "scale": 0.9,
+    "width": 0.9,
+    "height": 1.2,
+    "health": 20,
+    "attack": 5.416666666666667,
+    "speed": 0.235,
+    "clips": {
+      "ground_idle": "animation.koffing.ground_idle",
+      "air_idle": "animation.koffing.air_idle",
+      "air_fly": "animation.koffing.air_fly",
+      "blink": "animation.koffing.blink",
+      "cry": "animation.koffing.cry",
+      "ground_run": "animation.koffing.minemon_run",
+      "sit": "animation.koffing.minemon_sit",
+      "sleep": "animation.koffing.minemon_sleep",
+      "physical_attack": "animation.koffing.minemon_physical_attack"
+    },
+    "idle": "animation.koffing.air_idle",
+    "walk": "animation.koffing.air_fly",
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "sounds": [
+      "assets/minemon/sounds/pokemon/koffing/koffing_ambient.ogg",
+      "assets/minemon/sounds/pokemon/koffing/koffing_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/koffing/model-license.txt"
+    ],
+    "eggBase": 9662906,
+    "eggSpots": 10716368
+  },
+  {
     "nationalPokedexNumber": 113,
     "slug": "chansey",
     "name": "Chansey",
@@ -2231,6 +2270,122 @@
     ],
     "eggBase": 16755876,
     "eggSpots": 16765907
+  },
+  {
+    "nationalPokedexNumber": 116,
+    "slug": "horsea",
+    "name": "Horsea",
+    "model": "assets/minemon/geo/horsea/horsea.geo.json",
+    "texture": "assets/minemon/textures/pokemon/horsea/horsea.png",
+    "animation": "assets/minemon/animations/horsea/horsea.animation.json",
+    "mode": "ground",
+    "scale": 0.7,
+    "width": 0.5,
+    "height": 1.1,
+    "health": 20,
+    "attack": 3.3333333333333335,
+    "speed": 0.26,
+    "clips": {
+      "ground_idle": "animation.horsea.ground_idle",
+      "ground_walk": "animation.horsea.ground_walk",
+      "water_idle": "animation.horsea.water_idle",
+      "water_swim": "animation.horsea.water_swim",
+      "blink": "animation.horsea.blink",
+      "ground_run": "animation.horsea.minemon_run",
+      "sit": "animation.horsea.minemon_sit",
+      "sleep": "animation.horsea.minemon_sleep",
+      "physical_attack": "animation.horsea.minemon_physical_attack"
+    },
+    "idle": "animation.horsea.ground_idle",
+    "walk": "animation.horsea.ground_walk",
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "sounds": [
+      "assets/minemon/sounds/pokemon/horsea/horsea_ambient.ogg",
+      "assets/minemon/sounds/pokemon/horsea/horsea_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/horsea/model-license.txt"
+    ],
+    "eggBase": 5672379,
+    "eggSpots": 7058906
+  },
+  {
+    "nationalPokedexNumber": 117,
+    "slug": "seadra",
+    "name": "Seadra",
+    "model": "assets/minemon/geo/seadra/seadra.geo.json",
+    "texture": "assets/minemon/textures/pokemon/seadra/seadra.png",
+    "animation": "assets/minemon/animations/seadra/seadra.animation.json",
+    "mode": "ground",
+    "scale": 0.8,
+    "width": 0.8,
+    "height": 1.9,
+    "health": 27.5,
+    "attack": 5.416666666666667,
+    "speed": 0.285,
+    "clips": {
+      "ground_idle": "animation.seadra.ground_idle",
+      "ground_walk": "animation.seadra.ground_walk",
+      "water_idle": "animation.seadra.water_idle",
+      "water_swim": "animation.seadra.water_swim",
+      "blink": "animation.seadra.blink",
+      "ground_run": "animation.seadra.minemon_run",
+      "sit": "animation.seadra.minemon_sit",
+      "sleep": "animation.seadra.minemon_sleep",
+      "physical_attack": "animation.seadra.minemon_physical_attack"
+    },
+    "idle": "animation.seadra.ground_idle",
+    "walk": "animation.seadra.ground_walk",
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "sounds": [
+      "assets/minemon/sounds/pokemon/seadra/seadra_ambient.ogg",
+      "assets/minemon/sounds/pokemon/seadra/seadra_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/seadra/model-license.txt"
+    ],
+    "eggBase": 5016497,
+    "eggSpots": 5676992
+  },
+  {
+    "nationalPokedexNumber": 120,
+    "slug": "staryu",
+    "name": "Staryu",
+    "model": "assets/minemon/geo/staryu/staryu.geo.json",
+    "texture": "assets/minemon/textures/pokemon/staryu/staryu.png",
+    "animation": "assets/minemon/animations/staryu/staryu.animation.json",
+    "mode": "ground",
+    "scale": 0.9,
+    "width": 0.8,
+    "height": 1,
+    "health": 20,
+    "attack": 3.75,
+    "speed": 0.285,
+    "clips": {
+      "ground_idle": "animation.staryu.ground_idle",
+      "ground_walk": "animation.staryu.ground_walk",
+      "ground_run": "animation.staryu.ground_run",
+      "water_idle": "animation.staryu.water_idle",
+      "water_swim": "animation.staryu.water_swim",
+      "sleep": "animation.staryu.sleep",
+      "sit": "animation.staryu.minemon_sit",
+      "physical_attack": "animation.staryu.minemon_physical_attack"
+    },
+    "idle": "animation.staryu.ground_idle",
+    "walk": "animation.staryu.ground_walk",
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "sounds": [
+      "assets/minemon/sounds/pokemon/staryu/staryu_ambient.ogg",
+      "assets/minemon/sounds/pokemon/staryu/staryu_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/staryu/model-license.txt"
+    ],
+    "eggBase": 8868927,
+    "eggSpots": 9527623
   },
   {
     "slug": "electabuzz",

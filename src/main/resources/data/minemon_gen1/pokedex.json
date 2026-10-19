@@ -651,7 +651,7 @@
     "nationalPokedexNumber": 109,
     "slug": "koffing",
     "name": "Koffing",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 110,
@@ -693,13 +693,13 @@
     "nationalPokedexNumber": 116,
     "slug": "horsea",
     "name": "Horsea",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 117,
     "slug": "seadra",
     "name": "Seadra",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 118,
@@ -717,7 +717,7 @@
     "nationalPokedexNumber": 120,
     "slug": "staryu",
     "name": "Staryu",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 121,
