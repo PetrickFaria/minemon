@@ -4910,6 +4910,46 @@
     "eggSpots": 16765907
   },
   {
+    "nationalPokedexNumber": 114,
+    "slug": "tangela",
+    "name": "Tangela",
+    "model": "assets/minemon/geo/tangela/tangela.geo.json",
+    "texture": "assets/minemon/textures/pokemon/tangela/tangela.png",
+    "animation": "assets/minemon/animations/tangela/tangela.animation.json",
+    "mode": "ground",
+    "scale": 1.5,
+    "width": 0.8,
+    "height": 0.6,
+    "health": 32.5,
+    "attack": 4.583333333333333,
+    "speed": 0.26,
+    "clips": {
+      "cry": "animation.tangela.cry",
+      "ground_idle": "animation.tangela.minemon_static",
+      "ground_walk": "animation.tangela.minemon_static",
+      "ground_run": "animation.tangela.minemon_run",
+      "sit": "animation.tangela.minemon_sit",
+      "sleep": "animation.tangela.minemon_sleep",
+      "physical_attack": "animation.tangela.minemon_physical_attack"
+    },
+    "idle": "animation.tangela.minemon_static",
+    "walk": "animation.tangela.minemon_static",
+    "movement_fallback": "static",
+    "generated_static_animation": true,
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "stripped_bones": {},
+    "sounds": [
+      "assets/minemon/sounds/pokemon/tangela/tangela_ambient.ogg",
+      "assets/minemon/sounds/pokemon/tangela/tangela_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/tangela/model-license.txt"
+    ],
+    "eggBase": 4021641,
+    "eggSpots": 5735596
+  },
+  {
     "nationalPokedexNumber": 115,
     "slug": "kangaskhan",
     "name": "Kangaskhan",

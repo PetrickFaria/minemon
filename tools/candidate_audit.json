@@ -5233,12 +5233,9 @@
   },
   {
     "slug": "tangela",
-    "accepted": false,
-    "reason": "No usable idle clip; No usable locomotion clip",
-    "issues": [
-      "No usable idle clip",
-      "No usable locomotion clip"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 114,
       "slug": "tangela",
@@ -5254,12 +5251,14 @@
       "attack": 4.583333333333333,
       "speed": 0.26,
       "clips": {
-        "cry": "animation.tangela.cry"
+        "cry": "animation.tangela.cry",
+        "ground_idle": "animation.tangela.minemon_static",
+        "ground_walk": "animation.tangela.minemon_static"
       },
-      "idle": null,
-      "walk": null,
-      "movement_fallback": null,
-      "generated_static_animation": false,
+      "idle": "animation.tangela.minemon_static",
+      "walk": "animation.tangela.minemon_static",
+      "movement_fallback": "static",
+      "generated_static_animation": true,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},

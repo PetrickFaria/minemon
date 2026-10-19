@@ -299,5 +299,7 @@
   "entity.minemon_gen1.moltres": "Moltres",
   "item.minemon_gen1.moltres_spawn_egg": "Ovo de invocação de Moltres",
   "entity.minemon_gen1.mew": "Mew",
-  "item.minemon_gen1.mew_spawn_egg": "Ovo de invocação de Mew"
+  "item.minemon_gen1.mew_spawn_egg": "Ovo de invocação de Mew",
+  "entity.minemon_gen1.tangela": "Tangela",
+  "item.minemon_gen1.tangela_spawn_egg": "Ovo de invocação de Tangela"
 }
