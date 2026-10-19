@@ -2388,6 +2388,45 @@
     "eggSpots": 9527623
   },
   {
+    "nationalPokedexNumber": 121,
+    "slug": "starmie",
+    "name": "Starmie",
+    "model": "assets/minemon/geo/starmie/starmie.geo.json",
+    "texture": "assets/minemon/textures/pokemon/starmie/starmie.png",
+    "animation": "assets/minemon/animations/starmie/starmie.animation.json",
+    "mode": "ground",
+    "scale": 1.1,
+    "width": 0.8,
+    "height": 1.1,
+    "health": 30.0,
+    "attack": 6.25,
+    "speed": 0.315,
+    "clips": {
+      "ground_idle": "animation.starmie.ground_idle",
+      "ground_walk": "animation.starmie.ground_walk",
+      "ground_run": "animation.starmie.ground_run",
+      "water_idle": "animation.starmie.water_idle",
+      "water_swim": "animation.starmie.water_swim",
+      "battle_idle": "animation.starmie.battle_idle",
+      "sleep": "animation.starmie.sleep",
+      "sit": "animation.starmie.minemon_sit",
+      "physical_attack": "animation.starmie.minemon_physical_attack"
+    },
+    "idle": "animation.starmie.ground_idle",
+    "walk": "animation.starmie.ground_walk",
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "sounds": [
+      "assets/minemon/sounds/pokemon/starmie/starmie_ambient.ogg",
+      "assets/minemon/sounds/pokemon/starmie/starmie_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/starmie/model-license.txt"
+    ],
+    "eggBase": 8616126,
+    "eggSpots": 9734095
+  },
+  {
     "slug": "electabuzz",
     "name": "Electabuzz",
     "model": "assets/minemon/geo/electabuzz/electabuzz.geo.json",
@@ -2428,6 +2467,134 @@
     "eggBase": 14925098,
     "eggSpots": 15850041,
     "nationalPokedexNumber": 125
+  },
+  {
+    "nationalPokedexNumber": 127,
+    "slug": "pinsir",
+    "name": "Pinsir",
+    "model": "assets/minemon/geo/pinsir/pinsir.geo.json",
+    "texture": "assets/minemon/textures/pokemon/pinsir/pinsir.png",
+    "animation": "assets/minemon/animations/pinsir/pinsir.animation.json",
+    "mode": "ground",
+    "scale": 0.75,
+    "width": 1,
+    "height": 1.45,
+    "health": 32.5,
+    "attack": 10.416666666666666,
+    "speed": 0.285,
+    "clips": {
+      "ground_idle": "animation.pinsir.ground_idle",
+      "sleep": "animation.pinsir.sleep",
+      "ground_walk": "animation.pinsir.ground_walk",
+      "battle_idle": "animation.pinsir.battle_idle",
+      "blink": "animation.pinsir.blink",
+      "cry": "animation.pinsir.cry",
+      "ground_run": "animation.pinsir.minemon_run",
+      "sit": "animation.pinsir.minemon_sit",
+      "physical_attack": "animation.pinsir.minemon_physical_attack"
+    },
+    "idle": "animation.pinsir.ground_idle",
+    "walk": "animation.pinsir.ground_walk",
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "sounds": [
+      "assets/minemon/sounds/pokemon/pinsir/pinsir_ambient.ogg",
+      "assets/minemon/sounds/pokemon/pinsir/pinsir_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/pinsir/model-license.txt"
+    ],
+    "eggBase": 9466978,
+    "eggSpots": 10848114
+  },
+  {
+    "nationalPokedexNumber": 128,
+    "slug": "tauros",
+    "name": "Tauros",
+    "model": "assets/minemon/geo/tauros/tauros.geo.json",
+    "texture": "assets/minemon/textures/pokemon/tauros/tauros.png",
+    "animation": "assets/minemon/animations/tauros/tauros.animation.json",
+    "mode": "ground",
+    "scale": 1.3,
+    "width": 1.3,
+    "height": 1.4,
+    "health": 37.5,
+    "attack": 8.333333333333334,
+    "speed": 0.31,
+    "clips": {
+      "ground_walk": "animation.tauros.ground_walk",
+      "ground_run": "animation.tauros.ground_run",
+      "ground_idle": "animation.tauros.ground_idle",
+      "cry": "animation.tauros.cry",
+      "render": "animation.tauros.render",
+      "blink": "animation.tauros.blink",
+      "sit": "animation.tauros.minemon_sit",
+      "sleep": "animation.tauros.minemon_sleep",
+      "physical_attack": "animation.tauros.minemon_physical_attack"
+    },
+    "idle": "animation.tauros.ground_idle",
+    "walk": "animation.tauros.ground_walk",
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "sounds": [
+      "assets/minemon/sounds/pokemon/tauros/tauros_ambient.ogg",
+      "assets/minemon/sounds/pokemon/tauros/tauros_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/tauros/model-license.txt"
+    ],
+    "eggBase": 10445384,
+    "eggSpots": 12289371
+  },
+  {
+    "nationalPokedexNumber": 129,
+    "slug": "magikarp",
+    "name": "Magikarp",
+    "model": "assets/minemon/geo/magikarp/magikarp_female.geo.json",
+    "texture": "assets/minemon/textures/pokemon/magikarp/magikarp.png",
+    "animation": "assets/minemon/animations/magikarp/magikarp.animation.json",
+    "mode": "ground",
+    "scale": 1,
+    "width": 1,
+    "height": 1,
+    "health": 20,
+    "attack": 3,
+    "speed": 0.28,
+    "clips": {
+      "ground_idle": "animation.magikarp.ground_idle",
+      "ground_walk": "animation.magikarp.ground_walk",
+      "sleep": "animation.magikarp.sleep",
+      "ground_sleep_quirk": "animation.magikarp.ground_sleep_quirk",
+      "water_idle": "animation.magikarp.water_idle",
+      "water_swim": "animation.magikarp.water_swim",
+      "water_swimfast": "animation.magikarp.water_swimfast",
+      "water_sleep": "animation.magikarp.water_sleep",
+      "surfacewater_idle": "animation.magikarp.surfacewater_idle",
+      "surfacewater_swim": "animation.magikarp.surfacewater_swim",
+      "surfacewater_swimfast": "animation.magikarp.surfacewater_swimfast",
+      "surfacewater_quirk": "animation.magikarp.surfacewater_quirk",
+      "ground_faint": "animation.magikarp.ground_faint",
+      "water_faint": "animation.magikarp.water_faint",
+      "cry": "animation.magikarp.cry",
+      "ground_run": "animation.magikarp.minemon_run",
+      "sit": "animation.magikarp.minemon_sit",
+      "physical_attack": "animation.magikarp.minemon_physical_attack"
+    },
+    "idle": "animation.magikarp.ground_idle",
+    "walk": "animation.magikarp.ground_walk",
+    "attackTicks": 12,
+    "excluded_clips": [
+      "animation.magikarp.blink"
+    ],
+    "sounds": [
+      "assets/minemon/sounds/pokemon/magikarp/magikarp_ambient.ogg",
+      "assets/minemon/sounds/pokemon/magikarp/magikarp_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/magikarp/model-license.txt"
+    ],
+    "eggBase": 13844022,
+    "eggSpots": 14968380
   },
   {
     "nationalPokedexNumber": 133,

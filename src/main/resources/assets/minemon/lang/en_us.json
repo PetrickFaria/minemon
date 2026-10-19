@@ -123,5 +123,13 @@
   "entity.minemon_gen1.seadra": "Seadra",
   "item.minemon_gen1.seadra_spawn_egg": "Spawn Egg: Seadra",
   "entity.minemon_gen1.staryu": "Staryu",
-  "item.minemon_gen1.staryu_spawn_egg": "Spawn Egg: Staryu"
+  "item.minemon_gen1.staryu_spawn_egg": "Spawn Egg: Staryu",
+  "entity.minemon_gen1.starmie": "Starmie",
+  "item.minemon_gen1.starmie_spawn_egg": "Spawn Egg: Starmie",
+  "entity.minemon_gen1.pinsir": "Pinsir",
+  "item.minemon_gen1.pinsir_spawn_egg": "Spawn Egg: Pinsir",
+  "entity.minemon_gen1.tauros": "Tauros",
+  "item.minemon_gen1.tauros_spawn_egg": "Spawn Egg: Tauros",
+  "entity.minemon_gen1.magikarp": "Magikarp",
+  "item.minemon_gen1.magikarp_spawn_egg": "Spawn Egg: Magikarp"
 }

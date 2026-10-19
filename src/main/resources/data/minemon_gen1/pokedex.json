@@ -723,7 +723,7 @@
     "nationalPokedexNumber": 121,
     "slug": "starmie",
     "name": "Starmie",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 122,
@@ -759,19 +759,19 @@
     "nationalPokedexNumber": 127,
     "slug": "pinsir",
     "name": "Pinsir",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 128,
     "slug": "tauros",
     "name": "Tauros",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 129,
     "slug": "magikarp",
     "name": "Magikarp",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 130,
