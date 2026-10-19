@@ -111,7 +111,7 @@
     "nationalPokedexNumber": 19,
     "slug": "rattata",
     "name": "Rattata",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 20,
@@ -153,7 +153,7 @@
     "nationalPokedexNumber": 26,
     "slug": "raichu",
     "name": "Raichu",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 27,
@@ -207,13 +207,13 @@
     "nationalPokedexNumber": 35,
     "slug": "clefairy",
     "name": "Clefairy",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 36,
     "slug": "clefable",
     "name": "Clefable",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 37,
@@ -231,7 +231,7 @@
     "nationalPokedexNumber": 39,
     "slug": "jigglypuff",
     "name": "Jigglypuff",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 40,
@@ -255,37 +255,37 @@
     "nationalPokedexNumber": 43,
     "slug": "oddish",
     "name": "Oddish",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 44,
     "slug": "gloom",
     "name": "Gloom",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 45,
     "slug": "vileplume",
     "name": "Vileplume",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 46,
     "slug": "paras",
     "name": "Paras",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 47,
     "slug": "parasect",
     "name": "Parasect",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 48,
     "slug": "venonat",
     "name": "Venonat",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 49,
@@ -297,7 +297,7 @@
     "nationalPokedexNumber": 50,
     "slug": "diglett",
     "name": "Diglett",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 51,

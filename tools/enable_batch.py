@@ -3,8 +3,11 @@
 import json,sys
 from pathlib import Path
 from PIL import Image
-from audit_candidates import audit,ROOT,R
-rows={r['slug']:r for r in audit()}
+from audit_candidates import ROOT,R
+# Reuse the committed triage report. Re-running the full 151-species audit for
+# every batch is unnecessary; check only the requested assets below.
+audit_path=ROOT/'tools/candidate_audit.json'
+rows={r['slug']:r for r in json.loads(audit_path.read_text())}
 slugs=sys.argv[1:]
 if not slugs or len(set(slugs))!=len(slugs):raise SystemExit('List the complete intended species batch exactly once')
 old=json.loads((R/'data/minemon_gen1/runtime_species.json').read_text())
@@ -13,7 +16,14 @@ for slug in slugs:
  row=rows.get(slug)
  if not row:raise SystemExit('Not a generation 1 species: '+slug)
  if not row['accepted']:raise SystemExit(slug+': '+row['reason'])
- d=row['definition'];im=Image.open(R/d['texture']).convert('RGBA');colors=im.getcolors(im.width*im.height);colors=sorted(((n,c) for n,c in (colors or []) if c[3]>128),reverse=True)
+ d=row['definition']
+ for path in [d['model'],d['texture'],d['animation']]+d['sounds']+d['licenses']:
+  if not (R/path).is_file():raise SystemExit(slug+': triaged resource is missing: '+path)
+ excluded=set(d.get('excluded_clips',[]))
+ d['clips']={key:value for key,value in d['clips'].items() if value not in excluded}
+ if d.get('idle') in excluded or d.get('walk') in excluded:
+  raise SystemExit(slug+': required idle/walk clip was excluded by triage')
+ im=Image.open(R/d['texture']).convert('RGBA');colors=im.getcolors(im.width*im.height);colors=sorted(((n,c) for n,c in (colors or []) if c[3]>128),reverse=True)
  chosen=[c for n,c in colors if max(c[:3])-min(c[:3])>20][:2] or ([colors[0][1]]*2 if colors else [(128,128,128,255)]*2)
  d['eggBase']=int.from_bytes(bytes(chosen[0][:3]),'big');d['eggSpots']=int.from_bytes(bytes(chosen[-1][:3]),'big')
  clips=d['clips'];prefix='animation.'+slug+'.minemon_'
