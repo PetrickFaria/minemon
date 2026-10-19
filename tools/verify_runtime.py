@@ -19,7 +19,8 @@ def validate(read,definitions,prepared=False,packed=False):
    if missing:raise ValueError(name+' missing bones '+str(missing))
    for field in ('particle_effects','sound_effects'):
     ev=v.get(field,{})
-    if not isinstance(ev,dict) or any(not isinstance(x,dict) for x in ev.values()):raise ValueError(name+' incompatible event '+field)
+    valid_event_value=lambda x:isinstance(x,dict) or (not prepared and isinstance(x,list) and all(isinstance(item,dict) for item in x))
+    if not isinstance(ev,dict) or any(not valid_event_value(x) for x in ev.values()):raise ValueError(name+' incompatible event '+field)
    if prepared:
     if re.search(r'\bq\.',json.dumps(v)):raise ValueError(name+' unbound q alias')
     if 'animation_length' in v and v['animation_length']<=0:raise ValueError(name+' zero duration')
