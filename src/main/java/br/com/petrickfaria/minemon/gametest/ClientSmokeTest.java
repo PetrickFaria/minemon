@@ -50,8 +50,10 @@ public final class ClientSmokeTest {
     ModItems.MINEMON_TAB.fillItemList(tabItems);
     var eggOrder=new java.util.ArrayList<String>();
     for(var stack:tabItems){var key=net.minecraftforge.registries.ForgeRegistries.ITEMS.getKey(stack.getItem());if(key!=null&&key.getPath().endsWith("_spawn_egg"))eggOrder.add(key.getPath().substring(0,key.getPath().length()-"_spawn_egg".length()));}
-    var expectedEggOrder=java.util.List.of("bulbasaur","ivysaur","venusaur","charmander","charmeleon","charizard","squirtle","wartortle","blastoise","caterpie","butterfree","weedle","arbok","pikachu","psyduck","onix","hitmonlee","electabuzz","jolteon");
-    if(!eggOrder.equals(expectedEggOrder))throw new IllegalStateException("Creative spawn eggs are not in National Pokédex order: "+eggOrder);
+    var expectedEggOrder=SpeciesDefinitions.ALL.values().stream()
+      .sorted(java.util.Comparator.comparingInt(SpeciesDefinitions.Definition::nationalPokedexNumber))
+      .map(SpeciesDefinitions.Definition::slug).toList();
+    if(!eggOrder.equals(expectedEggOrder))throw new IllegalStateException("Creative spawn eggs are not unique and in National Pokédex order: "+eggOrder);
     for(var d:SpeciesDefinitions.ALL.values()) {
      var geo=new ResourceLocation(Minemon.MOD_ID,d.model().substring("assets/minemon/".length()));var anim=new ResourceLocation(Minemon.MOD_ID,d.animation().substring("assets/minemon/".length()));
      try(var stream=ClientSmokeTest.class.getResourceAsStream("/"+d.model().replace("assets/minemon/","assets/minemon_gen1/"))) {
@@ -60,7 +62,7 @@ public final class ClientSmokeTest {
      }
      if(!GeckoLibCache.getInstance().getGeoModels().containsKey(geo)||!GeckoLibCache.getInstance().getAnimations().containsKey(anim))throw new IllegalStateException("GeckoLib did not parse "+d.slug());
     }
-    Files.writeString(Path.of("client-validation.txt"),"PASS MENU: Minecraft reached TitleScreen; every registered model/animation parsed by GeckoLib.\nPASS CREATIVE ORDER: all 19 spawn eggs are unique and appear in National Pokédex order.\n");
+    Files.writeString(Path.of("client-validation.txt"),"PASS MENU: Minecraft reached TitleScreen; every registered model/animation parsed by GeckoLib.\nPASS CREATIVE ORDER: all "+SpeciesDefinitions.ALL.size()+" spawn eggs are unique and appear in National Pokédex order.\n");
     opened=true;
     var dataFile=Path.of("saves/minemon-validation/level.dat").toFile();var tag=net.minecraft.nbt.NbtIo.readCompressed(dataFile);tag.getCompound("Data").putBoolean("confirmedExperimentalSettings",true);net.minecraft.nbt.NbtIo.writeCompressed(tag,dataFile);
     Object flows=Minecraft.class.getMethod("createWorldOpenFlows").invoke(mc);boolean invoked=false;
