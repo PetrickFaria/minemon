@@ -5069,6 +5069,46 @@
     "eggSpots": 13391413
   },
   {
+    "nationalPokedexNumber": 119,
+    "slug": "seaking",
+    "name": "Seaking",
+    "model": "assets/minemon/geo/seaking/seaking_female.geo.json",
+    "texture": "assets/minemon/textures/pokemon/seaking/seaking.png",
+    "animation": "assets/minemon/animations/seaking/seaking.animation.json",
+    "mode": "ground",
+    "scale": 1.8,
+    "width": 0.7,
+    "height": 0.6,
+    "health": 40.0,
+    "attack": 7.666666666666667,
+    "speed": 0.268,
+    "clips": {
+      "ground_idle": "animation.seaking.ground_idle",
+      "water_idle": "animation.seaking.water_idle",
+      "water_swim": "animation.seaking.water_swim",
+      "ground_run": "animation.seaking.minemon_run",
+      "sit": "animation.seaking.minemon_sit",
+      "sleep": "animation.seaking.minemon_sleep",
+      "physical_attack": "animation.seaking.minemon_physical_attack"
+    },
+    "idle": "animation.seaking.ground_idle",
+    "walk": "animation.seaking.ground_idle",
+    "movement_fallback": "static",
+    "generated_static_animation": false,
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "stripped_bones": {},
+    "sounds": [
+      "assets/minemon/sounds/pokemon/seaking/seaking_ambient.ogg",
+      "assets/minemon/sounds/pokemon/seaking/seaking_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/seaking/model-license.txt"
+    ],
+    "eggBase": 12731694,
+    "eggSpots": 13391413
+  },
+  {
     "nationalPokedexNumber": 120,
     "slug": "staryu",
     "name": "Staryu",
@@ -5146,6 +5186,125 @@
     "eggSpots": 9734095
   },
   {
+    "nationalPokedexNumber": 122,
+    "slug": "mrmime",
+    "name": "Mr. Mime",
+    "model": "assets/minemon/geo/mrmime/mr_mime.geo.json",
+    "texture": "assets/minemon/textures/pokemon/mrmime/mr_mime.png",
+    "animation": "assets/minemon/animations/mrmime/mr_mime.animation.json",
+    "mode": "ground",
+    "scale": 0.7,
+    "width": 0.8,
+    "height": 1.8,
+    "health": 20,
+    "attack": 3.75,
+    "speed": 0.29,
+    "clips": {
+      "ground_idle": "animation.mr_mime.ground_idle",
+      "blink": "animation.mr_mime.blink",
+      "ground_run": "animation.mrmime.minemon_run",
+      "sit": "animation.mrmime.minemon_sit",
+      "sleep": "animation.mrmime.minemon_sleep",
+      "physical_attack": "animation.mrmime.minemon_physical_attack"
+    },
+    "idle": "animation.mr_mime.ground_idle",
+    "walk": "animation.mr_mime.ground_idle",
+    "movement_fallback": "static",
+    "generated_static_animation": false,
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "stripped_bones": {},
+    "sounds": [
+      "assets/minemon/sounds/pokemon/mrmime/mrmime_ambient.ogg",
+      "assets/minemon/sounds/pokemon/mrmime/mrmime_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/mrmime/model-license.txt"
+    ],
+    "eggBase": 15843265,
+    "eggSpots": 15183274
+  },
+  {
+    "nationalPokedexNumber": 123,
+    "slug": "scyther",
+    "name": "Scyther",
+    "model": "assets/minemon/geo/scyther/scyther_male.geo.json",
+    "texture": "assets/minemon/textures/pokemon/scyther/scyther.png",
+    "animation": "assets/minemon/animations/scyther/scyther.animation.json",
+    "mode": "flying",
+    "scale": 0.8,
+    "width": 0.9,
+    "height": 2,
+    "health": 35.0,
+    "attack": 9.166666666666666,
+    "speed": 0.305,
+    "clips": {
+      "pose": "animation.scyther.pose",
+      "ground_idle": "animation.scyther.ground_idle",
+      "air_idle": "animation.scyther.air_idle",
+      "blink": "animation.scyther.blink",
+      "cry": "animation.scyther.cry",
+      "ground_run": "animation.scyther.minemon_run",
+      "sit": "animation.scyther.minemon_sit",
+      "sleep": "animation.scyther.minemon_sleep",
+      "physical_attack": "animation.scyther.minemon_physical_attack"
+    },
+    "idle": "animation.scyther.air_idle",
+    "walk": "animation.scyther.air_idle",
+    "movement_fallback": "static",
+    "generated_static_animation": false,
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "stripped_bones": {},
+    "sounds": [
+      "assets/minemon/sounds/pokemon/scyther/scyther_ambient.ogg",
+      "assets/minemon/sounds/pokemon/scyther/scyther_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/scyther/model-license.txt"
+    ],
+    "eggBase": 7912309,
+    "eggSpots": 6135138
+  },
+  {
+    "nationalPokedexNumber": 124,
+    "slug": "jynx",
+    "name": "Jynx",
+    "model": "assets/minemon/geo/jynx/jynx.geo.json",
+    "texture": "assets/minemon/textures/pokemon/jynx/jynx.png",
+    "animation": "assets/minemon/animations/jynx/jynx.animation.json",
+    "mode": "ground",
+    "scale": 1.3,
+    "width": 0.9,
+    "height": 1.2,
+    "health": 32.5,
+    "attack": 4.166666666666667,
+    "speed": 0.295,
+    "clips": {
+      "ground_idle": "animation.jynx.ground_idle",
+      "ground_run": "animation.jynx.minemon_run",
+      "sit": "animation.jynx.minemon_sit",
+      "sleep": "animation.jynx.minemon_sleep",
+      "physical_attack": "animation.jynx.minemon_physical_attack"
+    },
+    "idle": "animation.jynx.ground_idle",
+    "walk": "animation.jynx.ground_idle",
+    "movement_fallback": "static",
+    "generated_static_animation": false,
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "stripped_bones": {},
+    "sounds": [
+      "assets/minemon/sounds/pokemon/jynx/jynx_ambient.ogg",
+      "assets/minemon/sounds/pokemon/jynx/jynx_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/jynx/model-license.txt"
+    ],
+    "eggBase": 11422282,
+    "eggSpots": 13613976
+  },
+  {
     "slug": "electabuzz",
     "name": "Electabuzz",
     "model": "assets/minemon/geo/electabuzz/electabuzz.geo.json",
@@ -5186,6 +5345,44 @@
     "eggBase": 14925098,
     "eggSpots": 15850041,
     "nationalPokedexNumber": 125
+  },
+  {
+    "nationalPokedexNumber": 126,
+    "slug": "magmar",
+    "name": "Magmar",
+    "model": "assets/minemon/geo/magmar/magmar.geo.json",
+    "texture": "assets/minemon/textures/pokemon/magmar/magmar.png",
+    "animation": "assets/minemon/animations/magmar/magmar.animation.json",
+    "mode": "ground",
+    "scale": 0.8,
+    "width": 0.7,
+    "height": 1.5,
+    "health": 32.5,
+    "attack": 7.916666666666667,
+    "speed": 0.293,
+    "clips": {
+      "ground_idle": "animation.magmar.ground_idle",
+      "ground_run": "animation.magmar.minemon_run",
+      "sit": "animation.magmar.minemon_sit",
+      "sleep": "animation.magmar.minemon_sleep",
+      "physical_attack": "animation.magmar.minemon_physical_attack"
+    },
+    "idle": "animation.magmar.ground_idle",
+    "walk": "animation.magmar.ground_idle",
+    "movement_fallback": "static",
+    "generated_static_animation": false,
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "stripped_bones": {},
+    "sounds": [
+      "assets/minemon/sounds/pokemon/magmar/magmar_ambient.ogg",
+      "assets/minemon/sounds/pokemon/magmar/magmar_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/magmar/model-license.txt"
+    ],
+    "eggBase": 13145692,
+    "eggSpots": 13649455
   },
   {
     "nationalPokedexNumber": 127,

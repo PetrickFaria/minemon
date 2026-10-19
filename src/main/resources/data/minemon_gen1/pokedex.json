@@ -711,7 +711,7 @@
     "nationalPokedexNumber": 119,
     "slug": "seaking",
     "name": "Seaking",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 120,
@@ -729,19 +729,19 @@
     "nationalPokedexNumber": 122,
     "slug": "mrmime",
     "name": "Mr. Mime",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 123,
     "slug": "scyther",
     "name": "Scyther",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 124,
     "slug": "jynx",
     "name": "Jynx",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 125,
@@ -753,7 +753,7 @@
     "nationalPokedexNumber": 126,
     "slug": "magmar",
     "name": "Magmar",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 127,

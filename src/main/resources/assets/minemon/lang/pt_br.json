@@ -277,5 +277,15 @@
   "entity.minemon_gen1.kangaskhan": "Kangaskhan",
   "item.minemon_gen1.kangaskhan_spawn_egg": "Ovo de invocação de Kangaskhan",
   "entity.minemon_gen1.goldeen": "Goldeen",
-  "item.minemon_gen1.goldeen_spawn_egg": "Ovo de invocação de Goldeen"
+  "item.minemon_gen1.goldeen_spawn_egg": "Ovo de invocação de Goldeen",
+  "entity.minemon_gen1.seaking": "Seaking",
+  "item.minemon_gen1.seaking_spawn_egg": "Ovo de invocação de Seaking",
+  "entity.minemon_gen1.mrmime": "Mr. Mime",
+  "item.minemon_gen1.mrmime_spawn_egg": "Ovo de invocação de Mr. Mime",
+  "entity.minemon_gen1.scyther": "Scyther",
+  "item.minemon_gen1.scyther_spawn_egg": "Ovo de invocação de Scyther",
+  "entity.minemon_gen1.jynx": "Jynx",
+  "item.minemon_gen1.jynx_spawn_egg": "Ovo de invocação de Jynx",
+  "entity.minemon_gen1.magmar": "Magmar",
+  "item.minemon_gen1.magmar_spawn_egg": "Ovo de invocação de Magmar"
 }
