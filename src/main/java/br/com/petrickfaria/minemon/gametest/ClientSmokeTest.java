@@ -155,6 +155,7 @@ public final class ClientSmokeTest {
      // Preserve a real horizontal movement signal for the GeckoLib predicate as
      // well as visible displacement; moveTo alone can be a teleport to the entity.
      current.setDeltaMovement(direction*animationVelocity,0,0);
+     current.hasImpulse=true;
     }
    });
    if(worldTicks>=380 && worldTicks<360+species.size()*SPECIES_TEST_WINDOW && (worldTicks-380)%SPECIES_TEST_WINDOW==0)Screenshot.grab(mc.gameDirectory,mc.getMainRenderTarget(),message->{});
