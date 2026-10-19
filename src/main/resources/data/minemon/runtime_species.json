@@ -513,5 +513,88 @@
     ],
     "eggBase": 10847438,
     "eggSpots": 8216240
+  },
+  {
+    "slug": "onix",
+    "name": "Onix",
+    "model": "assets/minemon/geo/onix/onix.geo.json",
+    "texture": "assets/minemon/textures/pokemon/onix/onix.png",
+    "animation": "assets/minemon/animations/onix/onix.animation.json",
+    "mode": "ground",
+    "scale": 2,
+    "width": 1.3,
+    "height": 2.5,
+    "health": 20,
+    "attack": 3.75,
+    "speed": 0.27,
+    "clips": {
+      "ground_idle": "animation.onix.ground_idle",
+      "ground_walk": "animation.onix.ground_walk",
+      "battle_idle": "animation.onix.battle_idle",
+      "boulder_rotation": "animation.onix.boulder_rotation",
+      "slow_boulder_rotation": "animation.onix.slow_boulder_rotation",
+      "cry": "animation.onix.cry",
+      "blink": "animation.onix.blink",
+      "sleep": "animation.onix.sleep",
+      "faint": "animation.onix.faint",
+      "summary_idle": "animation.onix.summary_idle",
+      "ground_run": "animation.onix.minemon_run",
+      "sit": "animation.onix.minemon_sit",
+      "physical_attack": "animation.onix.minemon_physical_attack"
+    },
+    "idle": "animation.onix.ground_idle",
+    "walk": "animation.onix.ground_walk",
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "sounds": [
+      "assets/minemon/sounds/pokemon/onix/onix_ambient.ogg",
+      "assets/minemon/sounds/pokemon/onix/onix_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/onix/model-license.txt"
+    ],
+    "eggBase": 10000814,
+    "eggSpots": 9079199
+  },
+  {
+    "slug": "electabuzz",
+    "name": "Electabuzz",
+    "model": "assets/minemon/geo/electabuzz/electabuzz.geo.json",
+    "texture": "assets/minemon/textures/pokemon/electabuzz/electabuzz.png",
+    "animation": "assets/minemon/animations/electabuzz/electabuzz.animation.json",
+    "mode": "ground",
+    "scale": 0.9,
+    "width": 0.7,
+    "height": 1.5,
+    "health": 32.5,
+    "attack": 6.916666666666667,
+    "speed": 0.305,
+    "clips": {
+      "ground_idle": "animation.electabuzz.ground_idle",
+      "ground_walk": "animation.electabuzz.ground_walk",
+      "battle_idle": "animation.electabuzz.battle_idle",
+      "sleep": "animation.electabuzz.sleep",
+      "blink": "animation.electabuzz.blink",
+      "ambient_sleep": "animation.electabuzz.ambient_sleep",
+      "new": "animation.electabuzz.new",
+      "faint_WIP": "animation.electabuzz.faint_WIP",
+      "cry": "animation.electabuzz.cry",
+      "ground_run": "animation.electabuzz.minemon_run",
+      "sit": "animation.electabuzz.minemon_sit",
+      "physical_attack": "animation.electabuzz.minemon_physical_attack"
+    },
+    "idle": "animation.electabuzz.ground_idle",
+    "walk": "animation.electabuzz.ground_walk",
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "sounds": [
+      "assets/minemon/sounds/pokemon/electabuzz/electabuzz_ambient.ogg",
+      "assets/minemon/sounds/pokemon/electabuzz/electabuzz_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/electabuzz/model-license.txt"
+    ],
+    "eggBase": 14925098,
+    "eggSpots": 15850041
   }
 ]

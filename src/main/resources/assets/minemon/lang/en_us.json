@@ -23,5 +23,9 @@
   "entity.minemon.wartortle": "Wartortle",
   "item.minemon.wartortle_spawn_egg": "Spawn Egg: Wartortle",
   "entity.minemon.arbok": "Arbok",
-  "item.minemon.arbok_spawn_egg": "Spawn Egg: Arbok"
+  "item.minemon.arbok_spawn_egg": "Spawn Egg: Arbok",
+  "entity.minemon.onix": "Onix",
+  "item.minemon.onix_spawn_egg": "Spawn Egg: Onix",
+  "entity.minemon.electabuzz": "Electabuzz",
+  "item.minemon.electabuzz_spawn_egg": "Spawn Egg: Electabuzz"
 }

@@ -12,7 +12,7 @@ Use the checked-in Gradle 7.5.1 Wrapper and ForgeGradle 5.1.77:
 python3 tools/verify_project.py
 ./gradlew clean test build
 ./gradlew runGameTestServer
-python3 tools/verify_runtime.py build/libs/Minemon-1.19.2-1.3.0.jar
+python3 tools/verify_runtime.py build/libs/Minemon-1.19.2-1.4.0.jar
 ```
 
 The workflow runs JUnit against GeckoLib's actual Molang parser, Minecraft server GameTests, and an Xvfb Minecraft client. The client test checks the title screen, GeckoLib's loaded models/animations, and actual rendered locomotion for each registered species. Diagnostic artifacts contain test results, client/server logs and screenshots. Validation code and test structures are excluded from the distributable JAR.
