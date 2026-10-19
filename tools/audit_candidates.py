@@ -36,7 +36,6 @@ def audit():
    idle=next((clips[n] for n in (('air_idle','ground_idle','idle') if mode=='flying' else ('ground_idle','idle','air_idle')) if n in clips),None)
    walk=next((clips[n] for n in (('air_fly','ground_walk','walk','ground_run','run') if mode=='flying' else ('ground_walk','walk','ground_run','run')) if n in clips),None)
    if not idle:issues.append('No usable idle clip')
-   if not walk:issues.append('No usable locomotion clip')
    excluded=[];stripped_bones={}
    # Keep useful source clips when only some channels target bones absent from
    # this model. The original files stay untouched; runtime preparation strips
@@ -49,19 +48,28 @@ def audit():
       if not remaining:issues.append(name+' has no channels for bones in the model')
       else:stripped_bones[name]=sorted(bad_bones)
      else:excluded.append(name)
-   if walk:
-    clip=ad[walk]
+   def has_motion(name):
+    if not name or name not in ad:return False
+    clip=ad[name]
     valid_bones={bone:channels for bone,channels in clip.get('bones',{}).items() if bone in bones}
     payload=json.dumps({'bones':valid_bones})
-    animated=bool(re.search(r'(?:q|query)\.anim_time',payload)) or any(isinstance(ch,dict) and len(ch)>1 for bone in valid_bones.values() for ch in bone.values())
-    if not animated:issues.append('Locomotion clip is a static pose')
+    return bool(re.search(r'(?:q|query)\\.anim_time',payload)) or any(isinstance(ch,dict) and len(ch)>1 for bone in valid_bones.values() for ch in bone.values())
+   movement_fallback=None
+   if not walk or not has_motion(walk):
+    # Several extracted species have a valid, animated idle but no locomotion
+    # clip. Reuse that original idle clip while the entity moves and record the
+    # limitation in runtime_species.json instead of fabricating a new gait.
+    if idle and has_motion(idle):
+     walk=idle;movement_fallback='idle'
+    else:
+     issues.append('No usable locomotion clip' if not walk else 'Locomotion clip is a static pose')
    attack=next((clips[n] for n in ('physical_attack','physical','attack') if n in clips),None)
    attack_ticks=math.ceil(ad[attack].get('animation_length',0)*20) if attack else 0
    if attack and attack_ticks<=0:issues.append('Physical attack has no finite duration')
   except Exception as exc:
    issues.append('Resource parse failed: '+str(exc))
    idle=walk=None;mode='ground';excluded=[];attack_ticks=0;clips={}
-  d=dict(nationalPokedexNumber=s['nationalPokedexNumber'],slug=slug,name=s['name'],model=model,texture=texture,animation=animation,mode=mode,scale=s.get('baseScale',1),width=s['hitbox']['width'],height=s['hitbox']['height'],health=max(20,s['baseStats']['hp']/2),attack=max(3,s['baseStats']['attack']/12),speed=round(min(.35,.20+s['baseStats']['speed']/1000),3),clips=clips,idle=idle,walk=walk,attackTicks=attack_ticks,excluded_clips=excluded,stripped_bones=stripped_bones,sounds=res['sounds'],licenses=res['licenses'])
+  d=dict(nationalPokedexNumber=s['nationalPokedexNumber'],slug=slug,name=s['name'],model=model,texture=texture,animation=animation,mode=mode,scale=s.get('baseScale',1),width=s['hitbox']['width'],height=s['hitbox']['height'],health=max(20,s['baseStats']['hp']/2),attack=max(3,s['baseStats']['attack']/12),speed=round(min(.35,.20+s['baseStats']['speed']/1000),3),clips=clips,idle=idle,walk=walk,movement_fallback=movement_fallback,attackTicks=attack_ticks,excluded_clips=excluded,stripped_bones=stripped_bones,sounds=res['sounds'],licenses=res['licenses'])
   accepted=not bool(issues)
   results.append(dict(slug=slug,accepted=accepted,reason='; '.join(issues) if issues else None,issues=issues,definition=d))
  return results
