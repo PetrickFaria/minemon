@@ -287,5 +287,15 @@
   "entity.minemon_gen1.jynx": "Jynx",
   "item.minemon_gen1.jynx_spawn_egg": "Ovo de invocação de Jynx",
   "entity.minemon_gen1.magmar": "Magmar",
-  "item.minemon_gen1.magmar_spawn_egg": "Ovo de invocação de Magmar"
+  "item.minemon_gen1.magmar_spawn_egg": "Ovo de invocação de Magmar",
+  "entity.minemon_gen1.gyarados": "Gyarados",
+  "item.minemon_gen1.gyarados_spawn_egg": "Ovo de invocação de Gyarados",
+  "entity.minemon_gen1.lapras": "Lapras",
+  "item.minemon_gen1.lapras_spawn_egg": "Ovo de invocação de Lapras",
+  "entity.minemon_gen1.articuno": "Articuno",
+  "item.minemon_gen1.articuno_spawn_egg": "Ovo de invocação de Articuno",
+  "entity.minemon_gen1.zapdos": "Zapdos",
+  "item.minemon_gen1.zapdos_spawn_egg": "Ovo de invocação de Zapdos",
+  "entity.minemon_gen1.moltres": "Moltres",
+  "item.minemon_gen1.moltres_spawn_egg": "Ovo de invocação de Moltres"
 }

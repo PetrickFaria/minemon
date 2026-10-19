@@ -777,13 +777,13 @@
     "nationalPokedexNumber": 130,
     "slug": "gyarados",
     "name": "Gyarados",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 131,
     "slug": "lapras",
     "name": "Lapras",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 132,
@@ -861,19 +861,19 @@
     "nationalPokedexNumber": 144,
     "slug": "articuno",
     "name": "Articuno",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 145,
     "slug": "zapdos",
     "name": "Zapdos",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 146,
     "slug": "moltres",
     "name": "Moltres",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 147,

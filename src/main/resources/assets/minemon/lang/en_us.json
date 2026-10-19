@@ -287,5 +287,15 @@
   "entity.minemon_gen1.jynx": "Jynx",
   "item.minemon_gen1.jynx_spawn_egg": "Spawn Egg: Jynx",
   "entity.minemon_gen1.magmar": "Magmar",
-  "item.minemon_gen1.magmar_spawn_egg": "Spawn Egg: Magmar"
+  "item.minemon_gen1.magmar_spawn_egg": "Spawn Egg: Magmar",
+  "entity.minemon_gen1.gyarados": "Gyarados",
+  "item.minemon_gen1.gyarados_spawn_egg": "Spawn Egg: Gyarados",
+  "entity.minemon_gen1.lapras": "Lapras",
+  "item.minemon_gen1.lapras_spawn_egg": "Spawn Egg: Lapras",
+  "entity.minemon_gen1.articuno": "Articuno",
+  "item.minemon_gen1.articuno_spawn_egg": "Spawn Egg: Articuno",
+  "entity.minemon_gen1.zapdos": "Zapdos",
+  "item.minemon_gen1.zapdos_spawn_egg": "Spawn Egg: Zapdos",
+  "entity.minemon_gen1.moltres": "Moltres",
+  "item.minemon_gen1.moltres_spawn_egg": "Spawn Egg: Moltres"
 }

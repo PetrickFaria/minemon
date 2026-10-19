@@ -5513,6 +5513,90 @@
     "eggSpots": 14968380
   },
   {
+    "nationalPokedexNumber": 130,
+    "slug": "gyarados",
+    "name": "Gyarados",
+    "model": "assets/minemon/geo/gyarados/gyarados_female.geo.json",
+    "texture": "assets/minemon/textures/pokemon/gyarados/gyarados.png",
+    "animation": "assets/minemon/animations/gyarados/gyarados.animation.json",
+    "mode": "ground",
+    "scale": 2,
+    "width": 1.5,
+    "height": 1.6,
+    "health": 47.5,
+    "attack": 10.416666666666666,
+    "speed": 0.281,
+    "clips": {
+      "ground_idle": "animation.gyarados.ground_idle",
+      "water_idle": "animation.gyarados.water_idle",
+      "water_swim": "animation.gyarados.water_swim",
+      "surface_idle": "animation.gyarados.surface_idle",
+      "blink": "animation.gyarados.blink",
+      "ground_run": "animation.gyarados.minemon_run",
+      "sit": "animation.gyarados.minemon_sit",
+      "sleep": "animation.gyarados.minemon_sleep",
+      "physical_attack": "animation.gyarados.minemon_physical_attack"
+    },
+    "idle": "animation.gyarados.ground_idle",
+    "walk": "animation.gyarados.ground_idle",
+    "movement_fallback": "static",
+    "generated_static_animation": false,
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "stripped_bones": {},
+    "sounds": [
+      "assets/minemon/sounds/pokemon/gyarados/gyarados_ambient.ogg",
+      "assets/minemon/sounds/pokemon/gyarados/gyarados_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/gyarados/model-license.txt"
+    ],
+    "eggBase": 1011112,
+    "eggSpots": 1673397
+  },
+  {
+    "nationalPokedexNumber": 131,
+    "slug": "lapras",
+    "name": "Lapras",
+    "model": "assets/minemon/geo/lapras/lapras.geo.json",
+    "texture": "assets/minemon/textures/pokemon/lapras/lapras.png",
+    "animation": "assets/minemon/animations/lapras/lapras.animation.json",
+    "mode": "ground",
+    "scale": 1.1,
+    "width": 2.4,
+    "height": 2.8,
+    "health": 65.0,
+    "attack": 7.083333333333333,
+    "speed": 0.26,
+    "clips": {
+      "ground_idle": "animation.lapras.ground_idle",
+      "surfacewater_idle": "animation.lapras.surfacewater_idle",
+      "surfacewater_swim": "animation.lapras.surfacewater_swim",
+      "blink": "animation.lapras.blink",
+      "cry": "animation.lapras.cry",
+      "ground_run": "animation.lapras.minemon_run",
+      "sit": "animation.lapras.minemon_sit",
+      "sleep": "animation.lapras.minemon_sleep",
+      "physical_attack": "animation.lapras.minemon_physical_attack"
+    },
+    "idle": "animation.lapras.ground_idle",
+    "walk": "animation.lapras.ground_idle",
+    "movement_fallback": "static",
+    "generated_static_animation": false,
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "stripped_bones": {},
+    "sounds": [
+      "assets/minemon/sounds/pokemon/lapras/lapras_ambient.ogg",
+      "assets/minemon/sounds/pokemon/lapras/lapras_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/lapras/model-license.txt"
+    ],
+    "eggBase": 4230871,
+    "eggSpots": 4564707
+  },
+  {
     "nationalPokedexNumber": 132,
     "slug": "ditto",
     "name": "Ditto",
@@ -6003,6 +6087,126 @@
     ],
     "eggBase": 1665924,
     "eggSpots": 1267313
+  },
+  {
+    "nationalPokedexNumber": 144,
+    "slug": "articuno",
+    "name": "Articuno",
+    "model": "assets/minemon/geo/articuno/articuno.geo.json",
+    "texture": "assets/minemon/textures/pokemon/articuno/articuno.png",
+    "animation": "assets/minemon/animations/articuno/articuno.animation.json",
+    "mode": "flying",
+    "scale": 1.5,
+    "width": 0.7,
+    "height": 1.8,
+    "health": 45.0,
+    "attack": 7.083333333333333,
+    "speed": 0.285,
+    "clips": {
+      "ground_idle": "animation.articuno.ground_idle",
+      "air_idle": "animation.articuno.air_idle",
+      "air_fly": "animation.articuno.air_fly",
+      "ground_run": "animation.articuno.minemon_run",
+      "sit": "animation.articuno.minemon_sit",
+      "sleep": "animation.articuno.minemon_sleep",
+      "physical_attack": "animation.articuno.minemon_physical_attack"
+    },
+    "idle": "animation.articuno.air_idle",
+    "walk": "animation.articuno.air_idle",
+    "movement_fallback": "static",
+    "generated_static_animation": false,
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "stripped_bones": {},
+    "sounds": [
+      "assets/minemon/sounds/pokemon/articuno/articuno_ambient.ogg",
+      "assets/minemon/sounds/pokemon/articuno/articuno_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/articuno/model-license.txt"
+    ],
+    "eggBase": 5736888,
+    "eggSpots": 6593991
+  },
+  {
+    "nationalPokedexNumber": 145,
+    "slug": "zapdos",
+    "name": "Zapdos",
+    "model": "assets/minemon/geo/zapdos/zapdos.geo.json",
+    "texture": "assets/minemon/textures/pokemon/zapdos/zapdos.png",
+    "animation": "assets/minemon/animations/zapdos/zapdos.animation.json",
+    "mode": "flying",
+    "scale": 1.5,
+    "width": 1.2,
+    "height": 1.6,
+    "health": 45.0,
+    "attack": 7.5,
+    "speed": 0.3,
+    "clips": {
+      "ground_idle": "animation.zapdos.ground_idle",
+      "air_idle": "animation.zapdos.air_idle",
+      "air_fly": "animation.zapdos.air_fly",
+      "ground_run": "animation.zapdos.minemon_run",
+      "sit": "animation.zapdos.minemon_sit",
+      "sleep": "animation.zapdos.minemon_sleep",
+      "physical_attack": "animation.zapdos.minemon_physical_attack"
+    },
+    "idle": "animation.zapdos.air_idle",
+    "walk": "animation.zapdos.air_idle",
+    "movement_fallback": "static",
+    "generated_static_animation": false,
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "stripped_bones": {},
+    "sounds": [
+      "assets/minemon/sounds/pokemon/zapdos/zapdos_ambient.ogg",
+      "assets/minemon/sounds/pokemon/zapdos/zapdos_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/zapdos/model-license.txt"
+    ],
+    "eggBase": 12555348,
+    "eggSpots": 13543518
+  },
+  {
+    "nationalPokedexNumber": 146,
+    "slug": "moltres",
+    "name": "Moltres",
+    "model": "assets/minemon/geo/moltres/moltres.geo.json",
+    "texture": "assets/minemon/textures/pokemon/moltres/moltres.png",
+    "animation": "assets/minemon/animations/moltres/moltres.animation.json",
+    "mode": "flying",
+    "scale": 1.6,
+    "width": 0.8,
+    "height": 1.7,
+    "health": 45.0,
+    "attack": 8.333333333333334,
+    "speed": 0.29,
+    "clips": {
+      "ground_idle": "animation.moltres.ground_idle",
+      "air_idle": "animation.moltres.air_idle",
+      "air_fly": "animation.moltres.air_fly",
+      "ground_run": "animation.moltres.minemon_run",
+      "sit": "animation.moltres.minemon_sit",
+      "sleep": "animation.moltres.minemon_sleep",
+      "physical_attack": "animation.moltres.minemon_physical_attack"
+    },
+    "idle": "animation.moltres.air_idle",
+    "walk": "animation.moltres.air_idle",
+    "movement_fallback": "static",
+    "generated_static_animation": false,
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "stripped_bones": {},
+    "sounds": [
+      "assets/minemon/sounds/pokemon/moltres/moltres_ambient.ogg",
+      "assets/minemon/sounds/pokemon/moltres/moltres_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/moltres/model-license.txt"
+    ],
+    "eggBase": 12812872,
+    "eggSpots": 13801554
   },
   {
     "nationalPokedexNumber": 147,
