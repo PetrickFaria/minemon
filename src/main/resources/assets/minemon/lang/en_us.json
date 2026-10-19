@@ -237,5 +237,15 @@
   "entity.minemon_gen1.poliwrath": "Poliwrath",
   "item.minemon_gen1.poliwrath_spawn_egg": "Spawn Egg: Poliwrath",
   "entity.minemon_gen1.kadabra": "Kadabra",
-  "item.minemon_gen1.kadabra_spawn_egg": "Spawn Egg: Kadabra"
+  "item.minemon_gen1.kadabra_spawn_egg": "Spawn Egg: Kadabra",
+  "entity.minemon_gen1.alakazam": "Alakazam",
+  "item.minemon_gen1.alakazam_spawn_egg": "Spawn Egg: Alakazam",
+  "entity.minemon_gen1.bellsprout": "Bellsprout",
+  "item.minemon_gen1.bellsprout_spawn_egg": "Spawn Egg: Bellsprout",
+  "entity.minemon_gen1.weepinbell": "Weepinbell",
+  "item.minemon_gen1.weepinbell_spawn_egg": "Spawn Egg: Weepinbell",
+  "entity.minemon_gen1.victreebel": "Victreebel",
+  "item.minemon_gen1.victreebel_spawn_egg": "Spawn Egg: Victreebel",
+  "entity.minemon_gen1.graveler": "Graveler",
+  "item.minemon_gen1.graveler_spawn_egg": "Spawn Egg: Graveler"
 }

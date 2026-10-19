@@ -387,7 +387,7 @@
     "nationalPokedexNumber": 65,
     "slug": "alakazam",
     "name": "Alakazam",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 66,
@@ -411,19 +411,19 @@
     "nationalPokedexNumber": 69,
     "slug": "bellsprout",
     "name": "Bellsprout",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 70,
     "slug": "weepinbell",
     "name": "Weepinbell",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 71,
     "slug": "victreebel",
     "name": "Victreebel",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 72,
@@ -447,7 +447,7 @@
     "nationalPokedexNumber": 75,
     "slug": "graveler",
     "name": "Graveler",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 76,

@@ -2749,6 +2749,47 @@
     "eggSpots": 14399786
   },
   {
+    "nationalPokedexNumber": 65,
+    "slug": "alakazam",
+    "name": "Alakazam",
+    "model": "assets/minemon/geo/alakazam/alakazam_female.geo.json",
+    "texture": "assets/minemon/textures/pokemon/alakazam/alakazam.png",
+    "animation": "assets/minemon/animations/alakazam/alakazam.animation.json",
+    "mode": "ground",
+    "scale": 1,
+    "width": 1,
+    "height": 1.7,
+    "health": 27.5,
+    "attack": 4.166666666666667,
+    "speed": 0.32,
+    "clips": {
+      "test": "animation.alakazam.test",
+      "ground_idle": "animation.alakazam.ground_idle",
+      "blink": "animation.alakazam.blink",
+      "cry": "animation.alakazam.cry",
+      "ground_run": "animation.alakazam.minemon_run",
+      "sit": "animation.alakazam.minemon_sit",
+      "sleep": "animation.alakazam.minemon_sleep",
+      "physical_attack": "animation.alakazam.minemon_physical_attack"
+    },
+    "idle": "animation.alakazam.ground_idle",
+    "walk": "animation.alakazam.ground_idle",
+    "movement_fallback": "static",
+    "generated_static_animation": false,
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "stripped_bones": {},
+    "sounds": [
+      "assets/minemon/sounds/pokemon/alakazam/alakazam_ambient.ogg",
+      "assets/minemon/sounds/pokemon/alakazam/alakazam_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/alakazam/model-license.txt"
+    ],
+    "eggBase": 15323184,
+    "eggSpots": 7425331
+  },
+  {
     "nationalPokedexNumber": 66,
     "slug": "machop",
     "name": "Machop",
@@ -2858,6 +2899,120 @@
     ],
     "eggBase": 7768486,
     "eggSpots": 8558514
+  },
+  {
+    "nationalPokedexNumber": 69,
+    "slug": "bellsprout",
+    "name": "Bellsprout",
+    "model": "assets/minemon/geo/bellsprout/bellsprout.geo.json",
+    "texture": "assets/minemon/textures/pokemon/bellsprout/bellsprout.png",
+    "animation": "assets/minemon/animations/bellsprout/bellsprout.animation.json",
+    "mode": "ground",
+    "scale": 0.6,
+    "width": 0.6,
+    "height": 1.3,
+    "health": 25.0,
+    "attack": 6.25,
+    "speed": 0.24,
+    "clips": {
+      "ground_idle": "animation.bellsprout.ground_idle",
+      "ground_run": "animation.bellsprout.minemon_run",
+      "sit": "animation.bellsprout.minemon_sit",
+      "sleep": "animation.bellsprout.minemon_sleep",
+      "physical_attack": "animation.bellsprout.minemon_physical_attack"
+    },
+    "idle": "animation.bellsprout.ground_idle",
+    "walk": "animation.bellsprout.ground_idle",
+    "movement_fallback": "static",
+    "generated_static_animation": false,
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "stripped_bones": {},
+    "sounds": [
+      "assets/minemon/sounds/pokemon/bellsprout/bellsprout_ambient.ogg",
+      "assets/minemon/sounds/pokemon/bellsprout/bellsprout_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/bellsprout/model-license.txt"
+    ],
+    "eggBase": 15131758,
+    "eggSpots": 14142819
+  },
+  {
+    "nationalPokedexNumber": 70,
+    "slug": "weepinbell",
+    "name": "Weepinbell",
+    "model": "assets/minemon/geo/weepinbell/weepinbell.geo.json",
+    "texture": "assets/minemon/textures/pokemon/weepinbell/weepinbell.png",
+    "animation": "assets/minemon/animations/weepinbell/weepinbell.animation.json",
+    "mode": "ground",
+    "scale": 1,
+    "width": 0.6,
+    "height": 0.9,
+    "health": 32.5,
+    "attack": 7.5,
+    "speed": 0.255,
+    "clips": {
+      "ground_idle": "animation.weepinbell.ground_idle",
+      "ground_run": "animation.weepinbell.minemon_run",
+      "sit": "animation.weepinbell.minemon_sit",
+      "sleep": "animation.weepinbell.minemon_sleep",
+      "physical_attack": "animation.weepinbell.minemon_physical_attack"
+    },
+    "idle": "animation.weepinbell.ground_idle",
+    "walk": "animation.weepinbell.ground_idle",
+    "movement_fallback": "static",
+    "generated_static_animation": false,
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "stripped_bones": {},
+    "sounds": [
+      "assets/minemon/sounds/pokemon/weepinbell/weepinbell_ambient.ogg",
+      "assets/minemon/sounds/pokemon/weepinbell/weepinbell_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/weepinbell/model-license.txt"
+    ],
+    "eggBase": 15131758,
+    "eggSpots": 12099408
+  },
+  {
+    "nationalPokedexNumber": 71,
+    "slug": "victreebel",
+    "name": "Victreebel",
+    "model": "assets/minemon/geo/victreebel/victreebel.geo.json",
+    "texture": "assets/minemon/textures/pokemon/victreebel/victreebel.png",
+    "animation": "assets/minemon/animations/victreebel/victreebel.animation.json",
+    "mode": "ground",
+    "scale": 1.5,
+    "width": 0.7,
+    "height": 1.1,
+    "health": 40.0,
+    "attack": 8.75,
+    "speed": 0.27,
+    "clips": {
+      "ground_idle": "animation.victreebel.ground_idle",
+      "ground_run": "animation.victreebel.minemon_run",
+      "sit": "animation.victreebel.minemon_sit",
+      "sleep": "animation.victreebel.minemon_sleep",
+      "physical_attack": "animation.victreebel.minemon_physical_attack"
+    },
+    "idle": "animation.victreebel.ground_idle",
+    "walk": "animation.victreebel.ground_idle",
+    "movement_fallback": "static",
+    "generated_static_animation": false,
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "stripped_bones": {},
+    "sounds": [
+      "assets/minemon/sounds/pokemon/victreebel/victreebel_ambient.ogg",
+      "assets/minemon/sounds/pokemon/victreebel/victreebel_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/victreebel/model-license.txt"
+    ],
+    "eggBase": 15131758,
+    "eggSpots": 14142820
   },
   {
     "nationalPokedexNumber": 72,
@@ -2980,6 +3135,47 @@
     ],
     "eggBase": 9867649,
     "eggSpots": 8879986
+  },
+  {
+    "nationalPokedexNumber": 75,
+    "slug": "graveler",
+    "name": "Graveler",
+    "model": "assets/minemon/geo/graveler/graveler.geo.json",
+    "texture": "assets/minemon/textures/pokemon/graveler/graveler.png",
+    "animation": "assets/minemon/animations/graveler/graveler.animation.json",
+    "mode": "ground",
+    "scale": 1.1,
+    "width": 0.9,
+    "height": 1,
+    "health": 27.5,
+    "attack": 7.916666666666667,
+    "speed": 0.235,
+    "clips": {
+      "ground_idle": "animation.graveler.ground_idle",
+      "test": "animation.graveler.test",
+      "blink": "animation.graveler.blink",
+      "cry": "animation.graveler.cry",
+      "ground_run": "animation.graveler.minemon_run",
+      "sit": "animation.graveler.minemon_sit",
+      "sleep": "animation.graveler.minemon_sleep",
+      "physical_attack": "animation.graveler.minemon_physical_attack"
+    },
+    "idle": "animation.graveler.ground_idle",
+    "walk": "animation.graveler.ground_idle",
+    "movement_fallback": "static",
+    "generated_static_animation": false,
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "stripped_bones": {},
+    "sounds": [
+      "assets/minemon/sounds/pokemon/graveler/graveler_ambient.ogg",
+      "assets/minemon/sounds/pokemon/graveler/graveler_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/graveler/model-license.txt"
+    ],
+    "eggBase": 9735295,
+    "eggSpots": 8551532
   },
   {
     "nationalPokedexNumber": 77,
