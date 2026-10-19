@@ -869,6 +869,91 @@
     "eggSpots": 8671525
   },
   {
+    "nationalPokedexNumber": 21,
+    "slug": "spearow",
+    "name": "Spearow",
+    "model": "assets/minemon/geo/spearow/spearow.geo.json",
+    "texture": "assets/minemon/textures/pokemon/spearow/spearow.png",
+    "animation": "assets/minemon/animations/spearow/spearow.animation.json",
+    "mode": "ground",
+    "scale": 0.8,
+    "width": 0.6,
+    "height": 0.8,
+    "health": 20,
+    "attack": 5.0,
+    "speed": 0.27,
+    "clips": {
+      "ground_idle": "animation.spearow.ground_idle",
+      "cry": "animation.spearow.cry",
+      "blink": "animation.spearow.blink",
+      "ground_run": "animation.spearow.minemon_run",
+      "sit": "animation.spearow.minemon_sit",
+      "sleep": "animation.spearow.minemon_sleep",
+      "physical_attack": "animation.spearow.minemon_physical_attack"
+    },
+    "idle": "animation.spearow.ground_idle",
+    "walk": "animation.spearow.ground_idle",
+    "movement_fallback": "static",
+    "generated_static_animation": false,
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "stripped_bones": {},
+    "sounds": [
+      "assets/minemon/sounds/pokemon/spearow/spearow_ambient.ogg",
+      "assets/minemon/sounds/pokemon/spearow/spearow_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/spearow/model-license.txt"
+    ],
+    "eggBase": 13796933,
+    "eggSpots": 14600621
+  },
+  {
+    "nationalPokedexNumber": 22,
+    "slug": "fearow",
+    "name": "Fearow",
+    "model": "assets/minemon/geo/fearow/fearow.geo.json",
+    "texture": "assets/minemon/textures/pokemon/fearow/fearow.png",
+    "animation": "assets/minemon/animations/fearow/fearow.animation.json",
+    "mode": "ground",
+    "scale": 1.3,
+    "width": 1,
+    "height": 1.4,
+    "health": 32.5,
+    "attack": 7.5,
+    "speed": 0.3,
+    "clips": {
+      "blink": "animation.fearow.blink",
+      "ground_idle": "animation.fearow.ground_idle",
+      "cry": "animation.fearow.cry",
+      "ground_run": "animation.fearow.minemon_run",
+      "sit": "animation.fearow.minemon_sit",
+      "sleep": "animation.fearow.minemon_sleep",
+      "physical_attack": "animation.fearow.minemon_physical_attack"
+    },
+    "idle": "animation.fearow.ground_idle",
+    "walk": "animation.fearow.ground_idle",
+    "movement_fallback": "static",
+    "generated_static_animation": false,
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "stripped_bones": {
+      "animation.fearow.ground_idle": [
+        "hairstrand",
+        "hairstrand2"
+      ]
+    },
+    "sounds": [
+      "assets/minemon/sounds/pokemon/fearow/fearow_ambient.ogg",
+      "assets/minemon/sounds/pokemon/fearow/fearow_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/fearow/model-license.txt"
+    ],
+    "eggBase": 7881770,
+    "eggSpots": 9065522
+  },
+  {
     "nationalPokedexNumber": 23,
     "slug": "ekans",
     "name": "Ekans",
@@ -1122,6 +1207,130 @@
     ],
     "eggBase": 11761730,
     "eggSpots": 13607250
+  },
+  {
+    "nationalPokedexNumber": 29,
+    "slug": "nidoranf",
+    "name": "Nidoran-F",
+    "model": "assets/minemon/geo/nidoranf/nidoranf.geo.json",
+    "texture": "assets/minemon/textures/pokemon/nidoranf/nidoranf.png",
+    "animation": "assets/minemon/animations/nidoranf/nidoranf.animation.json",
+    "mode": "ground",
+    "scale": 0.6,
+    "width": 0.7,
+    "height": 0.8,
+    "health": 27.5,
+    "attack": 3.9166666666666665,
+    "speed": 0.241,
+    "clips": {
+      "test": "animation.nidoranf.test",
+      "blink": "animation.nidoranf.blink",
+      "idle": "animation.nidoranf.idle",
+      "ground_run": "animation.nidoranf.minemon_run",
+      "sit": "animation.nidoranf.minemon_sit",
+      "sleep": "animation.nidoranf.minemon_sleep",
+      "physical_attack": "animation.nidoranf.minemon_physical_attack"
+    },
+    "idle": "animation.nidoranf.idle",
+    "walk": "animation.nidoranf.idle",
+    "movement_fallback": "static",
+    "generated_static_animation": false,
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "stripped_bones": {},
+    "sounds": [
+      "assets/minemon/sounds/pokemon/nidoranf/nidoranf_ambient.ogg",
+      "assets/minemon/sounds/pokemon/nidoranf/nidoranf_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/nidoranf/model-license.txt"
+    ],
+    "eggBase": 13816315,
+    "eggSpots": 12762860
+  },
+  {
+    "nationalPokedexNumber": 30,
+    "slug": "nidorina",
+    "name": "Nidorina",
+    "model": "assets/minemon/geo/nidorina/nidorina.geo.json",
+    "texture": "assets/minemon/textures/pokemon/nidorina/nidorina.png",
+    "animation": "assets/minemon/animations/nidorina/nidorina.animation.json",
+    "mode": "ground",
+    "scale": 0.9,
+    "width": 1,
+    "height": 0.8,
+    "health": 35.0,
+    "attack": 5.166666666666667,
+    "speed": 0.256,
+    "clips": {
+      "idle": "animation.nidorina.idle",
+      "idle2": "animation.nidorina.idle2",
+      "idle3": "animation.nidorina.idle3",
+      "blink": "animation.nidorina.blink",
+      "cry": "animation.nidorina.cry",
+      "ground_run": "animation.nidorina.minemon_run",
+      "sit": "animation.nidorina.minemon_sit",
+      "sleep": "animation.nidorina.minemon_sleep",
+      "physical_attack": "animation.nidorina.minemon_physical_attack"
+    },
+    "idle": "animation.nidorina.idle",
+    "walk": "animation.nidorina.idle",
+    "movement_fallback": "static",
+    "generated_static_animation": false,
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "stripped_bones": {},
+    "sounds": [
+      "assets/minemon/sounds/pokemon/nidorina/nidorina_ambient.ogg",
+      "assets/minemon/sounds/pokemon/nidorina/nidorina_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/nidorina/model-license.txt"
+    ],
+    "eggBase": 9357263,
+    "eggSpots": 8107205
+  },
+  {
+    "nationalPokedexNumber": 31,
+    "slug": "nidoqueen",
+    "name": "Nidoqueen",
+    "model": "assets/minemon/geo/nidoqueen/nidoqueen.geo.json",
+    "texture": "assets/minemon/textures/pokemon/nidoqueen/nidoqueen.png",
+    "animation": "assets/minemon/animations/nidoqueen/nidoqueen.animation.json",
+    "mode": "ground",
+    "scale": 1.2,
+    "width": 1.2,
+    "height": 1.6,
+    "health": 45.0,
+    "attack": 7.666666666666667,
+    "speed": 0.276,
+    "clips": {
+      "ground_idle": "animation.nidoqueen.ground_idle",
+      "blink": "animation.nidoqueen.blink",
+      "cry": "animation.nidoqueen.cry",
+      "spgs_happy_place": "animation.nidoqueen.spgs_happy_place",
+      "spgs_happy_place_loop": "animation.nidoqueen.spgs_happy_place_loop",
+      "ground_run": "animation.nidoqueen.minemon_run",
+      "sit": "animation.nidoqueen.minemon_sit",
+      "sleep": "animation.nidoqueen.minemon_sleep",
+      "physical_attack": "animation.nidoqueen.minemon_physical_attack"
+    },
+    "idle": "animation.nidoqueen.ground_idle",
+    "walk": "animation.nidoqueen.ground_idle",
+    "movement_fallback": "static",
+    "generated_static_animation": false,
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "stripped_bones": {},
+    "sounds": [
+      "assets/minemon/sounds/pokemon/nidoqueen/nidoqueen_ambient.ogg",
+      "assets/minemon/sounds/pokemon/nidoqueen/nidoqueen_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/nidoqueen/model-license.txt"
+    ],
+    "eggBase": 6457260,
+    "eggSpots": 7648719
   },
   {
     "nationalPokedexNumber": 33,

@@ -207,5 +207,15 @@
   "entity.minemon_gen1.tentacruel": "Tentacruel",
   "item.minemon_gen1.tentacruel_spawn_egg": "Ovo de invocação de Tentacruel",
   "entity.minemon_gen1.weezing": "Weezing",
-  "item.minemon_gen1.weezing_spawn_egg": "Ovo de invocação de Weezing"
+  "item.minemon_gen1.weezing_spawn_egg": "Ovo de invocação de Weezing",
+  "entity.minemon_gen1.spearow": "Spearow",
+  "item.minemon_gen1.spearow_spawn_egg": "Ovo de invocação de Spearow",
+  "entity.minemon_gen1.fearow": "Fearow",
+  "item.minemon_gen1.fearow_spawn_egg": "Ovo de invocação de Fearow",
+  "entity.minemon_gen1.nidoranf": "Nidoran-F",
+  "item.minemon_gen1.nidoranf_spawn_egg": "Ovo de invocação de Nidoran-F",
+  "entity.minemon_gen1.nidorina": "Nidorina",
+  "item.minemon_gen1.nidorina_spawn_egg": "Ovo de invocação de Nidorina",
+  "entity.minemon_gen1.nidoqueen": "Nidoqueen",
+  "item.minemon_gen1.nidoqueen_spawn_egg": "Ovo de invocação de Nidoqueen"
 }

@@ -30,6 +30,7 @@
       "idle": "animation.bulbasaur.ground_idle",
       "walk": "animation.bulbasaur.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -75,6 +76,7 @@
       "idle": "animation.ivysaur.ground_idle",
       "walk": "animation.ivysaur.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -118,6 +120,7 @@
       "idle": "animation.venusaur.ground_idle",
       "walk": "animation.venusaur.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -165,6 +168,7 @@
       "idle": "animation.charmander.ground_idle",
       "walk": "animation.charmander.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 68,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -209,6 +213,7 @@
       "idle": "animation.charmeleon.ground_idle",
       "walk": "animation.charmeleon.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -259,6 +264,7 @@
       "idle": "animation.charizard.air_idle",
       "walk": "animation.charizard.air_fly",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 60,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -315,6 +321,7 @@
       "idle": "animation.squirtle.ground_idle",
       "walk": "animation.squirtle.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 60,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -368,6 +375,7 @@
       "idle": "animation.wartortle.ground_idle",
       "walk": "animation.wartortle.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 60,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -423,6 +431,7 @@
       "idle": "animation.blastoise.ground_idle",
       "walk": "animation.blastoise.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 60,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -466,6 +475,7 @@
       "idle": "animation.caterpie.ground_idle",
       "walk": "animation.caterpie.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -508,6 +518,7 @@
       "idle": "animation.metapod.ground_idle",
       "walk": "animation.metapod.ground_idle",
       "movement_fallback": "idle",
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -550,6 +561,7 @@
       "idle": "animation.butterfree.air_idle",
       "walk": "animation.butterfree.air_fly",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -595,6 +607,7 @@
       "idle": "animation.weedle.ground_idle",
       "walk": "animation.weedle.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -636,6 +649,7 @@
       "idle": "animation.kakuna.ground_idle",
       "walk": "animation.kakuna.ground_idle",
       "movement_fallback": "idle",
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -677,6 +691,7 @@
       "idle": "animation.beedrill.air_idle",
       "walk": "animation.beedrill.air_fly",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -721,6 +736,7 @@
       "idle": "animation.pidgey.air_idle",
       "walk": "animation.pidgey.air_fly",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -765,6 +781,7 @@
       "idle": "animation.pidgeotto.air_idle",
       "walk": "animation.pidgeotto.air_fly",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [
         "animation.pidgeotto.sleep_PLACEHOLDER"
@@ -818,6 +835,7 @@
       "idle": "animation.pidgeot.air_idle",
       "walk": "animation.pidgeot.air_fly",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -860,6 +878,7 @@
       "idle": "animation.rattata.ground_idle",
       "walk": "animation.rattata.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -902,6 +921,7 @@
       "idle": "animation.raticate.ground_idle",
       "walk": "animation.raticate.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [
         "animation.raticate.faint"
@@ -932,11 +952,9 @@
   },
   {
     "slug": "spearow",
-    "accepted": false,
-    "reason": "No usable locomotion clip",
-    "issues": [
-      "No usable locomotion clip"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 21,
       "slug": "spearow",
@@ -957,8 +975,9 @@
         "blink": "animation.spearow.blink"
       },
       "idle": "animation.spearow.ground_idle",
-      "walk": null,
-      "movement_fallback": null,
+      "walk": "animation.spearow.ground_idle",
+      "movement_fallback": "static",
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -973,11 +992,9 @@
   },
   {
     "slug": "fearow",
-    "accepted": false,
-    "reason": "No usable locomotion clip",
-    "issues": [
-      "No usable locomotion clip"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 22,
       "slug": "fearow",
@@ -998,8 +1015,9 @@
         "cry": "animation.fearow.cry"
       },
       "idle": "animation.fearow.ground_idle",
-      "walk": null,
-      "movement_fallback": null,
+      "walk": "animation.fearow.ground_idle",
+      "movement_fallback": "static",
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {
@@ -1047,6 +1065,7 @@
       "idle": "animation.ekans.ground_idle",
       "walk": "animation.ekans.ground_idle",
       "movement_fallback": "idle",
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -1091,6 +1110,7 @@
       "idle": "animation.arbok.ground_idle",
       "walk": "animation.arbok.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -1136,6 +1156,7 @@
       "idle": "animation.pikachu.ground_idle",
       "walk": "animation.pikachu.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -1179,6 +1200,7 @@
       "idle": "animation.raichu.ground_idle",
       "walk": "animation.raichu.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -1221,6 +1243,7 @@
       "idle": "animation.sandshrew.ground_idle",
       "walk": "animation.sandshrew.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [
         "animation.sandshrew.faint"
@@ -1268,6 +1291,7 @@
       "idle": "animation.sandslash.ground_idle",
       "walk": "animation.sandslash.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [
         "animation.sandslash.faint"
@@ -1290,11 +1314,9 @@
   },
   {
     "slug": "nidoranf",
-    "accepted": false,
-    "reason": "No usable locomotion clip",
-    "issues": [
-      "No usable locomotion clip"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 29,
       "slug": "nidoranf",
@@ -1315,8 +1337,9 @@
         "idle": "animation.nidoranf.idle"
       },
       "idle": "animation.nidoranf.idle",
-      "walk": null,
-      "movement_fallback": null,
+      "walk": "animation.nidoranf.idle",
+      "movement_fallback": "static",
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -1331,11 +1354,9 @@
   },
   {
     "slug": "nidorina",
-    "accepted": false,
-    "reason": "No usable locomotion clip",
-    "issues": [
-      "No usable locomotion clip"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 30,
       "slug": "nidorina",
@@ -1358,8 +1379,9 @@
         "cry": "animation.nidorina.cry"
       },
       "idle": "animation.nidorina.idle",
-      "walk": null,
-      "movement_fallback": null,
+      "walk": "animation.nidorina.idle",
+      "movement_fallback": "static",
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -1374,11 +1396,9 @@
   },
   {
     "slug": "nidoqueen",
-    "accepted": false,
-    "reason": "No usable locomotion clip",
-    "issues": [
-      "No usable locomotion clip"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 31,
       "slug": "nidoqueen",
@@ -1401,8 +1421,9 @@
         "spgs_happy_place_loop": "animation.nidoqueen.spgs_happy_place_loop"
       },
       "idle": "animation.nidoqueen.ground_idle",
-      "walk": null,
-      "movement_fallback": null,
+      "walk": "animation.nidoqueen.ground_idle",
+      "movement_fallback": "static",
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -1417,11 +1438,9 @@
   },
   {
     "slug": "nidoranm",
-    "accepted": false,
-    "reason": "No usable locomotion clip",
-    "issues": [
-      "No usable locomotion clip"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 32,
       "slug": "nidoranm",
@@ -1442,8 +1461,9 @@
         "idle": "animation.nidoranm.idle"
       },
       "idle": "animation.nidoranm.idle",
-      "walk": null,
-      "movement_fallback": null,
+      "walk": "animation.nidoranm.idle",
+      "movement_fallback": "static",
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -1482,6 +1502,7 @@
       "idle": "animation.nidorino.ground_idle",
       "walk": "animation.nidorino.ground_idle",
       "movement_fallback": "idle",
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {
@@ -1501,11 +1522,9 @@
   },
   {
     "slug": "nidoking",
-    "accepted": false,
-    "reason": "No usable locomotion clip",
-    "issues": [
-      "No usable locomotion clip"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 34,
       "slug": "nidoking",
@@ -1526,8 +1545,9 @@
         "cry": "animation.nidoking.cry"
       },
       "idle": "animation.nidoking.ground_idle",
-      "walk": null,
-      "movement_fallback": null,
+      "walk": "animation.nidoking.ground_idle",
+      "movement_fallback": "static",
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -1571,6 +1591,7 @@
       "idle": "animation.clefairy.ground_idle",
       "walk": "animation.clefairy.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -1615,6 +1636,7 @@
       "idle": "animation.clefable.ground_idle",
       "walk": "animation.clefable.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 40,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -1629,12 +1651,9 @@
   },
   {
     "slug": "vulpix",
-    "accepted": false,
-    "reason": "No usable idle clip; No usable locomotion clip",
-    "issues": [
-      "No usable idle clip",
-      "No usable locomotion clip"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 37,
       "slug": "vulpix",
@@ -1654,9 +1673,10 @@
         "blink": "animation.vulpix.blink",
         "cry": "animation.vulpix.cry"
       },
-      "idle": null,
-      "walk": null,
-      "movement_fallback": null,
+      "idle": "animation.vulpix.blink",
+      "walk": "animation.vulpix.blink",
+      "movement_fallback": "static",
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -1671,11 +1691,9 @@
   },
   {
     "slug": "ninetales",
-    "accepted": false,
-    "reason": "No usable locomotion clip",
-    "issues": [
-      "No usable locomotion clip"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 38,
       "slug": "ninetales",
@@ -1697,8 +1715,9 @@
         "cry": "animation.ninetales.cry"
       },
       "idle": "animation.ninetales.ground_idle",
-      "walk": null,
-      "movement_fallback": null,
+      "walk": "animation.ninetales.ground_idle",
+      "movement_fallback": "static",
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -1740,6 +1759,7 @@
       "idle": "animation.jigglypuff.ground_idle",
       "walk": "animation.jigglypuff.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -1780,6 +1800,7 @@
       "idle": "animation.wigglytuff.ground_idle",
       "walk": "animation.wigglytuff.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {
@@ -1844,6 +1865,7 @@
       "idle": "animation.zubat.air_idle",
       "walk": "animation.zubat.air_fly",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -1891,6 +1913,7 @@
       "idle": "animation.golbat.air_idle",
       "walk": "animation.golbat.air_fly",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [
         "animation.golbat.ground_idle",
@@ -1949,6 +1972,7 @@
       "idle": "animation.oddish.ground_idle",
       "walk": "animation.oddish.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -1990,6 +2014,7 @@
       "idle": "animation.gloom.ground_idle",
       "walk": "animation.gloom.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -2033,6 +2058,7 @@
       "idle": "animation.vileplume.idle",
       "walk": "animation.vileplume.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [
         "animation.vileplume.ground_run"
@@ -2076,6 +2102,7 @@
       "idle": "animation.paras.ground_idle",
       "walk": "animation.paras.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -2116,6 +2143,7 @@
       "idle": "animation.parasect.ground_idle",
       "walk": "animation.parasect.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -2160,6 +2188,7 @@
       "idle": "animation.venonat.ground_idle",
       "walk": "animation.venonat.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -2207,6 +2236,7 @@
       "idle": "animation.venomoth.air_idle",
       "walk": "animation.venomoth.air_fly",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -2251,6 +2281,7 @@
       "idle": "animation.diglett.ground_idle",
       "walk": "animation.diglett.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -2299,6 +2330,7 @@
       "idle": "animation.dugtrio.ground_idle",
       "walk": "animation.dugtrio.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [
         "animation.dugtrio.blink",
@@ -2317,11 +2349,9 @@
   },
   {
     "slug": "meowth",
-    "accepted": false,
-    "reason": "No usable locomotion clip",
-    "issues": [
-      "No usable locomotion clip"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 52,
       "slug": "meowth",
@@ -2344,8 +2374,9 @@
         "cry": "animation.meowth.cry"
       },
       "idle": "animation.meowth.ground_idle",
-      "walk": null,
-      "movement_fallback": null,
+      "walk": "animation.meowth.ground_idle",
+      "movement_fallback": "static",
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -2362,11 +2393,9 @@
   },
   {
     "slug": "persian",
-    "accepted": false,
-    "reason": "No usable locomotion clip",
-    "issues": [
-      "No usable locomotion clip"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 53,
       "slug": "persian",
@@ -2388,8 +2417,9 @@
         "cry": "animation.persian.cry"
       },
       "idle": "animation.persian.ground_idle",
-      "walk": null,
-      "movement_fallback": null,
+      "walk": "animation.persian.ground_idle",
+      "movement_fallback": "static",
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -2436,6 +2466,7 @@
       "idle": "animation.psyduck.ground_idle",
       "walk": "animation.psyduck.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -2479,6 +2510,7 @@
       "idle": "animation.golduck.ground_idle",
       "walk": "animation.golduck.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -2522,6 +2554,7 @@
       "idle": "animation.mankey.ground_idle",
       "walk": "animation.mankey.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 60,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -2564,6 +2597,7 @@
       "idle": "animation.primeape.ground_idle",
       "walk": "animation.primeape.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [
         "animation.primeape.faint",
@@ -2581,11 +2615,9 @@
   },
   {
     "slug": "growlithe",
-    "accepted": false,
-    "reason": "No usable locomotion clip",
-    "issues": [
-      "No usable locomotion clip"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 58,
       "slug": "growlithe",
@@ -2609,8 +2641,9 @@
         "cry": "animation.growlithe.cry"
       },
       "idle": "animation.growlithe.idle",
-      "walk": null,
-      "movement_fallback": null,
+      "walk": "animation.growlithe.idle",
+      "movement_fallback": "static",
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -2625,11 +2658,9 @@
   },
   {
     "slug": "arcanine",
-    "accepted": false,
-    "reason": "No usable locomotion clip",
-    "issues": [
-      "No usable locomotion clip"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 59,
       "slug": "arcanine",
@@ -2652,8 +2683,9 @@
         "cry": "animation.arcanine.cry"
       },
       "idle": "animation.arcanine.idle",
-      "walk": null,
-      "movement_fallback": null,
+      "walk": "animation.arcanine.idle",
+      "movement_fallback": "static",
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -2697,6 +2729,7 @@
       "idle": "animation.poliwag.ground_idle",
       "walk": "animation.poliwag.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [
         "animation.poliwag.blink",
@@ -2758,6 +2791,7 @@
       "idle": "animation.poliwhirl.ground_idle",
       "walk": "animation.poliwhirl.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [
         "animation.poliwhirl.sleep"
@@ -2791,11 +2825,9 @@
   },
   {
     "slug": "poliwrath",
-    "accepted": false,
-    "reason": "No usable locomotion clip",
-    "issues": [
-      "No usable locomotion clip"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 62,
       "slug": "poliwrath",
@@ -2819,8 +2851,9 @@
         "render": "animation.poliwrath.render"
       },
       "idle": "animation.poliwrath.ground_idle",
-      "walk": null,
-      "movement_fallback": null,
+      "walk": "animation.poliwrath.ground_idle",
+      "movement_fallback": "static",
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [
         "animation.poliwrath.blink",
@@ -2868,6 +2901,7 @@
       "idle": "animation.abra.ground_idle",
       "walk": "animation.abra.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -2882,11 +2916,9 @@
   },
   {
     "slug": "kadabra",
-    "accepted": false,
-    "reason": "No usable locomotion clip",
-    "issues": [
-      "No usable locomotion clip"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 64,
       "slug": "kadabra",
@@ -2909,8 +2941,9 @@
         "cry": "animation.kadabra.cry"
       },
       "idle": "animation.kadabra.ground_idle",
-      "walk": null,
-      "movement_fallback": null,
+      "walk": "animation.kadabra.ground_idle",
+      "movement_fallback": "static",
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [
         "animation.kadabra.battle_idle"
@@ -2927,11 +2960,9 @@
   },
   {
     "slug": "alakazam",
-    "accepted": false,
-    "reason": "No usable locomotion clip",
-    "issues": [
-      "No usable locomotion clip"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 65,
       "slug": "alakazam",
@@ -2953,8 +2984,9 @@
         "cry": "animation.alakazam.cry"
       },
       "idle": "animation.alakazam.ground_idle",
-      "walk": null,
-      "movement_fallback": null,
+      "walk": "animation.alakazam.ground_idle",
+      "movement_fallback": "static",
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -2994,6 +3026,7 @@
       "idle": "animation.machop.ground_idle",
       "walk": "animation.machop.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -3033,6 +3066,7 @@
       "idle": "animation.machoke.ground_idle",
       "walk": "animation.machoke.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -3072,6 +3106,7 @@
       "idle": "animation.machamp.ground_idle",
       "walk": "animation.machamp.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -3086,11 +3121,9 @@
   },
   {
     "slug": "bellsprout",
-    "accepted": false,
-    "reason": "No usable locomotion clip",
-    "issues": [
-      "No usable locomotion clip"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 69,
       "slug": "bellsprout",
@@ -3109,8 +3142,9 @@
         "ground_idle": "animation.bellsprout.ground_idle"
       },
       "idle": "animation.bellsprout.ground_idle",
-      "walk": null,
-      "movement_fallback": null,
+      "walk": "animation.bellsprout.ground_idle",
+      "movement_fallback": "static",
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -3125,11 +3159,9 @@
   },
   {
     "slug": "weepinbell",
-    "accepted": false,
-    "reason": "No usable locomotion clip",
-    "issues": [
-      "No usable locomotion clip"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 70,
       "slug": "weepinbell",
@@ -3148,8 +3180,9 @@
         "ground_idle": "animation.weepinbell.ground_idle"
       },
       "idle": "animation.weepinbell.ground_idle",
-      "walk": null,
-      "movement_fallback": null,
+      "walk": "animation.weepinbell.ground_idle",
+      "movement_fallback": "static",
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -3164,11 +3197,9 @@
   },
   {
     "slug": "victreebel",
-    "accepted": false,
-    "reason": "No usable locomotion clip",
-    "issues": [
-      "No usable locomotion clip"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 71,
       "slug": "victreebel",
@@ -3187,8 +3218,9 @@
         "ground_idle": "animation.victreebel.ground_idle"
       },
       "idle": "animation.victreebel.ground_idle",
-      "walk": null,
-      "movement_fallback": null,
+      "walk": "animation.victreebel.ground_idle",
+      "movement_fallback": "static",
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -3232,6 +3264,7 @@
       "idle": "animation.tentacool.ground_idle",
       "walk": "animation.tentacool.ground_idle",
       "movement_fallback": "idle",
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -3275,6 +3308,7 @@
       "idle": "animation.tentacruel.ground_idle",
       "walk": "animation.tentacruel.ground_idle",
       "movement_fallback": "idle",
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -3317,6 +3351,7 @@
       "idle": "animation.geodude.ground_idle",
       "walk": "animation.geodude.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -3331,11 +3366,9 @@
   },
   {
     "slug": "graveler",
-    "accepted": false,
-    "reason": "No usable locomotion clip",
-    "issues": [
-      "No usable locomotion clip"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 75,
       "slug": "graveler",
@@ -3357,8 +3390,9 @@
         "cry": "animation.graveler.cry"
       },
       "idle": "animation.graveler.ground_idle",
-      "walk": null,
-      "movement_fallback": null,
+      "walk": "animation.graveler.ground_idle",
+      "movement_fallback": "static",
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -3373,12 +3407,9 @@
   },
   {
     "slug": "golem",
-    "accepted": false,
-    "reason": "No usable idle clip; No usable locomotion clip",
-    "issues": [
-      "No usable idle clip",
-      "No usable locomotion clip"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 76,
       "slug": "golem",
@@ -3398,9 +3429,10 @@
         "blink": "animation.golem.blink",
         "cry": "animation.golem.cry"
       },
-      "idle": null,
-      "walk": null,
-      "movement_fallback": null,
+      "idle": "animation.golem.blink",
+      "walk": "animation.golem.blink",
+      "movement_fallback": "static",
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -3447,6 +3479,7 @@
       "idle": "animation.ponyta.ground_idle",
       "walk": "animation.ponyta.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {
@@ -3514,6 +3547,7 @@
       "idle": "animation.rapidash.ground_idle",
       "walk": "animation.rapidash.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [
         "animation.rapidash.ground_run",
@@ -3592,6 +3626,7 @@
       "idle": "animation.slowpoke.ground_idle",
       "walk": "animation.slowpoke.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -3638,6 +3673,7 @@
       "idle": "animation.slowbro.ground_idle",
       "walk": "animation.slowbro.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [
         "animation.slowbro.battle_idle",
@@ -3689,6 +3725,7 @@
       "idle": "animation.magnemite.air_idle",
       "walk": "animation.magnemite.air_fly",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [
         "animation.magnemite.sleep"
@@ -3739,6 +3776,7 @@
       "idle": "animation.magneton.air_idle",
       "walk": "animation.magneton.air_fly",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -3786,6 +3824,7 @@
       "idle": "animation.farfetchd.air_idle",
       "walk": "animation.farfetchd.air_fly",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -3834,6 +3873,7 @@
       "idle": "animation.doduo.ground_idle",
       "walk": "animation.doduo.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -3882,6 +3922,7 @@
       "idle": "animation.dodrio.ground_idle",
       "walk": "animation.dodrio.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {
@@ -3900,11 +3941,9 @@
   },
   {
     "slug": "seel",
-    "accepted": false,
-    "reason": "No usable locomotion clip",
-    "issues": [
-      "No usable locomotion clip"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 86,
       "slug": "seel",
@@ -3926,8 +3965,9 @@
         "cry": "animation.seel.cry"
       },
       "idle": "animation.seel.ground_idle",
-      "walk": null,
-      "movement_fallback": null,
+      "walk": "animation.seel.ground_idle",
+      "movement_fallback": "static",
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -3942,11 +3982,9 @@
   },
   {
     "slug": "dewgong",
-    "accepted": false,
-    "reason": "No usable locomotion clip",
-    "issues": [
-      "No usable locomotion clip"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 87,
       "slug": "dewgong",
@@ -3968,8 +4006,9 @@
         "cry": "animation.dewgong.cry"
       },
       "idle": "animation.dewgong.ground_idle",
-      "walk": null,
-      "movement_fallback": null,
+      "walk": "animation.dewgong.ground_idle",
+      "movement_fallback": "static",
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -3984,11 +4023,9 @@
   },
   {
     "slug": "grimer",
-    "accepted": false,
-    "reason": "No usable locomotion clip",
-    "issues": [
-      "No usable locomotion clip"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 88,
       "slug": "grimer",
@@ -4009,8 +4046,9 @@
         "cry": "animation.grimer.cry"
       },
       "idle": "animation.grimer.ground_idle",
-      "walk": null,
-      "movement_fallback": null,
+      "walk": "animation.grimer.ground_idle",
+      "movement_fallback": "static",
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -4025,11 +4063,9 @@
   },
   {
     "slug": "muk",
-    "accepted": false,
-    "reason": "No usable locomotion clip",
-    "issues": [
-      "No usable locomotion clip"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 89,
       "slug": "muk",
@@ -4050,8 +4086,9 @@
         "cry": "animation.muk.cry"
       },
       "idle": "animation.muk.ground_idle",
-      "walk": null,
-      "movement_fallback": null,
+      "walk": "animation.muk.ground_idle",
+      "movement_fallback": "static",
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -4066,11 +4103,9 @@
   },
   {
     "slug": "shellder",
-    "accepted": false,
-    "reason": "No usable locomotion clip",
-    "issues": [
-      "No usable locomotion clip"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 90,
       "slug": "shellder",
@@ -4089,8 +4124,9 @@
         "ground_idle": "animation.shellder.ground_idle"
       },
       "idle": "animation.shellder.ground_idle",
-      "walk": null,
-      "movement_fallback": null,
+      "walk": "animation.shellder.ground_idle",
+      "movement_fallback": "static",
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -4105,11 +4141,9 @@
   },
   {
     "slug": "cloyster",
-    "accepted": false,
-    "reason": "No usable locomotion clip",
-    "issues": [
-      "No usable locomotion clip"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 91,
       "slug": "cloyster",
@@ -4128,8 +4162,9 @@
         "ground_idle": "animation.cloyster.ground_idle"
       },
       "idle": "animation.cloyster.ground_idle",
-      "walk": null,
-      "movement_fallback": null,
+      "walk": "animation.cloyster.ground_idle",
+      "movement_fallback": "static",
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -4170,6 +4205,7 @@
       "idle": "animation.gastly.ground_idle",
       "walk": "animation.gastly.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -4184,11 +4220,9 @@
   },
   {
     "slug": "haunter",
-    "accepted": false,
-    "reason": "No usable locomotion clip",
-    "issues": [
-      "No usable locomotion clip"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 93,
       "slug": "haunter",
@@ -4210,8 +4244,9 @@
         "cry": "animation.haunter.cry"
       },
       "idle": "animation.haunter.ground_idle",
-      "walk": null,
-      "movement_fallback": null,
+      "walk": "animation.haunter.ground_idle",
+      "movement_fallback": "static",
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -4226,11 +4261,9 @@
   },
   {
     "slug": "gengar",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 94,
       "slug": "gengar",
@@ -4253,8 +4286,9 @@
         "cry": "animation.gengar.cry"
       },
       "idle": "animation.gengar.air_idle",
-      "walk": "animation.gengar.air_fly",
-      "movement_fallback": null,
+      "walk": "animation.gengar.air_idle",
+      "movement_fallback": "static",
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -4301,6 +4335,7 @@
       "idle": "animation.onix.ground_idle",
       "walk": "animation.onix.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -4345,6 +4380,7 @@
       "idle": "animation.drowzee.ground_idle",
       "walk": "animation.drowzee.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [
         "animation.drowzee.battle_idle",
@@ -4469,6 +4505,7 @@
       "idle": "animation.hypno.ground_idle",
       "walk": "animation.hypno.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -4513,6 +4550,7 @@
       "idle": "animation.krabby.ground_idle",
       "walk": "animation.krabby.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -4552,6 +4590,7 @@
       "idle": "animation.kingler.ground_idle",
       "walk": "animation.kingler.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {
@@ -4614,6 +4653,7 @@
       "idle": "animation.voltorb.ground_idle",
       "walk": "animation.voltorb.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -4655,6 +4695,7 @@
       "idle": "animation.electrode.ground_idle",
       "walk": "animation.electrode.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -4703,6 +4744,7 @@
       "idle": "animation.exeggcute.ground_idle",
       "walk": "animation.exeggcute.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -4748,6 +4790,7 @@
       "idle": "animation.exeggutor.ground_idle",
       "walk": "animation.exeggutor.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [
         "animation.exeggutor.cry"
@@ -4766,11 +4809,9 @@
   },
   {
     "slug": "cubone",
-    "accepted": false,
-    "reason": "No usable locomotion clip",
-    "issues": [
-      "No usable locomotion clip"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 104,
       "slug": "cubone",
@@ -4792,8 +4833,9 @@
         "cry": "animation.cubone.cry"
       },
       "idle": "animation.cubone.idle",
-      "walk": null,
-      "movement_fallback": null,
+      "walk": "animation.cubone.idle",
+      "movement_fallback": "static",
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -4808,11 +4850,9 @@
   },
   {
     "slug": "marowak",
-    "accepted": false,
-    "reason": "No usable locomotion clip",
-    "issues": [
-      "No usable locomotion clip"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 105,
       "slug": "marowak",
@@ -4834,8 +4874,9 @@
         "cry": "animation.marowak.cry"
       },
       "idle": "animation.marowak.idle",
-      "walk": null,
-      "movement_fallback": null,
+      "walk": "animation.marowak.idle",
+      "movement_fallback": "static",
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -4880,6 +4921,7 @@
       "idle": "animation.hitmonlee.ground_idle",
       "walk": "animation.hitmonlee.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -4925,6 +4967,7 @@
       "idle": "animation.hitmonchan.ground_idle",
       "walk": "animation.hitmonchan.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -4968,6 +5011,7 @@
       "idle": "animation.lickitung.ground_idle",
       "walk": "animation.lickitung.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -5009,6 +5053,7 @@
       "idle": "animation.koffing.air_idle",
       "walk": "animation.koffing.air_fly",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -5049,6 +5094,7 @@
       "idle": "animation.weezing.ground_idle",
       "walk": "animation.weezing.ground_idle",
       "movement_fallback": "idle",
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -5063,20 +5109,48 @@
   },
   {
     "slug": "rhyhorn",
-    "accepted": false,
-    "reason": "Missing animation file",
-    "issues": [
-      "Missing animation file"
-    ],
-    "definition": null
+    "accepted": true,
+    "reason": null,
+    "issues": [],
+    "definition": {
+      "nationalPokedexNumber": 111,
+      "slug": "rhyhorn",
+      "name": "Rhyhorn",
+      "model": "assets/minemon/geo/rhyhorn/rhyhorn.geo.json",
+      "texture": "assets/minemon/textures/pokemon/rhyhorn/rhyhorn.png",
+      "animation": "assets/minemon/animations/rhyhorn/rhyhorn.animation.json",
+      "mode": "ground",
+      "scale": 1.2,
+      "width": 1.2,
+      "height": 0.8,
+      "health": 40.0,
+      "attack": 7.083333333333333,
+      "speed": 0.225,
+      "clips": {
+        "ground_idle": "animation.rhyhorn.minemon_static",
+        "ground_walk": "animation.rhyhorn.minemon_static"
+      },
+      "idle": "animation.rhyhorn.minemon_static",
+      "walk": "animation.rhyhorn.minemon_static",
+      "movement_fallback": "static",
+      "generated_static_animation": true,
+      "attackTicks": 0,
+      "excluded_clips": [],
+      "stripped_bones": {},
+      "sounds": [
+        "assets/minemon/sounds/pokemon/rhyhorn/rhyhorn_ambient.ogg",
+        "assets/minemon/sounds/pokemon/rhyhorn/rhyhorn_cry.ogg"
+      ],
+      "licenses": [
+        "assets/minemon/licenses/pokemon/rhyhorn/model-license.txt"
+      ]
+    }
   },
   {
     "slug": "rhydon",
-    "accepted": false,
-    "reason": "No usable locomotion clip",
-    "issues": [
-      "No usable locomotion clip"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 112,
       "slug": "rhydon",
@@ -5095,8 +5169,9 @@
         "ground_idle": "animation.rhydon.ground_idle"
       },
       "idle": "animation.rhydon.ground_idle",
-      "walk": null,
-      "movement_fallback": null,
+      "walk": "animation.rhydon.ground_idle",
+      "movement_fallback": "static",
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -5143,6 +5218,7 @@
       "idle": "animation.chansey.ground_idle",
       "walk": "animation.chansey.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -5183,6 +5259,7 @@
       "idle": null,
       "walk": null,
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -5197,11 +5274,9 @@
   },
   {
     "slug": "kangaskhan",
-    "accepted": false,
-    "reason": "No usable locomotion clip",
-    "issues": [
-      "No usable locomotion clip"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 115,
       "slug": "kangaskhan",
@@ -5222,8 +5297,9 @@
         "blink2": "animation.kangaskhan.blink2"
       },
       "idle": "animation.kangaskhan.ground_idle",
-      "walk": null,
-      "movement_fallback": null,
+      "walk": "animation.kangaskhan.ground_idle",
+      "movement_fallback": "static",
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [
         "animation.kangaskhan.blink",
@@ -5268,6 +5344,7 @@
       "idle": "animation.horsea.ground_idle",
       "walk": "animation.horsea.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -5309,6 +5386,7 @@
       "idle": "animation.seadra.ground_idle",
       "walk": "animation.seadra.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -5323,11 +5401,9 @@
   },
   {
     "slug": "goldeen",
-    "accepted": false,
-    "reason": "No usable locomotion clip",
-    "issues": [
-      "No usable locomotion clip"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 118,
       "slug": "goldeen",
@@ -5348,8 +5424,9 @@
         "water_swim": "animation.goldeen.water_swim"
       },
       "idle": "animation.goldeen.ground_idle",
-      "walk": null,
-      "movement_fallback": null,
+      "walk": "animation.goldeen.ground_idle",
+      "movement_fallback": "static",
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -5364,11 +5441,9 @@
   },
   {
     "slug": "seaking",
-    "accepted": false,
-    "reason": "No usable locomotion clip",
-    "issues": [
-      "No usable locomotion clip"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 119,
       "slug": "seaking",
@@ -5389,8 +5464,9 @@
         "water_swim": "animation.seaking.water_swim"
       },
       "idle": "animation.seaking.ground_idle",
-      "walk": null,
-      "movement_fallback": null,
+      "walk": "animation.seaking.ground_idle",
+      "movement_fallback": "static",
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -5433,6 +5509,7 @@
       "idle": "animation.staryu.ground_idle",
       "walk": "animation.staryu.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -5476,6 +5553,7 @@
       "idle": "animation.starmie.ground_idle",
       "walk": "animation.starmie.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -5490,11 +5568,9 @@
   },
   {
     "slug": "mrmime",
-    "accepted": false,
-    "reason": "No usable locomotion clip",
-    "issues": [
-      "No usable locomotion clip"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 122,
       "slug": "mrmime",
@@ -5514,8 +5590,9 @@
         "blink": "animation.mr_mime.blink"
       },
       "idle": "animation.mr_mime.ground_idle",
-      "walk": null,
-      "movement_fallback": null,
+      "walk": "animation.mr_mime.ground_idle",
+      "movement_fallback": "static",
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -5530,11 +5607,9 @@
   },
   {
     "slug": "scyther",
-    "accepted": false,
-    "reason": "No usable locomotion clip",
-    "issues": [
-      "No usable locomotion clip"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 123,
       "slug": "scyther",
@@ -5557,8 +5632,9 @@
         "cry": "animation.scyther.cry"
       },
       "idle": "animation.scyther.air_idle",
-      "walk": null,
-      "movement_fallback": null,
+      "walk": "animation.scyther.air_idle",
+      "movement_fallback": "static",
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -5573,11 +5649,9 @@
   },
   {
     "slug": "jynx",
-    "accepted": false,
-    "reason": "No usable locomotion clip",
-    "issues": [
-      "No usable locomotion clip"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 124,
       "slug": "jynx",
@@ -5596,8 +5670,9 @@
         "ground_idle": "animation.jynx.ground_idle"
       },
       "idle": "animation.jynx.ground_idle",
-      "walk": null,
-      "movement_fallback": null,
+      "walk": "animation.jynx.ground_idle",
+      "movement_fallback": "static",
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -5643,6 +5718,7 @@
       "idle": "animation.electabuzz.ground_idle",
       "walk": "animation.electabuzz.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -5657,11 +5733,9 @@
   },
   {
     "slug": "magmar",
-    "accepted": false,
-    "reason": "No usable locomotion clip",
-    "issues": [
-      "No usable locomotion clip"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 126,
       "slug": "magmar",
@@ -5680,8 +5754,9 @@
         "ground_idle": "animation.magmar.ground_idle"
       },
       "idle": "animation.magmar.ground_idle",
-      "walk": null,
-      "movement_fallback": null,
+      "walk": "animation.magmar.ground_idle",
+      "movement_fallback": "static",
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -5724,6 +5799,7 @@
       "idle": "animation.pinsir.ground_idle",
       "walk": "animation.pinsir.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -5766,6 +5842,7 @@
       "idle": "animation.tauros.ground_idle",
       "walk": "animation.tauros.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -5818,6 +5895,7 @@
       "idle": "animation.magikarp.ground_idle",
       "walk": "animation.magikarp.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [
         "animation.magikarp.blink"
@@ -5834,11 +5912,9 @@
   },
   {
     "slug": "gyarados",
-    "accepted": false,
-    "reason": "No usable locomotion clip",
-    "issues": [
-      "No usable locomotion clip"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 130,
       "slug": "gyarados",
@@ -5861,8 +5937,9 @@
         "blink": "animation.gyarados.blink"
       },
       "idle": "animation.gyarados.ground_idle",
-      "walk": null,
-      "movement_fallback": null,
+      "walk": "animation.gyarados.ground_idle",
+      "movement_fallback": "static",
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -5877,11 +5954,9 @@
   },
   {
     "slug": "lapras",
-    "accepted": false,
-    "reason": "No usable locomotion clip",
-    "issues": [
-      "No usable locomotion clip"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 131,
       "slug": "lapras",
@@ -5904,8 +5979,9 @@
         "cry": "animation.lapras.cry"
       },
       "idle": "animation.lapras.ground_idle",
-      "walk": null,
-      "movement_fallback": null,
+      "walk": "animation.lapras.ground_idle",
+      "movement_fallback": "static",
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -5948,6 +6024,7 @@
       "idle": "animation.ditto.ground_idle",
       "walk": "animation.ditto.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -5989,6 +6066,7 @@
       "idle": "animation.eevee.ground_idle",
       "walk": "animation.eevee.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -6032,6 +6110,7 @@
       "idle": "animation.vaporeon.ground_idle",
       "walk": "animation.vaporeon.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -6074,6 +6153,7 @@
       "idle": "animation.jolteon.ground_idle",
       "walk": "animation.jolteon.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [
         "animation.jolteon.cry"
@@ -6118,6 +6198,7 @@
       "idle": "animation.flareon.ground_idle",
       "walk": "animation.flareon.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [
         "animation.flareon.cry"
@@ -6162,6 +6243,7 @@
       "idle": "animation.porygon.ground_idle",
       "walk": "animation.porygon.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -6209,6 +6291,7 @@
       "idle": "animation.omanyte.ground_idle",
       "walk": "animation.omanyte.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -6257,6 +6340,7 @@
       "idle": "animation.omastar.ground_idle",
       "walk": "animation.omastar.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [
         "animation.omastar.shell_test"
@@ -6302,6 +6386,7 @@
       "idle": "animation.kabuto.ground_idle",
       "walk": "animation.kabuto.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {
@@ -6351,6 +6436,7 @@
       "idle": "animation.kabutops.ground_idle",
       "walk": "animation.kabutops.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -6394,6 +6480,7 @@
       "idle": "animation.aerodactyl.air_idle",
       "walk": "animation.aerodactyl.air_fly",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -6433,6 +6520,7 @@
       "idle": "animation.snorlax.ground_idle",
       "walk": "animation.snorlax.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -6448,11 +6536,9 @@
   },
   {
     "slug": "articuno",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 144,
       "slug": "articuno",
@@ -6473,8 +6559,9 @@
         "air_fly": "animation.articuno.air_fly"
       },
       "idle": "animation.articuno.air_idle",
-      "walk": "animation.articuno.air_fly",
-      "movement_fallback": null,
+      "walk": "animation.articuno.air_idle",
+      "movement_fallback": "static",
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -6489,11 +6576,9 @@
   },
   {
     "slug": "zapdos",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 145,
       "slug": "zapdos",
@@ -6514,8 +6599,9 @@
         "air_fly": "animation.zapdos.air_fly"
       },
       "idle": "animation.zapdos.air_idle",
-      "walk": "animation.zapdos.air_fly",
-      "movement_fallback": null,
+      "walk": "animation.zapdos.air_idle",
+      "movement_fallback": "static",
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -6530,11 +6616,9 @@
   },
   {
     "slug": "moltres",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 146,
       "slug": "moltres",
@@ -6555,8 +6639,9 @@
         "air_fly": "animation.moltres.air_fly"
       },
       "idle": "animation.moltres.air_idle",
-      "walk": "animation.moltres.air_fly",
-      "movement_fallback": null,
+      "walk": "animation.moltres.air_idle",
+      "movement_fallback": "static",
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -6604,6 +6689,7 @@
       "idle": "animation.dratini.ground_idle",
       "walk": "animation.dratini.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -6653,6 +6739,7 @@
       "idle": "animation.dragonair.ground_idle",
       "walk": "animation.dragonair.ground_walk",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -6701,6 +6788,7 @@
       "idle": "animation.dragonite.air_idle",
       "walk": "animation.dragonite.air_fly",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},
@@ -6741,6 +6829,7 @@
       "idle": "animation.mewtwo.air_idle",
       "walk": "animation.mewtwo.air_fly",
       "movement_fallback": null,
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [
         "animation.mewtwo.ground_idle"
@@ -6798,11 +6887,9 @@
   },
   {
     "slug": "mew",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 151,
       "slug": "mew",
@@ -6823,8 +6910,9 @@
         "blink": "animation.mew.blink"
       },
       "idle": "animation.mew.ground_idle",
-      "walk": "animation.mew.ground_walk",
-      "movement_fallback": null,
+      "walk": "animation.mew.ground_idle",
+      "movement_fallback": "static",
+      "generated_static_animation": false,
       "attackTicks": 0,
       "excluded_clips": [],
       "stripped_bones": {},

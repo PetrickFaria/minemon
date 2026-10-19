@@ -123,13 +123,13 @@
     "nationalPokedexNumber": 21,
     "slug": "spearow",
     "name": "Spearow",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 22,
     "slug": "fearow",
     "name": "Fearow",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 23,
@@ -171,19 +171,19 @@
     "nationalPokedexNumber": 29,
     "slug": "nidoranf",
     "name": "Nidoran-F",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 30,
     "slug": "nidorina",
     "name": "Nidorina",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 31,
     "slug": "nidoqueen",
     "name": "Nidoqueen",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 32,
