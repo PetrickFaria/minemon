@@ -1682,45 +1682,6 @@
     "eggSpots": 14235178
   },
   {
-    "nationalPokedexNumber": 101,
-    "slug": "electrode",
-    "name": "Electrode",
-    "model": "assets/minemon/geo/electrode/electrode.geo.json",
-    "texture": "assets/minemon/textures/pokemon/electrode/electrode.png",
-    "animation": "assets/minemon/animations/electrode/electrode.animation.json",
-    "mode": "ground",
-    "scale": 0.9,
-    "width": 1.2,
-    "height": 1.15,
-    "health": 30.0,
-    "attack": 4.166666666666667,
-    "speed": 0.35,
-    "clips": {
-      "ground_idle": "animation.electrode.ground_idle",
-      "ground_walk": "animation.electrode.ground_walk",
-      "blink": "animation.electrode.blink",
-      "cry": "animation.electrode.cry",
-      "ground_run": "animation.electrode.minemon_run",
-      "sit": "animation.electrode.minemon_sit",
-      "sleep": "animation.electrode.minemon_sleep",
-      "physical_attack": "animation.electrode.minemon_physical_attack"
-    },
-    "idle": "animation.electrode.ground_idle",
-    "walk": "animation.electrode.ground_walk",
-    "attackTicks": 12,
-    "excluded_clips": [],
-    "sounds": [
-      "assets/minemon/sounds/pokemon/electrode/electrode_ambient.ogg",
-      "assets/minemon/sounds/pokemon/electrode/electrode_cry.ogg",
-      "assets/minemon/sounds/pokemon/electrode/electrode_hisuian_cry.ogg"
-    ],
-    "licenses": [
-      "assets/minemon/licenses/pokemon/electrode/model-license.txt"
-    ],
-    "eggBase": 10950423,
-    "eggSpots": 12262942
-  },
-  {
     "nationalPokedexNumber": 102,
     "slug": "exeggcute",
     "name": "Exeggcute",
