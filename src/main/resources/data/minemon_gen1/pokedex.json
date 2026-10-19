@@ -579,13 +579,13 @@
     "nationalPokedexNumber": 97,
     "slug": "hypno",
     "name": "Hypno",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 98,
     "slug": "krabby",
     "name": "Krabby",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 99,
@@ -597,25 +597,25 @@
     "nationalPokedexNumber": 100,
     "slug": "voltorb",
     "name": "Voltorb",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 101,
     "slug": "electrode",
     "name": "Electrode",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 102,
     "slug": "exeggcute",
     "name": "Exeggcute",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 103,
     "slug": "exeggutor",
     "name": "Exeggutor",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 104,
@@ -639,13 +639,13 @@
     "nationalPokedexNumber": 107,
     "slug": "hitmonchan",
     "name": "Hitmonchan",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 108,
     "slug": "lickitung",
     "name": "Lickitung",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 109,
@@ -675,7 +675,7 @@
     "nationalPokedexNumber": 113,
     "slug": "chansey",
     "name": "Chansey",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 114,
@@ -795,7 +795,7 @@
     "nationalPokedexNumber": 133,
     "slug": "eevee",
     "name": "Eevee",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 134,
