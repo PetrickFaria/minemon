@@ -1078,6 +1078,52 @@
     "eggSpots": 12085313
   },
   {
+    "nationalPokedexNumber": 51,
+    "slug": "dugtrio",
+    "name": "Dugtrio",
+    "model": "assets/minemon/geo/dugtrio/dugtrio.geo.json",
+    "texture": "assets/minemon/textures/pokemon/dugtrio/dugtrio.png",
+    "animation": "assets/minemon/animations/dugtrio/dugtrio.animation.json",
+    "mode": "ground",
+    "scale": 0.8,
+    "width": 1.05,
+    "height": 1.1,
+    "health": 20,
+    "attack": 8.333333333333334,
+    "speed": 0.32,
+    "clips": {
+      "ground_idle": "animation.dugtrio.ground_idle",
+      "ground_walk": "animation.dugtrio.ground_walk",
+      "battle_idle": "animation.dugtrio.battle_idle",
+      "faint": "animation.dugtrio.faint",
+      "cry": "animation.dugtrio.cry",
+      "sleep": "animation.dugtrio.sleep",
+      "quirk_idle": "animation.dugtrio.quirk_idle",
+      "quirk_idle2": "animation.dugtrio.quirk_idle2",
+      "quirk_idle3": "animation.dugtrio.quirk_idle3",
+      "ground_run": "animation.dugtrio.minemon_run",
+      "sit": "animation.dugtrio.minemon_sit",
+      "physical_attack": "animation.dugtrio.minemon_physical_attack"
+    },
+    "idle": "animation.dugtrio.ground_idle",
+    "walk": "animation.dugtrio.ground_walk",
+    "attackTicks": 12,
+    "excluded_clips": [
+      "animation.dugtrio.blink",
+      "animation.dugtrio.blink2",
+      "animation.dugtrio.blink3"
+    ],
+    "sounds": [
+      "assets/minemon/sounds/pokemon/dugtrio/dugtrio_ambient.ogg",
+      "assets/minemon/sounds/pokemon/dugtrio/dugtrio_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/dugtrio/model-license.txt"
+    ],
+    "eggBase": 12085313,
+    "eggSpots": 13138763
+  },
+  {
     "slug": "psyduck",
     "name": "Psyduck",
     "model": "assets/minemon/geo/psyduck/psyduck.geo.json",
@@ -1119,6 +1165,356 @@
     "eggBase": 14457691,
     "eggSpots": 13469266,
     "nationalPokedexNumber": 54
+  },
+  {
+    "nationalPokedexNumber": 55,
+    "slug": "golduck",
+    "name": "Golduck",
+    "model": "assets/minemon/geo/golduck/golduck.geo.json",
+    "texture": "assets/minemon/textures/pokemon/golduck/golduck.png",
+    "animation": "assets/minemon/animations/golduck/golduck.animation.json",
+    "mode": "ground",
+    "scale": 1.2,
+    "width": 0.8,
+    "height": 1.5,
+    "health": 40.0,
+    "attack": 6.833333333333333,
+    "speed": 0.285,
+    "clips": {
+      "ground_idle": "animation.golduck.ground_idle",
+      "ground_walk": "animation.golduck.ground_walk",
+      "water_idle": "animation.golduck.water_idle",
+      "water_swim": "animation.golduck.water_swim",
+      "sleep": "animation.golduck.sleep",
+      "blink": "animation.golduck.blink",
+      "cry": "animation.golduck.cry",
+      "ground_run": "animation.golduck.minemon_run",
+      "sit": "animation.golduck.minemon_sit",
+      "physical_attack": "animation.golduck.minemon_physical_attack"
+    },
+    "idle": "animation.golduck.ground_idle",
+    "walk": "animation.golduck.ground_walk",
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "sounds": [
+      "assets/minemon/sounds/pokemon/golduck/golduck_ambient.ogg",
+      "assets/minemon/sounds/pokemon/golduck/golduck_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/golduck/model-license.txt"
+    ],
+    "eggBase": 5608642,
+    "eggSpots": 6597325
+  },
+  {
+    "nationalPokedexNumber": 56,
+    "slug": "mankey",
+    "name": "Mankey",
+    "model": "assets/minemon/geo/mankey/mankey.geo.json",
+    "texture": "assets/minemon/textures/pokemon/mankey/mankey.png",
+    "animation": "assets/minemon/animations/mankey/mankey.animation.json",
+    "mode": "ground",
+    "scale": 0.85,
+    "width": 0.6,
+    "height": 0.8,
+    "health": 20,
+    "attack": 6.666666666666667,
+    "speed": 0.27,
+    "clips": {
+      "ground_idle": "animation.mankey.ground_idle",
+      "ground_walk": "animation.mankey.ground_walk",
+      "physical_attack": "animation.mankey.physical_attack",
+      "faint": "animation.mankey.faint",
+      "sleep": "animation.mankey.sleep",
+      "blink": "animation.mankey.blink",
+      "cry": "animation.mankey.cry",
+      "ground_run": "animation.mankey.minemon_run",
+      "sit": "animation.mankey.minemon_sit"
+    },
+    "idle": "animation.mankey.ground_idle",
+    "walk": "animation.mankey.ground_walk",
+    "attackTicks": 60,
+    "excluded_clips": [],
+    "sounds": [
+      "assets/minemon/sounds/pokemon/mankey/mankey_ambient.ogg",
+      "assets/minemon/sounds/pokemon/mankey/mankey_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/mankey/model-license.txt"
+    ],
+    "eggBase": 14929048,
+    "eggSpots": 15983532
+  },
+  {
+    "nationalPokedexNumber": 57,
+    "slug": "primeape",
+    "name": "Primeape",
+    "model": "assets/minemon/geo/primeape/primeape.geo.json",
+    "texture": "assets/minemon/textures/pokemon/primeape/primeape.png",
+    "animation": "assets/minemon/animations/primeape/primeape.animation.json",
+    "mode": "ground",
+    "scale": 1.1,
+    "width": 0.7,
+    "height": 1.1,
+    "health": 32.5,
+    "attack": 8.75,
+    "speed": 0.295,
+    "clips": {
+      "ground_idle": "animation.primeape.ground_idle",
+      "ground_walk": "animation.primeape.ground_walk",
+      "blink": "animation.primeape.blink",
+      "cry": "animation.primeape.cry",
+      "ground_run": "animation.primeape.minemon_run",
+      "sit": "animation.primeape.minemon_sit",
+      "sleep": "animation.primeape.minemon_sleep",
+      "physical_attack": "animation.primeape.minemon_physical_attack"
+    },
+    "idle": "animation.primeape.ground_idle",
+    "walk": "animation.primeape.ground_walk",
+    "attackTicks": 12,
+    "excluded_clips": [
+      "animation.primeape.faint",
+      "animation.primeape.sleep"
+    ],
+    "sounds": [
+      "assets/minemon/sounds/pokemon/primeape/primeape_ambient.ogg",
+      "assets/minemon/sounds/pokemon/primeape/primeape_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/primeape/model-license.txt"
+    ],
+    "eggBase": 14926488,
+    "eggSpots": 15980972
+  },
+  {
+    "nationalPokedexNumber": 63,
+    "slug": "abra",
+    "name": "Abra",
+    "model": "assets/minemon/geo/abra/abra.geo.json",
+    "texture": "assets/minemon/textures/pokemon/abra/abra.png",
+    "animation": "assets/minemon/animations/abra/abra.animation.json",
+    "mode": "ground",
+    "scale": 0.85,
+    "width": 1,
+    "height": 1.2,
+    "health": 20,
+    "attack": 3,
+    "speed": 0.29,
+    "clips": {
+      "ground_idle": "animation.abra.ground_idle",
+      "ground_walk": "animation.abra.ground_walk",
+      "ground_run": "animation.abra.ground_run",
+      "battle_idle": "animation.abra.battle_idle",
+      "sleep": "animation.abra.sleep",
+      "dance": "animation.abra.dance",
+      "cry": "animation.abra.cry",
+      "faint": "animation.abra.faint",
+      "sit": "animation.abra.minemon_sit",
+      "physical_attack": "animation.abra.minemon_physical_attack"
+    },
+    "idle": "animation.abra.ground_idle",
+    "walk": "animation.abra.ground_walk",
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "sounds": [
+      "assets/minemon/sounds/pokemon/abra/abra_ambient.ogg",
+      "assets/minemon/sounds/pokemon/abra/abra_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/abra/model-license.txt"
+    ],
+    "eggBase": 15323184,
+    "eggSpots": 15785561
+  },
+  {
+    "nationalPokedexNumber": 66,
+    "slug": "machop",
+    "name": "Machop",
+    "model": "assets/minemon/geo/machop/machop.geo.json",
+    "texture": "assets/minemon/textures/pokemon/machop/machop.png",
+    "animation": "assets/minemon/animations/machop/machop.animation.json",
+    "mode": "ground",
+    "scale": 0.8,
+    "width": 0.7,
+    "height": 1.4,
+    "health": 35.0,
+    "attack": 6.666666666666667,
+    "speed": 0.235,
+    "clips": {
+      "ground_idle": "animation.machop.ground_idle",
+      "ground_walk": "animation.machop.ground_walk",
+      "blink": "animation.machop.blink",
+      "ground_run": "animation.machop.minemon_run",
+      "sit": "animation.machop.minemon_sit",
+      "sleep": "animation.machop.minemon_sleep",
+      "physical_attack": "animation.machop.minemon_physical_attack"
+    },
+    "idle": "animation.machop.ground_idle",
+    "walk": "animation.machop.ground_walk",
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "sounds": [
+      "assets/minemon/sounds/pokemon/machop/machop_ambient.ogg",
+      "assets/minemon/sounds/pokemon/machop/machop_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/machop/model-license.txt"
+    ],
+    "eggBase": 8891317,
+    "eggSpots": 9944772
+  },
+  {
+    "nationalPokedexNumber": 67,
+    "slug": "machoke",
+    "name": "Machoke",
+    "model": "assets/minemon/geo/machoke/machoke.geo.json",
+    "texture": "assets/minemon/textures/pokemon/machoke/machoke.png",
+    "animation": "assets/minemon/animations/machoke/machoke.animation.json",
+    "mode": "ground",
+    "scale": 1,
+    "width": 0.8,
+    "height": 1.7,
+    "health": 40.0,
+    "attack": 8.333333333333334,
+    "speed": 0.245,
+    "clips": {
+      "ground_idle": "animation.machoke.ground_idle",
+      "ground_walk": "animation.machoke.ground_walk",
+      "blink": "animation.machoke.blink",
+      "ground_run": "animation.machoke.minemon_run",
+      "sit": "animation.machoke.minemon_sit",
+      "sleep": "animation.machoke.minemon_sleep",
+      "physical_attack": "animation.machoke.minemon_physical_attack"
+    },
+    "idle": "animation.machoke.ground_idle",
+    "walk": "animation.machoke.ground_walk",
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "sounds": [
+      "assets/minemon/sounds/pokemon/machoke/machoke_ambient.ogg",
+      "assets/minemon/sounds/pokemon/machoke/machoke_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/machoke/model-license.txt"
+    ],
+    "eggBase": 8752564,
+    "eggSpots": 7962537
+  },
+  {
+    "nationalPokedexNumber": 68,
+    "slug": "machamp",
+    "name": "Machamp",
+    "model": "assets/minemon/geo/machamp/machamp.geo.json",
+    "texture": "assets/minemon/textures/pokemon/machamp/machamp.png",
+    "animation": "assets/minemon/animations/machamp/machamp.animation.json",
+    "mode": "ground",
+    "scale": 1.2,
+    "width": 1,
+    "height": 1.8,
+    "health": 45.0,
+    "attack": 10.833333333333334,
+    "speed": 0.255,
+    "clips": {
+      "ground_idle": "animation.machamp.ground_idle",
+      "ground_walk": "animation.machamp.ground_walk",
+      "blink": "animation.machamp.blink",
+      "ground_run": "animation.machamp.minemon_run",
+      "sit": "animation.machamp.minemon_sit",
+      "sleep": "animation.machamp.minemon_sleep",
+      "physical_attack": "animation.machamp.minemon_physical_attack"
+    },
+    "idle": "animation.machamp.ground_idle",
+    "walk": "animation.machamp.ground_walk",
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "sounds": [
+      "assets/minemon/sounds/pokemon/machamp/machamp_ambient.ogg",
+      "assets/minemon/sounds/pokemon/machamp/machamp_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/machamp/model-license.txt"
+    ],
+    "eggBase": 7768486,
+    "eggSpots": 8558514
+  },
+  {
+    "nationalPokedexNumber": 74,
+    "slug": "geodude",
+    "name": "Geodude",
+    "model": "assets/minemon/geo/geodude/geodude.geo.json",
+    "texture": "assets/minemon/textures/pokemon/geodude/geodude.png",
+    "animation": "assets/minemon/animations/geodude/geodude.animation.json",
+    "mode": "ground",
+    "scale": 1,
+    "width": 0.9,
+    "height": 0.5,
+    "health": 20,
+    "attack": 6.666666666666667,
+    "speed": 0.22,
+    "clips": {
+      "ground_idle": "animation.geodude.ground_idle",
+      "ground_walk": "animation.geodude.ground_walk",
+      "ground_run": "animation.geodude.ground_run",
+      "sleep": "animation.geodude.sleep",
+      "blink": "animation.geodude.blink",
+      "cry": "animation.geodude.cry",
+      "sit": "animation.geodude.minemon_sit",
+      "physical_attack": "animation.geodude.minemon_physical_attack"
+    },
+    "idle": "animation.geodude.ground_idle",
+    "walk": "animation.geodude.ground_walk",
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "sounds": [
+      "assets/minemon/sounds/pokemon/geodude/geodude_ambient.ogg",
+      "assets/minemon/sounds/pokemon/geodude/geodude_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/geodude/model-license.txt"
+    ],
+    "eggBase": 9867649,
+    "eggSpots": 8879986
+  },
+  {
+    "nationalPokedexNumber": 79,
+    "slug": "slowpoke",
+    "name": "Slowpoke",
+    "model": "assets/minemon/geo/slowpoke/slowpoke.geo.json",
+    "texture": "assets/minemon/textures/pokemon/slowpoke/slowpoke.png",
+    "animation": "assets/minemon/animations/slowpoke/slowpoke.animation.json",
+    "mode": "ground",
+    "scale": 0.75,
+    "width": 1.2,
+    "height": 0.7,
+    "health": 45.0,
+    "attack": 5.416666666666667,
+    "speed": 0.215,
+    "clips": {
+      "ground_idle": "animation.slowpoke.ground_idle",
+      "ground_walk": "animation.slowpoke.ground_walk",
+      "floor_idle": "animation.slowpoke.floor_idle",
+      "water_idle": "animation.slowpoke.water_idle",
+      "water_swim": "animation.slowpoke.water_swim",
+      "sleep": "animation.slowpoke.sleep",
+      "blink": "animation.slowpoke.blink",
+      "cry": "animation.slowpoke.cry",
+      "ground_run": "animation.slowpoke.minemon_run",
+      "sit": "animation.slowpoke.minemon_sit",
+      "physical_attack": "animation.slowpoke.minemon_physical_attack"
+    },
+    "idle": "animation.slowpoke.ground_idle",
+    "walk": "animation.slowpoke.ground_walk",
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "sounds": [
+      "assets/minemon/sounds/pokemon/slowpoke/slowpoke_ambient.ogg",
+      "assets/minemon/sounds/pokemon/slowpoke/slowpoke_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/slowpoke/model-license.txt"
+    ],
+    "eggBase": 15761301,
+    "eggSpots": 14774911
   },
   {
     "slug": "onix",

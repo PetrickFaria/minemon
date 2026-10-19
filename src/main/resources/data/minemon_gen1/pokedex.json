@@ -303,7 +303,7 @@
     "nationalPokedexNumber": 51,
     "slug": "dugtrio",
     "name": "Dugtrio",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 52,
@@ -327,19 +327,19 @@
     "nationalPokedexNumber": 55,
     "slug": "golduck",
     "name": "Golduck",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 56,
     "slug": "mankey",
     "name": "Mankey",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 57,
     "slug": "primeape",
     "name": "Primeape",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 58,
@@ -375,7 +375,7 @@
     "nationalPokedexNumber": 63,
     "slug": "abra",
     "name": "Abra",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 64,
@@ -393,19 +393,19 @@
     "nationalPokedexNumber": 66,
     "slug": "machop",
     "name": "Machop",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 67,
     "slug": "machoke",
     "name": "Machoke",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 68,
     "slug": "machamp",
     "name": "Machamp",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 69,
@@ -441,7 +441,7 @@
     "nationalPokedexNumber": 74,
     "slug": "geodude",
     "name": "Geodude",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 75,
@@ -471,7 +471,7 @@
     "nationalPokedexNumber": 79,
     "slug": "slowpoke",
     "name": "Slowpoke",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 80,
