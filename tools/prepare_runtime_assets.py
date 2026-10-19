@@ -130,7 +130,8 @@ def prepare_tail_flame(root,d):
  texture=root/'assets/minemon_gen1'/d['texture'].removeprefix('assets/minemon/')
  geo=json.loads(model.read_text());texture_data=texture.read_bytes();w,h,rows=decode_png_rgba(texture_data)
  sprite_sizes={'charmander':(5,8),'charmeleon':(6,10),'charizard':(8,12)}
- fw,fh=sprite_sizes[slug];pad=2;new_w=w+24;x=w+pad;y=2
+ fw,fh=sprite_sizes[slug];depth={'charmander':2,'charmeleon':3,'charizard':4}[slug]
+ pad=2;new_w=w+32;x=w+pad;y=5
  # A compact pixel flame is drawn only into the generated runtime atlas.
  # The extracted/original art and its license-bearing source files stay intact.
  for yy in range(fh):
@@ -147,7 +148,7 @@ def prepare_tail_flame(root,d):
    # Extend the row once when moving from the original atlas to the new atlas.
    if len(row)<new_w*4: row.extend(b'\0'*(new_w*4-len(row)))
    row[(x+xx)*4:(x+xx+1)*4]=bytes(rgba)
-   back_x=x+fw+1
+   back_x=x+fw+depth
    row[(back_x+xx)*4:(back_x+xx+1)*4]=bytes(rgba)
  for row in rows:
   if len(row)<new_w*4:row.extend(b'\0'*(new_w*4-len(row)))
@@ -159,9 +160,10 @@ def prepare_tail_flame(root,d):
  # supported format across GeckoLib 3 exporters; the back sprite occupies
  # the box-UV south face in the generated atlas.
  y0,z0={'charmander':(5.7,15.5),'charmeleon':(8.25,18.0),'charizard':(7.75,37.5)}[slug]
- cube={'origin':[-fw/2,y0,z0-0.5],'size':[fw,fh,1],'uv':[x-1,y-1]}
- crossed={'origin':[-fw/2,y0,z0-0.5],'size':[fw,fh,1],'pivot':[0,y0,z0],
-          'rotation':[0,90,0],'uv':[x-1,y-1]}
+ y0-=fh/2
+ cube={'origin':[-fw/2,y0,z0-depth/2],'size':[fw,fh,depth],'uv':[x-depth,y-depth]}
+ crossed={'origin':[-fw/2,y0,z0-depth/2],'size':[fw,fh,depth],'pivot':[0,y0+fh/2,z0],
+          'rotation':[0,90,0],'uv':[x-depth,y-depth]}
  fire['cubes']=[cube,crossed]
  model.write_text(json.dumps(geo,ensure_ascii=False,indent=2)+'\n')
  texture.write_bytes(encode_png_rgba(new_w,h,rows))

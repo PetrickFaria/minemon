@@ -38,10 +38,10 @@ def validate(read,definitions,prepared=False,packed=False):
     if len(cubes)!=2 or any(any(n<=0 for n in cube.get('size',[])) for cube in cubes):raise ValueError('Tail flame is missing or has degenerate geometry: '+d['slug'])
     texwidth=g['minecraft:geometry'][0]['description']['texture_width']
     for cube in cubes:
-     for face,uv in cube.get('uv',{}).items():
-      u,v=uv.get('uv',[-1,-1]);uw,vh=uv.get('uv_size',[0,0])
-      if u<0 or v<0 or u+uw>texwidth or v+vh>g['minecraft:geometry'][0]['description']['texture_height']:
-       raise ValueError('Tail flame UV outside texture: '+d['slug'])
+     uv=cube.get('uv',[]);u,v=uv if isinstance(uv,list) and len(uv)==2 else (-1,-1)
+     sx,sy,sz=cube.get('size',[0,0,0]);box_width=2*sx+2*sz;box_height=sy+sz
+     if u<0 or v<0 or u+box_width>texwidth or v+box_height>g['minecraft:geometry'][0]['description']['texture_height']:
+      raise ValueError('Tail flame box UV outside texture: '+d['slug'])
     for key,sign,base in [('left',1,{'charmander':35,'charmeleon':42.5,'charizard':55}[d['slug']]),('right',-1,{'charmander':-35,'charmeleon':-42.5,'charizard':-55}[d['slug']])]:
      for clip_key in ('ground_walk','ground_run'):
       clip=d['clips'][clip_key];rotation=a[clip]['bones']['arm_'+key]['rotation']
