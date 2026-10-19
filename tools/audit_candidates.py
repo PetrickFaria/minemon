@@ -53,7 +53,7 @@ def audit():
     clip=ad[name]
     valid_bones={bone:channels for bone,channels in clip.get('bones',{}).items() if bone in bones}
     payload=json.dumps({'bones':valid_bones})
-    return bool(re.search(r'(?:q|query)\\.anim_time',payload)) or any(isinstance(ch,dict) and len(ch)>1 for bone in valid_bones.values() for ch in bone.values())
+    return ('query.anim_time' in payload or 'q.anim_time' in payload) or any(isinstance(ch,dict) and len(ch)>1 for bone in valid_bones.values() for ch in bone.values())
    movement_fallback=None
    if not walk or not has_motion(walk):
     # Several extracted species have a valid, animated idle but no locomotion
