@@ -1,9 +1,11 @@
 [
   {
     "slug": "bulbasaur",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 1,
       "slug": "bulbasaur",
@@ -31,6 +33,7 @@
       "walk": "animation.bulbasaur.ground_walk",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/bulbasaur/bulbasaur_ambient.ogg",
         "assets/minemon/sounds/pokemon/bulbasaur/bulbasaur_cry.ogg",
@@ -44,9 +47,11 @@
   },
   {
     "slug": "ivysaur",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 2,
       "slug": "ivysaur",
@@ -74,6 +79,7 @@
       "walk": "animation.ivysaur.ground_walk",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/ivysaur/ivysaur_ambient.ogg",
         "assets/minemon/sounds/pokemon/ivysaur/ivysaur_cry.ogg"
@@ -85,9 +91,11 @@
   },
   {
     "slug": "venusaur",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 3,
       "slug": "venusaur",
@@ -115,6 +123,7 @@
       "walk": "animation.venusaur.ground_walk",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/venusaur/venusaur_ambient.ogg",
         "assets/minemon/sounds/pokemon/venusaur/venusaur_cry.ogg"
@@ -126,9 +135,11 @@
   },
   {
     "slug": "charmander",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 4,
       "slug": "charmander",
@@ -160,6 +171,7 @@
       "walk": "animation.charmander.ground_walk",
       "attackTicks": 68,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/charmander/charmander_ambient.ogg",
         "assets/minemon/sounds/pokemon/charmander/charmander_cry.ogg"
@@ -171,9 +183,11 @@
   },
   {
     "slug": "charmeleon",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 5,
       "slug": "charmeleon",
@@ -202,6 +216,7 @@
       "walk": "animation.charmeleon.ground_walk",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/charmeleon/charmeleon_ambient.ogg",
         "assets/minemon/sounds/pokemon/charmeleon/charmeleon_cry.ogg"
@@ -213,9 +228,11 @@
   },
   {
     "slug": "charizard",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 6,
       "slug": "charizard",
@@ -250,6 +267,7 @@
       "walk": "animation.charizard.air_fly",
       "attackTicks": 60,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/charizard/charizard_ambient.ogg",
         "assets/minemon/sounds/pokemon/charizard/charizard_cry.ogg"
@@ -304,6 +322,7 @@
       "walk": "animation.squirtle.ground_walk",
       "attackTicks": 60,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/squirtle/squirtle_ambient.ogg",
         "assets/minemon/sounds/pokemon/squirtle/squirtle_cry.ogg"
@@ -355,6 +374,7 @@
       "walk": "animation.wartortle.ground_walk",
       "attackTicks": 60,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/wartortle/wartortle_ambient.ogg",
         "assets/minemon/sounds/pokemon/wartortle/wartortle_cry.ogg"
@@ -408,6 +428,7 @@
       "walk": "animation.blastoise.ground_walk",
       "attackTicks": 60,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/blastoise/blastoise_ambient.ogg",
         "assets/minemon/sounds/pokemon/blastoise/blastoise_cry.ogg"
@@ -449,6 +470,7 @@
       "walk": "animation.caterpie.ground_walk",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/caterpie/caterpie_ambient.ogg",
         "assets/minemon/sounds/pokemon/caterpie/caterpie_cry.ogg"
@@ -491,6 +513,7 @@
       "walk": null,
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/metapod/metapod_ambient.ogg",
         "assets/minemon/sounds/pokemon/metapod/metapod_cry.ogg"
@@ -502,9 +525,11 @@
   },
   {
     "slug": "butterfree",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 12,
       "slug": "butterfree",
@@ -531,6 +556,7 @@
       "walk": "animation.butterfree.air_fly",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/butterfree/butterfree_ambient.ogg",
         "assets/minemon/sounds/pokemon/butterfree/butterfree_cry.ogg"
@@ -542,9 +568,11 @@
   },
   {
     "slug": "weedle",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 13,
       "slug": "weedle",
@@ -574,6 +602,7 @@
       "walk": "animation.weedle.ground_walk",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/weedle/weedle_ambient.ogg",
         "assets/minemon/sounds/pokemon/weedle/weedle_cry.ogg"
@@ -615,6 +644,7 @@
       "walk": null,
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/kakuna/kakuna_ambient.ogg",
         "assets/minemon/sounds/pokemon/kakuna/kakuna_cry.ogg"
@@ -626,9 +656,11 @@
   },
   {
     "slug": "beedrill",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 15,
       "slug": "beedrill",
@@ -654,6 +686,7 @@
       "walk": "animation.beedrill.air_fly",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/beedrill/beedrill_ambient.ogg",
         "assets/minemon/sounds/pokemon/beedrill/beedrill_cry.ogg"
@@ -696,6 +729,7 @@
       "walk": "animation.pidgey.air_fly",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/pidgey/pidgey_ambient.ogg",
         "assets/minemon/sounds/pokemon/pidgey/pidgey_cry.ogg"
@@ -708,9 +742,9 @@
   {
     "slug": "pidgeotto",
     "accepted": false,
-    "reason": "animation.pidgeotto.air_idle references model bones that are absent",
+    "reason": "Locomotion clip is a static pose",
     "issues": [
-      "animation.pidgeotto.air_idle references model bones that are absent"
+      "Locomotion clip is a static pose"
     ],
     "definition": {
       "nationalPokedexNumber": 17,
@@ -742,6 +776,15 @@
       "excluded_clips": [
         "animation.pidgeotto.sleep_PLACEHOLDER"
       ],
+      "stripped_bones": {
+        "animation.pidgeotto.air_idle": [
+          "claw_middle_left",
+          "claw_middle_right",
+          "hair6",
+          "toe_middle_left",
+          "toe_middle_right"
+        ]
+      },
       "sounds": [
         "assets/minemon/sounds/pokemon/pidgeotto/pidgeotto_ambient.ogg",
         "assets/minemon/sounds/pokemon/pidgeotto/pidgeotto_cry.ogg"
@@ -753,9 +796,11 @@
   },
   {
     "slug": "pidgeot",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 18,
       "slug": "pidgeot",
@@ -783,6 +828,7 @@
       "walk": "animation.pidgeot.air_fly",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/pidgeot/pidgeot_ambient.ogg",
         "assets/minemon/sounds/pokemon/pidgeot/pidgeot_cry.ogg"
@@ -794,9 +840,11 @@
   },
   {
     "slug": "rattata",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 19,
       "slug": "rattata",
@@ -823,6 +871,7 @@
       "walk": "animation.rattata.ground_walk",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/rattata/rattata_ambient.ogg",
         "assets/minemon/sounds/pokemon/rattata/rattata_cry.ogg"
@@ -835,10 +884,9 @@
   {
     "slug": "raticate",
     "accepted": false,
-    "reason": "animation.raticate.ground_idle references model bones that are absent; animation.raticate.ground_walk references model bones that are absent",
+    "reason": "Locomotion clip is a static pose",
     "issues": [
-      "animation.raticate.ground_idle references model bones that are absent",
-      "animation.raticate.ground_walk references model bones that are absent"
+      "Locomotion clip is a static pose"
     ],
     "definition": {
       "nationalPokedexNumber": 20,
@@ -868,6 +916,20 @@
       "excluded_clips": [
         "animation.raticate.faint"
       ],
+      "stripped_bones": {
+        "animation.raticate.ground_idle": [
+          "arm_left",
+          "arm_right",
+          "whiskers_lower_left",
+          "whiskers_lower_right"
+        ],
+        "animation.raticate.ground_walk": [
+          "arm_left",
+          "arm_right",
+          "whiskers_bottom_left",
+          "whiskers_bottom_right"
+        ]
+      },
       "sounds": [
         "assets/minemon/sounds/pokemon/raticate/raticate_alolan_cry.ogg",
         "assets/minemon/sounds/pokemon/raticate/raticate_ambient.ogg",
@@ -908,6 +970,7 @@
       "walk": null,
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/spearow/spearow_ambient.ogg",
         "assets/minemon/sounds/pokemon/spearow/spearow_cry.ogg"
@@ -920,10 +983,9 @@
   {
     "slug": "fearow",
     "accepted": false,
-    "reason": "No usable locomotion clip; animation.fearow.ground_idle references model bones that are absent",
+    "reason": "No usable locomotion clip",
     "issues": [
-      "No usable locomotion clip",
-      "animation.fearow.ground_idle references model bones that are absent"
+      "No usable locomotion clip"
     ],
     "definition": {
       "nationalPokedexNumber": 22,
@@ -948,6 +1010,12 @@
       "walk": null,
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {
+        "animation.fearow.ground_idle": [
+          "hairstrand",
+          "hairstrand2"
+        ]
+      },
       "sounds": [
         "assets/minemon/sounds/pokemon/fearow/fearow_ambient.ogg",
         "assets/minemon/sounds/pokemon/fearow/fearow_cry.ogg"
@@ -990,6 +1058,7 @@
       "walk": null,
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/ekans/ekans_ambient.ogg",
         "assets/minemon/sounds/pokemon/ekans/ekans_cry.ogg"
@@ -1001,9 +1070,11 @@
   },
   {
     "slug": "arbok",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 24,
       "slug": "arbok",
@@ -1032,6 +1103,7 @@
       "walk": "animation.arbok.ground_walk",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/arbok/arbok_ambient.ogg",
         "assets/minemon/sounds/pokemon/arbok/arbok_cry.ogg"
@@ -1043,9 +1115,11 @@
   },
   {
     "slug": "pikachu",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 25,
       "slug": "pikachu",
@@ -1075,6 +1149,7 @@
       "walk": "animation.pikachu.ground_walk",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/pikachu/pikachu_ambient.ogg",
         "assets/minemon/sounds/pokemon/pikachu/pikachu_cry.ogg"
@@ -1086,9 +1161,11 @@
   },
   {
     "slug": "raichu",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 26,
       "slug": "raichu",
@@ -1116,6 +1193,7 @@
       "walk": "animation.raichu.ground_walk",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/raichu/alolan_raichu_cry.ogg",
         "assets/minemon/sounds/pokemon/raichu/raichu_ambient.ogg",
@@ -1129,9 +1207,9 @@
   {
     "slug": "sandshrew",
     "accepted": false,
-    "reason": "animation.sandshrew.ground_idle references model bones that are absent",
+    "reason": "Locomotion clip is a static pose",
     "issues": [
-      "animation.sandshrew.ground_idle references model bones that are absent"
+      "Locomotion clip is a static pose"
     ],
     "definition": {
       "nationalPokedexNumber": 27,
@@ -1160,6 +1238,11 @@
       "excluded_clips": [
         "animation.sandshrew.faint"
       ],
+      "stripped_bones": {
+        "animation.sandshrew.ground_idle": [
+          "head_angle"
+        ]
+      },
       "sounds": [
         "assets/minemon/sounds/pokemon/sandshrew/sandshrew_ambient.ogg",
         "assets/minemon/sounds/pokemon/sandshrew/sandshrew_cry.ogg"
@@ -1172,9 +1255,9 @@
   {
     "slug": "sandslash",
     "accepted": false,
-    "reason": "animation.sandslash.ground_idle references model bones that are absent",
+    "reason": "Locomotion clip is a static pose",
     "issues": [
-      "animation.sandslash.ground_idle references model bones that are absent"
+      "Locomotion clip is a static pose"
     ],
     "definition": {
       "nationalPokedexNumber": 28,
@@ -1203,6 +1286,13 @@
       "excluded_clips": [
         "animation.sandslash.faint"
       ],
+      "stripped_bones": {
+        "animation.sandslash.ground_idle": [
+          "forearm_left",
+          "forearm_right",
+          "tail3"
+        ]
+      },
       "sounds": [
         "assets/minemon/sounds/pokemon/sandslash/sandslash_ambient.ogg",
         "assets/minemon/sounds/pokemon/sandslash/sandslash_cry.ogg"
@@ -1242,6 +1332,7 @@
       "walk": null,
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/nidoranf/nidoranf_ambient.ogg",
         "assets/minemon/sounds/pokemon/nidoranf/nidoranf_cry.ogg"
@@ -1283,6 +1374,7 @@
       "walk": null,
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/nidorina/nidorina_ambient.ogg",
         "assets/minemon/sounds/pokemon/nidorina/nidorina_cry.ogg"
@@ -1324,6 +1416,7 @@
       "walk": null,
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/nidoqueen/nidoqueen_ambient.ogg",
         "assets/minemon/sounds/pokemon/nidoqueen/nidoqueen_cry.ogg"
@@ -1363,6 +1456,7 @@
       "walk": null,
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/nidoranm/nidoranm_ambient.ogg",
         "assets/minemon/sounds/pokemon/nidoranm/nidoranm_cry.ogg"
@@ -1375,10 +1469,9 @@
   {
     "slug": "nidorino",
     "accepted": false,
-    "reason": "No usable locomotion clip; animation.nidorino.ground_idle references model bones that are absent",
+    "reason": "No usable locomotion clip",
     "issues": [
-      "No usable locomotion clip",
-      "animation.nidorino.ground_idle references model bones that are absent"
+      "No usable locomotion clip"
     ],
     "definition": {
       "nationalPokedexNumber": 33,
@@ -1402,6 +1495,12 @@
       "walk": null,
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {
+        "animation.nidorino.ground_idle": [
+          "ear_left",
+          "ear_right"
+        ]
+      },
       "sounds": [
         "assets/minemon/sounds/pokemon/nidorino/nidorino_ambient.ogg",
         "assets/minemon/sounds/pokemon/nidorino/nidorino_cry.ogg"
@@ -1441,6 +1540,7 @@
       "walk": null,
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/nidoking/nidoking_ambient.ogg",
         "assets/minemon/sounds/pokemon/nidoking/nidoking_cry.ogg"
@@ -1452,9 +1552,11 @@
   },
   {
     "slug": "clefairy",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 35,
       "slug": "clefairy",
@@ -1482,6 +1584,7 @@
       "walk": "animation.clefairy.ground_walk",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/clefairy/clefairy_ambient.ogg",
         "assets/minemon/sounds/pokemon/clefairy/clefairy_cry.ogg"
@@ -1493,9 +1596,11 @@
   },
   {
     "slug": "clefable",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 36,
       "slug": "clefable",
@@ -1524,6 +1629,7 @@
       "walk": "animation.clefable.ground_walk",
       "attackTicks": 40,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/clefable/clefable_ambient.ogg",
         "assets/minemon/sounds/pokemon/clefable/clefable_cry.ogg"
@@ -1564,6 +1670,7 @@
       "walk": null,
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/vulpix/vulpix_ambient.ogg",
         "assets/minemon/sounds/pokemon/vulpix/vulpix_cry.ogg"
@@ -1604,6 +1711,7 @@
       "walk": null,
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/ninetales/ninetales_ambient.ogg",
         "assets/minemon/sounds/pokemon/ninetales/ninetales_cry.ogg"
@@ -1615,9 +1723,11 @@
   },
   {
     "slug": "jigglypuff",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 39,
       "slug": "jigglypuff",
@@ -1643,6 +1753,7 @@
       "walk": "animation.jigglypuff.ground_walk",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/jigglypuff/jigglypuff_ambient.ogg",
         "assets/minemon/sounds/pokemon/jigglypuff/jigglypuff_cry.ogg"
@@ -1655,9 +1766,9 @@
   {
     "slug": "wigglytuff",
     "accepted": false,
-    "reason": "animation.wigglytuff.ground_walk references model bones that are absent",
+    "reason": "Locomotion clip is a static pose",
     "issues": [
-      "animation.wigglytuff.ground_walk references model bones that are absent"
+      "Locomotion clip is a static pose"
     ],
     "definition": {
       "nationalPokedexNumber": 40,
@@ -1683,6 +1794,24 @@
       "walk": "animation.wigglytuff.ground_walk",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {
+        "animation.wigglytuff.ground_walk": [
+          "drool",
+          "flower",
+          "leaf_back",
+          "leaf_back2",
+          "leaf_front_left",
+          "leaf_front_left2",
+          "leaf_front_right",
+          "leaf_front_right2",
+          "leaf_left",
+          "leaf_left2",
+          "leaf_left3",
+          "leaf_right",
+          "leaf_right2",
+          "leaf_right3"
+        ]
+      },
       "sounds": [
         "assets/minemon/sounds/pokemon/wigglytuff/wigglytuff_ambient.ogg",
         "assets/minemon/sounds/pokemon/wigglytuff/wigglytuff_cry.ogg"
@@ -1694,9 +1823,11 @@
   },
   {
     "slug": "zubat",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 41,
       "slug": "zubat",
@@ -1728,6 +1859,7 @@
       "walk": "animation.zubat.air_fly",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/zubat/zubat_ambient.ogg",
         "assets/minemon/sounds/pokemon/zubat/zubat_cry.ogg"
@@ -1740,10 +1872,9 @@
   {
     "slug": "golbat",
     "accepted": false,
-    "reason": "animation.golbat.air_idle references model bones that are absent; animation.golbat.air_fly references model bones that are absent",
+    "reason": "Locomotion clip is a static pose",
     "issues": [
-      "animation.golbat.air_idle references model bones that are absent",
-      "animation.golbat.air_fly references model bones that are absent"
+      "Locomotion clip is a static pose"
     ],
     "definition": {
       "nationalPokedexNumber": 42,
@@ -1783,6 +1914,16 @@
         "animation.golbat.sleep",
         "animation.golbat.roost"
       ],
+      "stripped_bones": {
+        "animation.golbat.air_idle": [
+          "wing_left_rotation",
+          "wing_right_rotation"
+        ],
+        "animation.golbat.air_fly": [
+          "wing_left_rotation",
+          "wing_right_rotation"
+        ]
+      },
       "sounds": [
         "assets/minemon/sounds/pokemon/golbat/golbat_ambient.ogg",
         "assets/minemon/sounds/pokemon/golbat/golbat_cry.ogg"
@@ -1794,9 +1935,11 @@
   },
   {
     "slug": "oddish",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 43,
       "slug": "oddish",
@@ -1823,6 +1966,7 @@
       "walk": "animation.oddish.ground_walk",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/oddish/oddish_ambient.ogg",
         "assets/minemon/sounds/pokemon/oddish/oddish_cry.ogg"
@@ -1834,9 +1978,11 @@
   },
   {
     "slug": "gloom",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 44,
       "slug": "gloom",
@@ -1862,6 +2008,7 @@
       "walk": "animation.gloom.ground_walk",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/gloom/gloom_ambient.ogg",
         "assets/minemon/sounds/pokemon/gloom/gloom_cry.ogg"
@@ -1873,9 +2020,11 @@
   },
   {
     "slug": "vileplume",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 45,
       "slug": "vileplume",
@@ -1905,6 +2054,7 @@
       "excluded_clips": [
         "animation.vileplume.ground_run"
       ],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/vileplume/vileplume_ambient.ogg",
         "assets/minemon/sounds/pokemon/vileplume/vileplume_cry.ogg"
@@ -1916,9 +2066,11 @@
   },
   {
     "slug": "paras",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 46,
       "slug": "paras",
@@ -1944,6 +2096,7 @@
       "walk": "animation.paras.ground_walk",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/paras/paras_ambient.ogg",
         "assets/minemon/sounds/pokemon/paras/paras_cry.ogg"
@@ -1955,9 +2108,11 @@
   },
   {
     "slug": "parasect",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 47,
       "slug": "parasect",
@@ -1982,6 +2137,7 @@
       "walk": "animation.parasect.ground_walk",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/parasect/parasect_ambient.ogg",
         "assets/minemon/sounds/pokemon/parasect/parasect_cry.ogg"
@@ -1993,9 +2149,11 @@
   },
   {
     "slug": "venonat",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 48,
       "slug": "venonat",
@@ -2024,6 +2182,7 @@
       "walk": "animation.venonat.ground_walk",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/venonat/venonat_ambient.ogg",
         "assets/minemon/sounds/pokemon/venonat/venonat_cry.ogg"
@@ -2035,9 +2194,11 @@
   },
   {
     "slug": "venomoth",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 49,
       "slug": "venomoth",
@@ -2069,6 +2230,7 @@
       "walk": "animation.venomoth.air_fly",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/venomoth/venomoth_ambient.ogg",
         "assets/minemon/sounds/pokemon/venomoth/venomoth_cry.ogg"
@@ -2080,9 +2242,11 @@
   },
   {
     "slug": "diglett",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 50,
       "slug": "diglett",
@@ -2111,6 +2275,7 @@
       "walk": "animation.diglett.ground_walk",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/diglett/diglett_ambient.ogg",
         "assets/minemon/sounds/pokemon/diglett/diglett_cry.ogg"
@@ -2122,9 +2287,11 @@
   },
   {
     "slug": "dugtrio",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 51,
       "slug": "dugtrio",
@@ -2161,6 +2328,7 @@
         "animation.dugtrio.blink2",
         "animation.dugtrio.blink3"
       ],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/dugtrio/dugtrio_ambient.ogg",
         "assets/minemon/sounds/pokemon/dugtrio/dugtrio_cry.ogg"
@@ -2202,6 +2370,7 @@
       "walk": null,
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/meowth/meowth_alolan_cry.ogg",
         "assets/minemon/sounds/pokemon/meowth/meowth_ambient.ogg",
@@ -2244,6 +2413,7 @@
       "walk": null,
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/persian/persian_ambient.ogg",
         "assets/minemon/sounds/pokemon/persian/persian_cry.ogg"
@@ -2255,9 +2425,11 @@
   },
   {
     "slug": "psyduck",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 54,
       "slug": "psyduck",
@@ -2288,6 +2460,7 @@
       "walk": "animation.psyduck.ground_walk",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/psyduck/psyduck_ambient.ogg",
         "assets/minemon/sounds/pokemon/psyduck/psyduck_cry.ogg"
@@ -2299,9 +2472,11 @@
   },
   {
     "slug": "golduck",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 55,
       "slug": "golduck",
@@ -2329,6 +2504,7 @@
       "walk": "animation.golduck.ground_walk",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/golduck/golduck_ambient.ogg",
         "assets/minemon/sounds/pokemon/golduck/golduck_cry.ogg"
@@ -2340,9 +2516,11 @@
   },
   {
     "slug": "mankey",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 56,
       "slug": "mankey",
@@ -2370,6 +2548,7 @@
       "walk": "animation.mankey.ground_walk",
       "attackTicks": 60,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/mankey/mankey_ambient.ogg",
         "assets/minemon/sounds/pokemon/mankey/mankey_cry.ogg"
@@ -2381,9 +2560,11 @@
   },
   {
     "slug": "primeape",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 57,
       "slug": "primeape",
@@ -2413,6 +2594,7 @@
         "animation.primeape.faint",
         "animation.primeape.sleep"
       ],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/primeape/primeape_ambient.ogg",
         "assets/minemon/sounds/pokemon/primeape/primeape_cry.ogg"
@@ -2455,6 +2637,7 @@
       "walk": null,
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/growlithe/growlithe_ambient.ogg",
         "assets/minemon/sounds/pokemon/growlithe/growlithe_cry.ogg"
@@ -2496,6 +2679,7 @@
       "walk": null,
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/arcanine/arcanine_ambient.ogg",
         "assets/minemon/sounds/pokemon/arcanine/arcanine_cry.ogg"
@@ -2508,9 +2692,9 @@
   {
     "slug": "poliwag",
     "accepted": false,
-    "reason": "animation.poliwag.ground_walk references model bones that are absent",
+    "reason": "Locomotion clip is a static pose",
     "issues": [
-      "animation.poliwag.ground_walk references model bones that are absent"
+      "Locomotion clip is a static pose"
     ],
     "definition": {
       "nationalPokedexNumber": 60,
@@ -2542,6 +2726,23 @@
         "animation.poliwag.blink",
         "animation.poliwag.sleep"
       ],
+      "stripped_bones": {
+        "animation.poliwag.ground_walk": [
+          "arm_left",
+          "arm_left2",
+          "arm_right",
+          "arm_right2",
+          "foot_left",
+          "foot_right",
+          "hand_left",
+          "hand_right",
+          "head",
+          "leg_left2",
+          "leg_right2",
+          "torso",
+          "torso2"
+        ]
+      },
       "sounds": [
         "assets/minemon/sounds/pokemon/poliwag/poliwag_ambient.ogg",
         "assets/minemon/sounds/pokemon/poliwag/poliwag_cry.ogg"
@@ -2554,10 +2755,9 @@
   {
     "slug": "poliwhirl",
     "accepted": false,
-    "reason": "animation.poliwhirl.ground_idle references model bones that are absent; animation.poliwhirl.ground_walk references model bones that are absent",
+    "reason": "Locomotion clip is a static pose",
     "issues": [
-      "animation.poliwhirl.ground_idle references model bones that are absent",
-      "animation.poliwhirl.ground_walk references model bones that are absent"
+      "Locomotion clip is a static pose"
     ],
     "definition": {
       "nationalPokedexNumber": 61,
@@ -2587,6 +2787,24 @@
       "excluded_clips": [
         "animation.poliwhirl.sleep"
       ],
+      "stripped_bones": {
+        "animation.poliwhirl.ground_idle": [
+          "foot_left",
+          "foot_right",
+          "head",
+          "leg_left2",
+          "leg_right2",
+          "torso2"
+        ],
+        "animation.poliwhirl.ground_walk": [
+          "foot_left",
+          "foot_right",
+          "head",
+          "leg_left2",
+          "leg_right2",
+          "torso2"
+        ]
+      },
       "sounds": [
         "assets/minemon/sounds/pokemon/poliwhirl/poliwhirl_ambient.ogg",
         "assets/minemon/sounds/pokemon/poliwhirl/poliwhirl_cry.ogg"
@@ -2632,6 +2850,7 @@
         "animation.poliwrath.blink",
         "animation.poliwrath.sleep"
       ],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/poliwrath/poliwrath_ambient.ogg",
         "assets/minemon/sounds/pokemon/poliwrath/poliwrath_cry.ogg"
@@ -2643,9 +2862,11 @@
   },
   {
     "slug": "abra",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 63,
       "slug": "abra",
@@ -2674,6 +2895,7 @@
       "walk": "animation.abra.ground_walk",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/abra/abra_ambient.ogg",
         "assets/minemon/sounds/pokemon/abra/abra_cry.ogg"
@@ -2717,6 +2939,7 @@
       "excluded_clips": [
         "animation.kadabra.battle_idle"
       ],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/kadabra/kadabra_ambient.ogg",
         "assets/minemon/sounds/pokemon/kadabra/kadabra_cry.ogg"
@@ -2757,6 +2980,7 @@
       "walk": null,
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/alakazam/alakazam_ambient.ogg",
         "assets/minemon/sounds/pokemon/alakazam/alakazam_cry.ogg"
@@ -2768,9 +2992,11 @@
   },
   {
     "slug": "machop",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 66,
       "slug": "machop",
@@ -2794,6 +3020,7 @@
       "walk": "animation.machop.ground_walk",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/machop/machop_ambient.ogg",
         "assets/minemon/sounds/pokemon/machop/machop_cry.ogg"
@@ -2805,9 +3032,11 @@
   },
   {
     "slug": "machoke",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 67,
       "slug": "machoke",
@@ -2831,6 +3060,7 @@
       "walk": "animation.machoke.ground_walk",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/machoke/machoke_ambient.ogg",
         "assets/minemon/sounds/pokemon/machoke/machoke_cry.ogg"
@@ -2842,9 +3072,11 @@
   },
   {
     "slug": "machamp",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 68,
       "slug": "machamp",
@@ -2868,6 +3100,7 @@
       "walk": "animation.machamp.ground_walk",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/machamp/machamp_ambient.ogg",
         "assets/minemon/sounds/pokemon/machamp/machamp_cry.ogg"
@@ -2905,6 +3138,7 @@
       "walk": null,
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/bellsprout/bellsprout_ambient.ogg",
         "assets/minemon/sounds/pokemon/bellsprout/bellsprout_cry.ogg"
@@ -2942,6 +3176,7 @@
       "walk": null,
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/weepinbell/weepinbell_ambient.ogg",
         "assets/minemon/sounds/pokemon/weepinbell/weepinbell_cry.ogg"
@@ -2979,6 +3214,7 @@
       "walk": null,
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/victreebel/victreebel_ambient.ogg",
         "assets/minemon/sounds/pokemon/victreebel/victreebel_cry.ogg"
@@ -3022,6 +3258,7 @@
       "walk": null,
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/tentacool/tentacool_ambient.ogg",
         "assets/minemon/sounds/pokemon/tentacool/tentacool_cry.ogg"
@@ -3065,6 +3302,7 @@
       "walk": null,
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/tentacruel/tentacruel_ambient.ogg",
         "assets/minemon/sounds/pokemon/tentacruel/tentacruel_cry.ogg"
@@ -3105,6 +3343,7 @@
       "walk": "animation.geodude.ground_walk",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/geodude/geodude_ambient.ogg",
         "assets/minemon/sounds/pokemon/geodude/geodude_cry.ogg"
@@ -3145,6 +3384,7 @@
       "walk": null,
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/graveler/graveler_ambient.ogg",
         "assets/minemon/sounds/pokemon/graveler/graveler_cry.ogg"
@@ -3185,6 +3425,7 @@
       "walk": null,
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/golem/golem_ambient.ogg",
         "assets/minemon/sounds/pokemon/golem/golem_cry.ogg"
@@ -3197,9 +3438,9 @@
   {
     "slug": "ponyta",
     "accepted": false,
-    "reason": "animation.ponyta.ground_walk references model bones that are absent",
+    "reason": "Locomotion clip is a static pose",
     "issues": [
-      "animation.ponyta.ground_walk references model bones that are absent"
+      "Locomotion clip is a static pose"
     ],
     "definition": {
       "nationalPokedexNumber": 77,
@@ -3231,6 +3472,29 @@
       "walk": "animation.ponyta.ground_walk",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {
+        "animation.ponyta.ground_walk": [
+          "mane_bottom",
+          "mane_top",
+          "tail2",
+          "tail3",
+          "tail4",
+          "tail5",
+          "tail6",
+          "tail_left",
+          "tail_left2",
+          "tail_left3",
+          "tail_left4",
+          "tail_left5",
+          "tail_left6",
+          "tail_right",
+          "tail_right2",
+          "tail_right3",
+          "tail_right4",
+          "tail_right5",
+          "tail_right6"
+        ]
+      },
       "sounds": [
         "assets/minemon/sounds/pokemon/ponyta/galarian_ponyta_cry.ogg",
         "assets/minemon/sounds/pokemon/ponyta/ponyta_ambient.ogg",
@@ -3244,10 +3508,9 @@
   {
     "slug": "rapidash",
     "accepted": false,
-    "reason": "animation.rapidash.ground_idle references model bones that are absent; animation.rapidash.ground_walk references model bones that are absent",
+    "reason": "Locomotion clip is a static pose",
     "issues": [
-      "animation.rapidash.ground_idle references model bones that are absent",
-      "animation.rapidash.ground_walk references model bones that are absent"
+      "Locomotion clip is a static pose"
     ],
     "definition": {
       "nationalPokedexNumber": 78,
@@ -3280,6 +3543,37 @@
         "animation.rapidash.ground_run",
         "animation.rapidash.sleep"
       ],
+      "stripped_bones": {
+        "animation.rapidash.ground_idle": [
+          "fire_mane3",
+          "fire_mane_head3",
+          "fire_mane_head4"
+        ],
+        "animation.rapidash.ground_walk": [
+          "fire_mane3",
+          "fire_mane_head3",
+          "fire_mane_head4",
+          "mane_bottom",
+          "mane_top",
+          "tail2",
+          "tail3",
+          "tail4",
+          "tail5",
+          "tail6",
+          "tail_left",
+          "tail_left2",
+          "tail_left3",
+          "tail_left4",
+          "tail_left5",
+          "tail_left6",
+          "tail_right",
+          "tail_right2",
+          "tail_right3",
+          "tail_right4",
+          "tail_right5",
+          "tail_right6"
+        ]
+      },
       "sounds": [
         "assets/minemon/sounds/pokemon/rapidash/galarian_rapidash_cry.ogg",
         "assets/minemon/sounds/pokemon/rapidash/rapidash_ambient.ogg",
@@ -3323,6 +3617,7 @@
       "walk": "animation.slowpoke.ground_walk",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/slowpoke/slowpoke_ambient.ogg",
         "assets/minemon/sounds/pokemon/slowpoke/slowpoke_cry.ogg"
@@ -3334,11 +3629,9 @@
   },
   {
     "slug": "slowbro",
-    "accepted": false,
-    "reason": "animation.slowbro.ground_idle references model bones that are absent",
-    "issues": [
-      "animation.slowbro.ground_idle references model bones that are absent"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 80,
       "slug": "slowbro",
@@ -3374,6 +3667,12 @@
         "animation.slowbro.water_swim",
         "animation.slowbro.bite_quirk"
       ],
+      "stripped_bones": {
+        "animation.slowbro.ground_idle": [
+          "leftarm",
+          "rightarm"
+        ]
+      },
       "sounds": [
         "assets/minemon/sounds/pokemon/slowbro/slowbro_ambient.ogg",
         "assets/minemon/sounds/pokemon/slowbro/slowbro_cry.ogg"
@@ -3386,10 +3685,9 @@
   {
     "slug": "magnemite",
     "accepted": false,
-    "reason": "animation.magnemite.air_idle references model bones that are absent; animation.magnemite.air_fly references model bones that are absent",
+    "reason": "Locomotion clip is a static pose",
     "issues": [
-      "animation.magnemite.air_idle references model bones that are absent",
-      "animation.magnemite.air_fly references model bones that are absent"
+      "Locomotion clip is a static pose"
     ],
     "definition": {
       "nationalPokedexNumber": 81,
@@ -3418,6 +3716,14 @@
       "excluded_clips": [
         "animation.magnemite.sleep"
       ],
+      "stripped_bones": {
+        "animation.magnemite.air_idle": [
+          "headnail"
+        ],
+        "animation.magnemite.air_fly": [
+          "headnail"
+        ]
+      },
       "sounds": [
         "assets/minemon/sounds/pokemon/magnemite/magnemite_ambient.ogg",
         "assets/minemon/sounds/pokemon/magnemite/magnemite_cry.ogg"
@@ -3429,9 +3735,11 @@
   },
   {
     "slug": "magneton",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 82,
       "slug": "magneton",
@@ -3457,6 +3765,7 @@
       "walk": "animation.magneton.air_fly",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/magneton/magneton_ambient.ogg",
         "assets/minemon/sounds/pokemon/magneton/magneton_cry.ogg"
@@ -3468,9 +3777,11 @@
   },
   {
     "slug": "farfetchd",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 83,
       "slug": "farfetchd",
@@ -3502,6 +3813,7 @@
       "walk": "animation.farfetchd.air_fly",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/farfetchd/farfetchd_ambient.ogg",
         "assets/minemon/sounds/pokemon/farfetchd/farfetchd_cry.ogg",
@@ -3548,6 +3860,7 @@
       "walk": "animation.doduo.ground_walk",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/doduo/doduo_ambient.ogg",
         "assets/minemon/sounds/pokemon/doduo/doduo_cry.ogg"
@@ -3559,11 +3872,9 @@
   },
   {
     "slug": "dodrio",
-    "accepted": false,
-    "reason": "animation.dodrio.ground_walk references model bones that are absent",
-    "issues": [
-      "animation.dodrio.ground_walk references model bones that are absent"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 85,
       "slug": "dodrio",
@@ -3596,6 +3907,11 @@
       "walk": "animation.dodrio.ground_walk",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {
+        "animation.dodrio.ground_walk": [
+          "head"
+        ]
+      },
       "sounds": [
         "assets/minemon/sounds/pokemon/dodrio/dodrio_ambient.ogg",
         "assets/minemon/sounds/pokemon/dodrio/dodrio_cry.ogg"
@@ -3636,6 +3952,7 @@
       "walk": null,
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/seel/seel_ambient.ogg",
         "assets/minemon/sounds/pokemon/seel/seel_cry.ogg"
@@ -3676,6 +3993,7 @@
       "walk": null,
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/dewgong/dewgong_ambient.ogg",
         "assets/minemon/sounds/pokemon/dewgong/dewgong_cry.ogg"
@@ -3715,6 +4033,7 @@
       "walk": null,
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/grimer/grimer_ambient.ogg",
         "assets/minemon/sounds/pokemon/grimer/grimer_cry.ogg"
@@ -3754,6 +4073,7 @@
       "walk": null,
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/muk/muk_ambient.ogg",
         "assets/minemon/sounds/pokemon/muk/muk_cry.ogg"
@@ -3791,6 +4111,7 @@
       "walk": null,
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/shellder/shellder_ambient.ogg",
         "assets/minemon/sounds/pokemon/shellder/shellder_cry.ogg"
@@ -3828,6 +4149,7 @@
       "walk": null,
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/cloyster/cloyster_ambient.ogg",
         "assets/minemon/sounds/pokemon/cloyster/cloyster_cry.ogg"
@@ -3839,9 +4161,11 @@
   },
   {
     "slug": "gastly",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 92,
       "slug": "gastly",
@@ -3866,6 +4190,7 @@
       "walk": "animation.gastly.ground_walk",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/gastly/gastly_ambient.ogg",
         "assets/minemon/sounds/pokemon/gastly/gastly_cry.ogg"
@@ -3906,6 +4231,7 @@
       "walk": null,
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/haunter/haunter_ambient.ogg",
         "assets/minemon/sounds/pokemon/haunter/haunter_cry.ogg"
@@ -3947,6 +4273,7 @@
       "walk": "animation.gengar.air_fly",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/gengar/gengar_ambient.ogg",
         "assets/minemon/sounds/pokemon/gengar/gengar_cry.ogg"
@@ -3958,9 +4285,11 @@
   },
   {
     "slug": "onix",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 95,
       "slug": "onix",
@@ -3991,6 +4320,7 @@
       "walk": "animation.onix.ground_walk",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/onix/onix_ambient.ogg",
         "assets/minemon/sounds/pokemon/onix/onix_cry.ogg"
@@ -4003,10 +4333,9 @@
   {
     "slug": "drowzee",
     "accepted": false,
-    "reason": "animation.drowzee.ground_idle references model bones that are absent; animation.drowzee.ground_walk references model bones that are absent",
+    "reason": "Locomotion clip is a static pose",
     "issues": [
-      "animation.drowzee.ground_idle references model bones that are absent",
-      "animation.drowzee.ground_walk references model bones that are absent"
+      "Locomotion clip is a static pose"
     ],
     "definition": {
       "nationalPokedexNumber": 96,
@@ -4039,6 +4368,84 @@
         "animation.drowzee.battle_idle",
         "animation.drowzee.sleep"
       ],
+      "stripped_bones": {
+        "animation.drowzee.ground_idle": [
+          "back_fluff",
+          "front_fluff",
+          "left_fluff",
+          "left_hand",
+          "left_index_finger1",
+          "left_index_finger2",
+          "left_middle_finger1",
+          "left_middle_finger2",
+          "left_pinky_finger1",
+          "left_pinky_finger2",
+          "left_ring_finger1",
+          "left_ring_finger2",
+          "left_thumb1",
+          "left_thumb2",
+          "left_upper_leg",
+          "neck_fluff",
+          "nose",
+          "pendulum",
+          "right_fluff",
+          "right_hand",
+          "right_index_finger1",
+          "right_index_finger2",
+          "right_middle_finger1",
+          "right_middle_finger2",
+          "right_pinky_finger1",
+          "right_pinky_finger2",
+          "right_ring_finger1",
+          "right_ring_finger2",
+          "right_thumb1",
+          "right_thumb2",
+          "right_upper_leg",
+          "string_1",
+          "string_2",
+          "string_3",
+          "weight"
+        ],
+        "animation.drowzee.ground_walk": [
+          "back_fluff",
+          "front_fluff",
+          "left_fluff",
+          "left_hand",
+          "left_index_finger1",
+          "left_index_finger2",
+          "left_middle_finger1",
+          "left_middle_finger2",
+          "left_pinky_finger1",
+          "left_pinky_finger2",
+          "left_ring_finger1",
+          "left_ring_finger2",
+          "left_thumb1",
+          "left_thumb2",
+          "left_toes",
+          "left_upper_leg",
+          "neck_fluff",
+          "nose",
+          "pendulum",
+          "right_fluff",
+          "right_hand",
+          "right_index_finger1",
+          "right_index_finger2",
+          "right_middle_finger1",
+          "right_middle_finger2",
+          "right_pinky_finger1",
+          "right_pinky_finger2",
+          "right_ring_finger1",
+          "right_ring_finger2",
+          "right_thumb1",
+          "right_thumb2",
+          "right_toes",
+          "right_upper_leg",
+          "string_1",
+          "string_2",
+          "string_3",
+          "weight"
+        ]
+      },
       "sounds": [
         "assets/minemon/sounds/pokemon/drowzee/drowzee_ambient.ogg",
         "assets/minemon/sounds/pokemon/drowzee/drowzee_cry.ogg"
@@ -4050,9 +4457,11 @@
   },
   {
     "slug": "hypno",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 97,
       "slug": "hypno",
@@ -4081,6 +4490,7 @@
       "walk": "animation.hypno.ground_walk",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/hypno/hypno_ambient.ogg",
         "assets/minemon/sounds/pokemon/hypno/hypno_cry.ogg"
@@ -4123,6 +4533,7 @@
       "walk": "animation.krabby.ground_walk",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/krabby/krabby_ambient.ogg",
         "assets/minemon/sounds/pokemon/krabby/krabby_cry.ogg"
@@ -4134,11 +4545,9 @@
   },
   {
     "slug": "kingler",
-    "accepted": false,
-    "reason": "animation.kingler.ground_walk references model bones that are absent",
-    "issues": [
-      "animation.kingler.ground_walk references model bones that are absent"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 99,
       "slug": "kingler",
@@ -4162,6 +4571,29 @@
       "walk": "animation.kingler.ground_walk",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {
+        "animation.kingler.ground_walk": [
+          "fang_left",
+          "fang_right",
+          "head",
+          "horn",
+          "legback_left",
+          "legback_left2",
+          "legback_right",
+          "legback_right2",
+          "legfront_left",
+          "legfront_left2",
+          "legfront_right",
+          "legfront_right2",
+          "legmiddle_left",
+          "legmiddle_left2",
+          "legmiddle_right",
+          "legmiddle_right2",
+          "torso",
+          "torso_pattern_left",
+          "torso_pattern_right"
+        ]
+      },
       "sounds": [
         "assets/minemon/sounds/pokemon/kingler/kingler_ambient.ogg",
         "assets/minemon/sounds/pokemon/kingler/kingler_cry.ogg"
@@ -4173,9 +4605,11 @@
   },
   {
     "slug": "voltorb",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 100,
       "slug": "voltorb",
@@ -4200,6 +4634,7 @@
       "walk": "animation.voltorb.ground_walk",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/voltorb/voltorb_ambient.ogg",
         "assets/minemon/sounds/pokemon/voltorb/voltorb_cry.ogg",
@@ -4212,9 +4647,11 @@
   },
   {
     "slug": "electrode",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 101,
       "slug": "electrode",
@@ -4239,6 +4676,7 @@
       "walk": "animation.electrode.ground_walk",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/electrode/electrode_ambient.ogg",
         "assets/minemon/sounds/pokemon/electrode/electrode_cry.ogg",
@@ -4251,9 +4689,11 @@
   },
   {
     "slug": "exeggcute",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 102,
       "slug": "exeggcute",
@@ -4285,6 +4725,7 @@
       "walk": "animation.exeggcute.ground_walk",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/exeggcute/exeggcute_ambient.ogg",
         "assets/minemon/sounds/pokemon/exeggcute/exeggcute_cry.ogg"
@@ -4330,6 +4771,7 @@
       "excluded_clips": [
         "animation.exeggutor.cry"
       ],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/exeggutor/alolan_exeggutor_ambient.ogg",
         "assets/minemon/sounds/pokemon/exeggutor/alolan_exeggutor_cry.ogg",
@@ -4372,6 +4814,7 @@
       "walk": null,
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/cubone/cubone_ambient.ogg",
         "assets/minemon/sounds/pokemon/cubone/cubone_cry.ogg"
@@ -4412,6 +4855,7 @@
       "walk": null,
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/marowak/marowak_ambient.ogg",
         "assets/minemon/sounds/pokemon/marowak/marowak_cry.ogg"
@@ -4454,6 +4898,7 @@
       "walk": "animation.hitmonlee.ground_walk",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/hitmonlee/hitmonlee_ambient.ogg",
         "assets/minemon/sounds/pokemon/hitmonlee/hitmonlee_cry.ogg"
@@ -4497,6 +4942,7 @@
       "walk": "animation.hitmonchan.ground_walk",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/hitmonchan/hitmonchan_ambient.ogg",
         "assets/minemon/sounds/pokemon/hitmonchan/hitmonchan_cry.ogg"
@@ -4508,9 +4954,11 @@
   },
   {
     "slug": "lickitung",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 108,
       "slug": "lickitung",
@@ -4538,6 +4986,7 @@
       "walk": "animation.lickitung.ground_walk",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/lickitung/lickitung_ambient.ogg",
         "assets/minemon/sounds/pokemon/lickitung/lickitung_cry.ogg"
@@ -4549,9 +4998,11 @@
   },
   {
     "slug": "koffing",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 109,
       "slug": "koffing",
@@ -4577,6 +5028,7 @@
       "walk": "animation.koffing.air_fly",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/koffing/koffing_ambient.ogg",
         "assets/minemon/sounds/pokemon/koffing/koffing_cry.ogg"
@@ -4617,6 +5069,7 @@
       "walk": null,
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/weezing/weezing_ambient.ogg",
         "assets/minemon/sounds/pokemon/weezing/weezing_cry.ogg"
@@ -4663,6 +5116,7 @@
       "walk": null,
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/rhydon/rhydon_ambient.ogg",
         "assets/minemon/sounds/pokemon/rhydon/rhydon_cry.ogg"
@@ -4707,6 +5161,7 @@
       "walk": "animation.chansey.ground_walk",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/chansey/chansey_ambient.ogg",
         "assets/minemon/sounds/pokemon/chansey/chansey_cry.ogg"
@@ -4745,6 +5200,7 @@
       "walk": null,
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/tangela/tangela_ambient.ogg",
         "assets/minemon/sounds/pokemon/tangela/tangela_cry.ogg"
@@ -4787,6 +5243,7 @@
         "animation.kangaskhan.blink",
         "animation.kangaskhan.blink2"
       ],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/kangaskhan/kangaskhan_ambient.ogg",
         "assets/minemon/sounds/pokemon/kangaskhan/kangaskhan_cry.ogg"
@@ -4798,9 +5255,11 @@
   },
   {
     "slug": "horsea",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 116,
       "slug": "horsea",
@@ -4826,6 +5285,7 @@
       "walk": "animation.horsea.ground_walk",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/horsea/horsea_ambient.ogg",
         "assets/minemon/sounds/pokemon/horsea/horsea_cry.ogg"
@@ -4837,9 +5297,11 @@
   },
   {
     "slug": "seadra",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 117,
       "slug": "seadra",
@@ -4865,6 +5327,7 @@
       "walk": "animation.seadra.ground_walk",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/seadra/seadra_ambient.ogg",
         "assets/minemon/sounds/pokemon/seadra/seadra_cry.ogg"
@@ -4904,6 +5367,7 @@
       "walk": null,
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/goldeen/goldeen_ambient.ogg",
         "assets/minemon/sounds/pokemon/goldeen/goldeen_cry.ogg"
@@ -4943,6 +5407,7 @@
       "walk": null,
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/seaking/seaking_ambient.ogg",
         "assets/minemon/sounds/pokemon/seaking/seaking_cry.ogg"
@@ -4954,9 +5419,11 @@
   },
   {
     "slug": "staryu",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 120,
       "slug": "staryu",
@@ -4983,6 +5450,7 @@
       "walk": "animation.staryu.ground_walk",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/staryu/staryu_ambient.ogg",
         "assets/minemon/sounds/pokemon/staryu/staryu_cry.ogg"
@@ -4994,9 +5462,11 @@
   },
   {
     "slug": "starmie",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 121,
       "slug": "starmie",
@@ -5024,6 +5494,7 @@
       "walk": "animation.starmie.ground_walk",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/starmie/starmie_ambient.ogg",
         "assets/minemon/sounds/pokemon/starmie/starmie_cry.ogg"
@@ -5062,6 +5533,7 @@
       "walk": null,
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/mrmime/mrmime_ambient.ogg",
         "assets/minemon/sounds/pokemon/mrmime/mrmime_cry.ogg"
@@ -5103,6 +5575,7 @@
       "walk": null,
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/scyther/scyther_ambient.ogg",
         "assets/minemon/sounds/pokemon/scyther/scyther_cry.ogg"
@@ -5140,6 +5613,7 @@
       "walk": null,
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/jynx/jynx_ambient.ogg",
         "assets/minemon/sounds/pokemon/jynx/jynx_cry.ogg"
@@ -5183,6 +5657,7 @@
       "walk": "animation.electabuzz.ground_walk",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/electabuzz/electabuzz_ambient.ogg",
         "assets/minemon/sounds/pokemon/electabuzz/electabuzz_cry.ogg"
@@ -5220,6 +5695,7 @@
       "walk": null,
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/magmar/magmar_ambient.ogg",
         "assets/minemon/sounds/pokemon/magmar/magmar_cry.ogg"
@@ -5260,6 +5736,7 @@
       "walk": "animation.pinsir.ground_walk",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/pinsir/pinsir_ambient.ogg",
         "assets/minemon/sounds/pokemon/pinsir/pinsir_cry.ogg"
@@ -5271,9 +5748,11 @@
   },
   {
     "slug": "tauros",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 128,
       "slug": "tauros",
@@ -5300,6 +5779,7 @@
       "walk": "animation.tauros.ground_walk",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/tauros/tauros_ambient.ogg",
         "assets/minemon/sounds/pokemon/tauros/tauros_cry.ogg"
@@ -5311,9 +5791,11 @@
   },
   {
     "slug": "magikarp",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 129,
       "slug": "magikarp",
@@ -5352,6 +5834,7 @@
       "excluded_clips": [
         "animation.magikarp.blink"
       ],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/magikarp/magikarp_ambient.ogg",
         "assets/minemon/sounds/pokemon/magikarp/magikarp_cry.ogg"
@@ -5393,6 +5876,7 @@
       "walk": null,
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/gyarados/gyarados_ambient.ogg",
         "assets/minemon/sounds/pokemon/gyarados/gyarados_cry.ogg"
@@ -5434,6 +5918,7 @@
       "walk": null,
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/lapras/lapras_ambient.ogg",
         "assets/minemon/sounds/pokemon/lapras/lapras_cry.ogg"
@@ -5445,9 +5930,11 @@
   },
   {
     "slug": "ditto",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 132,
       "slug": "ditto",
@@ -5474,6 +5961,7 @@
       "walk": "animation.ditto.ground_walk",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/ditto/ditto_ambient.ogg",
         "assets/minemon/sounds/pokemon/ditto/ditto_cry.ogg"
@@ -5485,9 +5973,11 @@
   },
   {
     "slug": "eevee",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 133,
       "slug": "eevee",
@@ -5513,6 +6003,7 @@
       "walk": "animation.eevee.ground_walk",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/eevee/eevee_ambient.ogg",
         "assets/minemon/sounds/pokemon/eevee/eevee_cry.ogg"
@@ -5524,9 +6015,11 @@
   },
   {
     "slug": "vaporeon",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 134,
       "slug": "vaporeon",
@@ -5554,6 +6047,7 @@
       "walk": "animation.vaporeon.ground_walk",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/vaporeon/vaporeon_ambient.ogg",
         "assets/minemon/sounds/pokemon/vaporeon/vaporeon_cry.ogg"
@@ -5565,9 +6059,11 @@
   },
   {
     "slug": "jolteon",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 135,
       "slug": "jolteon",
@@ -5596,6 +6092,7 @@
       "excluded_clips": [
         "animation.jolteon.cry"
       ],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/jolteon/jolteon_ambient.ogg",
         "assets/minemon/sounds/pokemon/jolteon/jolteon_cry.ogg"
@@ -5607,9 +6104,11 @@
   },
   {
     "slug": "flareon",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 136,
       "slug": "flareon",
@@ -5638,6 +6137,7 @@
       "excluded_clips": [
         "animation.flareon.cry"
       ],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/flareon/flareon_ambient.ogg",
         "assets/minemon/sounds/pokemon/flareon/flareon_cry.ogg"
@@ -5649,9 +6149,11 @@
   },
   {
     "slug": "porygon",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 137,
       "slug": "porygon",
@@ -5678,6 +6180,7 @@
       "walk": "animation.porygon.ground_walk",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/porygon/porygon_ambient.ogg",
         "assets/minemon/sounds/pokemon/porygon/porygon_cry.ogg"
@@ -5689,9 +6192,11 @@
   },
   {
     "slug": "omanyte",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 138,
       "slug": "omanyte",
@@ -5723,6 +6228,7 @@
       "walk": "animation.omanyte.ground_walk",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/omanyte/omanyte_ambient.ogg",
         "assets/minemon/sounds/pokemon/omanyte/omanyte_cry.ogg"
@@ -5734,9 +6240,11 @@
   },
   {
     "slug": "omastar",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 139,
       "slug": "omastar",
@@ -5771,6 +6279,7 @@
       "excluded_clips": [
         "animation.omastar.shell_test"
       ],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/omastar/omastar_ambient.ogg",
         "assets/minemon/sounds/pokemon/omastar/omastar_cry.ogg"
@@ -5783,10 +6292,9 @@
   {
     "slug": "kabuto",
     "accepted": false,
-    "reason": "animation.kabuto.ground_idle references model bones that are absent; animation.kabuto.ground_walk references model bones that are absent",
+    "reason": "Locomotion clip is a static pose",
     "issues": [
-      "animation.kabuto.ground_idle references model bones that are absent",
-      "animation.kabuto.ground_walk references model bones that are absent"
+      "Locomotion clip is a static pose"
     ],
     "definition": {
       "nationalPokedexNumber": 140,
@@ -5815,6 +6323,14 @@
       "walk": "animation.kabuto.ground_walk",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {
+        "animation.kabuto.ground_idle": [
+          "body2"
+        ],
+        "animation.kabuto.ground_walk": [
+          "body2"
+        ]
+      },
       "sounds": [
         "assets/minemon/sounds/pokemon/kabuto/kabuto_ambient.ogg",
         "assets/minemon/sounds/pokemon/kabuto/kabuto_cry.ogg"
@@ -5855,6 +6371,7 @@
       "walk": "animation.kabutops.ground_walk",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/kabutops/kabutops_ambient.ogg",
         "assets/minemon/sounds/pokemon/kabutops/kabutops_cry.ogg"
@@ -5866,9 +6383,11 @@
   },
   {
     "slug": "aerodactyl",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 142,
       "slug": "aerodactyl",
@@ -5896,6 +6415,7 @@
       "walk": "animation.aerodactyl.air_fly",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/aerodactyl/aerodactyl_ambient.ogg",
         "assets/minemon/sounds/pokemon/aerodactyl/aerodactyl_cry.ogg"
@@ -5907,9 +6427,11 @@
   },
   {
     "slug": "snorlax",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 143,
       "slug": "snorlax",
@@ -5933,6 +6455,7 @@
       "walk": "animation.snorlax.ground_walk",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/snorlax/snorlax_ambient.ogg",
         "assets/minemon/sounds/pokemon/snorlax/snorlax_cry.ogg",
@@ -5973,6 +6496,7 @@
       "walk": "animation.articuno.air_fly",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/articuno/articuno_ambient.ogg",
         "assets/minemon/sounds/pokemon/articuno/articuno_cry.ogg"
@@ -6012,6 +6536,7 @@
       "walk": "animation.zapdos.air_fly",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/zapdos/zapdos_ambient.ogg",
         "assets/minemon/sounds/pokemon/zapdos/zapdos_cry.ogg"
@@ -6051,6 +6576,7 @@
       "walk": "animation.moltres.air_fly",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/moltres/moltres_ambient.ogg",
         "assets/minemon/sounds/pokemon/moltres/moltres_cry.ogg"
@@ -6062,9 +6588,11 @@
   },
   {
     "slug": "dratini",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 147,
       "slug": "dratini",
@@ -6096,6 +6624,7 @@
       "walk": "animation.dratini.ground_walk",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/dratini/dratini_ambient.ogg",
         "assets/minemon/sounds/pokemon/dratini/dratini_cry.ogg"
@@ -6107,9 +6636,11 @@
   },
   {
     "slug": "dragonair",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 148,
       "slug": "dragonair",
@@ -6143,6 +6674,7 @@
       "walk": "animation.dragonair.ground_walk",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/dragonair/dragonair_ambient.ogg",
         "assets/minemon/sounds/pokemon/dragonair/dragonair_cry.ogg"
@@ -6154,9 +6686,11 @@
   },
   {
     "slug": "dragonite",
-    "accepted": true,
-    "reason": null,
-    "issues": [],
+    "accepted": false,
+    "reason": "Locomotion clip is a static pose",
+    "issues": [
+      "Locomotion clip is a static pose"
+    ],
     "definition": {
       "nationalPokedexNumber": 149,
       "slug": "dragonite",
@@ -6189,6 +6723,7 @@
       "walk": "animation.dragonite.air_fly",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/dragonite/dragonite_ambient.ogg",
         "assets/minemon/sounds/pokemon/dragonite/dragonite_cry.ogg"
@@ -6200,12 +6735,9 @@
   },
   {
     "slug": "mewtwo",
-    "accepted": false,
-    "reason": "animation.mewtwo.air_idle references model bones that are absent; animation.mewtwo.air_fly references model bones that are absent",
-    "issues": [
-      "animation.mewtwo.air_idle references model bones that are absent",
-      "animation.mewtwo.air_fly references model bones that are absent"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 150,
       "slug": "mewtwo",
@@ -6232,6 +6764,48 @@
       "excluded_clips": [
         "animation.mewtwo.ground_idle"
       ],
+      "stripped_bones": {
+        "animation.mewtwo.air_idle": [
+          "finger",
+          "finger2",
+          "finger3",
+          "finger4",
+          "finger5",
+          "finger6",
+          "leftarm",
+          "leftfoot",
+          "leftforearm",
+          "lefthand",
+          "leftknee",
+          "leftleg",
+          "rightarm",
+          "rightfoot",
+          "rightforearm",
+          "righthand",
+          "rightknee",
+          "rightleg"
+        ],
+        "animation.mewtwo.air_fly": [
+          "finger",
+          "finger2",
+          "finger3",
+          "finger4",
+          "finger5",
+          "finger6",
+          "leftarm",
+          "leftfoot",
+          "leftforearm",
+          "lefthand",
+          "leftknee",
+          "leftleg",
+          "rightarm",
+          "rightfoot",
+          "rightforearm",
+          "righthand",
+          "rightknee",
+          "rightleg"
+        ]
+      },
       "sounds": [
         "assets/minemon/sounds/pokemon/mewtwo/mewtwo_ambient.ogg",
         "assets/minemon/sounds/pokemon/mewtwo/mewtwo_cry.ogg"
@@ -6271,6 +6845,7 @@
       "walk": "animation.mew.ground_walk",
       "attackTicks": 0,
       "excluded_clips": [],
+      "stripped_bones": {},
       "sounds": [
         "assets/minemon/sounds/pokemon/mew/mew_ambient.ogg",
         "assets/minemon/sounds/pokemon/mew/mew_cry.ogg"

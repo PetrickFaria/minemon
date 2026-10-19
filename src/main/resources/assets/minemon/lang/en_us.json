@@ -159,5 +159,13 @@
   "entity.minemon_gen1.magneton": "Magneton",
   "item.minemon_gen1.magneton_spawn_egg": "Spawn Egg: Magneton",
   "entity.minemon_gen1.gastly": "Gastly",
-  "item.minemon_gen1.gastly_spawn_egg": "Spawn Egg: Gastly"
+  "item.minemon_gen1.gastly_spawn_egg": "Spawn Egg: Gastly",
+  "entity.minemon_gen1.slowbro": "Slowbro",
+  "item.minemon_gen1.slowbro_spawn_egg": "Spawn Egg: Slowbro",
+  "entity.minemon_gen1.dodrio": "Dodrio",
+  "item.minemon_gen1.dodrio_spawn_egg": "Spawn Egg: Dodrio",
+  "entity.minemon_gen1.kingler": "Kingler",
+  "item.minemon_gen1.kingler_spawn_egg": "Spawn Egg: Kingler",
+  "entity.minemon_gen1.mewtwo": "Mewtwo",
+  "item.minemon_gen1.mewtwo_spawn_egg": "Spawn Egg: Mewtwo"
 }
