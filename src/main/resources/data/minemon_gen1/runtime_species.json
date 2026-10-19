@@ -1852,6 +1852,43 @@
     "eggSpots": 12421970
   },
   {
+    "nationalPokedexNumber": 92,
+    "slug": "gastly",
+    "name": "Gastly",
+    "model": "assets/minemon/geo/gastly/gastly.geo.json",
+    "texture": "assets/minemon/textures/pokemon/gastly/gastly.png",
+    "animation": "assets/minemon/animations/gastly/gastly.animation.json",
+    "mode": "ground",
+    "scale": 1.7,
+    "width": 0.4,
+    "height": 0.4,
+    "health": 20,
+    "attack": 3,
+    "speed": 0.28,
+    "clips": {
+      "ground_idle": "animation.gastly.ground_idle",
+      "ground_walk": "animation.gastly.ground_walk",
+      "sleep": "animation.gastly.sleep",
+      "blink": "animation.gastly.blink",
+      "ground_run": "animation.gastly.minemon_run",
+      "sit": "animation.gastly.minemon_sit",
+      "physical_attack": "animation.gastly.minemon_physical_attack"
+    },
+    "idle": "animation.gastly.ground_idle",
+    "walk": "animation.gastly.ground_walk",
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "sounds": [
+      "assets/minemon/sounds/pokemon/gastly/gastly_ambient.ogg",
+      "assets/minemon/sounds/pokemon/gastly/gastly_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/gastly/model-license.txt"
+    ],
+    "eggBase": 8677510,
+    "eggSpots": 7821943
+  },
+  {
     "slug": "onix",
     "name": "Onix",
     "model": "assets/minemon/geo/onix/onix.geo.json",

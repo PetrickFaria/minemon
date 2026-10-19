@@ -549,7 +549,7 @@
     "nationalPokedexNumber": 92,
     "slug": "gastly",
     "name": "Gastly",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 93,

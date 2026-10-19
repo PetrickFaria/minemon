@@ -157,5 +157,7 @@
   "entity.minemon_gen1.dragonite": "Dragonite",
   "item.minemon_gen1.dragonite_spawn_egg": "Ovo de invocação de Dragonite",
   "entity.minemon_gen1.magneton": "Magneton",
-  "item.minemon_gen1.magneton_spawn_egg": "Ovo de invocação de Magneton"
+  "item.minemon_gen1.magneton_spawn_egg": "Ovo de invocação de Magneton",
+  "entity.minemon_gen1.gastly": "Gastly",
+  "item.minemon_gen1.gastly_spawn_egg": "Ovo de invocação de Gastly"
 }
