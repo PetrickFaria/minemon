@@ -257,5 +257,15 @@
   "entity.minemon_gen1.grimer": "Grimer",
   "item.minemon_gen1.grimer_spawn_egg": "Spawn Egg: Grimer",
   "entity.minemon_gen1.muk": "Muk",
-  "item.minemon_gen1.muk_spawn_egg": "Spawn Egg: Muk"
+  "item.minemon_gen1.muk_spawn_egg": "Spawn Egg: Muk",
+  "entity.minemon_gen1.shellder": "Shellder",
+  "item.minemon_gen1.shellder_spawn_egg": "Spawn Egg: Shellder",
+  "entity.minemon_gen1.cloyster": "Cloyster",
+  "item.minemon_gen1.cloyster_spawn_egg": "Spawn Egg: Cloyster",
+  "entity.minemon_gen1.haunter": "Haunter",
+  "item.minemon_gen1.haunter_spawn_egg": "Spawn Egg: Haunter",
+  "entity.minemon_gen1.gengar": "Gengar",
+  "item.minemon_gen1.gengar_spawn_egg": "Spawn Egg: Gengar",
+  "entity.minemon_gen1.cubone": "Cubone",
+  "item.minemon_gen1.cubone_spawn_egg": "Spawn Egg: Cubone"
 }

@@ -537,13 +537,13 @@
     "nationalPokedexNumber": 90,
     "slug": "shellder",
     "name": "Shellder",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 91,
     "slug": "cloyster",
     "name": "Cloyster",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 92,
@@ -555,13 +555,13 @@
     "nationalPokedexNumber": 93,
     "slug": "haunter",
     "name": "Haunter",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 94,
     "slug": "gengar",
     "name": "Gengar",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 95,
@@ -621,7 +621,7 @@
     "nationalPokedexNumber": 104,
     "slug": "cubone",
     "name": "Cubone",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 105,

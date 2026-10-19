@@ -257,5 +257,15 @@
   "entity.minemon_gen1.grimer": "Grimer",
   "item.minemon_gen1.grimer_spawn_egg": "Ovo de invocação de Grimer",
   "entity.minemon_gen1.muk": "Muk",
-  "item.minemon_gen1.muk_spawn_egg": "Ovo de invocação de Muk"
+  "item.minemon_gen1.muk_spawn_egg": "Ovo de invocação de Muk",
+  "entity.minemon_gen1.shellder": "Shellder",
+  "item.minemon_gen1.shellder_spawn_egg": "Ovo de invocação de Shellder",
+  "entity.minemon_gen1.cloyster": "Cloyster",
+  "item.minemon_gen1.cloyster_spawn_egg": "Ovo de invocação de Cloyster",
+  "entity.minemon_gen1.haunter": "Haunter",
+  "item.minemon_gen1.haunter_spawn_egg": "Ovo de invocação de Haunter",
+  "entity.minemon_gen1.gengar": "Gengar",
+  "item.minemon_gen1.gengar_spawn_egg": "Ovo de invocação de Gengar",
+  "entity.minemon_gen1.cubone": "Cubone",
+  "item.minemon_gen1.cubone_spawn_egg": "Ovo de invocação de Cubone"
 }
