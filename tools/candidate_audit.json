@@ -1,11 +1,9 @@
 [
   {
     "slug": "bulbasaur",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 1,
       "slug": "bulbasaur",
@@ -47,11 +45,9 @@
   },
   {
     "slug": "ivysaur",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 2,
       "slug": "ivysaur",
@@ -91,11 +87,9 @@
   },
   {
     "slug": "venusaur",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 3,
       "slug": "venusaur",
@@ -135,11 +129,9 @@
   },
   {
     "slug": "charmander",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 4,
       "slug": "charmander",
@@ -183,11 +175,9 @@
   },
   {
     "slug": "charmeleon",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 5,
       "slug": "charmeleon",
@@ -228,11 +218,9 @@
   },
   {
     "slug": "charizard",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 6,
       "slug": "charizard",
@@ -525,11 +513,9 @@
   },
   {
     "slug": "butterfree",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 12,
       "slug": "butterfree",
@@ -568,11 +554,9 @@
   },
   {
     "slug": "weedle",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 13,
       "slug": "weedle",
@@ -656,11 +640,9 @@
   },
   {
     "slug": "beedrill",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 15,
       "slug": "beedrill",
@@ -741,11 +723,9 @@
   },
   {
     "slug": "pidgeotto",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 17,
       "slug": "pidgeotto",
@@ -796,11 +776,9 @@
   },
   {
     "slug": "pidgeot",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 18,
       "slug": "pidgeot",
@@ -840,11 +818,9 @@
   },
   {
     "slug": "rattata",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 19,
       "slug": "rattata",
@@ -883,11 +859,9 @@
   },
   {
     "slug": "raticate",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 20,
       "slug": "raticate",
@@ -1070,11 +1044,9 @@
   },
   {
     "slug": "arbok",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 24,
       "slug": "arbok",
@@ -1115,11 +1087,9 @@
   },
   {
     "slug": "pikachu",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 25,
       "slug": "pikachu",
@@ -1161,11 +1131,9 @@
   },
   {
     "slug": "raichu",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 26,
       "slug": "raichu",
@@ -1206,11 +1174,9 @@
   },
   {
     "slug": "sandshrew",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 27,
       "slug": "sandshrew",
@@ -1254,11 +1220,9 @@
   },
   {
     "slug": "sandslash",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 28,
       "slug": "sandslash",
@@ -1552,11 +1516,9 @@
   },
   {
     "slug": "clefairy",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 35,
       "slug": "clefairy",
@@ -1596,11 +1558,9 @@
   },
   {
     "slug": "clefable",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 36,
       "slug": "clefable",
@@ -1723,11 +1683,9 @@
   },
   {
     "slug": "jigglypuff",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 39,
       "slug": "jigglypuff",
@@ -1765,11 +1723,9 @@
   },
   {
     "slug": "wigglytuff",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 40,
       "slug": "wigglytuff",
@@ -1823,11 +1779,9 @@
   },
   {
     "slug": "zubat",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 41,
       "slug": "zubat",
@@ -1871,11 +1825,9 @@
   },
   {
     "slug": "golbat",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 42,
       "slug": "golbat",
@@ -1935,11 +1887,9 @@
   },
   {
     "slug": "oddish",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 43,
       "slug": "oddish",
@@ -1978,11 +1928,9 @@
   },
   {
     "slug": "gloom",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 44,
       "slug": "gloom",
@@ -2020,11 +1968,9 @@
   },
   {
     "slug": "vileplume",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 45,
       "slug": "vileplume",
@@ -2066,11 +2012,9 @@
   },
   {
     "slug": "paras",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 46,
       "slug": "paras",
@@ -2108,11 +2052,9 @@
   },
   {
     "slug": "parasect",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 47,
       "slug": "parasect",
@@ -2149,11 +2091,9 @@
   },
   {
     "slug": "venonat",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 48,
       "slug": "venonat",
@@ -2194,11 +2134,9 @@
   },
   {
     "slug": "venomoth",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 49,
       "slug": "venomoth",
@@ -2242,11 +2180,9 @@
   },
   {
     "slug": "diglett",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 50,
       "slug": "diglett",
@@ -2287,11 +2223,9 @@
   },
   {
     "slug": "dugtrio",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 51,
       "slug": "dugtrio",
@@ -2425,11 +2359,9 @@
   },
   {
     "slug": "psyduck",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 54,
       "slug": "psyduck",
@@ -2472,11 +2404,9 @@
   },
   {
     "slug": "golduck",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 55,
       "slug": "golduck",
@@ -2516,11 +2446,9 @@
   },
   {
     "slug": "mankey",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 56,
       "slug": "mankey",
@@ -2560,11 +2488,9 @@
   },
   {
     "slug": "primeape",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 57,
       "slug": "primeape",
@@ -2691,11 +2617,9 @@
   },
   {
     "slug": "poliwag",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 60,
       "slug": "poliwag",
@@ -2754,11 +2678,9 @@
   },
   {
     "slug": "poliwhirl",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 61,
       "slug": "poliwhirl",
@@ -2862,11 +2784,9 @@
   },
   {
     "slug": "abra",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 63,
       "slug": "abra",
@@ -2992,11 +2912,9 @@
   },
   {
     "slug": "machop",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 66,
       "slug": "machop",
@@ -3032,11 +2950,9 @@
   },
   {
     "slug": "machoke",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 67,
       "slug": "machoke",
@@ -3072,11 +2988,9 @@
   },
   {
     "slug": "machamp",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 68,
       "slug": "machamp",
@@ -3437,11 +3351,9 @@
   },
   {
     "slug": "ponyta",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 77,
       "slug": "ponyta",
@@ -3507,11 +3419,9 @@
   },
   {
     "slug": "rapidash",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 78,
       "slug": "rapidash",
@@ -3684,11 +3594,9 @@
   },
   {
     "slug": "magnemite",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 81,
       "slug": "magnemite",
@@ -3735,11 +3643,9 @@
   },
   {
     "slug": "magneton",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 82,
       "slug": "magneton",
@@ -3777,11 +3683,9 @@
   },
   {
     "slug": "farfetchd",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 83,
       "slug": "farfetchd",
@@ -4161,11 +4065,9 @@
   },
   {
     "slug": "gastly",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 92,
       "slug": "gastly",
@@ -4285,11 +4187,9 @@
   },
   {
     "slug": "onix",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 95,
       "slug": "onix",
@@ -4332,11 +4232,9 @@
   },
   {
     "slug": "drowzee",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 96,
       "slug": "drowzee",
@@ -4457,11 +4355,9 @@
   },
   {
     "slug": "hypno",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 97,
       "slug": "hypno",
@@ -4605,11 +4501,9 @@
   },
   {
     "slug": "voltorb",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 100,
       "slug": "voltorb",
@@ -4647,11 +4541,9 @@
   },
   {
     "slug": "electrode",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 101,
       "slug": "electrode",
@@ -4689,11 +4581,9 @@
   },
   {
     "slug": "exeggcute",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 102,
       "slug": "exeggcute",
@@ -4954,11 +4844,9 @@
   },
   {
     "slug": "lickitung",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 108,
       "slug": "lickitung",
@@ -4998,11 +4886,9 @@
   },
   {
     "slug": "koffing",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 109,
       "slug": "koffing",
@@ -5255,11 +5141,9 @@
   },
   {
     "slug": "horsea",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 116,
       "slug": "horsea",
@@ -5297,11 +5181,9 @@
   },
   {
     "slug": "seadra",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 117,
       "slug": "seadra",
@@ -5419,11 +5301,9 @@
   },
   {
     "slug": "staryu",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 120,
       "slug": "staryu",
@@ -5462,11 +5342,9 @@
   },
   {
     "slug": "starmie",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 121,
       "slug": "starmie",
@@ -5748,11 +5626,9 @@
   },
   {
     "slug": "tauros",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 128,
       "slug": "tauros",
@@ -5791,11 +5667,9 @@
   },
   {
     "slug": "magikarp",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 129,
       "slug": "magikarp",
@@ -5930,11 +5804,9 @@
   },
   {
     "slug": "ditto",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 132,
       "slug": "ditto",
@@ -5973,11 +5845,9 @@
   },
   {
     "slug": "eevee",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 133,
       "slug": "eevee",
@@ -6015,11 +5885,9 @@
   },
   {
     "slug": "vaporeon",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 134,
       "slug": "vaporeon",
@@ -6059,11 +5927,9 @@
   },
   {
     "slug": "jolteon",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 135,
       "slug": "jolteon",
@@ -6104,11 +5970,9 @@
   },
   {
     "slug": "flareon",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 136,
       "slug": "flareon",
@@ -6149,11 +6013,9 @@
   },
   {
     "slug": "porygon",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 137,
       "slug": "porygon",
@@ -6192,11 +6054,9 @@
   },
   {
     "slug": "omanyte",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 138,
       "slug": "omanyte",
@@ -6240,11 +6100,9 @@
   },
   {
     "slug": "omastar",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 139,
       "slug": "omastar",
@@ -6291,11 +6149,9 @@
   },
   {
     "slug": "kabuto",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 140,
       "slug": "kabuto",
@@ -6383,11 +6239,9 @@
   },
   {
     "slug": "aerodactyl",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 142,
       "slug": "aerodactyl",
@@ -6427,11 +6281,9 @@
   },
   {
     "slug": "snorlax",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 143,
       "slug": "snorlax",
@@ -6588,11 +6440,9 @@
   },
   {
     "slug": "dratini",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 147,
       "slug": "dratini",
@@ -6636,11 +6486,9 @@
   },
   {
     "slug": "dragonair",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 148,
       "slug": "dragonair",
@@ -6686,11 +6534,9 @@
   },
   {
     "slug": "dragonite",
-    "accepted": false,
-    "reason": "Locomotion clip is a static pose",
-    "issues": [
-      "Locomotion clip is a static pose"
-    ],
+    "accepted": true,
+    "reason": null,
+    "issues": [],
     "definition": {
       "nationalPokedexNumber": 149,
       "slug": "dragonite",

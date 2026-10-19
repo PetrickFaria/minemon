@@ -99,7 +99,7 @@
     "nationalPokedexNumber": 17,
     "slug": "pidgeotto",
     "name": "Pidgeotto",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 18,
@@ -117,7 +117,7 @@
     "nationalPokedexNumber": 20,
     "slug": "raticate",
     "name": "Raticate",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 21,
@@ -159,13 +159,13 @@
     "nationalPokedexNumber": 27,
     "slug": "sandshrew",
     "name": "Sandshrew",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 28,
     "slug": "sandslash",
     "name": "Sandslash",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 29,
@@ -237,7 +237,7 @@
     "nationalPokedexNumber": 40,
     "slug": "wigglytuff",
     "name": "Wigglytuff",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 41,

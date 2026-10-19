@@ -167,5 +167,15 @@
   "entity.minemon_gen1.kingler": "Kingler",
   "item.minemon_gen1.kingler_spawn_egg": "Spawn Egg: Kingler",
   "entity.minemon_gen1.mewtwo": "Mewtwo",
-  "item.minemon_gen1.mewtwo_spawn_egg": "Spawn Egg: Mewtwo"
+  "item.minemon_gen1.mewtwo_spawn_egg": "Spawn Egg: Mewtwo",
+  "entity.minemon_gen1.pidgeotto": "Pidgeotto",
+  "item.minemon_gen1.pidgeotto_spawn_egg": "Spawn Egg: Pidgeotto",
+  "entity.minemon_gen1.raticate": "Raticate",
+  "item.minemon_gen1.raticate_spawn_egg": "Spawn Egg: Raticate",
+  "entity.minemon_gen1.sandshrew": "Sandshrew",
+  "item.minemon_gen1.sandshrew_spawn_egg": "Spawn Egg: Sandshrew",
+  "entity.minemon_gen1.sandslash": "Sandslash",
+  "item.minemon_gen1.sandslash_spawn_egg": "Spawn Egg: Sandslash",
+  "entity.minemon_gen1.wigglytuff": "Wigglytuff",
+  "item.minemon_gen1.wigglytuff_spawn_egg": "Spawn Egg: Wigglytuff"
 }

@@ -601,6 +601,58 @@
     "eggSpots": 15914130
   },
   {
+    "nationalPokedexNumber": 17,
+    "slug": "pidgeotto",
+    "name": "Pidgeotto",
+    "model": "assets/minemon/geo/pidgeotto/pidgeotto.geo.json",
+    "texture": "assets/minemon/textures/pokemon/pidgeotto/pidgeotto.png",
+    "animation": "assets/minemon/animations/pidgeotto/pidgeotto.animation.json",
+    "mode": "flying",
+    "scale": 1.1,
+    "width": 0.6,
+    "height": 1,
+    "health": 31.5,
+    "attack": 5.0,
+    "speed": 0.271,
+    "clips": {
+      "ground_idle_PLACEHOLDER": "animation.pidgeotto.ground_idle_PLACEHOLDER",
+      "air_idle": "animation.pidgeotto.air_idle",
+      "air_fly": "animation.pidgeotto.air_fly",
+      "air_fly_quirk": "animation.pidgeotto.air_fly_quirk",
+      "air_fly_quirk2": "animation.pidgeotto.air_fly_quirk2",
+      "cry": "animation.pidgeotto.cry",
+      "blink": "animation.pidgeotto.blink",
+      "ground_run": "animation.pidgeotto.minemon_run",
+      "sit": "animation.pidgeotto.minemon_sit",
+      "sleep": "animation.pidgeotto.minemon_sleep",
+      "physical_attack": "animation.pidgeotto.minemon_physical_attack"
+    },
+    "idle": "animation.pidgeotto.air_idle",
+    "walk": "animation.pidgeotto.air_fly",
+    "attackTicks": 12,
+    "excluded_clips": [
+      "animation.pidgeotto.sleep_PLACEHOLDER"
+    ],
+    "stripped_bones": {
+      "animation.pidgeotto.air_idle": [
+        "claw_middle_left",
+        "claw_middle_right",
+        "hair6",
+        "toe_middle_left",
+        "toe_middle_right"
+      ]
+    },
+    "sounds": [
+      "assets/minemon/sounds/pokemon/pidgeotto/pidgeotto_ambient.ogg",
+      "assets/minemon/sounds/pokemon/pidgeotto/pidgeotto_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/pidgeotto/model-license.txt"
+    ],
+    "eggBase": 15914130,
+    "eggSpots": 14925182
+  },
+  {
     "nationalPokedexNumber": 18,
     "slug": "pidgeot",
     "name": "Pidgeot",
@@ -679,6 +731,61 @@
     ],
     "eggBase": 9594536,
     "eggSpots": 7360138
+  },
+  {
+    "nationalPokedexNumber": 20,
+    "slug": "raticate",
+    "name": "Raticate",
+    "model": "assets/minemon/geo/raticate/raticate_alolan.geo.json",
+    "texture": "assets/minemon/textures/pokemon/raticate/raticate.png",
+    "animation": "assets/minemon/animations/raticate/raticate.animation.json",
+    "mode": "ground",
+    "scale": 0.8,
+    "width": 0.7,
+    "height": 1.1,
+    "health": 27.5,
+    "attack": 6.75,
+    "speed": 0.297,
+    "clips": {
+      "ground_idle": "animation.raticate.ground_idle",
+      "ground_walk": "animation.raticate.ground_walk",
+      "sleep": "animation.raticate.sleep",
+      "blink": "animation.raticate.blink",
+      "cry": "animation.raticate.cry",
+      "ground_run": "animation.raticate.minemon_run",
+      "sit": "animation.raticate.minemon_sit",
+      "physical_attack": "animation.raticate.minemon_physical_attack"
+    },
+    "idle": "animation.raticate.ground_idle",
+    "walk": "animation.raticate.ground_walk",
+    "attackTicks": 12,
+    "excluded_clips": [
+      "animation.raticate.faint"
+    ],
+    "stripped_bones": {
+      "animation.raticate.ground_idle": [
+        "arm_left",
+        "arm_right",
+        "whiskers_lower_left",
+        "whiskers_lower_right"
+      ],
+      "animation.raticate.ground_walk": [
+        "arm_left",
+        "arm_right",
+        "whiskers_bottom_left",
+        "whiskers_bottom_right"
+      ]
+    },
+    "sounds": [
+      "assets/minemon/sounds/pokemon/raticate/raticate_alolan_cry.ogg",
+      "assets/minemon/sounds/pokemon/raticate/raticate_ambient.ogg",
+      "assets/minemon/sounds/pokemon/raticate/raticate_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/raticate/model-license.txt"
+    ],
+    "eggBase": 11635008,
+    "eggSpots": 8671525
   },
   {
     "slug": "arbok",
@@ -805,6 +912,96 @@
     "eggSpots": 13333030
   },
   {
+    "nationalPokedexNumber": 27,
+    "slug": "sandshrew",
+    "name": "Sandshrew",
+    "model": "assets/minemon/geo/sandshrew/sandshrew.geo.json",
+    "texture": "assets/minemon/textures/pokemon/sandshrew/sandshrew.png",
+    "animation": "assets/minemon/animations/sandshrew/sandshrew.animation.json",
+    "mode": "ground",
+    "scale": 0.7,
+    "width": 0.8,
+    "height": 1,
+    "health": 25.0,
+    "attack": 6.25,
+    "speed": 0.24,
+    "clips": {
+      "ground_idle": "animation.sandshrew.ground_idle",
+      "ground_walk": "animation.sandshrew.ground_walk",
+      "sleep": "animation.sandshrew.sleep",
+      "blink": "animation.sandshrew.blink",
+      "ground_run": "animation.sandshrew.minemon_run",
+      "sit": "animation.sandshrew.minemon_sit",
+      "physical_attack": "animation.sandshrew.minemon_physical_attack"
+    },
+    "idle": "animation.sandshrew.ground_idle",
+    "walk": "animation.sandshrew.ground_walk",
+    "attackTicks": 12,
+    "excluded_clips": [
+      "animation.sandshrew.faint"
+    ],
+    "stripped_bones": {
+      "animation.sandshrew.ground_idle": [
+        "head_angle"
+      ]
+    },
+    "sounds": [
+      "assets/minemon/sounds/pokemon/sandshrew/sandshrew_ambient.ogg",
+      "assets/minemon/sounds/pokemon/sandshrew/sandshrew_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/sandshrew/model-license.txt"
+    ],
+    "eggBase": 11303484,
+    "eggSpots": 13609041
+  },
+  {
+    "nationalPokedexNumber": 28,
+    "slug": "sandslash",
+    "name": "Sandslash",
+    "model": "assets/minemon/geo/sandslash/sandslash.geo.json",
+    "texture": "assets/minemon/textures/pokemon/sandslash/sandslash.png",
+    "animation": "assets/minemon/animations/sandslash/sandslash.animation.json",
+    "mode": "ground",
+    "scale": 0.7,
+    "width": 1,
+    "height": 1.3,
+    "health": 37.5,
+    "attack": 8.333333333333334,
+    "speed": 0.265,
+    "clips": {
+      "ground_idle": "animation.sandslash.ground_idle",
+      "ground_walk": "animation.sandslash.ground_walk",
+      "sleep": "animation.sandslash.sleep",
+      "blink": "animation.sandslash.blink",
+      "ground_run": "animation.sandslash.minemon_run",
+      "sit": "animation.sandslash.minemon_sit",
+      "physical_attack": "animation.sandslash.minemon_physical_attack"
+    },
+    "idle": "animation.sandslash.ground_idle",
+    "walk": "animation.sandslash.ground_walk",
+    "attackTicks": 12,
+    "excluded_clips": [
+      "animation.sandslash.faint"
+    ],
+    "stripped_bones": {
+      "animation.sandslash.ground_idle": [
+        "forearm_left",
+        "forearm_right",
+        "tail3"
+      ]
+    },
+    "sounds": [
+      "assets/minemon/sounds/pokemon/sandslash/sandslash_ambient.ogg",
+      "assets/minemon/sounds/pokemon/sandslash/sandslash_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/sandslash/model-license.txt"
+    ],
+    "eggBase": 11761730,
+    "eggSpots": 13607250
+  },
+  {
     "nationalPokedexNumber": 35,
     "slug": "clefairy",
     "name": "Clefairy",
@@ -921,6 +1118,61 @@
     ],
     "eggBase": 15843264,
     "eggSpots": 14922166
+  },
+  {
+    "nationalPokedexNumber": 40,
+    "slug": "wigglytuff",
+    "name": "Wigglytuff",
+    "model": "assets/minemon/geo/wigglytuff/wigglytuff.geo.json",
+    "texture": "assets/minemon/textures/pokemon/wigglytuff/wigglytuff.png",
+    "animation": "assets/minemon/animations/wigglytuff/wigglytuff.animation.json",
+    "mode": "ground",
+    "scale": 1,
+    "width": 0.7,
+    "height": 1.2,
+    "health": 70.0,
+    "attack": 5.833333333333333,
+    "speed": 0.245,
+    "clips": {
+      "ground_idle": "animation.wigglytuff.ground_idle",
+      "ground_walk": "animation.wigglytuff.ground_walk",
+      "sleep": "animation.wigglytuff.sleep",
+      "blink": "animation.wigglytuff.blink",
+      "ground_run": "animation.wigglytuff.minemon_run",
+      "sit": "animation.wigglytuff.minemon_sit",
+      "physical_attack": "animation.wigglytuff.minemon_physical_attack"
+    },
+    "idle": "animation.wigglytuff.ground_idle",
+    "walk": "animation.wigglytuff.ground_walk",
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "stripped_bones": {
+      "animation.wigglytuff.ground_walk": [
+        "drool",
+        "flower",
+        "leaf_back",
+        "leaf_back2",
+        "leaf_front_left",
+        "leaf_front_left2",
+        "leaf_front_right",
+        "leaf_front_right2",
+        "leaf_left",
+        "leaf_left2",
+        "leaf_left3",
+        "leaf_right",
+        "leaf_right2",
+        "leaf_right3"
+      ]
+    },
+    "sounds": [
+      "assets/minemon/sounds/pokemon/wigglytuff/wigglytuff_ambient.ogg",
+      "assets/minemon/sounds/pokemon/wigglytuff/wigglytuff_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/wigglytuff/model-license.txt"
+    ],
+    "eggBase": 16170173,
+    "eggSpots": 15249333
   },
   {
     "nationalPokedexNumber": 41,
