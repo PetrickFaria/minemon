@@ -2279,6 +2279,48 @@
     "eggSpots": 5542594
   },
   {
+    "nationalPokedexNumber": 73,
+    "slug": "tentacruel",
+    "name": "Tentacruel",
+    "model": "assets/minemon/geo/tentacruel/tentacruel.geo.json",
+    "texture": "assets/minemon/textures/pokemon/tentacruel/tentacruel.png",
+    "animation": "assets/minemon/animations/tentacruel/tentacruel.animation.json",
+    "mode": "ground",
+    "scale": 0.9,
+    "width": 1.2,
+    "height": 2.45,
+    "health": 40.0,
+    "attack": 5.833333333333333,
+    "speed": 0.3,
+    "clips": {
+      "render": "animation.tentacruel.render",
+      "water_idle": "animation.tentacruel.water_idle",
+      "water_swim": "animation.tentacruel.water_swim",
+      "water_sleep": "animation.tentacruel.water_sleep",
+      "ground_idle": "animation.tentacruel.ground_idle",
+      "sleep": "animation.tentacruel.sleep",
+      "blink": "animation.tentacruel.blink",
+      "ground_run": "animation.tentacruel.minemon_run",
+      "sit": "animation.tentacruel.minemon_sit",
+      "physical_attack": "animation.tentacruel.minemon_physical_attack"
+    },
+    "idle": "animation.tentacruel.ground_idle",
+    "walk": "animation.tentacruel.ground_idle",
+    "movement_fallback": "idle",
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "stripped_bones": {},
+    "sounds": [
+      "assets/minemon/sounds/pokemon/tentacruel/tentacruel_ambient.ogg",
+      "assets/minemon/sounds/pokemon/tentacruel/tentacruel_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/tentacruel/model-license.txt"
+    ],
+    "eggBase": 4881843,
+    "eggSpots": 8021085
+  },
+  {
     "nationalPokedexNumber": 74,
     "slug": "geodude",
     "name": "Geodude",
@@ -3445,6 +3487,46 @@
     ],
     "eggBase": 9662906,
     "eggSpots": 10716368
+  },
+  {
+    "nationalPokedexNumber": 110,
+    "slug": "weezing",
+    "name": "Weezing",
+    "model": "assets/minemon/geo/weezing/weezing.geo.json",
+    "texture": "assets/minemon/textures/pokemon/weezing/weezing.png",
+    "animation": "assets/minemon/animations/weezing/weezing.animation.json",
+    "mode": "ground",
+    "scale": 1.2,
+    "width": 1.3,
+    "height": 1.4,
+    "health": 32.5,
+    "attack": 7.5,
+    "speed": 0.26,
+    "clips": {
+      "ground_idle": "animation.weezing.ground_idle",
+      "blink": "animation.weezing.blink",
+      "blink2": "animation.weezing.blink2",
+      "cry": "animation.weezing.cry",
+      "ground_run": "animation.weezing.minemon_run",
+      "sit": "animation.weezing.minemon_sit",
+      "sleep": "animation.weezing.minemon_sleep",
+      "physical_attack": "animation.weezing.minemon_physical_attack"
+    },
+    "idle": "animation.weezing.ground_idle",
+    "walk": "animation.weezing.ground_idle",
+    "movement_fallback": "idle",
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "stripped_bones": {},
+    "sounds": [
+      "assets/minemon/sounds/pokemon/weezing/weezing_ambient.ogg",
+      "assets/minemon/sounds/pokemon/weezing/weezing_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/weezing/model-license.txt"
+    ],
+    "eggBase": 12028877,
+    "eggSpots": 10778293
   },
   {
     "nationalPokedexNumber": 113,

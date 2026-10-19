@@ -203,5 +203,9 @@
   "entity.minemon_gen1.nidorino": "Nidorino",
   "item.minemon_gen1.nidorino_spawn_egg": "Spawn Egg: Nidorino",
   "entity.minemon_gen1.tentacool": "Tentacool",
-  "item.minemon_gen1.tentacool_spawn_egg": "Spawn Egg: Tentacool"
+  "item.minemon_gen1.tentacool_spawn_egg": "Spawn Egg: Tentacool",
+  "entity.minemon_gen1.tentacruel": "Tentacruel",
+  "item.minemon_gen1.tentacruel_spawn_egg": "Spawn Egg: Tentacruel",
+  "entity.minemon_gen1.weezing": "Weezing",
+  "item.minemon_gen1.weezing_spawn_egg": "Spawn Egg: Weezing"
 }

@@ -435,7 +435,7 @@
     "nationalPokedexNumber": 73,
     "slug": "tentacruel",
     "name": "Tentacruel",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 74,
@@ -657,7 +657,7 @@
     "nationalPokedexNumber": 110,
     "slug": "weezing",
     "name": "Weezing",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 111,
