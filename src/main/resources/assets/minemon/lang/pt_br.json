@@ -267,5 +267,15 @@
   "entity.minemon_gen1.gengar": "Gengar",
   "item.minemon_gen1.gengar_spawn_egg": "Ovo de invocação de Gengar",
   "entity.minemon_gen1.cubone": "Cubone",
-  "item.minemon_gen1.cubone_spawn_egg": "Ovo de invocação de Cubone"
+  "item.minemon_gen1.cubone_spawn_egg": "Ovo de invocação de Cubone",
+  "entity.minemon_gen1.marowak": "Marowak",
+  "item.minemon_gen1.marowak_spawn_egg": "Ovo de invocação de Marowak",
+  "entity.minemon_gen1.rhyhorn": "Rhyhorn",
+  "item.minemon_gen1.rhyhorn_spawn_egg": "Ovo de invocação de Rhyhorn",
+  "entity.minemon_gen1.rhydon": "Rhydon",
+  "item.minemon_gen1.rhydon_spawn_egg": "Ovo de invocação de Rhydon",
+  "entity.minemon_gen1.kangaskhan": "Kangaskhan",
+  "item.minemon_gen1.kangaskhan_spawn_egg": "Ovo de invocação de Kangaskhan",
+  "entity.minemon_gen1.goldeen": "Goldeen",
+  "item.minemon_gen1.goldeen_spawn_egg": "Ovo de invocação de Goldeen"
 }

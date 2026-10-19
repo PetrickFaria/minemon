@@ -627,7 +627,7 @@
     "nationalPokedexNumber": 105,
     "slug": "marowak",
     "name": "Marowak",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 106,
@@ -663,13 +663,13 @@
     "nationalPokedexNumber": 111,
     "slug": "rhyhorn",
     "name": "Rhyhorn",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 112,
     "slug": "rhydon",
     "name": "Rhydon",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 113,
@@ -687,7 +687,7 @@
     "nationalPokedexNumber": 115,
     "slug": "kangaskhan",
     "name": "Kangaskhan",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 116,
@@ -705,7 +705,7 @@
     "nationalPokedexNumber": 118,
     "slug": "goldeen",
     "name": "Goldeen",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 119,

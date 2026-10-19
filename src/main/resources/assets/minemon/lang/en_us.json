@@ -267,5 +267,15 @@
   "entity.minemon_gen1.gengar": "Gengar",
   "item.minemon_gen1.gengar_spawn_egg": "Spawn Egg: Gengar",
   "entity.minemon_gen1.cubone": "Cubone",
-  "item.minemon_gen1.cubone_spawn_egg": "Spawn Egg: Cubone"
+  "item.minemon_gen1.cubone_spawn_egg": "Spawn Egg: Cubone",
+  "entity.minemon_gen1.marowak": "Marowak",
+  "item.minemon_gen1.marowak_spawn_egg": "Spawn Egg: Marowak",
+  "entity.minemon_gen1.rhyhorn": "Rhyhorn",
+  "item.minemon_gen1.rhyhorn_spawn_egg": "Spawn Egg: Rhyhorn",
+  "entity.minemon_gen1.rhydon": "Rhydon",
+  "item.minemon_gen1.rhydon_spawn_egg": "Spawn Egg: Rhydon",
+  "entity.minemon_gen1.kangaskhan": "Kangaskhan",
+  "item.minemon_gen1.kangaskhan_spawn_egg": "Spawn Egg: Kangaskhan",
+  "entity.minemon_gen1.goldeen": "Goldeen",
+  "item.minemon_gen1.goldeen_spawn_egg": "Spawn Egg: Goldeen"
 }

@@ -4548,6 +4548,47 @@
     "eggSpots": 13082189
   },
   {
+    "nationalPokedexNumber": 105,
+    "slug": "marowak",
+    "name": "Marowak",
+    "model": "assets/minemon/geo/marowak/marowak.geo.json",
+    "texture": "assets/minemon/textures/pokemon/marowak/marowak.png",
+    "animation": "assets/minemon/animations/marowak/marowak.animation.json",
+    "mode": "ground",
+    "scale": 0.85,
+    "width": 0.85,
+    "height": 1.3,
+    "health": 30.0,
+    "attack": 6.666666666666667,
+    "speed": 0.245,
+    "clips": {
+      "test": "animation.marowak.test",
+      "idle": "animation.marowak.idle",
+      "blink": "animation.marowak.blink",
+      "cry": "animation.marowak.cry",
+      "ground_run": "animation.marowak.minemon_run",
+      "sit": "animation.marowak.minemon_sit",
+      "sleep": "animation.marowak.minemon_sleep",
+      "physical_attack": "animation.marowak.minemon_physical_attack"
+    },
+    "idle": "animation.marowak.idle",
+    "walk": "animation.marowak.idle",
+    "movement_fallback": "static",
+    "generated_static_animation": false,
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "stripped_bones": {},
+    "sounds": [
+      "assets/minemon/sounds/pokemon/marowak/marowak_ambient.ogg",
+      "assets/minemon/sounds/pokemon/marowak/marowak_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/marowak/model-license.txt"
+    ],
+    "eggBase": 13082189,
+    "eggSpots": 11766352
+  },
+  {
     "slug": "hitmonlee",
     "name": "Hitmonlee",
     "model": "assets/minemon/geo/hitmonlee/hitmonlee.geo.json",
@@ -4750,6 +4791,83 @@
     "eggSpots": 10778293
   },
   {
+    "nationalPokedexNumber": 111,
+    "slug": "rhyhorn",
+    "name": "Rhyhorn",
+    "model": "assets/minemon/geo/rhyhorn/rhyhorn.geo.json",
+    "texture": "assets/minemon/textures/pokemon/rhyhorn/rhyhorn.png",
+    "animation": "assets/minemon/animations/rhyhorn/rhyhorn.animation.json",
+    "mode": "ground",
+    "scale": 1.2,
+    "width": 1.2,
+    "height": 0.8,
+    "health": 40.0,
+    "attack": 7.083333333333333,
+    "speed": 0.225,
+    "clips": {
+      "ground_idle": "animation.rhyhorn.minemon_static",
+      "ground_walk": "animation.rhyhorn.minemon_static",
+      "ground_run": "animation.rhyhorn.minemon_run",
+      "sit": "animation.rhyhorn.minemon_sit",
+      "sleep": "animation.rhyhorn.minemon_sleep",
+      "physical_attack": "animation.rhyhorn.minemon_physical_attack"
+    },
+    "idle": "animation.rhyhorn.minemon_static",
+    "walk": "animation.rhyhorn.minemon_static",
+    "movement_fallback": "static",
+    "generated_static_animation": true,
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "stripped_bones": {},
+    "sounds": [
+      "assets/minemon/sounds/pokemon/rhyhorn/rhyhorn_ambient.ogg",
+      "assets/minemon/sounds/pokemon/rhyhorn/rhyhorn_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/rhyhorn/model-license.txt"
+    ],
+    "eggBase": 10899530,
+    "eggSpots": 10899530
+  },
+  {
+    "nationalPokedexNumber": 112,
+    "slug": "rhydon",
+    "name": "Rhydon",
+    "model": "assets/minemon/geo/rhydon/rhydon.geo.json",
+    "texture": "assets/minemon/textures/pokemon/rhydon/rhydon.png",
+    "animation": "assets/minemon/animations/rhydon/rhydon.animation.json",
+    "mode": "ground",
+    "scale": 1.3,
+    "width": 1.1,
+    "height": 1.7,
+    "health": 52.5,
+    "attack": 10.833333333333334,
+    "speed": 0.24,
+    "clips": {
+      "ground_idle": "animation.rhydon.ground_idle",
+      "ground_run": "animation.rhydon.minemon_run",
+      "sit": "animation.rhydon.minemon_sit",
+      "sleep": "animation.rhydon.minemon_sleep",
+      "physical_attack": "animation.rhydon.minemon_physical_attack"
+    },
+    "idle": "animation.rhydon.ground_idle",
+    "walk": "animation.rhydon.ground_idle",
+    "movement_fallback": "static",
+    "generated_static_animation": false,
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "stripped_bones": {},
+    "sounds": [
+      "assets/minemon/sounds/pokemon/rhydon/rhydon_ambient.ogg",
+      "assets/minemon/sounds/pokemon/rhydon/rhydon_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/rhydon/model-license.txt"
+    ],
+    "eggBase": 7370376,
+    "eggSpots": 8357015
+  },
+  {
     "nationalPokedexNumber": 113,
     "slug": "chansey",
     "name": "Chansey",
@@ -4790,6 +4908,47 @@
     ],
     "eggBase": 16755876,
     "eggSpots": 16765907
+  },
+  {
+    "nationalPokedexNumber": 115,
+    "slug": "kangaskhan",
+    "name": "Kangaskhan",
+    "model": "assets/minemon/geo/kangaskhan/kangaskhan.geo.json",
+    "texture": "assets/minemon/textures/pokemon/kangaskhan/kangaskhan.png",
+    "animation": "assets/minemon/animations/kangaskhan/kangaskhan.animation.json",
+    "mode": "ground",
+    "scale": 1.4,
+    "width": 1.2,
+    "height": 1.9,
+    "health": 52.5,
+    "attack": 7.916666666666667,
+    "speed": 0.29,
+    "clips": {
+      "ground_idle": "animation.kangaskhan.ground_idle",
+      "ground_run": "animation.kangaskhan.minemon_run",
+      "sit": "animation.kangaskhan.minemon_sit",
+      "sleep": "animation.kangaskhan.minemon_sleep",
+      "physical_attack": "animation.kangaskhan.minemon_physical_attack"
+    },
+    "idle": "animation.kangaskhan.ground_idle",
+    "walk": "animation.kangaskhan.ground_idle",
+    "movement_fallback": "static",
+    "generated_static_animation": false,
+    "attackTicks": 12,
+    "excluded_clips": [
+      "animation.kangaskhan.blink",
+      "animation.kangaskhan.blink2"
+    ],
+    "stripped_bones": {},
+    "sounds": [
+      "assets/minemon/sounds/pokemon/kangaskhan/kangaskhan_ambient.ogg",
+      "assets/minemon/sounds/pokemon/kangaskhan/kangaskhan_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/kangaskhan/model-license.txt"
+    ],
+    "eggBase": 9989990,
+    "eggSpots": 11307388
   },
   {
     "nationalPokedexNumber": 116,
@@ -4868,6 +5027,46 @@
     ],
     "eggBase": 5016497,
     "eggSpots": 5676992
+  },
+  {
+    "nationalPokedexNumber": 118,
+    "slug": "goldeen",
+    "name": "Goldeen",
+    "model": "assets/minemon/geo/goldeen/goldeen_female.geo.json",
+    "texture": "assets/minemon/textures/pokemon/goldeen/goldeen.png",
+    "animation": "assets/minemon/animations/goldeen/goldeen.animation.json",
+    "mode": "ground",
+    "scale": 1.2,
+    "width": 0.6,
+    "height": 0.4,
+    "health": 22.5,
+    "attack": 5.583333333333333,
+    "speed": 0.263,
+    "clips": {
+      "ground_idle": "animation.goldeen.ground_idle",
+      "water_idle": "animation.goldeen.water_idle",
+      "water_swim": "animation.goldeen.water_swim",
+      "ground_run": "animation.goldeen.minemon_run",
+      "sit": "animation.goldeen.minemon_sit",
+      "sleep": "animation.goldeen.minemon_sleep",
+      "physical_attack": "animation.goldeen.minemon_physical_attack"
+    },
+    "idle": "animation.goldeen.ground_idle",
+    "walk": "animation.goldeen.ground_idle",
+    "movement_fallback": "static",
+    "generated_static_animation": false,
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "stripped_bones": {},
+    "sounds": [
+      "assets/minemon/sounds/pokemon/goldeen/goldeen_ambient.ogg",
+      "assets/minemon/sounds/pokemon/goldeen/goldeen_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/goldeen/model-license.txt"
+    ],
+    "eggBase": 12731695,
+    "eggSpots": 13391413
   },
   {
     "nationalPokedexNumber": 120,
