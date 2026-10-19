@@ -189,7 +189,7 @@
     "nationalPokedexNumber": 32,
     "slug": "nidoranm",
     "name": "Nidoran-M",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 33,
@@ -201,7 +201,7 @@
     "nationalPokedexNumber": 34,
     "slug": "nidoking",
     "name": "Nidoking",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 35,
@@ -219,13 +219,13 @@
     "nationalPokedexNumber": 37,
     "slug": "vulpix",
     "name": "Vulpix",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 38,
     "slug": "ninetales",
     "name": "Ninetales",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 39,
@@ -309,7 +309,7 @@
     "nationalPokedexNumber": 52,
     "slug": "meowth",
     "name": "Meowth",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 53,

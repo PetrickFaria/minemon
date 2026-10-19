@@ -217,5 +217,15 @@
   "entity.minemon_gen1.nidorina": "Nidorina",
   "item.minemon_gen1.nidorina_spawn_egg": "Ovo de invocação de Nidorina",
   "entity.minemon_gen1.nidoqueen": "Nidoqueen",
-  "item.minemon_gen1.nidoqueen_spawn_egg": "Ovo de invocação de Nidoqueen"
+  "item.minemon_gen1.nidoqueen_spawn_egg": "Ovo de invocação de Nidoqueen",
+  "entity.minemon_gen1.nidoranm": "Nidoran-M",
+  "item.minemon_gen1.nidoranm_spawn_egg": "Ovo de invocação de Nidoran-M",
+  "entity.minemon_gen1.nidoking": "Nidoking",
+  "item.minemon_gen1.nidoking_spawn_egg": "Ovo de invocação de Nidoking",
+  "entity.minemon_gen1.vulpix": "Vulpix",
+  "item.minemon_gen1.vulpix_spawn_egg": "Ovo de invocação de Vulpix",
+  "entity.minemon_gen1.ninetales": "Ninetales",
+  "item.minemon_gen1.ninetales_spawn_egg": "Ovo de invocação de Ninetales",
+  "entity.minemon_gen1.meowth": "Meowth",
+  "item.minemon_gen1.meowth_spawn_egg": "Ovo de invocação de Meowth"
 }

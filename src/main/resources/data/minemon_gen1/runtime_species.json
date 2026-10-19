@@ -1333,6 +1333,46 @@
     "eggSpots": 7648719
   },
   {
+    "nationalPokedexNumber": 32,
+    "slug": "nidoranm",
+    "name": "Nidoran-M",
+    "model": "assets/minemon/geo/nidoranm/nidoranm.geo.json",
+    "texture": "assets/minemon/textures/pokemon/nidoranm/nidoranm.png",
+    "animation": "assets/minemon/animations/nidoranm/nidoranm.animation.json",
+    "mode": "ground",
+    "scale": 0.6,
+    "width": 0.7,
+    "height": 0.8,
+    "health": 23.0,
+    "attack": 4.75,
+    "speed": 0.25,
+    "clips": {
+      "test": "animation.nidoranm.test",
+      "blink": "animation.nidoranm.blink",
+      "idle": "animation.nidoranm.idle",
+      "ground_run": "animation.nidoranm.minemon_run",
+      "sit": "animation.nidoranm.minemon_sit",
+      "sleep": "animation.nidoranm.minemon_sleep",
+      "physical_attack": "animation.nidoranm.minemon_physical_attack"
+    },
+    "idle": "animation.nidoranm.idle",
+    "walk": "animation.nidoranm.idle",
+    "movement_fallback": "static",
+    "generated_static_animation": false,
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "stripped_bones": {},
+    "sounds": [
+      "assets/minemon/sounds/pokemon/nidoranm/nidoranm_ambient.ogg",
+      "assets/minemon/sounds/pokemon/nidoranm/nidoranm_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/nidoranm/model-license.txt"
+    ],
+    "eggBase": 12022451,
+    "eggSpots": 12943805
+  },
+  {
     "nationalPokedexNumber": 33,
     "slug": "nidorino",
     "name": "Nidorino",
@@ -1374,6 +1414,46 @@
     ],
     "eggBase": 10446754,
     "eggSpots": 9460627
+  },
+  {
+    "nationalPokedexNumber": 34,
+    "slug": "nidoking",
+    "name": "Nidoking",
+    "model": "assets/minemon/geo/nidoking/nidoking.geo.json",
+    "texture": "assets/minemon/textures/pokemon/nidoking/nidoking.png",
+    "animation": "assets/minemon/animations/nidoking/nidoking.animation.json",
+    "mode": "ground",
+    "scale": 1.2,
+    "width": 1.2,
+    "height": 1.8,
+    "health": 40.5,
+    "attack": 8.5,
+    "speed": 0.285,
+    "clips": {
+      "ground_idle": "animation.nidoking.ground_idle",
+      "blink": "animation.nidoking.blink",
+      "cry": "animation.nidoking.cry",
+      "ground_run": "animation.nidoking.minemon_run",
+      "sit": "animation.nidoking.minemon_sit",
+      "sleep": "animation.nidoking.minemon_sleep",
+      "physical_attack": "animation.nidoking.minemon_physical_attack"
+    },
+    "idle": "animation.nidoking.ground_idle",
+    "walk": "animation.nidoking.ground_idle",
+    "movement_fallback": "static",
+    "generated_static_animation": false,
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "stripped_bones": {},
+    "sounds": [
+      "assets/minemon/sounds/pokemon/nidoking/nidoking_ambient.ogg",
+      "assets/minemon/sounds/pokemon/nidoking/nidoking_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/nidoking/model-license.txt"
+    ],
+    "eggBase": 8603015,
+    "eggSpots": 10574500
   },
   {
     "nationalPokedexNumber": 35,
@@ -1454,6 +1534,85 @@
     ],
     "eggBase": 15643561,
     "eggSpots": 16631994
+  },
+  {
+    "nationalPokedexNumber": 37,
+    "slug": "vulpix",
+    "name": "Vulpix",
+    "model": "assets/minemon/geo/vulpix/vulpix.geo.json",
+    "texture": "assets/minemon/textures/pokemon/vulpix/vulpix.png",
+    "animation": "assets/minemon/animations/vulpix/vulpix.animation.json",
+    "mode": "ground",
+    "scale": 0.7,
+    "width": 0.9,
+    "height": 1.1,
+    "health": 20,
+    "attack": 3.4166666666666665,
+    "speed": 0.265,
+    "clips": {
+      "sleep": "animation.vulpix.sleep",
+      "blink": "animation.vulpix.blink",
+      "cry": "animation.vulpix.cry",
+      "ground_run": "animation.vulpix.minemon_run",
+      "sit": "animation.vulpix.minemon_sit",
+      "physical_attack": "animation.vulpix.minemon_physical_attack"
+    },
+    "idle": "animation.vulpix.blink",
+    "walk": "animation.vulpix.blink",
+    "movement_fallback": "static",
+    "generated_static_animation": false,
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "stripped_bones": {},
+    "sounds": [
+      "assets/minemon/sounds/pokemon/vulpix/vulpix_ambient.ogg",
+      "assets/minemon/sounds/pokemon/vulpix/vulpix_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/vulpix/model-license.txt"
+    ],
+    "eggBase": 14451543,
+    "eggSpots": 11629408
+  },
+  {
+    "nationalPokedexNumber": 38,
+    "slug": "ninetales",
+    "name": "Ninetales",
+    "model": "assets/minemon/geo/ninetales/ninetales.geo.json",
+    "texture": "assets/minemon/textures/pokemon/ninetales/ninetales.png",
+    "animation": "assets/minemon/animations/ninetales/ninetales.animation.json",
+    "mode": "ground",
+    "scale": 0.8,
+    "width": 1.1,
+    "height": 1.5,
+    "health": 36.5,
+    "attack": 6.333333333333333,
+    "speed": 0.3,
+    "clips": {
+      "ground_idle": "animation.ninetales.ground_idle",
+      "blink": "animation.ninetales.blink",
+      "sleep": "animation.ninetales.sleep",
+      "cry": "animation.ninetales.cry",
+      "ground_run": "animation.ninetales.minemon_run",
+      "sit": "animation.ninetales.minemon_sit",
+      "physical_attack": "animation.ninetales.minemon_physical_attack"
+    },
+    "idle": "animation.ninetales.ground_idle",
+    "walk": "animation.ninetales.ground_idle",
+    "movement_fallback": "static",
+    "generated_static_animation": false,
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "stripped_bones": {},
+    "sounds": [
+      "assets/minemon/sounds/pokemon/ninetales/ninetales_ambient.ogg",
+      "assets/minemon/sounds/pokemon/ninetales/ninetales_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/ninetales/model-license.txt"
+    ],
+    "eggBase": 11572060,
+    "eggSpots": 14537347
   },
   {
     "nationalPokedexNumber": 39,
@@ -2012,6 +2171,49 @@
     ],
     "eggBase": 12085313,
     "eggSpots": 13138763
+  },
+  {
+    "nationalPokedexNumber": 52,
+    "slug": "meowth",
+    "name": "Meowth",
+    "model": "assets/minemon/geo/meowth/meowth.geo.json",
+    "texture": "assets/minemon/textures/pokemon/meowth/meowth.png",
+    "animation": "assets/minemon/animations/meowth/meowth.animation.json",
+    "mode": "ground",
+    "scale": 0.7,
+    "width": 0.6,
+    "height": 1.1,
+    "health": 20,
+    "attack": 3.75,
+    "speed": 0.29,
+    "clips": {
+      "ground_idle": "animation.meowth.ground_idle",
+      "sleep": "animation.meowth.sleep",
+      "blink": "animation.meowth.blink",
+      "render": "animation.meowth.render",
+      "cry": "animation.meowth.cry",
+      "ground_run": "animation.meowth.minemon_run",
+      "sit": "animation.meowth.minemon_sit",
+      "physical_attack": "animation.meowth.minemon_physical_attack"
+    },
+    "idle": "animation.meowth.ground_idle",
+    "walk": "animation.meowth.ground_idle",
+    "movement_fallback": "static",
+    "generated_static_animation": false,
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "stripped_bones": {},
+    "sounds": [
+      "assets/minemon/sounds/pokemon/meowth/meowth_alolan_cry.ogg",
+      "assets/minemon/sounds/pokemon/meowth/meowth_ambient.ogg",
+      "assets/minemon/sounds/pokemon/meowth/meowth_cry.ogg",
+      "assets/minemon/sounds/pokemon/meowth/meowth_galarian_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/meowth/model-license.txt"
+    ],
+    "eggBase": 15195817,
+    "eggSpots": 14010515
   },
   {
     "slug": "psyduck",
