@@ -18,7 +18,7 @@ for slug in slugs:
  if not row['accepted']:raise SystemExit(slug+': '+row['reason'])
  d=row['definition']
  for path in [d['model'],d['texture'],d['animation']]+d['sounds']+d['licenses']:
-  if not (R/path).is_file():raise SystemExit(slug+': triaged resource is missing: '+path)
+  if not (R/path).is_file() and not (path==d['animation'] and d.get('generated_static_animation')):raise SystemExit(slug+': triaged resource is missing: '+path)
  excluded=set(d.get('excluded_clips',[]))
  d['clips']={key:value for key,value in d['clips'].items() if value not in excluded}
  if d.get('idle') in excluded or d.get('walk') in excluded:

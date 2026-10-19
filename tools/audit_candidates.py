@@ -20,12 +20,17 @@ def audit():
   animation=next((p for p in animations if p.endswith('/'+slug+'.animation.json')),animations[0] if animations else None)
   texture=next((p for p in textures if p.endswith('/'+slug+'.png') and not p.endswith('_shiny.png')),textures[0] if textures else None)
   if not model or not (R/model).is_file():issues.append('Missing model file')
-  if not animation or not (R/animation).is_file():issues.append('Missing animation file')
   if not texture or not (R/texture).is_file():issues.append('Missing texture file')
+  generated_static_animation=False
+  if not animation or not (R/animation).is_file():
+   if not issues:
+    animation=f'assets/minemon/animations/{slug}/{slug}.animation.json'
+    generated_static_animation=True
+   else:issues.append('Missing animation file')
   if issues:
    results.append(dict(slug=slug,accepted=False,reason='; '.join(issues),issues=issues,definition=None));continue
   try:
-   gd=json.loads((R/model).read_text());ad=json.loads((R/animation).read_text()).get('animations',{})
+   gd=json.loads((R/model).read_text());ad={} if generated_static_animation else json.loads((R/animation).read_text()).get('animations',{})
    bones={b['name'] for g in gd['minecraft:geometry'] for b in g['bones']}
    parents={b.get('parent') for g in gd['minecraft:geometry'] for b in g['bones'] if b.get('parent')}
    if parents-bones:issues.append('Missing geometry parents: '+str(sorted(parents-bones)))
@@ -35,6 +40,15 @@ def audit():
    mode='flying' if slug in FLYING or ('air_idle' in clips and 'air_fly' in clips) else 'ground'
    idle=next((clips[n] for n in (('air_idle','ground_idle','idle') if mode=='flying' else ('ground_idle','idle','air_idle')) if n in clips),None)
    walk=next((clips[n] for n in (('air_fly','ground_walk','walk','ground_run','run') if mode=='flying' else ('ground_walk','walk','ground_run','run')) if n in clips),None)
+   movement_fallback='static' if generated_static_animation else None
+   if generated_static_animation:
+    idle=walk=f'animation.{slug}.minemon_static'
+    clips={'ground_idle':idle,'ground_walk':walk}
+    mode='ground'
+   elif not idle:
+    # Use an existing eye-blink or sleep pose only as a safe static fallback.
+    # The manifest will label this as static; no missing animation is invented.
+    idle=next((clips[n] for n in ('blink','blink1','sleep') if n in clips),None)
    if not idle:issues.append('No usable idle clip')
    excluded=[];stripped_bones={}
    # Keep useful source clips when only some channels target bones absent from
@@ -51,16 +65,16 @@ def audit():
    def has_motion(name):
     if not name or name not in ad:return False
     clip=ad[name]
-    valid_bones={bone:channels for bone,channels in clip.get('bones',{}).items() if bone in bones}
+    valid_bones={bone:channels for bone,channels in clip.get('bones',{}).items() if bone in bones and not any(token in bone.lower() for token in ('eye','mouth','jaw'))}
     payload=json.dumps({'bones':valid_bones})
     return ('query.anim_time' in payload or 'q.anim_time' in payload) or any(isinstance(ch,dict) and len(ch)>1 for bone in valid_bones.values() for ch in bone.values())
-   movement_fallback=None
    if not walk or not has_motion(walk):
-    # Several extracted species have a valid, animated idle but no locomotion
-    # clip. Reuse that original idle clip while the entity moves and record the
-    # limitation in runtime_species.json instead of fabricating a new gait.
+    # Reuse a moving idle where available; otherwise keep the validated model
+    # static and record that missing locomotion explicitly in the manifest.
     if idle and has_motion(idle):
      walk=idle;movement_fallback='idle'
+    elif idle:
+     walk=idle;movement_fallback='static'
     else:
      issues.append('No usable locomotion clip' if not walk else 'Locomotion clip is a static pose')
    attack=next((clips[n] for n in ('physical_attack','physical','attack') if n in clips),None)
@@ -69,7 +83,7 @@ def audit():
   except Exception as exc:
    issues.append('Resource parse failed: '+str(exc))
    idle=walk=None;mode='ground';excluded=[];attack_ticks=0;clips={}
-  d=dict(nationalPokedexNumber=s['nationalPokedexNumber'],slug=slug,name=s['name'],model=model,texture=texture,animation=animation,mode=mode,scale=s.get('baseScale',1),width=s['hitbox']['width'],height=s['hitbox']['height'],health=max(20,s['baseStats']['hp']/2),attack=max(3,s['baseStats']['attack']/12),speed=round(min(.35,.20+s['baseStats']['speed']/1000),3),clips=clips,idle=idle,walk=walk,movement_fallback=movement_fallback,attackTicks=attack_ticks,excluded_clips=excluded,stripped_bones=stripped_bones,sounds=res['sounds'],licenses=res['licenses'])
+  d=dict(nationalPokedexNumber=s['nationalPokedexNumber'],slug=slug,name=s['name'],model=model,texture=texture,animation=animation,mode=mode,scale=s.get('baseScale',1),width=s['hitbox']['width'],height=s['hitbox']['height'],health=max(20,s['baseStats']['hp']/2),attack=max(3,s['baseStats']['attack']/12),speed=round(min(.35,.20+s['baseStats']['speed']/1000),3),clips=clips,idle=idle,walk=walk,movement_fallback=movement_fallback,generated_static_animation=generated_static_animation,attackTicks=attack_ticks,excluded_clips=excluded,stripped_bones=stripped_bones,sounds=res['sounds'],licenses=res['licenses'])
   accepted=not bool(issues)
   results.append(dict(slug=slug,accepted=accepted,reason='; '.join(issues) if issues else None,issues=issues,definition=d))
  return results

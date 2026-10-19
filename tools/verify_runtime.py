@@ -10,7 +10,12 @@ def validate(read,definitions,prepared=False,packed=False):
   if number<=previous:raise ValueError('Runtime roster is not in National Pokédex order')
   previous=number
   model_path=runtime_path(d['model']) if packed else d['model']; animation_path=runtime_path(d['animation']) if packed else d['animation']; texture_path=runtime_path(d['texture']) if packed else d['texture']
-  g=json.loads(read(model_path));a=json.loads(read(animation_path))['animations'];bone_names={b['name'] for part in g['minecraft:geometry'] for b in part['bones']}
+  g=json.loads(read(model_path))
+  try:a=json.loads(read(animation_path))['animations']
+  except FileNotFoundError:
+   if d.get('generated_static_animation') and not prepared and not packed:a={d['idle']:{'animation_length':1.0,'loop':True,'bones':{}}}
+   else:raise
+  bone_names={b['name'] for part in g['minecraft:geometry'] for b in part['bones']}
   for name in d.get('excluded_clips',[]):
    if prepared and name in a:raise ValueError('Excluded clip packaged '+name)
    a.pop(name,None)

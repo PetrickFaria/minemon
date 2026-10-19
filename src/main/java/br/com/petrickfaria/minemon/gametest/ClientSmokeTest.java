@@ -38,7 +38,7 @@ public final class ClientSmokeTest {
      && event.getSource().getEntity() instanceof MinemonCreature b && b.getUUID().equals(testEntity))combatHits++;
  }
  private static int direction=1;
- private static final int SPECIES_TEST_WINDOW=60;
+ private static final int SPECIES_TEST_WINDOW=40;
  private static final int BULBASAUR_VALIDATION_TICK=430;
  private static final int COMBAT_VALIDATION_TICK=BULBASAUR_VALIDATION_TICK+100;
  private static final int SPECIES_START_TICK=COMBAT_VALIDATION_TICK+10;
@@ -88,7 +88,7 @@ public final class ClientSmokeTest {
       if(slug.equals("charmander")||slug.equals("charmeleon")||slug.equals("charizard")) {
        var left=model.getAnimationProcessor().getBone("arm_left");var right=model.getAnimationProcessor().getBone("arm_right");
        int phase=Math.floorMod(worldTicks-SPECIES_START_TICK,SPECIES_TEST_WINDOW);
-       int mode=phase>=30?2:0;
+       int mode=phase>=20?2:0;
        var range=fireStarterArmRanges.computeIfAbsent(slug,k->new float[4]);
        range[mode]=Math.max(range[mode],Math.abs(left.getRotationZ()));
        range[mode+1]=Math.max(range[mode+1],Math.abs(right.getRotationZ()));
@@ -154,8 +154,8 @@ public final class ClientSmokeTest {
      // render-only animation check depend on pathfinding success. Navigation has its own tests.
      current.setNoAi(true);current.getNavigation().stop();
      if(current.getX()>2.5)direction=-1;if(current.getX()<-2.5)direction=1;
-     int phase=(worldTicks-360)%SPECIES_TEST_WINDOW;
-     boolean fireStarterRun=(current.getSpeciesSlug().equals("charmander")||current.getSpeciesSlug().equals("charmeleon")||current.getSpeciesSlug().equals("charizard"))&&phase>=30;
+     int phase=(worldTicks-SPECIES_START_TICK)%SPECIES_TEST_WINDOW;
+     boolean fireStarterRun=(current.getSpeciesSlug().equals("charmander")||current.getSpeciesSlug().equals("charmeleon")||current.getSpeciesSlug().equals("charizard"))&&phase>=20;
      double step=fireStarterRun?0.08:0.04;
      double animationVelocity=fireStarterRun?0.11:0.05;
      current.moveTo(current.getX()+direction*step,current.getY(),current.getZ(),current.getYRot(),current.getXRot());
@@ -166,14 +166,16 @@ public final class ClientSmokeTest {
     }
    });
    if(worldTicks>=SPECIES_START_TICK+20 && worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW && (worldTicks-(SPECIES_START_TICK+20))%SPECIES_TEST_WINDOW==0)Screenshot.grab(mc.gameDirectory,mc.getMainRenderTarget(),message->{});
-   if(worldTicks>=SPECIES_START_TICK && worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW && ((worldTicks-SPECIES_START_TICK)%SPECIES_TEST_WINDOW)==40
+   if(worldTicks>=SPECIES_START_TICK && worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW && ((worldTicks-SPECIES_START_TICK)%SPECIES_TEST_WINDOW)==30
        && java.util.Set.of("charmander","charmeleon","charizard").contains(species.get((worldTicks-SPECIES_START_TICK)/SPECIES_TEST_WINDOW)))Screenshot.grab(mc.gameDirectory,mc.getMainRenderTarget(),message->{});
    if(worldTicks==SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW) {
     if(!combatPassed)throw new IllegalStateException("Survival combat check did not pass");
     if(!renderedSpecies.containsAll(species))throw new IllegalStateException("Some species were not rendered: expected="+species+" actual="+renderedSpecies);
     for(String slug:species) {
      boolean bodyMoved=motionRanges.entrySet().stream().filter(e->e.getKey().startsWith(slug+":")).anyMatch(e->{for(int axis=0;axis<6;axis++)if(e.getValue()[axis+6]-e.getValue()[axis]>0.0001)return true;return false;});
-     if(!walkedSpecies.contains(slug)||!bodyMoved)throw new IllegalStateException("No animated locomotion rendered for "+slug+"; displacement="+walkedSpecies.contains(slug)+" bodyChanged="+bodyMoved);
+     var definition=SpeciesDefinitions.get(slug);
+     boolean staticFallback=definition!=null&&"static".equals(definition.movementFallback());
+     if(!walkedSpecies.contains(slug)||(!staticFallback&&!bodyMoved))throw new IllegalStateException("No rendered movement for "+slug+"; displacement="+walkedSpecies.contains(slug)+" bodyChanged="+bodyMoved+" staticFallback="+staticFallback);
     }
     for(String slug:java.util.List.of("charmander","charmeleon","charizard")) {
      float[] arms=fireStarterArmRanges.get(slug);
