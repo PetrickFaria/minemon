@@ -15,6 +15,8 @@ def validate(read,definitions,prepared=False,packed=False):
   except FileNotFoundError:
    if d.get('generated_static_animation') and not prepared and not packed:a={d['idle']:{'animation_length':1.0,'loop':True,'bones':{}}}
    else:raise
+  if d.get('generated_static_animation') and not prepared and not packed:
+   a.setdefault(d['idle'],{'animation_length':1.0,'loop':True,'bones':{}})
   bone_names={b['name'] for part in g['minecraft:geometry'] for b in part['bones']}
   for name in d.get('excluded_clips',[]):
    if prepared and name in a:raise ValueError('Excluded clip packaged '+name)
