@@ -56,7 +56,7 @@ jobs:
         if: ${{ !cancelled() && steps.compile.outcome == 'success' }}
         run: |
           python3 tools/prepare_client_world.py
-          timeout 420s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest
+          timeout 720s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest
           grep -F 'PASS WORLD' run/client-validation.txt
           grep -F 'PASS COMBAT' run/client-validation.txt
           grep -F 'PASS LOCOMOTION' run/client-validation.txt

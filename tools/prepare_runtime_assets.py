@@ -181,7 +181,7 @@ for d in definitions.values():
   p=root/'assets/minemon_gen1'/d['animation'].removeprefix('assets/minemon/')
   p.parent.mkdir(parents=True,exist_ok=True)
   data={'format_version':'1.8.0','animations':{d['idle']:{'animation_length':1.0,'loop':True,'bones':{}}}}
-  p.write_text(json.dumps(data,ensure_ascii=False,indent=2)+'\\n')
+  p.write_text(json.dumps(data,ensure_ascii=False,indent=2)+chr(10))
 for p in (root/'assets/minemon_gen1/animations').rglob('*.animation.json'):
  data=json.loads(p.read_text())
  def normalize(v):
