@@ -77,7 +77,11 @@ public final class ClientSmokeTest {
       walkedSpecies.add(slug);
       if(slug.equals("charmander")||slug.equals("charmeleon")||slug.equals("charizard")) {
        var left=model.getAnimationProcessor().getBone("arm_left");var right=model.getAnimationProcessor().getBone("arm_right");
-       boolean running=previous.distanceToSqr(position)>0.0025D;int mode=running?2:0;
+       // The smoke scenario drives fixed 30-tick walk and run phases. Use that
+       // authoritative phase marker instead of render-frame interpolation,
+       // which can group multiple server ticks into one larger client step.
+       int phase=Math.floorMod(worldTicks-360,SPECIES_TEST_WINDOW);
+       boolean running=phase>=30;int mode=running?2:0;
        var range=fireStarterArmRanges.computeIfAbsent(slug,k->new float[4]);
        range[mode]=Math.max(range[mode],Math.abs(left.getRotationZ()));
        range[mode+1]=Math.max(range[mode+1],Math.abs(right.getRotationZ()));

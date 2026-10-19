@@ -143,23 +143,26 @@ def prepare_tail_flame(root,d):
    elif distance<=max(0.6,half*0.36): rgba=(255,244,142,255)
    elif distance<=max(1.0,half*0.7): rgba=(255,174,38,255)
    else: rgba=(232,65,24,255)
-   i=(y+yy)*new_w*4+(x+xx)*4;row=rows[y+yy]
+   row=rows[y+yy]
    # Extend the row once when moving from the original atlas to the new atlas.
    if len(row)<new_w*4: row.extend(b'\0'*(new_w*4-len(row)))
    row[(x+xx)*4:(x+xx+1)*4]=bytes(rgba)
+   back_x=x+fw+1
+   row[(back_x+xx)*4:(back_x+xx+1)*4]=bytes(rgba)
  for row in rows:
   if len(row)<new_w*4:row.extend(b'\0'*(new_w*4-len(row)))
  description=geo['minecraft:geometry'][0]['description'];description['texture_width']=new_w
  bones=geo['minecraft:geometry'][0]['bones'];fire=next((b for b in bones if b['name']=='fire'),None)
  if fire is None:raise ValueError(slug+' model has no animated fire bone')
- # Replace the original zero-width / invalid-UV planes with two crossed thin
- # sprites. Both remain children of the animated tail-tip fire bone.
+ # Replace the original zero-width / invalid-UV planes with two crossed,
+ # shallow textured cuboids. Box UV arrays are the most consistently
+ # supported format across GeckoLib 3 exporters; the back sprite occupies
+ # the box-UV south face in the generated atlas.
  y0,z0={'charmander':(5.7,15.5),'charmeleon':(8.25,18.0),'charizard':(7.75,37.5)}[slug]
- def plane(origin,size,faces):
-  return {'origin':origin,'size':size,'uv':{face:{'uv':[x,y],'uv_size':[fw,fh]} for face in faces}}
- all_sides=('north','south','east','west')
- fire['cubes']=[plane([-fw/2,y0,z0-1],[fw,fh,2],all_sides+('up','down')),
-                plane([-1,y0,z0-fw/2],[2,fh,fw],all_sides+('up','down'))]
+ cube={'origin':[-fw/2,y0,z0-0.5],'size':[fw,fh,1],'uv':[x-1,y-1]}
+ crossed={'origin':[-fw/2,y0,z0-0.5],'size':[fw,fh,1],'pivot':[0,y0,z0],
+          'rotation':[0,90,0],'uv':[x-1,y-1]}
+ fire['cubes']=[cube,crossed]
  model.write_text(json.dumps(geo,ensure_ascii=False,indent=2)+'\n')
  texture.write_bytes(encode_png_rgba(new_w,h,rows))
 for p in (root/'assets/minemon_gen1/animations').rglob('*.animation.json'):
