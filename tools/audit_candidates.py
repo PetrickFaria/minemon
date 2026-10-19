@@ -49,6 +49,15 @@ def audit():
     # Use an existing eye-blink or sleep pose only as a safe static fallback.
     # The manifest will label this as static; no missing animation is invented.
     idle=next((clips[n] for n in ('blink','blink1','sleep') if n in clips),None)
+   if slug=='tangela' and not idle and not walk:
+    # Tangela's extracted file has only a cry event and no body animation.
+    # Keep its validated model/texture and use the existing static fallback path.
+    generated_static_animation=True
+    idle=walk=f'animation.{slug}.minemon_static'
+    clips['ground_idle']=idle
+    clips['ground_walk']=walk
+    movement_fallback='static'
+    mode='ground'
    if not idle:issues.append('No usable idle clip')
    excluded=[];stripped_bones={}
    # Keep useful source clips when only some channels target bones absent from
