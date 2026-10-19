@@ -12,7 +12,8 @@ from audit_candidates import ROOT, audit
 parser = argparse.ArgumentParser()
 parser.add_argument("--size", type=int, default=3)
 args = parser.parse_args()
-ISOLATED = {"magneton", "gastly", "electrode"}  # Previously troublesome; test one at a time.
+ISOLATED = {"magneton", "gastly", "electrode"}  # Test historical animation risks one at a time.
+BLOCKED = {"magneton"}  # Runtime validator confirmed unsupported particle_effects in animation.magneton.faint.
 if args.size < 1 or args.size > 5:
     raise SystemExit("Batch size must be between 1 and 5")
 
@@ -24,9 +25,11 @@ audit_path = ROOT / "tools/candidate_audit.json"
 audit_path.write_text(json.dumps(rows, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 eligible = [row["slug"] for row in rows if row["accepted"] and row["slug"] not in registered]
 regular = [slug for slug in eligible if slug not in ISOLATED]
-selected = regular[:args.size] if regular else eligible[:1]
+remaining = [slug for slug in eligible if slug not in BLOCKED]
+selected = regular[:args.size] if regular else remaining[:1]
 print(f"Kanto audit: {len(rows)} candidates, {len(eligible)} statically compatible and not yet registered")
 print("Isolating historical animation risks: " + ", ".join(slug for slug in eligible if slug in ISOLATED))
+print("Skipping confirmed incompatible resources: " + ", ".join(sorted(BLOCKED & set(eligible))))
 print("Selected next batch: " + (", ".join(selected) if selected else "(none)"))
 if selected:
     subprocess.run(
