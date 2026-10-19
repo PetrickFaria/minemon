@@ -6421,5 +6421,45 @@
     ],
     "eggBase": 13678290,
     "eggSpots": 12691139
+  },
+  {
+    "nationalPokedexNumber": 151,
+    "slug": "mew",
+    "name": "Mew",
+    "model": "assets/minemon/geo/mew/mew.geo.json",
+    "texture": "assets/minemon/textures/pokemon/mew/mew.png",
+    "animation": "assets/minemon/animations/mew/mew.animation.json",
+    "mode": "flying",
+    "scale": 0.5,
+    "width": 0.6,
+    "height": 1,
+    "health": 50.0,
+    "attack": 8.333333333333334,
+    "speed": 0.3,
+    "clips": {
+      "ground_idle": "animation.mew.ground_idle",
+      "ground_walk": "animation.mew.ground_walk",
+      "blink": "animation.mew.blink",
+      "ground_run": "animation.mew.minemon_run",
+      "sit": "animation.mew.minemon_sit",
+      "sleep": "animation.mew.minemon_sleep",
+      "physical_attack": "animation.mew.minemon_physical_attack"
+    },
+    "idle": "animation.mew.ground_idle",
+    "walk": "animation.mew.ground_idle",
+    "movement_fallback": "static",
+    "generated_static_animation": false,
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "stripped_bones": {},
+    "sounds": [
+      "assets/minemon/sounds/pokemon/mew/mew_ambient.ogg",
+      "assets/minemon/sounds/pokemon/mew/mew_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/mew/model-license.txt"
+    ],
+    "eggBase": 16759237,
+    "eggSpots": 15771310
   }
 ]
