@@ -77,6 +77,15 @@ def build_runtime_clips(data,geo,d):
     rotation=channel.get('rotation')
     if not isinstance(rotation,list) or len(rotation)!=3: continue
     channel['rotation'][2]=f'{sign*rest:g}{"+" if sign>0 else "-"}{swing:g}*math.sin(query.anim_time*{frequency})'
+ # The original flame-bone tilt drives the long Charizard flame back into the
+ # tail's final segment. Keep the flame upright in every state; it still follows
+ # the animated tail through its parent bone.
+ if d.get('slug') in ('charmander','charmeleon','charizard'):
+  for animation in animations.values():
+   fire=animation.get('bones',{}).get('fire')
+   if isinstance(fire,dict):
+    fire['rotation']=[0,0,0]
+    fire.pop('position',None)
 
 def png_chunks(data):
  if data[:8]!=b'\x89PNG\r\n\x1a\n': raise ValueError('Not a PNG texture')
