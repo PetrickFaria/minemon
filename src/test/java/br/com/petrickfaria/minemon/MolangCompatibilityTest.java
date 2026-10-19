@@ -14,7 +14,7 @@ public class MolangCompatibilityTest {
   assertTrue("Canonical animation clock must move the bone", Math.abs(nativeExpr.get()-start)>0.5);
  }
  @Test public void preparedBulbasaurBodyAndLegChannelsAdvance() throws Exception {
-  var stream=java.nio.file.Files.newInputStream(java.nio.file.Path.of(System.getProperty("minemon.testResources"),"assets/minemon/animations/bulbasaur/bulbasaur.animation.json"));
+  var stream=java.nio.file.Files.newInputStream(java.nio.file.Path.of(System.getProperty("minemon.testResources"),"assets/minemon_gen1/animations/bulbasaur/bulbasaur.animation.json"));
   assertNotNull(stream);
   var root=com.google.gson.JsonParser.parseReader(new java.io.InputStreamReader(stream,java.nio.charset.StandardCharsets.UTF_8)).getAsJsonObject();
   var walk=root.getAsJsonObject("animations").getAsJsonObject("animation.bulbasaur.ground_walk");

@@ -1,8 +1,8 @@
 # Minemon
 
-Minecraft Java 1.19.2 · Forge 43.5.0 · Java 17 · GeckoLib 3.1.40 · mod ID `minemon`.
+Minecraft Java 1.19.2 · Forge 43.5.0 · Java 17 · GeckoLib 3.1.40 · mod ID `minemon_gen1`.
 
-The source preserves the existing 1,025-entry catalog and extracted artwork. Only species explicitly listed in `data/minemon/runtime_species.json` and `gradle.properties` are registered or packaged. Catalog entries are not playable entity registrations. No Cobblemon classes or runtime dependency are included.
+This is the independent first-generation edition of Minemon. The source preserves the existing 1,025-entry catalog and extracted artwork; only registered species are runtime entities. The National Pokédex order is kept in `data/minemon_gen1/pokedex.json`. Only species explicitly listed in `data/minemon_gen1/runtime_species.json` and `gradle.properties` are registered or packaged. Catalog entries are not playable entity registrations. No Cobblemon classes or runtime dependency are included.
 
 ## Build and validation
 
@@ -12,10 +12,14 @@ Use the checked-in Gradle 7.5.1 Wrapper and ForgeGradle 5.1.77:
 python3 tools/verify_project.py
 ./gradlew clean test build
 ./gradlew runGameTestServer
-python3 tools/verify_runtime.py build/libs/Minemon-1.19.2-1.4.0.jar
+python3 tools/verify_runtime.py build/libs/Minemon-1.19.2-2.0.0-gen1.jar
 ```
 
 The workflow runs JUnit against GeckoLib's actual Molang parser, Minecraft server GameTests, and an Xvfb Minecraft client. The client test checks the title screen, GeckoLib's loaded models/animations, and actual rendered locomotion for each registered species. Diagnostic artifacts contain test results, client/server logs and screenshots. Validation code and test structures are excluded from the distributable JAR.
+
+## Generation namespace
+
+The registered ID is `minemon_gen1`. Runtime models, textures, animations, egg models and translations are copied from the preserved source asset tree into `assets/minemon_gen1/`; the original `assets/minemon/` extraction remains intact in the source. Existing worlds with the old `minemon` ID have not been verified for migration.
 
 ## Shared companion behavior
 
@@ -29,7 +33,7 @@ The workflow runs JUnit against GeckoLib's actual Molang parser, Minecraft serve
 
 Original animation files remain untouched in source. During resource processing, runtime copies normalize the Bedrock `q.anim_time` alias to GeckoLib 3's `query.anim_time`. GeckoLib's native continuous timing is retained for expression-only loops. Model, texture and animation paths are chosen explicitly per species. A secondary blink controller is kept separate from body locomotion and stops during movement/attacks. Physical attack clips are triggered after a successful melee hit. When an approved source clip is absent, runtime processing adds a conservative species-specific run variation from that model's walk clip, plus sit, sleep, or short physical pose clips using only bones present in that species' geometry.
 
-The current runtime roster is listed in `data/minemon/runtime_species.json`. Its six common state mappings are idle, walk, run, sit, sleep and attack. Original clips are preferred; generated runtime copies are reported as compatibility adaptations and leave the source artwork unchanged.
+The current runtime roster is listed in `data/minemon_gen1/runtime_species.json`. Its six common state mappings are idle, walk, run, sit, sleep and attack. Original clips are preferred; generated runtime copies are reported as compatibility adaptations and leave the source artwork unchanged.
 
 `tools/audit_candidates.py` records model/animation bone matching, event structure, UV dimensions and actual animated locomotion. Optional Jolteon cry has invalid bone references and is omitted only from the prepared runtime copy; the original source is preserved. Species with unsupported events, missing bones, only static poses or unvalidated locomotion remain unregistered.
 

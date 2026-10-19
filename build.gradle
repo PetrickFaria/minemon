@@ -13,37 +13,41 @@ java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 def runtimeSpecies = (findProperty('runtime_species') ?: 'bulbasaur')
         .toString().split(',').collect { it.trim().toLowerCase(Locale.ROOT) }.findAll { !it.isEmpty() }
-
-// GeckoLib 3 indexes animation JSON from every namespace during resource reload.
-// Keep non-registered species' extracted assets in source, but out of the runtime
-// JAR so unimplemented/unsupported event tracks cannot break Bulbasaur's cache.
-def speciesAssetRoots = [
-    'assets/minemon/geo/',
-    'assets/minemon/animations/',
-    'assets/minemon/textures/pokemon/',
-    'assets/minemon/sounds/pokemon/',
-    'assets/minemon/licenses/pokemon/'
-]
-def runtimeManifestFile = file('src/main/resources/data/minemon/runtime_species.json')
+def runtimeManifestFile = file('src/main/resources/data/minemon_gen1/runtime_species.json')
 def runtimeDefinitions = runtimeManifestFile.exists() ? new groovy.json.JsonSlurper().parse(runtimeManifestFile) : []
-def runtimeAssetFiles = runtimeDefinitions.collectMany { d -> [d.model,d.texture,d.animation] + d.sounds + d.licenses }.toSet()
+
 processResources {
     inputs.property 'version', project.version
     filesMatching('META-INF/mods.toml') {
         expand 'version': project.version
     }
     includeEmptyDirs = false
+    // Source art stays under assets/minemon for provenance. The selected species
+    // are copied into the independent generation namespace below.
+    exclude 'assets/minemon/**'
     doLast {
+        def sourceRoot = file('src/main/resources')
+        def destinationRoot = destinationDir
+        def assetPrefix = 'assets/minemon/'
+        def runtimePaths = runtimeDefinitions.collectMany { d -> [d.model,d.texture,d.animation] + d.sounds + d.licenses }.unique()
+        runtimeDefinitions.each { d -> runtimePaths << "assets/minemon/models/item/${d.slug}_spawn_egg.json" }
+        runtimePaths.unique().each { path ->
+            if (!path.startsWith(assetPrefix)) throw new GradleException("Unexpected source asset path: ${path}")
+            def source = new File(sourceRoot, path)
+            if (!source.isFile()) throw new GradleException("Missing selected runtime asset: ${path}")
+            def targetPath = 'assets/minemon_gen1/' + path.substring(assetPrefix.length())
+            def target = new File(destinationRoot, targetPath)
+            target.parentFile.mkdirs()
+            target.bytes = source.bytes
+        }
+        ['en_us.json','pt_br.json'].each { name ->
+            def source = new File(sourceRoot, "assets/minemon/lang/${name}")
+            def target = new File(destinationRoot, "assets/minemon_gen1/lang/${name}")
+            target.parentFile.mkdirs()
+            def language = new groovy.json.JsonSlurper().parse(source)
+            target.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(language)) + '\n'
+        }
         exec { commandLine 'python3', 'tools/prepare_runtime_assets.py', destinationDir.absolutePath }
-    }
-    exclude { details ->
-        if (details.isDirectory()) return false
-        def root = speciesAssetRoots.find { details.path.startsWith(it) }
-        if (root == null) return false
-        if (!runtimeAssetFiles.isEmpty()) return !runtimeAssetFiles.contains(details.path)
-        def relative = details.path.substring(root.length())
-        def species = relative.tokenize('/').find()
-        return species == null || !runtimeSpecies.contains(species)
     }
 }
 
@@ -55,14 +59,14 @@ minecraft {
             jvmArgs '-Xmx2G'
             forceExit false
             property 'forge.logging.console.level', 'info'
-            mods { minemon { source sourceSets.main } }
+            mods { minemon_gen1 { source sourceSets.main } }
         }
         client {
-            property 'forge.enabledGameTestNamespaces', 'minemon'
+            property 'forge.enabledGameTestNamespaces', 'minemon_gen1'
             property 'minemon.clientSmokeTest', project.hasProperty('clientSmokeTest').toString()
         }
         server { args '--nogui' }
-        gameTestServer { property 'forge.enabledGameTestNamespaces', 'minemon' }
+        gameTestServer { property 'forge.enabledGameTestNamespaces', 'minemon_gen1' }
     }
 }
 
@@ -80,7 +84,7 @@ dependencies {
 
 jar {
     exclude 'br/com/petrickfaria/minemon/gametest/**'
-    exclude 'data/minemon/structures/test_arena.nbt'
+    exclude 'data/minemon_gen1/structures/test_arena.nbt'
     from('ASSET_LICENSES.md') {
         into 'META-INF'
     }

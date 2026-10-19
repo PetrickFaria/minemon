@@ -12,7 +12,7 @@ import software.bernie.geckolib3.GeckoLib;
 
 @Mod(Minemon.MOD_ID)
 public final class Minemon {
-    public static final String MOD_ID = "minemon";
+    public static final String MOD_ID = "minemon_gen1";
 
     public Minemon() {
         // Registers GeckoLib's resource reload listener and model cache. Without this,

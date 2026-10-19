@@ -44,8 +44,8 @@ public final class ClientSmokeTest {
   try {
    if(!opened && mc.screen instanceof TitleScreen && ++titleTicks==20) {
     for(var d:SpeciesDefinitions.ALL.values()) {
-     var geo=new ResourceLocation("minemon",d.model().substring("assets/minemon/".length()));var anim=new ResourceLocation("minemon",d.animation().substring("assets/minemon/".length()));
-     try(var stream=ClientSmokeTest.class.getResourceAsStream("/"+d.model())) {
+     var geo=new ResourceLocation(Minemon.MOD_ID,d.model().substring("assets/minemon/".length()));var anim=new ResourceLocation(Minemon.MOD_ID,d.animation().substring("assets/minemon/".length()));
+     try(var stream=ClientSmokeTest.class.getResourceAsStream("/"+d.model().replace("assets/minemon/","assets/minemon_gen1/"))) {
       var json=com.google.gson.JsonParser.parseReader(new java.io.InputStreamReader(stream)).getAsJsonObject();var names=new java.util.ArrayList<String>();
       for(var geometry:json.getAsJsonArray("minecraft:geometry"))for(var bone:geometry.getAsJsonObject().getAsJsonArray("bones"))names.add(bone.getAsJsonObject().get("name").getAsString());modelBones.put(d.slug(),names);
      }

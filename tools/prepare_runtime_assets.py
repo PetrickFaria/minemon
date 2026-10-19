@@ -4,8 +4,8 @@ import json,re,sys
 from pathlib import Path
 root=Path(sys.argv[1])
 count=0
-manifest=root/'data/minemon/runtime_species.json'
-definitions={d['animation']:d for d in json.loads(manifest.read_text())} if manifest.exists() else {}
+manifest=root/'data/minemon_gen1/runtime_species.json'
+definitions={d['animation'].replace('assets/minemon/','assets/minemon_gen1/'):d for d in json.loads(manifest.read_text())} if manifest.exists() else {}
 def add_pose_animation(data, geo, d, name, kind):
  animations=data.setdefault('animations',{})
  if name in animations:return
@@ -57,7 +57,7 @@ def build_runtime_clips(data,geo,d):
  for key,kind in [('sit','sit'),('sleep','sleep'),('physical_attack','physical_attack')]:
   name=clips.get(key,'')
   if name.endswith('.minemon_'+kind):add_pose_animation(data,geo,d,name,kind)
-for p in (root/'assets/minemon/animations').rglob('*.animation.json'):
+for p in (root/'assets/minemon_gen1/animations').rglob('*.animation.json'):
  data=json.loads(p.read_text())
  def normalize(v):
   if isinstance(v,str): return re.sub(r'\bq\.', 'query.',v)
@@ -69,11 +69,14 @@ for p in (root/'assets/minemon/animations').rglob('*.animation.json'):
  for name in definition.get('excluded_clips',[]): data.get('animations',{}).pop(name,None)
  if definition:
   # Files in the processed resource tree keep the normal assets/minemon root.
-  model=root/'assets/minemon'/definition['model'].removeprefix('assets/minemon/')
+  model=root/'assets/minemon_gen1'/definition['model'].removeprefix('assets/minemon/')
   if model.exists():build_runtime_clips(data,json.loads(model.read_text()),definition)
  # GeckoLib 3.1.40 dereferences this field while parsing every clip, including
  # expression-only looping clips. Keep the source untouched and add a runtime fallback.
  for animation in data.get('animations',{}).values():
+  for field in ('particle_effects','sound_effects'):
+   events=animation.get(field)
+   if not isinstance(events,dict) or any(not isinstance(value,dict) for value in events.values()): animation.pop(field,None)
   if 'animation_length' not in animation:animation['animation_length']=4.0
  p.write_text(json.dumps(data,ensure_ascii=False,indent=2)+'\n')
  count+=1

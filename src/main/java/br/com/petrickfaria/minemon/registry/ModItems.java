@@ -6,7 +6,7 @@ import net.minecraft.world.item.*;
 import net.minecraftforge.common.ForgeSpawnEggItem;
 import net.minecraftforge.registries.*;
 public final class ModItems {
- public static final CreativeModeTab MINEMON_TAB=new CreativeModeTab("minemon"){@Override public ItemStack makeIcon(){return BULBASAUR_SPAWN_EGG.get().getDefaultInstance();}};
+ public static final CreativeModeTab MINEMON_TAB=new CreativeModeTab(Minemon.MOD_ID){@Override public ItemStack makeIcon(){return BULBASAUR_SPAWN_EGG.get().getDefaultInstance();}};
  public static final DeferredRegister<Item> ITEMS=DeferredRegister.create(ForgeRegistries.ITEMS,Minemon.MOD_ID);
  public static final Map<String,RegistryObject<Item>> EGGS=register();
  public static final RegistryObject<Item> BULBASAUR_SPAWN_EGG=EGGS.get("bulbasaur");

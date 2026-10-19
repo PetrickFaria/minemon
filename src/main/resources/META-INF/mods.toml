@@ -2,24 +2,24 @@ modLoader="javafml"
 loaderVersion="[43,)"
 license="See ASSET_LICENSES.md; bundled assets are CC BY-NC 3.0"
 [[mods]]
-modId="minemon"
+modId="minemon_gen1"
 version="${version}"
-displayName="Minemon"
+displayName="Minemon (1ª Geração)"
 authors="PetrickFaria"
 description='''A standalone creature companion framework for Minecraft 1.19.2.'''
-[[dependencies.minemon]]
+[[dependencies.minemon_gen1]]
 modId="forge"
 mandatory=true
 versionRange="[43.5.0,44)"
 ordering="NONE"
 side="BOTH"
-[[dependencies.minemon]]
+[[dependencies.minemon_gen1]]
 modId="minecraft"
 mandatory=true
 versionRange="[1.19.2,1.20)"
 ordering="NONE"
 side="BOTH"
-[[dependencies.minemon]]
+[[dependencies.minemon_gen1]]
 modId="geckolib3"
 mandatory=true
 versionRange="[3.1.40,4)"

@@ -15,8 +15,8 @@ import net.minecraftforge.common.util.FakePlayer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.gametest.GameTestHolder;
 import net.minecraftforge.gametest.PrefixGameTestTemplate;
-@net.minecraftforge.fml.common.Mod.EventBusSubscriber(modid="minemon")
-@GameTestHolder("minemon")
+@net.minecraftforge.fml.common.Mod.EventBusSubscriber(modid=br.com.petrickfaria.minemon.Minemon.MOD_ID)
+@GameTestHolder(br.com.petrickfaria.minemon.Minemon.MOD_ID)
 @PrefixGameTestTemplate(false)
 public final class CompanionTests {
  private static final java.util.Set<ServerPlayer> TEST_PLAYERS=new java.util.HashSet<>();

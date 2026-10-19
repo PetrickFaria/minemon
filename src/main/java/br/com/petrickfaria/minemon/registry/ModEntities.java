@@ -16,7 +16,7 @@ public final class ModEntities {
   Map<String,RegistryObject<EntityType<MinemonCreature>>> map=new LinkedHashMap<>();
   for(var d:SpeciesDefinitions.ALL.values())map.put(d.slug(),ENTITIES.register(d.slug(),()->{
    EntityType.EntityFactory<MinemonCreature> factory=d.mode().equals("flying")?MinemonFlyingCreature::new:MinemonCreature::new;
-   return EntityType.Builder.of(factory,MobCategory.CREATURE).sized(d.width(),d.height()).clientTrackingRange(10).build("minemon:"+d.slug());
+   return EntityType.Builder.of(factory,MobCategory.CREATURE).sized(d.width(),d.height()).clientTrackingRange(10).build(Minemon.MOD_ID+":"+d.slug());
   }));
   return Collections.unmodifiableMap(map);
  }
