@@ -315,7 +315,7 @@
     "nationalPokedexNumber": 53,
     "slug": "persian",
     "name": "Persian",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 54,
@@ -345,13 +345,13 @@
     "nationalPokedexNumber": 58,
     "slug": "growlithe",
     "name": "Growlithe",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 59,
     "slug": "arcanine",
     "name": "Arcanine",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 60,
@@ -369,7 +369,7 @@
     "nationalPokedexNumber": 62,
     "slug": "poliwrath",
     "name": "Poliwrath",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 63,
@@ -381,7 +381,7 @@
     "nationalPokedexNumber": 64,
     "slug": "kadabra",
     "name": "Kadabra",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 65,

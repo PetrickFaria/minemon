@@ -227,5 +227,15 @@
   "entity.minemon_gen1.ninetales": "Ninetales",
   "item.minemon_gen1.ninetales_spawn_egg": "Spawn Egg: Ninetales",
   "entity.minemon_gen1.meowth": "Meowth",
-  "item.minemon_gen1.meowth_spawn_egg": "Spawn Egg: Meowth"
+  "item.minemon_gen1.meowth_spawn_egg": "Spawn Egg: Meowth",
+  "entity.minemon_gen1.persian": "Persian",
+  "item.minemon_gen1.persian_spawn_egg": "Spawn Egg: Persian",
+  "entity.minemon_gen1.growlithe": "Growlithe",
+  "item.minemon_gen1.growlithe_spawn_egg": "Spawn Egg: Growlithe",
+  "entity.minemon_gen1.arcanine": "Arcanine",
+  "item.minemon_gen1.arcanine_spawn_egg": "Spawn Egg: Arcanine",
+  "entity.minemon_gen1.poliwrath": "Poliwrath",
+  "item.minemon_gen1.poliwrath_spawn_egg": "Spawn Egg: Poliwrath",
+  "entity.minemon_gen1.kadabra": "Kadabra",
+  "item.minemon_gen1.kadabra_spawn_egg": "Spawn Egg: Kadabra"
 }

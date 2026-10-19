@@ -2216,6 +2216,46 @@
     "eggSpots": 14010515
   },
   {
+    "nationalPokedexNumber": 53,
+    "slug": "persian",
+    "name": "Persian",
+    "model": "assets/minemon/geo/persian/persian.geo.json",
+    "texture": "assets/minemon/textures/pokemon/persian/persian.png",
+    "animation": "assets/minemon/animations/persian/persian.animation.json",
+    "mode": "ground",
+    "scale": 0.8,
+    "width": 1,
+    "height": 1.2,
+    "health": 32.5,
+    "attack": 5.833333333333333,
+    "speed": 0.315,
+    "clips": {
+      "ground_idle": "animation.persian.ground_idle",
+      "blink": "animation.persian.blink",
+      "sleep": "animation.persian.sleep",
+      "cry": "animation.persian.cry",
+      "ground_run": "animation.persian.minemon_run",
+      "sit": "animation.persian.minemon_sit",
+      "physical_attack": "animation.persian.minemon_physical_attack"
+    },
+    "idle": "animation.persian.ground_idle",
+    "walk": "animation.persian.ground_idle",
+    "movement_fallback": "static",
+    "generated_static_animation": false,
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "stripped_bones": {},
+    "sounds": [
+      "assets/minemon/sounds/pokemon/persian/persian_ambient.ogg",
+      "assets/minemon/sounds/pokemon/persian/persian_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/persian/model-license.txt"
+    ],
+    "eggBase": 13742995,
+    "eggSpots": 14665634
+  },
+  {
     "slug": "psyduck",
     "name": "Psyduck",
     "model": "assets/minemon/geo/psyduck/psyduck.geo.json",
@@ -2379,6 +2419,91 @@
     "eggSpots": 15980972
   },
   {
+    "nationalPokedexNumber": 58,
+    "slug": "growlithe",
+    "name": "Growlithe",
+    "model": "assets/minemon/geo/growlithe/growlithe.geo.json",
+    "texture": "assets/minemon/textures/pokemon/growlithe/growlithe.png",
+    "animation": "assets/minemon/animations/growlithe/growlithe.animation.json",
+    "mode": "ground",
+    "scale": 0.75,
+    "width": 1.1,
+    "height": 1.15,
+    "health": 27.5,
+    "attack": 5.833333333333333,
+    "speed": 0.26,
+    "clips": {
+      "test": "animation.growlithe.test",
+      "test2": "animation.growlithe.test2",
+      "test3": "animation.growlithe.test3",
+      "idle": "animation.growlithe.idle",
+      "blink": "animation.growlithe.blink",
+      "cry": "animation.growlithe.cry",
+      "ground_run": "animation.growlithe.minemon_run",
+      "sit": "animation.growlithe.minemon_sit",
+      "sleep": "animation.growlithe.minemon_sleep",
+      "physical_attack": "animation.growlithe.minemon_physical_attack"
+    },
+    "idle": "animation.growlithe.idle",
+    "walk": "animation.growlithe.idle",
+    "movement_fallback": "static",
+    "generated_static_animation": false,
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "stripped_bones": {},
+    "sounds": [
+      "assets/minemon/sounds/pokemon/growlithe/growlithe_ambient.ogg",
+      "assets/minemon/sounds/pokemon/growlithe/growlithe_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/growlithe/model-license.txt"
+    ],
+    "eggBase": 15699018,
+    "eggSpots": 14381636
+  },
+  {
+    "nationalPokedexNumber": 59,
+    "slug": "arcanine",
+    "name": "Arcanine",
+    "model": "assets/minemon/geo/arcanine/arcanine.geo.json",
+    "texture": "assets/minemon/textures/pokemon/arcanine/arcanine.png",
+    "animation": "assets/minemon/animations/arcanine/arcanine.animation.json",
+    "mode": "ground",
+    "scale": 1.1,
+    "width": 1.2,
+    "height": 1.7,
+    "health": 45.0,
+    "attack": 9.166666666666666,
+    "speed": 0.295,
+    "clips": {
+      "idle": "animation.arcanine.idle",
+      "test": "animation.arcanine.test",
+      "test2": "animation.arcanine.test2",
+      "blink": "animation.arcanine.blink",
+      "cry": "animation.arcanine.cry",
+      "ground_run": "animation.arcanine.minemon_run",
+      "sit": "animation.arcanine.minemon_sit",
+      "sleep": "animation.arcanine.minemon_sleep",
+      "physical_attack": "animation.arcanine.minemon_physical_attack"
+    },
+    "idle": "animation.arcanine.idle",
+    "walk": "animation.arcanine.idle",
+    "movement_fallback": "static",
+    "generated_static_animation": false,
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "stripped_bones": {},
+    "sounds": [
+      "assets/minemon/sounds/pokemon/arcanine/arcanine_ambient.ogg",
+      "assets/minemon/sounds/pokemon/arcanine/arcanine_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/arcanine/model-license.txt"
+    ],
+    "eggBase": 16109733,
+    "eggSpots": 15450781
+  },
+  {
     "nationalPokedexNumber": 60,
     "slug": "poliwag",
     "name": "Poliwag",
@@ -2497,6 +2622,50 @@
     "eggSpots": 5668785
   },
   {
+    "nationalPokedexNumber": 62,
+    "slug": "poliwrath",
+    "name": "Poliwrath",
+    "model": "assets/minemon/geo/poliwrath/poliwrath.geo.json",
+    "texture": "assets/minemon/textures/pokemon/poliwrath/poliwrath.png",
+    "animation": "assets/minemon/animations/poliwrath/poliwrath.animation.json",
+    "mode": "ground",
+    "scale": 1.4,
+    "width": 1,
+    "height": 1.3,
+    "health": 45.0,
+    "attack": 7.916666666666667,
+    "speed": 0.27,
+    "clips": {
+      "ground_idle": "animation.poliwrath.ground_idle",
+      "water_idle": "animation.poliwrath.water_idle",
+      "water_swim": "animation.poliwrath.water_swim",
+      "render": "animation.poliwrath.render",
+      "ground_run": "animation.poliwrath.minemon_run",
+      "sit": "animation.poliwrath.minemon_sit",
+      "sleep": "animation.poliwrath.minemon_sleep",
+      "physical_attack": "animation.poliwrath.minemon_physical_attack"
+    },
+    "idle": "animation.poliwrath.ground_idle",
+    "walk": "animation.poliwrath.ground_idle",
+    "movement_fallback": "static",
+    "generated_static_animation": false,
+    "attackTicks": 12,
+    "excluded_clips": [
+      "animation.poliwrath.blink",
+      "animation.poliwrath.sleep"
+    ],
+    "stripped_bones": {},
+    "sounds": [
+      "assets/minemon/sounds/pokemon/poliwrath/poliwrath_ambient.ogg",
+      "assets/minemon/sounds/pokemon/poliwrath/poliwrath_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/poliwrath/model-license.txt"
+    ],
+    "eggBase": 4281230,
+    "eggSpots": 5535148
+  },
+  {
     "nationalPokedexNumber": 63,
     "slug": "abra",
     "name": "Abra",
@@ -2535,6 +2704,49 @@
     ],
     "eggBase": 15323184,
     "eggSpots": 15785561
+  },
+  {
+    "nationalPokedexNumber": 64,
+    "slug": "kadabra",
+    "name": "Kadabra",
+    "model": "assets/minemon/geo/kadabra/kadabra_female.geo.json",
+    "texture": "assets/minemon/textures/pokemon/kadabra/kadabra.png",
+    "animation": "assets/minemon/animations/kadabra/kadabra.animation.json",
+    "mode": "ground",
+    "scale": 0.85,
+    "width": 1,
+    "height": 1.4,
+    "health": 20,
+    "attack": 3,
+    "speed": 0.305,
+    "clips": {
+      "test": "animation.kadabra.test",
+      "ground_idle": "animation.kadabra.ground_idle",
+      "blink": "animation.kadabra.blink",
+      "cry": "animation.kadabra.cry",
+      "ground_run": "animation.kadabra.minemon_run",
+      "sit": "animation.kadabra.minemon_sit",
+      "sleep": "animation.kadabra.minemon_sleep",
+      "physical_attack": "animation.kadabra.minemon_physical_attack"
+    },
+    "idle": "animation.kadabra.ground_idle",
+    "walk": "animation.kadabra.ground_idle",
+    "movement_fallback": "static",
+    "generated_static_animation": false,
+    "attackTicks": 12,
+    "excluded_clips": [
+      "animation.kadabra.battle_idle"
+    ],
+    "stripped_bones": {},
+    "sounds": [
+      "assets/minemon/sounds/pokemon/kadabra/kadabra_ambient.ogg",
+      "assets/minemon/sounds/pokemon/kadabra/kadabra_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/kadabra/model-license.txt"
+    ],
+    "eggBase": 15323184,
+    "eggSpots": 14399786
   },
   {
     "nationalPokedexNumber": 66,
