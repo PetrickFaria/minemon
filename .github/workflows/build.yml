@@ -24,7 +24,7 @@ jobs:
         if: ${{ github.event_name == 'push' && startsWith(github.event.head_commit.message, '[prepare-gen1-batch]') }}
         run: |
           python3 -m pip install --disable-pip-version-check Pillow==11.1.0
-          python3 tools/prepare_next_batch.py --size 4
+          python3 tools/prepare_next_batch.py --size 5
       - name: Verify extracted project resources
         run: python3 tools/verify_project.py
       - name: Ensure Gradle Wrapper is executable
