@@ -107,5 +107,13 @@
   "entity.minemon_gen1.pidgey": "Pidgey",
   "item.minemon_gen1.pidgey_spawn_egg": "Spawn Egg: Pidgey",
   "entity.minemon_gen1.pidgeot": "Pidgeot",
-  "item.minemon_gen1.pidgeot_spawn_egg": "Spawn Egg: Pidgeot"
+  "item.minemon_gen1.pidgeot_spawn_egg": "Spawn Egg: Pidgeot",
+  "entity.minemon_gen1.zubat": "Zubat",
+  "item.minemon_gen1.zubat_spawn_egg": "Spawn Egg: Zubat",
+  "entity.minemon_gen1.venomoth": "Venomoth",
+  "item.minemon_gen1.venomoth_spawn_egg": "Spawn Egg: Venomoth",
+  "entity.minemon_gen1.farfetchd": "Farfetch’d",
+  "item.minemon_gen1.farfetchd_spawn_egg": "Spawn Egg: Farfetch’d",
+  "entity.minemon_gen1.doduo": "Doduo",
+  "item.minemon_gen1.doduo_spawn_egg": "Spawn Egg: Doduo"
 }

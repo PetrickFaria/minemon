@@ -923,6 +923,50 @@
     "eggSpots": 14922166
   },
   {
+    "nationalPokedexNumber": 41,
+    "slug": "zubat",
+    "name": "Zubat",
+    "model": "assets/minemon/geo/zubat/zubat_female.geo.json",
+    "texture": "assets/minemon/textures/pokemon/zubat/zubat.png",
+    "animation": "assets/minemon/animations/zubat/zubat.animation.json",
+    "mode": "flying",
+    "scale": 0.8,
+    "width": 0.6,
+    "height": 1.1,
+    "health": 20,
+    "attack": 3.75,
+    "speed": 0.255,
+    "clips": {
+      "ground_idle": "animation.zubat.ground_idle",
+      "ground_walk": "animation.zubat.ground_walk",
+      "air_idle": "animation.zubat.air_idle",
+      "air_fly": "animation.zubat.air_fly",
+      "sleep": "animation.zubat.sleep",
+      "eartwitch": "animation.zubat.eartwitch",
+      "roost": "animation.zubat.roost",
+      "mouth_wide": "animation.zubat.mouth_wide",
+      "cry": "animation.zubat.cry",
+      "shoulder_left": "animation.zubat.shoulder_left",
+      "shoulder_right": "animation.zubat.shoulder_right",
+      "ground_run": "animation.zubat.minemon_run",
+      "sit": "animation.zubat.minemon_sit",
+      "physical_attack": "animation.zubat.minemon_physical_attack"
+    },
+    "idle": "animation.zubat.air_idle",
+    "walk": "animation.zubat.air_fly",
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "sounds": [
+      "assets/minemon/sounds/pokemon/zubat/zubat_ambient.ogg",
+      "assets/minemon/sounds/pokemon/zubat/zubat_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/zubat/model-license.txt"
+    ],
+    "eggBase": 5076919,
+    "eggSpots": 4482732
+  },
+  {
     "nationalPokedexNumber": 43,
     "slug": "oddish",
     "name": "Oddish",
@@ -1155,6 +1199,50 @@
     ],
     "eggBase": 9334182,
     "eggSpots": 6638973
+  },
+  {
+    "nationalPokedexNumber": 49,
+    "slug": "venomoth",
+    "name": "Venomoth",
+    "model": "assets/minemon/geo/venomoth/venomoth.geo.json",
+    "texture": "assets/minemon/textures/pokemon/venomoth/venomoth.png",
+    "animation": "assets/minemon/animations/venomoth/venomoth.animation.json",
+    "mode": "flying",
+    "scale": 0.9,
+    "width": 0.8,
+    "height": 1.55,
+    "health": 35.0,
+    "attack": 5.416666666666667,
+    "speed": 0.29,
+    "clips": {
+      "ground_idle": "animation.venomoth.ground_idle",
+      "ground_walk": "animation.venomoth.ground_walk",
+      "air_idle": "animation.venomoth.air_idle",
+      "air_fly": "animation.venomoth.air_fly",
+      "battle_idle": "animation.venomoth.battle_idle",
+      "sleep": "animation.venomoth.sleep",
+      "cry": "animation.venomoth.cry",
+      "blink": "animation.venomoth.blink",
+      "quirk1": "animation.venomoth.quirk1",
+      "quirk2": "animation.venomoth.quirk2",
+      "quirk_sleep": "animation.venomoth.quirk_sleep",
+      "ground_run": "animation.venomoth.minemon_run",
+      "sit": "animation.venomoth.minemon_sit",
+      "physical_attack": "animation.venomoth.minemon_physical_attack"
+    },
+    "idle": "animation.venomoth.air_idle",
+    "walk": "animation.venomoth.air_fly",
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "sounds": [
+      "assets/minemon/sounds/pokemon/venomoth/venomoth_ambient.ogg",
+      "assets/minemon/sounds/pokemon/venomoth/venomoth_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/venomoth/model-license.txt"
+    ],
+    "eggBase": 13878236,
+    "eggSpots": 13219290
   },
   {
     "nationalPokedexNumber": 50,
@@ -1635,6 +1723,95 @@
     ],
     "eggBase": 15761301,
     "eggSpots": 14774911
+  },
+  {
+    "nationalPokedexNumber": 83,
+    "slug": "farfetchd",
+    "name": "Farfetch’d",
+    "model": "assets/minemon/geo/farfetchd/farfetchd.geo.json",
+    "texture": "assets/minemon/textures/pokemon/farfetchd/farfetchd.png",
+    "animation": "assets/minemon/animations/farfetchd/farfetchd.animation.json",
+    "mode": "flying",
+    "scale": 0.8,
+    "width": 0.7,
+    "height": 1.0,
+    "health": 26.0,
+    "attack": 7.5,
+    "speed": 0.26,
+    "clips": {
+      "ground_idle": "animation.farfetchd.ground_idle",
+      "ground_walk": "animation.farfetchd.ground_walk",
+      "pose": "animation.farfetchd.pose",
+      "blink": "animation.farfetchd.blink",
+      "cry": "animation.farfetchd.cry",
+      "air_fly": "animation.farfetchd.air_fly",
+      "air_idle": "animation.farfetchd.air_idle",
+      "sleep": "animation.farfetchd.sleep",
+      "quirk_leakflip_idle": "animation.farfetchd.quirk_leakflip_idle",
+      "quirk_leakflip_walk": "animation.farfetchd.quirk_leakflip_walk",
+      "quirk_wink": "animation.farfetchd.quirk_wink",
+      "ground_run": "animation.farfetchd.minemon_run",
+      "sit": "animation.farfetchd.minemon_sit",
+      "physical_attack": "animation.farfetchd.minemon_physical_attack"
+    },
+    "idle": "animation.farfetchd.air_idle",
+    "walk": "animation.farfetchd.air_fly",
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "sounds": [
+      "assets/minemon/sounds/pokemon/farfetchd/farfetchd_ambient.ogg",
+      "assets/minemon/sounds/pokemon/farfetchd/farfetchd_cry.ogg",
+      "assets/minemon/sounds/pokemon/farfetchd/farfetchd_galar_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/farfetchd/model-license.txt"
+    ],
+    "eggBase": 11239020,
+    "eggSpots": 12226680
+  },
+  {
+    "nationalPokedexNumber": 84,
+    "slug": "doduo",
+    "name": "Doduo",
+    "model": "assets/minemon/geo/doduo/doduo_female.geo.json",
+    "texture": "assets/minemon/textures/pokemon/doduo/doduo.png",
+    "animation": "assets/minemon/animations/doduo/doduo.animation.json",
+    "mode": "ground",
+    "scale": 1.3,
+    "width": 0.6,
+    "height": 1.4,
+    "health": 20,
+    "attack": 7.083333333333333,
+    "speed": 0.275,
+    "clips": {
+      "ground_idle": "animation.doduo.ground_idle",
+      "battle_idle": "animation.doduo.battle_idle",
+      "ground_walk": "animation.doduo.ground_walk",
+      "bite_quirk1": "animation.doduo.bite_quirk1",
+      "bite_quirk2": "animation.doduo.bite_quirk2",
+      "sleep": "animation.doduo.sleep",
+      "blink1": "animation.doduo.blink1",
+      "blink2": "animation.doduo.blink2",
+      "pose": "animation.doduo.pose",
+      "faint_WIP": "animation.doduo.faint_WIP",
+      "cry": "animation.doduo.cry",
+      "ground_run": "animation.doduo.minemon_run",
+      "sit": "animation.doduo.minemon_sit",
+      "physical_attack": "animation.doduo.minemon_physical_attack"
+    },
+    "idle": "animation.doduo.ground_idle",
+    "walk": "animation.doduo.ground_walk",
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "sounds": [
+      "assets/minemon/sounds/pokemon/doduo/doduo_ambient.ogg",
+      "assets/minemon/sounds/pokemon/doduo/doduo_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/doduo/model-license.txt"
+    ],
+    "eggBase": 11236424,
+    "eggSpots": 12421970
   },
   {
     "slug": "onix",

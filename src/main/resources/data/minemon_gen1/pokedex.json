@@ -243,7 +243,7 @@
     "nationalPokedexNumber": 41,
     "slug": "zubat",
     "name": "Zubat",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 42,
@@ -291,7 +291,7 @@
     "nationalPokedexNumber": 49,
     "slug": "venomoth",
     "name": "Venomoth",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 50,
@@ -495,13 +495,13 @@
     "nationalPokedexNumber": 83,
     "slug": "farfetchd",
     "name": "Farfetch’d",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 84,
     "slug": "doduo",
     "name": "Doduo",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 85,
