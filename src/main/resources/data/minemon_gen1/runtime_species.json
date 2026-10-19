@@ -522,6 +522,126 @@
     "eggSpots": 11229980
   },
   {
+    "nationalPokedexNumber": 15,
+    "slug": "beedrill",
+    "name": "Beedrill",
+    "model": "assets/minemon/geo/beedrill/beedrill.geo.json",
+    "texture": "assets/minemon/textures/pokemon/beedrill/beedrill.png",
+    "animation": "assets/minemon/animations/beedrill/beedrill.animation.json",
+    "mode": "flying",
+    "scale": 0.9,
+    "width": 0.6,
+    "height": 1.6,
+    "health": 32.5,
+    "attack": 7.5,
+    "speed": 0.275,
+    "clips": {
+      "air_idle": "animation.beedrill.air_idle",
+      "air_fly": "animation.beedrill.air_fly",
+      "sleep": "animation.beedrill.sleep",
+      "cry": "animation.beedrill.cry",
+      "render": "animation.beedrill.render",
+      "ground_run": "animation.beedrill.minemon_run",
+      "sit": "animation.beedrill.minemon_sit",
+      "physical_attack": "animation.beedrill.minemon_physical_attack"
+    },
+    "idle": "animation.beedrill.air_idle",
+    "walk": "animation.beedrill.air_fly",
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "sounds": [
+      "assets/minemon/sounds/pokemon/beedrill/beedrill_ambient.ogg",
+      "assets/minemon/sounds/pokemon/beedrill/beedrill_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/beedrill/model-license.txt"
+    ],
+    "eggBase": 13138465,
+    "eggSpots": 14127144
+  },
+  {
+    "nationalPokedexNumber": 16,
+    "slug": "pidgey",
+    "name": "Pidgey",
+    "model": "assets/minemon/geo/pidgey/pidgey.geo.json",
+    "texture": "assets/minemon/textures/pokemon/pidgey/pidgey.png",
+    "animation": "assets/minemon/animations/pidgey/pidgey.animation.json",
+    "mode": "flying",
+    "scale": 0.8,
+    "width": 0.5,
+    "height": 0.7,
+    "health": 20,
+    "attack": 3.75,
+    "speed": 0.256,
+    "clips": {
+      "ground_idle": "animation.pidgey.ground_idle",
+      "ground_walk": "animation.pidgey.ground_walk",
+      "ground_run": "animation.pidgey.ground_run",
+      "air_idle": "animation.pidgey.air_idle",
+      "air_fly": "animation.pidgey.air_fly",
+      "cry": "animation.pidgey.cry",
+      "blink": "animation.pidgey.blink",
+      "sleep_PLACEHOLDER": "animation.pidgey.sleep_PLACEHOLDER",
+      "sit": "animation.pidgey.minemon_sit",
+      "sleep": "animation.pidgey.minemon_sleep",
+      "physical_attack": "animation.pidgey.minemon_physical_attack"
+    },
+    "idle": "animation.pidgey.air_idle",
+    "walk": "animation.pidgey.air_fly",
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "sounds": [
+      "assets/minemon/sounds/pokemon/pidgey/pidgey_ambient.ogg",
+      "assets/minemon/sounds/pokemon/pidgey/pidgey_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/pidgey/model-license.txt"
+    ],
+    "eggBase": 14925182,
+    "eggSpots": 15914130
+  },
+  {
+    "nationalPokedexNumber": 18,
+    "slug": "pidgeot",
+    "name": "Pidgeot",
+    "model": "assets/minemon/geo/pidgeot/pidgeot.geo.json",
+    "texture": "assets/minemon/textures/pokemon/pidgeot/pidgeot.png",
+    "animation": "assets/minemon/animations/pidgeot/pidgeot.animation.json",
+    "mode": "flying",
+    "scale": 1.4,
+    "width": 0.75,
+    "height": 1.5,
+    "health": 41.5,
+    "attack": 6.666666666666667,
+    "speed": 0.301,
+    "clips": {
+      "ground_idle_PLACEHOLDER": "animation.pidgeot.ground_idle_PLACEHOLDER",
+      "air_idle": "animation.pidgeot.air_idle",
+      "air_fly": "animation.pidgeot.air_fly",
+      "air_fly_quirk": "animation.pidgeot.air_fly_quirk",
+      "air_fly_quirk2": "animation.pidgeot.air_fly_quirk2",
+      "blink": "animation.pidgeot.blink",
+      "cry": "animation.pidgeot.cry",
+      "ground_run": "animation.pidgeot.minemon_run",
+      "sit": "animation.pidgeot.minemon_sit",
+      "sleep": "animation.pidgeot.minemon_sleep",
+      "physical_attack": "animation.pidgeot.minemon_physical_attack"
+    },
+    "idle": "animation.pidgeot.air_idle",
+    "walk": "animation.pidgeot.air_fly",
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "sounds": [
+      "assets/minemon/sounds/pokemon/pidgeot/pidgeot_ambient.ogg",
+      "assets/minemon/sounds/pokemon/pidgeot/pidgeot_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/pidgeot/model-license.txt"
+    ],
+    "eggBase": 15914130,
+    "eggSpots": 16376989
+  },
+  {
     "nationalPokedexNumber": 19,
     "slug": "rattata",
     "name": "Rattata",

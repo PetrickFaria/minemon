@@ -101,5 +101,11 @@
   "entity.minemon_gen1.chansey": "Chansey",
   "item.minemon_gen1.chansey_spawn_egg": "Ovo de invocação de Chansey",
   "entity.minemon_gen1.eevee": "Eevee",
-  "item.minemon_gen1.eevee_spawn_egg": "Ovo de invocação de Eevee"
+  "item.minemon_gen1.eevee_spawn_egg": "Ovo de invocação de Eevee",
+  "entity.minemon_gen1.beedrill": "Beedrill",
+  "item.minemon_gen1.beedrill_spawn_egg": "Ovo de invocação de Beedrill",
+  "entity.minemon_gen1.pidgey": "Pidgey",
+  "item.minemon_gen1.pidgey_spawn_egg": "Ovo de invocação de Pidgey",
+  "entity.minemon_gen1.pidgeot": "Pidgeot",
+  "item.minemon_gen1.pidgeot_spawn_egg": "Ovo de invocação de Pidgeot"
 }
