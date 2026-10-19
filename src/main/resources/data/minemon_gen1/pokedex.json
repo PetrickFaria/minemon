@@ -789,7 +789,7 @@
     "nationalPokedexNumber": 132,
     "slug": "ditto",
     "name": "Ditto",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 133,
@@ -801,7 +801,7 @@
     "nationalPokedexNumber": 134,
     "slug": "vaporeon",
     "name": "Vaporeon",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 135,
@@ -813,19 +813,19 @@
     "nationalPokedexNumber": 136,
     "slug": "flareon",
     "name": "Flareon",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 137,
     "slug": "porygon",
     "name": "Porygon",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 138,
     "slug": "omanyte",
     "name": "Omanyte",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 139,

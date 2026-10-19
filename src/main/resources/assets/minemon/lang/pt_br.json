@@ -131,5 +131,15 @@
   "entity.minemon_gen1.tauros": "Tauros",
   "item.minemon_gen1.tauros_spawn_egg": "Ovo de invocação de Tauros",
   "entity.minemon_gen1.magikarp": "Magikarp",
-  "item.minemon_gen1.magikarp_spawn_egg": "Ovo de invocação de Magikarp"
+  "item.minemon_gen1.magikarp_spawn_egg": "Ovo de invocação de Magikarp",
+  "entity.minemon_gen1.ditto": "Ditto",
+  "item.minemon_gen1.ditto_spawn_egg": "Ovo de invocação de Ditto",
+  "entity.minemon_gen1.vaporeon": "Vaporeon",
+  "item.minemon_gen1.vaporeon_spawn_egg": "Ovo de invocação de Vaporeon",
+  "entity.minemon_gen1.flareon": "Flareon",
+  "item.minemon_gen1.flareon_spawn_egg": "Ovo de invocação de Flareon",
+  "entity.minemon_gen1.porygon": "Porygon",
+  "item.minemon_gen1.porygon_spawn_egg": "Ovo de invocação de Porygon",
+  "entity.minemon_gen1.omanyte": "Omanyte",
+  "item.minemon_gen1.omanyte_spawn_egg": "Ovo de invocação de Omanyte"
 }

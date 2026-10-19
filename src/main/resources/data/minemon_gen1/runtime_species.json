@@ -2597,6 +2597,45 @@
     "eggSpots": 14968380
   },
   {
+    "nationalPokedexNumber": 132,
+    "slug": "ditto",
+    "name": "Ditto",
+    "model": "assets/minemon/geo/ditto/ditto.geo.json",
+    "texture": "assets/minemon/textures/pokemon/ditto/ditto.png",
+    "animation": "assets/minemon/animations/ditto/ditto.animation.json",
+    "mode": "ground",
+    "scale": 1,
+    "width": 0.5,
+    "height": 0.6,
+    "health": 24.0,
+    "attack": 4.0,
+    "speed": 0.248,
+    "clips": {
+      "ground_idle": "animation.ditto.ground_idle",
+      "ground_walk": "animation.ditto.ground_walk",
+      "faint": "animation.ditto.faint",
+      "sleep": "animation.ditto.sleep",
+      "cry": "animation.ditto.cry",
+      "blink": "animation.ditto.blink",
+      "ground_run": "animation.ditto.minemon_run",
+      "sit": "animation.ditto.minemon_sit",
+      "physical_attack": "animation.ditto.minemon_physical_attack"
+    },
+    "idle": "animation.ditto.ground_idle",
+    "walk": "animation.ditto.ground_walk",
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "sounds": [
+      "assets/minemon/sounds/pokemon/ditto/ditto_ambient.ogg",
+      "assets/minemon/sounds/pokemon/ditto/ditto_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/ditto/model-license.txt"
+    ],
+    "eggBase": 13274580,
+    "eggSpots": 12222154
+  },
+  {
     "nationalPokedexNumber": 133,
     "slug": "eevee",
     "name": "Eevee",
@@ -2634,6 +2673,46 @@
     ],
     "eggBase": 9455922,
     "eggSpots": 10443323
+  },
+  {
+    "nationalPokedexNumber": 134,
+    "slug": "vaporeon",
+    "name": "Vaporeon",
+    "model": "assets/minemon/geo/vaporeon/vaporeon.geo.json",
+    "texture": "assets/minemon/textures/pokemon/vaporeon/vaporeon.png",
+    "animation": "assets/minemon/animations/vaporeon/vaporeon.animation.json",
+    "mode": "ground",
+    "scale": 0.8,
+    "width": 0.9,
+    "height": 1,
+    "health": 65.0,
+    "attack": 5.416666666666667,
+    "speed": 0.265,
+    "clips": {
+      "ground_idle": "animation.vaporeon.ground_idle",
+      "ground_walk": "animation.vaporeon.ground_walk",
+      "ground_run": "animation.vaporeon.ground_run",
+      "water_idle": "animation.vaporeon.water_idle",
+      "water_swim": "animation.vaporeon.water_swim",
+      "cry": "animation.vaporeon.cry",
+      "blink": "animation.vaporeon.blink",
+      "sit": "animation.vaporeon.minemon_sit",
+      "sleep": "animation.vaporeon.minemon_sleep",
+      "physical_attack": "animation.vaporeon.minemon_physical_attack"
+    },
+    "idle": "animation.vaporeon.ground_idle",
+    "walk": "animation.vaporeon.ground_walk",
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "sounds": [
+      "assets/minemon/sounds/pokemon/vaporeon/vaporeon_ambient.ogg",
+      "assets/minemon/sounds/pokemon/vaporeon/vaporeon_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/vaporeon/model-license.txt"
+    ],
+    "eggBase": 6399429,
+    "eggSpots": 4947879
   },
   {
     "slug": "jolteon",
@@ -2674,5 +2753,128 @@
     "eggBase": 15055937,
     "eggSpots": 13078067,
     "nationalPokedexNumber": 135
+  },
+  {
+    "nationalPokedexNumber": 136,
+    "slug": "flareon",
+    "name": "Flareon",
+    "model": "assets/minemon/geo/flareon/flareon.geo.json",
+    "texture": "assets/minemon/textures/pokemon/flareon/flareon.png",
+    "animation": "assets/minemon/animations/flareon/flareon.animation.json",
+    "mode": "ground",
+    "scale": 0.8,
+    "width": 0.9,
+    "height": 1.1,
+    "health": 32.5,
+    "attack": 10.833333333333334,
+    "speed": 0.265,
+    "clips": {
+      "ground_idle": "animation.flareon.ground_idle",
+      "ground_walk": "animation.flareon.ground_walk",
+      "ground_run": "animation.flareon.ground_run",
+      "blink": "animation.flareon.blink",
+      "render": "animation.flareon.render",
+      "sit": "animation.flareon.minemon_sit",
+      "sleep": "animation.flareon.minemon_sleep",
+      "physical_attack": "animation.flareon.minemon_physical_attack"
+    },
+    "idle": "animation.flareon.ground_idle",
+    "walk": "animation.flareon.ground_walk",
+    "attackTicks": 12,
+    "excluded_clips": [
+      "animation.flareon.cry"
+    ],
+    "sounds": [
+      "assets/minemon/sounds/pokemon/flareon/flareon_ambient.ogg",
+      "assets/minemon/sounds/pokemon/flareon/flareon_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/flareon/model-license.txt"
+    ],
+    "eggBase": 14928753,
+    "eggSpots": 12597033
+  },
+  {
+    "nationalPokedexNumber": 137,
+    "slug": "porygon",
+    "name": "Porygon",
+    "model": "assets/minemon/geo/porygon/porygon.geo.json",
+    "texture": "assets/minemon/textures/pokemon/porygon/porygon.png",
+    "animation": "assets/minemon/animations/porygon/porygon.animation.json",
+    "mode": "ground",
+    "scale": 0.8,
+    "width": 0.9,
+    "height": 0.9,
+    "health": 32.5,
+    "attack": 5.0,
+    "speed": 0.24,
+    "clips": {
+      "ground_idle": "animation.porygon.ground_idle",
+      "ground_walk": "animation.porygon.ground_walk",
+      "sleep": "animation.porygon.sleep",
+      "blink": "animation.porygon.blink",
+      "faint": "animation.porygon.faint",
+      "faint2": "animation.porygon.faint2",
+      "ground_run": "animation.porygon.minemon_run",
+      "sit": "animation.porygon.minemon_sit",
+      "physical_attack": "animation.porygon.minemon_physical_attack"
+    },
+    "idle": "animation.porygon.ground_idle",
+    "walk": "animation.porygon.ground_walk",
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "sounds": [
+      "assets/minemon/sounds/pokemon/porygon/porygon_ambient.ogg",
+      "assets/minemon/sounds/pokemon/porygon/porygon_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/porygon/model-license.txt"
+    ],
+    "eggBase": 5486272,
+    "eggSpots": 4826293
+  },
+  {
+    "nationalPokedexNumber": 138,
+    "slug": "omanyte",
+    "name": "Omanyte",
+    "model": "assets/minemon/geo/omanyte/omanyte.geo.json",
+    "texture": "assets/minemon/textures/pokemon/omanyte/omanyte.png",
+    "animation": "assets/minemon/animations/omanyte/omanyte.animation.json",
+    "mode": "ground",
+    "scale": 1.1,
+    "width": 0.5,
+    "height": 0.5,
+    "health": 20,
+    "attack": 3.3333333333333335,
+    "speed": 0.235,
+    "clips": {
+      "ground_idle": "animation.omanyte.ground_idle",
+      "ground_walk": "animation.omanyte.ground_walk",
+      "battle_idle": "animation.omanyte.battle_idle",
+      "water_idle": "animation.omanyte.water_idle",
+      "water_swim": "animation.omanyte.water_swim",
+      "blink": "animation.omanyte.blink",
+      "cry": "animation.omanyte.cry",
+      "sleep": "animation.omanyte.sleep",
+      "walkspeedtest": "animation.omanyte.walkspeedtest",
+      "render": "animation.omanyte.render",
+      "shell_test": "animation.omanyte.shell_test",
+      "ground_run": "animation.omanyte.minemon_run",
+      "sit": "animation.omanyte.minemon_sit",
+      "physical_attack": "animation.omanyte.minemon_physical_attack"
+    },
+    "idle": "animation.omanyte.ground_idle",
+    "walk": "animation.omanyte.ground_walk",
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "sounds": [
+      "assets/minemon/sounds/pokemon/omanyte/omanyte_ambient.ogg",
+      "assets/minemon/sounds/pokemon/omanyte/omanyte_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/omanyte/model-license.txt"
+    ],
+    "eggBase": 14141588,
+    "eggSpots": 10256734
   }
 ]
