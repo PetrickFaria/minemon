@@ -32,6 +32,21 @@ def validate(read,definitions,prepared=False,packed=False):
   if prepared:
    for state,keys in {'run':('ground_run','run'),'sit':('sit',),'sleep':('sleep',),'attack':('physical_attack','physical','attack')}.items():
     if not any(d['clips'].get(k) in a for k in keys):raise ValueError('Missing prepared '+state+' animation '+d['slug'])
+   if d['slug'] in ('charmander','charmeleon','charizard'):
+    fire=next((b for b in g['minecraft:geometry'][0]['bones'] if b['name']=='fire'),None)
+    cubes=fire.get('cubes',[]) if fire else []
+    if len(cubes)!=2 or any(any(n<=0 for n in cube.get('size',[])) for cube in cubes):raise ValueError('Tail flame is missing or has degenerate geometry: '+d['slug'])
+    texwidth=g['minecraft:geometry'][0]['description']['texture_width']
+    for cube in cubes:
+     for face,uv in cube.get('uv',{}).items():
+      u,v=uv.get('uv',[-1,-1]);uw,vh=uv.get('uv_size',[0,0])
+      if u<0 or v<0 or u+uw>texwidth or v+vh>g['minecraft:geometry'][0]['description']['texture_height']:
+       raise ValueError('Tail flame UV outside texture: '+d['slug'])
+    for key,sign,base in [('left',1,{'charmander':35,'charmeleon':42.5,'charizard':55}[d['slug']]),('right',-1,{'charmander':-35,'charmeleon':-42.5,'charizard':-55}[d['slug']])]:
+     for clip_key in ('ground_walk','ground_run'):
+      clip=d['clips'][clip_key];rotation=a[clip]['bones']['arm_'+key]['rotation']
+      if len(rotation)!=3 or not str(rotation[2]).startswith(str(base)):
+       raise ValueError('Walk/run arm rest pose was not preserved for '+d['slug']+'/'+clip_key+'/'+key)
   tex=read(texture_path);dims=struct.unpack('>II',tex[16:24]);desc=g['minecraft:geometry'][0]['description']
   if dims!=(desc['texture_width'],desc['texture_height']):raise ValueError('UV dimensions '+d['slug'])
  print('PASS runtime asset validation:',len(definitions),'species; National Pokédex order')

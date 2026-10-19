@@ -3,6 +3,7 @@ import br.com.petrickfaria.minemon.Minemon;
 import br.com.petrickfaria.minemon.client.MinemonRenderer;
 import br.com.petrickfaria.minemon.entity.*;
 import br.com.petrickfaria.minemon.registry.ModEntities;
+import br.com.petrickfaria.minemon.registry.ModItems;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Screenshot;
 import net.minecraft.client.gui.screens.TitleScreen;
@@ -29,6 +30,7 @@ public final class ClientSmokeTest {
  private static volatile int combatHits;
  private static final java.util.Map<String,java.util.List<String>> modelBones=new java.util.HashMap<>();
  private static final java.util.Map<String,float[]> motionRanges=new java.util.HashMap<>();
+ private static final java.util.Map<String,float[]> fireStarterArmRanges=new java.util.HashMap<>();
  private static final java.util.Set<String> walkedSpecies=new java.util.HashSet<>();
  private static final java.util.Map<String,net.minecraft.world.phys.Vec3> lastRenderedPositions=new java.util.HashMap<>();
  @SubscribeEvent public static void actualDamage(net.minecraftforge.event.entity.living.LivingDamageEvent event) {
@@ -44,6 +46,12 @@ public final class ClientSmokeTest {
   Minecraft mc=Minecraft.getInstance();
   try {
    if(!opened && mc.screen instanceof TitleScreen && ++titleTicks==20) {
+    var tabItems=net.minecraft.core.NonNullList.<net.minecraft.world.item.ItemStack>create();
+    ModItems.MINEMON_TAB.fillItemList(tabItems);
+    var eggOrder=new java.util.ArrayList<String>();
+    for(var stack:tabItems){var key=net.minecraftforge.registries.ForgeRegistries.ITEMS.getKey(stack.getItem());if(key!=null&&key.getPath().endsWith("_spawn_egg"))eggOrder.add(key.getPath().substring(0,key.getPath().length()-"_spawn_egg".length()));}
+    var expectedEggOrder=java.util.List.of("bulbasaur","ivysaur","venusaur","charmander","charmeleon","charizard","squirtle","wartortle","blastoise","caterpie","butterfree","weedle","arbok","pikachu","psyduck","onix","hitmonlee","electabuzz","jolteon");
+    if(!eggOrder.equals(expectedEggOrder))throw new IllegalStateException("Creative spawn eggs are not in National Pokédex order: "+eggOrder);
     for(var d:SpeciesDefinitions.ALL.values()) {
      var geo=new ResourceLocation(Minemon.MOD_ID,d.model().substring("assets/minemon/".length()));var anim=new ResourceLocation(Minemon.MOD_ID,d.animation().substring("assets/minemon/".length()));
      try(var stream=ClientSmokeTest.class.getResourceAsStream("/"+d.model().replace("assets/minemon/","assets/minemon_gen1/"))) {
@@ -52,7 +60,7 @@ public final class ClientSmokeTest {
      }
      if(!GeckoLibCache.getInstance().getGeoModels().containsKey(geo)||!GeckoLibCache.getInstance().getAnimations().containsKey(anim))throw new IllegalStateException("GeckoLib did not parse "+d.slug());
     }
-    Files.writeString(Path.of("client-validation.txt"),"PASS MENU: Minecraft reached TitleScreen; every registered model/animation parsed by GeckoLib.\n");
+    Files.writeString(Path.of("client-validation.txt"),"PASS MENU: Minecraft reached TitleScreen; every registered model/animation parsed by GeckoLib.\nPASS CREATIVE ORDER: all 19 spawn eggs are unique and appear in National Pokédex order.\n");
     opened=true;
     var dataFile=Path.of("saves/minemon-validation/level.dat").toFile();var tag=net.minecraft.nbt.NbtIo.readCompressed(dataFile);tag.getCompound("Data").putBoolean("confirmedExperimentalSettings",true);net.minecraft.nbt.NbtIo.writeCompressed(tag,dataFile);
     Object flows=Minecraft.class.getMethod("createWorldOpenFlows").invoke(mc);boolean invoked=false;
@@ -67,6 +75,13 @@ public final class ClientSmokeTest {
      var position=entity.position();var previous=lastRenderedPositions.put(slug,position);
      if(previous!=null&&previous.distanceToSqr(position)>0.0001D) {
       walkedSpecies.add(slug);
+      if(slug.equals("charmander")||slug.equals("charmeleon")||slug.equals("charizard")) {
+       var left=model.getAnimationProcessor().getBone("arm_left");var right=model.getAnimationProcessor().getBone("arm_right");
+       boolean running=previous.distanceToSqr(position)>0.0025D;int mode=running?2:0;
+       var range=fireStarterArmRanges.computeIfAbsent(slug,k->new float[4]);
+       range[mode]=Math.max(range[mode],Math.abs(left.getRotationZ()));
+       range[mode+1]=Math.max(range[mode+1],Math.abs(right.getRotationZ()));
+      }
       for(String name:modelBones.get(slug)) {
        if(name.contains("eye")||name.contains("mouth")||name.contains("jaw"))continue;
        var bone=model.getAnimationProcessor().getBone(name);float[] values={bone.getRotationX(),bone.getRotationY(),bone.getRotationZ(),bone.getPositionX(),bone.getPositionY(),bone.getPositionZ()};
@@ -119,15 +134,19 @@ public final class ClientSmokeTest {
    }
    if(worldTicks>=360 && worldTicks<360+species.size()*SPECIES_TEST_WINDOW)mc.getSingleplayerServer().execute(()->{
     var current=(MinemonCreature)mc.getSingleplayerServer().overworld().getEntity(testEntity);
-    if(current!=null){
+     if(current!=null){
      // Drive a short, controlled displacement so larger collision boxes cannot make this
      // render-only animation check depend on pathfinding success. Navigation has its own tests.
      current.setNoAi(true);current.getNavigation().stop();
      if(current.getX()>2.5)direction=-1;if(current.getX()<-2.5)direction=1;
-     current.moveTo(current.getX()+direction*0.08,current.getY(),current.getZ(),current.getYRot(),current.getXRot());
+     int phase=(worldTicks-360)%SPECIES_TEST_WINDOW;
+     double step=(current.getSpeciesSlug().equals("charmander")||current.getSpeciesSlug().equals("charmeleon")||current.getSpeciesSlug().equals("charizard"))&&phase>=30?0.08:0.04;
+     current.moveTo(current.getX()+direction*step,current.getY(),current.getZ(),current.getYRot(),current.getXRot());
     }
    });
    if(worldTicks>=380 && worldTicks<360+species.size()*SPECIES_TEST_WINDOW && (worldTicks-380)%SPECIES_TEST_WINDOW==0)Screenshot.grab(mc.gameDirectory,mc.getMainRenderTarget(),message->{});
+   if(worldTicks>=360 && worldTicks<360+species.size()*SPECIES_TEST_WINDOW && ((worldTicks-360)%SPECIES_TEST_WINDOW)==40
+       && java.util.Set.of("charmander","charmeleon","charizard").contains(species.get((worldTicks-360)/SPECIES_TEST_WINDOW)))Screenshot.grab(mc.gameDirectory,mc.getMainRenderTarget(),message->{});
    if(worldTicks==360+species.size()*SPECIES_TEST_WINDOW) {
     if(!combatPassed)throw new IllegalStateException("Survival combat check did not pass");
     if(!renderedSpecies.containsAll(species))throw new IllegalStateException("Some species were not rendered: expected="+species+" actual="+renderedSpecies);
@@ -135,7 +154,13 @@ public final class ClientSmokeTest {
      boolean bodyMoved=motionRanges.entrySet().stream().filter(e->e.getKey().startsWith(slug+":")).anyMatch(e->{for(int axis=0;axis<6;axis++)if(e.getValue()[axis+6]-e.getValue()[axis]>0.0001)return true;return false;});
      if(!walkedSpecies.contains(slug)||!bodyMoved)throw new IllegalStateException("No animated locomotion rendered for "+slug+"; displacement="+walkedSpecies.contains(slug)+" bodyChanged="+bodyMoved);
     }
+    for(String slug:java.util.List.of("charmander","charmeleon","charizard")) {
+     float[] arms=fireStarterArmRanges.get(slug);
+     if(arms==null||arms[0]<0.35F||arms[1]<0.35F||arms[2]<0.35F||arms[3]<0.35F)
+      throw new IllegalStateException("Fire-starter arms remained near T-pose during walk/run for "+slug+"; arm rotations="+java.util.Arrays.toString(arms));
+    }
     Files.writeString(Path.of("client-validation.txt"),"PASS LOCOMOTION: every registered species moved and had changing body bone transforms.\n",StandardOpenOption.APPEND);
+    Files.writeString(Path.of("client-validation.txt"),"PASS FIRE-STARTER ARMS: Charmander, Charmeleon and Charizard kept both arm bones lowered during walk and run.\n",StandardOpenOption.APPEND);
     Files.writeString(Path.of("client-validation.txt"),"PASS ROSTER: every registered species rendered with its texture in a world: "+renderedSpecies+"\n",StandardOpenOption.APPEND);
     mc.stop();
    }
