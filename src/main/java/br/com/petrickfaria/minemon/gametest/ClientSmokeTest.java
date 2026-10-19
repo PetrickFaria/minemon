@@ -36,6 +36,7 @@ public final class ClientSmokeTest {
      && event.getSource().getEntity() instanceof MinemonCreature b && b.getUUID().equals(testEntity))combatHits++;
  }
  private static int direction=1;
+ private static final int SPECIES_TEST_WINDOW=60;
  private static final java.util.Set<String> renderedSpecies=java.util.concurrent.ConcurrentHashMap.newKeySet();
  private static final java.util.List<String> species=new java.util.ArrayList<>(SpeciesDefinitions.ALL.keySet());
  @SubscribeEvent public static void tick(TickEvent.ClientTickEvent event) {
@@ -109,14 +110,14 @@ public final class ClientSmokeTest {
     try{Files.writeString(Path.of("client-validation.txt"),"PASS COMBAT: connected Survival player received melee retaliation; damage events="+combatHits+" health="+player.getHealth()+"\n",StandardOpenOption.APPEND);}catch(java.io.IOException e){throw new RuntimeException(e);}
     player.setGameMode(GameType.CREATIVE);player.setHealth(20);player.teleportTo(mc.getSingleplayerServer().overworld(),0,101,0,0,12);player.fallDistance=0;
    });
-   if(worldTicks>=360 && worldTicks<360+species.size()*40 && (worldTicks-360)%40==0) {
-    String slug=species.get((worldTicks-360)/40);
+   if(worldTicks>=360 && worldTicks<360+species.size()*SPECIES_TEST_WINDOW && (worldTicks-360)%SPECIES_TEST_WINDOW==0) {
+    String slug=species.get((worldTicks-360)/SPECIES_TEST_WINDOW);
     mc.getSingleplayerServer().execute(()->{
      var level=mc.getSingleplayerServer().overworld();var previous=level.getEntity(testEntity);if(previous!=null)previous.discard();
      var next=ModEntities.SPECIES.get(slug).get().create(level);next.moveTo(0,101,4,180,0);next.setNoAi(false);level.addFreshEntity(next);testEntity=next.getUUID();
     });
    }
-   if(worldTicks>=360 && worldTicks<360+species.size()*40)mc.getSingleplayerServer().execute(()->{
+   if(worldTicks>=360 && worldTicks<360+species.size()*SPECIES_TEST_WINDOW)mc.getSingleplayerServer().execute(()->{
     var current=(MinemonCreature)mc.getSingleplayerServer().overworld().getEntity(testEntity);
     if(current!=null){
      // Drive a short, controlled displacement so larger collision boxes cannot make this
@@ -126,8 +127,8 @@ public final class ClientSmokeTest {
      current.moveTo(current.getX()+direction*0.08,current.getY(),current.getZ(),current.getYRot(),current.getXRot());
     }
    });
-   if(worldTicks>=380 && worldTicks<360+species.size()*40 && (worldTicks-380)%40==0)Screenshot.grab(mc.gameDirectory,mc.getMainRenderTarget(),message->{});
-   if(worldTicks==360+species.size()*40) {
+   if(worldTicks>=380 && worldTicks<360+species.size()*SPECIES_TEST_WINDOW && (worldTicks-380)%SPECIES_TEST_WINDOW==0)Screenshot.grab(mc.gameDirectory,mc.getMainRenderTarget(),message->{});
+   if(worldTicks==360+species.size()*SPECIES_TEST_WINDOW) {
     if(!combatPassed)throw new IllegalStateException("Survival combat check did not pass");
     if(!renderedSpecies.containsAll(species))throw new IllegalStateException("Some species were not rendered: expected="+species+" actual="+renderedSpecies);
     for(String slug:species) {
