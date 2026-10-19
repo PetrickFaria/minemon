@@ -2876,5 +2876,211 @@
     ],
     "eggBase": 14141588,
     "eggSpots": 10256734
+  },
+  {
+    "nationalPokedexNumber": 139,
+    "slug": "omastar",
+    "name": "Omastar",
+    "model": "assets/minemon/geo/omastar/omastar.geo.json",
+    "texture": "assets/minemon/textures/pokemon/omastar/omastar.png",
+    "animation": "assets/minemon/animations/omastar/omastar.animation.json",
+    "mode": "ground",
+    "scale": 1,
+    "width": 0.6,
+    "height": 0.7,
+    "health": 35.0,
+    "attack": 5.0,
+    "speed": 0.255,
+    "clips": {
+      "ground_idle": "animation.omastar.ground_idle",
+      "battle_idle": "animation.omastar.battle_idle",
+      "ground_walk": "animation.omastar.ground_walk",
+      "water_idle": "animation.omastar.water_idle",
+      "water_swim": "animation.omastar.water_swim",
+      "sleep": "animation.omastar.sleep",
+      "cry": "animation.omastar.cry",
+      "blink": "animation.omastar.blink",
+      "render": "animation.omastar.render",
+      "walkspeedtest": "animation.omastar.walkspeedtest",
+      "new": "animation.omastar.new",
+      "ground_run": "animation.omastar.minemon_run",
+      "sit": "animation.omastar.minemon_sit",
+      "physical_attack": "animation.omastar.minemon_physical_attack"
+    },
+    "idle": "animation.omastar.ground_idle",
+    "walk": "animation.omastar.ground_walk",
+    "attackTicks": 12,
+    "excluded_clips": [
+      "animation.omastar.shell_test"
+    ],
+    "sounds": [
+      "assets/minemon/sounds/pokemon/omastar/omastar_ambient.ogg",
+      "assets/minemon/sounds/pokemon/omastar/omastar_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/omastar/model-license.txt"
+    ],
+    "eggBase": 9401934,
+    "eggSpots": 5154782
+  },
+  {
+    "nationalPokedexNumber": 141,
+    "slug": "kabutops",
+    "name": "Kabutops",
+    "model": "assets/minemon/geo/kabutops/kabutops.geo.json",
+    "texture": "assets/minemon/textures/pokemon/kabutops/kabutops.png",
+    "animation": "assets/minemon/animations/kabutops/kabutops.animation.json",
+    "mode": "ground",
+    "scale": 0.9,
+    "width": 1.2,
+    "height": 1.72,
+    "health": 30.0,
+    "attack": 9.583333333333334,
+    "speed": 0.28,
+    "clips": {
+      "ground_idle": "animation.kabutops.ground_idle",
+      "ground_walk": "animation.kabutops.ground_walk",
+      "battle_idle": "animation.kabutops.battle_idle",
+      "sleep": "animation.kabutops.sleep",
+      "cry": "animation.kabutops.cry",
+      "blink": "animation.kabutops.blink",
+      "ground_run": "animation.kabutops.minemon_run",
+      "sit": "animation.kabutops.minemon_sit",
+      "physical_attack": "animation.kabutops.minemon_physical_attack"
+    },
+    "idle": "animation.kabutops.ground_idle",
+    "walk": "animation.kabutops.ground_walk",
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "sounds": [
+      "assets/minemon/sounds/pokemon/kabutops/kabutops_ambient.ogg",
+      "assets/minemon/sounds/pokemon/kabutops/kabutops_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/kabutops/model-license.txt"
+    ],
+    "eggBase": 10448459,
+    "eggSpots": 9263678
+  },
+  {
+    "nationalPokedexNumber": 142,
+    "slug": "aerodactyl",
+    "name": "Aerodactyl",
+    "model": "assets/minemon/geo/aerodactyl/aerodactyl.geo.json",
+    "texture": "assets/minemon/textures/pokemon/aerodactyl/aerodactyl.png",
+    "animation": "assets/minemon/animations/aerodactyl/aerodactyl.animation.json",
+    "mode": "flying",
+    "scale": 1.8,
+    "width": 1,
+    "height": 1,
+    "health": 40.0,
+    "attack": 8.75,
+    "speed": 0.33,
+    "clips": {
+      "ground_idle": "animation.aerodactyl.ground_idle",
+      "ground_walk": "animation.aerodactyl.ground_walk",
+      "air_idle": "animation.aerodactyl.air_idle",
+      "air_fly": "animation.aerodactyl.air_fly",
+      "sleep": "animation.aerodactyl.sleep",
+      "blink": "animation.aerodactyl.blink",
+      "cry": "animation.aerodactyl.cry",
+      "ground_run": "animation.aerodactyl.minemon_run",
+      "sit": "animation.aerodactyl.minemon_sit",
+      "physical_attack": "animation.aerodactyl.minemon_physical_attack"
+    },
+    "idle": "animation.aerodactyl.air_idle",
+    "walk": "animation.aerodactyl.air_fly",
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "sounds": [
+      "assets/minemon/sounds/pokemon/aerodactyl/aerodactyl_ambient.ogg",
+      "assets/minemon/sounds/pokemon/aerodactyl/aerodactyl_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/aerodactyl/model-license.txt"
+    ],
+    "eggBase": 11448023,
+    "eggSpots": 10329025
+  },
+  {
+    "nationalPokedexNumber": 143,
+    "slug": "snorlax",
+    "name": "Snorlax",
+    "model": "assets/minemon/geo/snorlax/snorlax.geo.json",
+    "texture": "assets/minemon/textures/pokemon/snorlax/snorlax.png",
+    "animation": "assets/minemon/animations/snorlax/snorlax.animation.json",
+    "mode": "ground",
+    "scale": 2,
+    "width": 1.2,
+    "height": 1.7,
+    "health": 80.0,
+    "attack": 9.166666666666666,
+    "speed": 0.23,
+    "clips": {
+      "ground_idle": "animation.snorlax.ground_idle",
+      "ground_walk": "animation.snorlax.ground_walk",
+      "cry": "animation.snorlax.cry",
+      "ground_run": "animation.snorlax.minemon_run",
+      "sit": "animation.snorlax.minemon_sit",
+      "sleep": "animation.snorlax.minemon_sleep",
+      "physical_attack": "animation.snorlax.minemon_physical_attack"
+    },
+    "idle": "animation.snorlax.ground_idle",
+    "walk": "animation.snorlax.ground_walk",
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "sounds": [
+      "assets/minemon/sounds/pokemon/snorlax/snorlax_ambient.ogg",
+      "assets/minemon/sounds/pokemon/snorlax/snorlax_cry.ogg",
+      "assets/minemon/sounds/pokemon/snorlax/snorlax_quirk1.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/snorlax/model-license.txt"
+    ],
+    "eggBase": 1665924,
+    "eggSpots": 1267313
+  },
+  {
+    "nationalPokedexNumber": 147,
+    "slug": "dratini",
+    "name": "Dratini",
+    "model": "assets/minemon/geo/dratini/dratini.geo.json",
+    "texture": "assets/minemon/textures/pokemon/dratini/dratini.png",
+    "animation": "assets/minemon/animations/dratini/dratini.animation.json",
+    "mode": "ground",
+    "scale": 0.6,
+    "width": 1,
+    "height": 1.5,
+    "health": 20.5,
+    "attack": 5.333333333333333,
+    "speed": 0.25,
+    "clips": {
+      "ground_idle": "animation.dratini.ground_idle",
+      "ground_walk": "animation.dratini.ground_walk",
+      "ground_run": "animation.dratini.ground_run",
+      "battle_idle": "animation.dratini.battle_idle",
+      "water_idle": "animation.dratini.water_idle",
+      "water_swim": "animation.dratini.water_swim",
+      "surfacewater_swim": "animation.dratini.surfacewater_swim",
+      "sleep": "animation.dratini.sleep",
+      "water_sleep": "animation.dratini.water_sleep",
+      "cry": "animation.dratini.cry",
+      "blink": "animation.dratini.blink",
+      "sit": "animation.dratini.minemon_sit",
+      "physical_attack": "animation.dratini.minemon_physical_attack"
+    },
+    "idle": "animation.dratini.ground_idle",
+    "walk": "animation.dratini.ground_walk",
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "sounds": [
+      "assets/minemon/sounds/pokemon/dratini/dratini_ambient.ogg",
+      "assets/minemon/sounds/pokemon/dratini/dratini_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/dratini/model-license.txt"
+    ],
+    "eggBase": 7176160,
+    "eggSpots": 7968497
   }
 ]

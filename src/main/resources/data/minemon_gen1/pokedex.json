@@ -831,7 +831,7 @@
     "nationalPokedexNumber": 139,
     "slug": "omastar",
     "name": "Omastar",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 140,
@@ -843,19 +843,19 @@
     "nationalPokedexNumber": 141,
     "slug": "kabutops",
     "name": "Kabutops",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 142,
     "slug": "aerodactyl",
     "name": "Aerodactyl",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 143,
     "slug": "snorlax",
     "name": "Snorlax",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 144,
@@ -879,7 +879,7 @@
     "nationalPokedexNumber": 147,
     "slug": "dratini",
     "name": "Dratini",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 148,

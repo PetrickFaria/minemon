@@ -141,5 +141,15 @@
   "entity.minemon_gen1.porygon": "Porygon",
   "item.minemon_gen1.porygon_spawn_egg": "Ovo de invocação de Porygon",
   "entity.minemon_gen1.omanyte": "Omanyte",
-  "item.minemon_gen1.omanyte_spawn_egg": "Ovo de invocação de Omanyte"
+  "item.minemon_gen1.omanyte_spawn_egg": "Ovo de invocação de Omanyte",
+  "entity.minemon_gen1.omastar": "Omastar",
+  "item.minemon_gen1.omastar_spawn_egg": "Ovo de invocação de Omastar",
+  "entity.minemon_gen1.kabutops": "Kabutops",
+  "item.minemon_gen1.kabutops_spawn_egg": "Ovo de invocação de Kabutops",
+  "entity.minemon_gen1.aerodactyl": "Aerodactyl",
+  "item.minemon_gen1.aerodactyl_spawn_egg": "Ovo de invocação de Aerodactyl",
+  "entity.minemon_gen1.snorlax": "Snorlax",
+  "item.minemon_gen1.snorlax_spawn_egg": "Ovo de invocação de Snorlax",
+  "entity.minemon_gen1.dratini": "Dratini",
+  "item.minemon_gen1.dratini_spawn_egg": "Ovo de invocação de Dratini"
 }
