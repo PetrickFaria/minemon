@@ -39,6 +39,9 @@ public final class ClientSmokeTest {
  }
  private static int direction=1;
  private static final int SPECIES_TEST_WINDOW=60;
+ private static final int BULBASAUR_VALIDATION_TICK=430;
+ private static final int COMBAT_VALIDATION_TICK=BULBASAUR_VALIDATION_TICK+100;
+ private static final int SPECIES_START_TICK=COMBAT_VALIDATION_TICK+10;
  private static final java.util.Set<String> renderedSpecies=java.util.concurrent.ConcurrentHashMap.newKeySet();
  private static final java.util.List<String> species=new java.util.ArrayList<>(SpeciesDefinitions.ALL.keySet());
  @SubscribeEvent public static void tick(TickEvent.ClientTickEvent event) {
@@ -81,10 +84,10 @@ public final class ClientSmokeTest {
      // Sample every render frame, independently of position updates. Filtering
      // these samples by displacement can alias animation keyframes when the
      // client batches several server ticks into a single render frame.
-     if(worldTicks>=360 && worldTicks<360+species.size()*SPECIES_TEST_WINDOW) {
+     if(worldTicks>=SPECIES_START_TICK && worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW) {
       if(slug.equals("charmander")||slug.equals("charmeleon")||slug.equals("charizard")) {
        var left=model.getAnimationProcessor().getBone("arm_left");var right=model.getAnimationProcessor().getBone("arm_right");
-       int phase=Math.floorMod(worldTicks-360,SPECIES_TEST_WINDOW);
+       int phase=Math.floorMod(worldTicks-SPECIES_START_TICK,SPECIES_TEST_WINDOW);
        int mode=phase>=30?2:0;
        var range=fireStarterArmRanges.computeIfAbsent(slug,k->new float[4]);
        range[mode]=Math.max(range[mode],Math.abs(left.getRotationZ()));
@@ -97,7 +100,7 @@ public final class ClientSmokeTest {
        for(int axis=0;axis<6;axis++){range[axis]=Math.min(range[axis],values[axis]);range[axis+6]=Math.max(range[axis+6],values[axis]);}
       }
      }
-     if(testEntity==null||!entity.getUUID().equals(testEntity)||worldTicks<110||worldTicks>220)return;
+     if(testEntity==null||!entity.getUUID().equals(testEntity)||worldTicks<110||worldTicks>=BULBASAUR_VALIDATION_TICK)return;
      var leg=model.getAnimationProcessor().getBone("leg_front_right");var body=model.getAnimationProcessor().getBone("body");
      minLeg=Math.min(minLeg,leg.getRotationX());maxLeg=Math.max(maxLeg,leg.getRotationX());minBody=Math.min(minBody,body.getPositionY());maxBody=Math.max(maxBody,body.getPositionY());frames++;
     };
@@ -114,10 +117,10 @@ public final class ClientSmokeTest {
    if(mc.screen!=null || (worldTicks==0 && (initialEntityId==0 || mc.level.getEntity(initialEntityId)==null || mc.player.getY()<100)))return;
    worldTicks++;
    if(worldTicks==70||worldTicks==170)Screenshot.grab(mc.gameDirectory,mc.getMainRenderTarget(),message->{});
-   if(worldTicks>=100&&worldTicks<=220)mc.getSingleplayerServer().execute(()->{
+   if(worldTicks>=100&&worldTicks<BULBASAUR_VALIDATION_TICKmc.getSingleplayerServer().execute(()->{
     var b=(MinemonCreature)mc.getSingleplayerServer().overworld().getEntity(testEntity);if(b!=null){b.setNoAi(true);b.getNavigation().stop();if(b.getX()>2.5)direction=-1;if(b.getX()< -2.5)direction=1;b.moveTo(b.getX()+direction*0.08,b.getY(),b.getZ(),b.getYRot(),b.getXRot());}
    });
-   if(worldTicks==250){
+   if(worldTicks==BULBASAUR_VALIDATION_TICK){
     if(frames<10||maxLeg-minLeg<0.1F||maxBody-minBody<0.01F)throw new IllegalStateException("Rendered body animation did not advance: frames="+frames+" leg="+(maxLeg-minLeg)+" body="+(maxBody-minBody));
     Files.writeString(Path.of("client-validation.txt"),"PASS WORLD: Bulbasaur rendered in a Minecraft world; frames="+frames+" leg rotation range="+(maxLeg-minLeg)+" body position range="+(maxBody-minBody)+"\n",StandardOpenOption.APPEND);
     mc.getSingleplayerServer().execute(()->{
@@ -126,21 +129,21 @@ public final class ClientSmokeTest {
      var wild=ModEntities.BULBASAUR.get().create(level);wild.moveTo(0,101,1.5,180,0);level.addFreshEntity(wild);testEntity=wild.getUUID();wild.hurt(net.minecraft.world.damagesource.DamageSource.playerAttack(player),1);
     });
    }
-   if(worldTicks==350)mc.getSingleplayerServer().execute(()->{
+   if(worldTicks==COMBAT_VALIDATION_TICK)mc.getSingleplayerServer().execute(()->{
     var player=mc.getSingleplayerServer().getPlayerList().getPlayers().get(0);var wild=(MinemonCreature)mc.getSingleplayerServer().overworld().getEntity(testEntity);
     combatPassed=combatHits>0&&player.getHealth()<20&&player.isAlive();
     if(!combatPassed)throw new IllegalStateException("Connected Survival player did not receive retaliation damage; health="+player.getHealth()+" target="+wild.getTarget());
     try{Files.writeString(Path.of("client-validation.txt"),"PASS COMBAT: connected Survival player received melee retaliation; damage events="+combatHits+" health="+player.getHealth()+"\n",StandardOpenOption.APPEND);}catch(java.io.IOException e){throw new RuntimeException(e);}
     player.setGameMode(GameType.CREATIVE);player.setHealth(20);player.teleportTo(mc.getSingleplayerServer().overworld(),0,101,0,0,12);player.fallDistance=0;
    });
-   if(worldTicks>=360 && worldTicks<360+species.size()*SPECIES_TEST_WINDOW && (worldTicks-360)%SPECIES_TEST_WINDOW==0) {
-    String slug=species.get((worldTicks-360)/SPECIES_TEST_WINDOW);
+   if(worldTicks>=SPECIES_START_TICK && worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW && (worldTicks-SPECIES_START_TICK)%SPECIES_TEST_WINDOW==0) {
+    String slug=species.get((worldTicks-SPECIES_START_TICK)/SPECIES_TEST_WINDOW);
     mc.getSingleplayerServer().execute(()->{
      var level=mc.getSingleplayerServer().overworld();var previous=level.getEntity(testEntity);if(previous!=null)previous.discard();
      var next=ModEntities.SPECIES.get(slug).get().create(level);next.moveTo(0,101,4,180,0);next.setNoAi(false);level.addFreshEntity(next);testEntity=next.getUUID();
     });
    }
-   if(worldTicks>=360 && worldTicks<360+species.size()*SPECIES_TEST_WINDOW)mc.getSingleplayerServer().execute(()->{
+   if(worldTicks>=SPECIES_START_TICK && worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW)mc.getSingleplayerServer().execute(()->{
     var current=(MinemonCreature)mc.getSingleplayerServer().overworld().getEntity(testEntity);
      if(current!=null){
      // Drive a short, controlled displacement so larger collision boxes cannot make this
@@ -158,10 +161,10 @@ public final class ClientSmokeTest {
      current.hasImpulse=true;
     }
    });
-   if(worldTicks>=380 && worldTicks<360+species.size()*SPECIES_TEST_WINDOW && (worldTicks-380)%SPECIES_TEST_WINDOW==0)Screenshot.grab(mc.gameDirectory,mc.getMainRenderTarget(),message->{});
-   if(worldTicks>=360 && worldTicks<360+species.size()*SPECIES_TEST_WINDOW && ((worldTicks-360)%SPECIES_TEST_WINDOW)==40
-       && java.util.Set.of("charmander","charmeleon","charizard").contains(species.get((worldTicks-360)/SPECIES_TEST_WINDOW)))Screenshot.grab(mc.gameDirectory,mc.getMainRenderTarget(),message->{});
-   if(worldTicks==360+species.size()*SPECIES_TEST_WINDOW) {
+   if(worldTicks>=SPECIES_START_TICK+20 && worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW && (worldTicks-(SPECIES_START_TICK+20))%SPECIES_TEST_WINDOW==0)Screenshot.grab(mc.gameDirectory,mc.getMainRenderTarget(),message->{});
+   if(worldTicks>=SPECIES_START_TICK && worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW && ((worldTicks-SPECIES_START_TICK)%SPECIES_TEST_WINDOW)==40
+       && java.util.Set.of("charmander","charmeleon","charizard").contains(species.get((worldTicks-SPECIES_START_TICK)/SPECIES_TEST_WINDOW)))Screenshot.grab(mc.gameDirectory,mc.getMainRenderTarget(),message->{});
+   if(worldTicks==SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW) {
     if(!combatPassed)throw new IllegalStateException("Survival combat check did not pass");
     if(!renderedSpecies.containsAll(species))throw new IllegalStateException("Some species were not rendered: expected="+species+" actual="+renderedSpecies);
     for(String slug:species) {
