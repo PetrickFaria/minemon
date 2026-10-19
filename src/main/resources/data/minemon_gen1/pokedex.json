@@ -483,7 +483,7 @@
     "nationalPokedexNumber": 81,
     "slug": "magnemite",
     "name": "Magnemite",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 82,
@@ -573,7 +573,7 @@
     "nationalPokedexNumber": 96,
     "slug": "drowzee",
     "name": "Drowzee",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 97,
@@ -837,7 +837,7 @@
     "nationalPokedexNumber": 140,
     "slug": "kabuto",
     "name": "Kabuto",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 141,

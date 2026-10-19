@@ -2342,6 +2342,54 @@
     "eggSpots": 13394795
   },
   {
+    "nationalPokedexNumber": 81,
+    "slug": "magnemite",
+    "name": "Magnemite",
+    "model": "assets/minemon/geo/magnemite/magnemite.geo.json",
+    "texture": "assets/minemon/textures/pokemon/magnemite/magnemite.png",
+    "animation": "assets/minemon/animations/magnemite/magnemite.animation.json",
+    "mode": "flying",
+    "scale": 0.9,
+    "width": 0.9,
+    "height": 0.6,
+    "health": 20,
+    "attack": 3,
+    "speed": 0.245,
+    "clips": {
+      "air_idle": "animation.magnemite.air_idle",
+      "air_fly": "animation.magnemite.air_fly",
+      "blink": "animation.magnemite.blink",
+      "faint": "animation.magnemite.faint",
+      "ground_run": "animation.magnemite.minemon_run",
+      "sit": "animation.magnemite.minemon_sit",
+      "sleep": "animation.magnemite.minemon_sleep",
+      "physical_attack": "animation.magnemite.minemon_physical_attack"
+    },
+    "idle": "animation.magnemite.air_idle",
+    "walk": "animation.magnemite.air_fly",
+    "attackTicks": 12,
+    "excluded_clips": [
+      "animation.magnemite.sleep"
+    ],
+    "stripped_bones": {
+      "animation.magnemite.air_idle": [
+        "headnail"
+      ],
+      "animation.magnemite.air_fly": [
+        "headnail"
+      ]
+    },
+    "sounds": [
+      "assets/minemon/sounds/pokemon/magnemite/magnemite_ambient.ogg",
+      "assets/minemon/sounds/pokemon/magnemite/magnemite_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/magnemite/model-license.txt"
+    ],
+    "eggBase": 11321793,
+    "eggSpots": 10070702
+  },
+  {
     "nationalPokedexNumber": 82,
     "slug": "magneton",
     "name": "Magneton",
@@ -2597,6 +2645,127 @@
     "eggBase": 10000814,
     "eggSpots": 9079199,
     "nationalPokedexNumber": 95
+  },
+  {
+    "nationalPokedexNumber": 96,
+    "slug": "drowzee",
+    "name": "Drowzee",
+    "model": "assets/minemon/geo/drowzee/drowzee.geo.json",
+    "texture": "assets/minemon/textures/pokemon/drowzee/drowzee.png",
+    "animation": "assets/minemon/animations/drowzee/drowzee.animation.json",
+    "mode": "ground",
+    "scale": 0.85,
+    "width": 0.7,
+    "height": 1.1,
+    "health": 30.0,
+    "attack": 4.0,
+    "speed": 0.242,
+    "clips": {
+      "test": "animation.drowzee.test",
+      "pose": "animation.drowzee.pose",
+      "ground_idle": "animation.drowzee.ground_idle",
+      "ground_walk": "animation.drowzee.ground_walk",
+      "cry": "animation.drowzee.cry",
+      "blink": "animation.drowzee.blink",
+      "ground_run": "animation.drowzee.minemon_run",
+      "sit": "animation.drowzee.minemon_sit",
+      "sleep": "animation.drowzee.minemon_sleep",
+      "physical_attack": "animation.drowzee.minemon_physical_attack"
+    },
+    "idle": "animation.drowzee.ground_idle",
+    "walk": "animation.drowzee.ground_walk",
+    "attackTicks": 12,
+    "excluded_clips": [
+      "animation.drowzee.battle_idle",
+      "animation.drowzee.sleep"
+    ],
+    "stripped_bones": {
+      "animation.drowzee.ground_idle": [
+        "back_fluff",
+        "front_fluff",
+        "left_fluff",
+        "left_hand",
+        "left_index_finger1",
+        "left_index_finger2",
+        "left_middle_finger1",
+        "left_middle_finger2",
+        "left_pinky_finger1",
+        "left_pinky_finger2",
+        "left_ring_finger1",
+        "left_ring_finger2",
+        "left_thumb1",
+        "left_thumb2",
+        "left_upper_leg",
+        "neck_fluff",
+        "nose",
+        "pendulum",
+        "right_fluff",
+        "right_hand",
+        "right_index_finger1",
+        "right_index_finger2",
+        "right_middle_finger1",
+        "right_middle_finger2",
+        "right_pinky_finger1",
+        "right_pinky_finger2",
+        "right_ring_finger1",
+        "right_ring_finger2",
+        "right_thumb1",
+        "right_thumb2",
+        "right_upper_leg",
+        "string_1",
+        "string_2",
+        "string_3",
+        "weight"
+      ],
+      "animation.drowzee.ground_walk": [
+        "back_fluff",
+        "front_fluff",
+        "left_fluff",
+        "left_hand",
+        "left_index_finger1",
+        "left_index_finger2",
+        "left_middle_finger1",
+        "left_middle_finger2",
+        "left_pinky_finger1",
+        "left_pinky_finger2",
+        "left_ring_finger1",
+        "left_ring_finger2",
+        "left_thumb1",
+        "left_thumb2",
+        "left_toes",
+        "left_upper_leg",
+        "neck_fluff",
+        "nose",
+        "pendulum",
+        "right_fluff",
+        "right_hand",
+        "right_index_finger1",
+        "right_index_finger2",
+        "right_middle_finger1",
+        "right_middle_finger2",
+        "right_pinky_finger1",
+        "right_pinky_finger2",
+        "right_ring_finger1",
+        "right_ring_finger2",
+        "right_thumb1",
+        "right_thumb2",
+        "right_toes",
+        "right_upper_leg",
+        "string_1",
+        "string_2",
+        "string_3",
+        "weight"
+      ]
+    },
+    "sounds": [
+      "assets/minemon/sounds/pokemon/drowzee/drowzee_ambient.ogg",
+      "assets/minemon/sounds/pokemon/drowzee/drowzee_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/drowzee/model-license.txt"
+    ],
+    "eggBase": 15584310,
+    "eggSpots": 6047031
   },
   {
     "nationalPokedexNumber": 97,
@@ -3763,6 +3932,54 @@
     ],
     "eggBase": 9401934,
     "eggSpots": 5154782
+  },
+  {
+    "nationalPokedexNumber": 140,
+    "slug": "kabuto",
+    "name": "Kabuto",
+    "model": "assets/minemon/geo/kabuto/kabuto.geo.json",
+    "texture": "assets/minemon/textures/pokemon/kabuto/kabuto.png",
+    "animation": "assets/minemon/animations/kabuto/kabuto.animation.json",
+    "mode": "ground",
+    "scale": 1.1,
+    "width": 0.5,
+    "height": 0.4,
+    "health": 20,
+    "attack": 6.666666666666667,
+    "speed": 0.255,
+    "clips": {
+      "ground_idle": "animation.kabuto.ground_idle",
+      "ground_walk": "animation.kabuto.ground_walk",
+      "sleep": "animation.kabuto.sleep",
+      "cry_WIP": "animation.kabuto.cry_WIP",
+      "render": "animation.kabuto.render",
+      "blink": "animation.kabuto.blink",
+      "cry": "animation.kabuto.cry",
+      "ground_run": "animation.kabuto.minemon_run",
+      "sit": "animation.kabuto.minemon_sit",
+      "physical_attack": "animation.kabuto.minemon_physical_attack"
+    },
+    "idle": "animation.kabuto.ground_idle",
+    "walk": "animation.kabuto.ground_walk",
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "stripped_bones": {
+      "animation.kabuto.ground_idle": [
+        "body2"
+      ],
+      "animation.kabuto.ground_walk": [
+        "body2"
+      ]
+    },
+    "sounds": [
+      "assets/minemon/sounds/pokemon/kabuto/kabuto_ambient.ogg",
+      "assets/minemon/sounds/pokemon/kabuto/kabuto_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/kabuto/model-license.txt"
+    ],
+    "eggBase": 10843985,
+    "eggSpots": 8869179
   },
   {
     "nationalPokedexNumber": 141,

@@ -187,5 +187,11 @@
   "entity.minemon_gen1.ponyta": "Ponyta",
   "item.minemon_gen1.ponyta_spawn_egg": "Spawn Egg: Ponyta",
   "entity.minemon_gen1.rapidash": "Rapidash",
-  "item.minemon_gen1.rapidash_spawn_egg": "Spawn Egg: Rapidash"
+  "item.minemon_gen1.rapidash_spawn_egg": "Spawn Egg: Rapidash",
+  "entity.minemon_gen1.magnemite": "Magnemite",
+  "item.minemon_gen1.magnemite_spawn_egg": "Spawn Egg: Magnemite",
+  "entity.minemon_gen1.drowzee": "Drowzee",
+  "item.minemon_gen1.drowzee_spawn_egg": "Spawn Egg: Drowzee",
+  "entity.minemon_gen1.kabuto": "Kabuto",
+  "item.minemon_gen1.kabuto_spawn_egg": "Spawn Egg: Kabuto"
 }
