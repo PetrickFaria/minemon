@@ -230,6 +230,8 @@ public final class ClientSmokeTest {
     Files.writeString(Path.of("client-validation.txt"),"PASS ROSTER: every registered species rendered with its texture in a world: "+renderedSpecies+"\n",StandardOpenOption.APPEND);
     mc.stop();
    }
+  }catch(Exception e){throw new IllegalStateException("Minemon client validation failed",e);}
+ }
   private static String locomotionState(int phase) {
    if(phase<8)return "IDLE_INITIAL";
    if(phase<12)return "WALK_START";
@@ -290,6 +292,4 @@ public final class ClientSmokeTest {
    }
    Files.writeString(Path.of("client-validation.txt"),"ARTICULATION PROFILES: passed="+passed+" expected fallback gaps="+knownFallbacks+" profiles="+ARTICULATION_PROFILES.size()+"; other species remain unverified by limb-specific profiles.\n"+report,StandardOpenOption.APPEND);
   }
-  }catch(Exception e){throw new IllegalStateException("Minemon client validation failed",e);}
- }
 }
