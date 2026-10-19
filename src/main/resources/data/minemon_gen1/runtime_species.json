@@ -1725,6 +1725,44 @@
     "eggSpots": 14774911
   },
   {
+    "nationalPokedexNumber": 82,
+    "slug": "magneton",
+    "name": "Magneton",
+    "model": "assets/minemon/geo/magneton/magneton.geo.json",
+    "texture": "assets/minemon/textures/pokemon/magneton/magneton.png",
+    "animation": "assets/minemon/animations/magneton/magneton.animation.json",
+    "mode": "flying",
+    "scale": 0.9,
+    "width": 1.1,
+    "height": 1.4,
+    "health": 25.0,
+    "attack": 5.0,
+    "speed": 0.27,
+    "clips": {
+      "blink": "animation.magneton.blink",
+      "air_idle": "animation.magneton.air_idle",
+      "air_fly": "animation.magneton.air_fly",
+      "sleep": "animation.magneton.sleep",
+      "faint": "animation.magneton.faint",
+      "ground_run": "animation.magneton.minemon_run",
+      "sit": "animation.magneton.minemon_sit",
+      "physical_attack": "animation.magneton.minemon_physical_attack"
+    },
+    "idle": "animation.magneton.air_idle",
+    "walk": "animation.magneton.air_fly",
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "sounds": [
+      "assets/minemon/sounds/pokemon/magneton/magneton_ambient.ogg",
+      "assets/minemon/sounds/pokemon/magneton/magneton_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/magneton/model-license.txt"
+    ],
+    "eggBase": 11321793,
+    "eggSpots": 10070702
+  },
+  {
     "nationalPokedexNumber": 83,
     "slug": "farfetchd",
     "name": "Farfetch’d",
