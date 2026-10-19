@@ -1219,6 +1219,62 @@
     "eggSpots": 4482732
   },
   {
+    "nationalPokedexNumber": 42,
+    "slug": "golbat",
+    "name": "Golbat",
+    "model": "assets/minemon/geo/golbat/golbat_female.geo.json",
+    "texture": "assets/minemon/textures/pokemon/golbat/golbat.png",
+    "animation": "assets/minemon/animations/golbat/golbat.animation.json",
+    "mode": "flying",
+    "scale": 1.2,
+    "width": 0.8,
+    "height": 1.2,
+    "health": 37.5,
+    "attack": 6.666666666666667,
+    "speed": 0.29,
+    "clips": {
+      "air_idle": "animation.golbat.air_idle",
+      "air_fly": "animation.golbat.air_fly",
+      "blink": "animation.golbat.blink",
+      "cry": "animation.golbat.cry",
+      "crytongue": "animation.golbat.crytongue",
+      "ground_run": "animation.golbat.minemon_run",
+      "sit": "animation.golbat.minemon_sit",
+      "sleep": "animation.golbat.minemon_sleep",
+      "physical_attack": "animation.golbat.minemon_physical_attack"
+    },
+    "idle": "animation.golbat.air_idle",
+    "walk": "animation.golbat.air_fly",
+    "attackTicks": 12,
+    "excluded_clips": [
+      "animation.golbat.ground_idle",
+      "animation.golbat.ground_walk",
+      "animation.golbat.battle_idle",
+      "animation.golbat.battle_idle_air",
+      "animation.golbat.sleep",
+      "animation.golbat.roost"
+    ],
+    "stripped_bones": {
+      "animation.golbat.air_idle": [
+        "wing_left_rotation",
+        "wing_right_rotation"
+      ],
+      "animation.golbat.air_fly": [
+        "wing_left_rotation",
+        "wing_right_rotation"
+      ]
+    },
+    "sounds": [
+      "assets/minemon/sounds/pokemon/golbat/golbat_ambient.ogg",
+      "assets/minemon/sounds/pokemon/golbat/golbat_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/golbat/model-license.txt"
+    ],
+    "eggBase": 5339834,
+    "eggSpots": 12083374
+  },
+  {
     "nationalPokedexNumber": 43,
     "slug": "oddish",
     "name": "Oddish",
@@ -1747,6 +1803,124 @@
     "eggSpots": 15980972
   },
   {
+    "nationalPokedexNumber": 60,
+    "slug": "poliwag",
+    "name": "Poliwag",
+    "model": "assets/minemon/geo/poliwag/poliwag.geo.json",
+    "texture": "assets/minemon/textures/pokemon/poliwag/poliwag.png",
+    "animation": "assets/minemon/animations/poliwag/poliwag.animation.json",
+    "mode": "ground",
+    "scale": 0.8,
+    "width": 0.6,
+    "height": 0.8,
+    "health": 20,
+    "attack": 4.166666666666667,
+    "speed": 0.29,
+    "clips": {
+      "ground_idle": "animation.poliwag.ground_idle",
+      "ground_walk": "animation.poliwag.ground_walk",
+      "water_idle": "animation.poliwag.water_idle",
+      "water_swim": "animation.poliwag.water_swim",
+      "render": "animation.poliwag.render",
+      "ground_run": "animation.poliwag.minemon_run",
+      "sit": "animation.poliwag.minemon_sit",
+      "sleep": "animation.poliwag.minemon_sleep",
+      "physical_attack": "animation.poliwag.minemon_physical_attack"
+    },
+    "idle": "animation.poliwag.ground_idle",
+    "walk": "animation.poliwag.ground_walk",
+    "attackTicks": 12,
+    "excluded_clips": [
+      "animation.poliwag.blink",
+      "animation.poliwag.sleep"
+    ],
+    "stripped_bones": {
+      "animation.poliwag.ground_walk": [
+        "arm_left",
+        "arm_left2",
+        "arm_right",
+        "arm_right2",
+        "foot_left",
+        "foot_right",
+        "hand_left",
+        "hand_right",
+        "head",
+        "leg_left2",
+        "leg_right2",
+        "torso",
+        "torso2"
+      ]
+    },
+    "sounds": [
+      "assets/minemon/sounds/pokemon/poliwag/poliwag_ambient.ogg",
+      "assets/minemon/sounds/pokemon/poliwag/poliwag_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/poliwag/model-license.txt"
+    ],
+    "eggBase": 6326715,
+    "eggSpots": 4281230
+  },
+  {
+    "nationalPokedexNumber": 61,
+    "slug": "poliwhirl",
+    "name": "Poliwhirl",
+    "model": "assets/minemon/geo/poliwhirl/poliwhirl.geo.json",
+    "texture": "assets/minemon/textures/pokemon/poliwhirl/poliwhirl.png",
+    "animation": "assets/minemon/animations/poliwhirl/poliwhirl.animation.json",
+    "mode": "ground",
+    "scale": 0.9,
+    "width": 1,
+    "height": 1.1,
+    "health": 32.5,
+    "attack": 5.416666666666667,
+    "speed": 0.29,
+    "clips": {
+      "ground_idle": "animation.poliwhirl.ground_idle",
+      "ground_walk": "animation.poliwhirl.ground_walk",
+      "water_idle": "animation.poliwhirl.water_idle",
+      "water_swim": "animation.poliwhirl.water_swim",
+      "blink": "animation.poliwhirl.blink",
+      "ground_run": "animation.poliwhirl.minemon_run",
+      "sit": "animation.poliwhirl.minemon_sit",
+      "sleep": "animation.poliwhirl.minemon_sleep",
+      "physical_attack": "animation.poliwhirl.minemon_physical_attack"
+    },
+    "idle": "animation.poliwhirl.ground_idle",
+    "walk": "animation.poliwhirl.ground_walk",
+    "attackTicks": 12,
+    "excluded_clips": [
+      "animation.poliwhirl.sleep"
+    ],
+    "stripped_bones": {
+      "animation.poliwhirl.ground_idle": [
+        "foot_left",
+        "foot_right",
+        "head",
+        "leg_left2",
+        "leg_right2",
+        "torso2"
+      ],
+      "animation.poliwhirl.ground_walk": [
+        "foot_left",
+        "foot_right",
+        "head",
+        "leg_left2",
+        "leg_right2",
+        "torso2"
+      ]
+    },
+    "sounds": [
+      "assets/minemon/sounds/pokemon/poliwhirl/poliwhirl_ambient.ogg",
+      "assets/minemon/sounds/pokemon/poliwhirl/poliwhirl_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/poliwhirl/model-license.txt"
+    ],
+    "eggBase": 3886472,
+    "eggSpots": 5668785
+  },
+  {
     "nationalPokedexNumber": 63,
     "slug": "abra",
     "name": "Abra",
@@ -1934,6 +2108,147 @@
     ],
     "eggBase": 9867649,
     "eggSpots": 8879986
+  },
+  {
+    "nationalPokedexNumber": 77,
+    "slug": "ponyta",
+    "name": "Ponyta",
+    "model": "assets/minemon/geo/ponyta/ponyta.geo.json",
+    "texture": "assets/minemon/textures/pokemon/ponyta/ponyta.png",
+    "animation": "assets/minemon/animations/ponyta/ponyta.animation.json",
+    "mode": "ground",
+    "scale": 1,
+    "width": 0.8,
+    "height": 1.4,
+    "health": 25.0,
+    "attack": 7.083333333333333,
+    "speed": 0.29,
+    "clips": {
+      "ground_runold": "animation.ponyta.ground_runold",
+      "ground_idle": "animation.ponyta.ground_idle",
+      "ground_walk": "animation.ponyta.ground_walk",
+      "ground_run": "animation.ponyta.ground_run",
+      "sleep": "animation.ponyta.sleep",
+      "blink": "animation.ponyta.blink",
+      "cry": "animation.ponyta.cry",
+      "faint": "animation.ponyta.faint",
+      "true faint": "animation.ponyta.true faint",
+      "quirk1": "animation.ponyta.quirk1",
+      "sit": "animation.ponyta.minemon_sit",
+      "physical_attack": "animation.ponyta.minemon_physical_attack"
+    },
+    "idle": "animation.ponyta.ground_idle",
+    "walk": "animation.ponyta.ground_walk",
+    "attackTicks": 12,
+    "excluded_clips": [],
+    "stripped_bones": {
+      "animation.ponyta.ground_walk": [
+        "mane_bottom",
+        "mane_top",
+        "tail2",
+        "tail3",
+        "tail4",
+        "tail5",
+        "tail6",
+        "tail_left",
+        "tail_left2",
+        "tail_left3",
+        "tail_left4",
+        "tail_left5",
+        "tail_left6",
+        "tail_right",
+        "tail_right2",
+        "tail_right3",
+        "tail_right4",
+        "tail_right5",
+        "tail_right6"
+      ]
+    },
+    "sounds": [
+      "assets/minemon/sounds/pokemon/ponyta/galarian_ponyta_cry.ogg",
+      "assets/minemon/sounds/pokemon/ponyta/ponyta_ambient.ogg",
+      "assets/minemon/sounds/pokemon/ponyta/ponyta_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/ponyta/model-license.txt"
+    ],
+    "eggBase": 15981484,
+    "eggSpots": 15189396
+  },
+  {
+    "nationalPokedexNumber": 78,
+    "slug": "rapidash",
+    "name": "Rapidash",
+    "model": "assets/minemon/geo/rapidash/rapidash.geo.json",
+    "texture": "assets/minemon/textures/pokemon/rapidash/rapidash.png",
+    "animation": "assets/minemon/animations/rapidash/rapidash.animation.json",
+    "mode": "ground",
+    "scale": 1.2,
+    "width": 0.9,
+    "height": 2,
+    "health": 32.5,
+    "attack": 8.333333333333334,
+    "speed": 0.305,
+    "clips": {
+      "ground_idle": "animation.rapidash.ground_idle",
+      "ground_walk": "animation.rapidash.ground_walk",
+      "blink": "animation.rapidash.blink",
+      "faint": "animation.rapidash.faint",
+      "battle_faint": "animation.rapidash.battle_faint",
+      "cry": "animation.rapidash.cry",
+      "ground_run": "animation.rapidash.minemon_run",
+      "sit": "animation.rapidash.minemon_sit",
+      "sleep": "animation.rapidash.minemon_sleep",
+      "physical_attack": "animation.rapidash.minemon_physical_attack"
+    },
+    "idle": "animation.rapidash.ground_idle",
+    "walk": "animation.rapidash.ground_walk",
+    "attackTicks": 12,
+    "excluded_clips": [
+      "animation.rapidash.ground_run",
+      "animation.rapidash.sleep"
+    ],
+    "stripped_bones": {
+      "animation.rapidash.ground_idle": [
+        "fire_mane3",
+        "fire_mane_head3",
+        "fire_mane_head4"
+      ],
+      "animation.rapidash.ground_walk": [
+        "fire_mane3",
+        "fire_mane_head3",
+        "fire_mane_head4",
+        "mane_bottom",
+        "mane_top",
+        "tail2",
+        "tail3",
+        "tail4",
+        "tail5",
+        "tail6",
+        "tail_left",
+        "tail_left2",
+        "tail_left3",
+        "tail_left4",
+        "tail_left5",
+        "tail_left6",
+        "tail_right",
+        "tail_right2",
+        "tail_right3",
+        "tail_right4",
+        "tail_right5",
+        "tail_right6"
+      ]
+    },
+    "sounds": [
+      "assets/minemon/sounds/pokemon/rapidash/galarian_rapidash_cry.ogg",
+      "assets/minemon/sounds/pokemon/rapidash/rapidash_ambient.ogg",
+      "assets/minemon/sounds/pokemon/rapidash/rapidash_cry.ogg"
+    ],
+    "licenses": [
+      "assets/minemon/licenses/pokemon/rapidash/model-license.txt"
+    ],
+    "eggBase": 16375996,
+    "eggSpots": 15782568
   },
   {
     "nationalPokedexNumber": 79,

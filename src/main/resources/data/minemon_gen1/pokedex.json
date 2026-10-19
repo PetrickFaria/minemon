@@ -249,7 +249,7 @@
     "nationalPokedexNumber": 42,
     "slug": "golbat",
     "name": "Golbat",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 43,
@@ -357,13 +357,13 @@
     "nationalPokedexNumber": 60,
     "slug": "poliwag",
     "name": "Poliwag",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 61,
     "slug": "poliwhirl",
     "name": "Poliwhirl",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 62,
@@ -459,13 +459,13 @@
     "nationalPokedexNumber": 77,
     "slug": "ponyta",
     "name": "Ponyta",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 78,
     "slug": "rapidash",
     "name": "Rapidash",
-    "registered": false
+    "registered": true
   },
   {
     "nationalPokedexNumber": 79,
