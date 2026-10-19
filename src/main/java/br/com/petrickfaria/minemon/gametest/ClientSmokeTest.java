@@ -77,13 +77,15 @@ public final class ClientSmokeTest {
      var position=entity.position();var previous=lastRenderedPositions.put(slug,position);
      if(previous!=null&&previous.distanceToSqr(position)>0.0001D) {
       walkedSpecies.add(slug);
+     }
+     // Sample every render frame, independently of position updates. Filtering
+     // these samples by displacement can alias animation keyframes when the
+     // client batches several server ticks into a single render frame.
+     if(worldTicks>=360 && worldTicks<360+species.size()*SPECIES_TEST_WINDOW) {
       if(slug.equals("charmander")||slug.equals("charmeleon")||slug.equals("charizard")) {
        var left=model.getAnimationProcessor().getBone("arm_left");var right=model.getAnimationProcessor().getBone("arm_right");
-       // The smoke scenario drives fixed 30-tick walk and run phases. Use that
-       // authoritative phase marker instead of render-frame interpolation,
-       // which can group multiple server ticks into one larger client step.
        int phase=Math.floorMod(worldTicks-360,SPECIES_TEST_WINDOW);
-       boolean running=phase>=30;int mode=running?2:0;
+       int mode=phase>=30?2:0;
        var range=fireStarterArmRanges.computeIfAbsent(slug,k->new float[4]);
        range[mode]=Math.max(range[mode],Math.abs(left.getRotationZ()));
        range[mode+1]=Math.max(range[mode+1],Math.abs(right.getRotationZ()));
