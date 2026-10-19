@@ -53,7 +53,7 @@ def audit():
     clip=ad[walk]
     valid_bones={bone:channels for bone,channels in clip.get('bones',{}).items() if bone in bones}
     payload=json.dumps({'bones':valid_bones})
-    animated=bool(re.search(r'(?:q|query)\\.anim_time',payload)) or any(isinstance(ch,dict) and len(ch)>1 for bone in valid_bones.values() for ch in bone.values())
+    animated=bool(re.search(r'(?:q|query)\.anim_time',payload)) or any(isinstance(ch,dict) and len(ch)>1 for bone in valid_bones.values() for ch in bone.values())
     if not animated:issues.append('Locomotion clip is a static pose')
    attack=next((clips[n] for n in ('physical_attack','physical','attack') if n in clips),None)
    attack_ticks=math.ceil(ad[attack].get('animation_length',0)*20) if attack else 0
