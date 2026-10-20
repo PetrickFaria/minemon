@@ -10,7 +10,7 @@ Escopo exclusivo #031–#040: Nidoqueen, Nidoran♂, Nidorino, Nidoking, Clefair
 - [x] Confirmar base aprovada e ausência de commits posteriores na branch base.
 - [x] Criar branch própria preservando os três lotes anteriores.
 - [x] Auditar modelos, variantes, texturas, ossos, clips e posers Cobblemon 1.8.2.
-- [ ] Importar exclusivamente dez espécies, preservando outras 141 entradas.
+- [x] Importar exclusivamente dez espécies, preservando outras 141 entradas.
 - [ ] Compilar, testes Java, GameTests servidor, smoke cliente cumulativo e inspeção real do JAR.
 - [ ] Publicar links de commit, execução aprovada e artefato.
 
@@ -23,3 +23,7 @@ Avaliação visual manual pendente por decisão do usuário. Aprovação automat
 Auditoria fonte: Actions 39473590254, 39473802916 e 39473935826. Nidoqueen/Nidorino usam posers Kotlin compilados, inspecionados com javap sem execução. Ninetales/Jigglypuff/Wigglytuff usam posers JSON procedurais. Adaptação preserva a pose nativa e acrescenta ciclo simples nos membros declarados; relógio adaptado ao Minemon, sem alegar equivalência exata ao limb swing Cobblemon. Nidoqueen, Ninetales, Jigglypuff e Wigglytuff têm idle estático nativo: manter e validar estabilidade. Demais seis conservam idle animado. Nidoran♂, Nidoking e Vulpix têm ground_run nativo; demais reutilizam caminhada em alta velocidade, sem inventar clip de corrida.
 
 Inconsistência nativa identificada: poser Jigglypuff aponta leg_left/right ausentes na geometria 1.8.2; ciclo bípede foi mapeado para foot_left/right existentes, mantendo offsets e canais Y/Z. Nidorino também tem canais de orelhas ausentes na geometria; somente a lista exata auditada é removida na preparação runtime, sem criar ossos.
+
+Preparação validada: [Actions 39475067832](https://github.com/PetrickFaria/minemon/actions/runs/39475067832), recursos das 151 espécies e preservação das outras 141 entradas aprovados. Correção adicional estritamente local: cry de Jigglypuff tinha animation_length=1.25 dentro de sound_effects; a duração foi movida para o clip, preservando timestamp e efeito. Nenhum som original foi substituído.
+
+O gate adicional compara manifest e perfis com a base aprovada, bloqueia sobrescrita de recursos existentes e inspeciona o JAR para todos os primeiros 40 modelos/texturas/animações. O smoke conserva os gates anteriores e verifica estabilidade das quatro poses de idle nativamente estáticas; não exige nem inventa oscilação para elas.

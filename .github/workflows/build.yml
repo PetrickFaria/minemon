@@ -22,6 +22,10 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - name: Verify extracted project resources
         run: python3 tools/verify_project.py
+      - name: Verify exclusive batch 4 and preserve approved prior batches
+        run: |
+          git fetch --no-tags --depth=1 origin 8bba5b0563d2170a77c1546ea81e32e717569af1
+          python3 tools/verify_batch4.py
       - name: Ensure Gradle Wrapper is executable
         run: chmod +x gradlew
       - name: Report resolved ForgeGradle version
@@ -76,6 +80,7 @@ jobs:
           jar tf "$jar_file" | grep -Fx 'assets/minemon_gen1/animations/bulbasaur_cobblemon_1_8_2/bulbasaur.animation.json'
           jar tf "$jar_file" | grep -Fx 'assets/minemon_gen1/models/item/bulbasaur_spawn_egg.json'
           python3 tools/verify_runtime.py "$jar_file"
+          python3 tools/verify_batch4.py "$jar_file"
           unzip -p "$jar_file" META-INF/mods.toml | grep -F 'modId="minemon_gen1"'
           unzip -p "$jar_file" META-INF/mods.toml | grep -F 'versionRange="[1.19.2,1.20)"'
           unzip -p "$jar_file" META-INF/mods.toml | grep -F 'modId="geckolib3"'

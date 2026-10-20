@@ -411,6 +411,21 @@ public final class ClientSmokeTest {
    }
    return moved;
   }
+  private static boolean sourceStaticIdle(String slug) {
+   return ADDITIONAL_PROFILES.getOrDefault(slug,java.util.Map.of()).containsKey("idle_static");
+  }
+  private static void validateSourceStaticIdle(String slug) {
+   if(articulationSampleCounts.getOrDefault(slug,java.util.Map.of()).getOrDefault("IDLE_FINAL",0)<2)
+    throw new IllegalStateException("Insufficient static idle samples for "+slug);
+   for(String joint:profileJoints(slug,"IDLE_FINAL")) {
+    float[] range=articulationRanges.getOrDefault(slug,java.util.Map.of()).get("IDLE_FINAL:"+joint);
+    if(range==null)throw new IllegalStateException("Missing static idle pose "+slug+":"+joint);
+    for(int axis=0;axis<6;axis++)
+     if(!Float.isFinite(range[axis])||!Float.isFinite(range[axis+6])||range[axis+6]<range[axis]
+        ||range[axis+6]-range[axis]>(axis<3?0.02F:0.05F))
+      throw new IllegalStateException("Native static idle pose was not stable for "+slug+":"+joint);
+   }
+  }
   private static void validateArticulationProfiles() throws java.io.IOException {
    StringBuilder report=new StringBuilder();
    int passed=0,knownFallbacks=0;
@@ -457,8 +472,11 @@ public final class ClientSmokeTest {
     int runJoints=run==null?0:movingJointCount(slug,"RUN_STEADY");
     int minimum=slug.equals("charmander")?2:1;
     int idleJoints=movingJointCount(slug,"IDLE_FINAL");
-    if(idleJoints<minimum||walkJoints<minimum||(run!=null&&runJoints<minimum))
+    boolean staticIdle=sourceStaticIdle(slug);
+    if(staticIdle)validateSourceStaticIdle(slug);
+    if((!staticIdle&&idleJoints<minimum)||walkJoints<minimum||(run!=null&&runJoints<minimum))
      throw new IllegalStateException("Relevant locomotion joints did not animate for "+slug+" idle="+idleJoints+" walk="+walkJoints+" run="+runJoints+" required="+minimum);
+    if(staticIdle)report.append("SOURCE STATIC IDLE ").append(slug).append(": native stance stable; no idle oscillation claimed.\n");
     passed++;
     report.append("PASS ").append(slug).append(": idle/walk").append(run==null?" (no source run clip)":"/run").append(" clips selected; profile joints changed idle=")
       .append(idleJoints).append(" walk=").append(walkJoints).append(" run=").append(runJoints).append("; transition samples=")

@@ -1,0 +1,403 @@
+{
+  "batch": 4,
+  "range": [
+    31,
+    40
+  ],
+  "source_url": "https://cdn.modrinth.com/data/MdwFAVRL/versions/GJ2a1b8O/Cobblemon-fabric-1.8.2%2B1.21.1.jar",
+  "source_sha256": "cae8ac328b61354fbe415208b8c6ffc12e7155094d0a87082e85e7914fb380c2",
+  "manual_visual_status": "pending; user will evaluate the authorized batches inside Minecraft",
+  "species": [
+    {
+      "number": 31,
+      "slug": "nidoqueen",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0031_nidoqueen/nidoqueen.geo.json",
+      "idle": "animation.nidoqueen.ground_idle",
+      "movement": "animation.nidoqueen.minemon_poser_walk",
+      "mode": "ground",
+      "native_run": null,
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "left_upper_leg",
+          "right_upper_leg",
+          "left_shoulder",
+          "right_shoulder"
+        ],
+        "walk": [
+          "left_upper_leg",
+          "right_upper_leg",
+          "left_shoulder",
+          "right_shoulder"
+        ],
+        "run": [
+          "left_upper_leg",
+          "right_upper_leg",
+          "left_shoulder",
+          "right_shoulder"
+        ],
+        "idle_static": [
+          "left_upper_leg",
+          "right_upper_leg",
+          "left_shoulder",
+          "right_shoulder"
+        ]
+      },
+      "stripped_bones": {}
+    },
+    {
+      "number": 32,
+      "slug": "nidoranm",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0032_nidoranm/nidoranm.geo.json",
+      "idle": "animation.nidoranm.ground_idle",
+      "movement": "animation.nidoranm.ground_walk",
+      "mode": "ground",
+      "native_run": "animation.nidoranm.ground_run",
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "head",
+          "torso",
+          "ear_left",
+          "ear_right"
+        ],
+        "walk": [
+          "leg_front_left",
+          "leg_front_right",
+          "leg_back_left",
+          "leg_back_right"
+        ],
+        "run": [
+          "leg_front_left",
+          "leg_front_right",
+          "leg_back_left",
+          "leg_back_right"
+        ]
+      },
+      "stripped_bones": {}
+    },
+    {
+      "number": 33,
+      "slug": "nidorino",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0033_nidorino/nidorino.geo.json",
+      "idle": "animation.nidorino.ground_idle",
+      "movement": "animation.nidorino.minemon_poser_walk",
+      "mode": "ground",
+      "native_run": null,
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "jaw",
+          "torso"
+        ],
+        "walk": [
+          "leg_front_left",
+          "leg_front_right",
+          "leg_back_left",
+          "leg_back_right"
+        ],
+        "run": [
+          "leg_front_left",
+          "leg_front_right",
+          "leg_back_left",
+          "leg_back_right"
+        ]
+      },
+      "stripped_bones": {
+        "animation.nidorino.ground_idle": [
+          "ear_left",
+          "ear_right"
+        ]
+      }
+    },
+    {
+      "number": 34,
+      "slug": "nidoking",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0034_nidoking/nidoking.geo.json",
+      "idle": "animation.nidoking.ground_idle",
+      "movement": "animation.nidoking.ground_walk",
+      "mode": "ground",
+      "native_run": "animation.nidoking.ground_run",
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "tail",
+          "tail2",
+          "arm_left1",
+          "arm_right1"
+        ],
+        "walk": [
+          "leg_left",
+          "leg_right"
+        ],
+        "run": [
+          "leg_left",
+          "leg_right"
+        ]
+      },
+      "stripped_bones": {
+        "animation.nidoking.battle_cry": [
+          "eyeshine_left",
+          "eyeshine_right"
+        ],
+        "animation.nidoking.battle_idle_temp": [
+          "jaw2"
+        ],
+        "animation.nidoking.beam": [
+          "eyeshine_left",
+          "eyeshine_right"
+        ],
+        "animation.nidoking.physical": [
+          "eyeshine_left",
+          "eyeshine_right"
+        ],
+        "animation.nidoking.special": [
+          "eyeshine_left",
+          "eyeshine_right"
+        ],
+        "animation.nidoking.status": [
+          "eyeshine_left",
+          "eyeshine_right"
+        ]
+      }
+    },
+    {
+      "number": 35,
+      "slug": "clefairy",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0035_clefairy/clefairy.geo.json",
+      "idle": "animation.clefairy.ground_idle",
+      "movement": "animation.clefairy.ground_walk",
+      "mode": "ground",
+      "native_run": null,
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "tail",
+          "tail2",
+          "wing_left",
+          "wing_right"
+        ],
+        "walk": [
+          "leg_left",
+          "leg_right"
+        ],
+        "run": [
+          "leg_left",
+          "leg_right"
+        ]
+      },
+      "stripped_bones": {
+        "animation.clefairy.faint": [
+          "ear_left",
+          "ear_right",
+          "mouth_closed",
+          "mouth_open"
+        ],
+        "animation.clefairy.special": [
+          "ear_left",
+          "ear_right",
+          "mouth_closed",
+          "mouth_open"
+        ]
+      }
+    },
+    {
+      "number": 36,
+      "slug": "clefable",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0036_clefable/clefable.geo.json",
+      "idle": "animation.clefable.ground_idle",
+      "movement": "animation.clefable.ground_walk",
+      "mode": "ground",
+      "native_run": null,
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "arm_left",
+          "arm_right",
+          "tail",
+          "tail2"
+        ],
+        "walk": [
+          "leg_left",
+          "leg_right"
+        ],
+        "run": [
+          "leg_left",
+          "leg_right"
+        ]
+      },
+      "stripped_bones": {
+        "animation.clefable.cry": [
+          "mouth_open"
+        ],
+        "animation.clefable.faint": [
+          "ear_left",
+          "ear_right",
+          "mouth_closed",
+          "mouth_open"
+        ],
+        "animation.clefable.physical": [
+          "ear_left",
+          "ear_right",
+          "mouth_closed",
+          "mouth_open"
+        ],
+        "animation.clefable.sleep": [
+          "ear_left",
+          "ear_right",
+          "mouth_closed"
+        ],
+        "animation.clefable.special": [
+          "ear_left",
+          "ear_right",
+          "mouth_closed",
+          "mouth_open"
+        ]
+      }
+    },
+    {
+      "number": 37,
+      "slug": "vulpix",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0037_vulpix/vulpix.geo.json",
+      "idle": "animation.vulpix.ground_idle",
+      "movement": "animation.vulpix.ground_walk",
+      "mode": "ground",
+      "native_run": "animation.vulpix.ground_run",
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "tail_left1",
+          "tail_right1",
+          "head_rotation"
+        ],
+        "walk": [
+          "leg_front_left",
+          "leg_front_right",
+          "leg_back_left",
+          "leg_back_right"
+        ],
+        "run": [
+          "leg_front_left",
+          "leg_front_right",
+          "leg_back_left",
+          "leg_back_right"
+        ]
+      },
+      "stripped_bones": {}
+    },
+    {
+      "number": 38,
+      "slug": "ninetales",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0038_ninetales/ninetales.geo.json",
+      "idle": "animation.ninetales.ground_idle",
+      "movement": "animation.ninetales.minemon_poser_walk",
+      "mode": "ground",
+      "native_run": null,
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "leg_front_left",
+          "leg_front_right",
+          "tail_middle"
+        ],
+        "walk": [
+          "leg_front_left",
+          "leg_front_right",
+          "leg_back_left",
+          "leg_back_right"
+        ],
+        "run": [
+          "leg_front_left",
+          "leg_front_right",
+          "leg_back_left",
+          "leg_back_right"
+        ],
+        "idle_static": [
+          "leg_front_left",
+          "leg_front_right",
+          "tail_middle"
+        ]
+      },
+      "stripped_bones": {
+        "animation.ninetales.cry": [
+          "mouth"
+        ]
+      }
+    },
+    {
+      "number": 39,
+      "slug": "jigglypuff",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0039_jigglypuff/jigglypuff.geo.json",
+      "idle": "animation.jigglypuff.ground_idle",
+      "movement": "animation.jigglypuff.minemon_poser_walk",
+      "mode": "ground",
+      "native_run": null,
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "foot_left",
+          "foot_right",
+          "head"
+        ],
+        "walk": [
+          "foot_left",
+          "foot_right"
+        ],
+        "run": [
+          "foot_left",
+          "foot_right"
+        ],
+        "idle_static": [
+          "foot_left",
+          "foot_right",
+          "head"
+        ]
+      },
+      "stripped_bones": {
+        "animation.jigglypuff.ground_idle": [
+          "leg_left",
+          "leg_right"
+        ],
+        "animation.jigglypuff.pose": [
+          "leg_left",
+          "leg_right"
+        ],
+        "animation.jigglypuff.pout": [
+          "leg_left",
+          "leg_right"
+        ]
+      }
+    },
+    {
+      "number": 40,
+      "slug": "wigglytuff",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0040_wigglytuff/wigglytuff.geo.json",
+      "idle": "animation.wigglytuff.ground_idle",
+      "movement": "animation.wigglytuff.minemon_poser_walk",
+      "mode": "ground",
+      "native_run": null,
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "foot_left",
+          "foot_right",
+          "torso"
+        ],
+        "walk": [
+          "foot_left",
+          "foot_right"
+        ],
+        "run": [
+          "foot_left",
+          "foot_right"
+        ],
+        "idle_static": [
+          "foot_left",
+          "foot_right",
+          "torso"
+        ]
+      },
+      "stripped_bones": {}
+    }
+  ]
+}

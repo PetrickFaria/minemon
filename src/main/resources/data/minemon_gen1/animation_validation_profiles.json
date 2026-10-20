@@ -310,5 +310,200 @@
       "left_upper_arm",
       "right_upper_arm"
     ]
+  },
+  "nidoqueen": {
+    "idle": [
+      "left_upper_leg",
+      "right_upper_leg",
+      "left_shoulder",
+      "right_shoulder"
+    ],
+    "walk": [
+      "left_upper_leg",
+      "right_upper_leg",
+      "left_shoulder",
+      "right_shoulder"
+    ],
+    "run": [
+      "left_upper_leg",
+      "right_upper_leg",
+      "left_shoulder",
+      "right_shoulder"
+    ],
+    "idle_static": [
+      "left_upper_leg",
+      "right_upper_leg",
+      "left_shoulder",
+      "right_shoulder"
+    ]
+  },
+  "nidoranm": {
+    "idle": [
+      "head",
+      "torso",
+      "ear_left",
+      "ear_right"
+    ],
+    "walk": [
+      "leg_front_left",
+      "leg_front_right",
+      "leg_back_left",
+      "leg_back_right"
+    ],
+    "run": [
+      "leg_front_left",
+      "leg_front_right",
+      "leg_back_left",
+      "leg_back_right"
+    ]
+  },
+  "nidorino": {
+    "idle": [
+      "jaw",
+      "torso"
+    ],
+    "walk": [
+      "leg_front_left",
+      "leg_front_right",
+      "leg_back_left",
+      "leg_back_right"
+    ],
+    "run": [
+      "leg_front_left",
+      "leg_front_right",
+      "leg_back_left",
+      "leg_back_right"
+    ]
+  },
+  "nidoking": {
+    "idle": [
+      "tail",
+      "tail2",
+      "arm_left1",
+      "arm_right1"
+    ],
+    "walk": [
+      "leg_left",
+      "leg_right"
+    ],
+    "run": [
+      "leg_left",
+      "leg_right"
+    ]
+  },
+  "clefairy": {
+    "idle": [
+      "tail",
+      "tail2",
+      "wing_left",
+      "wing_right"
+    ],
+    "walk": [
+      "leg_left",
+      "leg_right"
+    ],
+    "run": [
+      "leg_left",
+      "leg_right"
+    ]
+  },
+  "clefable": {
+    "idle": [
+      "arm_left",
+      "arm_right",
+      "tail",
+      "tail2"
+    ],
+    "walk": [
+      "leg_left",
+      "leg_right"
+    ],
+    "run": [
+      "leg_left",
+      "leg_right"
+    ]
+  },
+  "vulpix": {
+    "idle": [
+      "tail_left1",
+      "tail_right1",
+      "head_rotation"
+    ],
+    "walk": [
+      "leg_front_left",
+      "leg_front_right",
+      "leg_back_left",
+      "leg_back_right"
+    ],
+    "run": [
+      "leg_front_left",
+      "leg_front_right",
+      "leg_back_left",
+      "leg_back_right"
+    ]
+  },
+  "ninetales": {
+    "idle": [
+      "leg_front_left",
+      "leg_front_right",
+      "tail_middle"
+    ],
+    "walk": [
+      "leg_front_left",
+      "leg_front_right",
+      "leg_back_left",
+      "leg_back_right"
+    ],
+    "run": [
+      "leg_front_left",
+      "leg_front_right",
+      "leg_back_left",
+      "leg_back_right"
+    ],
+    "idle_static": [
+      "leg_front_left",
+      "leg_front_right",
+      "tail_middle"
+    ]
+  },
+  "jigglypuff": {
+    "idle": [
+      "foot_left",
+      "foot_right",
+      "head"
+    ],
+    "walk": [
+      "foot_left",
+      "foot_right"
+    ],
+    "run": [
+      "foot_left",
+      "foot_right"
+    ],
+    "idle_static": [
+      "foot_left",
+      "foot_right",
+      "head"
+    ]
+  },
+  "wigglytuff": {
+    "idle": [
+      "foot_left",
+      "foot_right",
+      "torso"
+    ],
+    "walk": [
+      "foot_left",
+      "foot_right"
+    ],
+    "run": [
+      "foot_left",
+      "foot_right"
+    ],
+    "idle_static": [
+      "foot_left",
+      "foot_right",
+      "torso"
+    ]
   }
 }
