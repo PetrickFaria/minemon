@@ -27,9 +27,11 @@ Clips de água, voo, sono, blink, recoil e ataque foram mapeados quando têm cor
 
 No rig fonte, a cadeia é `tail3 → fire → fire2 → locator_fire`. O pivô da chama `fire2` é `[0, 4.25, 16.5]`; o plano fonte começa em `[0, 4.2, 14]`, tem altura 8 e profundidade 5. A cópia runtime agora deixa `fire` e `fire2` seguirem os canais originais de idle/walk, remove somente o plano degenerado e coloca duas faces texturizadas no novo osso filho `tail_flame`, pai de `fire2`. A nova geometria conserva os limites e UV da chama fonte e acompanha as transformações da ponta da cauda.
 
-A imagem usada para a malha vem do frame `charmander_flame1.png` do Cobblemon, extraída da região UV original. Um controlador GeckoLib separado reproduz em loop `animation.charmander.minemon_tail_flame` no osso filho, com oscilação contínua de rotação e escala pequena. Portanto, a animação continua ativa enquanto o controlador corporal alterna entre idle e walk e não sobrescreve esses canais do corpo. O teste cliente mede movimento desse osso durante os dois estados e verifica o clip selecionado.
+A imagem usada para a malha vem do frame `charmander_flame1.png` do Cobblemon, extraída da região UV original. Um controlador GeckoLib separado reproduz em loop `animation.charmander.minemon_tail_flame` no osso filho, com oscilação contínua de rotação e escala pequena. As frequências adotam a mesma base angular `90*16`/`90*14` usada nos canais de fogo de Charmander no recurso fonte. Molang `math.sin` recebe graus; frequências subgrau eram lentas demais e foram substituídas após o smoke medir pouca variação. O teste Java amostra o ciclo em vários pontos, e o teste cliente mede o movimento desse osso durante idle e walk e verifica o clip selecionado.
 
 Charmeleon e Charizard também recebem malhas de chama compatíveis com GeckoLib, construídas a partir dos respectivos limites, UVs e bones fonte. Os clips originais de chama/cauda desses dois modelos não são zerados nem reescritos. A confirmação visual final da conexão, clipping e aparência ainda depende do teste manual do JAR no Minecraft.
+
+O smoke de cliente também encontrou o clip terrestre de corrida de Charizard com keyframes de braço Z estáticos em ±11,5°, diferente dos vetores Molang usados no caminho de caminhada. A adaptação runtime desloca somente esse eixo para a pose interna de ±55° já usada para o movimento dos iniciais de fogo; mantém os valores X/Y e as variações Z relativas do clip de origem.
 
 ## Compatibilidade e validação
 
@@ -37,7 +39,7 @@ Charmeleon e Charizard também recebem malhas de chama compatíveis com GeckoLib
 - Locators Bedrock não consumidos pelo GeckoLib 3 são removidos somente dos rigs runtime. Canais que apontam para bones ausentes na variante selecionada são removidos apenas quando explicitamente listados em `stripped_bones` no manifesto.
 - Os testes gerais continuam verificando 151 entidades/ovos, ordem, carga das 151 geometrias/animações/texturas, renderização e movimento. Perfis de articulação detalhados cobrem os dez deste lote, com bones próprios por espécie, estados idle/walk e run quando selecionado.
 - Os limites de velocidade/ticks existentes não foram ampliados. O cliente também valida os estados de transição já definidos pelo fixture.
-- `verify_project.py` e `verify_runtime.py` passaram no workspace. O build Gradle local não iniciou porque o wrapper precisaria baixar Gradle 7.5.1 de `services.gradle.org`, inacessível nesta rede. A validação obrigatória de compilação, Java, GameTests, smoke do cliente e JAR será obtida por GitHub Actions antes de declarar o lote pronto.
+- `verify_project.py`, compilação Java, testes Java e GameTests de servidor passaram. No primeiro smoke do cliente, o perfil de corrida de Charizard comprovou o problema dos keyframes estáticos; no retry limpo, a checagem de oscilação da chama comprovou alias de fase com as frequências anteriores. As adaptações correspondentes estão aplicadas e aguardam nova execução completa do GitHub Actions. O build Gradle local não iniciou porque o wrapper precisaria baixar Gradle 7.5.1 de `services.gradle.org`, inacessível nesta rede. O lote continua não aprovado até o smoke do cliente e a verificação do JAR passarem.
 
 ## Licenças e origem
 

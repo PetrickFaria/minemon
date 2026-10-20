@@ -64,8 +64,8 @@ def build_runtime_clips(data,geo,d):
    'bones':{'tail_flame':{
     # Molang math.sin takes degrees; the previous sub-degree-per-second
     # multipliers produced effectively static bending and scale changes.
-    'rotation':['2.4*math.sin(query.anim_time*90)','1.2*math.sin(query.anim_time*72+35)','1.8*math.sin(query.anim_time*108+110)'],
-    'scale':['1.0+0.035*math.sin(query.anim_time*90+20)','1.0+0.065*math.sin(query.anim_time*72+45)','1.0+0.035*math.sin(query.anim_time*90+20)']
+    'rotation':['2.4*math.sin(query.anim_time*90*16)','1.2*math.sin(query.anim_time*90*14+35)','1.8*math.sin(query.anim_time*90*12+110)'],
+    'scale':['1.0+0.02*math.sin(query.anim_time*90*16+20)','1.0+0.025*math.sin(query.anim_time*90*14+45)','1.0+0.02*math.sin(query.anim_time*90*16+20)']
    }}
   }
 
@@ -86,8 +86,26 @@ def build_runtime_clips(data,geo,d):
     channel=walk_bones.get(name)
     if not isinstance(channel,dict): continue
     rotation=channel.get('rotation')
-    if not isinstance(rotation,list) or len(rotation)!=3: continue
-    channel['rotation'][2]=f'{sign*rest:g}{"+" if sign>0 else "-"}{swing:g}*math.sin(query.anim_time*{frequency})'
+    if isinstance(rotation,list) and len(rotation)==3:
+     channel['rotation'][2]=f'{sign*rest:g}{"+" if sign>0 else "-"}{swing:g}*math.sin(query.anim_time*{frequency})'
+    elif clip_name==run_name and isinstance(rotation,dict):
+     # Some native run clips use a keyframed, almost flat arm Z angle instead
+     # of a Molang vector. Rebase only that axis onto the species' validated
+     # lowered arm pose; retain source X/Y motion and all relative Z keyframes.
+     frames=[]
+     for frame in rotation.values():
+      vector=frame.get('post',frame.get('pre',frame.get('vector'))) if isinstance(frame,dict) else frame
+      if isinstance(vector,list) and len(vector)==3 and isinstance(vector[2],(int,float)):
+       frames.append((frame,vector))
+     if frames:
+      offset=sign*rest-frames[0][1][2]
+      for frame,vector in frames:
+       if isinstance(frame,dict):
+        for key in ('post','pre','vector'):
+         if isinstance(frame.get(key),list) and len(frame[key])==3:
+          frame[key][2]+=offset
+       else:
+        vector[2]+=offset
 
 def flatten_bedrock_keyframes(data):
  # GeckoLib 3.1.40 does not deserialize Bedrock pre/post + lerp_mode objects.

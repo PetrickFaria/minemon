@@ -52,11 +52,13 @@ public class MolangCompatibilityTest {
   assertTrue("Tail flame independently bends and flickers",flame.getAsJsonObject("bones").getAsJsonObject("tail_flame").has("rotation")&&flame.getAsJsonObject("bones").getAsJsonObject("tail_flame").has("scale"));
   var flameBone=flame.getAsJsonObject("bones").getAsJsonObject("tail_flame");
   var flameBend=parser.parseExpression(flameBone.getAsJsonArray("rotation").get(0).getAsString());
-  parser.setValue("query.anim_time",0.0);first=flameBend.get();parser.setValue("query.anim_time",0.5);
-  assertTrue("Independent flame bend changes over time",Math.abs(flameBend.get()-first)>0.1);
+  parser.setValue("query.anim_time",0.0);double flameMin=flameBend.get(),flameMax=flameMin;
+  for(int i=1;i<=40;i++){parser.setValue("query.anim_time",i/40.0);double value=flameBend.get();flameMin=Math.min(flameMin,value);flameMax=Math.max(flameMax,value);}
+  assertTrue("Independent flame bend changes over a sampled cycle",flameMax-flameMin>0.1);
   var flameScale=parser.parseExpression(flameBone.getAsJsonArray("scale").get(1).getAsString());
-  parser.setValue("query.anim_time",0.0);first=flameScale.get();parser.setValue("query.anim_time",0.5);
-  assertTrue("Independent flame shape subtly expands and contracts",Math.abs(flameScale.get()-first)>0.005);
+  parser.setValue("query.anim_time",0.0);double scaleMin=flameScale.get(),scaleMax=scaleMin;
+  for(int i=1;i<=40;i++){parser.setValue("query.anim_time",i/40.0);double value=flameScale.get();scaleMin=Math.min(scaleMin,value);scaleMax=Math.max(scaleMax,value);}
+  assertTrue("Independent flame shape subtly expands and contracts over a sampled cycle",scaleMax-scaleMin>0.005);
   var loadedIdle=software.bernie.geckolib3.util.json.JsonAnimationUtils.deserializeJsonToAnimation(
     new java.util.AbstractMap.SimpleImmutableEntry<String,com.google.gson.JsonElement>("animation.charmander.ground_idle",idle),parser);
   var loadedWalk=software.bernie.geckolib3.util.json.JsonAnimationUtils.deserializeJsonToAnimation(
