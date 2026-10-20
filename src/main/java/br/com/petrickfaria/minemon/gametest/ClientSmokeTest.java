@@ -284,7 +284,7 @@ public final class ClientSmokeTest {
    // GeckoLib has evaluated this tick's controller predicate.
    return (phase>=3&&phase<8) || (phase>=12&&phase<16) || (phase>=18&&phase<24)
      || (phase>=25&&phase<27) || (phase>=29&&phase<34) || (phase>=36&&phase<38)
-     || (phase>=41&&phase<47) || phase==48 || (phase>=50&&phase<54) || phase>=68;
+     || (phase>=41&&phase<47) || (phase>=47&&phase<49) || (phase>=50&&phase<54) || phase>=68;
   }
   private static final String VALIDATION_PHASE_PREFIX="minemon-validation-phase:";
   private static void setValidationPhase(MinemonCreature entity,int phase) {
@@ -312,6 +312,16 @@ public final class ClientSmokeTest {
   }
   private static boolean hasSelectedClip(String slug,String state,String clip) {
    return clip!=null && articulationClips.getOrDefault(slug,java.util.Map.of()).getOrDefault(state,java.util.Set.of()).contains(clip);
+  }
+  private static boolean hasVelocitySample(String slug,String state,String clip,boolean aboveRunThreshold) {
+   for(String sample:articulationInputs.getOrDefault(slug,java.util.Map.of()).getOrDefault(state,java.util.Set.of())) {
+    if(!sample.contains("clip="+clip+",velocitySqr="))continue;
+    int start=sample.indexOf("velocitySqr=")+12;int end=sample.indexOf(',',start);
+    if(end<0)continue;
+    double speedSqr=Double.parseDouble(sample.substring(start,end));
+    if((speedSqr>0.01D)==aboveRunThreshold)return true;
+   }
+   return false;
   }
   private static int movingJointCount(String slug,String state) {
    int moved=0;
@@ -354,7 +364,9 @@ public final class ClientSmokeTest {
      throw new IllegalStateException("Run state selection failed for "+slug+" expected="+run+" states="+articulationClips.get(slug));
     if(run!=null) {
      var deceleration=articulationClips.getOrDefault(slug,java.util.Map.of()).getOrDefault("RUN_DECEL",java.util.Set.of());
-     if(!deceleration.contains(run)||java.util.Collections.disjoint(deceleration,java.util.Set.of(walk,idle)))
+     boolean observedLowerSpeed=hasVelocitySample(slug,"RUN_DECEL",walk,false)||hasVelocitySample(slug,"RUN_DECEL",idle,false);
+     if(!deceleration.contains(run)||java.util.Collections.disjoint(deceleration,java.util.Set.of(walk,idle))
+        ||!hasVelocitySample(slug,"RUN_DECEL",run,true)||!observedLowerSpeed)
       throw new IllegalStateException("Run deceleration did not transition from run to a lower-speed state for "+slug+" run="+run+" walk="+walk+" idle="+idle+" observed="+deceleration+" measured="+articulationInputs.getOrDefault(slug,java.util.Map.of()).get("RUN_DECEL"));
     }
     int walkJoints=movingJointCount(slug,"WALK_STEADY");

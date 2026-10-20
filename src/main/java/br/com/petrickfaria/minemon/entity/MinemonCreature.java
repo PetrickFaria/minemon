@@ -299,7 +299,10 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         } else if (this.isMoving(event)) {
             clip = definition.walk();
             String run=SpeciesAssetIndex.clip(slug,"ground_run","run");
-            if(!this.isFlyingSpecies() && run!=null && (this.getDeltaMovement().horizontalDistanceSqr()>0.01D || (this.getX()-this.xo)*(this.getX()-this.xo)+(this.getZ()-this.zo)*(this.getZ()-this.zo)>0.0025D)) clip=run;
+            // A large position delta can linger for a tick after velocity drops.
+            // Keep run selection tied to actual horizontal speed so deceleration
+            // promptly returns to the walk clip instead of sticking on run.
+            if(!this.isFlyingSpecies() && run!=null && this.getDeltaMovement().horizontalDistanceSqr()>0.01D) clip=run;
         } else {
             clip = definition.idle();
         }
