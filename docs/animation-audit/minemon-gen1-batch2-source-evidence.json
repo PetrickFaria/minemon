@@ -1,0 +1,356 @@
+{
+  "batch": 2,
+  "range": [
+    11,
+    20
+  ],
+  "source_url": "https://cdn.modrinth.com/data/MdwFAVRL/versions/GJ2a1b8O/Cobblemon-fabric-1.8.2%2B1.21.1.jar",
+  "source_sha256": "cae8ac328b61354fbe415208b8c6ffc12e7155094d0a87082e85e7914fb380c2",
+  "manual_visual_status": "pending; user authorized validation after batch 3",
+  "species": [
+    {
+      "number": 11,
+      "slug": "metapod",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0011_metapod/metapod.geo.json",
+      "idle": "animation.metapod.ground_idle",
+      "movement": "animation.metapod.ground_idle",
+      "mode": "ground",
+      "native_run": null,
+      "fallback": "idle",
+      "profiles": {
+        "idle": [
+          "body",
+          "body_segment"
+        ],
+        "walk": [
+          "body",
+          "body_segment"
+        ],
+        "run": [
+          "body",
+          "body_segment"
+        ]
+      },
+      "stripped_bones": {}
+    },
+    {
+      "number": 12,
+      "slug": "butterfree",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0012_butterfree/butterfree_male.geo.json",
+      "idle": "animation.butterfree.air_idle",
+      "movement": "animation.butterfree.air_fly",
+      "mode": "flying",
+      "native_run": null,
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "wing_left",
+          "wing_right"
+        ],
+        "walk": [
+          "wing_left",
+          "wing_right"
+        ],
+        "run": [
+          "wing_left",
+          "wing_right"
+        ]
+      },
+      "stripped_bones": {}
+    },
+    {
+      "number": 13,
+      "slug": "weedle",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0013_weedle/weedle.geo.json",
+      "idle": "animation.weedle.ground_idle",
+      "movement": "animation.weedle.ground_walk",
+      "mode": "ground",
+      "native_run": null,
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "body_segment",
+          "body_segment2",
+          "body_segment3"
+        ],
+        "walk": [
+          "body_segment",
+          "body_segment2",
+          "body_segment3"
+        ],
+        "run": [
+          "body_segment",
+          "body_segment2",
+          "body_segment3"
+        ]
+      },
+      "stripped_bones": {}
+    },
+    {
+      "number": 14,
+      "slug": "kakuna",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0014_kakuna/kakuna.geo.json",
+      "idle": "animation.kakuna.ground_idle",
+      "movement": "animation.kakuna.ground_idle",
+      "mode": "ground",
+      "native_run": null,
+      "fallback": "idle",
+      "profiles": {
+        "idle": [
+          "body"
+        ],
+        "walk": [
+          "body"
+        ],
+        "run": [
+          "body"
+        ]
+      },
+      "stripped_bones": {}
+    },
+    {
+      "number": 15,
+      "slug": "beedrill",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0015_beedrill/beedrill.geo.json",
+      "idle": "animation.beedrill.air_idle",
+      "movement": "animation.beedrill.air_fly",
+      "mode": "flying",
+      "native_run": null,
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "wing_left",
+          "wing_right"
+        ],
+        "walk": [
+          "wing_left",
+          "wing_right"
+        ],
+        "run": [
+          "wing_left",
+          "wing_right"
+        ]
+      },
+      "stripped_bones": {}
+    },
+    {
+      "number": 16,
+      "slug": "pidgey",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0016_pidgey/pidgey.geo.json",
+      "idle": "animation.pidgey.air_idle",
+      "movement": "animation.pidgey.air_fly",
+      "mode": "flying",
+      "native_run": null,
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "wing_open_left",
+          "wing_open_right"
+        ],
+        "walk": [
+          "wing_open_left",
+          "wing_open_right"
+        ],
+        "run": [
+          "wing_open_left",
+          "wing_open_right"
+        ]
+      },
+      "stripped_bones": {
+        "animation.pidgey.cry": [
+          "brows2"
+        ],
+        "animation.pidgey.ground_idle": [
+          "brows2"
+        ],
+        "animation.pidgey.ground_walk": [
+          "brows2"
+        ],
+        "animation.pidgey.idle_quirk": [
+          "brows2"
+        ],
+        "animation.pidgey.idle_quirk2": [
+          "brows2"
+        ],
+        "animation.pidgey.recoil": [
+          "brows2"
+        ],
+        "animation.pidgey.shoulder_left": [
+          "brows2"
+        ],
+        "animation.pidgey.shoulder_right": [
+          "brows2"
+        ],
+        "animation.pidgey.sleep": [
+          "brows2"
+        ]
+      }
+    },
+    {
+      "number": 17,
+      "slug": "pidgeotto",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0017_pidgeotto/pidgeotto.geo.json",
+      "idle": "animation.pidgeotto.air_idle",
+      "movement": "animation.pidgeotto.air_fly",
+      "mode": "flying",
+      "native_run": null,
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "wing_open_left",
+          "wing_open_right"
+        ],
+        "walk": [
+          "wing_open_left",
+          "wing_open_right"
+        ],
+        "run": [
+          "wing_open_left",
+          "wing_open_right"
+        ]
+      },
+      "stripped_bones": {}
+    },
+    {
+      "number": 18,
+      "slug": "pidgeot",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0018_pidgeot/pidgeot.geo.json",
+      "idle": "animation.pidgeot.air_idle",
+      "movement": "animation.pidgeot.air_fly",
+      "mode": "flying",
+      "native_run": null,
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "wing_open_left",
+          "wing_open_right"
+        ],
+        "walk": [
+          "wing_open_left",
+          "wing_open_right"
+        ],
+        "run": [
+          "wing_open_left",
+          "wing_open_right"
+        ]
+      },
+      "stripped_bones": {
+        "animation.pidgeot.air_glide": [
+          "seat_1"
+        ],
+        "animation.pidgeot.battle_cry": [
+          "seat_1"
+        ],
+        "animation.pidgeot.battle_idle": [
+          "seat_1"
+        ],
+        "animation.pidgeot.battle_sleep": [
+          "seat_1"
+        ],
+        "animation.pidgeot.ground_idle": [
+          "seat_1"
+        ],
+        "animation.pidgeot.ground_walk": [
+          "seat_1"
+        ],
+        "animation.pidgeot.mount_air_fly": [
+          "seat_1"
+        ],
+        "animation.pidgeot.mount_air_glide": [
+          "seat_1"
+        ],
+        "animation.pidgeot.mount_air_idle": [
+          "seat_1"
+        ],
+        "animation.pidgeot.mount_ground_idle": [
+          "seat_1"
+        ],
+        "animation.pidgeot.mount_ground_walk": [
+          "seat_1"
+        ],
+        "animation.pidgeot.ride_air_fly": [
+          "seat_1"
+        ],
+        "animation.pidgeot.ride_air_glide": [
+          "seat_1"
+        ],
+        "animation.pidgeot.sleep": [
+          "seat_1"
+        ],
+        "animation.pidgeot.status": [
+          "seat_1"
+        ]
+      }
+    },
+    {
+      "number": 19,
+      "slug": "rattata",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0019_rattata/rattata_male.geo.json",
+      "idle": "animation.rattata.ground_idle",
+      "movement": "animation.rattata.ground_walk",
+      "mode": "ground",
+      "native_run": null,
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "leg_front_left",
+          "leg_front_right",
+          "leg_back_left",
+          "leg_back_right"
+        ],
+        "walk": [
+          "leg_front_left",
+          "leg_front_right",
+          "leg_back_left",
+          "leg_back_right"
+        ],
+        "run": [
+          "leg_front_left",
+          "leg_front_right",
+          "leg_back_left",
+          "leg_back_right"
+        ]
+      },
+      "stripped_bones": {}
+    },
+    {
+      "number": 20,
+      "slug": "raticate",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0020_raticate/raticate_male.geo.json",
+      "idle": "animation.raticate.ground_idle",
+      "movement": "animation.raticate.ground_walk",
+      "mode": "ground",
+      "native_run": null,
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "body",
+          "head",
+          "tail"
+        ],
+        "walk": [
+          "foot_left",
+          "foot_right",
+          "hand_left",
+          "hand_right"
+        ],
+        "run": [
+          "foot_left",
+          "foot_right",
+          "hand_left",
+          "hand_right"
+        ]
+      },
+      "stripped_bones": {
+        "animation.raticate.faint": [
+          "whiskers_bottom_left",
+          "whiskers_bottom_right"
+        ],
+        "animation.raticate.ground_walk": [
+          "whiskers_bottom_left",
+          "whiskers_bottom_right"
+        ]
+      }
+    }
+  ]
+}

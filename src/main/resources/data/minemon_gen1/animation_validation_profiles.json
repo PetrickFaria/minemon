@@ -1,1 +1,153 @@
-{}
+{
+  "metapod": {
+    "idle": [
+      "body",
+      "body_segment"
+    ],
+    "walk": [
+      "body",
+      "body_segment"
+    ],
+    "run": [
+      "body",
+      "body_segment"
+    ]
+  },
+  "butterfree": {
+    "idle": [
+      "wing_left",
+      "wing_right"
+    ],
+    "walk": [
+      "wing_left",
+      "wing_right"
+    ],
+    "run": [
+      "wing_left",
+      "wing_right"
+    ]
+  },
+  "weedle": {
+    "idle": [
+      "body_segment",
+      "body_segment2",
+      "body_segment3"
+    ],
+    "walk": [
+      "body_segment",
+      "body_segment2",
+      "body_segment3"
+    ],
+    "run": [
+      "body_segment",
+      "body_segment2",
+      "body_segment3"
+    ]
+  },
+  "kakuna": {
+    "idle": [
+      "body"
+    ],
+    "walk": [
+      "body"
+    ],
+    "run": [
+      "body"
+    ]
+  },
+  "beedrill": {
+    "idle": [
+      "wing_left",
+      "wing_right"
+    ],
+    "walk": [
+      "wing_left",
+      "wing_right"
+    ],
+    "run": [
+      "wing_left",
+      "wing_right"
+    ]
+  },
+  "pidgey": {
+    "idle": [
+      "wing_open_left",
+      "wing_open_right"
+    ],
+    "walk": [
+      "wing_open_left",
+      "wing_open_right"
+    ],
+    "run": [
+      "wing_open_left",
+      "wing_open_right"
+    ]
+  },
+  "pidgeotto": {
+    "idle": [
+      "wing_open_left",
+      "wing_open_right"
+    ],
+    "walk": [
+      "wing_open_left",
+      "wing_open_right"
+    ],
+    "run": [
+      "wing_open_left",
+      "wing_open_right"
+    ]
+  },
+  "pidgeot": {
+    "idle": [
+      "wing_open_left",
+      "wing_open_right"
+    ],
+    "walk": [
+      "wing_open_left",
+      "wing_open_right"
+    ],
+    "run": [
+      "wing_open_left",
+      "wing_open_right"
+    ]
+  },
+  "rattata": {
+    "idle": [
+      "leg_front_left",
+      "leg_front_right",
+      "leg_back_left",
+      "leg_back_right"
+    ],
+    "walk": [
+      "leg_front_left",
+      "leg_front_right",
+      "leg_back_left",
+      "leg_back_right"
+    ],
+    "run": [
+      "leg_front_left",
+      "leg_front_right",
+      "leg_back_left",
+      "leg_back_right"
+    ]
+  },
+  "raticate": {
+    "idle": [
+      "body",
+      "head",
+      "tail"
+    ],
+    "walk": [
+      "foot_left",
+      "foot_right",
+      "hand_left",
+      "hand_right"
+    ],
+    "run": [
+      "foot_left",
+      "foot_right",
+      "hand_left",
+      "hand_right"
+    ]
+  }
+}
