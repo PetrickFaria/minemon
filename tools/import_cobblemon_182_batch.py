@@ -4,7 +4,7 @@ import argparse,copy,hashlib,io,json,math,urllib.request,zipfile
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 R=ROOT/'src/main/resources'
-ap=argparse.ArgumentParser();ap.add_argument('--batch',type=int,choices=(2,3,4),required=True);args=ap.parse_args()
+ap=argparse.ArgumentParser();ap.add_argument('--batch',type=int,choices=(2,3,4,5),required=True);args=ap.parse_args()
 start,end=(args.batch-1)*10+1,args.batch*10
 mp=R/'data/minemon_gen1/runtime_species.json'
 defs=json.loads(mp.read_text());before=copy.deepcopy(defs)
@@ -18,6 +18,16 @@ z=zipfile.ZipFile(io.BytesIO(raw));members=set(z.namelist())
 vp=R/'data/minemon_gen1/animation_validation_profiles.json'
 profiles=json.loads(vp.read_text()) if vp.exists() else {}
 GAIT={
+ 'zubat':["wing_left","wing_right"],
+ 'golbat':["wing_left","wing_right"],
+ 'oddish':["leg_left","leg_right"],
+ 'gloom':["leg_left","leg_right"],
+ 'vileplume':["leg_left","leg_right"],
+ 'paras':["leg_left_back","leg_left_front","leg_right_back","leg_right_front"],
+ 'parasect':["leg_left_back","leg_left_front","leg_right_back","leg_right_front"],
+ 'venonat':["left_foot","right_foot"],
+ 'venomoth':["left_top_wing","right_top_wing","left_bottom_wing","right_bottom_wing"],
+ 'diglett':["body","body2","ground"],
  'nidoqueen':['left_upper_leg','right_upper_leg','left_shoulder','right_shoulder'],
  'nidoranm':['leg_front_left','leg_front_right','leg_back_left','leg_back_right'],
  'nidorino':['leg_front_left','leg_front_right','leg_back_left','leg_back_right'],
@@ -39,7 +49,7 @@ GAIT={
  'nidoranf':['leg_front_left','leg_front_right','leg_back_left','leg_back_right'],
  'nidorina':['left_leg','right_leg','left_upper_arm','right_upper_arm']
 }
-IDLE={'nidoqueen':['left_upper_leg','right_upper_leg','left_shoulder','right_shoulder'],'nidoranm':['head','torso','ear_left','ear_right'],'nidorino':['jaw','torso'],'nidoking':['tail','tail2','arm_left1','arm_right1'],'clefairy':['tail','tail2','wing_left','wing_right'],'clefable':['arm_left','arm_right','tail','tail2'],'vulpix':['tail_left1','tail_right1','head_rotation'],'ninetales':['leg_front_left','leg_front_right','tail_middle'],'jigglypuff':['foot_left','foot_right','head'],'wigglytuff':['foot_left','foot_right','torso'],'spearow':['head'],'fearow':['head'],'raticate':['body','head','tail'],'ekans':['head','neck','tail5'],'sandslash':['arm_left','arm_right','tail']}
+IDLE={'oddish':["leaf_center3","leaf_inner_left3","leaf_inner_right3"],'gloom':["arm_left","arm_right","leaf_back_right4"],'vileplume':["arm_left","arm_right","petal_back_rotation"],'paras':["arm_left","arm_right","body"],'parasect':["claw_left","claw_right","body"],'venonat':["left_foot","right_foot","left_antenna","right_antenna"],'diglett':["body"],'nidoqueen':['left_upper_leg','right_upper_leg','left_shoulder','right_shoulder'],'nidoranm':['head','torso','ear_left','ear_right'],'nidorino':['jaw','torso'],'nidoking':['tail','tail2','arm_left1','arm_right1'],'clefairy':['tail','tail2','wing_left','wing_right'],'clefable':['arm_left','arm_right','tail','tail2'],'vulpix':['tail_left1','tail_right1','head_rotation'],'ninetales':['leg_front_left','leg_front_right','tail_middle'],'jigglypuff':['foot_left','foot_right','head'],'wigglytuff':['foot_left','foot_right','torso'],'spearow':['head'],'fearow':['head'],'raticate':['body','head','tail'],'ekans':['head','neck','tail5'],'sandslash':['arm_left','arm_right','tail']}
 RUN={'sandshrew':['ball']}
 evidence=[]
 for d in defs[start-1:end]:
@@ -69,6 +79,30 @@ for d in defs[start-1:end]:
   assert 'animation_length' not in cry or cry['animation_length']==misplaced
   cry['animation_length']=misplaced
   d['source_event_correction']='cry duration 1.25 moved from sound_effects metadata to clip animation_length; timestamp/effect unchanged'
+ if args.batch==5:
+  # Retain every native clip. Only normalize syntax / unsupported mounted inputs.
+  def adapt(value):
+   if isinstance(value,str):
+    value=value.replace('Math.','math.')
+    if slug=='parasect':
+     value=value.replace('q.r.yaw_change(0)','0').replace('q.r.velocity_y(0)','0')
+    return value
+   if isinstance(value,list):return [adapt(x) for x in value]
+   if isinstance(value,dict):return {k:adapt(v) for k,v in value.items()}
+   return value
+  animations=adapt(animations)
+  if slug=='parasect':
+   d['source_molang_adaptations']={'Math.':'math.','q.r.yaw_change(0)':'0: neutral non-ridden input; mounted clips not selected by Minemon','q.r.velocity_y(0)':'0: neutral non-ridden input; mounted clips not selected by Minemon'}
+  if slug=='zubat':
+   poser=json.loads(z.read(f'{prefix}/posers/{folder}/{slug}.json'))
+   assert {'part':'wings_folded','isVisible':False} in poser['poses']['hover']['transformedParts']
+   for name,clip in animations.items():
+    folded=name.endswith(('.shoulder_left','.shoulder_right'))
+    clip.setdefault('bones',{}).setdefault('wings_folded',{})['scale']=[1,1,1] if folded else [0,0,0]
+    clip['bones'].setdefault('wings_open',{})['scale']=[0,0,0] if folded else [1,1,1]
+   d['source_pose_visibility']='poser visibility adapted as parent scale: folded wings hidden except shoulder clips; open wings visible'
+  d['source_event_evidence']={name:{k:v for k,v in clip.items() if k in ('sound_effects','particle_effects','timeline')} for name,clip in animations.items() if any(k in clip for k in ('sound_effects','particle_effects','timeline'))}
+  (R/paths['animation']).write_text(json.dumps({'format_version':'1.8.0','animations':animations},indent=2)+'\n')
  names={name.rsplit('.',1)[-1]:name for name in animations if name.startswith(f'animation.{slug}.')}
  d.update(paths);d['licenses']=list(dict.fromkeys(d.get('licenses',[])+[lp]))
  d['clips']=dict(names);d['excluded_clips']=[]

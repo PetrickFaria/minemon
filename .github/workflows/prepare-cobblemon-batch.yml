@@ -1,5 +1,7 @@
 name: Prepare read-only Cobblemon batch source
 on:
+  push:
+    paths: ['tools/import_cobblemon_182_batch.py', '.github/workflows/prepare-cobblemon-batch.yml']
   workflow_dispatch:
 permissions:
   contents: read
@@ -11,8 +13,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Prepare exactly batch 4
-        run: python3 tools/import_cobblemon_182_batch.py --batch 4
+      - name: Prepare exactly batch 5
+        run: python3 tools/import_cobblemon_182_batch.py --batch 5
       - name: Verify resources
         run: python3 tools/verify_project.py
       - name: Emit public asset contents for connector publication
