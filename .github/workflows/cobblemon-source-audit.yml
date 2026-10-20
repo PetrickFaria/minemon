@@ -1,4 +1,4 @@
-name: Audit Cobblemon source for batches 2 and 3
+name: Audit Cobblemon source for batch 4
 on:
   push:
     paths: ['.github/workflows/cobblemon-source-audit.yml']
@@ -21,7 +21,7 @@ jobs:
           assert hashlib.sha256(raw).hexdigest()=='cae8ac328b61354fbe415208b8c6ffc12e7155094d0a87082e85e7914fb380c2'
           z=zipfile.ZipFile(io.BytesIO(raw))
           defs=json.load(open('src/main/resources/data/minemon_gen1/runtime_species.json'))
-          for d in defs[20:22]:
+          for d in defs[30:40]:
             slug=d['slug'];n=d['nationalPokedexNumber'];folder=f'{n:04d}_{slug}'
             models=[p for p in z.namelist() if p.startswith(f'assets/cobblemon/bedrock/pokemon/models/{folder}/') and p.endswith('.geo.json')]
             textures=[p for p in z.namelist() if p.startswith(f'assets/cobblemon/textures/pokemon/{folder}/') and p.endswith('.png')]
@@ -31,7 +31,7 @@ jobs:
             for p in z.namelist():
               if p.startswith(f'assets/cobblemon/bedrock/pokemon/posers/{folder}/') and p.endswith('.json'):
                 print('POSER_JSON',slug,p,z.read(p).decode())
-            print('ANIMATION_JSON',slug,json.dumps(anims))
+            print('ANIMATION_JSON',slug,json.dumps({k:v for k,v in anims.items() if any(t in k for t in ('ground_idle','ground_walk','ground_run'))}))
             for name,a in anims.items():
               if any(t in name for t in ('ground_','air_','idle','fly','walk','run','hover','float','swim')):
                 dynamic=[b for b,v in a.get('bones',{}).items() if 'math.' in json.dumps(v) or any(isinstance(x,dict) and len(x)>1 for x in v.values())]
