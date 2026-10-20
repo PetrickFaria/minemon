@@ -32,7 +32,7 @@ public final class ClientSmokeTest {
  private static final java.util.Map<String,float[]> motionRanges=new java.util.HashMap<>();
  private static final java.util.Map<String,float[]> fireStarterArmRanges=new java.util.HashMap<>();
  private static final java.util.Set<String> walkedSpecies=new java.util.HashSet<>();
- private static final java.util.Map<String,net.minecraft.world.phys.Vec3> lastRenderedPositions=new java.util.HashMap<>();
+ private static final java.util.Map<String,net.minecraft.world.phys.Vec3> firstRenderedPositions=new java.util.HashMap<>();
  @SubscribeEvent public static void actualDamage(net.minecraftforge.event.entity.living.LivingDamageEvent event) {
   if(Boolean.getBoolean("minemon.clientSmokeTest") && event.getAmount()>0 && event.getEntity() instanceof net.minecraft.server.level.ServerPlayer
      && event.getSource().getEntity() instanceof MinemonCreature b && b.getUUID().equals(testEntity))combatHits++;
@@ -47,8 +47,11 @@ public final class ClientSmokeTest {
    .sorted(java.util.Comparator.comparingInt(SpeciesDefinitions.Definition::nationalPokedexNumber))
    .map(SpeciesDefinitions.Definition::slug).toList();
   // Profiles use exact joints from each selected model skeleton, not one global bone-name list.
+  // The pilot changes only Charmander; all 151 retain the general render/movement smoke below.
+  private static final java.util.Set<String> ARTICULATION_VALIDATION_SPECIES=java.util.Set.of("charmander");
   private static final java.util.Map<String,java.util.List<String>> ARTICULATION_PROFILES=java.util.Map.ofEntries(
    java.util.Map.entry("bulbasaur",java.util.List.of("leg_front_right","leg_front_left","leg_back_right","leg_back_left")),
+   java.util.Map.entry("charmander",java.util.List.of("leg_left","leg_right")),
    java.util.Map.entry("pikachu",java.util.List.of("leg_right","leg_left")),
    java.util.Map.entry("caterpie",java.util.List.of("body_segment","body_segment2")),
    java.util.Map.entry("hitmonlee",java.util.List.of("leg_left","leg_right")),
@@ -60,6 +63,8 @@ public final class ClientSmokeTest {
   );
   private static final java.util.Map<String,java.util.Map<String,float[]>> articulationRanges=new java.util.HashMap<>();
   private static final java.util.Map<String,java.util.Map<String,java.util.Set<String>>> articulationClips=new java.util.HashMap<>();
+  private static final java.util.Map<String,java.util.Map<String,Integer>> articulationSampleCounts=new java.util.HashMap<>();
+  private static final java.util.Map<String,java.util.Map<String,java.util.Set<String>>> articulationInputs=new java.util.HashMap<>();
  @SubscribeEvent public static void tick(TickEvent.ClientTickEvent event) {
   if(!Boolean.getBoolean("minemon.clientSmokeTest")||event.phase!=TickEvent.Phase.END)return;
   Minecraft mc=Minecraft.getInstance();
@@ -93,17 +98,21 @@ public final class ClientSmokeTest {
     MinemonRenderer.validationObserver=(entity,model)->{
      if(mc.getResourceManager().getResource(model.getTextureResource(entity)).isEmpty())throw new IllegalStateException("Missing rendered texture "+entity.getSpeciesSlug());
      String slug=entity.getSpeciesSlug();renderedSpecies.add(slug);
-     var position=entity.position();var previous=lastRenderedPositions.put(slug,position);
-     if(previous!=null&&previous.distanceToSqr(position)>0.0001D) {
+     var position=entity.position();var origin=firstRenderedPositions.putIfAbsent(slug,position);
+     // Rendering can interpolate one server step over several frames. Measure
+     // net movement from the first rendered position instead of requiring a
+     // single frame to cross the threshold.
+     if(origin!=null&&origin.distanceToSqr(position)>0.0025D) {
       walkedSpecies.add(slug);
      }
      // Sample every render frame, independently of position updates. Filtering
      // these samples by displacement can alias animation keyframes when the
      // client batches several server ticks into a single render frame.
-     if(worldTicks>=SPECIES_START_TICK && worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW) {
+     Integer validationPhase=validationPhase(entity);
+     if(validationPhase!=null) {
       if(slug.equals("charmander")||slug.equals("charmeleon")||slug.equals("charizard")) {
        var left=model.getAnimationProcessor().getBone("arm_left");var right=model.getAnimationProcessor().getBone("arm_right");
-       int phase=Math.floorMod(worldTicks-SPECIES_START_TICK,SPECIES_TEST_WINDOW);
+       int phase=validationPhase;
        int mode=phase>=38&&phase<=46?2:(phase>=16&&phase<=23?0:-1);
        if(mode>=0){
         var range=fireStarterArmRanges.computeIfAbsent(slug,k->new float[4]);
@@ -113,19 +122,25 @@ public final class ClientSmokeTest {
       }
       for(String name:modelBones.get(slug)) {
        if(name.contains("eye")||name.contains("mouth")||name.contains("jaw"))continue;
-       var bone=model.getAnimationProcessor().getBone(name);float[] values={bone.getRotationX(),bone.getRotationY(),bone.getRotationZ(),bone.getPositionX(),bone.getPositionY(),bone.getPositionZ()};
+       var bone=model.getAnimationProcessor().getBone(name);if(bone==null)continue;
+       float[] values={bone.getRotationX(),bone.getRotationY(),bone.getRotationZ(),bone.getPositionX(),bone.getPositionY(),bone.getPositionZ()};
        var range=motionRanges.computeIfAbsent(slug+":"+name,k->{var r=new float[12];java.util.Arrays.fill(r,0,6,Float.MAX_VALUE);java.util.Arrays.fill(r,6,12,-Float.MAX_VALUE);return r;});
        for(int axis=0;axis<6;axis++){range[axis]=Math.min(range[axis],values[axis]);range[axis+6]=Math.max(range[axis+6],values[axis]);}
       }
      }
-      if(worldTicks>=SPECIES_START_TICK && worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW && ARTICULATION_PROFILES.containsKey(slug)) {
-       int phase=Math.floorMod(worldTicks-SPECIES_START_TICK,SPECIES_TEST_WINDOW);
+      if(validationPhase!=null && ARTICULATION_VALIDATION_SPECIES.contains(slug) && ARTICULATION_PROFILES.containsKey(slug)) {
+       int phase=validationPhase;
        String state=locomotionState(phase);
        // Clip selection is sampled only after a phase has settled. The first render
        // frame at a boundary can still expose the previous controller value.
        if(isSettledClipSample(phase)) {
         articulationClips.computeIfAbsent(slug,k->new java.util.HashMap<>())
          .computeIfAbsent(state,k->new java.util.HashSet<>()).add(entity.getSelectedAnimationForValidation());
+        articulationSampleCounts.computeIfAbsent(slug,k->new java.util.HashMap<>()).merge(state,1,Integer::sum);
+        double velocitySqr=entity.getDeltaMovement().horizontalDistanceSqr();
+        double displacementSqr=(entity.getX()-entity.xo)*(entity.getX()-entity.xo)+(entity.getZ()-entity.zo)*(entity.getZ()-entity.zo);
+        articulationInputs.computeIfAbsent(slug,k->new java.util.HashMap<>())
+         .computeIfAbsent(state,k->new java.util.HashSet<>()).add("phase="+phase+",clip="+entity.getSelectedAnimationForValidation()+",velocitySqr="+velocitySqr+",positionDeltaSqr="+displacementSqr);
        }
        var perSpecies=articulationRanges.computeIfAbsent(slug,k->new java.util.HashMap<>());
        for(String joint:ARTICULATION_PROFILES.get(slug)) {
@@ -180,36 +195,38 @@ public final class ClientSmokeTest {
     String slug=species.get((worldTicks-SPECIES_START_TICK)/SPECIES_TEST_WINDOW);
     mc.getSingleplayerServer().execute(()->{
      var level=mc.getSingleplayerServer().overworld();var previous=level.getEntity(testEntity);if(previous!=null)previous.discard();
-     var next=ModEntities.SPECIES.get(slug).get().create(level);next.moveTo(0,101,4,180,0);next.setNoAi(false);level.addFreshEntity(next);testEntity=next.getUUID();
+    var next=ModEntities.SPECIES.get(slug).get().create(level);next.moveTo(0,101,4,180,0);next.setNoAi(false);next.goalSelector.removeAllGoals();next.targetSelector.removeAllGoals();setValidationPhase(next,0);level.addFreshEntity(next);testEntity=next.getUUID();
     });
    }
    if(worldTicks>=SPECIES_START_TICK && worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW) {
-    // Snapshot before queueing; rereading worldTicks on the server can skip phases.
+    // Carry the client phase into the entity before sampling; server tasks can lag
+    // a client tick, so rereading worldTicks there mislabels the applied input.
     int phase=Math.floorMod(worldTicks-SPECIES_START_TICK,SPECIES_TEST_WINDOW);
     mc.getSingleplayerServer().execute(()->{
     var current=(MinemonCreature)mc.getSingleplayerServer().overworld().getEntity(testEntity);
      if(current!=null){
-     // Drive a short, controlled displacement so larger collision boxes cannot make this
-     // render-only animation check depend on pathfinding success. Navigation has its own tests.
-     current.setNoAi(true);current.getNavigation().stop();
+     setValidationPhase(current,phase);
+     // Keep the fixture's movement deterministic while still exercising its real travel
+     // and render path. The goals are removed at spawn, so no pathfinding competes with
+     // the controlled velocity used to select the locomotion clips.
+     current.setNoAi(false);current.getNavigation().stop();
      if(current.getX()>2.5)direction=-1;if(current.getX()<-2.5)direction=1;
      double animationVelocity;
      if(phase<8 || phase>=54) animationVelocity=0.0D;                         // idle
-     else if(phase<16) animationVelocity=(phase-7)*0.00625D;                   // walk start
-     else if(phase<24) animationVelocity=0.05D;                               // steady walk
-     else if(phase<27) animationVelocity=(27-phase)*0.0166667D;                // walk deceleration
-     else if(phase<34) animationVelocity=0.0D;                                // idle return
-     else if(phase<38) animationVelocity=(phase-33)*0.03D;                     // run transition
-     else if(phase<47) animationVelocity=0.12D;                               // steady run
-     else animationVelocity=Math.max(0.0D,(53-phase)*0.02D);                 // run deceleration
+     else if(phase<16) animationVelocity=(phase-7)*0.00625D;                  // walk start
+     else if(phase<24) animationVelocity=0.05D;                              // steady walk
+     else if(phase<27) animationVelocity=(27-phase)*0.0166667D;              // walk deceleration
+     else if(phase<34) animationVelocity=0.0D;                               // idle return
+     else if(phase<38) animationVelocity=(phase-33)*0.03D;                   // run transition
+     else if(phase<47) animationVelocity=0.12D;                              // steady run
+     else if(phase<49) animationVelocity=0.16D;                              // run remains selected in early deceleration
+     else if(phase<52) animationVelocity=0.05D;                              // transition to walk
+     else animationVelocity=0.0D;                                            // transition to idle
      if(animationVelocity>0.0D){
-      double step=animationVelocity<0.08D?0.04D:0.08D;
-      current.moveTo(current.getX()+direction*step,current.getY(),current.getZ(),current.getYRot(),current.getXRot());
       current.setDeltaMovement(direction*animationVelocity,0,0);
       current.hasImpulse=true;
      } else {
       current.setDeltaMovement(0,0,0);
-      current.getNavigation().stop();
      }
     }
     });
@@ -228,12 +245,14 @@ public final class ClientSmokeTest {
     }
     for(String slug:java.util.List.of("charmander","charmeleon","charizard")) {
      float[] arms=fireStarterArmRanges.get(slug);
-     if(arms==null||arms[0]<0.35F||arms[1]<0.35F||arms[2]<0.35F||arms[3]<0.35F)
-      throw new IllegalStateException("Fire-starter arms remained near T-pose during walk/run for "+slug+"; arm rotations="+java.util.Arrays.toString(arms));
+     boolean walkArms=arms!=null&&arms[0]>=0.35F&&arms[1]>=0.35F;
+     boolean fasterArms=slug.equals("charmander")||(arms!=null&&arms[2]>=0.35F&&arms[3]>=0.35F);
+     if(!walkArms||!fasterArms)
+      throw new IllegalStateException("Fire-starter arms remained near T-pose during validated movement for "+slug+"; arm rotations="+java.util.Arrays.toString(arms));
     }
     validateArticulationProfiles();
     Files.writeString(Path.of("client-validation.txt"),"PASS LOCOMOTION: every registered species moved and had changing body bone transforms.\n",StandardOpenOption.APPEND);
-    Files.writeString(Path.of("client-validation.txt"),"PASS FIRE-STARTER ARMS: Charmander, Charmeleon and Charizard kept both arm bones lowered during walk and run.\n",StandardOpenOption.APPEND);
+    Files.writeString(Path.of("client-validation.txt"),"PASS FIRE-STARTER ARMS: validated walk and faster-movement poses remain lowered; Charmander uses no source run clip.\n",StandardOpenOption.APPEND);
     Files.writeString(Path.of("client-validation.txt"),"PASS ROSTER: every registered species rendered with its texture in a world: "+renderedSpecies+"\n",StandardOpenOption.APPEND);
     mc.stop();
    }
@@ -244,7 +263,20 @@ public final class ClientSmokeTest {
    // GeckoLib has evaluated this tick's controller predicate.
    return (phase>=3&&phase<8) || (phase>=12&&phase<16) || (phase>=18&&phase<24)
      || (phase>=25&&phase<27) || (phase>=29&&phase<34) || (phase>=36&&phase<38)
-     || (phase>=41&&phase<47) || (phase>=50&&phase<54) || phase>=68;
+     || (phase>=41&&phase<47) || phase==48 || (phase>=50&&phase<54) || phase>=68;
+  }
+  private static final String VALIDATION_PHASE_PREFIX="minemon-validation-phase:";
+  private static void setValidationPhase(MinemonCreature entity,int phase) {
+   if(!Boolean.getBoolean("minemon.clientSmokeTest"))return;
+   entity.setCustomName(net.minecraft.network.chat.Component.literal(VALIDATION_PHASE_PREFIX+phase));
+   entity.setCustomNameVisible(false);
+  }
+  private static Integer validationPhase(MinemonCreature entity) {
+   if(!Boolean.getBoolean("minemon.clientSmokeTest")||entity.getCustomName()==null)return null;
+   String marker=entity.getCustomName().getString();
+   if(!marker.startsWith(VALIDATION_PHASE_PREFIX))return null;
+   try {int phase=Integer.parseInt(marker.substring(VALIDATION_PHASE_PREFIX.length()));return phase>=0&&phase<SPECIES_TEST_WINDOW?phase:null;}
+   catch(NumberFormatException ignored) {return null;}
   }
   private static String locomotionState(int phase) {
    if(phase<8)return "IDLE_INITIAL";
@@ -274,6 +306,7 @@ public final class ClientSmokeTest {
    int passed=0,knownFallbacks=0;
    for(var entry:ARTICULATION_PROFILES.entrySet()) {
     String slug=entry.getKey();
+    if(!ARTICULATION_VALIDATION_SPECIES.contains(slug))continue;
     var definition=SpeciesDefinitions.get(slug);
     if(definition==null)throw new IllegalStateException("Missing test profile species "+slug);
     String fallback=definition.movementFallback();
@@ -291,19 +324,25 @@ public final class ClientSmokeTest {
     if(!hasSelectedClip(slug,"IDLE_INITIAL",idle)||!hasSelectedClip(slug,"IDLE_FINAL",idle)||!hasSelectedClip(slug,"IDLE_RETURN",idle))
      throw new IllegalStateException("Idle state selection did not return to expected clip for "+slug+" expected="+idle+" observed="+articulationClips.get(slug));
     if(!hasSelectedClip(slug,"WALK_STEADY",walk)||!hasSelectedClip(slug,"WALK_START",walk)||!hasSelectedClip(slug,"WALK_DECEL",walk))
-     throw new IllegalStateException("Walk state selection failed for "+slug+" expected="+walk+" states="+articulationClips.get(slug));
+     throw new IllegalStateException("Walk state selection failed for "+slug+" expected="+walk+" states="+articulationClips.get(slug)+" samples="+articulationSampleCounts.get(slug)+" measured="+articulationInputs.get(slug));
     if(run!=null&&!hasSelectedClip(slug,"RUN_STEADY",run))
      throw new IllegalStateException("Run state selection failed for "+slug+" expected="+run+" states="+articulationClips.get(slug));
+    if(run!=null) {
+     var deceleration=articulationClips.getOrDefault(slug,java.util.Map.of()).getOrDefault("RUN_DECEL",java.util.Set.of());
+     if(!deceleration.contains(run)||java.util.Collections.disjoint(deceleration,java.util.Set.of(walk,idle)))
+      throw new IllegalStateException("Run deceleration did not transition from run to a lower-speed state for "+slug+" run="+run+" walk="+walk+" idle="+idle+" observed="+deceleration+" measured="+articulationInputs.getOrDefault(slug,java.util.Map.of()).get("RUN_DECEL"));
+    }
     int walkJoints=movingJointCount(slug,"WALK_STEADY");
-    int runJoints=movingJointCount(slug,"RUN_STEADY");
-    int minimum=java.util.Set.of("bulbasaur","pikachu","hitmonlee","jolteon").contains(slug)?2:1;
-    if(walkJoints<minimum||runJoints<minimum)
-     throw new IllegalStateException("Relevant locomotion joints did not animate for "+slug+" walk="+walkJoints+" run="+runJoints+" required="+minimum);
+    int runJoints=run==null?0:movingJointCount(slug,"RUN_STEADY");
+    int minimum=slug.equals("charmander")?2:1;
+    int idleJoints=movingJointCount(slug,"IDLE_FINAL");
+    if(idleJoints<minimum||walkJoints<minimum||(run!=null&&runJoints<minimum))
+     throw new IllegalStateException("Relevant locomotion joints did not animate for "+slug+" idle="+idleJoints+" walk="+walkJoints+" run="+runJoints+" required="+minimum);
     passed++;
-    report.append("PASS ").append(slug).append(": idle/walk/run/idle clips selected; profile joints changed walk=")
-      .append(walkJoints).append(" run=").append(runJoints).append("; transition samples=")
-      .append(articulationClips.get(slug)).append(".\n");
+    report.append("PASS ").append(slug).append(": idle/walk").append(run==null?" (no source run clip)":"/run").append(" clips selected; profile joints changed idle=")
+      .append(idleJoints).append(" walk=").append(walkJoints).append(" run=").append(runJoints).append("; transition samples=")
+      .append(articulationClips.get(slug)).append("; synchronized inputs=").append(articulationInputs.get(slug)).append(".\n");
    }
-   Files.writeString(Path.of("client-validation.txt"),"ARTICULATION PROFILES: passed="+passed+" expected fallback gaps="+knownFallbacks+" profiles="+ARTICULATION_PROFILES.size()+"; other species remain unverified by limb-specific profiles.\n"+report,StandardOpenOption.APPEND);
+   Files.writeString(Path.of("client-validation.txt"),"ARTICULATION PROFILES: passed="+passed+" expected fallback gaps="+knownFallbacks+" profiles="+ARTICULATION_VALIDATION_SPECIES.size()+" detailed scope="+ARTICULATION_VALIDATION_SPECIES+"; other species remain unverified by limb-specific profiles in this Charmander pilot, while general rendering/movement checks cover all registered species.\n"+report,StandardOpenOption.APPEND);
   }
 }

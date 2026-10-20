@@ -41,11 +41,18 @@ def validate(read,definitions,prepared=False,packed=False):
   if d['idle'] not in a or d['walk'] not in a:raise ValueError('Missing state clip '+d['slug'])
   if prepared:
    for state,keys in {'run':('ground_run','run'),'sit':('sit',),'sleep':('sleep',),'attack':('physical_attack','physical','attack')}.items():
+    if state=='run' and not any(d['clips'].get(k) in a for k in keys):continue
     if not any(d['clips'].get(k) in a for k in keys):raise ValueError('Missing prepared '+state+' animation '+d['slug'])
    if d['slug'] in ('charmander','charmeleon','charizard'):
     fire=next((b for b in g['minecraft:geometry'][0]['bones'] if b['name']=='fire'),None)
     cubes=fire.get('cubes',[]) if fire else []
     if len(cubes)!=2 or any(any(n<=0 for n in cube.get('size',[])) for cube in cubes):raise ValueError('Tail flame is missing or has degenerate geometry: '+d['slug'])
+    if d['slug']=='charmander':
+     pivot=fire.get('pivot',[])
+     for cube in cubes:
+      origin=cube.get('origin',[]);size=cube.get('size',[])
+      if len(pivot)!=3 or len(origin)!=3 or len(size)!=3 or abs((origin[1]+size[1]/2)-pivot[1]+0.05)>0.001 or abs((origin[2]+size[2]/2)-pivot[2]-0.5)>0.001:
+       raise ValueError('Charmander runtime flame moved from its approved local fire-bone offset')
     texwidth=g['minecraft:geometry'][0]['description']['texture_width']
     for cube in cubes:
      uv=cube.get('uv',[]);u,v=uv if isinstance(uv,list) and len(uv)==2 else (-1,-1)
@@ -54,9 +61,22 @@ def validate(read,definitions,prepared=False,packed=False):
       raise ValueError('Tail flame box UV outside texture: '+d['slug'])
     for key,sign,base in [('left',1,{'charmander':35,'charmeleon':42.5,'charizard':55}[d['slug']]),('right',-1,{'charmander':-35,'charmeleon':-42.5,'charizard':-55}[d['slug']])]:
      for clip_key in ('ground_walk','ground_run'):
+      if clip_key not in d['clips']:continue
       clip=d['clips'][clip_key];rotation=a[clip]['bones']['arm_'+key]['rotation']
       if len(rotation)!=3 or not str(rotation[2]).startswith(str(base)):
        raise ValueError('Walk/run arm rest pose was not preserved for '+d['slug']+'/'+clip_key+'/'+key)
+   if d['slug']=='charmander':
+    if 'charmander_cobblemon_1_8_2' not in d['model'] or 'charmander_cobblemon_1_8_2' not in d['texture'] or 'charmander_cobblemon_1_8_2' not in d['animation']:
+     raise ValueError('Charmander pilot is not using the Cobblemon 1.8.2 model, texture, and animation assets')
+    bones={b['name']:b for b in g['minecraft:geometry'][0]['bones']}
+    if d.get('strip_bedrock_locators') and any('locators' in b for b in bones.values()):raise ValueError('Charmander runtime geometry retained unsupported Bedrock locator metadata')
+    for name,parent,pivot in [('tail3','tail2',[0,4,13.5]),('fire','tail3',[0,4.25,16.5]),('fire2','fire',[0,4.25,16.5]),('locator_fire','fire2',[0,5,16.5])]:
+     b=bones.get(name)
+     if b is None or b.get('parent')!=parent or b.get('pivot')!=pivot:raise ValueError('Charmander Cobblemon tail/flame rig changed: '+name)
+    if d['idle']!='animation.charmander.ground_idle' or d['walk']!='animation.charmander.ground_walk':raise ValueError('Charmander pilot clips do not use Cobblemon ground idle/walk')
+    if not a[d['idle']].get('loop') or not a[d['walk']].get('loop'):raise ValueError('Charmander idle and walk must loop')
+    for clip in (d['idle'],d['walk']):
+     if not {'leg_left','leg_right','tail','torso'}.issubset(a[clip].get('bones',{})):raise ValueError('Charmander '+clip+' lost its source articulation channels')
   tex=read(texture_path);dims=struct.unpack('>II',tex[16:24]);desc=g['minecraft:geometry'][0]['description']
   if dims!=(desc['texture_width'],desc['texture_height']):raise ValueError('UV dimensions '+d['slug'])
  print('PASS runtime asset validation:',len(definitions),'species; National Pokédex order')

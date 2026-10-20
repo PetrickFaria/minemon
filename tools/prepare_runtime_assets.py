@@ -63,7 +63,7 @@ def build_runtime_clips(data,geo,d):
  # roughly zero, unlike the inward rotations in each species' idle clip.
  # Keep the original shoulder swing channels and restore the model-specific
  # inward pose with a restrained opposite-phase gait swing.
- if d.get('slug') in ('charmander','charmeleon','charizard') and walk_name in animations:
+ if d.get('slug') in ('charmander','charmeleon','charizard') and not d.get('preserve_arm_pose',False) and walk_name in animations:
   rest={'charmander':35.0,'charmeleon':42.5,'charizard':55.0}[d['slug']]
   swing={'charmander':5.0,'charmeleon':4.0,'charizard':5.0}[d['slug']]
   frequency={'charmander':'90*6','charmeleon':'90*4.5','charizard':'90*3'}[d['slug']]
@@ -86,6 +86,22 @@ def build_runtime_clips(data,geo,d):
    if isinstance(fire,dict):
     fire['rotation']=[0,0,0]
     fire.pop('position',None)
+
+def flatten_bedrock_keyframes(data):
+ # GeckoLib 3.1.40 does not deserialize Bedrock pre/post + lerp_mode objects.
+ # Keep each source keyframe's post value (or pre when it has no post) and let
+ # GeckoLib interpolate between those unchanged time/value anchors linearly.
+ for animation in data.get('animations',{}).values():
+  for channels in animation.get('bones',{}).values():
+   for channel,value in list(channels.items()):
+    if not isinstance(value,dict):continue
+    frames={}
+    for timestamp,keyframe in value.items():
+     if isinstance(keyframe,dict):
+      keyframe=keyframe.get('post',keyframe.get('pre',keyframe.get('vector',keyframe)))
+      if isinstance(keyframe,dict):keyframe=keyframe.get('vector',keyframe)
+     frames[timestamp]=keyframe
+    channels[channel]=frames
 
 def png_chunks(data):
  if data[:8]!=b'\x89PNG\r\n\x1a\n': raise ValueError('Not a PNG texture')
@@ -164,11 +180,18 @@ def prepare_tail_flame(root,d):
  description=geo['minecraft:geometry'][0]['description'];description['texture_width']=new_w
  bones=geo['minecraft:geometry'][0]['bones'];fire=next((b for b in bones if b['name']=='fire'),None)
  if fire is None:raise ValueError(slug+' model has no animated fire bone')
+ if d.get('strip_bedrock_locators'):
+  # GeckoLib 3.1.40's geo deserializer has no Bedrock locator support. Minemon
+  # uses the attached flame mesh instead, so remove only unsupported metadata
+  # from the generated runtime copy while retaining the original source JSON.
+  for bone in bones:bone.pop('locators',None)
  # Replace the original zero-width / invalid-UV planes with two crossed,
  # shallow textured cuboids. Box UV arrays are the most consistently
  # supported format across GeckoLib 3 exporters; the back sprite occupies
  # the box-UV south face in the generated atlas.
- y0,z0={'charmander':(5.7,15.5),'charmeleon':(8.25,18.0),'charizard':(7.75,37.5)}[slug]
+ # The 1.8.2 Charmander fire pivot moved with its new tail rig. Keep the approved
+ # flame center at the same local offset from the fire pivot: (-0.05,+0.5).
+ y0,z0={'charmander':(4.2,17.0),'charmeleon':(8.25,18.0),'charizard':(7.75,37.5)}[slug]
  y0-=fh/2
  cube={'origin':[-fw/2,y0,z0-depth/2],'size':[fw,fh,depth],'uv':[x-depth,y-depth]}
  crossed={'origin':[-fw/2,y0,z0-depth/2],'size':[fw,fh,depth],'pivot':[0,y0+fh/2,z0],
@@ -192,6 +215,8 @@ for p in (root/'assets/minemon_gen1/animations').rglob('*.animation.json'):
   return v
  data=normalize(data)
  definition=definitions.get(str(p.relative_to(root)),{})
+ if definition.get('geckolib3_bedrock_keyframes'):
+  flatten_bedrock_keyframes(data)
  for name in definition.get('excluded_clips',[]): data.get('animations',{}).pop(name,None)
  if definition:
   # Some source clips contain channels for bones omitted from the selected
