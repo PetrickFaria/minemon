@@ -32,4 +32,32 @@ public class MolangCompatibilityTest {
   parser.setValue("query.anim_time",0.125);assertTrue("Body channel must change",Math.abs(body.get()-first)>0.1);
  }
 
+ @Test public void cobblemon182CharmanderIdleAndWalkLoadAndAnimate() throws Exception {
+  var definition=br.com.petrickfaria.minemon.entity.SpeciesDefinitions.get("charmander");
+  assertTrue("Pilot must load the Cobblemon 1.8.2 model path",definition.model().contains("charmander_cobblemon_1_8_2"));
+  assertTrue("Pilot must load the Cobblemon 1.8.2 texture path",definition.texture().contains("charmander_cobblemon_1_8_2"));
+  var path=java.nio.file.Path.of(System.getProperty("minemon.testResources"),"assets/minemon_gen1/animations/charmander_cobblemon_1_8_2/charmander.animation.json");
+  var animations=com.google.gson.JsonParser.parseReader(java.nio.file.Files.newBufferedReader(path)).getAsJsonObject().getAsJsonObject("animations");
+  var idle=animations.getAsJsonObject("animation.charmander.ground_idle");
+  var walk=animations.getAsJsonObject("animation.charmander.ground_walk");
+  assertNotNull("Cobblemon idle clip is present",idle);
+  assertNotNull("Cobblemon walk clip is present",walk);
+  assertTrue("Idle loops",idle.get("loop").getAsBoolean());
+  assertTrue("Walk loops",walk.get("loop").getAsBoolean());
+  var parser=new MolangParser();
+  var loadedIdle=software.bernie.geckolib3.util.json.JsonAnimationUtils.deserializeJsonToAnimation(
+    new java.util.AbstractMap.SimpleImmutableEntry<String,com.google.gson.JsonElement>("animation.charmander.ground_idle",idle),parser);
+  var loadedWalk=software.bernie.geckolib3.util.json.JsonAnimationUtils.deserializeJsonToAnimation(
+    new java.util.AbstractMap.SimpleImmutableEntry<String,com.google.gson.JsonElement>("animation.charmander.ground_walk",walk),parser);
+  assertEquals("Idle duration uses Cobblemon's four second cycle",80.0,loadedIdle.animationLength,0.0);
+  assertEquals("Walk duration uses Cobblemon's one second cycle",20.0,loadedWalk.animationLength,0.0);
+  var torso=idle.getAsJsonObject("bones").getAsJsonObject("torso").getAsJsonArray("rotation").get(0).getAsString();
+  assertFalse("Runtime conversion binds Bedrock q aliases",torso.contains("q.anim_time"));
+  var breath=parser.parseExpression(torso);
+  parser.setValue("query.anim_time",0.0);double first=breath.get();
+  parser.setValue("query.anim_time",0.25);
+  assertTrue("Idle torso channel changes over time",Math.abs(breath.get()-first)>0.1);
+  assertTrue("Walk clip actuates leg joints",walk.getAsJsonObject("bones").has("leg_left")&&walk.getAsJsonObject("bones").has("leg_right"));
+ }
+
 }
