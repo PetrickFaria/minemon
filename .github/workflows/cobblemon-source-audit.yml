@@ -1,4 +1,4 @@
-name: Audit Cobblemon source for batch 4
+name: Audit remaining batch 4 procedural source
 on:
   push:
     paths: ['.github/workflows/cobblemon-source-audit.yml']
@@ -15,25 +15,16 @@ jobs:
       - name: Inspect exact audited source archive
         run: |
           python3 - <<'PY'
-          import urllib.request,hashlib,zipfile,json,io
+          import urllib.request,hashlib,zipfile,json,io,subprocess
+          from pathlib import Path
           url='https://cdn.modrinth.com/data/MdwFAVRL/versions/GJ2a1b8O/Cobblemon-fabric-1.8.2%2B1.21.1.jar'
           raw=urllib.request.urlopen(url).read()
           assert hashlib.sha256(raw).hexdigest()=='cae8ac328b61354fbe415208b8c6ffc12e7155094d0a87082e85e7914fb380c2'
           z=zipfile.ZipFile(io.BytesIO(raw))
-          defs=json.load(open('src/main/resources/data/minemon_gen1/runtime_species.json'))
-          for d in defs[30:40]:
-            slug=d['slug'];n=d['nationalPokedexNumber'];folder=f'{n:04d}_{slug}'
-            models=[p for p in z.namelist() if p.startswith(f'assets/cobblemon/bedrock/pokemon/models/{folder}/') and p.endswith('.geo.json')]
-            textures=[p for p in z.namelist() if p.startswith(f'assets/cobblemon/textures/pokemon/{folder}/') and p.endswith('.png')]
-            ap=f'assets/cobblemon/bedrock/pokemon/animations/{folder}/{slug}.animation.json'
-            anims=json.loads(z.read(ap))['animations']
-            print('SOURCE',n,slug,'MODELS',models,'TEXTURES',textures)
-            for p in z.namelist():
-              if p.startswith(f'assets/cobblemon/bedrock/pokemon/posers/{folder}/') and p.endswith('.json'):
-                print('POSER_JSON',slug,p,z.read(p).decode())
-            print('ANIMATION_JSON',slug,json.dumps({k:v for k,v in anims.items() if any(t in k for t in ('ground_idle','ground_walk','ground_run'))}))
-            for name,a in anims.items():
-              if any(t in name for t in ('ground_','air_','idle','fly','walk','run','hover','float','swim')):
-                dynamic=[b for b,v in a.get('bones',{}).items() if 'math.' in json.dumps(v) or any(isinstance(x,dict) and len(x)>1 for x in v.values())]
-                print('CLIP',slug,name,'DURATION',a.get('animation_length'),'DYNAMIC',dynamic,'BONES',list(a.get('bones',{})))
+          Path('/tmp/cobblemon-reference.jar').write_bytes(raw)
+          for p in z.namelist():
+            if p.endswith('.class') and any(s in p.lower() for s in ('nidoqueen','nidorino')):
+              print('SOURCE_CLASS',p,flush=True)
+              result=subprocess.run(['javap','-c','-p','-classpath','/tmp/cobblemon-reference.jar',p[:-6].replace('/','.')],capture_output=True,text=True,check=True)
+              print(result.stdout,flush=True)
           PY
