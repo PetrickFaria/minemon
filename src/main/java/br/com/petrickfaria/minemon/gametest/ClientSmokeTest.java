@@ -193,7 +193,7 @@ public final class ClientSmokeTest {
     String slug=species.get((worldTicks-SPECIES_START_TICK)/SPECIES_TEST_WINDOW);
     mc.getSingleplayerServer().execute(()->{
      var level=mc.getSingleplayerServer().overworld();var previous=level.getEntity(testEntity);if(previous!=null)previous.discard();
-    var next=ModEntities.SPECIES.get(slug).get().create(level);next.moveTo(0,101,4,180,0);next.setNoAi(false);setValidationPhase(next,0);level.addFreshEntity(next);testEntity=next.getUUID();
+    var next=ModEntities.SPECIES.get(slug).get().create(level);next.moveTo(0,101,4,180,0);next.setNoAi(false);next.goalSelector.removeAllGoals();next.targetSelector.removeAllGoals();setValidationPhase(next,0);level.addFreshEntity(next);testEntity=next.getUUID();
     });
    }
    if(worldTicks>=SPECIES_START_TICK && worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW) {
@@ -204,27 +204,27 @@ public final class ClientSmokeTest {
     var current=(MinemonCreature)mc.getSingleplayerServer().overworld().getEntity(testEntity);
      if(current!=null){
      setValidationPhase(current,phase);
-     // Drive a short, controlled displacement so larger collision boxes cannot make this
-     // render-only animation check depend on pathfinding success. The noAI fixture is moved
-     // directly with steps sized to exercise the walk and run selector thresholds.
-     current.setNoAi(true);current.getNavigation().stop();
+     // Keep the fixture's movement deterministic while still exercising its real travel
+     // and render path. The goals are removed at spawn, so no pathfinding competes with
+     // the controlled velocity used to select the locomotion clips.
+     current.setNoAi(false);current.getNavigation().stop();
      if(current.getX()>2.5)direction=-1;if(current.getX()<-2.5)direction=1;
-     double movementStep;
-     if(phase<8 || phase>=54) movementStep=0.0D;                              // idle
-     else if(phase<27) movementStep=0.02D;                                   // walk, below the run threshold
-     else if(phase<34) movementStep=0.0D;                                    // idle return
-     else if(phase<36) movementStep=0.02D;                                   // run transition
-     else if(phase<38) movementStep=0.06D;                                   // enter run
-     else if(phase<52) movementStep=0.08D;                                   // run and early deceleration
-     else movementStep=0.02D;                                                // finish deceleration at walk speed
-     current.setDeltaMovement(0,0,0);
-     if(movementStep>0.0D){
-      // noAI disables the mob's normal travel step. Move the fixture explicitly
-      // once per server update so rendered displacement and selector thresholds
-      // agree; adding velocity here would apply a second displacement.
-      current.moveTo(current.getX()+direction*movementStep,current.getY(),current.getZ(),current.getYRot(),current.getXRot());
+     double animationVelocity;
+     if(phase<8 || phase>=54) animationVelocity=0.0D;                         // idle
+     else if(phase<16) animationVelocity=(phase-7)*0.00625D;                  // walk start
+     else if(phase<24) animationVelocity=0.05D;                              // steady walk
+     else if(phase<27) animationVelocity=(27-phase)*0.0166667D;              // walk deceleration
+     else if(phase<34) animationVelocity=0.0D;                               // idle return
+     else if(phase<38) animationVelocity=(phase-33)*0.03D;                   // run transition
+     else if(phase<47) animationVelocity=0.12D;                              // steady run
+     else if(phase<49) animationVelocity=0.16D;                              // run remains selected in early deceleration
+     else if(phase<52) animationVelocity=0.05D;                              // transition to walk
+     else animationVelocity=0.0D;                                            // transition to idle
+     if(animationVelocity>0.0D){
+      current.setDeltaMovement(direction*animationVelocity,0,0);
+      current.hasImpulse=true;
      } else {
-      current.getNavigation().stop();
+      current.setDeltaMovement(0,0,0);
      }
     }
     });
@@ -261,7 +261,7 @@ public final class ClientSmokeTest {
    // GeckoLib has evaluated this tick's controller predicate.
    return (phase>=3&&phase<8) || (phase>=12&&phase<16) || (phase>=18&&phase<24)
      || (phase>=25&&phase<27) || (phase>=29&&phase<34) || (phase>=36&&phase<38)
-     || (phase>=41&&phase<47) || (phase>=50&&phase<54) || phase>=68;
+     || (phase>=41&&phase<47) || phase==48 || (phase>=50&&phase<54) || phase>=68;
   }
   private static final String VALIDATION_PHASE_PREFIX="minemon-validation-phase:";
   private static void setValidationPhase(MinemonCreature entity,int phase) {
