@@ -117,7 +117,7 @@ for d in defs[start-1:end]:
   adapted=copy.deepcopy(animations[idle]);adapted['loop']=True;adapted['animation_length']=4.0
   frequency=720*period/0.6662
   for joint,sign in signs.items():
-   assert joint in bones
+   assert joint in bones,(slug,joint,sorted(bones))
    channel=adapted.setdefault('bones',{}).setdefault(joint,{})
    rotation=channel.get('rotation',[0,0,0]);assert isinstance(rotation,list) and len(rotation)==3
    rotation[0]=f'({rotation[0]})+({sign*30*amplitude:.6f})*math.cos(q.anim_time*{frequency:.6f})'
