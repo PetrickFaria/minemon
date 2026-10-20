@@ -61,6 +61,7 @@ for d in defs[start-1:end]:
  target=R/lp;target.parent.mkdir(parents=True,exist_ok=True);target.write_bytes(z.read(license))
  geo=json.loads(z.read(model))['minecraft:geometry'][0];bones={b['name'] for b in geo['bones']}
  animations=json.loads(z.read(anim))['animations']
+ print('SOURCE_EVENTS',slug,json.dumps({name:{k:v for k,v in a.items() if k in ('sound_effects','particle_effects')} for name,a in animations.items() if any(k in a for k in ('sound_effects','particle_effects'))}),flush=True)
  names={name.rsplit('.',1)[-1]:name for name in animations if name.startswith(f'animation.{slug}.')}
  d.update(paths);d['licenses']=list(dict.fromkeys(d.get('licenses',[])+[lp]))
  d['clips']=dict(names);d['excluded_clips']=[]
