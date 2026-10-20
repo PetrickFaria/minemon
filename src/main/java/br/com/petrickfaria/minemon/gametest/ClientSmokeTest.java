@@ -79,6 +79,8 @@ public final class ClientSmokeTest {
    "wartortle",java.util.List.of("arm_left","arm_right","torso")
   );
   private static java.util.List<String> profileJoints(String slug,String state) {
+   // Native Blastoise run retracts its limbs and spins the shell/body.
+   if(slug.equals("blastoise") && state.startsWith("RUN_"))return java.util.List.of("body","body2");
    return state.startsWith("IDLE_") && IDLE_PROFILES.containsKey(slug)
     ? IDLE_PROFILES.get(slug) : ARTICULATION_PROFILES.getOrDefault(slug,java.util.List.of());
   }
