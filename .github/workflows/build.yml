@@ -76,9 +76,9 @@ jobs:
           jar tf "$jar_file" | grep -Fx 'br/com/petrickfaria/minemon/Minemon.class'
           jar tf "$jar_file" | grep -Fx 'data/minemon/species_catalog.json'
           jar tf "$jar_file" | grep -Fx 'data/minemon_gen1/pokedex.json'
-          jar tf "$jar_file" | grep -Fx 'assets/minemon_gen1/geo/bulbasaur/bulbasaur.geo.json'
-          jar tf "$jar_file" | grep -Fx 'assets/minemon_gen1/textures/pokemon/bulbasaur/bulbasaur.png'
-          jar tf "$jar_file" | grep -Fx 'assets/minemon_gen1/animations/bulbasaur/bulbasaur.animation.json'
+          jar tf "$jar_file" | grep -Fx 'assets/minemon_gen1/geo/bulbasaur_cobblemon_1_8_2/bulbasaur.geo.json'
+          jar tf "$jar_file" | grep -Fx 'assets/minemon_gen1/textures/pokemon/bulbasaur_cobblemon_1_8_2/bulbasaur.png'
+          jar tf "$jar_file" | grep -Fx 'assets/minemon_gen1/animations/bulbasaur_cobblemon_1_8_2/bulbasaur.animation.json'
           jar tf "$jar_file" | grep -Fx 'assets/minemon_gen1/models/item/bulbasaur_spawn_egg.json'
           python3 tools/verify_runtime.py "$jar_file"
           unzip -p "$jar_file" META-INF/mods.toml | grep -F 'modId="minemon_gen1"'
