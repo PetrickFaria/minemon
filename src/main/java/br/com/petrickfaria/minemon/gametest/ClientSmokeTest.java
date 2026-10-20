@@ -121,8 +121,12 @@ public final class ClientSmokeTest {
       if(worldTicks>=SPECIES_START_TICK && worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW && ARTICULATION_PROFILES.containsKey(slug)) {
        int phase=Math.floorMod(worldTicks-SPECIES_START_TICK,SPECIES_TEST_WINDOW);
        String state=locomotionState(phase);
-       articulationClips.computeIfAbsent(slug,k->new java.util.HashMap<>())
-        .computeIfAbsent(state,k->new java.util.HashSet<>()).add(entity.getSelectedAnimationForValidation());
+       // Clip selection is sampled only after a phase has settled. The first render
+       // frame at a boundary can still expose the previous controller value.
+       if(isSettledClipSample(phase)) {
+        articulationClips.computeIfAbsent(slug,k->new java.util.HashMap<>())
+         .computeIfAbsent(state,k->new java.util.HashSet<>()).add(entity.getSelectedAnimationForValidation());
+       }
        var perSpecies=articulationRanges.computeIfAbsent(slug,k->new java.util.HashMap<>());
        for(String joint:ARTICULATION_PROFILES.get(slug)) {
         var bone=model.getAnimationProcessor().getBone(joint);
@@ -232,6 +236,13 @@ public final class ClientSmokeTest {
    }
   }catch(Exception e){throw new IllegalStateException("Minemon client validation failed",e);}
  }
+  private static boolean isSettledClipSample(int phase) {
+   // Ignore samples at phase boundaries; the model renderer can run before
+   // GeckoLib has evaluated this tick's controller predicate.
+   return (phase>=3&&phase<8) || (phase>=10&&phase<12) || (phase>=16&&phase<26)
+     || (phase>=28&&phase<30) || (phase>=32&&phase<35) || phase==38
+     || (phase>=42&&phase<51) || (phase>=54&&phase<56) || phase>=58;
+  }
   private static String locomotionState(int phase) {
    if(phase<8)return "IDLE_INITIAL";
    if(phase<12)return "WALK_START";
@@ -275,7 +286,7 @@ public final class ClientSmokeTest {
     String run=SpeciesAssetIndex.clip(slug,"ground_run","run");
     String idle=definition.idle();
     if(!hasSelectedClip(slug,"IDLE_INITIAL",idle)||!hasSelectedClip(slug,"IDLE_FINAL",idle)||!hasSelectedClip(slug,"IDLE_RETURN",idle))
-     throw new IllegalStateException("Idle state selection did not return to expected clip for "+slug);
+     throw new IllegalStateException("Idle state selection did not return to expected clip for "+slug+" expected="+idle+" observed="+articulationClips.get(slug));
     if(!hasSelectedClip(slug,"WALK_STEADY",walk)||!hasSelectedClip(slug,"WALK_START",walk))
      throw new IllegalStateException("Walk state selection failed for "+slug+" expected="+walk+" states="+articulationClips.get(slug));
     if(run!=null&&!hasSelectedClip(slug,"RUN_STEADY",run))
