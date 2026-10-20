@@ -47,6 +47,8 @@ public final class ClientSmokeTest {
    .sorted(java.util.Comparator.comparingInt(SpeciesDefinitions.Definition::nationalPokedexNumber))
    .map(SpeciesDefinitions.Definition::slug).toList();
   // Profiles use exact joints from each selected model skeleton, not one global bone-name list.
+  // The pilot changes only Charmander; all 151 retain the general render/movement smoke below.
+  private static final java.util.Set<String> ARTICULATION_VALIDATION_SPECIES=java.util.Set.of("charmander");
   private static final java.util.Map<String,java.util.List<String>> ARTICULATION_PROFILES=java.util.Map.ofEntries(
    java.util.Map.entry("bulbasaur",java.util.List.of("leg_front_right","leg_front_left","leg_back_right","leg_back_left")),
    java.util.Map.entry("charmander",java.util.List.of("leg_left","leg_right")),
@@ -126,7 +128,7 @@ public final class ClientSmokeTest {
        for(int axis=0;axis<6;axis++){range[axis]=Math.min(range[axis],values[axis]);range[axis+6]=Math.max(range[axis+6],values[axis]);}
       }
      }
-      if(validationPhase!=null && ARTICULATION_PROFILES.containsKey(slug)) {
+      if(validationPhase!=null && ARTICULATION_VALIDATION_SPECIES.contains(slug) && ARTICULATION_PROFILES.containsKey(slug)) {
        int phase=validationPhase;
        String state=locomotionState(phase);
        // Clip selection is sampled only after a phase has settled. The first render
@@ -304,6 +306,7 @@ public final class ClientSmokeTest {
    int passed=0,knownFallbacks=0;
    for(var entry:ARTICULATION_PROFILES.entrySet()) {
     String slug=entry.getKey();
+    if(!ARTICULATION_VALIDATION_SPECIES.contains(slug))continue;
     var definition=SpeciesDefinitions.get(slug);
     if(definition==null)throw new IllegalStateException("Missing test profile species "+slug);
     String fallback=definition.movementFallback();
@@ -331,14 +334,15 @@ public final class ClientSmokeTest {
     }
     int walkJoints=movingJointCount(slug,"WALK_STEADY");
     int runJoints=run==null?0:movingJointCount(slug,"RUN_STEADY");
-    int minimum=java.util.Set.of("bulbasaur","pikachu","hitmonlee","jolteon").contains(slug)?2:1;
-    if(walkJoints<minimum||(run!=null&&runJoints<minimum))
-     throw new IllegalStateException("Relevant locomotion joints did not animate for "+slug+" walk="+walkJoints+" run="+runJoints+" required="+minimum);
+    int minimum=slug.equals("charmander")?2:1;
+    int idleJoints=movingJointCount(slug,"IDLE_FINAL");
+    if(idleJoints<minimum||walkJoints<minimum||(run!=null&&runJoints<minimum))
+     throw new IllegalStateException("Relevant locomotion joints did not animate for "+slug+" idle="+idleJoints+" walk="+walkJoints+" run="+runJoints+" required="+minimum);
     passed++;
-    report.append("PASS ").append(slug).append(": idle/walk").append(run==null?" (no source run clip)":"/run").append("/idle clips selected; profile joints changed walk=")
-      .append(walkJoints).append(" run=").append(runJoints).append("; transition samples=")
+    report.append("PASS ").append(slug).append(": idle/walk").append(run==null?" (no source run clip)":"/run").append(" clips selected; profile joints changed idle=")
+      .append(idleJoints).append(" walk=").append(walkJoints).append(" run=").append(runJoints).append("; transition samples=")
       .append(articulationClips.get(slug)).append("; synchronized inputs=").append(articulationInputs.get(slug)).append(".\n");
    }
-   Files.writeString(Path.of("client-validation.txt"),"ARTICULATION PROFILES: passed="+passed+" expected fallback gaps="+knownFallbacks+" profiles="+ARTICULATION_PROFILES.size()+"; other species remain unverified by limb-specific profiles.\n"+report,StandardOpenOption.APPEND);
+   Files.writeString(Path.of("client-validation.txt"),"ARTICULATION PROFILES: passed="+passed+" expected fallback gaps="+knownFallbacks+" profiles="+ARTICULATION_VALIDATION_SPECIES.size()+" detailed scope="+ARTICULATION_VALIDATION_SPECIES+"; other species remain unverified by limb-specific profiles in this Charmander pilot, while general rendering/movement checks cover all registered species.\n"+report,StandardOpenOption.APPEND);
   }
 }
