@@ -19,6 +19,15 @@ changed=subprocess.check_output(['git','diff','--name-only',BASE,'--','src/main/
 assert set(changed)<=allowed,set(changed)-allowed
 for p in changed:
  assert subprocess.run(['git','cat-file','-e',BASE+':'+p],cwd=ROOT,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL).returncode!=0,'Existing resource overwritten: '+p
+# Native signed eye shells use inward geometry and reversed UV extents.
+# GeckoLib GeoCube accepts signed dimensions; retain exactly the audited cases.
+signed={
+ ('paras','eye_right',0):([-1.5,7.25,-3.5],[-3,-3,-2],[10,35]),
+ ('paras','eye_left',0):([4.5,7.25,-3.5],[-3,-3,-2],[20,35]),
+ ('venomoth','left_eye',0):([4,11,2],[-3,-3,-3],[31,64]),
+ ('venomoth','right_eye',0):([-1,11,2],[-3,-3,-3],[43,64])
+}
+seen_signed=set()
 for d,b in zip(defs[40:50],before[40:50]):
  for k in ('mode','scale','width','height','health','attack','speed','eggBase','eggSpots','sounds','slug','nationalPokedexNumber'):
   assert d[k]==b[k],(d['slug'],k)
@@ -33,9 +42,14 @@ for d,b in zip(defs[40:50],before[40:50]):
    seen.add(parent);parent=bones[parent].get('parent')
   for field in ('pivot','rotation'):
    assert all(isinstance(v,(int,float)) and math.isfinite(v) for v in bone.get(field,[]))
-  for cube in bone.get('cubes',[]):
-   assert all(math.isfinite(v) for v in cube['origin'])
-   assert all(math.isfinite(v) and v>=0 for v in cube['size'])
+  for index,cube in enumerate(bone.get('cubes',[])):
+   assert all(math.isfinite(v) for v in cube['origin']+cube['size'])
+   key=(d['slug'],name,index)
+   if any(v<0 for v in cube['size']):
+    assert key in signed and (cube['origin'],cube['size'],cube['uv'])==signed[key],key
+    assert cube.get('inflate')==0.01
+    seen_signed.add(key)
+   else:assert key not in signed,'Authored signed eye shell changed: '+str(key)
  anims=json.loads((ROOT/'src/main/resources'/d['animation']).read_text())['animations']
  assert d['idle'].startswith('animation.'+d['slug']+'.') and 'minemon_' not in d['idle']
  assert 'minemon_' not in d['walk'] and not d.get('movement_fallback')
@@ -52,6 +66,7 @@ for d,b in zip(defs[40:50],before[40:50]):
    folded=name.endswith(('.shoulder_left','.shoulder_right'))
    assert a['bones']['wings_folded']['scale']==([1,1,1] if folded else [0,0,0])
    assert a['bones']['wings_open']['scale']==([0,0,0] if folded else [1,1,1])
+assert seen_signed==set(signed),'Native signed eye shells missing'
 print('PASS BATCH 5: exactly 50 updated; 40 previous and other 141 entries preserved; hierarchy, expressions, events and attributes checked')
 def normalize(value):
  if isinstance(value,str):return re.sub(r'\bq\.','query.',value)

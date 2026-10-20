@@ -54,4 +54,43 @@ public class Batch5AnimationCompatibilityTest {
    assertTrue(animations("golbat").getAsJsonObject("animation.golbat.air_idle").getAsJsonObject("bones").has("wing_"+side+"_rotation"));
   }
  }
+ @Test public void nativeSignedEyeShellsBakeWithFiniteInAtlasUvs() throws Exception {
+  int checked=0;
+  for(String slug:java.util.List.of("paras","venomoth")) {
+   var p=java.nio.file.Path.of(System.getProperty("minemon.testResources"),
+    "assets/minemon_gen1/geo/"+slug+"_cobblemon_1_8_2/"+slug+".geo.json");
+   JsonObject root;try(var r=java.nio.file.Files.newBufferedReader(p)){root=JsonParser.parseReader(r).getAsJsonObject();}
+   var geometry=root.getAsJsonArray("minecraft:geometry").get(0).getAsJsonObject();
+   var description=geometry.getAsJsonObject("description");
+   var properties=new software.bernie.geckolib3.geo.raw.pojo.ModelProperties();
+   properties.setTextureWidth(description.get("texture_width").getAsDouble());
+   properties.setTextureHeight(description.get("texture_height").getAsDouble());
+   for(var item:geometry.getAsJsonArray("bones")) {
+    var bone=item.getAsJsonObject();if(!bone.has("cubes"))continue;
+    for(var element:bone.getAsJsonArray("cubes")) {
+     var json=element.getAsJsonObject();var size=json.getAsJsonArray("size");
+     if(size.get(0).getAsDouble()>=0)continue;
+     checked++;
+     var cube=new software.bernie.geckolib3.geo.raw.pojo.Cube();
+     double[] dimensions=new double[3],origin=new double[3];
+     for(int axis=0;axis<3;axis++){dimensions[axis]=size.get(axis).getAsDouble();origin[axis]=json.getAsJsonArray("origin").get(axis).getAsDouble();}
+     cube.setSize(dimensions);cube.setOrigin(origin);cube.setInflate(json.get("inflate").getAsDouble());
+     var uv=new software.bernie.geckolib3.geo.raw.pojo.UvUnion();uv.isBoxUV=true;
+     uv.boxUVCoords=new double[]{json.getAsJsonArray("uv").get(0).getAsDouble(),json.getAsJsonArray("uv").get(1).getAsDouble()};cube.setUv(uv);
+     var baked=software.bernie.geckolib3.geo.render.built.GeoCube.createFromPojoCube(cube,properties,0.0,false);
+     assertEquals(6,baked.quads.length);
+     for(var quad:baked.quads) {
+      assertNotNull(quad);assertEquals(4,quad.vertices.length);
+      for(var vertex:quad.vertices) {
+       assertTrue(Float.isFinite(vertex.position.x())&&Float.isFinite(vertex.position.y())&&Float.isFinite(vertex.position.z()));
+       assertTrue(Float.isFinite(vertex.textureU)&&vertex.textureU>=0&&vertex.textureU<=1);
+       assertTrue(Float.isFinite(vertex.textureV)&&vertex.textureV>=0&&vertex.textureV<=1);
+      }
+     }
+    }
+   }
+  }
+  assertEquals("Exactly the four audited source eye shells must be tested",4,checked);
+ }
+
 }
