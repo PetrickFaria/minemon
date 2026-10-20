@@ -19,7 +19,7 @@ vp=R/'data/minemon_gen1/animation_validation_profiles.json'
 profiles=json.loads(vp.read_text()) if vp.exists() else {}
 GAIT={
  'zubat':["wing_left","wing_right"],
- 'golbat':["wing_left","wing_right"],
+ 'golbat':["wing_left","wing_right","wing_left_rotation","wing_right_rotation"],
  'oddish':["leg_left","leg_right"],
  'gloom':["leg_left","leg_right"],
  'vileplume':["leg_left","leg_right"],
@@ -69,7 +69,17 @@ for d in defs[start-1:end]:
   target=R/paths[key];target.parent.mkdir(parents=True,exist_ok=True);target.write_bytes(z.read(source))
  lp=f'assets/minemon/licenses/pokemon/{slug}/cobblemon-1.8.2-model-license.txt'
  target=R/lp;target.parent.mkdir(parents=True,exist_ok=True);target.write_bytes(z.read(license))
- geo=json.loads(z.read(model))['minecraft:geometry'][0];bones={b['name'] for b in geo['bones']}
+ model_data=json.loads(z.read(model));geo=model_data['minecraft:geometry'][0]
+ if args.batch==5 and slug=='golbat':
+  by_name={b['name']:b for b in geo['bones']}
+  for side in ('left','right'):
+   wing=by_name['wing_'+side];wrapper='wing_'+side+'_rotation'
+   assert wrapper not in by_name and wing['parent']=='wings'
+   geo['bones'].append({'name':wrapper,'parent':wing['parent'],'pivot':list(wing['pivot'])})
+   wing['parent']=wrapper
+  (R/paths['model']).write_text(json.dumps(model_data,indent=2)+'\n')
+  d['source_rig_adaptation']='Restore two missing native animation group nodes wing_left_rotation/right_rotation at existing wing pivots under wings; original bone pivots/cubes unchanged'
+ bones={b['name'] for b in geo['bones']}
  animations=json.loads(z.read(anim))['animations']
  print('SOURCE_EVENTS',slug,json.dumps({name:{k:v for k,v in a.items() if k in ('sound_effects','particle_effects')} for name,a in animations.items() if any(k in a for k in ('sound_effects','particle_effects'))}),flush=True)
  if args.batch==4 and slug=='jigglypuff':
