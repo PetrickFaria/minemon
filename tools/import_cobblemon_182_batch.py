@@ -85,7 +85,7 @@ for d in defs[start-1:end]:
    rotation[0]=f'{rotation[0]}+{sign*30}*math.sin(q.anim_time*720)'
    channel['rotation']=rotation
   animations[walk]=adapted;d['clips']['ground_walk']=walk
-  (R/paths['animation']).write_text(json.dumps({'format_version':'1.8.0','animations':animations},indent=2)+'\\n')
+  (R/paths['animation']).write_text(json.dumps({'format_version':'1.8.0','animations':animations},indent=2)+'\n')
   d['source_procedural_pose']={'poser':poser_path,'walk':source_animations,'head_look':'q.look','adaptation':'native ground stance plus opposed 30-degree leg cycle at 720 degrees per second; head look handled by MinemonModel'}
  if walk is None:
   walk=idle;d['movement_fallback']='idle'
