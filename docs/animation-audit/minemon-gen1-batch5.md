@@ -45,7 +45,7 @@ Run 39504614191: 8 testes Java executados, 7 passaram; o teste abrangente encont
 - GitHub Actions: [execução 39505150691](https://github.com/PetrickFaria/minemon/actions/runs/39505150691) — sucesso.
 - Compilação/Java: `build` concluído; 9 testes (5 Batch5, 1 Batch3 e 3 Molang), 0 falhas, 0 erros, 0 ignorados.
 - GameTests do servidor: 13 testes obrigatórios aprovados.
-- Smoke do cliente: aprovado em aproximadamente 30m48s. WORLD, COMBAT, LOCOMOTION e ROSTER passaram; as 151 espécies renderizaram com textura. A chama independente do Charmander mudou em repouso e caminhada; a regressão dos braços dos starters passou.
+- Smoke do cliente: aprovado em aproximadamente 31 minutos. WORLD, COMBAT, LOCOMOTION e ROSTER passaram; as 151 espécies renderizaram com textura. A chama independente do Charmander mudou em repouso e caminhada; a regressão dos braços dos starters passou.
 - Perfis cumulativos: 48 aprovações detalhadas de 50; as duas exceções esperadas são Kakuna e Metapod, que não têm clipe nativo de caminhada e usam idle. Os demais Pokémon continuam cobertos pelos testes gerais de renderização e movimento.
 - Gate e JAR: os 151 registros permanecem presentes; exatamente as 50 espécies #001–#050 usam os recursos atualizados; os 40 anteriores e as 101 espécies fora do escopo foram preservados. Conteúdo interno do JAR inspecionado: 1.927 entradas, `Minemon-1.19.2-2.0.0.jar`, 5.550.607 bytes, SHA-256 `1df177a2575fe471a29c2381f74c810a5b5d68f08ab0d74b32edaf659a6b1a7e`.
 - Artefato do GitHub Actions: [Minemon-1.19.2-2.0.0-gen1 (ID 12304019220)](https://github.com/PetrickFaria/minemon/actions/runs/39505150691/artifacts/12304019220), contendo um JAR. Expira em 3 de novembro de 2026.
