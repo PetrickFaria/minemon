@@ -62,6 +62,13 @@ for d in defs[start-1:end]:
  geo=json.loads(z.read(model))['minecraft:geometry'][0];bones={b['name'] for b in geo['bones']}
  animations=json.loads(z.read(anim))['animations']
  print('SOURCE_EVENTS',slug,json.dumps({name:{k:v for k,v in a.items() if k in ('sound_effects','particle_effects')} for name,a in animations.items() if any(k in a for k in ('sound_effects','particle_effects'))}),flush=True)
+ if args.batch==4 and slug=='jigglypuff':
+  cry=animations['animation.jigglypuff.cry']
+  misplaced=cry['sound_effects'].pop('animation_length')
+  assert misplaced==1.25
+  assert 'animation_length' not in cry or cry['animation_length']==misplaced
+  cry['animation_length']=misplaced
+  d['source_event_correction']='cry duration 1.25 moved from sound_effects metadata to clip animation_length; timestamp/effect unchanged'
  names={name.rsplit('.',1)[-1]:name for name in animations if name.startswith(f'animation.{slug}.')}
  d.update(paths);d['licenses']=list(dict.fromkeys(d.get('licenses',[])+[lp]))
  d['clips']=dict(names);d['excluded_clips']=[]
