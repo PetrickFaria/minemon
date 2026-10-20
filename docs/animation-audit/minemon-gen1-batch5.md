@@ -10,7 +10,7 @@ Escopo exclusivo #041–#050: Zubat, Golbat, Oddish, Gloom, Vileplume, Paras, Pa
 - [x] Confirmar base e aprovação; ausência de commits posteriores na branch base.
 - [x] Criar branch própria.
 - [x] Auditar fonte Cobblemon 1.8.2: modelos, texturas, ossos, posers, expressões e eventos.
-- [ ] Integrar somente dez espécies; preservar outras 141 entradas e recursos anteriores.
+- [x] Integrar somente dez espécies; preservar outras 141 entradas e recursos anteriores.
 - [ ] Compilação, Java, GameTests, smoke cumulativo dos 50 e gerais dos 151.
 - [ ] Inspecionar JAR real, publicar artefato e resultado.
 
@@ -25,3 +25,5 @@ Zubat: visibilidade de asas dobradas/abertas do poser convertida em escala dos m
 O smoke aprovado do Lote 4 levou 24m07s. O orçamento do processo para 50 espécies será de 35min (projeção proporcional ~30min), mantendo intactos fases, ticks por espécie, velocidades, thresholds e asserções. Sem redução da cobertura dos 151 nem dos perfis anteriores.
 
 Inconsistência adicional identificada: clips Golbat animam wing_left_rotation/right_rotation, mas as geometrias 1.8.2 omitem esses grupos. Para não perder parte substancial da batida das asas, restaurar os dois grupos de transformação nos pivôs existentes das asas, sob wings; reparentear somente wing_left/right a esses grupos. Nenhum pivô, cubo, textura ou canal nativo é deslocado/modificado. Os demais 149 modelos (inclusive os 40 aprovados) permanecem intactos. Vileplume.sleep contém nomes de folhas/baba de outro rig; remover apenas canais ausentes listados na evidência runtime, mantendo os canais válidos; pose de sono requer revisão visual.
+
+Preparação aprovada: [Actions 39482213213](https://github.com/PetrickFaria/minemon/actions/runs/39482213213). Recursos das 151 espécies e preservação das outras 141 entradas aprovados. Publicação retomada a partir dos mesmos 43 arquivos preparados, sem nova importação. Gate verify_batch5 compara com e435ab9; testes Java cobrem todos os clips/expressões novos, grupos de Golbat e visibilidade de Zubat. O smoke conserva os testes anteriores e acrescenta a asserção de visibilidade de Zubat. Nenhum código de entidade/IA/combate alterado. attackTicks de Zubat/Diglett sincroniza somente os clips físicos nativos de 3s.

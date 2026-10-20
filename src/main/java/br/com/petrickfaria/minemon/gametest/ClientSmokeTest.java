@@ -220,6 +220,12 @@ public final class ClientSmokeTest {
         articulationInputs.computeIfAbsent(slug,k->new java.util.HashMap<>())
          .computeIfAbsent(state,k->new java.util.HashSet<>()).add("phase="+phase+",clip="+entity.getSelectedAnimationForValidation()+",velocitySqr="+velocitySqr+",positionDeltaSqr="+displacementSqr);
        }
+       if(slug.equals("zubat")&&isSettledClipSample(phase)) {
+        var folded=model.getAnimationProcessor().getBone("wings_folded");
+        var open=model.getAnimationProcessor().getBone("wings_open");
+        if(folded==null||open==null||Math.abs(folded.getScaleX())>0.001F||Math.abs(open.getScaleX()-1.0F)>0.001F)
+         throw new IllegalStateException("Zubat poser visibility failed: folded wings must be hidden and open wings visible");
+       }
        var perSpecies=articulationRanges.computeIfAbsent(slug,k->new java.util.HashMap<>());
        for(String joint:profileJoints(slug,state)) {
         var bone=model.getAnimationProcessor().getBone(joint);

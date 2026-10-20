@@ -1,7 +1,5 @@
 name: Prepare read-only Cobblemon batch source
 on:
-  push:
-    paths: ['tools/import_cobblemon_182_batch.py', '.github/workflows/prepare-cobblemon-batch.yml']
   workflow_dispatch:
 permissions:
   contents: read

@@ -1,0 +1,306 @@
+{
+  "batch": 5,
+  "range": [
+    41,
+    50
+  ],
+  "source_url": "https://cdn.modrinth.com/data/MdwFAVRL/versions/GJ2a1b8O/Cobblemon-fabric-1.8.2%2B1.21.1.jar",
+  "source_sha256": "cae8ac328b61354fbe415208b8c6ffc12e7155094d0a87082e85e7914fb380c2",
+  "manual_visual_status": "pending; user will evaluate the authorized batches inside Minecraft",
+  "species": [
+    {
+      "number": 41,
+      "slug": "zubat",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0041_zubat/zubat_male.geo.json",
+      "idle": "animation.zubat.air_idle",
+      "movement": "animation.zubat.air_fly",
+      "mode": "flying",
+      "native_run": null,
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "wing_left",
+          "wing_right"
+        ],
+        "walk": [
+          "wing_left",
+          "wing_right"
+        ],
+        "run": [
+          "wing_left",
+          "wing_right"
+        ]
+      },
+      "stripped_bones": {}
+    },
+    {
+      "number": 42,
+      "slug": "golbat",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0042_golbat/golbat_male.geo.json",
+      "idle": "animation.golbat.air_idle",
+      "movement": "animation.golbat.air_fly",
+      "mode": "flying",
+      "native_run": null,
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "wing_left",
+          "wing_right",
+          "wing_left_rotation",
+          "wing_right_rotation"
+        ],
+        "walk": [
+          "wing_left",
+          "wing_right",
+          "wing_left_rotation",
+          "wing_right_rotation"
+        ],
+        "run": [
+          "wing_left",
+          "wing_right",
+          "wing_left_rotation",
+          "wing_right_rotation"
+        ]
+      },
+      "stripped_bones": {}
+    },
+    {
+      "number": 43,
+      "slug": "oddish",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0043_oddish/oddish.geo.json",
+      "idle": "animation.oddish.ground_idle",
+      "movement": "animation.oddish.ground_walk",
+      "mode": "ground",
+      "native_run": "animation.oddish.ground_run",
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "leaf_center3",
+          "leaf_inner_left3",
+          "leaf_inner_right3"
+        ],
+        "walk": [
+          "leg_left",
+          "leg_right"
+        ],
+        "run": [
+          "leg_left",
+          "leg_right"
+        ]
+      },
+      "stripped_bones": {}
+    },
+    {
+      "number": 44,
+      "slug": "gloom",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0044_gloom/gloom_male.geo.json",
+      "idle": "animation.gloom.ground_idle",
+      "movement": "animation.gloom.ground_walk",
+      "mode": "ground",
+      "native_run": null,
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "arm_left",
+          "arm_right",
+          "leaf_back_right4"
+        ],
+        "walk": [
+          "leg_left",
+          "leg_right"
+        ],
+        "run": [
+          "leg_left",
+          "leg_right"
+        ]
+      },
+      "stripped_bones": {}
+    },
+    {
+      "number": 45,
+      "slug": "vileplume",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0045_vileplume/vileplume_male.geo.json",
+      "idle": "animation.vileplume.ground_idle",
+      "movement": "animation.vileplume.ground_walk",
+      "mode": "ground",
+      "native_run": null,
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "arm_left",
+          "arm_right",
+          "petal_back_rotation"
+        ],
+        "walk": [
+          "leg_left",
+          "leg_right"
+        ],
+        "run": [
+          "leg_left",
+          "leg_right"
+        ]
+      },
+      "stripped_bones": {
+        "animation.vileplume.sleep": [
+          "drool2",
+          "head_bulbs",
+          "leaf_back_left2",
+          "leaf_back_left3",
+          "leaf_back_left_rotation",
+          "leaf_back_right2",
+          "leaf_back_right3",
+          "leaf_back_right4",
+          "leaf_back_right_rotation",
+          "leaf_front_left2",
+          "leaf_front_left_rotation",
+          "leaf_front_right_rotation",
+          "mouth_bottom"
+        ]
+      }
+    },
+    {
+      "number": 46,
+      "slug": "paras",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0046_paras/paras.geo.json",
+      "idle": "animation.paras.ground_idle",
+      "movement": "animation.paras.ground_walk",
+      "mode": "ground",
+      "native_run": null,
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "arm_left",
+          "arm_right",
+          "body"
+        ],
+        "walk": [
+          "leg_left_back",
+          "leg_left_front",
+          "leg_right_back",
+          "leg_right_front"
+        ],
+        "run": [
+          "leg_left_back",
+          "leg_left_front",
+          "leg_right_back",
+          "leg_right_front"
+        ]
+      },
+      "stripped_bones": {}
+    },
+    {
+      "number": 47,
+      "slug": "parasect",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0047_parasect/parasect.geo.json",
+      "idle": "animation.parasect.ground_idle",
+      "movement": "animation.parasect.ground_walk",
+      "mode": "ground",
+      "native_run": "animation.parasect.ground_run",
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "claw_left",
+          "claw_right",
+          "body"
+        ],
+        "walk": [
+          "leg_left_back",
+          "leg_left_front",
+          "leg_right_back",
+          "leg_right_front"
+        ],
+        "run": [
+          "leg_left_back",
+          "leg_left_front",
+          "leg_right_back",
+          "leg_right_front"
+        ]
+      },
+      "stripped_bones": {}
+    },
+    {
+      "number": 48,
+      "slug": "venonat",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0048_venonat/venonat.geo.json",
+      "idle": "animation.venonat.ground_idle",
+      "movement": "animation.venonat.ground_walk",
+      "mode": "ground",
+      "native_run": null,
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "left_foot",
+          "right_foot",
+          "left_antenna",
+          "right_antenna"
+        ],
+        "walk": [
+          "left_foot",
+          "right_foot"
+        ],
+        "run": [
+          "left_foot",
+          "right_foot"
+        ]
+      },
+      "stripped_bones": {}
+    },
+    {
+      "number": 49,
+      "slug": "venomoth",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0049_venomoth/venomoth.geo.json",
+      "idle": "animation.venomoth.air_idle",
+      "movement": "animation.venomoth.air_fly",
+      "mode": "flying",
+      "native_run": null,
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "left_top_wing",
+          "right_top_wing",
+          "left_bottom_wing",
+          "right_bottom_wing"
+        ],
+        "walk": [
+          "left_top_wing",
+          "right_top_wing",
+          "left_bottom_wing",
+          "right_bottom_wing"
+        ],
+        "run": [
+          "left_top_wing",
+          "right_top_wing",
+          "left_bottom_wing",
+          "right_bottom_wing"
+        ]
+      },
+      "stripped_bones": {}
+    },
+    {
+      "number": 50,
+      "slug": "diglett",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0050_diglett/diglett.geo.json",
+      "idle": "animation.diglett.ground_idle",
+      "movement": "animation.diglett.ground_walk",
+      "mode": "ground",
+      "native_run": null,
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "body"
+        ],
+        "walk": [
+          "body",
+          "body2",
+          "ground"
+        ],
+        "run": [
+          "body",
+          "body2",
+          "ground"
+        ]
+      },
+      "stripped_bones": {}
+    }
+  ]
+}

@@ -505,5 +505,173 @@
       "foot_right",
       "torso"
     ]
+  },
+  "zubat": {
+    "idle": [
+      "wing_left",
+      "wing_right"
+    ],
+    "walk": [
+      "wing_left",
+      "wing_right"
+    ],
+    "run": [
+      "wing_left",
+      "wing_right"
+    ]
+  },
+  "golbat": {
+    "idle": [
+      "wing_left",
+      "wing_right",
+      "wing_left_rotation",
+      "wing_right_rotation"
+    ],
+    "walk": [
+      "wing_left",
+      "wing_right",
+      "wing_left_rotation",
+      "wing_right_rotation"
+    ],
+    "run": [
+      "wing_left",
+      "wing_right",
+      "wing_left_rotation",
+      "wing_right_rotation"
+    ]
+  },
+  "oddish": {
+    "idle": [
+      "leaf_center3",
+      "leaf_inner_left3",
+      "leaf_inner_right3"
+    ],
+    "walk": [
+      "leg_left",
+      "leg_right"
+    ],
+    "run": [
+      "leg_left",
+      "leg_right"
+    ]
+  },
+  "gloom": {
+    "idle": [
+      "arm_left",
+      "arm_right",
+      "leaf_back_right4"
+    ],
+    "walk": [
+      "leg_left",
+      "leg_right"
+    ],
+    "run": [
+      "leg_left",
+      "leg_right"
+    ]
+  },
+  "vileplume": {
+    "idle": [
+      "arm_left",
+      "arm_right",
+      "petal_back_rotation"
+    ],
+    "walk": [
+      "leg_left",
+      "leg_right"
+    ],
+    "run": [
+      "leg_left",
+      "leg_right"
+    ]
+  },
+  "paras": {
+    "idle": [
+      "arm_left",
+      "arm_right",
+      "body"
+    ],
+    "walk": [
+      "leg_left_back",
+      "leg_left_front",
+      "leg_right_back",
+      "leg_right_front"
+    ],
+    "run": [
+      "leg_left_back",
+      "leg_left_front",
+      "leg_right_back",
+      "leg_right_front"
+    ]
+  },
+  "parasect": {
+    "idle": [
+      "claw_left",
+      "claw_right",
+      "body"
+    ],
+    "walk": [
+      "leg_left_back",
+      "leg_left_front",
+      "leg_right_back",
+      "leg_right_front"
+    ],
+    "run": [
+      "leg_left_back",
+      "leg_left_front",
+      "leg_right_back",
+      "leg_right_front"
+    ]
+  },
+  "venonat": {
+    "idle": [
+      "left_foot",
+      "right_foot",
+      "left_antenna",
+      "right_antenna"
+    ],
+    "walk": [
+      "left_foot",
+      "right_foot"
+    ],
+    "run": [
+      "left_foot",
+      "right_foot"
+    ]
+  },
+  "venomoth": {
+    "idle": [
+      "left_top_wing",
+      "right_top_wing",
+      "left_bottom_wing",
+      "right_bottom_wing"
+    ],
+    "walk": [
+      "left_top_wing",
+      "right_top_wing",
+      "left_bottom_wing",
+      "right_bottom_wing"
+    ],
+    "run": [
+      "left_top_wing",
+      "right_top_wing",
+      "left_bottom_wing",
+      "right_bottom_wing"
+    ]
+  },
+  "diglett": {
+    "idle": [
+      "body"
+    ],
+    "walk": [
+      "body",
+      "body2",
+      "ground"
+    ],
+    "run": [
+      "body",
+      "body2",
+      "ground"
+    ]
   }
 }
