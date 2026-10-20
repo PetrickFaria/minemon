@@ -33,3 +33,7 @@ Preparação aprovada: [Actions 39482213213](https://github.com/PetrickFaria/min
 Runs 39503957422 e 39504234020 falharam antes da compilação: comparação set/dict no verificador corrigida; depois o gate revelou quatro cubos oculares com dimensões assinadas nativas (Paras eye_left/right; Venomoth left_eye/right). O baker GeoCube da GeckoLib 3 aceita dimensões assinadas e calcula UV com seus sinais; tornar os tamanhos positivos alteraria o atlas (Venomoth usa v=64 com extensões negativas). Preservar exatamente os quatro cubos com origem/tamanho/UV/inflate auditados. O gate rejeita outros casos negativos e alterações desses quatro. Novo teste Java usa GeoCube.createFromPojoCube da dependência 3.1.40 para exigir seis faces, vértices finitos e UVs dentro do atlas. Nenhum recurso foi modificado para contornar o gate.
 
 Referência primária: https://github.com/bernie-g/geckolib/blob/1.19/Forge/src/main/java/software/bernie/geckolib3/geo/render/built/GeoCube.java .
+
+## Compatibilidade Molang das pernas de Paras/Parasect
+
+Run 39504614191: 8 testes Java executados, 7 passaram; o teste abrangente encontrou erro do parser 3 em -(math.sin(...)*1)*0.25. Reescritos somente os 16 canais correspondentes para -1*(math.sin(...)*1)*0.25, sem alterar tempos, valores ou oscilação. Novo teste compara 81 amostras contra -0.25*sin em graus, idle a 360 graus/s e walk a 1440 graus/s. Os testes de cubos oculares assinados, grupos Golbat e visibilidade Zubat passaram nessa execução. Os recursos dos 40 anteriores continuam intactos.

@@ -93,4 +93,21 @@ public class Batch5AnimationCompatibilityTest {
   assertEquals("Exactly the four audited source eye shells must be tested",4,checked);
  }
 
+ @Test public void parasLegLiftMatchesNativeSignedSineNumerically() throws Exception {
+  for(String slug:java.util.List.of("paras","parasect")) {
+   var clips=animations(slug);
+   for(String state:java.util.List.of("ground_idle","ground_walk")) {
+    var bones=clips.getAsJsonObject("animation."+slug+"."+state).getAsJsonObject("bones");
+    if(!slug.equals("paras")&&state.equals("ground_idle"))continue;
+    var value=bones.getAsJsonObject("leg_left_back").getAsJsonArray("position").get(1).getAsString();
+    var parser=new MolangParser();var expression=parser.parseExpression(value);
+    double degreesPerSecond=state.equals("ground_idle")?360.0:1440.0;
+    for(int i=0;i<=80;i++){
+     double time=i/80.0;parser.setValue("query.anim_time",time);
+     assertEquals("Native leg lift amplitude/phase must be preserved",-0.25*Math.sin(Math.toRadians(time*degreesPerSecond)),expression.get(),0.00001);
+    }
+   }
+  }
+ }
+
 }

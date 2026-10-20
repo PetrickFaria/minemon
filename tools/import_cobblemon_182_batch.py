@@ -94,6 +94,8 @@ for d in defs[start-1:end]:
   def adapt(value):
    if isinstance(value,str):
     value=value.replace('Math.','math.')
+    if slug in ('paras','parasect') and value.startswith('-(math.sin(') and value.endswith(')*0.25'):
+     value='-1*'+value[1:]
     if slug=='parasect':
      value=value.replace('q.r.yaw_change(0)','0').replace('q.r.velocity_y(0)','0')
     return value
