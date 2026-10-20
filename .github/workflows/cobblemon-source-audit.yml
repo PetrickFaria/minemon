@@ -1,0 +1,35 @@
+name: Audit Cobblemon source for batches 2 and 3
+on:
+  push:
+    paths: ['.github/workflows/cobblemon-source-audit.yml']
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Inspect exact audited source archive
+        run: |
+          python3 - <<'PY'
+          import urllib.request,hashlib,zipfile,json,io
+          url='https://cdn.modrinth.com/data/MdwFAVRL/versions/GJ2a1b8O/Cobblemon-fabric-1.8.2%2B1.21.1.jar'
+          raw=urllib.request.urlopen(url).read()
+          assert hashlib.sha256(raw).hexdigest()=='cae8ac328b61354fbe415208b8c6ffc12e7155094d0a87082e85e7914fb380c2'
+          z=zipfile.ZipFile(io.BytesIO(raw))
+          defs=json.load(open('src/main/resources/data/minemon_gen1/runtime_species.json'))
+          for d in defs[10:30]:
+            slug=d['slug'];n=d['nationalPokedexNumber'];folder=f'{n:04d}_{slug}'
+            models=[p for p in z.namelist() if p.startswith(f'assets/cobblemon/bedrock/pokemon/models/{folder}/') and p.endswith('.geo.json')]
+            textures=[p for p in z.namelist() if p.startswith(f'assets/cobblemon/textures/pokemon/{folder}/') and p.endswith('.png')]
+            ap=f'assets/cobblemon/bedrock/pokemon/animations/{folder}/{slug}.animation.json'
+            anims=json.loads(z.read(ap))['animations']
+            print('SOURCE',n,slug,'MODELS',models,'TEXTURES',textures)
+            for name,a in anims.items():
+              if any(t in name for t in ('ground_','air_','idle','fly','walk','run','hover','float','swim')):
+                dynamic=[b for b,v in a.get('bones',{}).items() if 'math.' in json.dumps(v) or any(isinstance(x,dict) and len(x)>1 for x in v.values())]
+                print('CLIP',slug,name,'DURATION',a.get('animation_length'),'DYNAMIC',dynamic,'BONES',list(a.get('bones',{})))
+          PY
