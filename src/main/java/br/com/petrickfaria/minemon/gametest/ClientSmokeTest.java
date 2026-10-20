@@ -183,14 +183,16 @@ public final class ClientSmokeTest {
      var next=ModEntities.SPECIES.get(slug).get().create(level);next.moveTo(0,101,4,180,0);next.setNoAi(false);level.addFreshEntity(next);testEntity=next.getUUID();
     });
    }
-   if(worldTicks>=SPECIES_START_TICK && worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW)mc.getSingleplayerServer().execute(()->{
+   if(worldTicks>=SPECIES_START_TICK && worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW) {
+    // Snapshot before queueing; rereading worldTicks on the server can skip phases.
+    int phase=Math.floorMod(worldTicks-SPECIES_START_TICK,SPECIES_TEST_WINDOW);
+    mc.getSingleplayerServer().execute(()->{
     var current=(MinemonCreature)mc.getSingleplayerServer().overworld().getEntity(testEntity);
      if(current!=null){
      // Drive a short, controlled displacement so larger collision boxes cannot make this
      // render-only animation check depend on pathfinding success. Navigation has its own tests.
      current.setNoAi(true);current.getNavigation().stop();
      if(current.getX()>2.5)direction=-1;if(current.getX()<-2.5)direction=1;
-     int phase=Math.floorMod(worldTicks-SPECIES_START_TICK,SPECIES_TEST_WINDOW);
      double animationVelocity;
      if(phase<8 || phase>=54) animationVelocity=0.0D;                         // idle
      else if(phase<16) animationVelocity=(phase-7)*0.00625D;                   // walk start
@@ -210,7 +212,8 @@ public final class ClientSmokeTest {
       current.getNavigation().stop();
      }
     }
-   });
+    });
+   }
    if(worldTicks>=SPECIES_START_TICK+20 && worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW && (worldTicks-(SPECIES_START_TICK+20))%SPECIES_TEST_WINDOW==0)Screenshot.grab(mc.gameDirectory,mc.getMainRenderTarget(),message->{});
    if(worldTicks>=SPECIES_START_TICK && worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW && ((worldTicks-SPECIES_START_TICK)%SPECIES_TEST_WINDOW)==40
        && java.util.Set.of("charmander","charmeleon","charizard").contains(species.get((worldTicks-SPECIES_START_TICK)/SPECIES_TEST_WINDOW)))Screenshot.grab(mc.gameDirectory,mc.getMainRenderTarget(),message->{});
