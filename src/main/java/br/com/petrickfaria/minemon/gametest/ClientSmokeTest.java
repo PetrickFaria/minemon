@@ -47,11 +47,19 @@ public final class ClientSmokeTest {
    .sorted(java.util.Comparator.comparingInt(SpeciesDefinitions.Definition::nationalPokedexNumber))
    .map(SpeciesDefinitions.Definition::slug).toList();
   // Profiles use exact joints from each selected model skeleton, not one global bone-name list.
-  // The pilot changes only Charmander; all 151 retain the general render/movement smoke below.
-  private static final java.util.Set<String> ARTICULATION_VALIDATION_SPECIES=java.util.Set.of("charmander");
+  // The active ten-species development batch receives detailed gait validation;
+  // the general render, texture, movement and roster smoke continues to cover all 151.
+  private static final java.util.Set<String> ARTICULATION_VALIDATION_SPECIES=java.util.Set.of("bulbasaur","ivysaur","venusaur","charmander","charmeleon","charizard","squirtle","wartortle","blastoise","caterpie");
   private static final java.util.Map<String,java.util.List<String>> ARTICULATION_PROFILES=java.util.Map.ofEntries(
    java.util.Map.entry("bulbasaur",java.util.List.of("leg_front_right","leg_front_left","leg_back_right","leg_back_left")),
+   java.util.Map.entry("ivysaur",java.util.List.of("leg_front_right","leg_front_left","leg_back_right","leg_back_left")),
+   java.util.Map.entry("venusaur",java.util.List.of("leg_front_left","leg_front_right","leg_left","leg_right")),
    java.util.Map.entry("charmander",java.util.List.of("leg_left","leg_right")),
+   java.util.Map.entry("charmeleon",java.util.List.of("leg_left","leg_right")),
+   java.util.Map.entry("charizard",java.util.List.of("leg_left","leg_right")),
+   java.util.Map.entry("squirtle",java.util.List.of("leg_left","leg_right")),
+   java.util.Map.entry("wartortle",java.util.List.of("leg_left","leg_right")),
+   java.util.Map.entry("blastoise",java.util.List.of("leg_left","leg_right")),
    java.util.Map.entry("pikachu",java.util.List.of("leg_right","leg_left")),
    java.util.Map.entry("caterpie",java.util.List.of("body_segment","body_segment2")),
    java.util.Map.entry("hitmonlee",java.util.List.of("leg_left","leg_right")),
@@ -65,6 +73,8 @@ public final class ClientSmokeTest {
   private static final java.util.Map<String,java.util.Map<String,java.util.Set<String>>> articulationClips=new java.util.HashMap<>();
   private static final java.util.Map<String,java.util.Map<String,Integer>> articulationSampleCounts=new java.util.HashMap<>();
   private static final java.util.Map<String,java.util.Map<String,java.util.Set<String>>> articulationInputs=new java.util.HashMap<>();
+  private static final java.util.Map<String,float[]> charmFlameRanges=new java.util.HashMap<>();
+  private static final java.util.Set<String> charmFlameClips=java.util.concurrent.ConcurrentHashMap.newKeySet();
  @SubscribeEvent public static void tick(TickEvent.ClientTickEvent event) {
   if(!Boolean.getBoolean("minemon.clientSmokeTest")||event.phase!=TickEvent.Phase.END)return;
   Minecraft mc=Minecraft.getInstance();
@@ -149,6 +159,17 @@ public final class ClientSmokeTest {
         float[] values={bone.getRotationX(),bone.getRotationY(),bone.getRotationZ(),bone.getPositionX(),bone.getPositionY(),bone.getPositionZ()};
         var range=perSpecies.computeIfAbsent(state+":"+joint,k->{var v=new float[12];java.util.Arrays.fill(v,0,6,Float.MAX_VALUE);java.util.Arrays.fill(v,6,12,-Float.MAX_VALUE);return v;});
         for(int axis=0;axis<6;axis++){range[axis]=Math.min(range[axis],values[axis]);range[axis+6]=Math.max(range[axis+6],values[axis]);}
+       }
+       if(slug.equals("charmander")) {
+        var flame=model.getAnimationProcessor().getBone("tail_flame");
+        if(flame==null)throw new IllegalStateException("Charmander runtime model is missing tail_flame bone");
+        String mode=(phase<8||phase>=54)?"idle":(phase>=8&&phase<27)?"walk":null;
+        if(mode!=null) {
+         float[] range=charmFlameRanges.computeIfAbsent(mode,k->{var v=new float[6];java.util.Arrays.fill(v,0,3,Float.MAX_VALUE);java.util.Arrays.fill(v,3,6,-Float.MAX_VALUE);return v;});
+         float[] rotations={flame.getRotationX(),flame.getRotationY(),flame.getRotationZ()};
+         for(int axis=0;axis<3;axis++){range[axis]=Math.min(range[axis],rotations[axis]);range[axis+3]=Math.max(range[axis+3],rotations[axis]);}
+        }
+        String flameClip=entity.getSelectedTailFlameAnimationForValidation();if(flameClip!=null)charmFlameClips.add(flameClip);
        }
       }
      if(testEntity==null||!entity.getUUID().equals(testEntity)||worldTicks<110||worldTicks>=BULBASAUR_VALIDATION_TICK)return;
@@ -304,6 +325,10 @@ public final class ClientSmokeTest {
   private static void validateArticulationProfiles() throws java.io.IOException {
    StringBuilder report=new StringBuilder();
    int passed=0,knownFallbacks=0;
+   var flameIdle=charmFlameRanges.get("idle");var flameWalk=charmFlameRanges.get("walk");
+   boolean animatedFlame=flameIdle!=null&&flameWalk!=null&&charmFlameClips.contains("animation.charmander.minemon_tail_flame");
+   for(int axis=0;axis<3&&animatedFlame;axis++)animatedFlame=flameIdle[axis+3]-flameIdle[axis]>0.01F&&flameWalk[axis+3]-flameWalk[axis]>0.01F;
+   if(!animatedFlame)throw new IllegalStateException("Charmander tail flame did not animate independently during idle and walk; idle="+java.util.Arrays.toString(flameIdle)+" walk="+java.util.Arrays.toString(flameWalk)+" selected="+charmFlameClips);
    for(var entry:ARTICULATION_PROFILES.entrySet()) {
     String slug=entry.getKey();
     if(!ARTICULATION_VALIDATION_SPECIES.contains(slug))continue;
@@ -343,6 +368,7 @@ public final class ClientSmokeTest {
       .append(idleJoints).append(" walk=").append(walkJoints).append(" run=").append(runJoints).append("; transition samples=")
       .append(articulationClips.get(slug)).append("; synchronized inputs=").append(articulationInputs.get(slug)).append(".\n");
    }
-   Files.writeString(Path.of("client-validation.txt"),"ARTICULATION PROFILES: passed="+passed+" expected fallback gaps="+knownFallbacks+" profiles="+ARTICULATION_VALIDATION_SPECIES.size()+" detailed scope="+ARTICULATION_VALIDATION_SPECIES+"; other species remain unverified by limb-specific profiles in this Charmander pilot, while general rendering/movement checks cover all registered species.\n"+report,StandardOpenOption.APPEND);
+   Files.writeString(Path.of("client-validation.txt"),"PASS CHARMANDER TAIL FLAME: independent clip="+charmFlameClips+" changed in idle range="+java.util.Arrays.toString(flameIdle)+" and walk range="+java.util.Arrays.toString(flameWalk)+".\n",StandardOpenOption.APPEND);
+   Files.writeString(Path.of("client-validation.txt"),"ARTICULATION PROFILES: passed="+passed+" expected fallback gaps="+knownFallbacks+" profiles="+ARTICULATION_VALIDATION_SPECIES.size()+" detailed scope="+ARTICULATION_VALIDATION_SPECIES+"; other species remain covered by general render/movement checks.\n"+report,StandardOpenOption.APPEND);
   }
 }

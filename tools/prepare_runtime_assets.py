@@ -57,6 +57,15 @@ def build_runtime_clips(data,geo,d):
  for key,kind in [('sit','sit'),('sleep','sleep'),('physical_attack','physical_attack')]:
   name=clips.get(key,'')
   if name.endswith('.minemon_'+kind):add_pose_animation(data,geo,d,name,kind)
+ flame_name=clips.get('tail_flame','')
+ if d.get('tail_flame_animation') and flame_name:
+  animations[flame_name]={
+   'animation_length':1.0,'loop':True,
+   'bones':{'tail_flame':{
+    'rotation':['2.4*math.sin(query.anim_time*0.42)','1.2*math.sin(query.anim_time*0.31+1.1)','1.8*math.sin(query.anim_time*0.53)'],
+    'scale':['1.0+0.035*math.sin(query.anim_time*0.48)','1.0+0.065*math.sin(query.anim_time*0.42+0.4)','1.0+0.035*math.sin(query.anim_time*0.48)']
+   }}
+  }
 
  # The three fire starters have arm bones posed outward in their bind pose.
  # Their source walk clips animate those bones but flatten the Z rotation to
@@ -77,15 +86,6 @@ def build_runtime_clips(data,geo,d):
     rotation=channel.get('rotation')
     if not isinstance(rotation,list) or len(rotation)!=3: continue
     channel['rotation'][2]=f'{sign*rest:g}{"+" if sign>0 else "-"}{swing:g}*math.sin(query.anim_time*{frequency})'
- # The original flame-bone tilt drives the long Charizard flame back into the
- # tail's final segment. Keep the flame upright in every state; it still follows
- # the animated tail through its parent bone.
- if d.get('slug') in ('charmander','charmeleon','charizard'):
-  for animation in animations.values():
-   fire=animation.get('bones',{}).get('fire')
-   if isinstance(fire,dict):
-    fire['rotation']=[0,0,0]
-    fire.pop('position',None)
 
 def flatten_bedrock_keyframes(data):
  # GeckoLib 3.1.40 does not deserialize Bedrock pre/post + lerp_mode objects.
@@ -114,14 +114,14 @@ def png_chunks(data):
 def decode_png_rgba(data):
  chunks=png_chunks(data);items={kind:payload for kind,payload in chunks}
  w,h,depth,color,compression,filter_method,interlace=struct.unpack('>IIBBBBB',items[b'IHDR'])
- if depth!=8 or color not in (2,3,6) or interlace!=0:raise ValueError('Unsupported source PNG format')
- channels={2:3,3:1,6:4}[color];stride=w*channels
+ if depth not in (1,2,4,8) or color not in (2,3,6) or interlace!=0 or (color!=3 and depth!=8):raise ValueError('Unsupported source PNG format')
+ channels={2:3,3:1,6:4}[color];filter_bpp=max(1,(channels*depth+7)//8);stride=(w*channels*depth+7)//8
  packed=zlib.decompress(b''.join(payload for kind,payload in chunks if kind==b'IDAT'))
  prev=bytearray(stride);rows=[];offset=0
  for _ in range(h):
   f=packed[offset];offset+=1;scan=bytearray(packed[offset:offset+stride]);offset+=stride
   for i in range(stride):
-   a=scan[i-channels] if i>=channels else 0;b=prev[i];c=prev[i-channels] if i>=channels else 0
+   a=scan[i-filter_bpp] if i>=filter_bpp else 0;b=prev[i];c=prev[i-filter_bpp] if i>=filter_bpp else 0
    if f==1:scan[i]=(scan[i]+a)&255
    elif f==2:scan[i]=(scan[i]+b)&255
    elif f==3:scan[i]=(scan[i]+((a+b)//2))&255
@@ -136,7 +136,13 @@ def decode_png_rgba(data):
   elif color==2:
    for i in range(0,len(row),3):out.extend((row[i],row[i+1],row[i+2],255))
   else:
-   for index in row:
+   if depth==8:indices=row[:w]
+   else:
+    mask=(1<<depth)-1;indices=[]
+    for byte in row:
+     for shift in range(8-depth,-1,-depth):
+      if len(indices)<w:indices.append((byte>>shift)&mask)
+   for index in indices:
     j=index*3
     if j+2>=len(palette):raise ValueError('PNG palette index outside palette')
     out.extend((palette[j],palette[j+1],palette[j+2],alpha[index] if index<len(alpha) else 255))
@@ -154,51 +160,43 @@ def prepare_tail_flame(root,d):
  model=root/'assets/minemon_gen1'/d['model'].removeprefix('assets/minemon/')
  texture=root/'assets/minemon_gen1'/d['texture'].removeprefix('assets/minemon/')
  geo=json.loads(model.read_text());texture_data=texture.read_bytes();w,h,rows=decode_png_rgba(texture_data)
- sprite_sizes={'charmander':(5,8),'charmeleon':(6,10),'charizard':(8,12)}
- fw,fh=sprite_sizes[slug];depth={'charmander':2,'charmeleon':3,'charizard':4}[slug]
- pad=2;new_w=w+32;x=w+pad;y=5
- # A compact pixel flame is drawn only into the generated runtime atlas.
- # The extracted/original art and its license-bearing source files stay intact.
- for yy in range(fh):
-  for xx in range(fw):
-   # Layered pointed silhouette, from a narrow yellow core to orange/red edges.
-   center=fw/2-0.5;distance=abs(xx-center);progress=yy/max(1,fh-1)
-   half=(0.7+progress*(fw/2-0.7))
-   if distance>half: continue
-   if progress<0.22 and distance>max(0,half-1.2): rgba=(255,226,72,255)
-   elif distance<=max(0.6,half*0.36): rgba=(255,244,142,255)
-   elif distance<=max(1.0,half*0.7): rgba=(255,174,38,255)
-   else: rgba=(232,65,24,255)
-   row=rows[y+yy]
-   # Extend the row once when moving from the original atlas to the new atlas.
-   if len(row)<new_w*4: row.extend(b'\0'*(new_w*4-len(row)))
-   row[(x+xx)*4:(x+xx+1)*4]=bytes(rgba)
-   back_x=x+fw+depth
-   row[(back_x+xx)*4:(back_x+xx+1)*4]=bytes(rgba)
+ bones=geo['minecraft:geometry'][0]['bones']
+ if d.get('strip_bedrock_locators'):
+  for bone in bones:bone.pop('locators',None)
+ host=next((b for b in bones if b['name'] in ('fire2','fire') and b.get('cubes')),None)
+ if host is None:raise ValueError(slug+' model has no source tail-flame mesh')
+ source_cube=host['cubes'][0];origin=source_cube['origin'];size=source_cube['size'];uv=source_cube['uv']
+ if len(size)!=3 or size[0]!=0:raise ValueError(slug+' source flame plane did not match the audited zero-width layout')
+ fw,fh=int(round(size[2])),int(round(size[1]))
+ source_flame=root/'assets/minemon_gen1'/d['flame_texture'].removeprefix('assets/minemon/')
+ sw,sh,flame_rows=decode_png_rgba(source_flame.read_bytes())
+ u,v=int(round(uv[0])),int(round(uv[1]))
+ if u<0 or v<0 or u+fw>sw or v+fh>sh:raise ValueError(slug+' source flame UV lies outside its flame sheet')
+ pad=2;new_w=w+32;x=w+pad;y=2
+ sprite=[bytes(flame_rows[v+yy][u*4:(u+fw)*4]) for yy in range(fh)]
+ # Box UV side-face rectangles for the thin X-by-Y-by-Z cube are located at
+ # (u, v+z) and (u+x+z, v+z); populate both visible sides with the original
+ # flame frame. The other box faces remain transparent.
+ uv_x=x-1;uv_y=y-1+fw
+ for sprite_x in (uv_x,uv_x+1+fw):
+  for yy in range(fh):
+   row=rows[uv_y+yy]
+   if len(row)<new_w*4:row.extend(b'\0'*(new_w*4-len(row)))
+   row[sprite_x*4:(sprite_x+fw)*4]=sprite[yy]
  for row in rows:
   if len(row)<new_w*4:row.extend(b'\0'*(new_w*4-len(row)))
  description=geo['minecraft:geometry'][0]['description'];description['texture_width']=new_w
- bones=geo['minecraft:geometry'][0]['bones'];fire=next((b for b in bones if b['name']=='fire'),None)
- if fire is None:raise ValueError(slug+' model has no animated fire bone')
- if d.get('strip_bedrock_locators'):
-  # GeckoLib 3.1.40's geo deserializer has no Bedrock locator support. Minemon
-  # uses the attached flame mesh instead, so remove only unsupported metadata
-  # from the generated runtime copy while retaining the original source JSON.
-  for bone in bones:bone.pop('locators',None)
- # Replace the original zero-width / invalid-UV planes with two crossed,
- # shallow textured cuboids. Box UV arrays are the most consistently
- # supported format across GeckoLib 3 exporters; the back sprite occupies
- # the box-UV south face in the generated atlas.
- # The 1.8.2 Charmander fire pivot moved with its new tail rig. Keep the approved
- # flame center at the same local offset from the fire pivot: (-0.05,+0.5).
- y0,z0={'charmander':(4.2,17.0),'charmeleon':(8.25,18.0),'charizard':(7.75,37.5)}[slug]
- y0-=fh/2
- cube={'origin':[-fw/2,y0,z0-depth/2],'size':[fw,fh,depth],'uv':[x-depth,y-depth]}
- crossed={'origin':[-fw/2,y0,z0-depth/2],'size':[fw,fh,depth],'pivot':[0,y0+fh/2,z0],
-          'rotation':[0,90,0],'uv':[x-depth,y-depth]}
- fire['cubes']=[cube,crossed]
+ # Replace the source zero-width plane by two thin crossing faces. Their
+ # vertical/depth bounds and parent come from the exact Cobblemon geometry;
+ # the previous hard-coded center moved this flame several units down-tail.
+ pivot=host.get('pivot',[0,0,0]);parent=host['name'];host['cubes']=[]
+ cube={'origin':[-0.5,origin[1],origin[2]],'size':[1,fh,fw],'uv':[uv_x,y-1]}
+ crossed={'origin':[-0.5,origin[1],origin[2]],'size':[1,fh,fw],'pivot':pivot,
+          'rotation':[0,90,0],'uv':[uv_x,y-1]}
+ bones.append({'name':'tail_flame','parent':parent,'pivot':pivot,'cubes':[cube,crossed]})
  model.write_text(json.dumps(geo,ensure_ascii=False,indent=2)+'\n')
  texture.write_bytes(encode_png_rgba(new_w,h,rows))
+ source_flame.unlink()
 for d in definitions.values():
  if d.get('generated_static_animation'):
   p=root/'assets/minemon_gen1'/d['animation'].removeprefix('assets/minemon/')
@@ -239,4 +237,12 @@ for p in (root/'assets/minemon_gen1/animations').rglob('*.animation.json'):
   if 'animation_length' not in animation:animation['animation_length']=4.0
  p.write_text(json.dumps(data,ensure_ascii=False,indent=2)+'\n')
  count+=1
+for definition in definitions.values():
+ if not definition.get('strip_bedrock_locators'):continue
+ model=root/'assets/minemon_gen1'/definition['model'].removeprefix('assets/minemon/')
+ if not model.is_file():continue
+ geo=json.loads(model.read_text());changed=False
+ for bone in geo.get('minecraft:geometry',[{}])[0].get('bones',[]):
+  if 'locators' in bone:bone.pop('locators');changed=True
+ if changed:model.write_text(json.dumps(geo,ensure_ascii=False,indent=2)+'\n')
 print('GeckoLib 3 runtime animations prepared:',count)

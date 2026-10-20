@@ -1,6 +1,6 @@
 # Plano proposto — 16 lotes de locomoção Gen 1
 
-**Status:** aguardando autorização para iniciar o Lote 1. Fase 0 ainda não aprovada; nenhuma animação alterada nesta auditoria.
+**Status:** Lote 1 (#001–#010) iniciado por autorização explícita do usuário em 2026-10-20. Lote 2 permanece bloqueado até a conclusão e revisão do Lote 1.
 
 ## Regras comuns dos lotes
 
@@ -33,4 +33,4 @@
 5. **Chamas congeladas:** qualquer ajuste dos três starters preserva posição/UV/offset das chamas já aprovadas.
 6. **Gate:** compilação, testes Java, GameTests de servidor, smoke do cliente, clips verdadeiros e articulações; reter o último JAR aprovado. Efeitos especiais são incluídos quando aplicáveis antes de fechar o lote, sem ampliar ticks sem diagnóstico.
 
-**Não iniciar #001–#010 antes de a Fase 0 passar integralmente e o usuário autorizar o lote.**
+O usuário autorizou neste marco a correção da chama de Charmander seguida imediatamente pelo Lote 1, sem pausa para nova aprovação. O Lote 2 não começa neste marco.

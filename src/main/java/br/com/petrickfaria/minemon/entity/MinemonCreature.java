@@ -57,6 +57,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     private int playedAttackSequence;
     // Client-only diagnostic sample used by the automated locomotion smoke test.
     private String selectedAnimationForValidation;
+    private String selectedTailFlameAnimationForValidation;
 
     public MinemonCreature(EntityType<? extends TamableAnimal> type, Level level) {
         super(type, level);
@@ -274,6 +275,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     public void registerControllers(AnimationData data) {
         data.addAnimationController(new AnimationController<>(this, "movement", 4, this::animationPredicate));
         data.addAnimationController(new AnimationController<>(this, "blink", 0, this::blinkPredicate));
+        data.addAnimationController(new AnimationController<>(this, "tail_flame", 0, this::tailFlamePredicate));
     }
 
     private <E extends IAnimatable> PlayState animationPredicate(AnimationEvent<E> event) {
@@ -307,6 +309,16 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     }
 
     public String getSelectedAnimationForValidation() { return this.selectedAnimationForValidation; }
+
+    public String getSelectedTailFlameAnimationForValidation() { return this.selectedTailFlameAnimationForValidation; }
+
+    private <E extends IAnimatable> PlayState tailFlamePredicate(AnimationEvent<E> event) {
+        String clip=SpeciesAssetIndex.clip(this.getSpeciesSlug(), "tail_flame", "tail_flame");
+        if (clip == null) return PlayState.STOP;
+        event.getController().setAnimation(new AnimationBuilder().addAnimation(clip, true));
+        if (Boolean.getBoolean("minemon.clientSmokeTest")) this.selectedTailFlameAnimationForValidation=clip;
+        return PlayState.CONTINUE;
+    }
 
     private boolean isMoving(AnimationEvent<?> event) {
         return !this.isOrderedToSit() && (event.isMoving() || this.getDeltaMovement().horizontalDistanceSqr() > 0.0004D || (this.getX()-this.xo)*(this.getX()-this.xo)+(this.getZ()-this.zo)*(this.getZ()-this.zo)>0.0001D);

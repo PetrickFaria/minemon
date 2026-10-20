@@ -9,6 +9,8 @@ def validate(read,definitions,prepared=False,packed=False):
   number=d['nationalPokedexNumber']
   if number<=previous:raise ValueError('Runtime roster is not in National Pokédex order')
   previous=number
+  if number<=10 and not all('_cobblemon_1_8_2/' in d[key] for key in ('model','texture','animation')):
+   raise ValueError('Batch 1 species is not using all three Cobblemon 1.8.2 assets: '+d['slug'])
   model_path=runtime_path(d['model']) if packed else d['model']; animation_path=runtime_path(d['animation']) if packed else d['animation']; texture_path=runtime_path(d['texture']) if packed else d['texture']
   g=json.loads(read(model_path))
   try:a=json.loads(read(animation_path))['animations']
@@ -33,26 +35,34 @@ def validate(read,definitions,prepared=False,packed=False):
    if prepared:
     if re.search(r'\bq\.',json.dumps(v)):raise ValueError(name+' unbound q alias')
     if 'animation_length' in v and v['animation_length']<=0:raise ValueError(name+' zero duration')
-  generated=lambda n:any(n.endswith('.minemon_'+suffix) for suffix in ('run','sit','sleep','physical_attack'))
+  generated=lambda n:any(n.endswith('.minemon_'+suffix) for suffix in ('run','sit','sleep','physical_attack','tail_flame'))
   for name in d['clips'].values():
    if name not in a and (prepared or not generated(name)):raise ValueError('Missing referenced clip '+name)
   attack=next((d['clips'][n] for n in ('physical_attack','physical','attack') if n in d['clips']),None)
   if attack and attack in a and d.get('attackTicks')!=math.ceil(a[attack]['animation_length']*20):raise ValueError('Attack duration mismatch '+d['slug'])
   if d['idle'] not in a or d['walk'] not in a:raise ValueError('Missing state clip '+d['slug'])
+  if number<=10:
+   source_runs={3:'animation.venusaur.ground_run',6:'animation.charizard.ground_run',9:'animation.blastoise.ground_run'}
+   expected_run=source_runs.get(number)
+   if d['clips'].get('ground_run')!=expected_run:raise ValueError('Batch 1 source run reference differs from audited poser evidence: '+d['slug'])
   if prepared:
    for state,keys in {'run':('ground_run','run'),'sit':('sit',),'sleep':('sleep',),'attack':('physical_attack','physical','attack')}.items():
     if state=='run' and not any(d['clips'].get(k) in a for k in keys):continue
     if not any(d['clips'].get(k) in a for k in keys):raise ValueError('Missing prepared '+state+' animation '+d['slug'])
    if d['slug'] in ('charmander','charmeleon','charizard'):
-    fire=next((b for b in g['minecraft:geometry'][0]['bones'] if b['name']=='fire'),None)
-    cubes=fire.get('cubes',[]) if fire else []
+    anchor=d.get('flame_anchor');flame=next((b for b in g['minecraft:geometry'][0]['bones'] if b['name']=='tail_flame'),None)
+    if not anchor or not flame or flame.get('parent')!=anchor['host']:raise ValueError('Tail flame is not attached to its source flame bone: '+d['slug'])
+    cubes=flame.get('cubes',[])
     if len(cubes)!=2 or any(any(n<=0 for n in cube.get('size',[])) for cube in cubes):raise ValueError('Tail flame is missing or has degenerate geometry: '+d['slug'])
-    if d['slug']=='charmander':
-     pivot=fire.get('pivot',[])
-     for cube in cubes:
-      origin=cube.get('origin',[]);size=cube.get('size',[])
-      if len(pivot)!=3 or len(origin)!=3 or len(size)!=3 or abs((origin[1]+size[1]/2)-pivot[1]+0.05)>0.001 or abs((origin[2]+size[2]/2)-pivot[2]-0.5)>0.001:
-       raise ValueError('Charmander runtime flame moved from its approved local fire-bone offset')
+    for cube in cubes:
+     origin=cube.get('origin',[]);size=cube.get('size',[])
+     if len(origin)!=3 or len(size)!=3 or abs(origin[1]-anchor['origin'][1])>0.001 or abs(origin[2]-anchor['origin'][2])>0.001 or abs((origin[1]+size[1])- (anchor['origin'][1]+anchor['size'][1]))>0.001 or abs((origin[2]+size[2])-(anchor['origin'][2]+anchor['size'][2]))>0.001:
+      raise ValueError('Tail flame geometry no longer matches the source plane bounds: '+d['slug'])
+   if d['slug']=='charmander':
+    if d.get('tail_flame_animation'):
+     flame_clip=d['clips'].get('tail_flame');clip=a.get(flame_clip,{})
+     if not flame_clip or not clip.get('loop') or not {'rotation','scale'}.issubset(clip.get('bones',{}).get('tail_flame',{})):
+      raise ValueError('Charmander has no independent looping tail-flame rotation/scale animation')
     texwidth=g['minecraft:geometry'][0]['description']['texture_width']
     for cube in cubes:
      uv=cube.get('uv',[]);u,v=uv if isinstance(uv,list) and len(uv)==2 else (-1,-1)

@@ -14,7 +14,7 @@ public class MolangCompatibilityTest {
   assertTrue("Canonical animation clock must move the bone", Math.abs(nativeExpr.get()-start)>0.5);
  }
  @Test public void preparedBulbasaurBodyAndLegChannelsAdvance() throws Exception {
-  var stream=java.nio.file.Files.newInputStream(java.nio.file.Path.of(System.getProperty("minemon.testResources"),"assets/minemon_gen1/animations/bulbasaur/bulbasaur.animation.json"));
+  var stream=java.nio.file.Files.newInputStream(java.nio.file.Path.of(System.getProperty("minemon.testResources"),"assets/minemon_gen1/animations/bulbasaur_cobblemon_1_8_2/bulbasaur.animation.json"));
   assertNotNull(stream);
   var root=com.google.gson.JsonParser.parseReader(new java.io.InputStreamReader(stream,java.nio.charset.StandardCharsets.UTF_8)).getAsJsonObject();
   var walk=root.getAsJsonObject("animations").getAsJsonObject("animation.bulbasaur.ground_walk");
@@ -40,10 +40,21 @@ public class MolangCompatibilityTest {
   var animations=com.google.gson.JsonParser.parseReader(java.nio.file.Files.newBufferedReader(path)).getAsJsonObject().getAsJsonObject("animations");
   var idle=animations.getAsJsonObject("animation.charmander.ground_idle");
   var walk=animations.getAsJsonObject("animation.charmander.ground_walk");
+  var flame=animations.getAsJsonObject("animation.charmander.minemon_tail_flame");
   assertNotNull("Cobblemon idle clip is present",idle);
   assertNotNull("Cobblemon walk clip is present",walk);
+  assertNotNull("Charmander has a dedicated tail flame clip",flame);
   assertTrue("Idle loops",idle.get("loop").getAsBoolean());
   assertTrue("Walk loops",walk.get("loop").getAsBoolean());
+  assertTrue("Tail flame clip loops",flame.get("loop").getAsBoolean());
+  assertTrue("Tail flame independently bends and flickers",flame.getAsJsonObject("bones").getAsJsonObject("tail_flame").has("rotation")&&flame.getAsJsonObject("bones").getAsJsonObject("tail_flame").has("scale"));
+  var flameBone=flame.getAsJsonObject("bones").getAsJsonObject("tail_flame");
+  var flameBend=parser.parseExpression(flameBone.getAsJsonArray("rotation").get(0).getAsString());
+  parser.setValue("query.anim_time",0.0);first=flameBend.get();parser.setValue("query.anim_time",0.5);
+  assertTrue("Independent flame bend changes over time",Math.abs(flameBend.get()-first)>0.1);
+  var flameScale=parser.parseExpression(flameBone.getAsJsonArray("scale").get(1).getAsString());
+  parser.setValue("query.anim_time",0.0);first=flameScale.get();parser.setValue("query.anim_time",0.5);
+  assertTrue("Independent flame shape subtly expands and contracts",Math.abs(flameScale.get()-first)>0.005);
   var parser=new MolangParser();
   var loadedIdle=software.bernie.geckolib3.util.json.JsonAnimationUtils.deserializeJsonToAnimation(
     new java.util.AbstractMap.SimpleImmutableEntry<String,com.google.gson.JsonElement>("animation.charmander.ground_idle",idle),parser);

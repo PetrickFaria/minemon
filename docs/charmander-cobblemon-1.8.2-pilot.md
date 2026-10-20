@@ -1,4 +1,6 @@
-# Piloto Charmander — Cobblemon 1.8.2
+# Piloto Charmander — Cobblemon 1.8.2 (registro histórico)
+
+> Este documento descreve o commit-piloto `8061ea9` e não o estado atual do Lote 1. A chama em malha sintética e o texto de “offset aprovado” abaixo foram substituídos pela adaptação baseada no pivô/UV do modelo fonte e pelo clip independente `tail_flame`. Consulte [`minemon-gen1-batch1-cobblemon-1.8.2.md`](animation-audit/minemon-gen1-batch1-cobblemon-1.8.2.md) para o estado atual.
 
 ## Escopo e preservação
 
