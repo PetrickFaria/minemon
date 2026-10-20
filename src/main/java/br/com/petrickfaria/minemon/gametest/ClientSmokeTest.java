@@ -38,6 +38,8 @@ public final class ClientSmokeTest {
      && event.getSource().getEntity() instanceof MinemonCreature b && b.getUUID().equals(testEntity))combatHits++;
  }
  private static int direction=1;
+ private static String renderedPhaseSpecies;
+ private static int renderedPhase=-1,renderedPhaseFrames;
  private static final int SPECIES_TEST_WINDOW=80;
  private static final int BULBASAUR_VALIDATION_TICK=430;
  private static final int COMBAT_VALIDATION_TICK=BULBASAUR_VALIDATION_TICK+100;
@@ -105,6 +107,14 @@ public final class ClientSmokeTest {
      if(method.getParameterCount()==1&&method.getParameterTypes()[0]==String.class){method.invoke(flows,"minemon-validation");invoked=true;break;}
     }
     if(!invoked)throw new IllegalStateException("Could not locate WorldOpenFlows.loadLevel");
+    // Animation selection receives a controlled input, independent of the timing
+    // of velocity packets and client-side friction. World movement is still
+    // driven by real server travel and checked separately for every species.
+    MinemonRenderer.validationInput=entity->{
+     Integer phase=validationPhase(entity);
+     if(phase!=null && ARTICULATION_VALIDATION_SPECIES.contains(entity.getSpeciesSlug()))
+      entity.setDeltaMovement(animationVelocity(phase),0,0);
+    };
     MinemonRenderer.validationObserver=(entity,model)->{
      if(mc.getResourceManager().getResource(model.getTextureResource(entity)).isEmpty())throw new IllegalStateException("Missing rendered texture "+entity.getSpeciesSlug());
      String slug=entity.getSpeciesSlug();renderedSpecies.add(slug);
@@ -119,6 +129,12 @@ public final class ClientSmokeTest {
      // these samples by displacement can alias animation keyframes when the
      // client batches several server ticks into a single render frame.
      Integer validationPhase=validationPhase(entity);
+     if(validationPhase!=null && ARTICULATION_VALIDATION_SPECIES.contains(slug)) {
+      if(!slug.equals(renderedPhaseSpecies)||renderedPhase!=validationPhase) {
+       renderedPhaseSpecies=slug;renderedPhase=validationPhase;renderedPhaseFrames=0;
+      }
+      renderedPhaseFrames++;
+     }
      if(validationPhase!=null) {
       if(slug.equals("charmander")||slug.equals("charmeleon")||slug.equals("charizard")) {
        var left=model.getAnimationProcessor().getBone("arm_left");var right=model.getAnimationProcessor().getBone("arm_right");
@@ -191,6 +207,15 @@ public final class ClientSmokeTest {
     });
    }
    if(mc.screen!=null || (worldTicks==0 && (initialEntityId==0 || mc.level.getEntity(initialEntityId)==null || mc.player.getY()<100)))return;
+   // Do not skip a short input phase when the client batches ticks between
+   // render frames. Keep every original phase and assertion, and require two
+   // rendered observations before advancing the ten-species fixture.
+   if(worldTicks>=SPECIES_START_TICK && worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW) {
+    String active=species.get((worldTicks-SPECIES_START_TICK)/SPECIES_TEST_WINDOW);
+    int appliedPhase=(worldTicks-SPECIES_START_TICK)%SPECIES_TEST_WINDOW;
+    if(ARTICULATION_VALIDATION_SPECIES.contains(active)
+       && (!active.equals(renderedPhaseSpecies)||renderedPhase!=appliedPhase||renderedPhaseFrames<2))return;
+   }
    worldTicks++;
    if(worldTicks==70||worldTicks==170)Screenshot.grab(mc.gameDirectory,mc.getMainRenderTarget(),message->{});
    if(worldTicks>=100&&worldTicks<BULBASAUR_VALIDATION_TICK)mc.getSingleplayerServer().execute(()->{
@@ -232,17 +257,7 @@ public final class ClientSmokeTest {
      // the controlled velocity used to select the locomotion clips.
      current.setNoAi(false);current.getNavigation().stop();
      if(current.getX()>2.5)direction=-1;if(current.getX()<-2.5)direction=1;
-     double animationVelocity;
-     if(phase<8 || phase>=54) animationVelocity=0.0D;                         // idle
-     else if(phase<16) animationVelocity=(phase-7)*0.00625D;                  // walk start
-     else if(phase<24) animationVelocity=0.05D;                              // steady walk
-     else if(phase<27) animationVelocity=(27-phase)*0.0166667D;              // walk deceleration
-     else if(phase<34) animationVelocity=0.0D;                               // idle return
-     else if(phase<38) animationVelocity=(phase-33)*0.03D;                   // run transition
-     else if(phase<47) animationVelocity=0.12D;                              // steady run
-     else if(phase<49) animationVelocity=0.16D;                              // run remains selected in early deceleration
-     else if(phase<52) animationVelocity=0.05D;                              // transition to walk
-     else animationVelocity=0.0D;                                            // transition to idle
+     double animationVelocity=animationVelocity(phase);
      if(animationVelocity>0.0D){
       current.setDeltaMovement(direction*animationVelocity,0,0);
       current.hasImpulse=true;
@@ -279,6 +294,18 @@ public final class ClientSmokeTest {
    }
   }catch(Exception e){throw new IllegalStateException("Minemon client validation failed",e);}
  }
+  private static double animationVelocity(int phase) {
+   if(phase<8 || phase>=54)return 0.0D;
+   if(phase<16)return (phase-7)*0.00625D;
+   if(phase<24)return 0.05D;
+   if(phase<27)return (27-phase)*0.0166667D;
+   if(phase<34)return 0.0D;
+   if(phase<38)return (phase-33)*0.03D;
+   if(phase<47)return 0.12D;
+   if(phase<49)return 0.16D;
+   if(phase<52)return 0.05D;
+   return 0.0D;
+  }
   private static boolean isSettledClipSample(int phase) {
    // Ignore samples at phase boundaries; the model renderer can run before
    // GeckoLib has evaluated this tick's controller predicate.
