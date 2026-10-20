@@ -149,5 +149,166 @@
       "hand_left",
       "hand_right"
     ]
+  },
+  "spearow": {
+    "idle": [
+      "head"
+    ],
+    "walk": [
+      "leg_left",
+      "leg_right"
+    ],
+    "run": [
+      "leg_left",
+      "leg_right"
+    ]
+  },
+  "fearow": {
+    "idle": [
+      "head"
+    ],
+    "walk": [
+      "leg_left",
+      "leg_right"
+    ],
+    "run": [
+      "leg_left",
+      "leg_right"
+    ]
+  },
+  "ekans": {
+    "idle": [
+      "head",
+      "neck",
+      "tail5"
+    ],
+    "walk": [
+      "tail",
+      "tail2",
+      "tail3",
+      "body"
+    ],
+    "run": [
+      "tail",
+      "tail2",
+      "tail3",
+      "body"
+    ]
+  },
+  "arbok": {
+    "idle": [
+      "body_upper",
+      "body_upper2",
+      "tail",
+      "tail2"
+    ],
+    "walk": [
+      "body_upper",
+      "body_upper2",
+      "tail",
+      "tail2"
+    ],
+    "run": [
+      "body_upper",
+      "body_upper2",
+      "tail",
+      "tail2"
+    ]
+  },
+  "pikachu": {
+    "idle": [
+      "leg_left",
+      "leg_right"
+    ],
+    "walk": [
+      "leg_left",
+      "leg_right"
+    ],
+    "run": [
+      "leg_left",
+      "leg_right"
+    ]
+  },
+  "raichu": {
+    "idle": [
+      "leg_left",
+      "leg_right"
+    ],
+    "walk": [
+      "leg_left",
+      "leg_right"
+    ],
+    "run": [
+      "leg_left",
+      "leg_right"
+    ]
+  },
+  "sandshrew": {
+    "idle": [
+      "leg_left",
+      "leg_right"
+    ],
+    "walk": [
+      "leg_left",
+      "leg_right"
+    ],
+    "run": [
+      "ball"
+    ]
+  },
+  "sandslash": {
+    "idle": [
+      "arm_left",
+      "arm_right",
+      "tail"
+    ],
+    "walk": [
+      "leg_left",
+      "leg_right"
+    ],
+    "run": [
+      "leg_left",
+      "leg_right"
+    ]
+  },
+  "nidoranf": {
+    "idle": [
+      "leg_front_left",
+      "leg_front_right",
+      "leg_back_left",
+      "leg_back_right"
+    ],
+    "walk": [
+      "leg_front_left",
+      "leg_front_right",
+      "leg_back_left",
+      "leg_back_right"
+    ],
+    "run": [
+      "leg_front_left",
+      "leg_front_right",
+      "leg_back_left",
+      "leg_back_right"
+    ]
+  },
+  "nidorina": {
+    "idle": [
+      "left_leg",
+      "right_leg",
+      "left_upper_arm",
+      "right_upper_arm"
+    ],
+    "walk": [
+      "left_leg",
+      "right_leg",
+      "left_upper_arm",
+      "right_upper_arm"
+    ],
+    "run": [
+      "left_leg",
+      "right_leg",
+      "left_upper_arm",
+      "right_upper_arm"
+    ]
   }
 }

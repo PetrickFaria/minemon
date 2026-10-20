@@ -1,0 +1,343 @@
+{
+  "batch": 3,
+  "range": [
+    21,
+    30
+  ],
+  "source_url": "https://cdn.modrinth.com/data/MdwFAVRL/versions/GJ2a1b8O/Cobblemon-fabric-1.8.2%2B1.21.1.jar",
+  "source_sha256": "cae8ac328b61354fbe415208b8c6ffc12e7155094d0a87082e85e7914fb380c2",
+  "manual_visual_status": "pending; user authorized validation after batch 3",
+  "species": [
+    {
+      "number": 21,
+      "slug": "spearow",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0021_spearow/spearow.geo.json",
+      "idle": "animation.spearow.ground_idle",
+      "movement": "animation.spearow.minemon_poser_walk",
+      "mode": "ground",
+      "native_run": null,
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "head"
+        ],
+        "walk": [
+          "leg_left",
+          "leg_right"
+        ],
+        "run": [
+          "leg_left",
+          "leg_right"
+        ]
+      },
+      "stripped_bones": {
+        "animation.spearow.ground_idle": [
+          "wing_left",
+          "wing_left2",
+          "wing_left3",
+          "wing_right",
+          "wing_right2",
+          "wing_right3"
+        ]
+      }
+    },
+    {
+      "number": 22,
+      "slug": "fearow",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0022_fearow/fearow.geo.json",
+      "idle": "animation.fearow.ground_idle",
+      "movement": "animation.fearow.minemon_poser_walk",
+      "mode": "ground",
+      "native_run": null,
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "head"
+        ],
+        "walk": [
+          "leg_left",
+          "leg_right"
+        ],
+        "run": [
+          "leg_left",
+          "leg_right"
+        ]
+      },
+      "stripped_bones": {
+        "animation.fearow.ground_idle": [
+          "hairstrand",
+          "hairstrand2"
+        ]
+      }
+    },
+    {
+      "number": 23,
+      "slug": "ekans",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0023_ekans/ekans.geo.json",
+      "idle": "animation.ekans.ground_idle",
+      "movement": "animation.ekans.ground_walk",
+      "mode": "ground",
+      "native_run": "animation.ekans.ground_run",
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "head",
+          "neck",
+          "tail5"
+        ],
+        "walk": [
+          "tail",
+          "tail2",
+          "tail3",
+          "body"
+        ],
+        "run": [
+          "tail",
+          "tail2",
+          "tail3",
+          "body"
+        ]
+      },
+      "stripped_bones": {}
+    },
+    {
+      "number": 24,
+      "slug": "arbok",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0024_arbok/arbok.geo.json",
+      "idle": "animation.arbok.ground_idle",
+      "movement": "animation.arbok.ground_walk",
+      "mode": "ground",
+      "native_run": "animation.arbok.ground_run",
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "body_upper",
+          "body_upper2",
+          "tail",
+          "tail2"
+        ],
+        "walk": [
+          "body_upper",
+          "body_upper2",
+          "tail",
+          "tail2"
+        ],
+        "run": [
+          "body_upper",
+          "body_upper2",
+          "tail",
+          "tail2"
+        ]
+      },
+      "stripped_bones": {
+        "animation.arbok.faint": [
+          "tongue_opening"
+        ]
+      }
+    },
+    {
+      "number": 25,
+      "slug": "pikachu",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0025_pikachu/pikachu_male.geo.json",
+      "idle": "animation.pikachu.ground_idle",
+      "movement": "animation.pikachu.ground_walk",
+      "mode": "ground",
+      "native_run": "animation.pikachu.ground_run",
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "leg_left",
+          "leg_right"
+        ],
+        "walk": [
+          "leg_left",
+          "leg_right"
+        ],
+        "run": [
+          "leg_left",
+          "leg_right"
+        ]
+      },
+      "stripped_bones": {
+        "animation.pikachu.battle_cry": [
+          "cheek_left",
+          "cheek_right",
+          "mouth_closed_outer",
+          "mouth_open_happy",
+          "mouth_open_o"
+        ],
+        "animation.pikachu.look_quirk": [
+          "highlight_right",
+          "mouth_closed_outer",
+          "waist"
+        ],
+        "animation.pikachu.shoulder_left": [
+          "elbow_left",
+          "elbow_right",
+          "waist"
+        ],
+        "animation.pikachu.shoulder_right": [
+          "elbow_left",
+          "elbow_right",
+          "waist"
+        ],
+        "animation.pikachu.sleep": [
+          "elbow_left",
+          "elbow_right",
+          "waist"
+        ],
+        "animation.pikachu.surfacewater_idle": [
+          "elbow_left",
+          "elbow_right",
+          "waist"
+        ],
+        "animation.pikachu.surfacewater_swim": [
+          "elbow_left",
+          "elbow_right",
+          "waist"
+        ]
+      }
+    },
+    {
+      "number": 26,
+      "slug": "raichu",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0026_raichu/raichu_male.geo.json",
+      "idle": "animation.raichu.ground_idle",
+      "movement": "animation.raichu.ground_walk",
+      "mode": "ground",
+      "native_run": "animation.raichu.ground_run",
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "leg_left",
+          "leg_right"
+        ],
+        "walk": [
+          "leg_left",
+          "leg_right"
+        ],
+        "run": [
+          "leg_left",
+          "leg_right"
+        ]
+      },
+      "stripped_bones": {}
+    },
+    {
+      "number": 27,
+      "slug": "sandshrew",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0027_sandshrew/sandshrew.geo.json",
+      "idle": "animation.sandshrew.ground_idle",
+      "movement": "animation.sandshrew.ground_walk",
+      "mode": "ground",
+      "native_run": "animation.sandshrew.ground_run",
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "leg_left",
+          "leg_right"
+        ],
+        "walk": [
+          "leg_left",
+          "leg_right"
+        ],
+        "run": [
+          "ball"
+        ]
+      },
+      "stripped_bones": {}
+    },
+    {
+      "number": 28,
+      "slug": "sandslash",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0028_sandslash/sandslash.geo.json",
+      "idle": "animation.sandslash.ground_idle",
+      "movement": "animation.sandslash.ground_walk",
+      "mode": "ground",
+      "native_run": null,
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "arm_left",
+          "arm_right",
+          "tail"
+        ],
+        "walk": [
+          "leg_left",
+          "leg_right"
+        ],
+        "run": [
+          "leg_left",
+          "leg_right"
+        ]
+      },
+      "stripped_bones": {
+        "animation.sandslash.faint": [
+          "tail3"
+        ]
+      }
+    },
+    {
+      "number": 29,
+      "slug": "nidoranf",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0029_nidoranf/nidoranf.geo.json",
+      "idle": "animation.nidoranf.ground_idle",
+      "movement": "animation.nidoranf.ground_walk",
+      "mode": "ground",
+      "native_run": "animation.nidoranf.ground_run",
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "leg_front_left",
+          "leg_front_right",
+          "leg_back_left",
+          "leg_back_right"
+        ],
+        "walk": [
+          "leg_front_left",
+          "leg_front_right",
+          "leg_back_left",
+          "leg_back_right"
+        ],
+        "run": [
+          "leg_front_left",
+          "leg_front_right",
+          "leg_back_left",
+          "leg_back_right"
+        ]
+      },
+      "stripped_bones": {}
+    },
+    {
+      "number": 30,
+      "slug": "nidorina",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0030_nidorina/nidorina.geo.json",
+      "idle": "animation.nidorina.ground_idle",
+      "movement": "animation.nidorina.ground_walk",
+      "mode": "ground",
+      "native_run": "animation.nidorina.ground_run",
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "left_leg",
+          "right_leg",
+          "left_upper_arm",
+          "right_upper_arm"
+        ],
+        "walk": [
+          "left_leg",
+          "right_leg",
+          "left_upper_arm",
+          "right_upper_arm"
+        ],
+        "run": [
+          "left_leg",
+          "right_leg",
+          "left_upper_arm",
+          "right_upper_arm"
+        ]
+      },
+      "stripped_bones": {}
+    }
+  ]
+}

@@ -157,8 +157,15 @@ public final class ClientSmokeTest {
     // driven by real server travel and checked separately for every species.
     MinemonRenderer.validationInput=entity->{
      Integer phase=validationPhase(entity);
-     if(phase!=null && ARTICULATION_VALIDATION_SPECIES.contains(entity.getSpeciesSlug()))
+     if(phase!=null && ARTICULATION_VALIDATION_SPECIES.contains(entity.getSpeciesSlug())) {
       entity.setDeltaMovement(animationVelocity(phase),0,0);
+      if(entity.getSpeciesSlug().equals("spearow")||entity.getSpeciesSlug().equals("fearow")) {
+       // Probe the native procedural look input while preserving a static idle
+       // stance; no invented autonomous idle oscillation is claimed.
+       entity.setXRot((float)Math.sin(entity.tickCount*0.17F)*12.0F);
+       entity.yHeadRot=entity.getYRot()+(float)Math.sin(entity.tickCount*0.13F)*25.0F;
+      }
+     }
     };
     MinemonRenderer.validationObserver=(entity,model)->{
      if(mc.getResourceManager().getResource(model.getTextureResource(entity)).isEmpty())throw new IllegalStateException("Missing rendered texture "+entity.getSpeciesSlug());
