@@ -11,8 +11,8 @@ Escopo exclusivo #031–#040: Nidoqueen, Nidoran♂, Nidorino, Nidoking, Clefair
 - [x] Criar branch própria preservando os três lotes anteriores.
 - [x] Auditar modelos, variantes, texturas, ossos, clips e posers Cobblemon 1.8.2.
 - [x] Importar exclusivamente dez espécies, preservando outras 141 entradas.
-- [ ] Compilar, testes Java, GameTests servidor, smoke cliente cumulativo e inspeção real do JAR.
-- [ ] Publicar links de commit, execução aprovada e artefato.
+- [x] Compilar, testes Java, GameTests servidor, smoke cliente cumulativo e inspeção real do JAR.
+- [x] Publicar links de commit, execução aprovada e artefato.
 
 ## Recuperação
 
@@ -61,8 +61,24 @@ A inicialização contém mensagens de parser Molang que também aparecem na exe
 
 Conferidos sem alteração nas dez espécies: mode, scale, width, height, health, attack, speed, cores dos ovos, sons, número e slug. Nenhum arquivo de entidades, IA, captura ou batalha foi modificado. Nidoking passa a usar o physical nativo de 3 segundos; attackTicks=60 sincroniza somente o controlador visual (handleEntityEvent/predicate de MinemonCreature), sem alterar dano, cooldown ou MeleeAttackGoal. Clefable conserva duração visual de 40 ticks; demais oito conservam 12 ticks.
 
-## Validação em andamento
+## Resultado final automatizado
 
-Commit de implementação: `f9cda38a0834ebfd7cde21a13286a5b752a5ae05`.
-Execução: [39475562845](https://github.com/PetrickFaria/minemon/actions/runs/39475562845).
-Em 2026-10-20 18:53 UTC: compilação completa, testes Java, preservação e 13 GameTests aprovados. Smoke cliente ainda em execução; inspeção do JAR e publicação do artefato pendentes. Não repetir ou reiniciar esta execução ao retomar. Este checkpoint altera somente documentação e não dispara outro build.
+Aprovado em [Actions 39475562845](https://github.com/PetrickFaria/minemon/actions/runs/39475562845), commit de código/JAR `f9cda38a0834ebfd7cde21a13286a5b752a5ae05`. Execução concluída em 20/10/2026 às 15:58 (Brasília).
+
+| Gate | Resultado |
+|---|---|
+| Recursos JSON/PNG e roster | Aprovado, 151 espécies |
+| Preservação comparada à base 8bba5b0 | Aprovado, outras 141 entradas e recursos anteriores intactos |
+| Compilação completa e testes Java | Aprovado |
+| GameTests servidor | 13 obrigatórios aprovados |
+| Smoke cliente | Aprovado na primeira tentativa; 24m07s de processo |
+| Renderização/textura/movimento e combate real | Aprovado, todas as 151 espécies |
+| Articulações cumulativas dos primeiros 40 e regressões dos starters | Aprovado; validateArticulationProfiles executa antes do PASS LOCOMOTION, incluindo chama independente do Charmander e braços dos starters |
+| Inspeção real do JAR | Aprovado, 151 ovos/registros e os 40 conjuntos selecionados com perfis cumulativos |
+| Inspeção visual manual | Pendente por decisão do usuário |
+
+[Baixar artefato com o único JAR atualizado](https://github.com/PetrickFaria/minemon/actions/runs/39475562845/artifacts/12290856969). Artefato `Minemon-1.19.2-2.0.0-gen1`, ID 12290856969; upload confirmou um único arquivo. Contém os quatro primeiros lotes (40 atualizados), mantendo os 151 registrados. Expiração prevista: 03/11/2026 às 15:58 (Brasília). SHA-256 do ZIP do artefato (não do JAR interno): `e669a269ad53204ac3c7b07a5355f7e53123dbef5cfa182c978ff0d91ac93c28`.
+
+[Diagnósticos, relatórios Java, client-validation.txt e capturas](https://github.com/PetrickFaria/minemon/actions/runs/39475562845/artifacts/12290272398).
+
+Este fechamento altera somente documentação. O código e os recursos do JAR são exatamente os do commit aprovado acima. Nenhum workflow foi repetido após a aprovação. Lote 5 não iniciado.
