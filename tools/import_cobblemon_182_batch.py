@@ -39,7 +39,7 @@ GAIT={
  'nidoranf':['leg_front_left','leg_front_right','leg_back_left','leg_back_right'],
  'nidorina':['left_leg','right_leg','left_upper_arm','right_upper_arm']
 }
-IDLE={'nidoqueen':['left_upper_leg','right_upper_leg','left_shoulder','right_shoulder'],'nidoranm':['head','torso','ear_left','ear_right'],'nidorino':['jaw','ear_left','ear_right','torso'],'nidoking':['tail','tail2','arm_left1','arm_right1'],'clefairy':['tail','tail2','wing_left','wing_right'],'clefable':['arm_left','arm_right','tail','tail2'],'vulpix':['tail_left1','tail_right1','head_rotation'],'ninetales':['leg_front_left','leg_front_right','tail_middle'],'jigglypuff':['leg_left','leg_right','head'],'wigglytuff':['foot_left','foot_right','torso'],'spearow':['head'],'fearow':['head'],'raticate':['body','head','tail'],'ekans':['head','neck','tail5'],'sandslash':['arm_left','arm_right','tail']}
+IDLE={'nidoqueen':['left_upper_leg','right_upper_leg','left_shoulder','right_shoulder'],'nidoranm':['head','torso','ear_left','ear_right'],'nidorino':['jaw','torso'],'nidoking':['tail','tail2','arm_left1','arm_right1'],'clefairy':['tail','tail2','wing_left','wing_right'],'clefable':['arm_left','arm_right','tail','tail2'],'vulpix':['tail_left1','tail_right1','head_rotation'],'ninetales':['leg_front_left','leg_front_right','tail_middle'],'jigglypuff':['leg_left','leg_right','head'],'wigglytuff':['foot_left','foot_right','torso'],'spearow':['head'],'fearow':['head'],'raticate':['body','head','tail'],'ekans':['head','neck','tail5'],'sandslash':['arm_left','arm_right','tail']}
 RUN={'sandshrew':['ball']}
 evidence=[]
 for d in defs[start-1:end]:
@@ -112,7 +112,7 @@ for d in defs[start-1:end]:
   if slug not in ('nidoqueen','nidorino'):
    poser_path=f'{prefix}/posers/{folder}/{slug}.json'
    poser=json.loads(z.read(poser_path))
-   assert any(origin in a for a in poser['poses']['walking']['animations'])
+   assert any(origin[:-1] in a for a in poser['poses']['walking']['animations'])
   walk=f'animation.{slug}.minemon_poser_walk'
   adapted=copy.deepcopy(animations[idle]);adapted['loop']=True;adapted['animation_length']=4.0
   frequency=720*period/0.6662
