@@ -62,8 +62,10 @@ def build_runtime_clips(data,geo,d):
   animations[flame_name]={
    'animation_length':1.0,'loop':True,
    'bones':{'tail_flame':{
-    'rotation':['2.4*math.sin(query.anim_time*0.42)','1.2*math.sin(query.anim_time*0.31+1.1)','1.8*math.sin(query.anim_time*0.53)'],
-    'scale':['1.0+0.035*math.sin(query.anim_time*0.48)','1.0+0.065*math.sin(query.anim_time*0.42+0.4)','1.0+0.035*math.sin(query.anim_time*0.48)']
+    # Molang math.sin takes degrees; the previous sub-degree-per-second
+    # multipliers produced effectively static bending and scale changes.
+    'rotation':['2.4*math.sin(query.anim_time*90)','1.2*math.sin(query.anim_time*72+35)','1.8*math.sin(query.anim_time*108+110)'],
+    'scale':['1.0+0.035*math.sin(query.anim_time*90+20)','1.0+0.065*math.sin(query.anim_time*72+45)','1.0+0.035*math.sin(query.anim_time*90+20)']
    }}
   }
 
