@@ -71,6 +71,17 @@ public final class ClientSmokeTest {
    java.util.Map.entry("nidorina",java.util.List.of("left_leg","right_leg")),
    java.util.Map.entry("meowth",java.util.List.of("leg_left","leg_right"))
   );
+  // These source idle clips intentionally keep their gait legs static. Inspect
+  // their animated idle joints without weakening the leg checks for walk/run.
+  private static final java.util.Map<String,java.util.List<String>> IDLE_PROFILES=java.util.Map.of(
+   "bulbasaur",java.util.List.of("torso","head"),
+   "squirtle",java.util.List.of("arm_left","arm_right","torso"),
+   "wartortle",java.util.List.of("arm_left","arm_right","torso")
+  );
+  private static java.util.List<String> profileJoints(String slug,String state) {
+   return state.startsWith("IDLE_") && IDLE_PROFILES.containsKey(slug)
+    ? IDLE_PROFILES.get(slug) : ARTICULATION_PROFILES.getOrDefault(slug,java.util.List.of());
+  }
   private static final java.util.Map<String,java.util.Map<String,float[]>> articulationRanges=new java.util.HashMap<>();
   private static final java.util.Map<String,java.util.Map<String,java.util.Set<String>>> articulationClips=new java.util.HashMap<>();
   private static final java.util.Map<String,java.util.Map<String,Integer>> articulationSampleCounts=new java.util.HashMap<>();
@@ -169,7 +180,7 @@ public final class ClientSmokeTest {
          .computeIfAbsent(state,k->new java.util.HashSet<>()).add("phase="+phase+",clip="+entity.getSelectedAnimationForValidation()+",velocitySqr="+velocitySqr+",positionDeltaSqr="+displacementSqr);
        }
        var perSpecies=articulationRanges.computeIfAbsent(slug,k->new java.util.HashMap<>());
-       for(String joint:ARTICULATION_PROFILES.get(slug)) {
+       for(String joint:profileJoints(slug,state)) {
         var bone=model.getAnimationProcessor().getBone(joint);
         if(bone==null)throw new IllegalStateException("Locomotion profile references missing bone "+slug+":"+joint);
         float[] values={bone.getRotationX(),bone.getRotationY(),bone.getRotationZ(),bone.getPositionX(),bone.getPositionY(),bone.getPositionZ()};
@@ -352,7 +363,7 @@ public final class ClientSmokeTest {
   }
   private static int movingJointCount(String slug,String state) {
    int moved=0;
-   for(String joint:ARTICULATION_PROFILES.getOrDefault(slug,java.util.List.of())) {
+   for(String joint:profileJoints(slug,state)) {
     float[] range=articulationRanges.getOrDefault(slug,java.util.Map.of()).get(state+":"+joint);
     if(range==null)continue;
     for(int axis=0;axis<6;axis++)if(range[axis+6]-range[axis]>(axis<3?0.02F:0.05F)){moved++;break;}
