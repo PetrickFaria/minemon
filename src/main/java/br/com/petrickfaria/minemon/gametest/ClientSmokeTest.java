@@ -38,7 +38,7 @@ public final class ClientSmokeTest {
      && event.getSource().getEntity() instanceof MinemonCreature b && b.getUUID().equals(testEntity))combatHits++;
  }
  private static int direction=1;
- private static final int SPECIES_TEST_WINDOW=60;
+ private static final int SPECIES_TEST_WINDOW=80;
  private static final int BULBASAUR_VALIDATION_TICK=430;
  private static final int COMBAT_VALIDATION_TICK=BULBASAUR_VALIDATION_TICK+100;
  private static final int SPECIES_START_TICK=COMBAT_VALIDATION_TICK+10;
@@ -241,7 +241,7 @@ public final class ClientSmokeTest {
    // GeckoLib has evaluated this tick's controller predicate.
    return (phase>=3&&phase<8) || (phase>=10&&phase<12) || (phase>=14&&phase<20)
      || (phase>=21&&phase<23) || (phase>=26&&phase<30) || phase==33
-     || (phase>=37&&phase<43) || (phase>=46&&phase<50) || phase>=55;
+     || (phase>=37&&phase<43) || (phase>=46&&phase<50) || phase>=68;
   }
   private static String locomotionState(int phase) {
    if(phase<8)return "IDLE_INITIAL";
