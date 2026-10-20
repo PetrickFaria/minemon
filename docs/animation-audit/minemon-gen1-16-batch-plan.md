@@ -1,6 +1,6 @@
 # Plano proposto — 16 lotes de locomoção Gen 1
 
-**Status:** Lote 1 (#001–#010) aprovado automaticamente em `2aa0c05`. Em 2026-10-20 o usuário autorizou os Lotes 2 e 3, sequencialmente, sem aguardar avaliação visual. Lotes 2 e 3 aprovados em `8bba5b0` (Actions 39469489652). Em 2026-10-20 o usuário autorizou exclusivamente o Lote 4 (#031–#040); Lote 5 não autorizado.
+**Status:** Lote 1 (#001–#010) aprovado automaticamente em `2aa0c05`. Em 2026-10-20 o usuário autorizou os Lotes 2 e 3, sequencialmente, sem aguardar avaliação visual. Lotes 2 e 3 aprovados em `8bba5b0` (Actions 39469489652). Em 2026-10-20 o usuário autorizou exclusivamente o Lote 4 (#031–#040); Lote 4 aprovado em `f9cda38`, encerramento `e435ab9` (Actions 39475562845). O usuário autorizou exclusivamente o Lote 5 (#041–#050), sem aguardar visual manual. Lote 6 não autorizado.
 
 ## Regras comuns dos lotes
 
