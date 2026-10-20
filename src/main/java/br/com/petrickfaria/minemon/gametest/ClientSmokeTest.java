@@ -51,8 +51,36 @@ public final class ClientSmokeTest {
   // Profiles use exact joints from each selected model skeleton, not one global bone-name list.
   // The active ten-species development batch receives detailed gait validation;
   // the general render, texture, movement and roster smoke continues to cover all 151.
-  private static final java.util.Set<String> ARTICULATION_VALIDATION_SPECIES=java.util.Set.of("bulbasaur","ivysaur","venusaur","charmander","charmeleon","charizard","squirtle","wartortle","blastoise","caterpie");
-  private static final java.util.Map<String,java.util.List<String>> ARTICULATION_PROFILES=java.util.Map.ofEntries(
+  private static final java.util.Map<String,java.util.Map<String,java.util.List<String>>> ADDITIONAL_PROFILES=loadAdditionalProfiles();
+  private static java.util.Map<String,java.util.Map<String,java.util.List<String>>> loadAdditionalProfiles() {
+   try(var stream=ClientSmokeTest.class.getResourceAsStream("/data/minemon_gen1/animation_validation_profiles.json")) {
+    if(stream==null)throw new IllegalStateException("Missing batch articulation profiles");
+    var json=com.google.gson.JsonParser.parseReader(new java.io.InputStreamReader(stream)).getAsJsonObject();
+    var result=new java.util.HashMap<String,java.util.Map<String,java.util.List<String>>>();
+    for(var species:json.entrySet()) {
+     var states=new java.util.HashMap<String,java.util.List<String>>();
+     for(var state:species.getValue().getAsJsonObject().entrySet()) {
+      var joints=new java.util.ArrayList<String>();
+      for(var joint:state.getValue().getAsJsonArray())joints.add(joint.getAsString());
+      if(joints.isEmpty())throw new IllegalStateException("Empty articulation profile "+species.getKey()+"/"+state.getKey());
+      states.put(state.getKey(),java.util.List.copyOf(joints));
+     }
+     result.put(species.getKey(),java.util.Map.copyOf(states));
+    }
+    return java.util.Map.copyOf(result);
+   }catch(java.io.IOException e){throw new ExceptionInInitializerError(e);}
+  }
+  private static java.util.Set<String> validationSpecies() {
+   var result=new java.util.HashSet<>(java.util.Set.of("bulbasaur","ivysaur","venusaur","charmander","charmeleon","charizard","squirtle","wartortle","blastoise","caterpie"));
+   result.addAll(ADDITIONAL_PROFILES.keySet());return java.util.Set.copyOf(result);
+  }
+  private static java.util.Map<String,java.util.List<String>> addProfiles(java.util.Map<String,java.util.List<String>> original) {
+   var result=new java.util.HashMap<>(original);
+   ADDITIONAL_PROFILES.forEach((slug,states)->result.put(slug,states.get("walk")));
+   return java.util.Map.copyOf(result);
+  }
+  private static final java.util.Set<String> ARTICULATION_VALIDATION_SPECIES=validationSpecies();
+  private static final java.util.Map<String,java.util.List<String>> ARTICULATION_PROFILES=addProfiles(java.util.Map.ofEntries(
    java.util.Map.entry("bulbasaur",java.util.List.of("leg_front_right","leg_front_left","leg_back_right","leg_back_left")),
    java.util.Map.entry("ivysaur",java.util.List.of("leg_front_right","leg_front_left","leg_back_right","leg_back_left")),
    java.util.Map.entry("venusaur",java.util.List.of("leg_front_left","leg_front_right","leg_left","leg_right")),
@@ -70,7 +98,7 @@ public final class ClientSmokeTest {
    java.util.Map.entry("jolteon",java.util.List.of("leg_front_right","leg_front_left","leg_back_right","leg_back_left")),
    java.util.Map.entry("nidorina",java.util.List.of("left_leg","right_leg")),
    java.util.Map.entry("meowth",java.util.List.of("leg_left","leg_right"))
-  );
+  ));
   // These source idle clips intentionally keep their gait legs static. Inspect
   // their animated idle joints without weakening the leg checks for walk/run.
   private static final java.util.Map<String,java.util.List<String>> IDLE_PROFILES=java.util.Map.of(
@@ -79,6 +107,10 @@ public final class ClientSmokeTest {
    "wartortle",java.util.List.of("arm_left","arm_right","torso")
   );
   private static java.util.List<String> profileJoints(String slug,String state) {
+   if(ADDITIONAL_PROFILES.containsKey(slug)) {
+    String key=state.startsWith("IDLE_")?"idle":state.startsWith("RUN_")?"run":"walk";
+    return ADDITIONAL_PROFILES.get(slug).get(key);
+   }
    // Native Blastoise run retracts its limbs and spins the shell/body.
    if(slug.equals("blastoise") && state.startsWith("RUN_"))return java.util.List.of("body","body2");
    return state.startsWith("IDLE_") && IDLE_PROFILES.containsKey(slug)
@@ -388,6 +420,11 @@ public final class ClientSmokeTest {
     if("static".equals(fallback)||"idle".equals(fallback)) {
      String expected=definition.walk();
      if(!hasSelectedClip(slug,"WALK_STEADY",expected))throw new IllegalStateException("Fallback classification did not match selected walk clip for "+slug);
+     if(ADDITIONAL_PROFILES.containsKey(slug)) {
+      if(!hasSelectedClip(slug,"IDLE_INITIAL",definition.idle())||!hasSelectedClip(slug,"IDLE_FINAL",definition.idle())
+         ||movingJointCount(slug,"IDLE_FINAL")<1)
+       throw new IllegalStateException("Source idle fallback did not animate for "+slug);
+     }
      knownFallbacks++;
      report.append("EXPECTED GAP ").append(slug).append(": fallback=").append(fallback)
        .append("; selected walk=").append(expected).append("; no gait pass claimed.\n");

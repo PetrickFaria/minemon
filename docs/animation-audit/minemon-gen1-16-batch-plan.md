@@ -1,6 +1,6 @@
 # Plano proposto — 16 lotes de locomoção Gen 1
 
-**Status:** Lote 1 (#001–#010) iniciado por autorização explícita do usuário em 2026-10-20. Lote 2 permanece bloqueado até a conclusão e revisão do Lote 1.
+**Status:** Lote 1 (#001–#010) aprovado automaticamente em `2aa0c05`. Em 2026-10-20 o usuário autorizou os Lotes 2 e 3, sequencialmente, sem aguardar avaliação visual. Lote 4 não autorizado.
 
 ## Regras comuns dos lotes
 
@@ -34,3 +34,7 @@
 6. **Gate:** compilação, testes Java, GameTests de servidor, smoke do cliente, clips verdadeiros e articulações; reter o último JAR aprovado. Efeitos especiais são incluídos quando aplicáveis antes de fechar o lote, sem ampliar ticks sem diagnóstico.
 
 O usuário autorizou neste marco a correção da chama de Charmander seguida imediatamente pelo Lote 1, sem pausa para nova aprovação. O Lote 2 não começa neste marco.
+
+## Autorização e validação dos Lotes 2 e 3
+
+A avaliação visual dos três lotes permanece pendente por decisão do usuário. O Lote 2 deve passar todos os gates automatizados antes de iniciar o Lote 3. Cada importação mantém os registros dos 151 Pokémon, verifica preservação das outras 141 entradas, inclui o Lote 1 nos testes detalhados e preserva seu JAR aprovado. Novos recursos usam o SHA-256 já auditado do Cobblemon Fabric 1.8.2. Não se inventa caminhada para casulos nem se classifica voo como corrida terrestre. O prazo do processo de smoke foi ampliado para 25 minutos para acomodar os perfis cumulativos de até 30 espécies, sem alterar fases, velocidades, limites ou asserções das animações.

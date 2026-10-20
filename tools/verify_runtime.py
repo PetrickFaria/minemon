@@ -9,7 +9,7 @@ def validate(read,definitions,prepared=False,packed=False):
   number=d['nationalPokedexNumber']
   if number<=previous:raise ValueError('Runtime roster is not in National Pokédex order')
   previous=number
-  if number<=10 and not all('_cobblemon_1_8_2/' in d[key] for key in ('model','texture','animation')):
+  if (number<=10 or d.get('source_cobblemon_version')=='1.8.2') and not all('_cobblemon_1_8_2/' in d[key] for key in ('model','texture','animation')):
    raise ValueError('Batch 1 species is not using all three Cobblemon 1.8.2 assets: '+d['slug'])
   model_path=runtime_path(d['model']) if packed else d['model']; animation_path=runtime_path(d['animation']) if packed else d['animation']; texture_path=runtime_path(d['texture']) if packed else d['texture']
   g=json.loads(read(model_path))

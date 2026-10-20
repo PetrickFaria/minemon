@@ -1,11 +1,12 @@
 name: Build Minemon
 on:
   push:
+    paths-ignore: [".github/workflows/cobblemon-source-audit.yml", ".github/workflows/prepare-cobblemon-batch.yml", "tools/import_cobblemon_182_batch.py", "docs/**"]
   pull_request:
   workflow_dispatch:
 permissions:
-  contents: write
-  actions: write
+  contents: read
+  actions: read
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -19,12 +20,6 @@ jobs:
         with:
           python-version: '3.12'
       - uses: gradle/actions/setup-gradle@v4
-      - name: Prepare one audited Kanto batch
-        id: batch
-        if: ${{ github.event_name == 'push' && startsWith(github.event.head_commit.message, '[prepare-gen1-batch]') }}
-        run: |
-          python3 -m pip install --disable-pip-version-check Pillow==11.1.0
-          python3 tools/prepare_next_batch.py --size 5
       - name: Verify extracted project resources
         run: python3 tools/verify_project.py
       - name: Ensure Gradle Wrapper is executable
@@ -56,10 +51,10 @@ jobs:
         if: ${{ !cancelled() && steps.compile.outcome == 'success' }}
         run: |
           python3 tools/prepare_client_world.py
-          if ! timeout 900s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest; then
+          if ! timeout 1500s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest; then
             echo "Client smoke run failed; retrying the complete client validation once with a clean world."
             python3 tools/prepare_client_world.py
-            timeout 900s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest
+            timeout 1500s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest
           fi
           grep -F 'PASS WORLD' run/client-validation.txt
           grep -F 'PASS COMBAT' run/client-validation.txt
@@ -87,24 +82,6 @@ jobs:
           unzip -p "$jar_file" META-INF/ASSET_LICENSES.md | grep -F 'CC BY-NC 3.0'
           unzip -p "$jar_file" assets/minemon_gen1/models/item/bulbasaur_spawn_egg.json | grep -F 'minecraft:item/template_spawn_egg'
           unzip -p "$jar_file" pack.mcmeta | grep -F '"pack_format": 9'
-      - name: Publish validated batch commit
-        id: publish_batch
-        if: ${{ github.event_name == 'push' && startsWith(github.event.head_commit.message, '[prepare-gen1-batch]') && steps.batch.outputs.changed == 'true' }}
-        run: |
-          set -euo pipefail
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add tools/candidate_audit.json
-          git add src/main/resources/data/minemon_gen1/runtime_species.json
-          git add src/main/resources/data/minemon_gen1/pokedex.json
-          git add src/main/resources/assets/minemon/lang/en_us.json src/main/resources/assets/minemon/lang/pt_br.json
-          git add src/main/resources/assets/minemon/models/item/
-          git add gradle.properties
-          batch="${{ steps.batch.outputs.slugs }}"
-          git commit -m "Add audited Kanto batch: $batch"
-          git push origin "HEAD:$GITHUB_REF_NAME"
-          echo "published=true" >> "$GITHUB_OUTPUT"
-          echo "Validated batch commit: $(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
       - name: Upload Minemon JAR
         uses: actions/upload-artifact@v4
         with:
