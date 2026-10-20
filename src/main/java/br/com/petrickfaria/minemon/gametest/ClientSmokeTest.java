@@ -104,7 +104,7 @@ public final class ClientSmokeTest {
       if(slug.equals("charmander")||slug.equals("charmeleon")||slug.equals("charizard")) {
        var left=model.getAnimationProcessor().getBone("arm_left");var right=model.getAnimationProcessor().getBone("arm_right");
        int phase=Math.floorMod(worldTicks-SPECIES_START_TICK,SPECIES_TEST_WINDOW);
-       int mode=phase>=39&&phase<=50?2:(phase>=12&&phase<=25?0:-1);
+       int mode=phase>=34&&phase<=42?2:(phase>=12&&phase<=19?0:-1);
        if(mode>=0){
         var range=fireStarterArmRanges.computeIfAbsent(slug,k->new float[4]);
         range[mode]=Math.max(range[mode],Math.abs(left.getRotationZ()));
@@ -192,14 +192,14 @@ public final class ClientSmokeTest {
      if(current.getX()>2.5)direction=-1;if(current.getX()<-2.5)direction=1;
      int phase=Math.floorMod(worldTicks-SPECIES_START_TICK,SPECIES_TEST_WINDOW);
      double animationVelocity;
-     if(phase<8 || phase>=56) animationVelocity=0.0D;                         // idle
+     if(phase<8 || phase>=50) animationVelocity=0.0D;                         // idle
      else if(phase<12) animationVelocity=(phase-7)*0.0125D;                    // walk start
-     else if(phase<26) animationVelocity=0.05D;                               // steady walk
-     else if(phase<30) animationVelocity=(29-phase)*0.0125D;                   // walk deceleration
-     else if(phase<35) animationVelocity=0.0D;                                // idle return
-     else if(phase<39) animationVelocity=(phase-34)*0.03D;                     // run transition
-     else if(phase<51) animationVelocity=0.12D;                               // steady run
-     else animationVelocity=Math.max(0.0D,(56-phase)*0.024D);                 // run deceleration
+     else if(phase<20) animationVelocity=0.05D;                               // steady walk
+     else if(phase<23) animationVelocity=(23-phase)*0.0125D;                   // walk deceleration
+     else if(phase<30) animationVelocity=0.0D;                                // idle return
+     else if(phase<34) animationVelocity=(phase-29)*0.03D;                     // run transition
+     else if(phase<43) animationVelocity=0.12D;                               // steady run
+     else animationVelocity=Math.max(0.0D,(49-phase)*0.02D);                 // run deceleration
      if(animationVelocity>0.0D){
       double step=animationVelocity<0.08D?0.04D:0.08D;
       current.moveTo(current.getX()+direction*step,current.getY(),current.getZ(),current.getYRot(),current.getXRot());
@@ -239,19 +239,19 @@ public final class ClientSmokeTest {
   private static boolean isSettledClipSample(int phase) {
    // Ignore samples at phase boundaries; the model renderer can run before
    // GeckoLib has evaluated this tick's controller predicate.
-   return (phase>=3&&phase<8) || (phase>=10&&phase<12) || (phase>=16&&phase<26)
-     || (phase>=28&&phase<30) || (phase>=32&&phase<35) || phase==38
-     || (phase>=42&&phase<51) || (phase>=54&&phase<56) || phase>=58;
+   return (phase>=3&&phase<8) || (phase>=10&&phase<12) || (phase>=14&&phase<20)
+     || (phase>=21&&phase<23) || (phase>=26&&phase<30) || phase==33
+     || (phase>=37&&phase<43) || (phase>=46&&phase<50) || phase>=55;
   }
   private static String locomotionState(int phase) {
    if(phase<8)return "IDLE_INITIAL";
    if(phase<12)return "WALK_START";
-   if(phase<26)return "WALK_STEADY";
-   if(phase<30)return "WALK_DECEL";
-   if(phase<35)return "IDLE_RETURN";
-   if(phase<39)return "RUN_START";
-   if(phase<51)return "RUN_STEADY";
-   if(phase<56)return "RUN_DECEL";
+   if(phase<20)return "WALK_STEADY";
+   if(phase<23)return "WALK_DECEL";
+   if(phase<30)return "IDLE_RETURN";
+   if(phase<34)return "RUN_START";
+   if(phase<43)return "RUN_STEADY";
+   if(phase<50)return "RUN_DECEL";
    return "IDLE_FINAL";
   }
   private static boolean hasSelectedClip(String slug,String state,String clip) {
