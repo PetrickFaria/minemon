@@ -18,6 +18,7 @@ z=zipfile.ZipFile(io.BytesIO(raw));members=set(z.namelist())
 vp=R/'data/minemon_gen1/animation_validation_profiles.json'
 profiles=json.loads(vp.read_text()) if vp.exists() else {}
 GAIT={
+ 'spearow':['leg_left','leg_right'],'fearow':['leg_left','leg_right'],
  'metapod':['body','body_segment'],'butterfree':['wing_left','wing_right'],
  'weedle':['body_segment','body_segment2','body_segment3'],'kakuna':['body'],
  'beedrill':['wing_left','wing_right'],'pidgey':['wing_open_left','wing_open_right'],
@@ -30,7 +31,7 @@ GAIT={
  'nidoranf':['leg_front_left','leg_front_right','leg_back_left','leg_back_right'],
  'nidorina':['left_leg','right_leg','left_upper_arm','right_upper_arm']
 }
-IDLE={'raticate':['body','head','tail'],'ekans':['head','neck','tail5'],'sandslash':['arm_left','arm_right','tail']}
+IDLE={'spearow':['head'],'fearow':['head'],'raticate':['body','head','tail'],'ekans':['head','neck','tail5'],'sandslash':['arm_left','arm_right','tail']}
 RUN={'sandshrew':['ball']}
 evidence=[]
 for d in defs[start-1:end]:
@@ -68,6 +69,24 @@ for d in defs[start-1:end]:
  idle=names.get('air_idle') if flying else names.get('ground_idle')
  walk=names.get('air_fly') if flying else names.get('ground_walk')
  assert idle,'Missing source idle '+slug
+ if slug in ('spearow','fearow'):
+  poser_path=f'{prefix}/posers/{folder}/{slug}.json'
+  poser=json.loads(z.read(poser_path))
+  source_animations=poser['poses']['walking']['animations']
+  assert "q.biped_walk(1, 1, 'leg_left', 'leg_right')" in source_animations
+  assert "q.look('head')" in source_animations
+  # GeckoLib 3 has no Cobblemon procedural poser runtime. Retain the source
+  # stance, overlay an opposed biped cycle, and implement q.look in the model.
+  walk=f'animation.{slug}.minemon_poser_walk'
+  adapted=copy.deepcopy(animations[idle]);adapted['loop']=True;adapted['animation_length']=1.0
+  for side,sign in [('left',1),('right',-1)]:
+   channel=adapted.setdefault('bones',{}).setdefault('leg_'+side,{})
+   rotation=channel.get('rotation',[0,0,0]);assert isinstance(rotation,list) and len(rotation)==3
+   rotation[0]=f'{rotation[0]}+{sign*30}*math.sin(q.anim_time*720)'
+   channel['rotation']=rotation
+  animations[walk]=adapted;d['clips']['ground_walk']=walk
+  (R/paths['animation']).write_text(json.dumps({'format_version':'1.8.0','animations':animations},indent=2)+'\\n')
+  d['source_procedural_pose']={'poser':poser_path,'walk':source_animations,'head_look':'q.look','adaptation':'native ground stance plus opposed 30-degree leg cycle at 720 degrees per second; head look handled by MinemonModel'}
  if walk is None:
   walk=idle;d['movement_fallback']='idle'
  d['idle']=idle;d['walk']=walk

@@ -12,8 +12,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Prepare exactly batch 2
-        run: python3 tools/import_cobblemon_182_batch.py --batch 2
+      - name: Prepare exactly batch 3
+        run: python3 tools/import_cobblemon_182_batch.py --batch 3
       - name: Verify resources
         run: python3 tools/verify_project.py
       - name: Emit public asset contents for connector publication
