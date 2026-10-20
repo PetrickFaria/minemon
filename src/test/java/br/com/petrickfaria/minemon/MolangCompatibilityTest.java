@@ -41,6 +41,8 @@ public class MolangCompatibilityTest {
   var idle=animations.getAsJsonObject("animation.charmander.ground_idle");
   var walk=animations.getAsJsonObject("animation.charmander.ground_walk");
   var flame=animations.getAsJsonObject("animation.charmander.minemon_tail_flame");
+  var parser=new MolangParser();
+  double first;
   assertNotNull("Cobblemon idle clip is present",idle);
   assertNotNull("Cobblemon walk clip is present",walk);
   assertNotNull("Charmander has a dedicated tail flame clip",flame);
@@ -55,7 +57,6 @@ public class MolangCompatibilityTest {
   var flameScale=parser.parseExpression(flameBone.getAsJsonArray("scale").get(1).getAsString());
   parser.setValue("query.anim_time",0.0);first=flameScale.get();parser.setValue("query.anim_time",0.5);
   assertTrue("Independent flame shape subtly expands and contracts",Math.abs(flameScale.get()-first)>0.005);
-  var parser=new MolangParser();
   var loadedIdle=software.bernie.geckolib3.util.json.JsonAnimationUtils.deserializeJsonToAnimation(
     new java.util.AbstractMap.SimpleImmutableEntry<String,com.google.gson.JsonElement>("animation.charmander.ground_idle",idle),parser);
   var loadedWalk=software.bernie.geckolib3.util.json.JsonAnimationUtils.deserializeJsonToAnimation(
@@ -65,7 +66,7 @@ public class MolangCompatibilityTest {
   var torso=idle.getAsJsonObject("bones").getAsJsonObject("torso").getAsJsonArray("rotation").get(0).getAsString();
   assertFalse("Runtime conversion binds Bedrock q aliases",torso.contains("q.anim_time"));
   var breath=parser.parseExpression(torso);
-  parser.setValue("query.anim_time",0.0);double first=breath.get();
+  parser.setValue("query.anim_time",0.0);first=breath.get();
   parser.setValue("query.anim_time",0.25);
   assertTrue("Idle torso channel changes over time",Math.abs(breath.get()-first)>0.1);
   assertTrue("Walk clip actuates leg joints",walk.getAsJsonObject("bones").has("leg_left")&&walk.getAsJsonObject("bones").has("leg_right"));
