@@ -23,7 +23,7 @@ jobs:
           z=zipfile.ZipFile(io.BytesIO(raw))
           Path('/tmp/cobblemon-reference.jar').write_bytes(raw)
           for p in z.namelist():
-            if p.endswith('.class') and any(s in p.lower() for s in ('nidoqueen','nidorino')):
+            if p.endswith('.class') and any(s in p.lower() for s in ('bipedwalkanimation.class','quadrupedwalkanimation.class','bimanualswinganimation.class')):
               print('SOURCE_CLASS',p,flush=True)
               result=subprocess.run(['javap','-c','-p','-classpath','/tmp/cobblemon-reference.jar',p[:-6].replace('/','.')],capture_output=True,text=True,check=True)
               print(result.stdout,flush=True)
