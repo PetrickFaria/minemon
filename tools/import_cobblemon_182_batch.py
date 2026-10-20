@@ -25,7 +25,7 @@ GAIT={
  'clefable':['leg_left','leg_right'],
  'vulpix':['leg_front_left','leg_front_right','leg_back_left','leg_back_right'],
  'ninetales':['leg_front_left','leg_front_right','leg_back_left','leg_back_right'],
- 'jigglypuff':['leg_left','leg_right'],'wigglytuff':['foot_left','foot_right'],
+ 'jigglypuff':['foot_left','foot_right'],'wigglytuff':['foot_left','foot_right'],
  'spearow':['leg_left','leg_right'],'fearow':['leg_left','leg_right'],
  'metapod':['body','body_segment'],'butterfree':['wing_left','wing_right'],
  'weedle':['body_segment','body_segment2','body_segment3'],'kakuna':['body'],
@@ -39,7 +39,7 @@ GAIT={
  'nidoranf':['leg_front_left','leg_front_right','leg_back_left','leg_back_right'],
  'nidorina':['left_leg','right_leg','left_upper_arm','right_upper_arm']
 }
-IDLE={'nidoqueen':['left_upper_leg','right_upper_leg','left_shoulder','right_shoulder'],'nidoranm':['head','torso','ear_left','ear_right'],'nidorino':['jaw','torso'],'nidoking':['tail','tail2','arm_left1','arm_right1'],'clefairy':['tail','tail2','wing_left','wing_right'],'clefable':['arm_left','arm_right','tail','tail2'],'vulpix':['tail_left1','tail_right1','head_rotation'],'ninetales':['leg_front_left','leg_front_right','tail_middle'],'jigglypuff':['leg_left','leg_right','head'],'wigglytuff':['foot_left','foot_right','torso'],'spearow':['head'],'fearow':['head'],'raticate':['body','head','tail'],'ekans':['head','neck','tail5'],'sandslash':['arm_left','arm_right','tail']}
+IDLE={'nidoqueen':['left_upper_leg','right_upper_leg','left_shoulder','right_shoulder'],'nidoranm':['head','torso','ear_left','ear_right'],'nidorino':['jaw','torso'],'nidoking':['tail','tail2','arm_left1','arm_right1'],'clefairy':['tail','tail2','wing_left','wing_right'],'clefable':['arm_left','arm_right','tail','tail2'],'vulpix':['tail_left1','tail_right1','head_rotation'],'ninetales':['leg_front_left','leg_front_right','tail_middle'],'jigglypuff':['foot_left','foot_right','head'],'wigglytuff':['foot_left','foot_right','torso'],'spearow':['head'],'fearow':['head'],'raticate':['body','head','tail'],'ekans':['head','neck','tail5'],'sandslash':['arm_left','arm_right','tail']}
 RUN={'sandshrew':['ball']}
 evidence=[]
 for d in defs[start-1:end]:
@@ -105,7 +105,7 @@ for d in defs[start-1:end]:
    'nidoqueen':(0.6662,1.4,{'left_upper_leg':-1,'right_upper_leg':1,'left_shoulder':1,'right_shoulder':-1},'NidoqueenModel: BipedWalkAnimation defaults plus BimanualSwingAnimation defaults'),
    'nidorino':(0.7,0.7,{'leg_front_left':1,'leg_front_right':-1,'leg_back_left':-1,'leg_back_right':1},'NidorinoModel: QuadrupedWalkAnimation(0.7,0.7)'),
    'ninetales':(0.66,1.4,{'leg_front_left':1,'leg_front_right':-1,'leg_back_left':-1,'leg_back_right':1},'q.quadruped_walk(0.66, 1.4)'),
-   'jigglypuff':(0.66,0.6,{'leg_left':-1,'leg_right':1},'q.biped_walk(0.66, 0.6)'),
+   'jigglypuff':(0.66,0.6,{'foot_left':-1,'foot_right':1},'q.biped_walk(0.66, 0.6)'),
    'wigglytuff':(0.66,0.6,{'foot_left':-1,'foot_right':1},'q.biped_walk(0.66, 0.6)')
   }
   period,amplitude,signs,origin=settings[slug]
