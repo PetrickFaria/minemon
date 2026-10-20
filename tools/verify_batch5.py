@@ -40,7 +40,7 @@ for d,b in zip(defs[40:50],before[40:50]):
  assert d['idle'].startswith('animation.'+d['slug']+'.') and 'minemon_' not in d['idle']
  assert 'minemon_' not in d['walk'] and not d.get('movement_fallback')
  assert not re.search(r'\b(?:q|query)\.r\.|Math\.',json.dumps({k:v.get('bones',{}) for k,v in anims.items()}))
- for state,joints in profiles[d['slug']].items():assert set(joints)<=bones
+ for state,joints in profiles[d['slug']].items():assert set(joints)<=set(bones)
  assert 'idle_static' not in profiles[d['slug']],'Batch 5 native idle is animated'
  if d['mode']=='flying':
   assert d['idle'].endswith('.air_idle') and d['walk'].endswith('.air_fly') and 'ground_run' not in d['clips']
