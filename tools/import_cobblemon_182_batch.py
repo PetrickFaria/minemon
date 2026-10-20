@@ -82,7 +82,7 @@ for d in defs[start-1:end]:
   for side,sign in [('left',1),('right',-1)]:
    channel=adapted.setdefault('bones',{}).setdefault('leg_'+side,{})
    rotation=channel.get('rotation',[0,0,0]);assert isinstance(rotation,list) and len(rotation)==3
-   rotation[0]=f'{rotation[0]}+{sign*30}*math.sin(q.anim_time*720)'
+   rotation[0]=f'{rotation[0]}{"+30" if sign>0 else "-30"}*math.sin(q.anim_time*720)'
    channel['rotation']=rotation
   for absent in set(adapted['bones'])-bones:
    assert absent in d['stripped_bones'].get(idle,[]),'Unexpected missing procedural bone: '+absent
