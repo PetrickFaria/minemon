@@ -32,7 +32,7 @@ public final class ClientSmokeTest {
  private static final java.util.Map<String,float[]> motionRanges=new java.util.HashMap<>();
  private static final java.util.Map<String,float[]> fireStarterArmRanges=new java.util.HashMap<>();
  private static final java.util.Set<String> walkedSpecies=new java.util.HashSet<>();
- private static final java.util.Map<String,net.minecraft.world.phys.Vec3> lastRenderedPositions=new java.util.HashMap<>();
+ private static final java.util.Map<String,net.minecraft.world.phys.Vec3> firstRenderedPositions=new java.util.HashMap<>();
  @SubscribeEvent public static void actualDamage(net.minecraftforge.event.entity.living.LivingDamageEvent event) {
   if(Boolean.getBoolean("minemon.clientSmokeTest") && event.getAmount()>0 && event.getEntity() instanceof net.minecraft.server.level.ServerPlayer
      && event.getSource().getEntity() instanceof MinemonCreature b && b.getUUID().equals(testEntity))combatHits++;
@@ -96,8 +96,11 @@ public final class ClientSmokeTest {
     MinemonRenderer.validationObserver=(entity,model)->{
      if(mc.getResourceManager().getResource(model.getTextureResource(entity)).isEmpty())throw new IllegalStateException("Missing rendered texture "+entity.getSpeciesSlug());
      String slug=entity.getSpeciesSlug();renderedSpecies.add(slug);
-     var position=entity.position();var previous=lastRenderedPositions.put(slug,position);
-     if(previous!=null&&previous.distanceToSqr(position)>0.0001D) {
+     var position=entity.position();var origin=firstRenderedPositions.putIfAbsent(slug,position);
+     // Rendering can interpolate one server step over several frames. Measure
+     // net movement from the first rendered position instead of requiring a
+     // single frame to cross the threshold.
+     if(origin!=null&&origin.distanceToSqr(position)>0.0025D) {
       walkedSpecies.add(slug);
      }
      // Sample every render frame, independently of position updates. Filtering
@@ -202,24 +205,25 @@ public final class ClientSmokeTest {
      if(current!=null){
      setValidationPhase(current,phase);
      // Drive a short, controlled displacement so larger collision boxes cannot make this
-     // render-only animation check depend on pathfinding success. Entity physics applies
-     // velocity once; teleports plus velocity crossed the run threshold during walk phases.
+     // render-only animation check depend on pathfinding success. The noAI fixture is moved
+     // directly with steps sized to exercise the walk and run selector thresholds.
      current.setNoAi(true);current.getNavigation().stop();
      if(current.getX()>2.5)direction=-1;if(current.getX()<-2.5)direction=1;
-     double animationVelocity;
-     if(phase<8 || phase>=54) animationVelocity=0.0D;                         // idle
-     else if(phase<16) animationVelocity=(phase-7)*0.00625D;                   // walk start
-     else if(phase<24) animationVelocity=0.05D;                               // steady walk
-     else if(phase<27) animationVelocity=(27-phase)*0.0166667D;                // walk deceleration
-     else if(phase<34) animationVelocity=0.0D;                                // idle return
-     else if(phase<38) animationVelocity=(phase-33)*0.03D;                     // run transition
-     else if(phase<47) animationVelocity=0.12D;                               // steady run
-     else animationVelocity=Math.max(0.0D,(53-phase)*0.02D);                 // run deceleration
-     if(animationVelocity>0.0D){
-      current.setDeltaMovement(direction*animationVelocity,0,0);
-      current.hasImpulse=true;
+     double movementStep;
+     if(phase<8 || phase>=54) movementStep=0.0D;                              // idle
+     else if(phase<27) movementStep=0.02D;                                   // walk, below the run threshold
+     else if(phase<34) movementStep=0.0D;                                    // idle return
+     else if(phase<36) movementStep=0.02D;                                   // run transition
+     else if(phase<38) movementStep=0.06D;                                   // enter run
+     else if(phase<52) movementStep=0.08D;                                   // run and early deceleration
+     else movementStep=0.02D;                                                // finish deceleration at walk speed
+     current.setDeltaMovement(0,0,0);
+     if(movementStep>0.0D){
+      // noAI disables the mob's normal travel step. Move the fixture explicitly
+      // once per server update so rendered displacement and selector thresholds
+      // agree; adding velocity here would apply a second displacement.
+      current.moveTo(current.getX()+direction*movementStep,current.getY(),current.getZ(),current.getYRot(),current.getXRot());
      } else {
-      current.setDeltaMovement(0,0,0);
       current.getNavigation().stop();
      }
     }
