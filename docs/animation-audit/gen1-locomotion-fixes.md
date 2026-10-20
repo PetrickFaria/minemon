@@ -38,3 +38,35 @@ Commit `8baa23cbe8748e2299a6977b3eab23f503f4baa7` ampliou cada janela por espéc
 - Fase 1: não iniciada.
 - JAR novo validado: nenhum produzido pelos runs 103–105.
 - Restrições de infraestrutura do Actions: dois runs recentes falharam sem executar etapas; diagnóstico remoto de logs desses runs não está disponível.
+
+
+## Diagnóstico do bloqueio do GitHub Actions — 2026-10-20
+
+Branch HEAD confirmado no momento do diagnóstico: `d2126733333ecec67bec18236a5a7db804d80b8b`.
+
+### Evidências dos runs 104–106
+
+Foram examinadas as cinco tentativas de job registradas nos runs 104–106:
+
+- Run 104: tentativas 1 e 2, job IDs `118389292671` e `118389694214`.
+- Run 105: tentativas 1 e 2, job IDs `118401135186` e `118401258851`.
+- Run 106: tentativa 1, job ID `118401520473`.
+
+Todas terminaram em aproximadamente 3 segundos, com `runner_id=0`, nome do runner vazio e zero etapas. Nenhum artefato foi produzido. O endpoint de logs retorna 404; o conector GitHub disponível não oferece as anotações do check run, consulta aos runners nem dados de cobrança. Assim, não há mensagem de erro de inicialização acessível para atribuir a falha a uma cota ou bloqueio específico.
+
+### Diferenciação de causas
+
+- **Workflow:** `.github/workflows/build.yml` usa `ubuntu-latest` hospedado pelo GitHub e tem um único job `build`. O mesmo workflow executou normalmente no run 103: as etapas de compilação/testes Java e GameTests passaram e o job chegou ao smoke do cliente. Não há evidência que justifique alterar sua configuração.
+- **Falha real de teste:** no run 103, o cliente falhou em `validateArticulationProfiles`: Jolteon selecionou `animation.jolteon.ground_walk` em `IDLE_FINAL`, quando o esperado era `animation.jolteon.ground_idle`. Essa execução chegou ao runner e não é a falha de inicialização investigada aqui.
+- **Inicialização dos jobs:** nos runs 104–106 não houve runner atribuído nem etapa executada. Esse padrão é anterior ao workflow e compatível com indisponibilidade/recusa de runner, mas o motivo exato não aparece nos metadados acessíveis.
+- **Status público:** o GitHub Status registra um incidente de disponibilidade de Actions em 19/10, resolvido às 16:56 UTC. Os jobs examinados começaram em 20/10, após o status público voltar a operacional; não há evidência de que o incidente seja a causa desses failures. O status em 20/10 às 00:09 UTC era “All Systems Operational”.
+- **Permissões:** a conta conectada é `PetrickFaria` e o GitHub confirma permissão `admin` no repositório. A permissão para alterar arquivos está presente; isso não revela o estado de billing ou política de Actions da conta.
+- **Cotas/restrições:** não foi possível confirmar nem descartar limite de minutos, orçamento de Actions, cobrança ou bloqueio de runners porque esses dados ficam na interface de billing/Actions da conta e não são expostos pelo conector nesta sessão. Não se deve tratar isso como confirmado.
+
+### Ação controlada e próxima verificação
+
+A única reexecução controlada feita foi a tentativa 2 do run 105; ela repetiu a falha sem iniciar etapa alguma. Não se repetiram novas execuções depois disso.
+
+Antes de solicitar nova tentativa, abrir o job do [run 106](https://github.com/PetrickFaria/minemon/actions/runs/39353067243) no GitHub e ler a mensagem de falha/anotações exibidas na página do job. Se a mensagem mencionar billing/minutos/limite, conferir **Settings → Billing & licensing → Usage** na conta pessoal e resolver o aviso de orçamento/cobrança indicado. Se mencionar Actions desativado ou runner, conferir **Repository → Settings → Actions → General** e a disponibilidade/política de runners. Se não houver explicação ou indicação de bloqueio, encaminhar o run/job ID ao GitHub Support; a execução terminou sem logs que permitam diagnóstico por API.
+
+O commit `8baa23cbe8748e2299a6977b3eab23f503f4baa7` (janela de 80 ticks) ainda não foi executado com sucesso: runs 105–106 falharam antes das etapas. Não alterar a janela de amostragem novamente, não iniciar a Fase 1 e preservar o último JAR validado até haver uma execução completa.
