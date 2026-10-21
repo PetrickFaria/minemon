@@ -50,7 +50,7 @@ public class ActiveAnimationMolangPreflightTest {
             for(var entry:value.getAsJsonObject().entrySet())count+=parse(entry.getValue(),parser,source);
         } else if(value.isJsonPrimitive()&&value.getAsJsonPrimitive().isString()) {
             String expression=value.getAsString();
-            assertFalse(source+" has unsupported GeckoLib 3.1.40 query.r function: "+expression,COBALT_QUERY.matcher(expression).find());
+            assertFalse(source+" has unsupported GeckoLib 3.1.40 query.r function: "+expression,COBBLEMON_QUERY.matcher(expression).find());
             assertFalse(source+" has unconverted Bedrock q. alias: "+expression,BEDROCK_ALIAS.matcher(expression).find());
             var parsed=parser.parseExpression(expression);
             for(int tick=0;tick<=20;tick++) {
