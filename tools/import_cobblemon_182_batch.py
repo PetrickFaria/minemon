@@ -4,13 +4,14 @@ import argparse,copy,hashlib,io,json,math,re,urllib.request,zipfile
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 R=ROOT/'src/main/resources'
-ap=argparse.ArgumentParser();ap.add_argument('--batch',type=int,choices=(2,3,4,5,6,7,8),required=True);ap.add_argument('--segment',choices=('first','second'));ap.add_argument('--source-jar',type=Path);args=ap.parse_args()
+ap=argparse.ArgumentParser();ap.add_argument('--batch',type=int,choices=(2,3,4,5,6,7,8,9),required=True);ap.add_argument('--segment',choices=('first','second'));ap.add_argument('--source-jar',type=Path);args=ap.parse_args()
 start,end=(args.batch-1)*10+1,args.batch*10
-if args.batch==8 and args.segment:start,end=(71,75) if args.segment=='first' else (76,80)
+if args.batch in (8,9) and args.segment:
+ start,end=(((71,75) if args.segment=='first' else (76,80)) if args.batch==8 else ((81,85) if args.segment=='first' else (86,90)))
 mp=R/'data/minemon_gen1/runtime_species.json'
 defs=json.loads(mp.read_text());before=copy.deepcopy(defs)
 assert len(defs)==151 and [d['nationalPokedexNumber'] for d in defs]==list(range(1,152))
-assert all('_cobblemon_1_8_2/' in d['model'] for d in defs[:min(start-1,70)]),'Previous batch must be imported and validated first'
+assert all('_cobblemon_1_8_2/' in d['model'] for d in defs[:min(start-1,80 if args.batch==9 else 70)]),'Previous batch must be imported and validated first'
 url='https://cdn.modrinth.com/data/MdwFAVRL/versions/GJ2a1b8O/Cobblemon-fabric-1.8.2%2B1.21.1.jar'
 raw=args.source_jar.read_bytes() if args.source_jar else urllib.request.urlopen(url,timeout=180).read()
 digest=hashlib.sha256(raw).hexdigest()
@@ -75,7 +76,17 @@ GAIT={
  'ponyta':['leg_front_left','leg_front_right','leg_back_left','leg_back_right','fire_mane_head','tail'],
  'rapidash':['leg_front_left','leg_front_right','leg_back_left','leg_back_right','fire_mane_head_flame','tail'],
  'slowpoke':['leg_front_left','leg_front_right','leg_back_left','leg_back_right','tail','tail2','tail4'],
- 'slowbro':['leg_left','leg_right','shell','shell_jaw','tail']
+ 'slowbro':['leg_left','leg_right','shell','shell_jaw','tail'],
+ 'magnemite':['body','nail_left_rotation','nail_right_rotation','magnet_left','magnet_right'],
+ 'magneton':['allbodies','body2','body3','magnet_left_rotation','magnet_right_rotation'],
+ 'farfetchd':['wing_left','wing_right','leak','leg_left','leg_right'],
+ 'doduo':['leg_left','leg_left2','leg_right','leg_right2','neck_left','neck_right'],
+ 'dodrio':['leg_left','leg_left2','leg_right','leg_right2','head2','head3'],
+ 'seel':['flipper_left','flipper_right','tail','body'],
+ 'dewgong':['flipper_left','flipper_right','tail','body'],
+ 'grimer':['body','arm_left','arm_right','back_tail','front_tail'],
+ 'muk':['body','arm_left','arm_right','mouth_sludge'],
+ 'shellder':['shell_top','shell_bottom','head','tongue']
 }
 IDLE={'oddish':["leaf_center3","leaf_inner_left3","leaf_inner_right3"],'gloom':["arm_left","arm_right","leaf_back_right4"],'vileplume':["arm_left","arm_right","petal_back_rotation"],'paras':["arm_left","arm_right","body"],'parasect':["claw_left","claw_right","body"],'venonat':["left_foot","right_foot","left_antenna","right_antenna"],'diglett':["body"],'nidoqueen':['left_upper_leg','right_upper_leg','left_shoulder','right_shoulder'],'nidoranm':['head','torso','ear_left','ear_right'],'nidorino':['jaw','torso'],'nidoking':['tail','tail2','arm_left1','arm_right1'],'clefairy':['tail','tail2','wing_left','wing_right'],'clefable':['arm_left','arm_right','tail','tail2'],'vulpix':['tail_left1','tail_right1','head_rotation'],'ninetales':['leg_front_left','leg_front_right','tail_middle'],'jigglypuff':['foot_left','foot_right','head'],'wigglytuff':['foot_left','foot_right','torso'],'spearow':['head'],'fearow':['head'],'raticate':['body','head','tail'],'ekans':['head','neck','tail5'],'sandslash':['arm_left','arm_right','tail'],
  'dugtrio':['body1','body2','body3','body3_2'],'meowth':['tail1','tail2','tail3'],'persian':['head','neck','tail1','tail2','tail3','tail4','tail5','tail6'],
@@ -100,7 +111,18 @@ IDLE.update({'poliwhirl':['body','arm_left','arm_right'],'poliwrath':['body','ar
  'tentacruel':['tentacle_left_3','tentacle_right_3'],'geodude':['arm_left','arm_right'],
  'graveler':['arm_bottom_left','arm_bottom_right'],'golem':['left_upper_arm','right_upper_arm'],
  'ponyta':['fire_mane','fire_mane_head','tail'],'rapidash':['fire_mane_head_flame','tail'],
- 'slowpoke':['tail','tail2','tail4'],'slowbro':['shell','shell_jaw','tail']})
+ 'slowpoke':['tail','tail2','tail4'],'slowbro':['shell','shell_jaw','tail'],
+ 'magnemite':['body','magnet_left','magnet_right','nail_head'],
+ 'magneton':['allbodies','body2','body3','magnet_left','magnet_right'],
+ 'farfetchd':['head','neck','tail','leak','wing_left','wing_right'],
+ 'doduo':['body','head','head2','neck_left','neck_right'],
+ 'dodrio':['body','head2','head3','neck_left','neck_right'],
+ 'seel':['body','head','flipper_left','flipper_right','tail'],
+ 'dewgong':['body','head','flipper_left','flipper_right','tail'],
+ 'grimer':['body','head','arm_left','arm_right','back_tail','front_tail'],
+ 'muk':['body','arm_left','arm_right','mouth_sludge'],
+ 'shellder':['body','shell_top','shell_bottom','tongue']})
+RUN.update({'grimer':['body','arm_left','arm_right','back_tail','front_tail']})
 evidence=[]
 for d in defs[start-1:end]:
  slug=d['slug'];n=d['nationalPokedexNumber'];folder=f'{n:04d}_{slug}'
@@ -146,12 +168,12 @@ for d in defs[start-1:end]:
   assert 'animation_length' not in cry or cry['animation_length']==misplaced
   cry['animation_length']=misplaced
   d['source_event_correction']='cry duration 1.25 moved from sound_effects metadata to clip animation_length; timestamp/effect unchanged'
- if args.batch in (5,6,7,8):
+ if args.batch in (5,6,7,8,9):
   # Retain every native clip. Only normalize syntax / unsupported mounted inputs.
   def adapt(value):
    if isinstance(value,str):
     value=value.replace('Math.','math.')
-    if args.batch in (7,8):
+    if args.batch in (7,8,9):
      value=re.sub(r'\bq\.', 'query.',value)
      # GeckoLib 3.1.40's Molang parser rejects a unary minus directly before
      # a grouped expression; multiplying the complete group by -1 is equal.
@@ -176,6 +198,8 @@ for d in defs[start-1:end]:
    d['source_molang_adaptations']={'q.':'query.'}
   if args.batch==8:
    d['source_molang_adaptations']={'q.':'query.','Math.':'math.'}
+  if args.batch==9:
+   d['source_molang_adaptations']={'q.':'query.','Math.':'math.'}
   if slug=='zubat':
    poser=json.loads(z.read(f'{prefix}/posers/{folder}/{slug}.json'))
    assert {'part':'wings_folded','isVisible':False} in poser['poses']['hover']['transformedParts']
@@ -187,7 +211,9 @@ for d in defs[start-1:end]:
   d['source_event_evidence']={name:{k:v for k,v in clip.items() if k in ('sound_effects','particle_effects','timeline')} for name,clip in animations.items() if any(k in clip for k in ('sound_effects','particle_effects','timeline'))}
   (R/paths['animation']).write_text(json.dumps({'format_version':'1.8.0','animations':animations},indent=2)+'\n')
  names={name.rsplit('.',1)[-1]:name for name in animations if name.startswith(f'animation.{slug}.')}
- d.update(paths);d['licenses']=list(dict.fromkeys(d.get('licenses',[])+[lp]))
+ d.update(paths)
+ existing_licenses=[p for p in d.get('licenses',[]) if (R/p).is_file()]
+ d['licenses']=list(dict.fromkeys(existing_licenses+[lp]))
  d['clips']=dict(names);d['excluded_clips']=[]
  d['stripped_bones']={name:sorted(set(a.get('bones',{}))-bones) for name,a in animations.items() if set(a.get('bones',{}))-bones}
  d['geckolib3_bedrock_keyframes']=True;d['strip_bedrock_locators']=True
@@ -313,7 +339,7 @@ for d in defs[start-1:end]:
     look_bones=sorted({re.search(r"q.look\('([^']+)'",a).group(1) for a in look_inputs})
     available={name:(name if name in bones else 'head' if name=='head_ai' and 'head' in bones else None) for name in look_bones}
     d['source_procedural_pose']={'poser':poser_path,'look':look_inputs,'look_bones':look_bones,'adapted_geo_bones':available,'adaptation':'Map q.look to the source head bone when present; no locomotion gait is synthesized'}
- if args.batch==8:
+ if args.batch in (8,9):
   poser_path=f'{prefix}/posers/{folder}/{variant}.json'
   if poser_path in members:
    poser=json.loads(z.read(poser_path))
@@ -331,7 +357,7 @@ mp.write_text(json.dumps(defs,ensure_ascii=False,indent=2)+'\n')
 vp.parent.mkdir(parents=True,exist_ok=True);vp.write_text(json.dumps(profiles,indent=2)+'\n')
 report={'batch':args.batch,'range':[start,end],'source_url':url,'source_sha256':digest,'manual_visual_status':'pending; user will evaluate the authorized batches inside Minecraft','species':evidence}
 out=ROOT/f'docs/animation-audit/minemon-gen1-batch{args.batch}-source-evidence.json'
-if args.batch==8 and args.segment=='second' and out.exists():
+if args.batch in (8,9) and args.segment=='second' and out.exists():
  old=json.loads(out.read_text());report['species']=old['species']+evidence;report['range']=[71,80]
 out.write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n')
 print(json.dumps(report,ensure_ascii=False,indent=2))

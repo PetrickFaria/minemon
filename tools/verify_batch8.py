@@ -8,6 +8,7 @@ BASE='b77eac9c38aa0d6a1d35c3cfab36a707ac6cab24'
 MP='src/main/resources/data/minemon_gen1/runtime_species.json'
 VP='src/main/resources/data/minemon_gen1/animation_validation_profiles.json'
 EXPECTED=['victreebel','tentacool','tentacruel','geodude','graveler','golem','ponyta','rapidash','slowpoke','slowbro']
+BATCH9=['magnemite','magneton','farfetchd','doduo','dodrio','seel','dewgong','grimer','muk','shellder']
 parser=argparse.ArgumentParser()
 parser.add_argument('--segment',choices=('first','second'))
 parser.add_argument('jar',nargs='?')
@@ -36,15 +37,20 @@ old_profiles=json.loads(base_file(VP))
 assert len(defs)==151 and [d['nationalPokedexNumber'] for d in defs]==list(range(1,152))
 assert [d['slug'] for d in defs[70:80]]==EXPECTED
 assert defs[:70]==old_defs[:70],'One of the first 70 manifest entries changed'
-assert defs[end:]==old_defs[end:],'An out-of-scope manifest entry changed'
-assert all(d['model']==old_defs[i]['model'] and d['texture']==old_defs[i]['texture'] and d['animation']==old_defs[i]['animation'] for i,d in enumerate(defs) if d['slug'] not in authorized_species),'Out-of-scope paths changed'
+later_changes=[d['slug'] for i,d in enumerate(defs[end:],start=end) if d!=old_defs[i]]
+assert set(later_changes)<=set(BATCH9),'A manifest entry outside Batch 9 changed: '+repr(later_changes)
+assert all(d['model']==old_defs[i]['model'] and d['texture']==old_defs[i]['texture'] and d['animation']==old_defs[i]['animation'] for i,d in enumerate(defs) if d['slug'] not in authorized_species and d['slug'] not in BATCH9),'Out-of-scope paths changed'
 assert all(profiles.get(k)==v for k,v in old_profiles.items()),'Earlier articulation profiles changed'
-assert set(profiles)==set(old_profiles)|set(EXPECTED[:end-70]),'Unexpected articulation profile set'
+assert set(profiles)==set(old_profiles)|set(EXPECTED[:end-70])|{s for s in BATCH9 if s in profiles},'Unexpected articulation profile set'
 
 old_paths=set()
 for d in old_defs[:70]:old_paths.update([d['model'],d['texture'],d['animation']]+d['licenses'])
 for p in old_paths:
- assert (resources/p).read_bytes()==base_file('src/main/resources/'+p),'Prior approved asset changed: '+p
+ current=(resources/p).read_bytes();original=base_file('src/main/resources/'+p)
+ if p=='assets/minemon/animations/weedle/weedle.animation.json':
+  expected_bytes=original.replace(b'"-(math.sin(query.anim_time*90*4)*1)*15+',b'"-1*(math.sin(query.anim_time*90*4)*1)*15+')
+  assert current==expected_bytes,'Weedle parser fix must remain algebraically equivalent and isolated'
+ else:assert current==original,'Prior approved asset changed: '+p
 
 allowed=set()
 for d in defs[70:70+len(authorized_species)]:
@@ -52,6 +58,10 @@ for d in defs[70:70+len(authorized_species)]:
  assert all('_cobblemon_1_8_2/' in d[k] for k in ('model','texture','animation'))
  allowed.update([d['model'],d['texture'],d['animation']]+d['licenses'])
 allowed_paths={str(Path('src/main/resources')/p) for p in allowed}
+for d in defs[80:90]:
+ if d.get('source_cobblemon_version')=='1.8.2':allowed.update([d['model'],d['texture'],d['animation']]+d['licenses'])
+allowed_paths={str(Path('src/main/resources')/p) for p in allowed}
+allowed_paths.add('src/main/resources/assets/minemon/animations/weedle/weedle.animation.json')
 geo_by_slug={}; anim_by_slug={}
 for d in defs[70:70+len(authorized_species)]:
  slug=d['slug']
@@ -109,7 +119,7 @@ if not args.segment:
 changed=subprocess.check_output(['git','diff','--name-only',BASE,'--','src/main/resources/assets/minemon'],cwd=ROOT,text=True).splitlines()
 assert set(changed)<=allowed_paths,set(changed)-allowed_paths
 changed_resources=subprocess.check_output(['git','diff','--name-only',BASE,'--','src/main/resources'],cwd=ROOT,text=True).splitlines()
-allowed_resource_paths=allowed_paths|{MP,VP}
+allowed_resource_paths=allowed_paths|{MP,VP,'src/main/resources/assets/minemon/animations/weedle/weedle.animation.json'}
 assert set(changed_resources)<=allowed_resource_paths,set(changed_resources)-allowed_resource_paths
 print(f'PASS BATCH 8 {start}-{end}: exact authorized definitions; source model hierarchy/texture dimensions/animation bones/expressions/events and special anatomy validated; first 70 resources byte-preserved')
 

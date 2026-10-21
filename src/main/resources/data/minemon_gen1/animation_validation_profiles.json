@@ -1306,5 +1306,124 @@
       "shell_jaw",
       "tail"
     ]
+  },
+  "magnemite": {
+    "idle": [
+      "body",
+      "magnet_left",
+      "magnet_right",
+      "nail_head"
+    ],
+    "walk": [
+      "body",
+      "nail_left_rotation",
+      "nail_right_rotation",
+      "magnet_left",
+      "magnet_right"
+    ],
+    "run": [
+      "body",
+      "nail_left_rotation",
+      "nail_right_rotation",
+      "magnet_left",
+      "magnet_right"
+    ]
+  },
+  "magneton": {
+    "idle": [
+      "allbodies",
+      "body2",
+      "body3",
+      "magnet_left",
+      "magnet_right"
+    ],
+    "walk": [
+      "allbodies",
+      "body2",
+      "body3",
+      "magnet_left_rotation",
+      "magnet_right_rotation"
+    ],
+    "run": [
+      "allbodies",
+      "body2",
+      "body3",
+      "magnet_left_rotation",
+      "magnet_right_rotation"
+    ]
+  },
+  "farfetchd": {
+    "idle": [
+      "head",
+      "neck",
+      "tail",
+      "leak",
+      "wing_left",
+      "wing_right"
+    ],
+    "walk": [
+      "wing_left",
+      "wing_right",
+      "leak",
+      "leg_left",
+      "leg_right"
+    ],
+    "run": [
+      "wing_left",
+      "wing_right",
+      "leak",
+      "leg_left",
+      "leg_right"
+    ]
+  },
+  "doduo": {
+    "idle": [
+      "body",
+      "head",
+      "head2",
+      "neck_left",
+      "neck_right"
+    ],
+    "walk": [
+      "leg_left",
+      "leg_left2",
+      "leg_right",
+      "leg_right2",
+      "neck_left",
+      "neck_right"
+    ],
+    "run": [
+      "leg_left",
+      "leg_left2",
+      "leg_right",
+      "leg_right2",
+      "neck_left",
+      "neck_right"
+    ]
+  },
+  "dodrio": {
+    "idle": [
+      "body",
+      "head2",
+      "head3",
+      "neck_left",
+      "neck_right"
+    ],
+    "walk": [
+      "leg_left",
+      "leg_left2",
+      "leg_right",
+      "leg_right2",
+      "head2",
+      "head3"
+    ],
+    "run": [
+      "leg_left",
+      "leg_left2",
+      "leg_right",
+      "leg_right2",
+      "head2",
+      "head3"
+    ]
   }
 }
