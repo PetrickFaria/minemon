@@ -2,7 +2,7 @@
   "batch": 8,
   "range": [
     71,
-    75
+    80
   ],
   "source_url": "https://cdn.modrinth.com/data/MdwFAVRL/versions/GJ2a1b8O/Cobblemon-fabric-1.8.2%2B1.21.1.jar",
   "source_sha256": "cae8ac328b61354fbe415208b8c6ffc12e7155094d0a87082e85e7914fb380c2",
@@ -135,6 +135,702 @@
         ]
       },
       "stripped_bones": {}
+    },
+    {
+      "number": 76,
+      "slug": "golem",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0076_golem/golem.geo.json",
+      "idle": "animation.golem.ground_idle",
+      "movement": "animation.golem.ground_walk",
+      "mode": "ground",
+      "native_run": "animation.golem.ground_run",
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "left_upper_arm",
+          "right_upper_arm"
+        ],
+        "walk": [
+          "left_upper_arm",
+          "right_upper_arm"
+        ],
+        "run": [
+          "left_upper_arm",
+          "right_upper_arm"
+        ]
+      },
+      "stripped_bones": {}
+    },
+    {
+      "number": 77,
+      "slug": "ponyta",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0077_ponyta/ponyta.geo.json",
+      "idle": "animation.ponyta.ground_idle",
+      "movement": "animation.ponyta.ground_walk",
+      "mode": "ground",
+      "native_run": null,
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "fire_mane",
+          "fire_mane_head",
+          "tail"
+        ],
+        "walk": [
+          "leg_front_left",
+          "leg_front_right",
+          "leg_back_left",
+          "leg_back_right"
+        ],
+        "run": [
+          "leg_front_left",
+          "leg_front_right",
+          "leg_back_left",
+          "leg_back_right"
+        ]
+      },
+      "stripped_bones": {
+        "animation.ponyta.ground_walk": [
+          "mane_bottom",
+          "mane_top",
+          "tail2",
+          "tail3",
+          "tail4",
+          "tail5",
+          "tail6",
+          "tail_left",
+          "tail_left2",
+          "tail_left3",
+          "tail_left4",
+          "tail_left5",
+          "tail_left6",
+          "tail_right",
+          "tail_right2",
+          "tail_right3",
+          "tail_right4",
+          "tail_right5",
+          "tail_right6"
+        ]
+      }
+    },
+    {
+      "number": 78,
+      "slug": "rapidash",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0078_rapidash/rapidash.geo.json",
+      "idle": "animation.rapidash.ground_idle",
+      "movement": "animation.rapidash.ground_walk",
+      "mode": "ground",
+      "native_run": "animation.rapidash.ground_run",
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "fire_mane_head_flame",
+          "tail"
+        ],
+        "walk": [
+          "leg_front_left",
+          "leg_front_right",
+          "leg_back_left",
+          "leg_back_right"
+        ],
+        "run": [
+          "leg_front_left",
+          "leg_front_right",
+          "leg_back_left",
+          "leg_back_right"
+        ]
+      },
+      "stripped_bones": {
+        "animation.rapidash.ground_idle": [
+          "fire_mane3",
+          "fire_mane_head3",
+          "fire_mane_head4"
+        ],
+        "animation.rapidash.ground_run": [
+          "fire_mane3",
+          "fire_mane_head3",
+          "fire_mane_head4",
+          "fire_mane_head5"
+        ],
+        "animation.rapidash.ground_walk": [
+          "fire_mane3",
+          "fire_mane_head3",
+          "fire_mane_head4",
+          "mane_bottom",
+          "mane_top",
+          "tail2",
+          "tail3",
+          "tail4",
+          "tail5",
+          "tail6",
+          "tail_left",
+          "tail_left2",
+          "tail_left3",
+          "tail_left4",
+          "tail_left5",
+          "tail_left6",
+          "tail_right",
+          "tail_right2",
+          "tail_right3",
+          "tail_right4",
+          "tail_right5",
+          "tail_right6"
+        ],
+        "animation.rapidash.sleep": [
+          "fire_mane3",
+          "fire_mane_head3",
+          "fire_mane_head4"
+        ]
+      }
+    },
+    {
+      "number": 79,
+      "slug": "slowpoke",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0079_slowpoke/slowpoke.geo.json",
+      "idle": "animation.slowpoke.ground_idle",
+      "movement": "animation.slowpoke.ground_walk",
+      "mode": "ground",
+      "native_run": null,
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "tail",
+          "tail2",
+          "tail4"
+        ],
+        "walk": [
+          "leg_front_left",
+          "leg_front_right",
+          "leg_back_left",
+          "leg_back_right"
+        ],
+        "run": [
+          "leg_front_left",
+          "leg_front_right",
+          "leg_back_left",
+          "leg_back_right"
+        ]
+      },
+      "stripped_bones": {}
+    },
+    {
+      "number": 80,
+      "slug": "slowbro",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0080_slowbro/slowbro.geo.json",
+      "idle": "animation.slowbro.ground_idle",
+      "movement": "animation.slowbro.ground_walk",
+      "mode": "ground",
+      "native_run": null,
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "shell",
+          "shell_jaw",
+          "tail"
+        ],
+        "walk": [
+          "leg_left",
+          "leg_right"
+        ],
+        "run": [
+          "leg_left",
+          "leg_right"
+        ]
+      },
+      "stripped_bones": {
+        "animation.slowbro.battle_idle": [
+          "leftarm",
+          "rightarm"
+        ],
+        "animation.slowbro.ground_idle": [
+          "leftarm",
+          "rightarm"
+        ],
+        "animation.slowbro.water_idle": [
+          "fesh",
+          "leftarm",
+          "leftleg",
+          "rightarm",
+          "rightleg"
+        ],
+        "animation.slowbro.water_swim": [
+          "fesh",
+          "leftarm",
+          "rightarm"
+        ]
+      }
+    },
+    {
+      "number": 76,
+      "slug": "golem",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0076_golem/golem.geo.json",
+      "idle": "animation.golem.ground_idle",
+      "movement": "animation.golem.ground_walk",
+      "mode": "ground",
+      "native_run": "animation.golem.ground_run",
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "left_upper_arm",
+          "right_upper_arm"
+        ],
+        "walk": [
+          "left_upper_arm",
+          "right_upper_arm"
+        ],
+        "run": [
+          "left_upper_arm",
+          "right_upper_arm"
+        ]
+      },
+      "stripped_bones": {}
+    },
+    {
+      "number": 77,
+      "slug": "ponyta",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0077_ponyta/ponyta.geo.json",
+      "idle": "animation.ponyta.ground_idle",
+      "movement": "animation.ponyta.ground_walk",
+      "mode": "ground",
+      "native_run": null,
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "fire_mane",
+          "fire_mane_head",
+          "tail"
+        ],
+        "walk": [
+          "leg_front_left",
+          "leg_front_right",
+          "leg_back_left",
+          "leg_back_right",
+          "fire_mane_head",
+          "tail"
+        ],
+        "run": [
+          "leg_front_left",
+          "leg_front_right",
+          "leg_back_left",
+          "leg_back_right",
+          "fire_mane_head",
+          "tail"
+        ]
+      },
+      "stripped_bones": {
+        "animation.ponyta.ground_walk": [
+          "mane_bottom",
+          "mane_top",
+          "tail2",
+          "tail3",
+          "tail4",
+          "tail5",
+          "tail6",
+          "tail_left",
+          "tail_left2",
+          "tail_left3",
+          "tail_left4",
+          "tail_left5",
+          "tail_left6",
+          "tail_right",
+          "tail_right2",
+          "tail_right3",
+          "tail_right4",
+          "tail_right5",
+          "tail_right6"
+        ]
+      }
+    },
+    {
+      "number": 78,
+      "slug": "rapidash",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0078_rapidash/rapidash.geo.json",
+      "idle": "animation.rapidash.ground_idle",
+      "movement": "animation.rapidash.ground_walk",
+      "mode": "ground",
+      "native_run": "animation.rapidash.ground_run",
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "fire_mane_head_flame",
+          "tail"
+        ],
+        "walk": [
+          "leg_front_left",
+          "leg_front_right",
+          "leg_back_left",
+          "leg_back_right",
+          "fire_mane_head_flame",
+          "tail"
+        ],
+        "run": [
+          "leg_front_left",
+          "leg_front_right",
+          "leg_back_left",
+          "leg_back_right"
+        ]
+      },
+      "stripped_bones": {
+        "animation.rapidash.ground_idle": [
+          "fire_mane3",
+          "fire_mane_head3",
+          "fire_mane_head4"
+        ],
+        "animation.rapidash.ground_run": [
+          "fire_mane3",
+          "fire_mane_head3",
+          "fire_mane_head4",
+          "fire_mane_head5"
+        ],
+        "animation.rapidash.ground_walk": [
+          "fire_mane3",
+          "fire_mane_head3",
+          "fire_mane_head4",
+          "mane_bottom",
+          "mane_top",
+          "tail2",
+          "tail3",
+          "tail4",
+          "tail5",
+          "tail6",
+          "tail_left",
+          "tail_left2",
+          "tail_left3",
+          "tail_left4",
+          "tail_left5",
+          "tail_left6",
+          "tail_right",
+          "tail_right2",
+          "tail_right3",
+          "tail_right4",
+          "tail_right5",
+          "tail_right6"
+        ],
+        "animation.rapidash.sleep": [
+          "fire_mane3",
+          "fire_mane_head3",
+          "fire_mane_head4"
+        ]
+      }
+    },
+    {
+      "number": 79,
+      "slug": "slowpoke",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0079_slowpoke/slowpoke.geo.json",
+      "idle": "animation.slowpoke.ground_idle",
+      "movement": "animation.slowpoke.ground_walk",
+      "mode": "ground",
+      "native_run": null,
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "tail",
+          "tail2",
+          "tail4"
+        ],
+        "walk": [
+          "leg_front_left",
+          "leg_front_right",
+          "leg_back_left",
+          "leg_back_right"
+        ],
+        "run": [
+          "leg_front_left",
+          "leg_front_right",
+          "leg_back_left",
+          "leg_back_right"
+        ]
+      },
+      "stripped_bones": {}
+    },
+    {
+      "number": 80,
+      "slug": "slowbro",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0080_slowbro/slowbro.geo.json",
+      "idle": "animation.slowbro.ground_idle",
+      "movement": "animation.slowbro.ground_walk",
+      "mode": "ground",
+      "native_run": null,
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "shell",
+          "shell_jaw",
+          "tail"
+        ],
+        "walk": [
+          "leg_left",
+          "leg_right"
+        ],
+        "run": [
+          "leg_left",
+          "leg_right"
+        ]
+      },
+      "stripped_bones": {
+        "animation.slowbro.battle_idle": [
+          "leftarm",
+          "rightarm"
+        ],
+        "animation.slowbro.ground_idle": [
+          "leftarm",
+          "rightarm"
+        ],
+        "animation.slowbro.water_idle": [
+          "fesh",
+          "leftarm",
+          "leftleg",
+          "rightarm",
+          "rightleg"
+        ],
+        "animation.slowbro.water_swim": [
+          "fesh",
+          "leftarm",
+          "rightarm"
+        ]
+      }
+    },
+    {
+      "number": 76,
+      "slug": "golem",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0076_golem/golem.geo.json",
+      "idle": "animation.golem.ground_idle",
+      "movement": "animation.golem.ground_walk",
+      "mode": "ground",
+      "native_run": "animation.golem.ground_run",
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "left_upper_arm",
+          "right_upper_arm"
+        ],
+        "walk": [
+          "left_upper_arm",
+          "right_upper_arm"
+        ],
+        "run": [
+          "left_upper_arm",
+          "right_upper_arm"
+        ]
+      },
+      "stripped_bones": {}
+    },
+    {
+      "number": 77,
+      "slug": "ponyta",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0077_ponyta/ponyta.geo.json",
+      "idle": "animation.ponyta.ground_idle",
+      "movement": "animation.ponyta.ground_walk",
+      "mode": "ground",
+      "native_run": null,
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "fire_mane",
+          "fire_mane_head",
+          "tail"
+        ],
+        "walk": [
+          "leg_front_left",
+          "leg_front_right",
+          "leg_back_left",
+          "leg_back_right",
+          "fire_mane_head",
+          "tail"
+        ],
+        "run": [
+          "leg_front_left",
+          "leg_front_right",
+          "leg_back_left",
+          "leg_back_right",
+          "fire_mane_head",
+          "tail"
+        ]
+      },
+      "stripped_bones": {
+        "animation.ponyta.ground_walk": [
+          "mane_bottom",
+          "mane_top",
+          "tail2",
+          "tail3",
+          "tail4",
+          "tail5",
+          "tail6",
+          "tail_left",
+          "tail_left2",
+          "tail_left3",
+          "tail_left4",
+          "tail_left5",
+          "tail_left6",
+          "tail_right",
+          "tail_right2",
+          "tail_right3",
+          "tail_right4",
+          "tail_right5",
+          "tail_right6"
+        ]
+      }
+    },
+    {
+      "number": 78,
+      "slug": "rapidash",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0078_rapidash/rapidash.geo.json",
+      "idle": "animation.rapidash.ground_idle",
+      "movement": "animation.rapidash.ground_walk",
+      "mode": "ground",
+      "native_run": "animation.rapidash.ground_run",
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "fire_mane_head_flame",
+          "tail"
+        ],
+        "walk": [
+          "leg_front_left",
+          "leg_front_right",
+          "leg_back_left",
+          "leg_back_right",
+          "fire_mane_head_flame",
+          "tail"
+        ],
+        "run": [
+          "leg_front_left",
+          "leg_front_right",
+          "leg_back_left",
+          "leg_back_right"
+        ]
+      },
+      "stripped_bones": {
+        "animation.rapidash.ground_idle": [
+          "fire_mane3",
+          "fire_mane_head3",
+          "fire_mane_head4"
+        ],
+        "animation.rapidash.ground_run": [
+          "fire_mane3",
+          "fire_mane_head3",
+          "fire_mane_head4",
+          "fire_mane_head5"
+        ],
+        "animation.rapidash.ground_walk": [
+          "fire_mane3",
+          "fire_mane_head3",
+          "fire_mane_head4",
+          "mane_bottom",
+          "mane_top",
+          "tail2",
+          "tail3",
+          "tail4",
+          "tail5",
+          "tail6",
+          "tail_left",
+          "tail_left2",
+          "tail_left3",
+          "tail_left4",
+          "tail_left5",
+          "tail_left6",
+          "tail_right",
+          "tail_right2",
+          "tail_right3",
+          "tail_right4",
+          "tail_right5",
+          "tail_right6"
+        ],
+        "animation.rapidash.sleep": [
+          "fire_mane3",
+          "fire_mane_head3",
+          "fire_mane_head4"
+        ]
+      }
+    },
+    {
+      "number": 79,
+      "slug": "slowpoke",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0079_slowpoke/slowpoke.geo.json",
+      "idle": "animation.slowpoke.ground_idle",
+      "movement": "animation.slowpoke.ground_walk",
+      "mode": "ground",
+      "native_run": null,
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "tail",
+          "tail2",
+          "tail4"
+        ],
+        "walk": [
+          "leg_front_left",
+          "leg_front_right",
+          "leg_back_left",
+          "leg_back_right",
+          "tail",
+          "tail2",
+          "tail4"
+        ],
+        "run": [
+          "leg_front_left",
+          "leg_front_right",
+          "leg_back_left",
+          "leg_back_right",
+          "tail",
+          "tail2",
+          "tail4"
+        ]
+      },
+      "stripped_bones": {}
+    },
+    {
+      "number": 80,
+      "slug": "slowbro",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0080_slowbro/slowbro.geo.json",
+      "idle": "animation.slowbro.ground_idle",
+      "movement": "animation.slowbro.ground_walk",
+      "mode": "ground",
+      "native_run": null,
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "shell",
+          "shell_jaw",
+          "tail"
+        ],
+        "walk": [
+          "leg_left",
+          "leg_right",
+          "shell",
+          "shell_jaw",
+          "tail"
+        ],
+        "run": [
+          "leg_left",
+          "leg_right",
+          "shell",
+          "shell_jaw",
+          "tail"
+        ]
+      },
+      "stripped_bones": {
+        "animation.slowbro.battle_idle": [
+          "leftarm",
+          "rightarm"
+        ],
+        "animation.slowbro.ground_idle": [
+          "leftarm",
+          "rightarm"
+        ],
+        "animation.slowbro.water_idle": [
+          "fesh",
+          "leftarm",
+          "leftleg",
+          "rightarm",
+          "rightleg"
+        ],
+        "animation.slowbro.water_swim": [
+          "fesh",
+          "leftarm",
+          "rightarm"
+        ]
+      }
     }
   ]
 }

@@ -21,11 +21,11 @@ Integrar exclusivamente os recursos Cobblemon Fabric 1.8.2 dos Pokémon #071–#
 | 073 | Tentacruel | Implementado localmente; validação parcial aprovada |
 | 074 | Geodude | Implementado localmente; validação parcial aprovada |
 | 075 | Graveler | Implementado localmente; validação parcial aprovada |
-| 076 | Golem | Pendente |
-| 077 | Ponyta | Pendente |
-| 078 | Rapidash | Pendente |
-| 079 | Slowpoke | Pendente |
-| 080 | Slowbro | Pendente |
+| 076 | Golem | Implementado localmente; validação parcial aprovada |
+| 077 | Ponyta | Implementado localmente; validação parcial aprovada |
+| 078 | Rapidash | Implementado localmente; validação parcial aprovada |
+| 079 | Slowpoke | Implementado localmente; validação parcial aprovada |
+| 080 | Slowbro | Implementado localmente; validação parcial aprovada |
 
 ## Checkpoint 1 — Preparação concluída
 
@@ -46,13 +46,25 @@ Integrar exclusivamente os recursos Cobblemon Fabric 1.8.2 dos Pokémon #071–#
 - `python3 -m py_compile tools/import_cobblemon_182_batch.py tools/verify_batch8.py`: passou.
 - Checkpoint publicado em `e9990321f38df7ef21c412c61af246e647c4f732` com `[skip ci]`. Nenhum workflow foi iniciado.
 
+## Checkpoint 3 — #076–#080 implementados localmente
+
+- Integrados modelo, textura, animações e licença fonte para Golem, Ponyta, Rapidash, Slowpoke e Slowbro.
+- Mantidos os clips aquáticos nativos de Slowpoke/Slowbro sem seletor de natação. Ponyta conserva `ground_runold` sem selecioná-lo; `ground_run` nativo está selecionado para Golem e Rapidash. Geodude/Graveler também têm corrida nativa.
+- Perfis do caminhar de Ponyta/Rapidash e Slowpoke/Slowbro cobrem tanto articulações de locomoção como as chamas/caudas/casco animados pela fonte.
+- Poser `q.look('head')` foi associado apenas aos ossos `head` existentes de Golem, Slowpoke e Slowbro; Geodude permanece adaptado com limites do seu poser. Graveler não possui osso `head` compatível e seu look não é declarado como implementado.
+- `python3 tools/verify_batch8.py --segment second`: passou para #076–#080 e confirmou preservação dos primeiros 70 recursos.
+- `python3 tools/verify_batch8.py`: passou para #071–#080, conferindo as dez espécies, recursos, perfis, expressões/eventos e fallbacks.
+- `python3 tools/verify_project.py`: passou; 151 espécies runtime, 1.025 registros catalogados e 5.979 referências existentes; JSON/modelos/animações/PNGs/OGGs válidos.
+- `python3 -m py_compile tools/import_cobblemon_182_batch.py tools/verify_batch8.py`: passou.
+- Alterações deste checkpoint ainda não publicadas; nenhum workflow do Lote 8 foi iniciado.
+
 ## Etapas pendentes
 
-1. Publicar o checkpoint #071–#075 com `[skip ci]` para não iniciar validação antes do segundo grupo.
-2. Implementar e validar #076–#080, publicar o checkpoint seguinte.
-3. Atualizar os gates cumulativos para os 80 Pokémon; executar compilação, testes Java, GameTests, smoke do cliente, testes regressivos, validações cumulativas do catálogo/JAR e inspeção do JAR real.
-4. Iniciar GitHub Actions somente após a implementação final completa. Se ainda estiver em execução, registrar ID/URL/estado e encerrar o acompanhamento dessa etapa.
-5. Registrar artefato, hash e expiração disponíveis após aprovação do CI.
+1. Publicar o checkpoint #076–#080 com `[skip ci]`.
+2. Atualizar os gates para verificar as 80 espécies preservando os validadores do JAR e as regressões das asas de Pidgeotto/Pidgeot.
+3. Executar compilação, testes Java, GameTests, smoke do cliente, verificadores cumulativos do catálogo/JAR e inspeção do JAR real no GitHub Actions.
+4. Iniciar GitHub Actions após commit final; se continuar em andamento, registrar ID/URL/estado e encerrar o acompanhamento.
+5. Registrar o artefato, hash e expiração após aprovação do CI.
 
 ## Bloqueios e limitações
 

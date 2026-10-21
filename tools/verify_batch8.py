@@ -17,6 +17,7 @@ start,end=(71,80)
 if args.segment=='first':start,end=71,75
 if args.segment=='second':start,end=76,80
 expected=EXPECTED[start-71:end-70]
+authorized_species=EXPECTED[:end-70] if args.segment else EXPECTED
 resources=ROOT/'src/main/resources'
 
 def base_file(path):
@@ -36,7 +37,7 @@ assert len(defs)==151 and [d['nationalPokedexNumber'] for d in defs]==list(range
 assert [d['slug'] for d in defs[70:80]]==EXPECTED
 assert defs[:70]==old_defs[:70],'One of the first 70 manifest entries changed'
 assert defs[end:]==old_defs[end:],'An out-of-scope manifest entry changed'
-assert all(d['model']==old_defs[i]['model'] and d['texture']==old_defs[i]['texture'] and d['animation']==old_defs[i]['animation'] for i,d in enumerate(defs) if not start-1<=i<end),'Out-of-scope paths changed'
+assert all(d['model']==old_defs[i]['model'] and d['texture']==old_defs[i]['texture'] and d['animation']==old_defs[i]['animation'] for i,d in enumerate(defs) if d['slug'] not in authorized_species),'Out-of-scope paths changed'
 assert all(profiles.get(k)==v for k,v in old_profiles.items()),'Earlier articulation profiles changed'
 assert set(profiles)==set(old_profiles)|set(EXPECTED[:end-70]),'Unexpected articulation profile set'
 
@@ -46,13 +47,13 @@ for p in old_paths:
  assert (resources/p).read_bytes()==base_file('src/main/resources/'+p),'Prior approved asset changed: '+p
 
 allowed=set()
-for d in defs[start-1:end]:
+for d in defs[70:70+len(authorized_species)]:
  assert d['source_cobblemon_version']=='1.8.2'
  assert all('_cobblemon_1_8_2/' in d[k] for k in ('model','texture','animation'))
  allowed.update([d['model'],d['texture'],d['animation']]+d['licenses'])
 allowed_paths={str(Path('src/main/resources')/p) for p in allowed}
 geo_by_slug={}; anim_by_slug={}
-for d in defs[start-1:end]:
+for d in defs[70:70+len(authorized_species)]:
  slug=d['slug']
  geo=json.loads((resources/'assets/minemon'/d['model'].removeprefix('assets/minemon/')).read_text())['minecraft:geometry']
  bones={}
@@ -95,7 +96,7 @@ required={
  'ponyta':('fire_mane','fire_mane_head','tail'),'rapidash':('fire_mane_head_flame','tail'),
  'slowpoke':('tail','tail2','tail4'),'slowbro':('shell','shell_jaw','tail')}
 for slug,joints in required.items():
- if slug not in expected:continue
+ if slug not in authorized_species:continue
  assert set(joints)<=set(geo_by_slug[slug]),(slug,'missing characteristic anatomy',set(joints)-set(geo_by_slug[slug]))
  assert set(joints)&set(profiles[slug]['walk']),(slug,'profile omits source anatomy')
 if not args.segment:

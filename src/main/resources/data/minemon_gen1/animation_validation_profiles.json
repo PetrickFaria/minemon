@@ -1203,5 +1203,108 @@
       "arm_bottom_left",
       "arm_bottom_right"
     ]
+  },
+  "golem": {
+    "idle": [
+      "left_upper_arm",
+      "right_upper_arm"
+    ],
+    "walk": [
+      "left_upper_arm",
+      "right_upper_arm"
+    ],
+    "run": [
+      "left_upper_arm",
+      "right_upper_arm"
+    ]
+  },
+  "ponyta": {
+    "idle": [
+      "fire_mane",
+      "fire_mane_head",
+      "tail"
+    ],
+    "walk": [
+      "leg_front_left",
+      "leg_front_right",
+      "leg_back_left",
+      "leg_back_right",
+      "fire_mane_head",
+      "tail"
+    ],
+    "run": [
+      "leg_front_left",
+      "leg_front_right",
+      "leg_back_left",
+      "leg_back_right",
+      "fire_mane_head",
+      "tail"
+    ]
+  },
+  "rapidash": {
+    "idle": [
+      "fire_mane_head_flame",
+      "tail"
+    ],
+    "walk": [
+      "leg_front_left",
+      "leg_front_right",
+      "leg_back_left",
+      "leg_back_right",
+      "fire_mane_head_flame",
+      "tail"
+    ],
+    "run": [
+      "leg_front_left",
+      "leg_front_right",
+      "leg_back_left",
+      "leg_back_right"
+    ]
+  },
+  "slowpoke": {
+    "idle": [
+      "tail",
+      "tail2",
+      "tail4"
+    ],
+    "walk": [
+      "leg_front_left",
+      "leg_front_right",
+      "leg_back_left",
+      "leg_back_right",
+      "tail",
+      "tail2",
+      "tail4"
+    ],
+    "run": [
+      "leg_front_left",
+      "leg_front_right",
+      "leg_back_left",
+      "leg_back_right",
+      "tail",
+      "tail2",
+      "tail4"
+    ]
+  },
+  "slowbro": {
+    "idle": [
+      "shell",
+      "shell_jaw",
+      "tail"
+    ],
+    "walk": [
+      "leg_left",
+      "leg_right",
+      "shell",
+      "shell_jaw",
+      "tail"
+    ],
+    "run": [
+      "leg_left",
+      "leg_right",
+      "shell",
+      "shell_jaw",
+      "tail"
+    ]
   }
 }

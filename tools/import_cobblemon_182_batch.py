@@ -72,9 +72,10 @@ GAIT={
  'victreebel':['body','head_stem','head_leaf'],'tentacool':['tentacle_left_3','tentacle_right_3'],
  'tentacruel':['tentacle_left_3','tentacle_right_3'],'geodude':['arm_left','arm_right'],
  'graveler':['arm_bottom_left','arm_bottom_right'],'golem':['left_upper_arm','right_upper_arm'],
- 'ponyta':['leg_front_left','leg_front_right','leg_back_left','leg_back_right'],
- 'rapidash':['leg_front_left','leg_front_right','leg_back_left','leg_back_right'],
- 'slowpoke':['leg_front_left','leg_front_right','leg_back_left','leg_back_right'],'slowbro':['leg_left','leg_right']
+ 'ponyta':['leg_front_left','leg_front_right','leg_back_left','leg_back_right','fire_mane_head','tail'],
+ 'rapidash':['leg_front_left','leg_front_right','leg_back_left','leg_back_right','fire_mane_head_flame','tail'],
+ 'slowpoke':['leg_front_left','leg_front_right','leg_back_left','leg_back_right','tail','tail2','tail4'],
+ 'slowbro':['leg_left','leg_right','shell','shell_jaw','tail']
 }
 IDLE={'oddish':["leaf_center3","leaf_inner_left3","leaf_inner_right3"],'gloom':["arm_left","arm_right","leaf_back_right4"],'vileplume':["arm_left","arm_right","petal_back_rotation"],'paras':["arm_left","arm_right","body"],'parasect':["claw_left","claw_right","body"],'venonat':["left_foot","right_foot","left_antenna","right_antenna"],'diglett':["body"],'nidoqueen':['left_upper_leg','right_upper_leg','left_shoulder','right_shoulder'],'nidoranm':['head','torso','ear_left','ear_right'],'nidorino':['jaw','torso'],'nidoking':['tail','tail2','arm_left1','arm_right1'],'clefairy':['tail','tail2','wing_left','wing_right'],'clefable':['arm_left','arm_right','tail','tail2'],'vulpix':['tail_left1','tail_right1','head_rotation'],'ninetales':['leg_front_left','leg_front_right','tail_middle'],'jigglypuff':['foot_left','foot_right','head'],'wigglytuff':['foot_left','foot_right','torso'],'spearow':['head'],'fearow':['head'],'raticate':['body','head','tail'],'ekans':['head','neck','tail5'],'sandslash':['arm_left','arm_right','tail'],
  'dugtrio':['body1','body2','body3','body3_2'],'meowth':['tail1','tail2','tail3'],'persian':['head','neck','tail1','tail2','tail3','tail4','tail5','tail6'],
