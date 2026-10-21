@@ -32,7 +32,9 @@ old_profiles=json.loads(base_file(VP))
 assert len(defs)==151 and [d['nationalPokedexNumber'] for d in defs]==list(range(1,152))
 assert [d['slug'] for d in defs[80:90]]==EXPECTED
 assert defs[:80]==old_defs[:80],'One of the first 80 species definitions changed'
-assert all(defs[i]==old_defs[i] for i in range(80,151) if i+1<start or i+1>end),'Out-of-scope species definition changed'
+allowed_l9=set(EXPECTED[:end-80])
+assert all(defs[i]==old_defs[i] for i in range(80,90) if defs[i]['slug'] not in allowed_l9),'Unimplemented Batch 9 species definition changed'
+assert defs[90:]==old_defs[90:],'Species after Batch 9 changed'
 assert all(profiles.get(k)==v for k,v in old_profiles.items()),'Earlier animation profiles changed'
 assert set(profiles)==set(old_profiles)|set(EXPECTED[:end-80]),'Unexpected articulation profile set'
 

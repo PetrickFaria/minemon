@@ -1,8 +1,8 @@
 {
   "batch": 9,
   "range": [
-    81,
-    85
+    71,
+    80
   ],
   "source_url": "https://cdn.modrinth.com/data/MdwFAVRL/versions/GJ2a1b8O/Cobblemon-fabric-1.8.2%2B1.21.1.jar",
   "source_sha256": "cae8ac328b61354fbe415208b8c6ffc12e7155094d0a87082e85e7914fb380c2",
@@ -196,6 +196,184 @@
           "head"
         ]
       }
+    },
+    {
+      "number": 86,
+      "slug": "seel",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0086_seel/seel.geo.json",
+      "idle": "animation.seel.ground_idle",
+      "movement": "animation.seel.ground_idle",
+      "mode": "ground",
+      "native_run": null,
+      "fallback": "idle",
+      "profiles": {
+        "idle": [
+          "body",
+          "head",
+          "flipper_left",
+          "flipper_right",
+          "tail"
+        ],
+        "walk": [
+          "flipper_left",
+          "flipper_right",
+          "tail",
+          "body"
+        ],
+        "run": [
+          "flipper_left",
+          "flipper_right",
+          "tail",
+          "body"
+        ]
+      },
+      "stripped_bones": {}
+    },
+    {
+      "number": 87,
+      "slug": "dewgong",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0087_dewgong/dewgong.geo.json",
+      "idle": "animation.dewgong.ground_idle",
+      "movement": "animation.dewgong.ground_walk",
+      "mode": "ground",
+      "native_run": null,
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "body",
+          "head",
+          "flipper_left",
+          "flipper_right",
+          "tail"
+        ],
+        "walk": [
+          "flipper_left",
+          "flipper_right",
+          "tail",
+          "body"
+        ],
+        "run": [
+          "flipper_left",
+          "flipper_right",
+          "tail",
+          "body"
+        ]
+      },
+      "stripped_bones": {}
+    },
+    {
+      "number": 88,
+      "slug": "grimer",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0088_grimer/grimer.geo.json",
+      "idle": "animation.grimer.ground_idle",
+      "movement": "animation.grimer.ground_walk",
+      "mode": "ground",
+      "native_run": "animation.grimer.ground_run",
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "body",
+          "head",
+          "arm_left",
+          "arm_right",
+          "back_tail",
+          "front_tail"
+        ],
+        "walk": [
+          "body",
+          "arm_left",
+          "arm_right",
+          "back_tail",
+          "front_tail"
+        ],
+        "run": [
+          "body",
+          "arm_left",
+          "arm_right",
+          "back_tail",
+          "front_tail"
+        ]
+      },
+      "stripped_bones": {
+        "animation.grimer.water_surface_battle_idle": [
+          "body_base",
+          "goop_bottom"
+        ],
+        "animation.grimer.water_surface_idle": [
+          "body_base",
+          "goop_bottom"
+        ],
+        "animation.grimer.water_surface_sleep": [
+          "body_base",
+          "goop_bottom"
+        ],
+        "animation.grimer.water_surface_swim": [
+          "body_base",
+          "goop_bottom"
+        ]
+      }
+    },
+    {
+      "number": 89,
+      "slug": "muk",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0089_muk/muk.geo.json",
+      "idle": "animation.muk.ground_idle",
+      "movement": "animation.muk.ground_idle",
+      "mode": "ground",
+      "native_run": null,
+      "fallback": "idle",
+      "profiles": {
+        "idle": [
+          "body",
+          "arm_left",
+          "arm_right",
+          "mouth_sludge"
+        ],
+        "walk": [
+          "body",
+          "arm_left",
+          "arm_right",
+          "mouth_sludge"
+        ],
+        "run": [
+          "body",
+          "arm_left",
+          "arm_right",
+          "mouth_sludge"
+        ]
+      },
+      "stripped_bones": {}
+    },
+    {
+      "number": 90,
+      "slug": "shellder",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0090_shellder/shellder.geo.json",
+      "idle": "animation.shellder.ground_idle",
+      "movement": "animation.shellder.ground_walk",
+      "mode": "ground",
+      "native_run": null,
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "body",
+          "shell_top",
+          "shell_bottom",
+          "tongue"
+        ],
+        "walk": [
+          "shell_top",
+          "shell_bottom",
+          "head",
+          "tongue"
+        ],
+        "run": [
+          "shell_top",
+          "shell_bottom",
+          "head",
+          "tongue"
+        ]
+      },
+      "stripped_bones": {}
     }
   ]
 }

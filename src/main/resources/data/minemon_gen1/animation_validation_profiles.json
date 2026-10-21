@@ -1425,5 +1425,111 @@
       "head2",
       "head3"
     ]
+  },
+  "seel": {
+    "idle": [
+      "body",
+      "head",
+      "flipper_left",
+      "flipper_right",
+      "tail"
+    ],
+    "walk": [
+      "flipper_left",
+      "flipper_right",
+      "tail",
+      "body"
+    ],
+    "run": [
+      "flipper_left",
+      "flipper_right",
+      "tail",
+      "body"
+    ]
+  },
+  "dewgong": {
+    "idle": [
+      "body",
+      "head",
+      "flipper_left",
+      "flipper_right",
+      "tail"
+    ],
+    "walk": [
+      "flipper_left",
+      "flipper_right",
+      "tail",
+      "body"
+    ],
+    "run": [
+      "flipper_left",
+      "flipper_right",
+      "tail",
+      "body"
+    ]
+  },
+  "grimer": {
+    "idle": [
+      "body",
+      "head",
+      "arm_left",
+      "arm_right",
+      "back_tail",
+      "front_tail"
+    ],
+    "walk": [
+      "body",
+      "arm_left",
+      "arm_right",
+      "back_tail",
+      "front_tail"
+    ],
+    "run": [
+      "body",
+      "arm_left",
+      "arm_right",
+      "back_tail",
+      "front_tail"
+    ]
+  },
+  "muk": {
+    "idle": [
+      "body",
+      "arm_left",
+      "arm_right",
+      "mouth_sludge"
+    ],
+    "walk": [
+      "body",
+      "arm_left",
+      "arm_right",
+      "mouth_sludge"
+    ],
+    "run": [
+      "body",
+      "arm_left",
+      "arm_right",
+      "mouth_sludge"
+    ]
+  },
+  "shellder": {
+    "idle": [
+      "body",
+      "shell_top",
+      "shell_bottom",
+      "tongue"
+    ],
+    "walk": [
+      "shell_top",
+      "shell_bottom",
+      "head",
+      "tongue"
+    ],
+    "run": [
+      "shell_top",
+      "shell_bottom",
+      "head",
+      "tongue"
+    ]
   }
 }
