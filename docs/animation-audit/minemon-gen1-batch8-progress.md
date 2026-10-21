@@ -88,7 +88,9 @@ Integrar exclusivamente os recursos Cobblemon Fabric 1.8.2 dos Pokémon #071–#
 - Diagnóstico: o perfil `run` do Graveler media `arm_bottom_left`/`arm_bottom_right`, estáticos no clip nativo. O clip anima `body` com expressões Molang e `body_roll` com keyframes/rotação. O perfil foi atualizado para esses ossos e a regressão Java agora verifica o canal animado de ambos os Pokémon rochosos.
 - Nenhum modelo, animação fonte ou espécie fora do Lote 8 foi alterado.
 - `python3 tools/verify_batch8.py`, `python3 tools/verify_project.py` e `git diff --check`: passaram após o reparo. Testes Java e smoke real seguem pendentes do próximo Actions.
-- Commit-base deste reparo: `f0c940f00262b7bf7692c622ea5c3b8840bbf45b`. Pendência: publicar este checkpoint, consultar o Actions resultante e continuar tratando somente falhas comprovadas.
+- Commit de correção publicado: `a9c2cd6d226c404f0bc7d29eb65829f586314fea`; commit-base: `f0c940f00262b7bf7692c622ea5c3b8840bbf45b`.
+- GitHub Actions: [39658750383](https://github.com/PetrickFaria/minemon/actions/runs/39658750383), estado inicial `in_progress`; job `build` está preparando o Gradle e ainda não concluiu os verificadores. Nenhum outro workflow foi iniciado.
+- Próxima ação: consultar essa mesma execução. Não abrir Lote 9 antes da aprovação integral do Lote 8.
 
 ## Bloqueios e limitações
 
