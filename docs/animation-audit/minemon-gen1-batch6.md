@@ -26,7 +26,13 @@ Escopo: somente #051–#060, conforme o plano de 16 lotes. O Lote 7 não foi ini
 - [x] Integrar localmente os dez recursos e seus arquivos de licença; manter os 151 registros e os recursos anteriores sem alteração.
 - [x] Adaptar a caminhada procedural de Growlithe a partir de `q.quadruped_walk(0.66, 1.4)`, usando pares diagonais de pernas no ciclo de GeckoLib 3.
 - [x] Marcar poses nativas estáticas sem adicionar oscilação artificial; Meowth e Persian usam idle como fallback de movimento porque a fonte não oferece caminhada.
-- [ ] Concluir gate cumulativo, testes Java, GameTests, smoke do cliente, inspeção do JAR, commit e publicação.
+- [x] Passar gate de recursos: 151 registros ordenados, exatamente as espécies 051–060 atualizadas, os 50 anteriores preservados e os 91 registros restantes inalterados.
+- [x] Passar verificação do projeto e preparar uma cópia dos 151 modelos/clipes para validar as transformações de runtime GeckoLib 3.
+- [ ] Aguardar no Actions compilação/testes Java, GameTests, smoke do cliente e inspeção do JAR após o commit do código.
+
+O `./gradlew clean test build` não pôde ser executado neste ambiente local: o Gradle Wrapper 7.5.1 tentou baixar sua distribuição e a conexão de saída foi recusada. A validação completa será feita no GitHub Actions antes da entrega.
+
+A janela máxima do smoke do cliente foi ampliada de 35 para 45 minutos com as asserções, velocidades e fases intactas. O smoke cumulativo do Lote 5 levou cerca de 31 minutos para 50 perfis detalhados; a janela maior comporta a cobertura de 60 sem encurtar os testes.
 
 ## Adaptações e limites conhecidos
 

@@ -673,5 +673,251 @@
       "body2",
       "ground"
     ]
+  },
+  "dugtrio": {
+    "idle": [
+      "body1",
+      "body2",
+      "body3",
+      "body3_2"
+    ],
+    "walk": [
+      "body1",
+      "body1_2",
+      "body2",
+      "body3",
+      "body3_2"
+    ],
+    "run": [
+      "body1",
+      "body1_2",
+      "body2",
+      "body3",
+      "body3_2"
+    ]
+  },
+  "meowth": {
+    "idle": [
+      "tail1",
+      "tail2",
+      "tail3"
+    ],
+    "walk": [
+      "arm_left",
+      "arm_right",
+      "foot_left",
+      "foot_right",
+      "tail1",
+      "tail2",
+      "tail3"
+    ],
+    "run": [
+      "arm_left",
+      "arm_right",
+      "foot_left",
+      "foot_right",
+      "tail1",
+      "tail2",
+      "tail3"
+    ],
+    "idle_static": [
+      "tail1",
+      "tail2",
+      "tail3"
+    ]
+  },
+  "persian": {
+    "idle": [
+      "head",
+      "neck",
+      "tail1",
+      "tail2",
+      "tail3",
+      "tail4",
+      "tail5",
+      "tail6"
+    ],
+    "walk": [
+      "head",
+      "neck",
+      "tail1",
+      "tail2",
+      "tail3",
+      "tail4",
+      "tail5",
+      "tail6"
+    ],
+    "run": [
+      "head",
+      "neck",
+      "tail1",
+      "tail2",
+      "tail3",
+      "tail4",
+      "tail5",
+      "tail6"
+    ],
+    "idle_static": [
+      "head",
+      "neck",
+      "tail1",
+      "tail2",
+      "tail3",
+      "tail4",
+      "tail5",
+      "tail6"
+    ]
+  },
+  "psyduck": {
+    "idle": [
+      "head",
+      "tail",
+      "tail2",
+      "hair2",
+      "hair3"
+    ],
+    "walk": [
+      "foot_left",
+      "foot_right",
+      "arm_left",
+      "arm_right"
+    ],
+    "run": [
+      "foot_left",
+      "foot_right",
+      "arm_left",
+      "arm_right"
+    ]
+  },
+  "golduck": {
+    "idle": [
+      "head",
+      "neck",
+      "tail",
+      "tail2",
+      "tail3"
+    ],
+    "walk": [
+      "leg_left",
+      "leg_right",
+      "arm_left",
+      "arm_right"
+    ],
+    "run": [
+      "leg_left",
+      "leg_right",
+      "arm_left",
+      "arm_right"
+    ]
+  },
+  "mankey": {
+    "idle": [
+      "body",
+      "ear_left",
+      "ear_right",
+      "tail1",
+      "tail2"
+    ],
+    "walk": [
+      "leg_left",
+      "leg_right",
+      "arm_left",
+      "arm_right"
+    ],
+    "run": [
+      "leg_left",
+      "leg_right",
+      "arm_left",
+      "arm_right"
+    ]
+  },
+  "primeape": {
+    "idle": [
+      "body",
+      "ear_left",
+      "ear_right"
+    ],
+    "walk": [
+      "leg_left",
+      "leg_right",
+      "arm_left",
+      "arm_right"
+    ],
+    "run": [
+      "leg_left",
+      "leg_right",
+      "arm_left",
+      "arm_right"
+    ]
+  },
+  "growlithe": {
+    "idle": [
+      "body",
+      "head",
+      "upper_torso",
+      "tail"
+    ],
+    "walk": [
+      "leg_front_left",
+      "leg_front_right",
+      "leg_back_left",
+      "leg_back_right"
+    ],
+    "run": [
+      "leg_front_left",
+      "leg_front_right",
+      "leg_back_left",
+      "leg_back_right"
+    ],
+    "idle_static": [
+      "body",
+      "head",
+      "upper_torso",
+      "tail"
+    ]
+  },
+  "arcanine": {
+    "idle": [
+      "body",
+      "head",
+      "tail",
+      "neck"
+    ],
+    "walk": [
+      "leg_front_left",
+      "leg_front_right",
+      "leg_back_left",
+      "leg_back_right"
+    ],
+    "run": [
+      "leg_front_left",
+      "leg_front_right",
+      "leg_back_left",
+      "leg_back_right"
+    ]
+  },
+  "poliwag": {
+    "idle": [
+      "tail",
+      "tail2",
+      "tail3"
+    ],
+    "walk": [
+      "left_leg",
+      "right_leg",
+      "left_foot",
+      "right_foot"
+    ],
+    "run": [
+      "left_leg",
+      "right_leg",
+      "left_foot",
+      "right_foot"
+    ],
+    "idle_static": [
+      "tail",
+      "tail2",
+      "tail3"
+    ]
   }
 }

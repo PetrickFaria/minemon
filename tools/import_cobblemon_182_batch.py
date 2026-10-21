@@ -4,7 +4,7 @@ import argparse,copy,hashlib,io,json,math,urllib.request,zipfile
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 R=ROOT/'src/main/resources'
-ap=argparse.ArgumentParser();ap.add_argument('--batch',type=int,choices=(2,3,4,5),required=True);args=ap.parse_args()
+ap=argparse.ArgumentParser();ap.add_argument('--batch',type=int,choices=(2,3,4,5,6),required=True);args=ap.parse_args()
 start,end=(args.batch-1)*10+1,args.batch*10
 mp=R/'data/minemon_gen1/runtime_species.json'
 defs=json.loads(mp.read_text());before=copy.deepcopy(defs)
@@ -47,10 +47,23 @@ GAIT={
  'pikachu':['leg_left','leg_right'],'raichu':['leg_left','leg_right'],
  'sandshrew':['leg_left','leg_right'],'sandslash':['leg_left','leg_right'],
  'nidoranf':['leg_front_left','leg_front_right','leg_back_left','leg_back_right'],
- 'nidorina':['left_leg','right_leg','left_upper_arm','right_upper_arm']
+ 'nidorina':['left_leg','right_leg','left_upper_arm','right_upper_arm'],
+ 'dugtrio':['body1','body1_2','body2','body3','body3_2'],
+ 'meowth':['arm_left','arm_right','foot_left','foot_right','tail1','tail2','tail3'],
+ 'persian':['head','neck','tail1','tail2','tail3','tail4','tail5','tail6'],
+ 'psyduck':['foot_left','foot_right','arm_left','arm_right'],
+ 'golduck':['leg_left','leg_right','arm_left','arm_right'],
+ 'mankey':['leg_left','leg_right','arm_left','arm_right'],
+ 'primeape':['leg_left','leg_right','arm_left','arm_right'],
+ 'growlithe':['leg_front_left','leg_front_right','leg_back_left','leg_back_right'],
+ 'arcanine':['leg_front_left','leg_front_right','leg_back_left','leg_back_right'],
+ 'poliwag':['left_leg','right_leg','left_foot','right_foot']
 }
-IDLE={'oddish':["leaf_center3","leaf_inner_left3","leaf_inner_right3"],'gloom':["arm_left","arm_right","leaf_back_right4"],'vileplume':["arm_left","arm_right","petal_back_rotation"],'paras':["arm_left","arm_right","body"],'parasect':["claw_left","claw_right","body"],'venonat':["left_foot","right_foot","left_antenna","right_antenna"],'diglett':["body"],'nidoqueen':['left_upper_leg','right_upper_leg','left_shoulder','right_shoulder'],'nidoranm':['head','torso','ear_left','ear_right'],'nidorino':['jaw','torso'],'nidoking':['tail','tail2','arm_left1','arm_right1'],'clefairy':['tail','tail2','wing_left','wing_right'],'clefable':['arm_left','arm_right','tail','tail2'],'vulpix':['tail_left1','tail_right1','head_rotation'],'ninetales':['leg_front_left','leg_front_right','tail_middle'],'jigglypuff':['foot_left','foot_right','head'],'wigglytuff':['foot_left','foot_right','torso'],'spearow':['head'],'fearow':['head'],'raticate':['body','head','tail'],'ekans':['head','neck','tail5'],'sandslash':['arm_left','arm_right','tail']}
-RUN={'sandshrew':['ball']}
+IDLE={'oddish':["leaf_center3","leaf_inner_left3","leaf_inner_right3"],'gloom':["arm_left","arm_right","leaf_back_right4"],'vileplume':["arm_left","arm_right","petal_back_rotation"],'paras':["arm_left","arm_right","body"],'parasect':["claw_left","claw_right","body"],'venonat':["left_foot","right_foot","left_antenna","right_antenna"],'diglett':["body"],'nidoqueen':['left_upper_leg','right_upper_leg','left_shoulder','right_shoulder'],'nidoranm':['head','torso','ear_left','ear_right'],'nidorino':['jaw','torso'],'nidoking':['tail','tail2','arm_left1','arm_right1'],'clefairy':['tail','tail2','wing_left','wing_right'],'clefable':['arm_left','arm_right','tail','tail2'],'vulpix':['tail_left1','tail_right1','head_rotation'],'ninetales':['leg_front_left','leg_front_right','tail_middle'],'jigglypuff':['foot_left','foot_right','head'],'wigglytuff':['foot_left','foot_right','torso'],'spearow':['head'],'fearow':['head'],'raticate':['body','head','tail'],'ekans':['head','neck','tail5'],'sandslash':['arm_left','arm_right','tail'],
+ 'dugtrio':['body1','body2','body3','body3_2'],'meowth':['tail1','tail2','tail3'],'persian':['head','neck','tail1','tail2','tail3','tail4','tail5','tail6'],
+ 'psyduck':['head','tail','tail2','hair2','hair3'],'golduck':['head','neck','tail','tail2','tail3'],'mankey':['body','ear_left','ear_right','tail1','tail2'],'primeape':['body','ear_left','ear_right'],
+ 'growlithe':['body','head','upper_torso','tail'],'arcanine':['body','head','tail','neck'],'poliwag':['tail','tail2','tail3']}
+RUN={'sandshrew':['ball'],'arcanine':['leg_front_left','leg_front_right','leg_back_left','leg_back_right']}
 evidence=[]
 for d in defs[start-1:end]:
  slug=d['slug'];n=d['nationalPokedexNumber'];folder=f'{n:04d}_{slug}'
@@ -89,22 +102,27 @@ for d in defs[start-1:end]:
   assert 'animation_length' not in cry or cry['animation_length']==misplaced
   cry['animation_length']=misplaced
   d['source_event_correction']='cry duration 1.25 moved from sound_effects metadata to clip animation_length; timestamp/effect unchanged'
- if args.batch==5:
+ if args.batch in (5,6):
   # Retain every native clip. Only normalize syntax / unsupported mounted inputs.
   def adapt(value):
    if isinstance(value,str):
     value=value.replace('Math.','math.')
-    if slug in ('paras','parasect') and value.startswith('-(math.sin(') and value.endswith(')*0.25'):
+    if args.batch==5 and slug in ('paras','parasect') and value.startswith('-(math.sin(') and value.endswith(')*0.25'):
      value='-1*'+value[1:]
-    if slug=='parasect':
+    if args.batch==5 and slug=='parasect':
      value=value.replace('q.r.yaw_change(0)','0').replace('q.r.velocity_y(0)','0')
+    if args.batch==6 and slug=='arcanine':
+     for index in (0,2,4,6): value=value.replace(f'q.r.yaw_change({index})','0')
+     for index in (0,1,2,4,6): value=value.replace(f'q.r.velocity_y({index})','0')
     return value
    if isinstance(value,list):return [adapt(x) for x in value]
    if isinstance(value,dict):return {k:adapt(v) for k,v in value.items()}
    return value
   animations=adapt(animations)
-  if slug=='parasect':
+  if args.batch==5 and slug=='parasect':
    d['source_molang_adaptations']={'Math.':'math.','q.r.yaw_change(0)':'0: neutral non-ridden input; mounted clips not selected by Minemon','q.r.velocity_y(0)':'0: neutral non-ridden input; mounted clips not selected by Minemon'}
+  if args.batch==6 and slug=='arcanine':
+   d['source_molang_adaptations']={'q.r.yaw_change(n)':'0 for retained ride clips; Minemon has no ride input','q.r.velocity_y(n)':'0 for retained ride clips; Minemon has no ride input'}
   if slug=='zubat':
    poser=json.loads(z.read(f'{prefix}/posers/{folder}/{slug}.json'))
    assert {'part':'wings_folded','isVisible':False} in poser['poses']['hover']['transformedParts']
@@ -128,8 +146,8 @@ for d in defs[start-1:end]:
   # These sources use procedural poser wing motion; no native gait is invented.
   # Preserve the existing ground mode until the source-backed adapter is audited.
   flying=False
- idle=names.get('air_idle') if flying else names.get('ground_idle')
- walk=names.get('air_fly') if flying else names.get('ground_walk')
+ idle=names.get('air_idle') if flying else (names.get('ground_idle') or names.get('idle') or names.get('ground_idle_placeholder'))
+ walk=names.get('air_fly') if flying else (names.get('ground_walk') or names.get('ground_walk_placeholder'))
  assert idle,'Missing source idle '+slug
  if slug in ('spearow','fearow'):
   poser_path=f'{prefix}/posers/{folder}/{slug}.json'
@@ -182,6 +200,28 @@ for d in defs[start-1:end]:
   animations[walk]=adapted;d['clips']['ground_walk']=walk
   (R/paths['animation']).write_text(json.dumps({'format_version':'1.8.0','animations':animations},indent=2)+'\n')
   d['source_procedural_pose']={'reference':origin,'adaptation':'native stance plus opposed X rotation; diagonal pairs for quadrupeds; 30 degrees times source amplitude, 720 degrees/second times source period/0.6662; no native limb-swing clock in GeckoLib 3','joints':signs}
+ if args.batch==6 and slug=='growlithe':
+  poser_path=f'{prefix}/posers/{folder}/{slug}.json'
+  poser=json.loads(z.read(poser_path))
+  source_animations=poser['poses']['walking']['animations']
+  expected="q.quadruped_walk(0.66, 1.4, 'leg_front_left', 'leg_front_right', 'leg_back_left', 'leg_back_right')"
+  assert expected in source_animations
+  walk=f'animation.{slug}.minemon_poser_walk'
+  adapted=copy.deepcopy(animations[idle]);adapted['loop']=True;adapted['animation_length']=4.0
+  signs={'leg_front_left':1,'leg_front_right':-1,'leg_back_left':-1,'leg_back_right':1}
+  frequency=720*0.66/0.6662
+  for joint,sign in signs.items():
+   assert joint in bones,(slug,joint,sorted(bones))
+   channel=adapted.setdefault('bones',{}).setdefault(joint,{})
+   rotation=channel.get('rotation',[0,0,0]);assert isinstance(rotation,list) and len(rotation)==3
+   rotation[0]=f'({rotation[0]})+({sign*30*1.4:.6f})*math.cos(q.anim_time*{frequency:.6f})'
+   channel['rotation']=rotation
+  for absent in set(adapted['bones'])-bones:
+   assert absent in d['stripped_bones'].get(idle,[])
+   adapted['bones'].pop(absent)
+  animations[walk]=adapted;d['clips']['ground_walk']=walk
+  (R/paths['animation']).write_text(json.dumps({'format_version':'1.8.0','animations':animations},indent=2)+'\n')
+  d['source_procedural_pose']={'poser':poser_path,'walk':source_animations,'adaptation':'native standing channels plus diagonal quadruped X rotations; 42-degree amplitude and 713.299 degrees/second derived from q.quadruped_walk(0.66, 1.4); q.look is not synthesized','joints':signs}
  if walk is None:
   walk=idle;d['movement_fallback']='idle'
  d['idle']=idle;d['walk']=walk
@@ -194,6 +234,12 @@ for d in defs[start-1:end]:
  gait=GAIT.get(slug)
  assert gait,'Species needs an explicit source-backed gait profile: '+slug
  prof={'idle':IDLE.get(slug,gait),'walk':gait,'run':RUN.get(slug,gait)}
+ if args.batch==6 and slug in ('meowth','persian','growlithe','poliwag'):
+  native_idle=animations[idle]
+  assert not any(token in json.dumps(native_idle) for token in ('math.','q.','query.'))
+  assert all(not isinstance(value,dict) for ch in native_idle['bones'].values() for value in ch.values())
+  prof['idle_static']=prof['idle']
+  d['source_static_idle']=True
  if args.batch==4 and slug in ('nidoqueen','ninetales','jigglypuff','wigglytuff'):
   native_idle=animations[idle]
   assert not any(token in json.dumps(native_idle) for token in ('math.','q.','query.'))

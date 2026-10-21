@@ -3177,9 +3177,9 @@
     "nationalPokedexNumber": 51,
     "slug": "dugtrio",
     "name": "Dugtrio",
-    "model": "assets/minemon/geo/dugtrio/dugtrio.geo.json",
-    "texture": "assets/minemon/textures/pokemon/dugtrio/dugtrio.png",
-    "animation": "assets/minemon/animations/dugtrio/dugtrio.animation.json",
+    "model": "assets/minemon/geo/dugtrio_cobblemon_1_8_2/dugtrio.geo.json",
+    "texture": "assets/minemon/textures/pokemon/dugtrio_cobblemon_1_8_2/dugtrio.png",
+    "animation": "assets/minemon/animations/dugtrio_cobblemon_1_8_2/dugtrio.animation.json",
     "mode": "ground",
     "scale": 0.8,
     "width": 1.05,
@@ -3188,44 +3188,71 @@
     "attack": 8.333333333333334,
     "speed": 0.32,
     "clips": {
+      "battle_idle": "animation.dugtrio.battle_idle",
+      "blink": "animation.dugtrio.blink",
+      "blink2": "animation.dugtrio.blink2",
+      "blink3": "animation.dugtrio.blink3",
+      "cry": "animation.dugtrio.cry",
+      "faint": "animation.dugtrio.faint",
       "ground_idle": "animation.dugtrio.ground_idle",
       "ground_walk": "animation.dugtrio.ground_walk",
-      "battle_idle": "animation.dugtrio.battle_idle",
-      "faint": "animation.dugtrio.faint",
-      "cry": "animation.dugtrio.cry",
-      "sleep": "animation.dugtrio.sleep",
+      "physical": "animation.dugtrio.physical",
       "quirk_idle": "animation.dugtrio.quirk_idle",
       "quirk_idle2": "animation.dugtrio.quirk_idle2",
       "quirk_idle3": "animation.dugtrio.quirk_idle3",
-      "ground_run": "animation.dugtrio.minemon_run",
+      "sleep": "animation.dugtrio.sleep",
       "sit": "animation.dugtrio.minemon_sit",
-      "physical_attack": "animation.dugtrio.minemon_physical_attack"
+      "physical_attack": "animation.dugtrio.physical"
     },
     "idle": "animation.dugtrio.ground_idle",
     "walk": "animation.dugtrio.ground_walk",
-    "attackTicks": 12,
-    "excluded_clips": [
-      "animation.dugtrio.blink",
-      "animation.dugtrio.blink2",
-      "animation.dugtrio.blink3"
-    ],
+    "attackTicks": 60,
+    "excluded_clips": [],
     "sounds": [
       "assets/minemon/sounds/pokemon/dugtrio/dugtrio_ambient.ogg",
       "assets/minemon/sounds/pokemon/dugtrio/dugtrio_cry.ogg"
     ],
     "licenses": [
-      "assets/minemon/licenses/pokemon/dugtrio/model-license.txt"
+      "assets/minemon/licenses/pokemon/dugtrio/model-license.txt",
+      "assets/minemon/licenses/pokemon/dugtrio/cobblemon-1.8.2-model-license.txt"
     ],
     "eggBase": 12085313,
-    "eggSpots": 13138763
+    "eggSpots": 13138763,
+    "source_event_evidence": {
+      "animation.dugtrio.cry": {
+        "sound_effects": {
+          "0.1667": {
+            "effect": "pokemon.dugtrio.cry"
+          }
+        }
+      }
+    },
+    "stripped_bones": {
+      "animation.dugtrio.blink": [
+        "eyelid_left",
+        "eyelid_right"
+      ],
+      "animation.dugtrio.blink2": [
+        "eyelid_left",
+        "eyelid_right"
+      ],
+      "animation.dugtrio.blink3": [
+        "eyelid_left",
+        "eyelid_right"
+      ]
+    },
+    "geckolib3_bedrock_keyframes": true,
+    "strip_bedrock_locators": true,
+    "source_model_variant": "dugtrio.geo.json",
+    "source_cobblemon_version": "1.8.2"
   },
   {
     "nationalPokedexNumber": 52,
     "slug": "meowth",
     "name": "Meowth",
-    "model": "assets/minemon/geo/meowth/meowth.geo.json",
-    "texture": "assets/minemon/textures/pokemon/meowth/meowth.png",
-    "animation": "assets/minemon/animations/meowth/meowth.animation.json",
+    "model": "assets/minemon/geo/meowth_cobblemon_1_8_2/meowth.geo.json",
+    "texture": "assets/minemon/textures/pokemon/meowth_cobblemon_1_8_2/meowth.png",
+    "animation": "assets/minemon/animations/meowth_cobblemon_1_8_2/meowth.animation.json",
     "mode": "ground",
     "scale": 0.7,
     "width": 0.6,
@@ -3234,19 +3261,16 @@
     "attack": 3.75,
     "speed": 0.29,
     "clips": {
-      "ground_idle": "animation.meowth.ground_idle",
-      "sleep": "animation.meowth.sleep",
       "blink": "animation.meowth.blink",
-      "render": "animation.meowth.render",
       "cry": "animation.meowth.cry",
-      "ground_run": "animation.meowth.minemon_run",
+      "ground_idle": "animation.meowth.ground_idle",
+      "render": "animation.meowth.render",
+      "sleep": "animation.meowth.sleep",
       "sit": "animation.meowth.minemon_sit",
       "physical_attack": "animation.meowth.minemon_physical_attack"
     },
     "idle": "animation.meowth.ground_idle",
     "walk": "animation.meowth.ground_idle",
-    "movement_fallback": "static",
-    "generated_static_animation": false,
     "attackTicks": 12,
     "excluded_clips": [],
     "stripped_bones": {},
@@ -3257,18 +3281,34 @@
       "assets/minemon/sounds/pokemon/meowth/meowth_galarian_cry.ogg"
     ],
     "licenses": [
-      "assets/minemon/licenses/pokemon/meowth/model-license.txt"
+      "assets/minemon/licenses/pokemon/meowth/model-license.txt",
+      "assets/minemon/licenses/pokemon/meowth/cobblemon-1.8.2-model-license.txt"
     ],
     "eggBase": 15195817,
-    "eggSpots": 14010515
+    "eggSpots": 14010515,
+    "source_event_evidence": {
+      "animation.meowth.cry": {
+        "sound_effects": {
+          "0.2083": {
+            "effect": "pokemon.meowth.cry"
+          }
+        }
+      }
+    },
+    "geckolib3_bedrock_keyframes": true,
+    "strip_bedrock_locators": true,
+    "source_model_variant": "meowth.geo.json",
+    "source_cobblemon_version": "1.8.2",
+    "movement_fallback": "idle",
+    "source_static_idle": true
   },
   {
     "nationalPokedexNumber": 53,
     "slug": "persian",
     "name": "Persian",
-    "model": "assets/minemon/geo/persian/persian.geo.json",
-    "texture": "assets/minemon/textures/pokemon/persian/persian.png",
-    "animation": "assets/minemon/animations/persian/persian.animation.json",
+    "model": "assets/minemon/geo/persian_cobblemon_1_8_2/persian.geo.json",
+    "texture": "assets/minemon/textures/pokemon/persian_cobblemon_1_8_2/persian.png",
+    "animation": "assets/minemon/animations/persian_cobblemon_1_8_2/persian.animation.json",
     "mode": "ground",
     "scale": 0.8,
     "width": 1,
@@ -3277,18 +3317,15 @@
     "attack": 5.833333333333333,
     "speed": 0.315,
     "clips": {
-      "ground_idle": "animation.persian.ground_idle",
       "blink": "animation.persian.blink",
-      "sleep": "animation.persian.sleep",
       "cry": "animation.persian.cry",
-      "ground_run": "animation.persian.minemon_run",
+      "ground_idle": "animation.persian.ground_idle",
+      "sleep": "animation.persian.sleep",
       "sit": "animation.persian.minemon_sit",
       "physical_attack": "animation.persian.minemon_physical_attack"
     },
     "idle": "animation.persian.ground_idle",
     "walk": "animation.persian.ground_idle",
-    "movement_fallback": "static",
-    "generated_static_animation": false,
     "attackTicks": 12,
     "excluded_clips": [],
     "stripped_bones": {},
@@ -3297,17 +3334,33 @@
       "assets/minemon/sounds/pokemon/persian/persian_cry.ogg"
     ],
     "licenses": [
-      "assets/minemon/licenses/pokemon/persian/model-license.txt"
+      "assets/minemon/licenses/pokemon/persian/model-license.txt",
+      "assets/minemon/licenses/pokemon/persian/cobblemon-1.8.2-model-license.txt"
     ],
     "eggBase": 13742995,
-    "eggSpots": 14665634
+    "eggSpots": 14665634,
+    "source_event_evidence": {
+      "animation.persian.cry": {
+        "sound_effects": {
+          "0.1667": {
+            "effect": "pokemon.persian.cry"
+          }
+        }
+      }
+    },
+    "geckolib3_bedrock_keyframes": true,
+    "strip_bedrock_locators": true,
+    "source_model_variant": "persian.geo.json",
+    "source_cobblemon_version": "1.8.2",
+    "movement_fallback": "idle",
+    "source_static_idle": true
   },
   {
     "slug": "psyduck",
     "name": "Psyduck",
-    "model": "assets/minemon/geo/psyduck/psyduck.geo.json",
-    "texture": "assets/minemon/textures/pokemon/psyduck/psyduck.png",
-    "animation": "assets/minemon/animations/psyduck/psyduck.animation.json",
+    "model": "assets/minemon/geo/psyduck_cobblemon_1_8_2/psyduck.geo.json",
+    "texture": "assets/minemon/textures/pokemon/psyduck_cobblemon_1_8_2/psyduck.png",
+    "animation": "assets/minemon/animations/psyduck_cobblemon_1_8_2/psyduck.animation.json",
     "mode": "ground",
     "scale": 0.8,
     "width": 0.8,
@@ -3316,17 +3369,16 @@
     "attack": 4.333333333333333,
     "speed": 0.255,
     "clips": {
-      "ground_idle": "animation.psyduck.ground_idle",
-      "water_idle": "animation.psyduck.water_idle",
-      "ground_walk": "animation.psyduck.ground_walk",
-      "water_swim": "animation.psyduck.water_swim",
-      "faint": "animation.psyduck.faint",
-      "sleep": "animation.psyduck.sleep",
       "awooga": "animation.psyduck.awooga",
-      "render": "animation.psyduck.render",
       "blink": "animation.psyduck.blink",
       "cry": "animation.psyduck.cry",
-      "ground_run": "animation.psyduck.minemon_run",
+      "faint": "animation.psyduck.faint",
+      "ground_idle": "animation.psyduck.ground_idle",
+      "ground_walk": "animation.psyduck.ground_walk",
+      "render": "animation.psyduck.render",
+      "sleep": "animation.psyduck.sleep",
+      "water_idle": "animation.psyduck.water_idle",
+      "water_swim": "animation.psyduck.water_swim",
       "sit": "animation.psyduck.minemon_sit",
       "physical_attack": "animation.psyduck.minemon_physical_attack"
     },
@@ -3339,19 +3391,34 @@
       "assets/minemon/sounds/pokemon/psyduck/psyduck_cry.ogg"
     ],
     "licenses": [
-      "assets/minemon/licenses/pokemon/psyduck/model-license.txt"
+      "assets/minemon/licenses/pokemon/psyduck/model-license.txt",
+      "assets/minemon/licenses/pokemon/psyduck/cobblemon-1.8.2-model-license.txt"
     ],
     "eggBase": 14457691,
     "eggSpots": 13469266,
-    "nationalPokedexNumber": 54
+    "nationalPokedexNumber": 54,
+    "source_event_evidence": {
+      "animation.psyduck.cry": {
+        "sound_effects": {
+          "0.0833": {
+            "effect": "pokemon.psyduck.cry"
+          }
+        }
+      }
+    },
+    "stripped_bones": {},
+    "geckolib3_bedrock_keyframes": true,
+    "strip_bedrock_locators": true,
+    "source_model_variant": "psyduck.geo.json",
+    "source_cobblemon_version": "1.8.2"
   },
   {
     "nationalPokedexNumber": 55,
     "slug": "golduck",
     "name": "Golduck",
-    "model": "assets/minemon/geo/golduck/golduck.geo.json",
-    "texture": "assets/minemon/textures/pokemon/golduck/golduck.png",
-    "animation": "assets/minemon/animations/golduck/golduck.animation.json",
+    "model": "assets/minemon/geo/golduck_cobblemon_1_8_2/golduck.geo.json",
+    "texture": "assets/minemon/textures/pokemon/golduck_cobblemon_1_8_2/golduck.png",
+    "animation": "assets/minemon/animations/golduck_cobblemon_1_8_2/golduck.animation.json",
     "mode": "ground",
     "scale": 1.2,
     "width": 0.8,
@@ -3360,14 +3427,13 @@
     "attack": 6.833333333333333,
     "speed": 0.285,
     "clips": {
-      "ground_idle": "animation.golduck.ground_idle",
-      "ground_walk": "animation.golduck.ground_walk",
-      "water_idle": "animation.golduck.water_idle",
-      "water_swim": "animation.golduck.water_swim",
-      "sleep": "animation.golduck.sleep",
       "blink": "animation.golduck.blink",
       "cry": "animation.golduck.cry",
-      "ground_run": "animation.golduck.minemon_run",
+      "ground_idle": "animation.golduck.ground_idle",
+      "ground_walk": "animation.golduck.ground_walk",
+      "sleep": "animation.golduck.sleep",
+      "water_idle": "animation.golduck.water_idle",
+      "water_swim": "animation.golduck.water_swim",
       "sit": "animation.golduck.minemon_sit",
       "physical_attack": "animation.golduck.minemon_physical_attack"
     },
@@ -3380,18 +3446,33 @@
       "assets/minemon/sounds/pokemon/golduck/golduck_cry.ogg"
     ],
     "licenses": [
-      "assets/minemon/licenses/pokemon/golduck/model-license.txt"
+      "assets/minemon/licenses/pokemon/golduck/model-license.txt",
+      "assets/minemon/licenses/pokemon/golduck/cobblemon-1.8.2-model-license.txt"
     ],
     "eggBase": 5608642,
-    "eggSpots": 6597325
+    "eggSpots": 6597325,
+    "source_event_evidence": {
+      "animation.golduck.cry": {
+        "sound_effects": {
+          "0.125": {
+            "effect": "pokemon.golduck.cry"
+          }
+        }
+      }
+    },
+    "stripped_bones": {},
+    "geckolib3_bedrock_keyframes": true,
+    "strip_bedrock_locators": true,
+    "source_model_variant": "golduck.geo.json",
+    "source_cobblemon_version": "1.8.2"
   },
   {
     "nationalPokedexNumber": 56,
     "slug": "mankey",
     "name": "Mankey",
-    "model": "assets/minemon/geo/mankey/mankey.geo.json",
-    "texture": "assets/minemon/textures/pokemon/mankey/mankey.png",
-    "animation": "assets/minemon/animations/mankey/mankey.animation.json",
+    "model": "assets/minemon/geo/mankey_cobblemon_1_8_2/mankey.geo.json",
+    "texture": "assets/minemon/textures/pokemon/mankey_cobblemon_1_8_2/mankey.png",
+    "animation": "assets/minemon/animations/mankey_cobblemon_1_8_2/mankey.animation.json",
     "mode": "ground",
     "scale": 0.85,
     "width": 0.6,
@@ -3400,14 +3481,13 @@
     "attack": 6.666666666666667,
     "speed": 0.27,
     "clips": {
+      "blink": "animation.mankey.blink",
+      "cry": "animation.mankey.cry",
+      "faint": "animation.mankey.faint",
       "ground_idle": "animation.mankey.ground_idle",
       "ground_walk": "animation.mankey.ground_walk",
       "physical_attack": "animation.mankey.physical_attack",
-      "faint": "animation.mankey.faint",
       "sleep": "animation.mankey.sleep",
-      "blink": "animation.mankey.blink",
-      "cry": "animation.mankey.cry",
-      "ground_run": "animation.mankey.minemon_run",
       "sit": "animation.mankey.minemon_sit"
     },
     "idle": "animation.mankey.ground_idle",
@@ -3419,18 +3499,33 @@
       "assets/minemon/sounds/pokemon/mankey/mankey_cry.ogg"
     ],
     "licenses": [
-      "assets/minemon/licenses/pokemon/mankey/model-license.txt"
+      "assets/minemon/licenses/pokemon/mankey/model-license.txt",
+      "assets/minemon/licenses/pokemon/mankey/cobblemon-1.8.2-model-license.txt"
     ],
     "eggBase": 14929048,
-    "eggSpots": 15983532
+    "eggSpots": 15983532,
+    "source_event_evidence": {
+      "animation.mankey.cry": {
+        "sound_effects": {
+          "0.0833": {
+            "effect": "pokemon.mankey.cry"
+          }
+        }
+      }
+    },
+    "stripped_bones": {},
+    "geckolib3_bedrock_keyframes": true,
+    "strip_bedrock_locators": true,
+    "source_model_variant": "mankey.geo.json",
+    "source_cobblemon_version": "1.8.2"
   },
   {
     "nationalPokedexNumber": 57,
     "slug": "primeape",
     "name": "Primeape",
-    "model": "assets/minemon/geo/primeape/primeape.geo.json",
-    "texture": "assets/minemon/textures/pokemon/primeape/primeape.png",
-    "animation": "assets/minemon/animations/primeape/primeape.animation.json",
+    "model": "assets/minemon/geo/primeape_cobblemon_1_8_2/primeape.geo.json",
+    "texture": "assets/minemon/textures/pokemon/primeape_cobblemon_1_8_2/primeape.png",
+    "animation": "assets/minemon/animations/primeape_cobblemon_1_8_2/primeape.animation.json",
     "mode": "ground",
     "scale": 1.1,
     "width": 0.7,
@@ -3439,39 +3534,62 @@
     "attack": 8.75,
     "speed": 0.295,
     "clips": {
-      "ground_idle": "animation.primeape.ground_idle",
-      "ground_walk": "animation.primeape.ground_walk",
+      "battle_idle": "animation.primeape.battle_idle",
       "blink": "animation.primeape.blink",
       "cry": "animation.primeape.cry",
-      "ground_run": "animation.primeape.minemon_run",
+      "cyclopsside": "animation.primeape.cyclopsside",
+      "faint": "animation.primeape.faint",
+      "ground_idle": "animation.primeape.ground_idle",
+      "ground_walk": "animation.primeape.ground_walk",
+      "physical": "animation.primeape.physical",
+      "recoil": "animation.primeape.recoil",
+      "sleep": "animation.primeape.sleep",
       "sit": "animation.primeape.minemon_sit",
-      "sleep": "animation.primeape.minemon_sleep",
-      "physical_attack": "animation.primeape.minemon_physical_attack"
+      "physical_attack": "animation.primeape.physical"
     },
     "idle": "animation.primeape.ground_idle",
     "walk": "animation.primeape.ground_walk",
-    "attackTicks": 12,
-    "excluded_clips": [
-      "animation.primeape.faint",
-      "animation.primeape.sleep"
-    ],
+    "attackTicks": 60,
+    "excluded_clips": [],
     "sounds": [
       "assets/minemon/sounds/pokemon/primeape/primeape_ambient.ogg",
       "assets/minemon/sounds/pokemon/primeape/primeape_cry.ogg"
     ],
     "licenses": [
-      "assets/minemon/licenses/pokemon/primeape/model-license.txt"
+      "assets/minemon/licenses/pokemon/primeape/model-license.txt",
+      "assets/minemon/licenses/pokemon/primeape/cobblemon-1.8.2-model-license.txt"
     ],
     "eggBase": 14926488,
-    "eggSpots": 15980972
+    "eggSpots": 15980972,
+    "source_event_evidence": {
+      "animation.primeape.cry": {
+        "sound_effects": {
+          "0.1667": {
+            "effect": "pokemon.primeape.cry"
+          }
+        }
+      }
+    },
+    "stripped_bones": {
+      "animation.primeape.faint": [
+        "eyelids"
+      ],
+      "animation.primeape.sleep": [
+        "eyelids"
+      ]
+    },
+    "geckolib3_bedrock_keyframes": true,
+    "strip_bedrock_locators": true,
+    "source_model_variant": "primeape.geo.json",
+    "source_cobblemon_version": "1.8.2"
   },
   {
     "nationalPokedexNumber": 58,
     "slug": "growlithe",
     "name": "Growlithe",
-    "model": "assets/minemon/geo/growlithe/growlithe.geo.json",
-    "texture": "assets/minemon/textures/pokemon/growlithe/growlithe.png",
-    "animation": "assets/minemon/animations/growlithe/growlithe.animation.json",
+    "model": "assets/minemon/geo/growlithe_cobblemon_1_8_2/growlithe.geo.json",
+    "texture": "assets/minemon/textures/pokemon/growlithe_cobblemon_1_8_2/growlithe.png",
+    "animation": "assets/minemon/animations/growlithe_cobblemon_1_8_2/growlithe.animation.json",
     "mode": "ground",
     "scale": 0.75,
     "width": 1.1,
@@ -3480,41 +3598,145 @@
     "attack": 5.833333333333333,
     "speed": 0.26,
     "clips": {
+      "blink": "animation.growlithe.blink",
+      "cry": "animation.growlithe.cry",
+      "idle": "animation.growlithe.idle",
       "test": "animation.growlithe.test",
       "test2": "animation.growlithe.test2",
       "test3": "animation.growlithe.test3",
-      "idle": "animation.growlithe.idle",
-      "blink": "animation.growlithe.blink",
-      "cry": "animation.growlithe.cry",
-      "ground_run": "animation.growlithe.minemon_run",
+      "ground_walk": "animation.growlithe.minemon_poser_walk",
       "sit": "animation.growlithe.minemon_sit",
       "sleep": "animation.growlithe.minemon_sleep",
       "physical_attack": "animation.growlithe.minemon_physical_attack"
     },
     "idle": "animation.growlithe.idle",
-    "walk": "animation.growlithe.idle",
-    "movement_fallback": "static",
-    "generated_static_animation": false,
+    "walk": "animation.growlithe.minemon_poser_walk",
     "attackTicks": 12,
     "excluded_clips": [],
-    "stripped_bones": {},
+    "stripped_bones": {
+      "animation.growlithe.blink": [
+        "left_eyelid",
+        "right_eyelid"
+      ],
+      "animation.growlithe.idle": [
+        "left_ankle",
+        "left_elbow",
+        "left_foot",
+        "left_frontpaw",
+        "left_knee",
+        "left_shoulder",
+        "left_thigh",
+        "right_ankle",
+        "right_elbow",
+        "right_frontpaw",
+        "right_knee",
+        "right_shoulder",
+        "right_thigh"
+      ],
+      "animation.growlithe.test": [
+        "left_ankle",
+        "left_elbow",
+        "left_foot",
+        "left_frontpaw",
+        "left_knee",
+        "left_shoulder",
+        "left_tail_fluff",
+        "left_thigh",
+        "right_ankle",
+        "right_elbow",
+        "right_frontpaw",
+        "right_knee",
+        "right_shoulder",
+        "right_tail_fluff",
+        "right_thigh"
+      ],
+      "animation.growlithe.test2": [
+        "left_ankle",
+        "left_ear",
+        "left_elbow",
+        "left_foot",
+        "left_frontpaw",
+        "left_knee",
+        "left_shoulder",
+        "left_tail_fluff",
+        "left_thigh",
+        "right_ankle",
+        "right_ear",
+        "right_elbow",
+        "right_foot",
+        "right_frontpaw",
+        "right_knee",
+        "right_shoulder",
+        "right_tail_fluff",
+        "right_thigh"
+      ],
+      "animation.growlithe.test3": [
+        "bottom_chest_fluff",
+        "left_ankle",
+        "left_chest_fluff",
+        "left_elbow",
+        "left_foot",
+        "left_knee",
+        "left_shoulder",
+        "left_tail_fluff",
+        "left_thigh",
+        "right_ankle",
+        "right_chest_fluff",
+        "right_elbow",
+        "right_foot",
+        "right_knee",
+        "right_shoulder",
+        "right_tail_fluff",
+        "right_thigh"
+      ]
+    },
     "sounds": [
       "assets/minemon/sounds/pokemon/growlithe/growlithe_ambient.ogg",
       "assets/minemon/sounds/pokemon/growlithe/growlithe_cry.ogg"
     ],
     "licenses": [
-      "assets/minemon/licenses/pokemon/growlithe/model-license.txt"
+      "assets/minemon/licenses/pokemon/growlithe/model-license.txt",
+      "assets/minemon/licenses/pokemon/growlithe/cobblemon-1.8.2-model-license.txt"
     ],
     "eggBase": 15699018,
-    "eggSpots": 14381636
+    "eggSpots": 14381636,
+    "source_event_evidence": {
+      "animation.growlithe.cry": {
+        "sound_effects": {
+          "0.0417": {
+            "effect": "pokemon.growlithe.cry"
+          }
+        }
+      }
+    },
+    "geckolib3_bedrock_keyframes": true,
+    "strip_bedrock_locators": true,
+    "source_model_variant": "growlithe.geo.json",
+    "source_cobblemon_version": "1.8.2",
+    "source_procedural_pose": {
+      "poser": "assets/cobblemon/bedrock/pokemon/posers/0058_growlithe/growlithe.json",
+      "walk": [
+        "q.look('head')",
+        "q.bedrock('growlithe', 'idle')",
+        "q.quadruped_walk(0.66, 1.4, 'leg_front_left', 'leg_front_right', 'leg_back_left', 'leg_back_right')"
+      ],
+      "adaptation": "native standing channels plus diagonal quadruped X rotations; 42-degree amplitude and 713.299 degrees/second derived from q.quadruped_walk(0.66, 1.4); q.look is not synthesized",
+      "joints": {
+        "leg_front_left": 1,
+        "leg_front_right": -1,
+        "leg_back_left": -1,
+        "leg_back_right": 1
+      }
+    },
+    "source_static_idle": true
   },
   {
     "nationalPokedexNumber": 59,
     "slug": "arcanine",
     "name": "Arcanine",
-    "model": "assets/minemon/geo/arcanine/arcanine.geo.json",
-    "texture": "assets/minemon/textures/pokemon/arcanine/arcanine.png",
-    "animation": "assets/minemon/animations/arcanine/arcanine.animation.json",
+    "model": "assets/minemon/geo/arcanine_cobblemon_1_8_2/arcanine.geo.json",
+    "texture": "assets/minemon/textures/pokemon/arcanine_cobblemon_1_8_2/arcanine.png",
+    "animation": "assets/minemon/animations/arcanine_cobblemon_1_8_2/arcanine.animation.json",
     "mode": "ground",
     "scale": 1.1,
     "width": 1.2,
@@ -3523,20 +3745,27 @@
     "attack": 9.166666666666666,
     "speed": 0.295,
     "clips": {
-      "idle": "animation.arcanine.idle",
-      "test": "animation.arcanine.test",
-      "test2": "animation.arcanine.test2",
+      "battle_idle": "animation.arcanine.battle_idle",
       "blink": "animation.arcanine.blink",
       "cry": "animation.arcanine.cry",
-      "ground_run": "animation.arcanine.minemon_run",
+      "cry_water_surface": "animation.arcanine.cry_water_surface",
+      "ground_idle": "animation.arcanine.ground_idle",
+      "ground_run": "animation.arcanine.ground_run",
+      "ground_walk": "animation.arcanine.ground_walk",
+      "recoil": "animation.arcanine.recoil",
+      "recoil_water_surface": "animation.arcanine.recoil_water_surface",
+      "ride_ground_run": "animation.arcanine.ride_ground_run",
+      "ride_ground_walk": "animation.arcanine.ride_ground_walk",
+      "ride_jump": "animation.arcanine.ride_jump",
+      "sleep": "animation.arcanine.sleep",
+      "water_surface_idle": "animation.arcanine.water_surface_idle",
+      "water_surface_swim": "animation.arcanine.water_surface_swim",
+      "wild_sleep": "animation.arcanine.wild_sleep",
       "sit": "animation.arcanine.minemon_sit",
-      "sleep": "animation.arcanine.minemon_sleep",
       "physical_attack": "animation.arcanine.minemon_physical_attack"
     },
-    "idle": "animation.arcanine.idle",
-    "walk": "animation.arcanine.idle",
-    "movement_fallback": "static",
-    "generated_static_animation": false,
+    "idle": "animation.arcanine.ground_idle",
+    "walk": "animation.arcanine.ground_walk",
     "attackTicks": 12,
     "excluded_clips": [],
     "stripped_bones": {},
@@ -3545,18 +3774,43 @@
       "assets/minemon/sounds/pokemon/arcanine/arcanine_cry.ogg"
     ],
     "licenses": [
-      "assets/minemon/licenses/pokemon/arcanine/model-license.txt"
+      "assets/minemon/licenses/pokemon/arcanine/model-license.txt",
+      "assets/minemon/licenses/pokemon/arcanine/cobblemon-1.8.2-model-license.txt"
     ],
     "eggBase": 16109733,
-    "eggSpots": 15450781
+    "eggSpots": 15450781,
+    "source_molang_adaptations": {
+      "q.r.yaw_change(n)": "0 for retained ride clips; Minemon has no ride input",
+      "q.r.velocity_y(n)": "0 for retained ride clips; Minemon has no ride input"
+    },
+    "source_event_evidence": {
+      "animation.arcanine.cry": {
+        "sound_effects": {
+          "0.4167": {
+            "effect": "pokemon.arcanine.cry"
+          }
+        }
+      },
+      "animation.arcanine.cry_water_surface": {
+        "sound_effects": {
+          "0.4167": {
+            "effect": "pokemon.arcanine.cry"
+          }
+        }
+      }
+    },
+    "geckolib3_bedrock_keyframes": true,
+    "strip_bedrock_locators": true,
+    "source_model_variant": "arcanine.geo.json",
+    "source_cobblemon_version": "1.8.2"
   },
   {
     "nationalPokedexNumber": 60,
     "slug": "poliwag",
     "name": "Poliwag",
-    "model": "assets/minemon/geo/poliwag/poliwag.geo.json",
-    "texture": "assets/minemon/textures/pokemon/poliwag/poliwag.png",
-    "animation": "assets/minemon/animations/poliwag/poliwag.animation.json",
+    "model": "assets/minemon/geo/poliwag_cobblemon_1_8_2/poliwag.geo.json",
+    "texture": "assets/minemon/textures/pokemon/poliwag_cobblemon_1_8_2/poliwag.png",
+    "animation": "assets/minemon/animations/poliwag_cobblemon_1_8_2/poliwag.animation.json",
     "mode": "ground",
     "scale": 0.8,
     "width": 0.6,
@@ -3565,38 +3819,25 @@
     "attack": 4.166666666666667,
     "speed": 0.29,
     "clips": {
-      "ground_idle": "animation.poliwag.ground_idle",
-      "ground_walk": "animation.poliwag.ground_walk",
-      "water_idle": "animation.poliwag.water_idle",
-      "water_swim": "animation.poliwag.water_swim",
-      "render": "animation.poliwag.render",
-      "ground_run": "animation.poliwag.minemon_run",
+      "blink_placeholder": "animation.poliwag.blink_placeholder",
+      "cry": "animation.poliwag.cry",
+      "ground_idle_placeholder": "animation.poliwag.ground_idle_placeholder",
+      "ground_walk_placeholder": "animation.poliwag.ground_walk_placeholder",
+      "sleep_placeholder": "animation.poliwag.sleep_placeholder",
+      "test": "animation.poliwag.test",
+      "water_idle_placeholder": "animation.poliwag.water_idle_placeholder",
+      "water_swim_placeholder": "animation.poliwag.water_swim_placeholder",
       "sit": "animation.poliwag.minemon_sit",
       "sleep": "animation.poliwag.minemon_sleep",
       "physical_attack": "animation.poliwag.minemon_physical_attack"
     },
-    "idle": "animation.poliwag.ground_idle",
-    "walk": "animation.poliwag.ground_walk",
+    "idle": "animation.poliwag.ground_idle_placeholder",
+    "walk": "animation.poliwag.ground_walk_placeholder",
     "attackTicks": 12,
-    "excluded_clips": [
-      "animation.poliwag.blink",
-      "animation.poliwag.sleep"
-    ],
+    "excluded_clips": [],
     "stripped_bones": {
-      "animation.poliwag.ground_walk": [
-        "arm_left",
-        "arm_left2",
-        "arm_right",
-        "arm_right2",
-        "foot_left",
-        "foot_right",
-        "hand_left",
-        "hand_right",
-        "head",
-        "leg_left2",
-        "leg_right2",
-        "torso",
-        "torso2"
+      "animation.poliwag.ground_walk_placeholder": [
+        "arm_right2"
       ]
     },
     "sounds": [
@@ -3604,10 +3845,25 @@
       "assets/minemon/sounds/pokemon/poliwag/poliwag_cry.ogg"
     ],
     "licenses": [
-      "assets/minemon/licenses/pokemon/poliwag/model-license.txt"
+      "assets/minemon/licenses/pokemon/poliwag/model-license.txt",
+      "assets/minemon/licenses/pokemon/poliwag/cobblemon-1.8.2-model-license.txt"
     ],
     "eggBase": 6326715,
-    "eggSpots": 4281230
+    "eggSpots": 4281230,
+    "source_event_evidence": {
+      "animation.poliwag.cry": {
+        "sound_effects": {
+          "0.0417": {
+            "effect": "pokemon.poliwag.cry"
+          }
+        }
+      }
+    },
+    "geckolib3_bedrock_keyframes": true,
+    "strip_bedrock_locators": true,
+    "source_model_variant": "poliwag.geo.json",
+    "source_cobblemon_version": "1.8.2",
+    "source_static_idle": true
   },
   {
     "nationalPokedexNumber": 61,

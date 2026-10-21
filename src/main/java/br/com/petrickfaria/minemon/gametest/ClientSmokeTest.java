@@ -449,9 +449,11 @@ public final class ClientSmokeTest {
      String expected=definition.walk();
      if(!hasSelectedClip(slug,"WALK_STEADY",expected))throw new IllegalStateException("Fallback classification did not match selected walk clip for "+slug);
      if(ADDITIONAL_PROFILES.containsKey(slug)) {
-      if(!hasSelectedClip(slug,"IDLE_INITIAL",definition.idle())||!hasSelectedClip(slug,"IDLE_FINAL",definition.idle())
-         ||movingJointCount(slug,"IDLE_FINAL")<1)
-       throw new IllegalStateException("Source idle fallback did not animate for "+slug);
+      if(!hasSelectedClip(slug,"IDLE_INITIAL",definition.idle())||!hasSelectedClip(slug,"IDLE_FINAL",definition.idle()))
+       throw new IllegalStateException("Source idle fallback did not select the expected clip for "+slug);
+      if(sourceStaticIdle(slug))validateSourceStaticIdle(slug);
+      else if(movingJointCount(slug,"IDLE_FINAL")<1)
+       throw new IllegalStateException("Animated source idle fallback did not animate for "+slug);
      }
      knownFallbacks++;
      report.append("EXPECTED GAP ").append(slug).append(": fallback=").append(fallback)
