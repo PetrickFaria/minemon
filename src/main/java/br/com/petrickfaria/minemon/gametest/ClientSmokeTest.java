@@ -32,6 +32,7 @@ public final class ClientSmokeTest {
  private static final java.util.Map<String,float[]> motionRanges=new java.util.HashMap<>();
  private static final java.util.Map<String,float[]> fireStarterArmRanges=new java.util.HashMap<>();
  private static final java.util.Set<String> walkedSpecies=new java.util.HashSet<>();
+ private static final java.util.Set<String> wingVisibilitySpecies=new java.util.HashSet<>();
  private static final java.util.Map<String,net.minecraft.world.phys.Vec3> firstRenderedPositions=new java.util.HashMap<>();
  @SubscribeEvent public static void actualDamage(net.minecraftforge.event.entity.living.LivingDamageEvent event) {
   if(Boolean.getBoolean("minemon.clientSmokeTest") && event.getAmount()>0 && event.getEntity() instanceof net.minecraft.server.level.ServerPlayer
@@ -226,6 +227,13 @@ public final class ClientSmokeTest {
         if(folded==null||open==null||Math.abs(folded.getScaleX())>0.001F||Math.abs(open.getScaleX()-1.0F)>0.001F)
          throw new IllegalStateException("Zubat poser visibility failed: folded wings must be hidden and open wings visible");
        }
+       if((slug.equals("pidgeotto")||slug.equals("pidgeot"))&&isSettledClipSample(phase)) {
+        var closed=model.getAnimationProcessor().getBone("wings_closed");
+        var open=model.getAnimationProcessor().getBone("wings_open");
+        if(closed==null||open==null||Math.abs(closed.getScaleX())>0.001F||Math.abs(open.getScaleX()-1.0F)>0.001F)
+         throw new IllegalStateException("Pidge wing poser visibility failed for "+slug+"/"+entity.getSelectedAnimationForValidation()+": closed pair must be hidden and open pair visible; scales="+(closed==null?"missing":closed.getScaleX())+"/"+(open==null?"missing":open.getScaleX()));
+        wingVisibilitySpecies.add(slug);
+       }
        var perSpecies=articulationRanges.computeIfAbsent(slug,k->new java.util.HashMap<>());
        for(String joint:profileJoints(slug,state)) {
         var bone=model.getAnimationProcessor().getBone(joint);
@@ -345,7 +353,10 @@ public final class ClientSmokeTest {
       throw new IllegalStateException("Fire-starter arms remained near T-pose during validated movement for "+slug+"; arm rotations="+java.util.Arrays.toString(arms));
     }
     validateArticulationProfiles();
+    if(!wingVisibilitySpecies.containsAll(java.util.Set.of("pidgeotto","pidgeot")))
+     throw new IllegalStateException("Pidge wing visibility was not sampled for both models: "+wingVisibilitySpecies);
     Files.writeString(Path.of("client-validation.txt"),"PASS LOCOMOTION: every registered species moved and had changing body bone transforms.\n",StandardOpenOption.APPEND);
+    Files.writeString(Path.of("client-validation.txt"),"PASS PIDGE WINGS: Pidgeotto and Pidgeot rendered the open pair only in settled idle/walk/run poses; closed alternatives stayed hidden.\n",StandardOpenOption.APPEND);
     Files.writeString(Path.of("client-validation.txt"),"PASS FIRE-STARTER ARMS: validated walk and faster-movement poses remain lowered; Charmander uses no source run clip.\n",StandardOpenOption.APPEND);
     Files.writeString(Path.of("client-validation.txt"),"PASS ROSTER: every registered species rendered with its texture in a world: "+renderedSpecies+"\n",StandardOpenOption.APPEND);
     mc.stop();

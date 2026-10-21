@@ -26,6 +26,7 @@ jobs:
         run: |
           git fetch --no-tags --depth=1 origin eae973354e05a49dc2cd4522006c07585dbd82af
           python3 tools/verify_batch6.py
+          python3 tools/verify_pidge_wing_visibility.py
       - name: Ensure Gradle Wrapper is executable
         run: chmod +x gradlew
       - name: Report resolved ForgeGradle version
@@ -66,6 +67,7 @@ jobs:
           grep -F 'PASS ROSTER' run/client-validation.txt
           grep -F 'PASS CHARMANDER TAIL FLAME' run/client-validation.txt
           grep -F 'PASS FIRE-STARTER ARMS' run/client-validation.txt
+          grep -F 'PASS PIDGE WINGS' run/client-validation.txt
           grep -F 'ARTICULATION PROFILES:' run/client-validation.txt
       - name: Verify executable mod JAR contents
         shell: bash
@@ -84,6 +86,7 @@ jobs:
           jar tf "$jar_file" | grep -Fx 'assets/minemon_gen1/models/item/bulbasaur_spawn_egg.json'
           python3 tools/verify_runtime.py "$jar_file"
           python3 tools/verify_batch6.py "$jar_file"
+          python3 tools/verify_pidge_wing_visibility.py "$jar_file"
           unzip -p "$jar_file" META-INF/mods.toml | grep -F 'modId="minemon_gen1"'
           unzip -p "$jar_file" META-INF/mods.toml | grep -F 'versionRange="[1.19.2,1.20)"'
           unzip -p "$jar_file" META-INF/mods.toml | grep -F 'modId="geckolib3"'

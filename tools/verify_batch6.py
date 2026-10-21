@@ -8,8 +8,21 @@ BASE='eae973354e05a49dc2cd4522006c07585dbd82af'
 MP='src/main/resources/data/minemon_gen1/runtime_species.json'
 VP='src/main/resources/data/minemon_gen1/animation_validation_profiles.json'
 EXPECTED=['dugtrio','meowth','persian','psyduck','golduck','mankey','primeape','growlithe','arcanine','poliwag']
+PATCHED_PRIOR_ASSETS={
+ 'assets/minemon/animations/pidgeotto_cobblemon_1_8_2/pidgeotto.animation.json',
+ 'assets/minemon/animations/pidgeot_cobblemon_1_8_2/pidgeot.animation.json',
+}
 def base_file(path):
  return subprocess.check_output(['git','show',BASE+':'+path],cwd=ROOT)
+def without_wing_visibility(data):
+ animations=json.loads(data)['animations']
+ for clip in animations.values():
+  bones=clip.get('bones',{})
+  for group in ('wings_open','wings_closed'):
+   if group in bones:
+    bones[group].pop('scale',None)
+    if not bones[group]:bones.pop(group)
+ return animations
 def normalize(value):
  if isinstance(value,str):return re.sub(r'\bq\.', 'query.',value)
  if isinstance(value,list):return [normalize(x) for x in value]
@@ -29,7 +42,12 @@ old_paths=set()
 for d in old_defs[:50]:
  old_paths.update([d['model'],d['texture'],d['animation']]+d['licenses'])
 for p in old_paths:
- assert (ROOT/'src/main/resources'/p).read_bytes()==base_file('src/main/resources/'+p),'Prior batch asset changed: '+p
+ current=(ROOT/'src/main/resources'/p).read_bytes()
+ original=base_file('src/main/resources/'+p)
+ if p in PATCHED_PRIOR_ASSETS:
+  assert without_wing_visibility(current)==without_wing_visibility(original),'Unrelated Pidge wing animation changed: '+p
+ else:
+  assert current==original,'Prior batch asset changed: '+p
 
 allowed=set()
 for d in defs[50:60]:
@@ -82,9 +100,10 @@ assert defs[59]['idle'].endswith('ground_idle_placeholder') and defs[59]['walk']
 assert all(d['slug'] not in ('charmander','charizard') for d in defs[50:60])
 
 changed=subprocess.check_output(['git','diff','--name-only',BASE,'--','src/main/resources/assets/minemon'],cwd=ROOT,text=True).splitlines()
-assert set(changed)<=allowed_paths,set(changed)-allowed_paths
+patched_prior_paths={str(Path('src/main/resources')/p) for p in PATCHED_PRIOR_ASSETS}
+assert set(changed)<=allowed_paths|patched_prior_paths,set(changed)-allowed_paths-patched_prior_paths
 changed_resources=subprocess.check_output(['git','diff','--name-only',BASE,'--','src/main/resources'],cwd=ROOT,text=True).splitlines()
-assert set(changed_resources)<=allowed_paths|{MP,VP},set(changed_resources)-allowed_paths-{MP,VP}
+assert set(changed_resources)<=allowed_paths|{MP,VP}|patched_prior_paths,set(changed_resources)-allowed_paths-{MP,VP}-patched_prior_paths
 for d in defs[50:60]:
  for key in ('model','texture','animation'):
   assert '_cobblemon_1_8_2/' in d[key]
