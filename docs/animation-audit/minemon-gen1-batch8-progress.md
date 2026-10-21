@@ -98,6 +98,16 @@ Integrar exclusivamente os recursos Cobblemon Fabric 1.8.2 dos Pokémon #071–#
 - Aparência visual manual dentro do Minecraft continuará pendente; os gates automatizados de cliente verificam renderização, movimento e transforms reais dos ossos.
 - Erros de código/testes identificados no checkpoint parcial: nenhum após a correção dos perfis de tentáculos para os nomes de osso reais da fonte.
 
+## Checkpoint 7 — auditoria da otimização do smoke (2026-10-21)
+
+- Última referência de código: `a9c2cd6d226c404f0bc7d29eb65829f586314fea`; a branch recebeu o commit documental `747f344a3ebe2da7d1136309fc72ee28468903ae` após a atualização do código.
+- Actions existente [39658750383](https://github.com/PetrickFaria/minemon/actions/runs/39658750383) segue `in_progress`; gates de recursos, perfis Pidge, Gradle `clean test build` e GameTests do servidor passaram. O smoke do cliente continua ativo; inspeção/upload do JAR permanecem pendentes. Não foi iniciada uma execução duplicada.
+- Auditoria do workflow confirmou que qualquer falha do cliente reinicia o smoke inteiro com outro timeout de 2700 s, sem classificar falha transitória.
+- O smoke completo percorre as 151 espécies com janela de 80 ticks por espécie, guarda captura de tela por espécie, e só escreve os relatórios de aprovação detalhados no final. O teste seletivo e progresso por espécie/fase ainda não existem.
+- Verificação local dos recursos encontrou expressões Cobblemon `q.r.*` nos arquivos de animação de Charizard e Blastoise, incluindo `q.r.velocity_forward`. Seus efeitos de runtime ainda precisam ser classificados e verificados contra o parser GeckoLib 3.1.40; nenhuma expressão foi alterada nem silenciada nesta auditoria.
+- Perfis do Golem e Graveler usam agora `body`/`body_roll` para corrida e têm regressões publicadas; o smoke real para confirmar esses perfis está dentro do mesmo run ativo.
+- Etapa seguinte: após o run atual encerrar, implementar seleção de espécies usando as mesmas verificações, logs de progresso por transição de fase, preflight Molang acionável e remoção do retry integral; manter o smoke completo como gate final. Nenhum Lote 9 será iniciado.
+
 ## Próxima ação
 
-Concluir a validação do reparo de corrida do Golem. Não iniciar o Lote 9 antes de todos os gates do Lote 8 passarem.
+Acompanhar a execução `39658750383` existente sem abrir outra. Quando terminar, concluir as otimizações do smoke no mesmo branch e executar uma única validação da versão otimizada.
