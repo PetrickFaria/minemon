@@ -9,7 +9,7 @@ from collections import Counter, defaultdict
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1] / "src" / "main" / "resources"
-QUERY_R = re.compile(r"\\b(?:q|query)\\.r\\.([A-Za-z_][A-Za-z0-9_]*)\\s*\\(")
+QUERY_R = re.compile(r"\b(?:q|query)\.r\.([A-Za-z_][A-Za-z0-9_]*)\s*\(")
 
 
 def strings(value):
