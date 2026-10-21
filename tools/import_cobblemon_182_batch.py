@@ -283,7 +283,8 @@ for d in defs[start-1:end]:
   prof['idle_static']=prof['idle']
   d['source_static_idle']=True
  if args.batch==7 and slug in ('poliwhirl','poliwrath','abra','kadabra','alakazam','machop','machoke','machamp','bellsprout','weepinbell'):
-  dynamic=any(isinstance(value,str) for channel in animations[idle].get('bones',{}).values() for value in channel.values())
+  # Time expressions can be nested inside rotation/position vector arrays.
+  dynamic=bool(re.search(r'\b(?:q|query)\.(?:anim_time|life_time)\b',json.dumps(animations[idle].get('bones',{}))))
   dynamic=dynamic or any(isinstance(value,dict) and len(value)>1 for channel in animations[idle].get('bones',{}).values() for value in channel.values())
   if not dynamic:
    prof['idle_static']=prof['idle'];d['source_static_idle']=True

@@ -937,11 +937,6 @@
       "leg_right",
       "foot_left1",
       "foot_right1"
-    ],
-    "idle_static": [
-      "body",
-      "arm_left",
-      "arm_right"
     ]
   },
   "poliwrath": {
@@ -959,11 +954,6 @@
     "run": [
       "leg_left",
       "leg_right",
-      "arm_left1",
-      "arm_right1"
-    ],
-    "idle_static": [
-      "body",
       "arm_left1",
       "arm_right1"
     ]
@@ -986,10 +976,6 @@
       "leg_right",
       "arm_left",
       "arm_right"
-    ],
-    "idle_static": [
-      "body",
-      "tail"
     ]
   },
   "kadabra": {
@@ -1009,11 +995,6 @@
     "run": [
       "leg_left",
       "leg_right",
-      "arm_left",
-      "arm_right"
-    ],
-    "idle_static": [
-      "tail",
       "arm_left",
       "arm_right"
     ]
@@ -1036,11 +1017,6 @@
       "right_upper_leg",
       "left_upper_arm",
       "right_upper_arm"
-    ],
-    "idle_static": [
-      "upper_torso",
-      "left_mustache",
-      "right_mustache"
     ]
   },
   "machop": {
@@ -1063,12 +1039,6 @@
       "arm_left",
       "arm_right",
       "torso"
-    ],
-    "idle_static": [
-      "torso",
-      "arm_left",
-      "arm_right",
-      "tail"
     ]
   },
   "machoke": {
@@ -1090,11 +1060,6 @@
       "arm_left",
       "arm_right",
       "torso"
-    ],
-    "idle_static": [
-      "torso",
-      "arm_left",
-      "arm_right"
     ]
   },
   "machamp": {
@@ -1118,13 +1083,6 @@
       "arm_left",
       "arm_right",
       "torso"
-    ],
-    "idle_static": [
-      "torso",
-      "arm_left",
-      "arm_right",
-      "arm_back_left",
-      "arm_back_right"
     ]
   },
   "bellsprout": {
@@ -1146,11 +1104,6 @@
       "arm_left",
       "arm_right",
       "body"
-    ],
-    "idle_static": [
-      "body",
-      "arm_left",
-      "arm_right"
     ]
   },
   "weepinbell": {
@@ -1176,13 +1129,6 @@
       "arm_right",
       "stem",
       "stem2"
-    ],
-    "idle_static": [
-      "body",
-      "stem",
-      "stem2",
-      "arm_left",
-      "arm_right"
     ]
   }
 }

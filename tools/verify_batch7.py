@@ -97,7 +97,11 @@ assert [d['clips'].get('ground_run') for d in defs[60:70]].count(None)==7
 for i in (62,63,64):
  assert defs[i]['clips'].get('ground_run')==f"animation.{defs[i]['slug']}.ground_run"
 assert all(d['walk']==f"animation.{d['slug']}.ground_walk" for d in defs[60:70])
-assert all(d.get('source_static_idle') and profiles[d['slug']]['idle_static']==profiles[d['slug']]['idle'] for d in defs[60:70])
+assert all(not d.get('source_static_idle') and 'idle_static' not in profiles[d['slug']] for d in defs[60:70])
+for d in defs[60:70]:
+ idle=animation_by_slug[d['slug']][d['idle']]['bones']
+ assert re.search(r'\b(?:q|query)\.anim_time\b',json.dumps(idle)),d['slug']+' must retain native animated idle'
+ assert any(re.search(r'\b(?:q|query)\.anim_time\b',json.dumps(idle.get(joint,{}))) for joint in profiles[d['slug']]['idle']),d['slug']+' idle profile must sample native temporal channels'
 assert all(not d.get('movement_fallback') for d in defs[60:70])
 assert defs[63]['source_model_variant']=='kadabra_male.geo.json'
 assert defs[64]['source_model_variant']=='alakazam_male.geo.json'

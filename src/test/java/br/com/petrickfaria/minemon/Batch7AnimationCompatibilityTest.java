@@ -42,6 +42,25 @@ public class Batch7AnimationCompatibilityTest {
         }
     }
 
+    private static boolean changesWithTime(JsonElement value,MolangParser parser) throws Exception {
+        boolean changed=false;
+        if(value.isJsonArray()) {
+            for(var item:value.getAsJsonArray())changed|=changesWithTime(item,parser);
+        } else if(value.isJsonObject()) {
+            for(var item:value.getAsJsonObject().entrySet())changed|=changesWithTime(item.getValue(),parser);
+        } else if(value.isJsonPrimitive()&&value.getAsJsonPrimitive().isString()) {
+            var expression=parser.parseExpression(value.getAsString());
+            double min=Double.POSITIVE_INFINITY,max=Double.NEGATIVE_INFINITY;
+            for(int i=0;i<=160;i++) {
+                parser.setValue("query.anim_time",i/40.0);
+                double sample=expression.get();assertTrue(Double.isFinite(sample));
+                min=Math.min(min,sample);max=Math.max(max,sample);
+            }
+            changed=max-min>0.000001;
+        }
+        return changed;
+    }
+
     @Test public void sourceAnimationsParseAndLoadInGeckoLib3() throws Exception {
         for(String slug:SPECIES) {
             var clips=animations(slug);
@@ -60,7 +79,7 @@ public class Batch7AnimationCompatibilityTest {
         }
     }
 
-    @Test public void nativeRunsAndSourceStaticIdlesAreDeclaredAccurately() throws Exception {
+    @Test public void nativeRunsAndAnimatedIdlesAreDeclaredAccurately() throws Exception {
         var root=Path.of(System.getProperty("minemon.testResources"),"data/minemon_gen1/runtime_species.json");
         JsonArray defs;
         try(var reader=Files.newBufferedReader(root)) { defs=JsonParser.parseReader(reader).getAsJsonArray(); }
@@ -73,8 +92,16 @@ public class Batch7AnimationCompatibilityTest {
             assertTrue(def.get("model").getAsString(),def.get("model").getAsString().contains(slug+"_cobblemon_1_8_2"));
             assertTrue(def.get("texture").getAsString(),def.get("texture").getAsString().contains(slug+"_cobblemon_1_8_2"));
             assertTrue(def.get("animation").getAsString(),def.get("animation").getAsString().contains(slug+"_cobblemon_1_8_2"));
-            assertTrue("Cobblemon has a fixed native idle for "+slug,def.get("source_static_idle").getAsBoolean());
-            assertEquals(profiles.getAsJsonObject(slug).getAsJsonArray("idle"),profiles.getAsJsonObject(slug).getAsJsonArray("idle_static"));
+            assertFalse("Native animated idle must not be classified static: "+slug,
+                def.has("source_static_idle")&&def.get("source_static_idle").getAsBoolean());
+            assertFalse(profiles.getAsJsonObject(slug).has("idle_static"));
+            var idle=animations(slug).getAsJsonObject(def.get("idle").getAsString()).getAsJsonObject("bones");
+            boolean changed=false;
+            for(var joint:profiles.getAsJsonObject(slug).getAsJsonArray("idle")) {
+                var channels=idle.getAsJsonObject(joint.getAsString());
+                if(channels!=null)changed|=changesWithTime(channels,new MolangParser());
+            }
+            assertTrue("Profile must measure real native idle motion: "+slug,changed);
             boolean hasNativeRun=List.of("abra","kadabra","alakazam").contains(slug);
             assertEquals("Only source-backed run clips are selected for "+slug,hasNativeRun,
                 def.getAsJsonObject("clips").has("ground_run"));
