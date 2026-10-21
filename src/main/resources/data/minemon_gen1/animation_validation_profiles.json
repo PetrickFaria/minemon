@@ -1200,8 +1200,8 @@
       "arm_bottom_right"
     ],
     "run": [
-      "arm_bottom_left",
-      "arm_bottom_right"
+      "body",
+      "body_roll"
     ]
   },
   "golem": {

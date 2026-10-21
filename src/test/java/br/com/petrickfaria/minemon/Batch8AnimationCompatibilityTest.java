@@ -111,6 +111,13 @@ public class Batch8AnimationCompatibilityTest {
         assertTrue("Golem's native run body must change over time",
             changesWithTime(golemRunBones.getAsJsonObject("body"),new MolangParser()));
         assertTrue("Golem's native run must retain its source body-roll keyframes",golemRunBones.has("body_roll"));
+        var gravelerRunBones=animations("graveler").getAsJsonObject("animation.graveler.ground_run").getAsJsonObject("bones");
+        var gravelerRunProfile=new java.util.ArrayList<String>();
+        for(var joint:profiles.getAsJsonObject("graveler").getAsJsonArray("run"))gravelerRunProfile.add(joint.getAsString());
+        assertEquals("Measure Graveler's animated torso instead of rigid source limbs",List.of("body","body_roll"),gravelerRunProfile);
+        assertTrue("Graveler's native run body must change over time",
+            changesWithTime(gravelerRunBones.getAsJsonObject("body"),new MolangParser()));
+        assertTrue("Graveler's native run must retain its source body-roll keyframes",gravelerRunBones.has("body_roll"));
         var ponyta=defs.get(76).getAsJsonObject().getAsJsonObject("clips");
         assertTrue("Retain Ponyta's unreferenced source clip without claiming it as a selected ground run",ponyta.has("ground_runold"));
         assertFalse(ponyta.has("ground_run"));

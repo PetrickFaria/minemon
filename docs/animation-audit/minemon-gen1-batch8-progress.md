@@ -77,10 +77,18 @@ Integrar exclusivamente os recursos Cobblemon Fabric 1.8.2 dos Pokémon #071–#
 - `python3 tools/verify_project.py`: passou; 151 espécies em ordem, 1.025 registros, 5.979 referências existentes e JSON/modelos/animações/PNGs/OGGs válidos.
 - `python3 -m py_compile tools/verify_batch8.py` e `git diff --check`: passaram.
 - `./gradlew test`: não iniciou porque o ambiente não conseguiu baixar Gradle 7.5.1 (`Network is unreachable`); os testes Java não foram ignorados e permanecem a cargo do Actions.
-- Actions anterior: [39617375461](https://github.com/PetrickFaria/minemon/actions/runs/39617375461), reprovada no smoke de articulação de corrida do Golem. Nova validação do reparo: [39643119039](https://github.com/PetrickFaria/minemon/actions/runs/39643119039), atualmente `in_progress` no job `build`; nenhuma execução duplicada foi iniciada.
+- Actions anterior [39617375461](https://github.com/PetrickFaria/minemon/actions/runs/39617375461) falhou no perfil de corrida do Golem. A execução de validação da correção [39643119039](https://github.com/PetrickFaria/minemon/actions/runs/39643119039) concluiu com falha no cliente: Golem passou após o ajuste, e Graveler falhou com `run=0`; build/testes Java e GameTests de servidor passaram. Diagnóstico publicado no artefato [12371321174](https://github.com/PetrickFaria/minemon/actions/runs/39643119039/artifacts/12371321174).
 - Commit de código do reparo publicado: `f946031ca2bf714ba3b8022359c4e5df04b246c9` (derivado do último estado `ce08db1`).
-- Resultado desta sessão: a execução `39643119039` iniciou novamente todos os gates, incluindo teste Java, GameTests, smoke do cliente, verificação cumulativa e inspeção/publicação do JAR. Não declarar o Lote 8 aprovado nem iniciar o Lote 9 enquanto ela não concluir com sucesso. Próxima ação: consultar essa mesma execução.
+- Resultado desta sessão: a execução `39643119039` concluiu reprovada no smoke; inspeção/publicação do JAR foram puladas. Correção seguinte registrada no Checkpoint 6. Não iniciar o Lote 9 antes de aprovação integral.
 
+
+## Checkpoint 6 — reparo específico do smoke de Graveler
+
+- O smoke atualizado confirmou que o Golem passou a ver movimento na corrida; falhou em seguida no Graveler (`idle=2 walk=2 run=0`).
+- Diagnóstico: o perfil `run` do Graveler media `arm_bottom_left`/`arm_bottom_right`, estáticos no clip nativo. O clip anima `body` com expressões Molang e `body_roll` com keyframes/rotação. O perfil foi atualizado para esses ossos e a regressão Java agora verifica o canal animado de ambos os Pokémon rochosos.
+- Nenhum modelo, animação fonte ou espécie fora do Lote 8 foi alterado.
+- `python3 tools/verify_batch8.py`, `python3 tools/verify_project.py` e `git diff --check`: passaram após o reparo. Testes Java e smoke real seguem pendentes do próximo Actions.
+- Commit-base deste reparo: `f0c940f00262b7bf7692c622ea5c3b8840bbf45b`. Pendência: publicar este checkpoint, consultar o Actions resultante e continuar tratando somente falhas comprovadas.
 
 ## Bloqueios e limitações
 
