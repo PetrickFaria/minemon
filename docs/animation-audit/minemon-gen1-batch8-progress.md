@@ -61,10 +61,12 @@ Integrar exclusivamente os recursos Cobblemon Fabric 1.8.2 dos Pokémon #071–#
 ## Checkpoint 4 — validação final
 
 - Workflow atualizado para executar `verify_batch8.py` contra o commit-base `b77eac9c38aa0d6a1d35c3cfab36a707ac6cab24` e também contra o JAR final; a regressão `verify_pidge_wing_visibility.py` continua nos dois pontos.
-- Esta mudança do workflow e do documento aguarda publicação. Nenhuma execução do Lote 8 foi iniciada até agora.
+- Commit de implementação/gates: `8c3ab0ddd70d97bb78a9505a97e7a6afe008310c`.
+- GitHub Actions: [execução 39617375461](https://github.com/PetrickFaria/minemon/actions/runs/39617375461), status inicial `queued`, conclusão pendente. Nenhuma segunda execução foi iniciada.
+- O artefato JAR ainda não pode ser confirmado ou linkado enquanto esta execução não concluir.
 - Próximos gates no Actions: build completo, testes Java, GameTests do servidor, smoke do cliente, inspeção cumulativa do JAR e regressão das asas Pidgeotto/Pidgeot.
-- Após publicar o commit final, consultar o estado inicial da execução; se ficar em andamento, registrar ID/URL/estado e encerrar essa etapa de acompanhamento.
-- Disponibilizar JAR, hash e expiração somente após a aprovação.
+- A execução 39617375461 ficou `queued` na primeira consulta. Próxima sessão: consultar essa execução existente; não iniciar outra enquanto estiver em andamento.
+- JAR, hash e expiração ainda pendentes até a conclusão aprovada do Actions.
 
 
 ## Bloqueios e limitações
