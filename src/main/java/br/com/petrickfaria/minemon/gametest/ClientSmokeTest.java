@@ -141,7 +141,9 @@ public final class ClientSmokeTest {
   if(!Boolean.getBoolean("minemon.clientSmokeTest")||event.phase!=TickEvent.Phase.END)return;
   Minecraft mc=Minecraft.getInstance();
   try {
-   if(!opened && mc.screen instanceof TitleScreen && ++titleTicks==20) {
+   if(!opened && mc.screen instanceof TitleScreen && titleTicks==0)
+   System.out.println("[CLIENT SMOKE] inicialização — TitleScreen alcançada; verificando cache GeckoLib e recursos registrados.");
+  if(!opened && mc.screen instanceof TitleScreen && ++titleTicks==20) {
     var tabItems=net.minecraft.core.NonNullList.<net.minecraft.world.item.ItemStack>create();
     ModItems.MINEMON_TAB.fillItemList(tabItems);
     var eggOrder=new java.util.ArrayList<String>();
@@ -160,6 +162,8 @@ public final class ClientSmokeTest {
     }
     Files.writeString(Path.of("client-validation.txt"),"PASS MENU: Minecraft reached TitleScreen; every registered model/animation parsed by GeckoLib.\nPASS CREATIVE ORDER: all "+SpeciesDefinitions.ALL.size()+" spawn eggs are unique and appear in National Pokédex order.\n");
     opened=true;
+    System.out.println("[CLIENT SMOKE] PASS carregamento — cache GeckoLib e "+SpeciesDefinitions.ALL.size()+" espécies verificadas.");
+    System.out.flush();
     var dataFile=Path.of("saves/minemon-validation/level.dat").toFile();var tag=net.minecraft.nbt.NbtIo.readCompressed(dataFile);tag.getCompound("Data").putBoolean("confirmedExperimentalSettings",true);net.minecraft.nbt.NbtIo.writeCompressed(tag,dataFile);
     Object flows=Minecraft.class.getMethod("createWorldOpenFlows").invoke(mc);boolean invoked=false;
     for(var method:flows.getClass().getMethods())if(method.getName().equals("loadLevel")) {
