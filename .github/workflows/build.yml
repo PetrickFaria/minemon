@@ -56,10 +56,19 @@ jobs:
         if: ${{ !cancelled() && steps.compile.outcome == 'success' }}
         run: |
           python3 tools/prepare_client_world.py
-          if ! timeout 2700s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest; then
-            echo "Client smoke run failed; retrying the complete client validation once with a clean world."
-            python3 tools/prepare_client_world.py
-            timeout 2700s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest
+          set +e
+          timeout --kill-after=30s 2700s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest
+          smoke_status=$?
+          set -e
+          if [ "$smoke_status" -ne 0 ]; then
+            if [ "$smoke_status" -eq 124 ]; then
+              echo "[CLIENT SMOKE] FAIL timeout after 2700s; last phase and species progress follow."
+            else
+              echo "[CLIENT SMOKE] FAIL exit=$smoke_status; no automatic full-client retry will be started."
+            fi
+            tail -n 120 run/client-validation.txt 2>/dev/null || true
+            tail -n 160 run/logs/latest.log 2>/dev/null || true
+            exit "$smoke_status"
           fi
           grep -F 'PASS WORLD' run/client-validation.txt
           grep -F 'PASS COMBAT' run/client-validation.txt
