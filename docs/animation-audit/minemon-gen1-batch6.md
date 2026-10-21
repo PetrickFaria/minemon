@@ -30,13 +30,14 @@ Escopo: somente #051–#060, conforme o plano de 16 lotes. O Lote 7 não foi ini
 - [x] Passar verificação do projeto e preparar uma cópia dos 151 modelos/clipes para validar as transformações de runtime GeckoLib 3.
 - [x] Investigar a falha de `Batch6AnimationCompatibilityTest` na execução `39523351214`: o parser GeckoLib 3 rejeitou o operador unário aplicado a uma expressão parentetizada no movimento da pata esquerda de Psyduck.
 - [x] Reescrever por identidades algébricas as expressões iniciadas por `-(...)` nos clips importados de Psyduck, Golduck, Mankey, Primeape e Arcanine; manter valores, fases e amplitudes originais em formas aceitas pelo parser GeckoLib 3.
-- [ ] Reexecutar Actions após publicar a correção; completar compilação/testes Java, GameTests, smoke do cliente e inspeção do JAR.
+- [x] Identificar que a execução `39524128879` falhou no verificador de JSON antes da compilação: os três arquivos de animação maiores foram truncados durante a publicação via API.
+- [ ] Republicar e validar os arquivos completos por SHA; depois completar compilação/testes Java, GameTests, smoke do cliente e inspeção do JAR.
 
 O `./gradlew clean test build` não pôde ser executado neste ambiente local: o Gradle Wrapper 7.5.1 tentou baixar sua distribuição e a conexão de saída foi recusada. A validação completa será feita no GitHub Actions antes da entrega.
 
 A janela máxima do smoke do cliente foi ampliada de 35 para 45 minutos com as asserções, velocidades e fases intactas. O smoke cumulativo do Lote 5 levou cerca de 31 minutos para 50 perfis detalhados; a janela maior comporta a cobertura de 60 sem encurtar os testes.
 
-A execução `39523351214` passou os dois gates de recursos e todos os testes Java anteriores; um dos quatro testes do Lote 6 falhou ao analisar uma expressão Molang do clip `water_swim` de Psyduck. A execução posterior detectou a mesma forma de negação parentetizada em clips de Golduck. A auditoria de todos os dez arquivos encontrou e adaptou todas essas expressões iniciais sem alterar as suas funções matemáticas. Os GameTests, o smoke do cliente e o empacotamento do JAR foram pulados nas duas execuções; aguardam a próxima validação.
+A execução `39523351214` passou os dois gates de recursos e todos os testes Java anteriores; um dos quatro testes do Lote 6 falhou ao analisar uma expressão Molang do clip `water_swim` de Psyduck. A execução `39523772540` encontrou a mesma forma em expressões de Golduck, levando à adaptação algébrica dos casos equivalentes nos arquivos do Lote 6. Na execução `39524128879`, o verificador estrutural identificou JSON inválido antes da compilação; a publicação via API havia truncado os arquivos grandes de Arcanine, Mankey e Primeape. Os arquivos locais completos serão publicados com verificação de SHA. Os GameTests, o smoke do cliente e o JAR seguem pendentes.
 
 ## Adaptações e limites conhecidos
 
