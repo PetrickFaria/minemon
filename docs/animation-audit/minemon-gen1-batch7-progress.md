@@ -42,3 +42,11 @@ Ainda pendente: revalidar a ocultação real das asas, repetir smoke do cliente,
 - Testes de recursos locais: passaram para a correção das asas e preservação do Lote 6.
 - Execução Gradle local: não disponível porque o wrapper precisa baixar Gradle 7.5.1 e esta sessão não tem conexão de saída para `services.gradle.org`; a validação de build seguirá no GitHub Actions após publicação.
 - Próxima etapa: publicar correção de runtime da Etapa A e acompanhar o Actions; revisar relatório de articulação e conteúdo do JAR antes da entrega.
+
+## Retomada após interrupção — 21/10/2026
+
+- GitHub consultado antes de alterações: HEAD `430dcdc290bcab501d9e7d7cf220041efec086d5`; última execução `39535514146`, falha no verificador de asas. Nenhuma execução posterior existente.
+- Causa encontrada no próprio arquivo Java: o commit anterior inseriu literalmente uma saída truncada, removendo cerca de cem linhas do smoke. Restaurado o conteúdo integral do pai `2e81d367`, preservando as verificações de movimento, articulação, combate e renderização.
+- A checagem de Pidgeotto/Pidgeot agora consulta os GeoBones reais após `super.render`: rig fechado oculto com descendentes e rig aberto visível com descendentes. Não assume escala zero, incompatível com o clamp do GeckoLib. Mantidas as verificações de geometria/hierarquia/animações e a implementação de renderização.
+- Verificadores locais `verify_project.py`, `verify_batch7.py` e `verify_pidge_wing_visibility.py`: aprovados. Recursos e modelos não foram reimportados ou modificados.
+- Gradle local não iniciou: download do Gradle 7.5.1 bloqueado por rede (`Network is unreachable`). Compilação, Java, servidor, cliente e JAR serão validados pelo workflow completo do novo commit. Ainda não há aprovação final nem artefato final anunciado. Lote 8 não iniciado.
