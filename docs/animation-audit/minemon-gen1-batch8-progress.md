@@ -2,70 +2,64 @@
 
 ## Objetivo
 
-Integrar exclusivamente os recursos Cobblemon Fabric 1.8.2 dos Pokémon #071–#080, preservando os Lotes 1–7, os 151 registros e todas as funcionalidades existentes. A validação visual manual no Minecraft permanece pendente. Não iniciar o Lote 9.
+Integrar exclusivamente os recursos Cobblemon Fabric 1.8.2 dos Pokémon #071–#080, preservando os Lotes 1–7, os 151 registros e as funcionalidades existentes. A avaliação visual manual dentro do Minecraft permanece pendente. Não iniciar o Lote 9.
 
-## Base e branch
+## Branch e base
 
-- Branch: `feature/minemon-gen1-batch8-cobblemon`
-- Base aprovada: `feature/minemon-gen1-batch7-cobblemon` @ `b77eac9c38aa0d6a1d35c3cfab36a707ac6cab24`
-- GitHub Actions base aprovado: [39543680758](https://github.com/PetrickFaria/minemon/actions/runs/39543680758)
-- Planejamento confirmado: `docs/animation-audit/minemon-gen1-16-batch-plan.md`, Lote 8 = #071–#080.
-- Não havia branch do Lote 8 nem commits posteriores na branch do Lote 7 durante a preparação.
-- A branch foi criada a partir do SHA aprovado acima. Nenhum recurso de jogo foi modificado neste checkpoint.
+- Branch: `feature/minemon-gen1-batch8-cobblemon`.
+- Base aprovada: `feature/minemon-gen1-batch7-cobblemon` @ `b77eac9c38aa0d6a1d35c3cfab36a707ac6cab24`.
+- Último commit publicado nesta branch: `ea02a48ad29de18a7cd3807171472e1b1d43e052` — auditoria dos recursos fonte.
+- Planejamento em `docs/animation-audit/minemon-gen1-16-batch-plan.md`: lote 8 = #071–#080.
+- Nenhum workflow do Lote 8 foi iniciado. A execução-base aprovada do Lote 7 é [39543680758](https://github.com/PetrickFaria/minemon/actions/runs/39543680758).
 
-## Escopo exato
+## Pokémon e estado
 
-1. #071 Victreebel
-2. #072 Tentacool
-3. #073 Tentacruel
-4. #074 Geodude
-5. #075 Graveler
-6. #076 Golem
-7. #077 Ponyta
-8. #078 Rapidash
-9. #079 Slowpoke
-10. #080 Slowbro
+| # | Espécie | Estado |
+|---|---|---|
+| 071 | Victreebel | Implementado localmente; validação parcial aprovada |
+| 072 | Tentacool | Implementado localmente; validação parcial aprovada |
+| 073 | Tentacruel | Implementado localmente; validação parcial aprovada |
+| 074 | Geodude | Implementado localmente; validação parcial aprovada |
+| 075 | Graveler | Implementado localmente; validação parcial aprovada |
+| 076 | Golem | Pendente |
+| 077 | Ponyta | Pendente |
+| 078 | Rapidash | Pendente |
+| 079 | Slowpoke | Pendente |
+| 080 | Slowbro | Pendente |
 
-## Progresso
+## Checkpoint 1 — Preparação concluída
 
-### Concluído — checkpoint de preparação
+- Confirmados o commit-base aprovado, o plano original e a ausência de commits posteriores na branch-base quando iniciada esta branch.
+- Criada a branch sobre `b77eac9c38aa0d6a1d35c3cfab36a707ac6cab24`.
+- Pacote Cobblemon Fabric 1.8.2 baixado e SHA-256 confirmado: `cae8ac328b61354fbe415208b8c6ffc12e7155094d0a87082e85e7914fb380c2`.
+- Verificados modelos, texturas, animações e posers para #071–#080.
+- Clips aquáticos nativos serão preservados, sem criar seletor de natação. Clips `ground_run` nativos existem para Geodude, Graveler, Golem e Rapidash. Ponyta tem somente `ground_runold`; fica preservado sem ser selecionado como corrida. Não há corrida terrestre nativa para Victreebel, Tentacool, Tentacruel, Slowpoke e Slowbro.
 
-- Confirmada a base aprovada do Lote 7 e a ausência de commits posteriores.
-- Confirmado no plano original o escopo #071–#080.
-- Verificadas as execuções recentes: a execução base 39543680758 está concluída com sucesso; nenhuma execução do Lote 8 está em andamento.
-- Criada esta branch sobre o commit aprovado.
-- Criado este documento de continuidade.
-- Baixado e verificado o pacote de referência Cobblemon Fabric 1.8.2: SHA-256 `cae8ac328b61354fbe415208b8c6ffc12e7155094d0a87082e85e7914fb380c2`.
-- Confirmados no pacote modelo, textura, arquivo de animação e poser quando existente para #071–#080.
-- Confirmados clips de água para Tentacool, Tentacruel, Slowpoke e Slowbro; serão preservados, sem introduzir seletor de natação.
-- Identificados clips terrestres `ground_run` para Geodude, Graveler, Golem e Rapidash. Ponyta fornece `ground_runold`; a seleção como corrida depende de validação do clip contra modelo/testes e registro de que o poser não o seleciona, se aplicável.
-- A fonte não fornece `ground_run` para Victreebel, Tentacool, Tentacruel, Slowpoke e Slowbro. Nesses casos, manter fallback existente em vez de inventar corrida.
-- A inspeção do primeiro grupo confirmou animações que movimentam folhas/caule (Victreebel), os tentáculos e flaps (Tentacool/Tentacruel) e membros (Geodude/Graveler).
+## Checkpoint 2 — #071–#075 implementados localmente
 
-### Pendente
+- Integrados modelo, textura, animação e licença fonte para Victreebel, Tentacool, Tentacruel, Geodude e Graveler.
+- Mantidos clips de água e fallback de repouso terrestre de Tentacool/Tentacruel; nenhum comportamento de natação foi introduzido.
+- As expressões Molang `q.`/`Math.` são adaptadas para GeckoLib 3.1.40 preservando a expressão. O perfil de Geodude mantém os membros que se movem no repouso/caminhada/corrida.
+- Adaptado `q.look('head', ...)` de Geodude ao osso `head`, com limites de pitch/yaw do poser; o smoke do cliente mede a resposta renderizada. Victreebel usa `head_ai`, sem osso compatível, e Graveler não tem osso `head`; esses posers não são falsamente declarados como adaptados.
+- `python3 tools/verify_batch8.py --segment first`: passou, verificando a faixa #071–#075, hierarquia dos ossos, dimensões de textura, referências/expressões/eventos das animações e preservação byte a byte dos recursos dos primeiros 70.
+- `python3 tools/verify_project.py`: passou; 151 espécies runtime em ordem, 1.025 registros de espécies no catálogo, 5.979 referências existentes, JSON/modelos/animações/PNGs/OGGs válidos.
+- `python3 -m py_compile tools/import_cobblemon_182_batch.py tools/verify_batch8.py`: passou.
+- Alterações deste checkpoint ainda não publicadas. Não foi iniciado GitHub Actions.
 
-- Auditar no pacote-fonte Cobblemon 1.8.2 os modelos, texturas, clips, poser/controladores, expressões Molang e eventos para as dez espécies.
-- Registrar as adaptações específicas e validar compatibilidade com GeckoLib 3.1.40.
-- Implementar o primeiro grupo (#071–#075), validar recursos e publicar checkpoint.
-- Implementar o segundo grupo (#076–#080), validar recursos e publicar checkpoint.
-- Rodar os gates cumulativos até 80 espécies, regressões, build, testes Java, GameTests, smoke do cliente e inspeção do JAR.
-- Iniciar/consultar Actions somente após o commit de implementação; nunca duplicar execução em andamento.
-- Após CI, registrar resultado, link/ID, artefato e expiração. A avaliação visual manual segue pendente até o usuário avaliar no Minecraft.
+## Etapas pendentes
 
-## Preservação e gates
+1. Publicar o checkpoint #071–#075 com `[skip ci]` para não iniciar validação antes do segundo grupo.
+2. Implementar e validar #076–#080, publicar o checkpoint seguinte.
+3. Atualizar os gates cumulativos para os 80 Pokémon; executar compilação, testes Java, GameTests, smoke do cliente, testes regressivos, validações cumulativas do catálogo/JAR e inspeção do JAR real.
+4. Iniciar GitHub Actions somente após a implementação final completa. Se ainda estiver em execução, registrar ID/URL/estado e encerrar o acompanhamento dessa etapa.
+5. Registrar artefato, hash e expiração disponíveis após aprovação do CI.
 
-- Comparar as alterações com o commit-base aprovado.
-- O gate cumulativo deverá exigir #071–#080 como únicas novas definições, 80 espécies atualizadas, 151 registros preservados, recursos e perfis válidos no JAR.
-- Preservar recursos anteriores, incluindo a chama do Charmander, braços do Charizard e estado de ossos/renderização das asas de Pidgeotto/Pidgeot.
-- Não enfraquecer testes nem introduzir IA, combate, captura ou locomoção novos.
-- Não iniciar o Lote 9.
+## Bloqueios e limitações
 
-## Testes e erros
-
-- Testes da preparação: leitura da branch/commit e comparação do planejamento; download do JAR fonte e validação do SHA-256; inspeção dos caminhos/nomes de clips/posers. Nenhum teste de código nesta etapa.
-- Erros identificados até agora: nenhum na preparação.
-- Não há execução do Lote 8 associada a esta branch ainda.
+- A distribuição Gradle 7.5.1 não estava alcançável de `services.gradle.org` no primeiro teste local; por isso os testes Java/build ainda não foram executados localmente. Nenhum teste foi desativado. A URL da fonte Cobblemon ficou acessível e seu arquivo foi novamente baixado/verificado durante a recuperação do workspace.
+- Aparência visual manual dentro do Minecraft continuará pendente; os gates automatizados de cliente verificam renderização, movimento e transforms reais dos ossos.
+- Erros de código/testes identificados no checkpoint parcial: nenhum após a correção dos perfis de tentáculos para os nomes de osso reais da fonte.
 
 ## Próxima ação
 
-Auditar os dez conjuntos de recursos do Cobblemon 1.8.2 e os validadores/fluxos de importação existentes. Atualizar esta seção antes do checkpoint de implementação #071–#075.
+Revisar o diff do checkpoint local, executar novamente os verificadores parciais e publicar #071–#075. Depois importar #076–#080; não iniciar o Lote 9.

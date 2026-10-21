@@ -4539,9 +4539,9 @@
     "nationalPokedexNumber": 71,
     "slug": "victreebel",
     "name": "Victreebel",
-    "model": "assets/minemon/geo/victreebel/victreebel.geo.json",
-    "texture": "assets/minemon/textures/pokemon/victreebel/victreebel.png",
-    "animation": "assets/minemon/animations/victreebel/victreebel.animation.json",
+    "model": "assets/minemon/geo/victreebel_cobblemon_1_8_2/victreebel.geo.json",
+    "texture": "assets/minemon/textures/pokemon/victreebel_cobblemon_1_8_2/victreebel.png",
+    "animation": "assets/minemon/animations/victreebel_cobblemon_1_8_2/victreebel.animation.json",
     "mode": "ground",
     "scale": 1.5,
     "width": 0.7,
@@ -4550,16 +4550,17 @@
     "attack": 8.75,
     "speed": 0.27,
     "clips": {
+      "battle_idle": "animation.victreebel.battle_idle",
+      "blink": "animation.victreebel.blink",
+      "cry": "animation.victreebel.cry",
       "ground_idle": "animation.victreebel.ground_idle",
-      "ground_run": "animation.victreebel.minemon_run",
+      "ground_walk": "animation.victreebel.ground_walk",
+      "sleep": "animation.victreebel.sleep",
       "sit": "animation.victreebel.minemon_sit",
-      "sleep": "animation.victreebel.minemon_sleep",
       "physical_attack": "animation.victreebel.minemon_physical_attack"
     },
     "idle": "animation.victreebel.ground_idle",
-    "walk": "animation.victreebel.ground_idle",
-    "movement_fallback": "static",
-    "generated_static_animation": false,
+    "walk": "animation.victreebel.ground_walk",
     "attackTicks": 12,
     "excluded_clips": [],
     "stripped_bones": {},
@@ -4568,18 +4569,49 @@
       "assets/minemon/sounds/pokemon/victreebel/victreebel_cry.ogg"
     ],
     "licenses": [
-      "assets/minemon/licenses/pokemon/victreebel/model-license.txt"
+      "assets/minemon/licenses/pokemon/victreebel/model-license.txt",
+      "assets/minemon/licenses/pokemon/victreebel/cobblemon-1.8.2-model-license.txt"
     ],
     "eggBase": 15131758,
-    "eggSpots": 14142820
+    "eggSpots": 14142820,
+    "source_molang_adaptations": {
+      "q.": "query.",
+      "Math.": "math."
+    },
+    "source_event_evidence": {
+      "animation.victreebel.cry": {
+        "sound_effects": {
+          "0.0": {
+            "effect": "pokemon.victreebel.cry"
+          }
+        }
+      }
+    },
+    "geckolib3_bedrock_keyframes": true,
+    "strip_bedrock_locators": true,
+    "source_model_variant": "victreebel.geo.json",
+    "source_cobblemon_version": "1.8.2",
+    "source_procedural_pose": {
+      "poser": "assets/cobblemon/bedrock/pokemon/posers/0071_victreebel/victreebel.json",
+      "look": [
+        "q.look('head_ai')"
+      ],
+      "look_bones": [
+        "head_ai"
+      ],
+      "adapted_geo_bones": {
+        "head_ai": null
+      },
+      "adaptation": "Map q.look to a real compatible source head bone in MinemonModel; no locomotion gait is synthesized"
+    }
   },
   {
     "nationalPokedexNumber": 72,
     "slug": "tentacool",
     "name": "Tentacool",
-    "model": "assets/minemon/geo/tentacool/tentacool.geo.json",
-    "texture": "assets/minemon/textures/pokemon/tentacool/tentacool.png",
-    "animation": "assets/minemon/animations/tentacool/tentacool.animation.json",
+    "model": "assets/minemon/geo/tentacool_cobblemon_1_8_2/tentacool.geo.json",
+    "texture": "assets/minemon/textures/pokemon/tentacool_cobblemon_1_8_2/tentacool.png",
+    "animation": "assets/minemon/animations/tentacool_cobblemon_1_8_2/tentacool.animation.json",
     "mode": "ground",
     "scale": 0.8,
     "width": 0.8,
@@ -4588,20 +4620,18 @@
     "attack": 3.3333333333333335,
     "speed": 0.27,
     "clips": {
-      "render": "animation.tentacool.render",
-      "water_idle": "animation.tentacool.water_idle",
-      "water_swim": "animation.tentacool.water_swim",
-      "water_sleep": "animation.tentacool.water_sleep",
-      "ground_idle": "animation.tentacool.ground_idle",
-      "sleep": "animation.tentacool.sleep",
       "blink": "animation.tentacool.blink",
-      "ground_run": "animation.tentacool.minemon_run",
+      "ground_idle": "animation.tentacool.ground_idle",
+      "render": "animation.tentacool.render",
+      "sleep": "animation.tentacool.sleep",
+      "water_idle": "animation.tentacool.water_idle",
+      "water_sleep": "animation.tentacool.water_sleep",
+      "water_swim": "animation.tentacool.water_swim",
       "sit": "animation.tentacool.minemon_sit",
       "physical_attack": "animation.tentacool.minemon_physical_attack"
     },
     "idle": "animation.tentacool.ground_idle",
     "walk": "animation.tentacool.ground_idle",
-    "movement_fallback": "idle",
     "attackTicks": 12,
     "excluded_clips": [],
     "stripped_bones": {},
@@ -4610,18 +4640,29 @@
       "assets/minemon/sounds/pokemon/tentacool/tentacool_cry.ogg"
     ],
     "licenses": [
-      "assets/minemon/licenses/pokemon/tentacool/model-license.txt"
+      "assets/minemon/licenses/pokemon/tentacool/model-license.txt",
+      "assets/minemon/licenses/pokemon/tentacool/cobblemon-1.8.2-model-license.txt"
     ],
     "eggBase": 4881843,
-    "eggSpots": 5542594
+    "eggSpots": 5542594,
+    "source_molang_adaptations": {
+      "q.": "query.",
+      "Math.": "math."
+    },
+    "source_event_evidence": {},
+    "geckolib3_bedrock_keyframes": true,
+    "strip_bedrock_locators": true,
+    "source_model_variant": "tentacool.geo.json",
+    "source_cobblemon_version": "1.8.2",
+    "movement_fallback": "idle"
   },
   {
     "nationalPokedexNumber": 73,
     "slug": "tentacruel",
     "name": "Tentacruel",
-    "model": "assets/minemon/geo/tentacruel/tentacruel.geo.json",
-    "texture": "assets/minemon/textures/pokemon/tentacruel/tentacruel.png",
-    "animation": "assets/minemon/animations/tentacruel/tentacruel.animation.json",
+    "model": "assets/minemon/geo/tentacruel_cobblemon_1_8_2/tentacruel.geo.json",
+    "texture": "assets/minemon/textures/pokemon/tentacruel_cobblemon_1_8_2/tentacruel.png",
+    "animation": "assets/minemon/animations/tentacruel_cobblemon_1_8_2/tentacruel.animation.json",
     "mode": "ground",
     "scale": 0.9,
     "width": 1.2,
@@ -4630,20 +4671,19 @@
     "attack": 5.833333333333333,
     "speed": 0.3,
     "clips": {
+      "blink": "animation.tentacruel.blink",
+      "ground_idle": "animation.tentacruel.ground_idle",
+      "ground_sleep": "animation.tentacruel.ground_sleep",
       "render": "animation.tentacruel.render",
       "water_idle": "animation.tentacruel.water_idle",
-      "water_swim": "animation.tentacruel.water_swim",
       "water_sleep": "animation.tentacruel.water_sleep",
-      "ground_idle": "animation.tentacruel.ground_idle",
-      "sleep": "animation.tentacruel.sleep",
-      "blink": "animation.tentacruel.blink",
-      "ground_run": "animation.tentacruel.minemon_run",
+      "water_swim": "animation.tentacruel.water_swim",
       "sit": "animation.tentacruel.minemon_sit",
+      "sleep": "animation.tentacruel.minemon_sleep",
       "physical_attack": "animation.tentacruel.minemon_physical_attack"
     },
     "idle": "animation.tentacruel.ground_idle",
     "walk": "animation.tentacruel.ground_idle",
-    "movement_fallback": "idle",
     "attackTicks": 12,
     "excluded_clips": [],
     "stripped_bones": {},
@@ -4652,18 +4692,29 @@
       "assets/minemon/sounds/pokemon/tentacruel/tentacruel_cry.ogg"
     ],
     "licenses": [
-      "assets/minemon/licenses/pokemon/tentacruel/model-license.txt"
+      "assets/minemon/licenses/pokemon/tentacruel/model-license.txt",
+      "assets/minemon/licenses/pokemon/tentacruel/cobblemon-1.8.2-model-license.txt"
     ],
     "eggBase": 4881843,
-    "eggSpots": 8021085
+    "eggSpots": 8021085,
+    "source_molang_adaptations": {
+      "q.": "query.",
+      "Math.": "math."
+    },
+    "source_event_evidence": {},
+    "geckolib3_bedrock_keyframes": true,
+    "strip_bedrock_locators": true,
+    "source_model_variant": "tentacruel.geo.json",
+    "source_cobblemon_version": "1.8.2",
+    "movement_fallback": "idle"
   },
   {
     "nationalPokedexNumber": 74,
     "slug": "geodude",
     "name": "Geodude",
-    "model": "assets/minemon/geo/geodude/geodude.geo.json",
-    "texture": "assets/minemon/textures/pokemon/geodude/geodude.png",
-    "animation": "assets/minemon/animations/geodude/geodude.animation.json",
+    "model": "assets/minemon/geo/geodude_cobblemon_1_8_2/geodude.geo.json",
+    "texture": "assets/minemon/textures/pokemon/geodude_cobblemon_1_8_2/geodude.png",
+    "animation": "assets/minemon/animations/geodude_cobblemon_1_8_2/geodude.animation.json",
     "mode": "ground",
     "scale": 1,
     "width": 0.9,
@@ -4672,12 +4723,18 @@
     "attack": 6.666666666666667,
     "speed": 0.22,
     "clips": {
-      "ground_idle": "animation.geodude.ground_idle",
-      "ground_walk": "animation.geodude.ground_walk",
-      "ground_run": "animation.geodude.ground_run",
-      "sleep": "animation.geodude.sleep",
+      "battle_cry": "animation.geodude.battle_cry",
+      "battle_idle": "animation.geodude.battle_idle",
       "blink": "animation.geodude.blink",
       "cry": "animation.geodude.cry",
+      "ground_idle": "animation.geodude.ground_idle",
+      "ground_run": "animation.geodude.ground_run",
+      "ground_walk": "animation.geodude.ground_walk",
+      "recoil": "animation.geodude.recoil",
+      "render": "animation.geodude.render",
+      "sleep": "animation.geodude.sleep",
+      "status": "animation.geodude.status",
+      "wild_sleep": "animation.geodude.wild_sleep",
       "sit": "animation.geodude.minemon_sit",
       "physical_attack": "animation.geodude.minemon_physical_attack"
     },
@@ -4690,18 +4747,57 @@
       "assets/minemon/sounds/pokemon/geodude/geodude_cry.ogg"
     ],
     "licenses": [
-      "assets/minemon/licenses/pokemon/geodude/model-license.txt"
+      "assets/minemon/licenses/pokemon/geodude/model-license.txt",
+      "assets/minemon/licenses/pokemon/geodude/cobblemon-1.8.2-model-license.txt"
     ],
     "eggBase": 9867649,
-    "eggSpots": 8879986
+    "eggSpots": 8879986,
+    "source_molang_adaptations": {
+      "q.": "query.",
+      "Math.": "math."
+    },
+    "source_event_evidence": {
+      "animation.geodude.battle_cry": {
+        "sound_effects": {
+          "0.1667": {
+            "effect": "pokemon.geodude.cry"
+          }
+        }
+      },
+      "animation.geodude.cry": {
+        "sound_effects": {
+          "0.1667": {
+            "effect": "pokemon.geodude.cry"
+          }
+        }
+      }
+    },
+    "stripped_bones": {},
+    "geckolib3_bedrock_keyframes": true,
+    "strip_bedrock_locators": true,
+    "source_model_variant": "geodude.geo.json",
+    "source_cobblemon_version": "1.8.2",
+    "source_procedural_pose": {
+      "poser": "assets/cobblemon/bedrock/pokemon/posers/0074_geodude/geodude.json",
+      "look": [
+        "q.look('head', 1, 1, 15, -25, 15, -15)"
+      ],
+      "look_bones": [
+        "head"
+      ],
+      "adapted_geo_bones": {
+        "head": "head"
+      },
+      "adaptation": "Map q.look to a real compatible source head bone in MinemonModel; no locomotion gait is synthesized"
+    }
   },
   {
     "nationalPokedexNumber": 75,
     "slug": "graveler",
     "name": "Graveler",
-    "model": "assets/minemon/geo/graveler/graveler.geo.json",
-    "texture": "assets/minemon/textures/pokemon/graveler/graveler.png",
-    "animation": "assets/minemon/animations/graveler/graveler.animation.json",
+    "model": "assets/minemon/geo/graveler_cobblemon_1_8_2/graveler.geo.json",
+    "texture": "assets/minemon/textures/pokemon/graveler_cobblemon_1_8_2/graveler.png",
+    "animation": "assets/minemon/animations/graveler_cobblemon_1_8_2/graveler.animation.json",
     "mode": "ground",
     "scale": 1.1,
     "width": 0.9,
@@ -4710,20 +4806,26 @@
     "attack": 7.916666666666667,
     "speed": 0.235,
     "clips": {
-      "ground_idle": "animation.graveler.ground_idle",
-      "test": "animation.graveler.test",
+      "battle_cry": "animation.graveler.battle_cry",
+      "battle_idle": "animation.graveler.battle_idle",
+      "battle_recoil": "animation.graveler.battle_recoil",
       "blink": "animation.graveler.blink",
       "cry": "animation.graveler.cry",
-      "ground_run": "animation.graveler.minemon_run",
+      "ground_idle": "animation.graveler.ground_idle",
+      "ground_run": "animation.graveler.ground_run",
+      "ground_walk": "animation.graveler.ground_walk",
+      "look_quirk_WIP": "animation.graveler.look_quirk_WIP",
+      "physical": "animation.graveler.physical",
+      "recoil": "animation.graveler.recoil",
+      "sleep": "animation.graveler.sleep",
+      "status": "animation.graveler.status",
+      "wild_sleep": "animation.graveler.wild_sleep",
       "sit": "animation.graveler.minemon_sit",
-      "sleep": "animation.graveler.minemon_sleep",
-      "physical_attack": "animation.graveler.minemon_physical_attack"
+      "physical_attack": "animation.graveler.physical"
     },
     "idle": "animation.graveler.ground_idle",
-    "walk": "animation.graveler.ground_idle",
-    "movement_fallback": "static",
-    "generated_static_animation": false,
-    "attackTicks": 12,
+    "walk": "animation.graveler.ground_walk",
+    "attackTicks": 60,
     "excluded_clips": [],
     "stripped_bones": {},
     "sounds": [
@@ -4731,10 +4833,48 @@
       "assets/minemon/sounds/pokemon/graveler/graveler_cry.ogg"
     ],
     "licenses": [
-      "assets/minemon/licenses/pokemon/graveler/model-license.txt"
+      "assets/minemon/licenses/pokemon/graveler/model-license.txt",
+      "assets/minemon/licenses/pokemon/graveler/cobblemon-1.8.2-model-license.txt"
     ],
     "eggBase": 9735295,
-    "eggSpots": 8551532
+    "eggSpots": 8551532,
+    "source_molang_adaptations": {
+      "q.": "query.",
+      "Math.": "math."
+    },
+    "source_event_evidence": {
+      "animation.graveler.battle_cry": {
+        "sound_effects": {
+          "0.1667": {
+            "effect": "pokemon.graveler.cry"
+          }
+        }
+      },
+      "animation.graveler.cry": {
+        "sound_effects": {
+          "0.1667": {
+            "effect": "pokemon.graveler.cry"
+          }
+        }
+      }
+    },
+    "geckolib3_bedrock_keyframes": true,
+    "strip_bedrock_locators": true,
+    "source_model_variant": "graveler.geo.json",
+    "source_cobblemon_version": "1.8.2",
+    "source_procedural_pose": {
+      "poser": "assets/cobblemon/bedrock/pokemon/posers/0075_graveler/graveler.json",
+      "look": [
+        "q.look('head')"
+      ],
+      "look_bones": [
+        "head"
+      ],
+      "adapted_geo_bones": {
+        "head": null
+      },
+      "adaptation": "Map q.look to a real compatible source head bone in MinemonModel; no locomotion gait is synthesized"
+    }
   },
   {
     "nationalPokedexNumber": 76,

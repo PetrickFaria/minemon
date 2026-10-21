@@ -1,0 +1,140 @@
+{
+  "batch": 8,
+  "range": [
+    71,
+    75
+  ],
+  "source_url": "https://cdn.modrinth.com/data/MdwFAVRL/versions/GJ2a1b8O/Cobblemon-fabric-1.8.2%2B1.21.1.jar",
+  "source_sha256": "cae8ac328b61354fbe415208b8c6ffc12e7155094d0a87082e85e7914fb380c2",
+  "manual_visual_status": "pending; user will evaluate the authorized batches inside Minecraft",
+  "species": [
+    {
+      "number": 71,
+      "slug": "victreebel",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0071_victreebel/victreebel.geo.json",
+      "idle": "animation.victreebel.ground_idle",
+      "movement": "animation.victreebel.ground_walk",
+      "mode": "ground",
+      "native_run": null,
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "head_stem",
+          "head_leaf",
+          "head_leaf_left"
+        ],
+        "walk": [
+          "body",
+          "head_stem",
+          "head_leaf"
+        ],
+        "run": [
+          "body",
+          "head_stem",
+          "head_leaf"
+        ]
+      },
+      "stripped_bones": {}
+    },
+    {
+      "number": 72,
+      "slug": "tentacool",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0072_tentacool/tentacool.geo.json",
+      "idle": "animation.tentacool.ground_idle",
+      "movement": "animation.tentacool.ground_idle",
+      "mode": "ground",
+      "native_run": null,
+      "fallback": "idle",
+      "profiles": {
+        "idle": [
+          "tentacle_left_3",
+          "tentacle_right_3"
+        ],
+        "walk": [
+          "tentacle_left_3",
+          "tentacle_right_3"
+        ],
+        "run": [
+          "tentacle_left_3",
+          "tentacle_right_3"
+        ]
+      },
+      "stripped_bones": {}
+    },
+    {
+      "number": 73,
+      "slug": "tentacruel",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0073_tentacruel/tentacruel.geo.json",
+      "idle": "animation.tentacruel.ground_idle",
+      "movement": "animation.tentacruel.ground_idle",
+      "mode": "ground",
+      "native_run": null,
+      "fallback": "idle",
+      "profiles": {
+        "idle": [
+          "tentacle_left_3",
+          "tentacle_right_3"
+        ],
+        "walk": [
+          "tentacle_left_3",
+          "tentacle_right_3"
+        ],
+        "run": [
+          "tentacle_left_3",
+          "tentacle_right_3"
+        ]
+      },
+      "stripped_bones": {}
+    },
+    {
+      "number": 74,
+      "slug": "geodude",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0074_geodude/geodude.geo.json",
+      "idle": "animation.geodude.ground_idle",
+      "movement": "animation.geodude.ground_walk",
+      "mode": "ground",
+      "native_run": "animation.geodude.ground_run",
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "arm_left",
+          "arm_right"
+        ],
+        "walk": [
+          "arm_left",
+          "arm_right"
+        ],
+        "run": [
+          "arm_left",
+          "arm_right"
+        ]
+      },
+      "stripped_bones": {}
+    },
+    {
+      "number": 75,
+      "slug": "graveler",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0075_graveler/graveler.geo.json",
+      "idle": "animation.graveler.ground_idle",
+      "movement": "animation.graveler.ground_walk",
+      "mode": "ground",
+      "native_run": "animation.graveler.ground_run",
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "arm_bottom_left",
+          "arm_bottom_right"
+        ],
+        "walk": [
+          "arm_bottom_left",
+          "arm_bottom_right"
+        ],
+        "run": [
+          "arm_bottom_left",
+          "arm_bottom_right"
+        ]
+      },
+      "stripped_bones": {}
+    }
+  ]
+}

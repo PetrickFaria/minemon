@@ -167,7 +167,7 @@ public final class ClientSmokeTest {
        entity.setXRot((float)Math.sin(entity.tickCount*0.17F)*12.0F);
        entity.yHeadRot=entity.getYRot()+(float)Math.sin(entity.tickCount*0.13F)*25.0F;
       }
-      if(java.util.Set.of("abra","kadabra","alakazam","bellsprout").contains(entity.getSpeciesSlug())) {
+      if(java.util.Set.of("abra","kadabra","alakazam","bellsprout","geodude","golem","slowpoke","slowbro").contains(entity.getSpeciesSlug())) {
        // Exercise source q.look('head') / q.look('head_ai') adaptations.
        entity.setXRot((float)Math.sin(entity.tickCount*0.17F)*12.0F);
        entity.yHeadRot=entity.getYRot()+(float)Math.sin(entity.tickCount*0.13F)*25.0F;
@@ -194,7 +194,7 @@ public final class ClientSmokeTest {
       }
       renderedPhaseFrames++;
      }
-     if(validationPhase!=null && java.util.Set.of("abra","kadabra","alakazam","bellsprout").contains(slug)) {
+     if(validationPhase!=null && java.util.Set.of("abra","kadabra","alakazam","bellsprout","geodude","golem","slowpoke","slowbro").contains(slug)) {
       var lookHead=model.getAnimationProcessor().getBone("head");
       if(lookHead==null)throw new IllegalStateException("Source q.look head adapter has no GeckoLib head bone for "+slug);
       float[] range=sourceLookRanges.computeIfAbsent(slug,k->{var v=new float[4];java.util.Arrays.fill(v,0,2,Float.MAX_VALUE);java.util.Arrays.fill(v,2,4,-Float.MAX_VALUE);return v;});
@@ -367,7 +367,7 @@ public final class ClientSmokeTest {
       throw new IllegalStateException("Fire-starter arms remained near T-pose during validated movement for "+slug+"; arm rotations="+java.util.Arrays.toString(arms));
     }
     validateArticulationProfiles();
-    for(String slug:java.util.List.of("abra","kadabra","alakazam","bellsprout")) {
+    for(String slug:java.util.List.of("abra","kadabra","alakazam","bellsprout","geodude","golem","slowpoke","slowbro")) {
      float[] look=sourceLookRanges.get(slug);
      if(look==null||look[2]-look[0]<0.05F||look[3]-look[1]<0.05F)
       throw new IllegalStateException("Source q.look adaptation did not move the head for "+slug+": "+java.util.Arrays.toString(look));
@@ -376,7 +376,7 @@ public final class ClientSmokeTest {
      throw new IllegalStateException("Pidge wing visibility was not sampled for both models: "+wingVisibilitySpecies);
     Files.writeString(Path.of("client-validation.txt"),"PASS LOCOMOTION: every registered species moved and had changing body bone transforms.\n",StandardOpenOption.APPEND);
     Files.writeString(Path.of("client-validation.txt"),"PASS PIDGE WINGS: Pidgeotto and Pidgeot rendered the open pair only in settled idle/walk/run poses; closed alternatives stayed hidden.\n",StandardOpenOption.APPEND);
-    Files.writeString(Path.of("client-validation.txt"),"PASS SOURCE LOOK: Abra, Kadabra, Alakazam, and Bellsprout head bones respond to their source poser look input.\n",StandardOpenOption.APPEND);
+    Files.writeString(Path.of("client-validation.txt"),"PASS SOURCE LOOK: Abra, Kadabra, Alakazam, Bellsprout, Geodude, Golem, Slowpoke, and Slowbro head bones respond to their source poser look input.\n",StandardOpenOption.APPEND);
     Files.writeString(Path.of("client-validation.txt"),"PASS FIRE-STARTER ARMS: validated walk and faster-movement poses remain lowered; Charmander uses no source run clip.\n",StandardOpenOption.APPEND);
     Files.writeString(Path.of("client-validation.txt"),"PASS ROSTER: every registered species rendered with its texture in a world: "+renderedSpecies+"\n",StandardOpenOption.APPEND);
     mc.stop();

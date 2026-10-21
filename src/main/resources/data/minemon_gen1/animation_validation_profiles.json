@@ -1130,5 +1130,78 @@
       "stem",
       "stem2"
     ]
+  },
+  "victreebel": {
+    "idle": [
+      "head_stem",
+      "head_leaf",
+      "head_leaf_left"
+    ],
+    "walk": [
+      "body",
+      "head_stem",
+      "head_leaf"
+    ],
+    "run": [
+      "body",
+      "head_stem",
+      "head_leaf"
+    ]
+  },
+  "tentacool": {
+    "idle": [
+      "tentacle_left_3",
+      "tentacle_right_3"
+    ],
+    "walk": [
+      "tentacle_left_3",
+      "tentacle_right_3"
+    ],
+    "run": [
+      "tentacle_left_3",
+      "tentacle_right_3"
+    ]
+  },
+  "tentacruel": {
+    "idle": [
+      "tentacle_left_3",
+      "tentacle_right_3"
+    ],
+    "walk": [
+      "tentacle_left_3",
+      "tentacle_right_3"
+    ],
+    "run": [
+      "tentacle_left_3",
+      "tentacle_right_3"
+    ]
+  },
+  "geodude": {
+    "idle": [
+      "arm_left",
+      "arm_right"
+    ],
+    "walk": [
+      "arm_left",
+      "arm_right"
+    ],
+    "run": [
+      "arm_left",
+      "arm_right"
+    ]
+  },
+  "graveler": {
+    "idle": [
+      "arm_bottom_left",
+      "arm_bottom_right"
+    ],
+    "walk": [
+      "arm_bottom_left",
+      "arm_bottom_right"
+    ],
+    "run": [
+      "arm_bottom_left",
+      "arm_bottom_right"
+    ]
   }
 }
