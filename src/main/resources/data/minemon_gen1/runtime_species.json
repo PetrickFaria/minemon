@@ -5717,7 +5717,6 @@
     "strip_bedrock_locators": true,
     "source_model_variant": "seel.geo.json",
     "source_cobblemon_version": "1.8.2",
-    "movement_fallback": "idle",
     "source_procedural_pose": {
       "poser": "assets/cobblemon/bedrock/pokemon/posers/0086_seel/seel.json",
       "look": [
@@ -5730,7 +5729,9 @@
         "head": "head"
       },
       "adaptation": "Map q.look to a real compatible source head bone in MinemonModel; no locomotion gait is synthesized"
-    }
+    },
+    "source_static_idle": true,
+    "movement_fallback": "idle"
   },
   {
     "nationalPokedexNumber": 87,
@@ -5977,7 +5978,6 @@
     "strip_bedrock_locators": true,
     "source_model_variant": "muk.geo.json",
     "source_cobblemon_version": "1.8.2",
-    "movement_fallback": "idle",
     "source_procedural_pose": {
       "poser": "assets/cobblemon/bedrock/pokemon/posers/0089_muk/muk.json",
       "look": [
@@ -5990,7 +5990,9 @@
         "head": "head"
       },
       "adaptation": "Map q.look to a real compatible source head bone in MinemonModel; no locomotion gait is synthesized"
-    }
+    },
+    "source_static_idle": true,
+    "movement_fallback": "idle"
   },
   {
     "nationalPokedexNumber": 90,

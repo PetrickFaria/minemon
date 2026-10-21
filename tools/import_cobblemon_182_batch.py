@@ -313,6 +313,11 @@ for d in defs[start-1:end]:
  gait=GAIT.get(slug)
  assert gait,'Species needs an explicit source-backed gait profile: '+slug
  prof={'idle':IDLE.get(slug,gait),'walk':gait,'run':RUN.get(slug,gait)}
+ if args.batch==9 and slug in ('seel','muk'):
+  # Source inspection: these native idle clips contain only static vectors.
+  # Keep their pose and make the client smoke assert stability, not motion.
+  prof['idle_static']=prof['idle']
+  d['source_static_idle']=True
  if args.batch==6 and slug in ('meowth','persian','growlithe','poliwag'):
   native_idle=animations[idle]
   assert not any(token in json.dumps(native_idle) for token in ('math.','q.','query.'))
@@ -358,7 +363,11 @@ vp.parent.mkdir(parents=True,exist_ok=True);vp.write_text(json.dumps(profiles,in
 report={'batch':args.batch,'range':[start,end],'source_url':url,'source_sha256':digest,'manual_visual_status':'pending; user will evaluate the authorized batches inside Minecraft','species':evidence}
 out=ROOT/f'docs/animation-audit/minemon-gen1-batch{args.batch}-source-evidence.json'
 if args.batch in (8,9) and args.segment=='second' and out.exists():
- old=json.loads(out.read_text());report['species']=old['species']+evidence;report['range']=[71,80]
+ old=json.loads(out.read_text())
+ merged={item['number']:item for item in old['species']}
+ merged.update({item['number']:item for item in evidence})
+ report['species']=[merged[number] for number in sorted(merged)]
+ report['range']=[71,80] if args.batch==8 else [81,90]
 out.write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n')
 print(json.dumps(report,ensure_ascii=False,indent=2))
 print(f'PASS PRESERVATION: {151-(end-start+1)} out-of-batch manifest entries unchanged; source originals retained')

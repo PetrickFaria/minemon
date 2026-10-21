@@ -20,10 +20,10 @@ Integrar exclusivamente os recursos Cobblemon Fabric 1.8.2 dos Pokémon #081–#
 | 083 | Farfetch'd | Importado #081–#085; verificação estrutural direcionada aprovada |
 | 084 | Doduo | Importado #081–#085; verificação estrutural direcionada aprovada |
 | 085 | Dodrio | Importado #081–#085; verificação estrutural direcionada aprovada |
-| 086 | Seel | Importado #086–#090; verificação estrutural direcionada aprovada; fallback idle sem clip nativo de caminhada |
+| 086 | Seel | Importado #086–#090; idle de pose estática e fallback idle sem clip nativo de caminhada |
 | 087 | Dewgong | Importado #086–#090; verificação estrutural direcionada aprovada |
 | 088 | Grimer | Importado #086–#090; idle, caminhada e corrida nativos preservados |
-| 089 | Muk | Importado #086–#090; verificação estrutural direcionada aprovada; fallback idle sem clip nativo de caminhada |
+| 089 | Muk | Importado #086–#090; idle de pose estática e fallback idle sem clip nativo de caminhada |
 | 090 | Shellder | Importado #086–#090; verificação estrutural direcionada aprovada |
 
 A correspondência está confirmada no planejamento original `docs/animation-audit/minemon-gen1-16-batch-plan.md`: Lote 9 = #081–#090.
@@ -41,14 +41,17 @@ A correspondência está confirmada no planejamento original `docs/animation-aud
 - #081 Magnemite, #082 Magneton e #083 Farfetch'd preservam os clips aéreos nativos. #084 Doduo e #085 Dodrio preservam as duas/três cabeças, pescoços e pernas articuladas. Nenhum tem clip nativo de corrida terrestre.
 - A branch de trabalho foi criada sobre `40458f0`; commit inicial da continuidade `2503dd085402211ec2e9c6287fca83ab4747d2d5`. Primeiro checkpoint remoto #081–#085: `5c6301642a5fc0a411375fb411ac6fff2c8a7a71` (`[skip ci] Complete batch 9 checkpoint #081-#085`).
 - Verificações direcionadas locais aprovadas: `verify_project.py`, `verify_batch9.py --segment first`, `verify_batch8.py`, `verify_pidge_wing_visibility.py` e `verify_molang_compatibility.py`. A última informa compatibilidade de clips ativos e deixa explícitas as referências não selecionadas. Testes Java completos e client smoke permanecem pendentes.
-- #086–#090 importados do mesmo arquivo de referência/hash. Adaptações de namespace `q.` → `query.` e `Math.` → `math.`; hierarquias, texturas, bones referenciados e eventos foram verificados. #086 Seel e #089 Muk não têm `ground_walk` na fonte e estão explicitamente marcados com fallback `idle`; não foi fabricada corrida. #087 Dewgong mantém animações aquáticas nativas, sem introdução de sistema de estados de água. Apenas #088 Grimer fornece `ground_run` nativo no lote.
-- Checkpoints estruturais #086–#090 aprovados: `verify_batch9.py --segment second`, `verify_project.py`, `verify_batch8.py`, `verify_pidge_wing_visibility.py` e `verify_molang_compatibility.py`. A verificação completa dos dez passa localmente. `verify_project.py` confirma 151 registros da Pokédex, 1.025 definições de espécies e todos os recursos referenciados presentes.
-- Commit remoto do checkpoint #086–#090 ainda pendente neste ponto de edição. Não há workflow novo; commits intermediários usam `[skip ci]` para evitar fumaça completa repetida antes da integração final.
-- A validação integral do Lote 8 continua pendente porque a execução #153 falhou em testes Java; as duas causas foram corrigidas no branch, ainda sem nova confirmação de CI. O Lote 9 avança conforme autorização expressa, mas não há JAR aprovado.
+- #086–#090 importados do mesmo arquivo de referência/hash. Adaptações de namespace `q.` → `query.` e `Math.` → `math.`; hierarquias, texturas, bones referenciados e eventos foram verificados. #086 Seel e #089 Muk não têm `ground_walk` na fonte e estão explicitamente marcados com fallback `idle`; seus clips idle originais são poses estáticas, então os perfis do smoke exigem estabilidade da pose em vez de movimento inventado. Não foi fabricada corrida. #087 Dewgong mantém animações aquáticas nativas, sem introdução de sistema de estados de água. Apenas #088 Grimer fornece `ground_run` nativo no lote.
+- Checkpoints estruturais #086–#090 aprovados: `verify_batch9.py --segment second`, `verify_project.py`, `verify_batch8.py`, `verify_pidge_wing_visibility.py` e `verify_molang_compatibility.py`. A verificação completa dos dez passa localmente. `verify_project.py` confirma 151 registros da Pokédex, 1.025 definições de espécies e todos os recursos referenciados presentes. `py_compile` dos verificadores/importador e `git diff --check` também passam.
+- Limitação Molang documentada: o preflight encontra 798 chamadas `query.r` exclusivamente em clips retidos mas não selecionados para a locomoção ativa (animações montadas, ações especiais e o nado montado do Dewgong). Os nomes de queries que GeckoLib 3.1.40 não reconhece continuam registrados/visíveis nos relatórios; não foram silenciosamente reescritos. O uso visual dessas animações fora do escopo ativo permanece não validado.
+- Segundo checkpoint remoto #086–#090: `246d02a98c80271a23d83cf400275399cf73ad55` (`[skip ci] Complete batch 9 checkpoint #086-#090`). Esse commit contém os recursos completos do Lote 9 e os ajustes de registro/perfil de animação.
+- Resultado estrutural cumulativo dos dez: `verify_batch9.py`, `verify_batch8.py`, `verify_project.py`, `verify_pidge_wing_visibility.py` e `verify_molang_compatibility.py` aprovados localmente. O preflight reporta 798 referências a funções `query.r` apenas em clips retidos não selecionados (incluindo animações montadas e nado montado de Dewgong); não suprime nem altera essas expressões. Nenhum clip ativo de repouso/caminhada/corrida as utiliza.
+- Workflow `.github/workflows/build.yml` preparado para executar ambos os verificadores dos Lotes 8 e 9 no código e no JAR, além da regressão das asas. A próxima publicação final sem `[skip ci]` iniciará uma execução completa única. Execução correspondente: ainda não iniciada neste commit intermediário.
+- A validação integral do Lote 8 continua pendente porque a execução #153 falhou nos testes Java; as duas causas diagnosticadas foram corrigidas no branch e aguardam confirmação no próximo Actions. GameTests, smoke integral do cliente, inspeção/JAR e artefato final ainda não estão aprovados ou publicados. Não considerar JAR aprovado.
 
 ## Próximo passo
 
-Publicar o checkpoint #086–#090 com `[skip ci]`. Atualizar o workflow para executar verificações cumulativas dos lotes 8 e 9, depois publicar um commit final de código e iniciar uma única validação completa. O Java compile/test, GameTests, client smoke, inspeção do JAR e artefato ainda são obrigatórios. Não iniciar Lote 10.
+Publicar o commit de integração/workflow sem `[skip ci]` e consultar a execução única iniciada por ele. Se terminar, corrigir somente falhas comprovadas e repetir a validação completa necessária. Antes de declarar aprovação, confirmar Java, GameTests, smoke integral do cliente, verificação cumulativa de 90, Pokédex de 151 e inspeção/publicação do JAR. Não iniciar Lote 10.
 
 ## Preservação e validação final
 

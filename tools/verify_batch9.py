@@ -37,6 +37,9 @@ assert all(defs[i]==old_defs[i] for i in range(80,90) if defs[i]['slug'] not in 
 assert defs[90:]==old_defs[90:],'Species after Batch 9 changed'
 assert all(profiles.get(k)==v for k,v in old_profiles.items()),'Earlier animation profiles changed'
 assert set(profiles)==set(old_profiles)|set(EXPECTED[:end-80]),'Unexpected articulation profile set'
+source_report=json.loads((ROOT/'docs/animation-audit/minemon-gen1-batch9-source-evidence.json').read_text())
+assert source_report['source_sha256']=='cae8ac328b61354fbe415208b8c6ffc12e7155094d0a87082e85e7914fb380c2'
+assert [s['slug'] for s in source_report['species']]==EXPECTED[:end-80]
 
 prior_paths=set()
 for d in old_defs[:80]:prior_paths.update([d['model'],d['texture'],d['animation']]+d['licenses'])
@@ -89,7 +92,26 @@ for d in defs[80:80+len(authorized)]:
   assert set(profiles[slug][state])<=set(clip.get('bones',{})),(slug,state,'profile joints are not in selected clip')
  if d['clips'].get('ground_run'):
   assert set(profiles[slug]['run'])<=set(anim[d['clips']['ground_run']].get('bones',{})),(slug,'run profile joints absent')
+ if d.get('source_static_idle'):
+  assert profiles[slug].get('idle_static')==profiles[slug]['idle'],(slug,'source static idle profile mismatch')
  geo_by_slug[slug]=bones;anim_by_slug[slug]=anim
+
+anatomy={
+ 'magnemite':('nail_left_rotation','nail_right_rotation','magnet_left','magnet_right'),
+ 'magneton':('body2','body3','magnet_left_rotation','magnet_right_rotation'),
+ 'farfetchd':('leak','wing_left','wing_right'),
+ 'doduo':('head','head2','neck_left','neck_right','leg_left','leg_right'),
+ 'dodrio':('head2','head3','neck','neck_left','neck_right','leg_left','leg_right'),
+ 'seel':('flipper_left','flipper_right','tail'),
+ 'dewgong':('flipper_left','flipper_right','tail'),
+ 'grimer':('body','arm_left','arm_right','back_tail','front_tail'),
+ 'muk':('body','arm_left','arm_right','mouth_sludge'),
+ 'shellder':('shell_top','shell_bottom','tongue')}
+for slug,joints in anatomy.items():
+ if slug not in authorized:continue
+ assert set(joints)<=set(geo_by_slug[slug]),(slug,'missing characteristic anatomy')
+ selected=set(anim_by_slug[slug][defs[80+EXPECTED.index(slug)]['walk']].get('bones',{}))
+ assert set(joints)&selected,(slug,'walk/flight clip omits characteristic joints')
 
 if not args.segment:
  assert [defs[i]['slug'] for i in range(80,90)]==EXPECTED
@@ -97,6 +119,7 @@ if not args.segment:
  assert [d['slug'] for d in defs[:90] if d['model'].find('_cobblemon_1_8_2/')>=0]==[d['slug'] for d in defs[:90]],'All first 90 definitions must use imported models'
  assert [d['slug'] for d in defs[80:90] if d['clips'].get('ground_run')]==['grimer'],'Do not invent missing native run clips'
  assert all(defs[i]['movement_fallback']=='idle' for i in (85,88)),'Seel and Muk source walk limitations must be explicit'
+ assert {d['slug'] for d in defs[80:90] if d.get('source_static_idle')}=={'seel','muk'},'Only source-verified static idle clips may use the stable-pose profile'
 
 changed=subprocess.check_output(['git','diff','--name-only',BASE,'--','src/main/resources'],cwd=ROOT,text=True).splitlines()
 allowed_resources=allowed_paths|{MP,VP,'docs/animation-audit/minemon-gen1-batch9-source-evidence.json','src/main/resources/assets/minemon/animations/weedle/weedle.animation.json'}

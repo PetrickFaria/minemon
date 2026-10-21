@@ -24,10 +24,12 @@ jobs:
         run: python3 tools/verify_project.py
       - name: Preflight active animation Molang compatibility
         run: python3 tools/verify_molang_compatibility.py
-      - name: Verify exclusive batch 8, prior batches, and Pidge wing rigs
+      - name: Verify batches 8 and 9, prior assets, and Pidge wing rigs
         run: |
           git fetch --no-tags --depth=1 origin b77eac9c38aa0d6a1d35c3cfab36a707ac6cab24
+          git fetch --no-tags --depth=1 origin 2503dd085402211ec2e9c6287fca83ab4747d2d5
           python3 tools/verify_batch8.py
+          python3 tools/verify_batch9.py
           python3 tools/verify_pidge_wing_visibility.py
       - name: Ensure Gradle Wrapper is executable
         run: chmod +x gradlew
@@ -96,6 +98,7 @@ jobs:
           jar tf "$jar_file" | grep -Fx 'assets/minemon_gen1/models/item/bulbasaur_spawn_egg.json'
           python3 tools/verify_runtime.py "$jar_file"
           python3 tools/verify_batch8.py "$jar_file"
+          python3 tools/verify_batch9.py "$jar_file"
           python3 tools/verify_pidge_wing_visibility.py "$jar_file"
           unzip -p "$jar_file" META-INF/mods.toml | grep -F 'modId="minemon_gen1"'
           unzip -p "$jar_file" META-INF/mods.toml | grep -F 'versionRange="[1.19.2,1.20)"'

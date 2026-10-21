@@ -1,8 +1,8 @@
 {
   "batch": 9,
   "range": [
-    71,
-    80
+    81,
+    90
   ],
   "source_url": "https://cdn.modrinth.com/data/MdwFAVRL/versions/GJ2a1b8O/Cobblemon-fabric-1.8.2%2B1.21.1.jar",
   "source_sha256": "cae8ac328b61354fbe415208b8c6ffc12e7155094d0a87082e85e7914fb380c2",
@@ -225,6 +225,13 @@
           "flipper_right",
           "tail",
           "body"
+        ],
+        "idle_static": [
+          "body",
+          "head",
+          "flipper_left",
+          "flipper_right",
+          "tail"
         ]
       },
       "stripped_bones": {}
@@ -336,6 +343,12 @@
           "mouth_sludge"
         ],
         "run": [
+          "body",
+          "arm_left",
+          "arm_right",
+          "mouth_sludge"
+        ],
+        "idle_static": [
           "body",
           "arm_left",
           "arm_right",

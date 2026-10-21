@@ -1445,6 +1445,13 @@
       "flipper_right",
       "tail",
       "body"
+    ],
+    "idle_static": [
+      "body",
+      "head",
+      "flipper_left",
+      "flipper_right",
+      "tail"
     ]
   },
   "dewgong": {
@@ -1506,6 +1513,12 @@
       "mouth_sludge"
     ],
     "run": [
+      "body",
+      "arm_left",
+      "arm_right",
+      "mouth_sludge"
+    ],
+    "idle_static": [
       "body",
       "arm_left",
       "arm_right",
