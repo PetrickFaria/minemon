@@ -9,6 +9,7 @@ Integrar exclusivamente os recursos Cobblemon Fabric 1.8.2 dos Pokémon #081–#
 - Branch de trabalho: `feature/minemon-gen1-batch9-cobblemon`.
 - Base mais recente do Lote 8: `85ed009ff141c7ecfa849969ae354b065596d8e6`.
 - Commit de integração final do Lote 9 e workflow: `65f025f76e5db2f50142105c65bf46c11d392f34`.
+- Commit corretivo da sintaxe Molang ativa do Weedle: `166da28cfa9acc1b9838bc650ec7581ab3a351db`.
 - Correção pontual de compilação publicada na branch do Lote 8: `40458f0a81b3395ec7fc30400c65171fab606253` — substitui a referência incorreta `COBALT_QUERY` pela constante existente `COBBLEMON_QUERY` em `gametest/ActiveAnimationMolangPreflightTest.java`.
 - O Lote 9 foi criado sobre o commit de correção acima, mantendo todos os commits e recursos prévios.
 
@@ -48,11 +49,13 @@ A correspondência está confirmada no planejamento original `docs/animation-aud
 - Segundo checkpoint remoto #086–#090: `246d02a98c80271a23d83cf400275399cf73ad55` (`[skip ci] Complete batch 9 checkpoint #086-#090`). Esse commit contém os recursos completos do Lote 9 e os ajustes de registro/perfil de animação.
 - Resultado estrutural cumulativo dos dez: `verify_batch9.py`, `verify_batch8.py`, `verify_project.py`, `verify_pidge_wing_visibility.py` e `verify_molang_compatibility.py` aprovados localmente. O preflight reporta 798 referências a funções `query.r` apenas em clips retidos não selecionados (incluindo animações montadas e nado montado de Dewgong); não suprime nem altera essas expressões. Nenhum clip ativo de repouso/caminhada/corrida as utiliza.
 - Workflow `.github/workflows/build.yml` executa verificadores cumulativos dos Lotes 8 e 9 no código e no JAR, além da regressão das asas. A execução [Build Minemon #39696380089](https://github.com/PetrickFaria/minemon/actions/runs/39696380089), SHA `65f025f76e5db2f50142105c65bf46c11d392f34`, terminou com falha somente em `ActiveAnimationMolangPreflightTest`. `compileTestJava`, os demais testes Java, verificações de recursos, preflight antecipado, regressões dos Lotes 3–8, teste de seleção e teste de asas passaram.
-- GameTests, smoke integral do cliente, inspeção do JAR e upload do artefato foram pulados porque o teste Java falhou. Nenhum JAR aprovado foi publicado. Corrigido no recurso ativo de Weedle após inspecionar esse run; próxima ação: publicar a correção e consultar a nova execução única.
+- A causa foi a sintaxe `-(...)` no idle ativo de Weedle. Corrigida no arquivo importado selecionado pelo manifesto com a expressão equivalente `-1*(...)`; arquivo legado inativo restaurado. Verificadores locais cumulativos passaram após a correção.
+- Nova execução [Build Minemon #39696750113](https://github.com/PetrickFaria/minemon/actions/runs/39696750113), SHA `166da28cfa9acc1b9838bc650ec7581ab3a351db`, iniciada por push. Na última consulta: job em andamento no checkout; compile/testes Java, GameTests, smoke integral, inspeção e publicação do JAR ainda pendentes. Não inicie outra execução enquanto esta estiver ativa.
+- GameTests, smoke integral do cliente, inspeção do JAR e upload do artefato foram pulados no run #39696380089. Nenhum JAR aprovado foi publicado.
 
 ## Próximo passo
 
-Publicar a correção Molang no recurso Weedle efetivamente selecionado, então acompanhar a execução iniciada pelo commit novo sem duplicá-la. Se surgir outra falha determinística, usar os diagnósticos existentes e corrigir apenas sua causa. Antes de declarar aprovação, confirmar Java, GameTests, smoke integral do cliente, verificação cumulativa de 90, Pokédex de 151 e inspeção/publicação do JAR. Não iniciar Lote 10.
+Acompanhar a execução #39696750113 já existente a partir do checkout. Se surgir outra falha determinística, usar os diagnósticos existentes e corrigir apenas sua causa. Antes de declarar aprovação, confirmar Java, GameTests, smoke integral do cliente, verificação cumulativa de 90, Pokédex de 151 e inspeção/publicação do JAR. Não iniciar Lote 10.
 
 ## Preservação e validação final
 
