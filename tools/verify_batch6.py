@@ -39,6 +39,7 @@ for d in defs[50:60]:
  assert d['source_cobblemon_version']=='1.8.2'
  assert all('_cobblemon_1_8_2/' in d[k] for k in ('model','texture','animation'))
  allowed.update([d['model'],d['texture'],d['animation']]+d['licenses'])
+allowed_paths={str(Path('src/main/resources')/path) for path in allowed}
 geo_by_slug={};animation_by_slug={}
 for d in defs[50:60]:
  geo=json.loads((ROOT/'src/main/resources'/d['model']).read_text())['minecraft:geometry']
@@ -81,9 +82,9 @@ assert defs[59]['idle'].endswith('ground_idle_placeholder') and defs[59]['walk']
 assert all(d['slug'] not in ('charmander','charizard') for d in defs[50:60])
 
 changed=subprocess.check_output(['git','diff','--name-only',BASE,'--','src/main/resources/assets/minemon'],cwd=ROOT,text=True).splitlines()
-assert set(changed)<=allowed,set(changed)-allowed
+assert set(changed)<=allowed_paths,set(changed)-allowed_paths
 changed_resources=subprocess.check_output(['git','diff','--name-only',BASE,'--','src/main/resources'],cwd=ROOT,text=True).splitlines()
-assert set(changed_resources)<=allowed|{MP,VP},set(changed_resources)-allowed-{MP,VP}
+assert set(changed_resources)<=allowed_paths|{MP,VP},set(changed_resources)-allowed_paths-{MP,VP}
 for d in defs[50:60]:
  for key in ('model','texture','animation'):
   assert '_cobblemon_1_8_2/' in d[key]
