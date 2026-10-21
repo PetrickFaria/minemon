@@ -125,3 +125,12 @@ Integrar exclusivamente os recursos Cobblemon Fabric 1.8.2 dos Pokémon #071–#
 ## Próxima ação
 
 Aguardar o run legado `39658750383` encerrar sem iniciá-lo novamente. Depois, executar uma única validação completa do HEAD atualizado, corrigir somente falhas reais e registrar o JAR e o resultado.
+
+
+## Checkpoint 9 — run legado encerrado e otimização localmente auditada (2026-10-21)
+
+- HEAD remoto confirmado: `a3f73867c3f6758c3bfe24318a572dfe9861e9f1`. A branch remota permanece `feature/minemon-gen1-batch8-cobblemon`; as alterações locais preexistentes no worktree não foram tocadas.
+- Actions legado [39658750383](https://github.com/PetrickFaria/minemon/actions/runs/39658750383), SHA `a9c2cd6d226c404f0bc7d29eb65829f586314fea`, encerrou com falha no smoke do cliente: a segunda tentativa completa atingiu o timeout de 2700 s. Logs mostram o cliente abrindo mundo e conectando o jogador, sem progresso de teste disponível nesse código antigo. Por isso, não se pode atribuir uma espécie/fase específica à falha. Compilação/testes Java e GameTests do servidor passaram; verificação do JAR e publicação foram puladas. Diagnósticos: artefato [minemon-test-diagnostics](https://github.com/PetrickFaria/minemon/actions/runs/39658750383/artifacts/12380461532), expira em 2026-10-28.
+- O workflow antigo já encerrou, portanto não há execução equivalente em andamento. O HEAD otimizado `a3f7386` não foi validado por Actions: todos os commits de implementação foram intencionalmente publicados com `[skip ci]` enquanto o run anterior estava ativo.
+- Validação rápida local contra `a3f7386`: `verify_project.py` passou (151 espécies runtime, 1.025 registros, 5.979 referências válidas); preflight Molang passou (783 referências verificadas, zero nos clips ativos); `verify_batch8.py` e regressão `verify_pidge_wing_visibility.py` passaram; `py_compile` passou. Testes Java locais não iniciaram porque o wrapper não conseguiu baixar Gradle 7.5.1 (`Network is unreachable`). Não houve smoke direcionado local.
+- Próximo passo obrigatório: executar uma única validação completa do HEAD otimizado (`buildEnvironment clean test build`, GameTests, smoke de cliente sem filtro, inspeção do JAR). O workflow atual declara `workflow_dispatch`; o acionamento manual não cria commit adicional. Até o Actions verde, testes Java/cliente e JAR da otimização permanecem pendentes. Não iniciar o Lote 9.
