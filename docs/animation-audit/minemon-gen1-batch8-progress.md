@@ -62,11 +62,24 @@ Integrar exclusivamente os recursos Cobblemon Fabric 1.8.2 dos Pokémon #071–#
 
 - Workflow atualizado para executar `verify_batch8.py` contra o commit-base `b77eac9c38aa0d6a1d35c3cfab36a707ac6cab24` e também contra o JAR final; a regressão `verify_pidge_wing_visibility.py` continua nos dois pontos.
 - Commit de implementação/gates: `8c3ab0ddd70d97bb78a9505a97e7a6afe008310c`.
-- GitHub Actions: [execução 39617375461](https://github.com/PetrickFaria/minemon/actions/runs/39617375461), status inicial `queued`, conclusão pendente. Nenhuma segunda execução foi iniciada.
-- O artefato JAR ainda não pode ser confirmado ou linkado enquanto esta execução não concluir.
-- Próximos gates no Actions: build completo, testes Java, GameTests do servidor, smoke do cliente, inspeção cumulativa do JAR e regressão das asas Pidgeotto/Pidgeot.
-- A execução 39617375461 ficou `queued` na primeira consulta. Próxima sessão: consultar essa execução existente; não iniciar outra enquanto estiver em andamento.
-- JAR, hash e expiração ainda pendentes até a conclusão aprovada do Actions.
+- GitHub Actions: [execução 39617375461](https://github.com/PetrickFaria/minemon/actions/runs/39617375461), concluída em `failure`.
+- Os gates de recursos, compilação/testes Java e GameTests de servidor passaram. O smoke do cliente falhou ao validar a corrida real do Golem (`idle=2 walk=2 run=0`); por isso, inspeção do JAR e publicação foram puladas.
+- Diagnóstico do teste: o perfil `run` media `left_upper_arm`/`right_upper_arm`, que o clip nativo `animation.golem.ground_run` mantém em pose rígida. O clip anima `body` via expressões Molang e `body_roll` por keyframes e rotação, então o perfil de corrida foi ajustado para medir esses ossos efetivamente animados. Nenhum modelo, clip ou outra espécie foi alterado.
+- A verificação das asas de Pidgeotto/Pidgeot passou na etapa anterior do mesmo workflow.
+- Commit-base do reparo: `ce08db1bf93bb6aa437d4d579913df0fb09c4a13`. Branch: `feature/minemon-gen1-batch8-cobblemon`.
+- O JAR final, hash e expiração continuam pendentes até um workflow verde.
+
+## Checkpoint 5 — reparo específico do smoke de Golem
+
+- Corrigido o perfil de corrida do Golem de braços estáticos para `body` e `body_roll`, alvos realmente animados pelo clip nativo fonte. Os perfis de repouso/caminhada permanecem inalterados.
+- Pokémon concluídos: #071–#080; nenhuma espécie nova iniciada. Pendência: repetir a validação final do Lote 8 após este reparo, incluindo smoke do cliente e inspeção do JAR.
+- `python3 tools/verify_batch8.py`: passou; faixa #071–#080, perfis, recursos e preservação byte a byte dos primeiros 70 verificados.
+- `python3 tools/verify_project.py`: passou; 151 espécies em ordem, 1.025 registros, 5.979 referências existentes e JSON/modelos/animações/PNGs/OGGs válidos.
+- `python3 -m py_compile tools/verify_batch8.py` e `git diff --check`: passaram.
+- `./gradlew test`: não iniciou porque o ambiente não conseguiu baixar Gradle 7.5.1 (`Network is unreachable`); os testes Java não foram ignorados e permanecem a cargo do Actions.
+- Actions anterior: [39617375461](https://github.com/PetrickFaria/minemon/actions/runs/39617375461), reprovada exclusivamente no smoke de articulação de corrida do Golem; não iniciar o Lote 9.
+- Último commit publicado antes deste reparo: `ce08db1bf93bb6aa437d4d579913df0fb09c4a13`; este checkpoint ainda precisa ser publicado.
+- Próximo passo: publicar o reparo e consultar o Actions gerado por esse commit. O Lote 9 só pode iniciar após aprovação integral.
 
 
 ## Bloqueios e limitações
@@ -77,4 +90,4 @@ Integrar exclusivamente os recursos Cobblemon Fabric 1.8.2 dos Pokémon #071–#
 
 ## Próxima ação
 
-Importar #076–#080, validar o segundo grupo e publicar o checkpoint 3. Não iniciar o Lote 9.
+Concluir a validação do reparo de corrida do Golem. Não iniciar o Lote 9 antes de todos os gates do Lote 8 passarem.

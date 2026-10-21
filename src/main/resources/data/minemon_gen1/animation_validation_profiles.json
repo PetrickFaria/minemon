@@ -1214,8 +1214,8 @@
       "right_upper_arm"
     ],
     "run": [
-      "left_upper_arm",
-      "right_upper_arm"
+      "body",
+      "body_roll"
     ]
   },
   "ponyta": {
