@@ -77,9 +77,9 @@ Integrar exclusivamente os recursos Cobblemon Fabric 1.8.2 dos Pokémon #071–#
 - `python3 tools/verify_project.py`: passou; 151 espécies em ordem, 1.025 registros, 5.979 referências existentes e JSON/modelos/animações/PNGs/OGGs válidos.
 - `python3 -m py_compile tools/verify_batch8.py` e `git diff --check`: passaram.
 - `./gradlew test`: não iniciou porque o ambiente não conseguiu baixar Gradle 7.5.1 (`Network is unreachable`); os testes Java não foram ignorados e permanecem a cargo do Actions.
-- Actions anterior: [39617375461](https://github.com/PetrickFaria/minemon/actions/runs/39617375461), reprovada exclusivamente no smoke de articulação de corrida do Golem; não iniciar o Lote 9.
-- Último commit publicado antes deste reparo: `ce08db1bf93bb6aa437d4d579913df0fb09c4a13`; este checkpoint ainda precisa ser publicado.
-- Próximo passo: publicar o reparo e consultar o Actions gerado por esse commit. O Lote 9 só pode iniciar após aprovação integral.
+- Actions anterior: [39617375461](https://github.com/PetrickFaria/minemon/actions/runs/39617375461), reprovada no smoke de articulação de corrida do Golem. Nova validação do reparo: [39643119039](https://github.com/PetrickFaria/minemon/actions/runs/39643119039), atualmente `in_progress` no job `build`; nenhuma execução duplicada foi iniciada.
+- Commit de código do reparo publicado: `f946031ca2bf714ba3b8022359c4e5df04b246c9` (derivado do último estado `ce08db1`).
+- Resultado desta sessão: a execução `39643119039` iniciou novamente todos os gates, incluindo teste Java, GameTests, smoke do cliente, verificação cumulativa e inspeção/publicação do JAR. Não declarar o Lote 8 aprovado nem iniciar o Lote 9 enquanto ela não concluir com sucesso. Próxima ação: consultar essa mesma execução.
 
 
 ## Bloqueios e limitações
