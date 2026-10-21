@@ -134,3 +134,11 @@ Aguardar o run legado `39658750383` encerrar sem iniciá-lo novamente. Depois, e
 - O workflow antigo já encerrou, portanto não há execução equivalente em andamento. O HEAD otimizado `a3f7386` não foi validado por Actions: todos os commits de implementação foram intencionalmente publicados com `[skip ci]` enquanto o run anterior estava ativo.
 - Validação rápida local contra `a3f7386`: `verify_project.py` passou (151 espécies runtime, 1.025 registros, 5.979 referências válidas); preflight Molang passou (783 referências verificadas, zero nos clips ativos); `verify_batch8.py` e regressão `verify_pidge_wing_visibility.py` passaram; `py_compile` passou. Testes Java locais não iniciaram porque o wrapper não conseguiu baixar Gradle 7.5.1 (`Network is unreachable`). Não houve smoke direcionado local.
 - Próximo passo obrigatório: executar uma única validação completa do HEAD otimizado (`buildEnvironment clean test build`, GameTests, smoke de cliente sem filtro, inspeção do JAR). O workflow atual declara `workflow_dispatch`; o acionamento manual não cria commit adicional. Até o Actions verde, testes Java/cliente e JAR da otimização permanecem pendentes. Não iniciar o Lote 9.
+
+
+## Checkpoint 10 — workflow manual disparado na branch incorreta (2026-10-21)
+
+- Execução encontrada após acionamento manual: [39684036307](https://github.com/PetrickFaria/minemon/actions/runs/39684036307), evento `workflow_dispatch`, branch `main`, SHA `b7dc3b09416546bfdd6c4a27cbfc47f6d010a4fc`.
+- No momento da consulta, o job estava em andamento em `Build and run tests`; smoke do cliente ainda pendente. Esta execução usa o código da branch `main`, não contém as otimizações publicadas na branch do Lote 8 e não aprova a versão otimizada nem o Lote 8.
+- Branch que precisa de validação: `feature/minemon-gen1-batch8-cobblemon`. HEAD de código otimizado: `a3f73867c3f6758c3bfe24318a572dfe9861e9f1`; HEAD atual inclui somente checkpoints documentais posteriores.
+- Não iniciado outro workflow enquanto a execução manual existente permanece ativa. Próxima ação: aguardar/cancelar a execução incorreta e disparar `Build Minemon` com a branch `feature/minemon-gen1-batch8-cobblemon` selecionada. Não iniciar Lote 9 até o run dessa branch passar integralmente.
