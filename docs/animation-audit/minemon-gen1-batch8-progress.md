@@ -35,6 +35,12 @@ Integrar exclusivamente os recursos Cobblemon Fabric 1.8.2 dos Pokémon #071–#
 - Verificadas as execuções recentes: a execução base 39543680758 está concluída com sucesso; nenhuma execução do Lote 8 está em andamento.
 - Criada esta branch sobre o commit aprovado.
 - Criado este documento de continuidade.
+- Baixado e verificado o pacote de referência Cobblemon Fabric 1.8.2: SHA-256 `cae8ac328b61354fbe415208b8c6ffc12e7155094d0a87082e85e7914fb380c2`.
+- Confirmados no pacote modelo, textura, arquivo de animação e poser quando existente para #071–#080.
+- Confirmados clips de água para Tentacool, Tentacruel, Slowpoke e Slowbro; serão preservados, sem introduzir seletor de natação.
+- Identificados clips terrestres `ground_run` para Geodude, Graveler, Golem e Rapidash. Ponyta fornece `ground_runold`; a seleção como corrida depende de validação do clip contra modelo/testes e registro de que o poser não o seleciona, se aplicável.
+- A fonte não fornece `ground_run` para Victreebel, Tentacool, Tentacruel, Slowpoke e Slowbro. Nesses casos, manter fallback existente em vez de inventar corrida.
+- A inspeção do primeiro grupo confirmou animações que movimentam folhas/caule (Victreebel), os tentáculos e flaps (Tentacool/Tentacruel) e membros (Geodude/Graveler).
 
 ### Pendente
 
@@ -56,7 +62,7 @@ Integrar exclusivamente os recursos Cobblemon Fabric 1.8.2 dos Pokémon #071–#
 
 ## Testes e erros
 
-- Testes da preparação: leitura da branch/commit e comparação do planejamento; sem testes de código nesta etapa porque nenhum recurso do mod foi alterado.
+- Testes da preparação: leitura da branch/commit e comparação do planejamento; download do JAR fonte e validação do SHA-256; inspeção dos caminhos/nomes de clips/posers. Nenhum teste de código nesta etapa.
 - Erros identificados até agora: nenhum na preparação.
 - Não há execução do Lote 8 associada a esta branch ainda.
 
