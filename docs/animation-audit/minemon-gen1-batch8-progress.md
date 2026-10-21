@@ -142,3 +142,11 @@ Aguardar o run legado `39658750383` encerrar sem iniciá-lo novamente. Depois, e
 - No momento da consulta, o job estava em andamento em `Build and run tests`; smoke do cliente ainda pendente. Esta execução usa o código da branch `main`, não contém as otimizações publicadas na branch do Lote 8 e não aprova a versão otimizada nem o Lote 8.
 - Branch que precisa de validação: `feature/minemon-gen1-batch8-cobblemon`. HEAD de código otimizado: `a3f73867c3f6758c3bfe24318a572dfe9861e9f1`; HEAD atual inclui somente checkpoints documentais posteriores.
 - Não iniciado outro workflow enquanto a execução manual existente permanece ativa. Próxima ação: aguardar/cancelar a execução incorreta e disparar `Build Minemon` com a branch `feature/minemon-gen1-batch8-cobblemon` selecionada. Não iniciar Lote 9 até o run dessa branch passar integralmente.
+
+
+## Checkpoint 11 — tentativa 2 do run antigo em andamento (2026-10-21)
+
+- O run [39658750383](https://github.com/PetrickFaria/minemon/actions/runs/39658750383) está na tentativa 2, evento original `push`, ainda no SHA antigo `a9c2cd6d226c404f0bc7d29eb65829f586314fea`. Não é um novo `workflow_dispatch` do HEAD otimizado.
+- Nesta tentativa, verificações de recursos, regressões, compilação/testes Java e GameTests do servidor passaram. A etapa ativa é `Launch Minecraft client and validate GeckoLib cache`; inspeção do JAR e upload continuam pendentes.
+- Não iniciar outra execução enquanto este smoke completo estiver ativo. Esta tentativa ainda não pode aprovar as melhorias recentes porque executa workflow/código anterior a elas.
+- Próxima ação: acompanhar o encerramento deste run legado; depois, iniciar um único `workflow_dispatch` selecionando explicitamente a branch `feature/minemon-gen1-batch8-cobblemon` (HEAD de código otimizado `a3f7386`, atualmente com checkpoints documentais posteriores). Somente o resultado verde desse HEAD libera o Lote 9.
