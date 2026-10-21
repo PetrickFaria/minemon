@@ -245,7 +245,7 @@
 				},
 				"body_segment3": {
 					"rotation": [
-						"-1*(math.sin(query.anim_time*90*4)*1)*15+math.clamp((math.sin(query.anim_time*90*4)*1+90)*10,0,10)",
+						"-(math.sin(query.anim_time*90*4)*1)*15+math.clamp((math.sin(query.anim_time*90*4)*1+90)*10,0,10)",
 						0,
 						0
 					],

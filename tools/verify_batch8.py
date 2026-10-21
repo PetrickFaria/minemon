@@ -47,8 +47,8 @@ old_paths=set()
 for d in old_defs[:70]:old_paths.update([d['model'],d['texture'],d['animation']]+d['licenses'])
 for p in old_paths:
  current=(resources/p).read_bytes();original=base_file('src/main/resources/'+p)
- if p=='assets/minemon/animations/weedle/weedle.animation.json':
-  expected_bytes=original.replace(b'"-(math.sin(query.anim_time*90*4)*1)*15+',b'"-1*(math.sin(query.anim_time*90*4)*1)*15+')
+ if p=='assets/minemon/animations/weedle_cobblemon_1_8_2/weedle.animation.json':
+  expected_bytes=original.replace(b'"-(math.sin(q.anim_time*90*4)*1)*15+',b'"-1*(math.sin(q.anim_time*90*4)*1)*15+')
   assert current==expected_bytes,'Weedle parser fix must remain algebraically equivalent and isolated'
  else:assert current==original,'Prior approved asset changed: '+p
 
@@ -61,7 +61,7 @@ allowed_paths={str(Path('src/main/resources')/p) for p in allowed}
 for d in defs[80:90]:
  if d.get('source_cobblemon_version')=='1.8.2':allowed.update([d['model'],d['texture'],d['animation']]+d['licenses'])
 allowed_paths={str(Path('src/main/resources')/p) for p in allowed}
-allowed_paths.add('src/main/resources/assets/minemon/animations/weedle/weedle.animation.json')
+allowed_paths.add('src/main/resources/assets/minemon/animations/weedle_cobblemon_1_8_2/weedle.animation.json')
 geo_by_slug={}; anim_by_slug={}
 for d in defs[70:70+len(authorized_species)]:
  slug=d['slug']

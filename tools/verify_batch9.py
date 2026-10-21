@@ -46,8 +46,8 @@ for d in old_defs[:80]:prior_paths.update([d['model'],d['texture'],d['animation'
 for p in prior_paths:
  current=(R/p).read_bytes()
  original=base_file('src/main/resources/'+p)
- if p=='assets/minemon/animations/weedle/weedle.animation.json':
-  expected=original.replace(b'"-(math.sin(query.anim_time*90*4)*1)*15+',b'"-1*(math.sin(query.anim_time*90*4)*1)*15+')
+ if p=='assets/minemon/animations/weedle_cobblemon_1_8_2/weedle.animation.json':
+  expected=original.replace(b'"-(math.sin(q.anim_time*90*4)*1)*15+',b'"-1*(math.sin(q.anim_time*90*4)*1)*15+')
   assert current==expected,'Weedle parser-compatibility adjustment must remain algebraically equivalent and isolated'
  else:assert current==original,'Prior approved asset changed: '+p
 
@@ -122,7 +122,7 @@ if not args.segment:
  assert {d['slug'] for d in defs[80:90] if d.get('source_static_idle')}=={'seel','muk'},'Only source-verified static idle clips may use the stable-pose profile'
 
 changed=subprocess.check_output(['git','diff','--name-only',BASE,'--','src/main/resources'],cwd=ROOT,text=True).splitlines()
-allowed_resources=allowed_paths|{MP,VP,'docs/animation-audit/minemon-gen1-batch9-source-evidence.json','src/main/resources/assets/minemon/animations/weedle/weedle.animation.json'}
+allowed_resources=allowed_paths|{MP,VP,'docs/animation-audit/minemon-gen1-batch9-source-evidence.json','src/main/resources/assets/minemon/animations/weedle_cobblemon_1_8_2/weedle.animation.json'}
 assert set(changed)<=allowed_resources,set(changed)-allowed_resources
 print(f'PASS BATCH 9 {start}-{end}: source 1.8.2, rig/texture/clips/events, selected profile joints, and previous 80 resource preservation')
 if args.jar:
