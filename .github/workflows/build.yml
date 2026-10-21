@@ -22,6 +22,8 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - name: Verify extracted project resources
         run: python3 tools/verify_project.py
+      - name: Preflight active animation Molang compatibility
+        run: python3 tools/verify_molang_compatibility.py
       - name: Verify exclusive batch 8, prior batches, and Pidge wing rigs
         run: |
           git fetch --no-tags --depth=1 origin b77eac9c38aa0d6a1d35c3cfab36a707ac6cab24
