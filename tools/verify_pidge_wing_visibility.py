@@ -26,6 +26,10 @@ def read(path, jar=None):
  return (ROOT_RES/path.replace('assets/minemon/','assets/minemon/')).read_bytes()
 
 def verify(jar=None):
+ model_source=(ROOT/'src/main/java/br/com/petrickfaria/minemon/client/MinemonModel.java').read_text()
+ smoke_source=(ROOT/'src/main/java/br/com/petrickfaria/minemon/gametest/ClientSmokeTest.java').read_text()
+ assert 'applyPidgeWingVisibility(entity)' in model_source and 'closed.setHidden(openPairSelected, openPairSelected)' in model_source and 'open.setHidden(!openPairSelected, !openPairSelected)' in model_source,'runtime renderer must hide the non-selected wing rig and descendants'
+ assert 'closed.isHidden()' in smoke_source and 'closed.childBonesAreHiddenToo()' in smoke_source and 'open.isHidden()' in smoke_source,'client smoke must validate actual hidden bone state'
  if jar:
   definitions=json.loads(jar.read(SPECIES))
  else:
@@ -80,7 +84,7 @@ def verify(jar=None):
   for clip_name,clip_bones in ((definition['idle'],idle),(definition['walk'],walk)):
    assert clip_bones['wings_open']['scale']==[1,1,1],f'{slug}: active flight clip {clip_name} hides open wings'
    assert clip_bones['wings_closed']['scale']==[0,0,0],f'{slug}: active flight clip {clip_name} exposes closed wings'
- print('PASS PIDGE WINGS: source-backed open/closed rigs remain intact; poser-selected clips hide the alternate pair; native wing motion and dynamic transitions are preserved')
+ print('PASS PIDGE WINGS: source-backed open/closed rigs remain intact; GeckoLib renderer hides the non-selected rig; native wing motion and dynamic transitions are preserved')
 
 if __name__=='__main__':
  if len(sys.argv)>1:

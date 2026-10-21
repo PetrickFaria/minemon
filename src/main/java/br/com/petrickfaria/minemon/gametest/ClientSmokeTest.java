@@ -1,3 +1,6 @@
+Warning: truncated output (original token count: 10355)
+Total output lines: 526
+
 package br.com.petrickfaria.minemon.gametest;
 import br.com.petrickfaria.minemon.Minemon;
 import br.com.petrickfaria.minemon.client.MinemonRenderer;
@@ -208,111 +211,7 @@ public final class ClientSmokeTest {
        int mode=phase>=38&&phase<=46?2:(phase>=16&&phase<=23?0:-1);
        if(mode>=0){
         var range=fireStarterArmRanges.computeIfAbsent(slug,k->new float[4]);
-        range[mode]=Math.max(range[mode],Math.abs(left.getRotationZ()));
-        range[mode+1]=Math.max(range[mode+1],Math.abs(right.getRotationZ()));
-       }
-      }
-      for(String name:modelBones.get(slug)) {
-       if(name.contains("eye")||name.contains("mouth")||name.contains("jaw"))continue;
-       var bone=model.getAnimationProcessor().getBone(name);if(bone==null)continue;
-       float[] values={bone.getRotationX(),bone.getRotationY(),bone.getRotationZ(),bone.getPositionX(),bone.getPositionY(),bone.getPositionZ()};
-       var range=motionRanges.computeIfAbsent(slug+":"+name,k->{var r=new float[12];java.util.Arrays.fill(r,0,6,Float.MAX_VALUE);java.util.Arrays.fill(r,6,12,-Float.MAX_VALUE);return r;});
-       for(int axis=0;axis<6;axis++){range[axis]=Math.min(range[axis],values[axis]);range[axis+6]=Math.max(range[axis+6],values[axis]);}
-      }
-     }
-      if(validationPhase!=null && ARTICULATION_VALIDATION_SPECIES.contains(slug) && ARTICULATION_PROFILES.containsKey(slug)) {
-       int phase=validationPhase;
-       String state=locomotionState(phase);
-       // Clip selection is sampled only after a phase has settled. The first render
-       // frame at a boundary can still expose the previous controller value.
-       if(isSettledClipSample(phase)) {
-        articulationClips.computeIfAbsent(slug,k->new java.util.HashMap<>())
-         .computeIfAbsent(state,k->new java.util.HashSet<>()).add(entity.getSelectedAnimationForValidation());
-        articulationSampleCounts.computeIfAbsent(slug,k->new java.util.HashMap<>()).merge(state,1,Integer::sum);
-        double velocitySqr=entity.getDeltaMovement().horizontalDistanceSqr();
-        double displacementSqr=(entity.getX()-entity.xo)*(entity.getX()-entity.xo)+(entity.getZ()-entity.zo)*(entity.getZ()-entity.zo);
-        articulationInputs.computeIfAbsent(slug,k->new java.util.HashMap<>())
-         .computeIfAbsent(state,k->new java.util.HashSet<>()).add("phase="+phase+",clip="+entity.getSelectedAnimationForValidation()+",velocitySqr="+velocitySqr+",positionDeltaSqr="+displacementSqr);
-       }
-       if(slug.equals("zubat")&&isSettledClipSample(phase)) {
-        var folded=model.getAnimationProcessor().getBone("wings_folded");
-        var open=model.getAnimationProcessor().getBone("wings_open");
-        if(folded==null||open==null||Math.abs(folded.getScaleX())>0.001F||Math.abs(open.getScaleX()-1.0F)>0.001F)
-         throw new IllegalStateException("Zubat poser visibility failed: folded wings must be hidden and open wings visible");
-       }
-       if((slug.equals("pidgeotto")||slug.equals("pidgeot"))&&isSettledClipSample(phase)) {
-        var closed=model.getAnimationProcessor().getBone("wings_closed");
-        var open=model.getAnimationProcessor().getBone("wings_open");
-        if(closed==null||open==null||Math.abs(closed.getScaleX())>0.001F||Math.abs(open.getScaleX()-1.0F)>0.001F)
-         throw new IllegalStateException("Pidge wing poser visibility failed for "+slug+"/"+entity.getSelectedAnimationForValidation()+": closed pair must be hidden and open pair visible; scales="+(closed==null?"missing":closed.getScaleX())+"/"+(open==null?"missing":open.getScaleX()));
-        wingVisibilitySpecies.add(slug);
-       }
-       var perSpecies=articulationRanges.computeIfAbsent(slug,k->new java.util.HashMap<>());
-       for(String joint:profileJoints(slug,state)) {
-        var bone=model.getAnimationProcessor().getBone(joint);
-        if(bone==null)throw new IllegalStateException("Locomotion profile references missing bone "+slug+":"+joint);
-        float[] values={bone.getRotationX(),bone.getRotationY(),bone.getRotationZ(),bone.getPositionX(),bone.getPositionY(),bone.getPositionZ()};
-        var range=perSpecies.computeIfAbsent(state+":"+joint,k->{var v=new float[12];java.util.Arrays.fill(v,0,6,Float.MAX_VALUE);java.util.Arrays.fill(v,6,12,-Float.MAX_VALUE);return v;});
-        for(int axis=0;axis<6;axis++){range[axis]=Math.min(range[axis],values[axis]);range[axis+6]=Math.max(range[axis+6],values[axis]);}
-       }
-       if(slug.equals("charmander")) {
-        var flame=model.getAnimationProcessor().getBone("tail_flame");
-        if(flame==null)throw new IllegalStateException("Charmander runtime model is missing tail_flame bone");
-        String mode=(phase<8||phase>=54)?"idle":(phase>=8&&phase<27)?"walk":null;
-        if(mode!=null) {
-         float[] range=charmFlameRanges.computeIfAbsent(mode,k->{var v=new float[6];java.util.Arrays.fill(v,0,3,Float.MAX_VALUE);java.util.Arrays.fill(v,3,6,-Float.MAX_VALUE);return v;});
-         float[] rotations={flame.getRotationX(),flame.getRotationY(),flame.getRotationZ()};
-         for(int axis=0;axis<3;axis++){range[axis]=Math.min(range[axis],rotations[axis]);range[axis+3]=Math.max(range[axis+3],rotations[axis]);}
-        }
-        String flameClip=entity.getSelectedTailFlameAnimationForValidation();if(flameClip!=null)charmFlameClips.add(flameClip);
-       }
-      }
-     if(testEntity==null||!entity.getUUID().equals(testEntity)||worldTicks<110||worldTicks>=BULBASAUR_VALIDATION_TICK)return;
-     var leg=model.getAnimationProcessor().getBone("leg_front_right");var body=model.getAnimationProcessor().getBone("body");
-     minLeg=Math.min(minLeg,leg.getRotationX());maxLeg=Math.max(maxLeg,leg.getRotationX());minBody=Math.min(minBody,body.getPositionY());maxBody=Math.max(maxBody,body.getPositionY());frames++;
-    };
-   }
-   if(mc.level==null||mc.player==null||mc.getSingleplayerServer()==null)return;
-   if(!setup) {
-    setup=true;mc.getSingleplayerServer().execute(()->{
-     var level=mc.getSingleplayerServer().overworld();level.setDayTime(1000);level.getGameRules().getRule(GameRules.RULE_DOMOBSPAWNING).set(false,mc.getSingleplayerServer());
-     for(int x=-8;x<=8;x++)for(int z=-5;z<=12;z++)level.setBlockAndUpdate(new BlockPos(x,100,z),Blocks.STONE.defaultBlockState());
-     // The generated validation world can contain terrain or structures above y=100.
-     // Clear a roomy air volume so the render fixture cannot suffocate before sampling.
-     for(int x=-8;x<=8;x++)for(int z=-5;z<=12;z++)for(int y=101;y<=110;y++)
-      level.setBlockAndUpdate(new BlockPos(x,y,z),Blocks.AIR.defaultBlockState());
-     var player=mc.getSingleplayerServer().getPlayerList().getPlayers().get(0);player.setGameMode(GameType.CREATIVE);player.teleportTo(level,0,101,0,0,12);
-     var b=ModEntities.BULBASAUR.get().create(level);b.moveTo(0,101,4,180,0);b.tame(player);b.setOrderedToSit(false);b.setNoAi(true);level.addFreshEntity(b);testEntity=b.getUUID();initialEntityId=b.getId();
-    });
-   }
-   if(mc.screen!=null || (worldTicks==0 && (initialEntityId==0 || mc.level.getEntity(initialEntityId)==null || mc.player.getY()<100)))return;
-   // Do not skip a short input phase when the client batches ticks between
-   // render frames. Keep every original phase and assertion, and require two
-   // rendered observations before advancing the ten-species fixture.
-   if(worldTicks>=SPECIES_START_TICK && worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW) {
-    String active=species.get((worldTicks-SPECIES_START_TICK)/SPECIES_TEST_WINDOW);
-    int appliedPhase=(worldTicks-SPECIES_START_TICK)%SPECIES_TEST_WINDOW;
-    if(ARTICULATION_VALIDATION_SPECIES.contains(active)
-       && (!active.equals(renderedPhaseSpecies)||renderedPhase!=appliedPhase||renderedPhaseFrames<2))return;
-   }
-   worldTicks++;
-   if(worldTicks==70||worldTicks==170)Screenshot.grab(mc.gameDirectory,mc.getMainRenderTarget(),message->{});
-   if(worldTicks>=100&&worldTicks<BULBASAUR_VALIDATION_TICK)mc.getSingleplayerServer().execute(()->{
-    var b=(MinemonCreature)mc.getSingleplayerServer().overworld().getEntity(testEntity);if(b!=null){b.setNoAi(true);b.getNavigation().stop();if(b.getX()>2.5)direction=-1;if(b.getX()< -2.5)direction=1;b.moveTo(b.getX()+direction*0.08,b.getY(),b.getZ(),b.getYRot(),b.getXRot());}
-   });
-   if(worldTicks==BULBASAUR_VALIDATION_TICK){
-    if(frames<10||maxLeg-minLeg<0.1F||maxBody-minBody<0.01F)throw new IllegalStateException("Rendered body animation did not advance: frames="+frames+" leg="+(maxLeg-minLeg)+" body="+(maxBody-minBody));
-    Files.writeString(Path.of("client-validation.txt"),"PASS WORLD: Bulbasaur rendered in a Minecraft world; frames="+frames+" leg rotation range="+(maxLeg-minLeg)+" body position range="+(maxBody-minBody)+"\n",StandardOpenOption.APPEND);
-    mc.getSingleplayerServer().execute(()->{
-     var level=mc.getSingleplayerServer().overworld();var old=level.getEntity(testEntity);if(old!=null)old.discard();
-     var player=mc.getSingleplayerServer().getPlayerList().getPlayers().get(0);player.teleportTo(level,0,101,0,0,12);player.setGameMode(GameType.SURVIVAL);player.setHealth(20);player.getFoodData().setFoodLevel(0);
-     var wild=ModEntities.BULBASAUR.get().create(level);wild.moveTo(0,101,1.5,180,0);level.addFreshEntity(wild);testEntity=wild.getUUID();wild.hurt(net.minecraft.world.damagesource.DamageSource.playerAttack(player),1);
-    });
-   }
-   if(worldTicks==COMBAT_VALIDATION_TICK)mc.getSingleplayerServer().execute(()->{
-    var player=mc.getSingleplayerServer().getPlayerList().getPlayers().get(0);var wild=(MinemonCreature)mc.getSingleplayerServer().overworld().getEntity(testEntity);
-    combatPassed=combatHits>0&&player.getHealth()<20&&player.isAlive();
-    if(!combatPassed)throw new IllegalStateException("Connected Survival player did not receive retaliation damage; health="+player.getHealth()+" target="+wild.getTarget());
+        range[mode]=Math.max(r…2355 tokens truncated…ected Survival player did not receive retaliation damage; health="+player.getHealth()+" target="+wild.getTarget());
     try{Files.writeString(Path.of("client-validation.txt"),"PASS COMBAT: connected Survival player received melee retaliation; damage events="+combatHits+" health="+player.getHealth()+"\n",StandardOpenOption.APPEND);}catch(java.io.IOException e){throw new RuntimeException(e);}
     player.setGameMode(GameType.CREATIVE);player.setHealth(20);player.teleportTo(mc.getSingleplayerServer().overworld(),0,101,0,0,12);player.fallDistance=0;
    });

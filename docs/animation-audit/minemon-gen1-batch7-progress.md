@@ -14,12 +14,12 @@
 
 Referência inspecionada: Cobblemon Fabric 1.8.2, arquivo `Cobblemon-fabric-1.8.2+1.21.1.jar`, SHA-256 `cae8ac328b61354fbe415208b8c6ffc12e7155094d0a87082e85e7914fb380c2`. Posers originais em `assets/cobblemon/bedrock/pokemon/posers/0017_pidgeotto/pidgeotto.json` e `.../0018_pidgeot/pidgeot.json`.
 
-**Correção aplicada:** clipes de voo/hover e solo/repouso mapeados pelo poser agora definem escala nos grupos pai para mostrar um único par por pose. Os cubos, ossos, textura e animações de movimento das asas permanecem intactos. A transição nativa de `ground_quirk` do Pidgeotto e a troca dinâmica de asas do `ride_dive` do Pidgeot foram preservadas. O verificador permite apenas mudanças nessas trilhas de escala nas animações anteriores; os demais recursos dos Lotes 1–6 são comparados byte a byte.
+**Correção aplicada:** clipes de voo/hover e solo/repouso mapeados pelo poser definem escala nos grupos pai. O smoke do cliente revelou que GeckoLib 3.1.40 eleva escala zero a `0,01`, ainda renderizando o rig alternativo. `MinemonModel` seleciona o grupo com a escala maior e marca o outro `GeoBone` e seus descendentes como ocultos, mantendo as duas alternativas, seus cubos e as animações nativas intactas. A transição nativa de `ground_quirk` do Pidgeotto e a troca dinâmica de asas do `ride_dive` do Pidgeot foram preservadas. O verificador permite apenas mudanças nessas trilhas de escala nas animações anteriores; os demais recursos dos Lotes 1–6 são comparados byte a byte.
 
 Verificação automatizada incluída:
 
 - `tools/verify_pidge_wing_visibility.py`: integridade da hierarquia e cubos das duas alternativas, escala em clipes selecionados, transições dinâmicas, uso dos clipes ativos e inspeção opcional do JAR.
-- Smoke de cliente exige que os grupos `wings_closed` e `wings_open` apresentem escalas 0/1 em amostras estabilizadas de Pidgeotto e Pidgeot. Isso valida transforms carregados/renderizados pelo GeckoLib, mas não substitui confirmação visual manual dentro do jogo.
+- Smoke de cliente exige que, em amostras estabilizadas de Pidgeotto e Pidgeot, o grupo do rig alternativo e seus descendentes estejam ocultos (`isHidden()`/`childBonesAreHiddenToo()`) e o selecionado permaneça renderizável. Isso valida a ocultação real do GeckoLib, mas não substitui confirmação visual manual dentro do jogo.
 
 ## Etapa B — Lote 7
 
@@ -31,14 +31,14 @@ As posers de Abra, Kadabra, Alakazam e Bellsprout chamam `q.look` para o osso ca
 
 O adaptador mantém os clipes e eventos sonoros originais e normaliza `q.*` para `query.*` e `Math.*` para `math.*`. A primeira execução de CI encontrou uma incompatibilidade real do parser GeckoLib 3.1.40 com expressões source no formato `-(...)`; elas agora são expressas como `-1*(...)`, matematicamente equivalente e sem alteração dos keyframes. `tools/verify_batch7.py` exige exatamente #061–#070, byte-preservação dos recursos aprovados #001–#060, 81 definições posteriores inalteradas, hierarquias/ossos/texturas/clipes válidos e 151 registros no JAR. O teste Java novo desserializa todos os clipes e verifica suas expressões no parser GeckoLib 3.
 
-Etapa B está implementada; as verificações locais de recursos e preservação passaram. A execução `39533874912` encontrou e reportou a incompatibilidade Molang acima na nova prova Java; a correção de adaptação está preparada e será revalidada por uma nova execução do commit corretivo. O smoke de cliente e os gates posteriores ainda precisam passar no Actions.
+Etapa B está implementada; as verificações locais de recursos e preservação passaram. A execução `39533874912` encontrou a incompatibilidade Molang na prova Java; a adaptação equivalente `-1*(...)` foi publicada em `2e81d36723c649267a48a499a3f8f7b390d184ec` e passou compilação, testes Java e GameTests do servidor em `39534268151`. O smoke de cliente desse commit detectou que a escala mínima `0,01` do GeckoLib ainda deixava o rig alternativo renderizável; a ocultação direta do grupo e seus descendentes foi adicionada para nova validação.
 
 ## Etapa C — validação final
 
-Ainda pendente: compilação, testes Java, GameTests do servidor, smoke do cliente, validação dos recursos/JAR, confirmação dos 151 registros e publicação do JAR final aprovado. Não iniciar o Lote 8.
+Ainda pendente: revalidar a ocultação real das asas, repetir smoke do cliente, validar o JAR contendo os 70 Pokémon e publicar o artefato final aprovado. Não iniciar o Lote 8.
 
 ## Estado desta etapa
 
 - Testes de recursos locais: passaram para a correção das asas e preservação do Lote 6.
 - Execução Gradle local: não disponível porque o wrapper precisa baixar Gradle 7.5.1 e esta sessão não tem conexão de saída para `services.gradle.org`; a validação de build seguirá no GitHub Actions após publicação.
-- Próxima etapa: publicar commit específico da Etapa B e acompanhar seu Actions; depois revisar logs, relatório de articulação e conteúdo do JAR antes da entrega.
+- Próxima etapa: publicar correção de runtime da Etapa A e acompanhar o Actions; revisar relatório de articulação e conteúdo do JAR antes da entrega.
