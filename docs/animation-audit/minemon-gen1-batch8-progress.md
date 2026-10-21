@@ -8,7 +8,7 @@ Integrar exclusivamente os recursos Cobblemon Fabric 1.8.2 dos Pokémon #071–#
 
 - Branch: `feature/minemon-gen1-batch8-cobblemon`.
 - Base aprovada: `feature/minemon-gen1-batch7-cobblemon` @ `b77eac9c38aa0d6a1d35c3cfab36a707ac6cab24`.
-- Último commit publicado nesta branch: `ea02a48ad29de18a7cd3807171472e1b1d43e052` — auditoria dos recursos fonte.
+- Último commit publicado nesta branch: `e9990321f38df7ef21c412c61af246e647c4f732` — checkpoint #071–#075.
 - Planejamento em `docs/animation-audit/minemon-gen1-16-batch-plan.md`: lote 8 = #071–#080.
 - Nenhum workflow do Lote 8 foi iniciado. A execução-base aprovada do Lote 7 é [39543680758](https://github.com/PetrickFaria/minemon/actions/runs/39543680758).
 
@@ -16,7 +16,7 @@ Integrar exclusivamente os recursos Cobblemon Fabric 1.8.2 dos Pokémon #071–#
 
 | # | Espécie | Estado |
 |---|---|---|
-| 071 | Victreebel | Implementado localmente; validação parcial aprovada |
+| 071 | Victreebel | Implementado e publicado; validação parcial aprovada |
 | 072 | Tentacool | Implementado localmente; validação parcial aprovada |
 | 073 | Tentacruel | Implementado localmente; validação parcial aprovada |
 | 074 | Geodude | Implementado localmente; validação parcial aprovada |
@@ -44,7 +44,7 @@ Integrar exclusivamente os recursos Cobblemon Fabric 1.8.2 dos Pokémon #071–#
 - `python3 tools/verify_batch8.py --segment first`: passou, verificando a faixa #071–#075, hierarquia dos ossos, dimensões de textura, referências/expressões/eventos das animações e preservação byte a byte dos recursos dos primeiros 70.
 - `python3 tools/verify_project.py`: passou; 151 espécies runtime em ordem, 1.025 registros de espécies no catálogo, 5.979 referências existentes, JSON/modelos/animações/PNGs/OGGs válidos.
 - `python3 -m py_compile tools/import_cobblemon_182_batch.py tools/verify_batch8.py`: passou.
-- Alterações deste checkpoint ainda não publicadas. Não foi iniciado GitHub Actions.
+- Checkpoint publicado em `e9990321f38df7ef21c412c61af246e647c4f732` com `[skip ci]`. Nenhum workflow foi iniciado.
 
 ## Etapas pendentes
 
@@ -62,4 +62,4 @@ Integrar exclusivamente os recursos Cobblemon Fabric 1.8.2 dos Pokémon #071–#
 
 ## Próxima ação
 
-Revisar o diff do checkpoint local, executar novamente os verificadores parciais e publicar #071–#075. Depois importar #076–#080; não iniciar o Lote 9.
+Importar #076–#080, validar o segundo grupo e publicar o checkpoint 3. Não iniciar o Lote 9.
