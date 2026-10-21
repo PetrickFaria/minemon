@@ -8,6 +8,7 @@ Integrar exclusivamente os recursos Cobblemon Fabric 1.8.2 dos Pokémon #081–#
 
 - Branch de trabalho: `feature/minemon-gen1-batch9-cobblemon`.
 - Base mais recente do Lote 8: `85ed009ff141c7ecfa849969ae354b065596d8e6`.
+- Commit de integração final do Lote 9 e workflow: `65f025f76e5db2f50142105c65bf46c11d392f34`.
 - Correção pontual de compilação publicada na branch do Lote 8: `40458f0a81b3395ec7fc30400c65171fab606253` — substitui a referência incorreta `COBALT_QUERY` pela constante existente `COBBLEMON_QUERY` em `gametest/ActiveAnimationMolangPreflightTest.java`.
 - O Lote 9 foi criado sobre o commit de correção acima, mantendo todos os commits e recursos prévios.
 
@@ -46,12 +47,13 @@ A correspondência está confirmada no planejamento original `docs/animation-aud
 - Limitação Molang documentada: o preflight encontra 798 chamadas `query.r` exclusivamente em clips retidos mas não selecionados para a locomoção ativa (animações montadas, ações especiais e o nado montado do Dewgong). Os nomes de queries que GeckoLib 3.1.40 não reconhece continuam registrados/visíveis nos relatórios; não foram silenciosamente reescritos. O uso visual dessas animações fora do escopo ativo permanece não validado.
 - Segundo checkpoint remoto #086–#090: `246d02a98c80271a23d83cf400275399cf73ad55` (`[skip ci] Complete batch 9 checkpoint #086-#090`). Esse commit contém os recursos completos do Lote 9 e os ajustes de registro/perfil de animação.
 - Resultado estrutural cumulativo dos dez: `verify_batch9.py`, `verify_batch8.py`, `verify_project.py`, `verify_pidge_wing_visibility.py` e `verify_molang_compatibility.py` aprovados localmente. O preflight reporta 798 referências a funções `query.r` apenas em clips retidos não selecionados (incluindo animações montadas e nado montado de Dewgong); não suprime nem altera essas expressões. Nenhum clip ativo de repouso/caminhada/corrida as utiliza.
-- Workflow `.github/workflows/build.yml` preparado para executar ambos os verificadores dos Lotes 8 e 9 no código e no JAR, além da regressão das asas. A próxima publicação final sem `[skip ci]` iniciará uma execução completa única. Execução correspondente: ainda não iniciada neste commit intermediário.
-- A validação integral do Lote 8 continua pendente porque a execução #153 falhou nos testes Java; as duas causas diagnosticadas foram corrigidas no branch e aguardam confirmação no próximo Actions. GameTests, smoke integral do cliente, inspeção/JAR e artefato final ainda não estão aprovados ou publicados. Não considerar JAR aprovado.
+- Workflow `.github/workflows/build.yml` executa verificadores cumulativos dos Lotes 8 e 9 no código e no JAR, além da regressão das asas. Execução final única iniciada: [Build Minemon #39696380089](https://github.com/PetrickFaria/minemon/actions/runs/39696380089), SHA `65f025f76e5db2f50142105c65bf46c11d392f34`.
+- Checkpoint ao iniciar #39696380089: `Set up job`, checkout, setup Java 17 e Python 3.12 concluídos; `gradle/actions/setup-gradle@v4` em andamento. Verificação de recursos, preflight Molang, regressões, compilação/testes Java, GameTests, smoke integral, inspeção do JAR e artefato ainda estavam pendentes na última consulta.
+- A validação integral do Lote 8 continua pendente porque #153 falhou nos testes Java; as duas causas diagnosticadas foram corrigidas e estão sendo reavaliadas na execução acima. Não há JAR aprovado nem artefato final publicado neste checkpoint.
 
 ## Próximo passo
 
-Publicar o commit de integração/workflow sem `[skip ci]` e consultar a execução única iniciada por ele. Se terminar, corrigir somente falhas comprovadas e repetir a validação completa necessária. Antes de declarar aprovação, confirmar Java, GameTests, smoke integral do cliente, verificação cumulativa de 90, Pokédex de 151 e inspeção/publicação do JAR. Não iniciar Lote 10.
+Consultar a execução #39696380089 já existente e retomar do primeiro job/fase pendente. Se terminar, corrigir somente falhas comprovadas e repetir a validação completa necessária. Antes de declarar aprovação, confirmar Java, GameTests, smoke integral do cliente, verificação cumulativa de 90, Pokédex de 151 e inspeção/publicação do JAR. Não iniciar Lote 10.
 
 ## Preservação e validação final
 
