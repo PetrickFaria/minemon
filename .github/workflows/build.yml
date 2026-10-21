@@ -31,11 +31,9 @@ jobs:
           python3 tools/verify_pidge_wing_visibility.py
       - name: Ensure Gradle Wrapper is executable
         run: chmod +x gradlew
-      - name: Report resolved ForgeGradle version
-        run: ./gradlew --no-daemon buildEnvironment
-      - name: Build and run tests
+      - name: Report ForgeGradle and build/run tests
         id: compile
-        run: ./gradlew --no-daemon clean test build
+        run: ./gradlew --no-daemon buildEnvironment clean test build
       - name: Run Minecraft server behavior tests
         run: |
           mkdir -p run
