@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Import one authorized ten-species batch from the exact audited Cobblemon archive."""
-import argparse,copy,hashlib,io,json,math,urllib.request,zipfile
+import argparse,copy,hashlib,io,json,math,re,urllib.request,zipfile
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 R=ROOT/'src/main/resources'
-ap=argparse.ArgumentParser();ap.add_argument('--batch',type=int,choices=(2,3,4,5,6),required=True);args=ap.parse_args()
+ap=argparse.ArgumentParser();ap.add_argument('--batch',type=int,choices=(2,3,4,5,6,7),required=True);args=ap.parse_args()
 start,end=(args.batch-1)*10+1,args.batch*10
 mp=R/'data/minemon_gen1/runtime_species.json'
 defs=json.loads(mp.read_text());before=copy.deepcopy(defs)
@@ -57,13 +57,35 @@ GAIT={
  'primeape':['leg_left','leg_right','arm_left','arm_right'],
  'growlithe':['leg_front_left','leg_front_right','leg_back_left','leg_back_right'],
  'arcanine':['leg_front_left','leg_front_right','leg_back_left','leg_back_right'],
- 'poliwag':['left_leg','right_leg','left_foot','right_foot']
+ 'poliwag':['left_leg','right_leg','left_foot','right_foot'],
+ 'poliwhirl':['leg_left','leg_right','foot_left1','foot_right1'],
+ 'poliwrath':['leg_left','leg_right','arm_left1','arm_right1'],
+ 'abra':['leg_left','leg_right','arm_left','arm_right','body','tail'],
+ 'kadabra':['leg_left','leg_right','arm_left','arm_right','torso','tail'],
+ 'alakazam':['left_upper_leg','right_upper_leg','left_upper_arm','right_upper_arm','upper_torso'],
+ 'machop':['leg_left','leg_right','arm_left','arm_right','torso'],
+ 'machoke':['leg_left','leg_right','arm_left','arm_right','torso'],
+ 'machamp':['leg_left','leg_right','arm_left','arm_right','torso'],
+ 'bellsprout':['leg_left_rotation','leg_right_rotation','arm_left','arm_right','body'],
+ 'weepinbell':['body','body2','arm_left','arm_right','stem','stem2']
 }
 IDLE={'oddish':["leaf_center3","leaf_inner_left3","leaf_inner_right3"],'gloom':["arm_left","arm_right","leaf_back_right4"],'vileplume':["arm_left","arm_right","petal_back_rotation"],'paras':["arm_left","arm_right","body"],'parasect':["claw_left","claw_right","body"],'venonat':["left_foot","right_foot","left_antenna","right_antenna"],'diglett':["body"],'nidoqueen':['left_upper_leg','right_upper_leg','left_shoulder','right_shoulder'],'nidoranm':['head','torso','ear_left','ear_right'],'nidorino':['jaw','torso'],'nidoking':['tail','tail2','arm_left1','arm_right1'],'clefairy':['tail','tail2','wing_left','wing_right'],'clefable':['arm_left','arm_right','tail','tail2'],'vulpix':['tail_left1','tail_right1','head_rotation'],'ninetales':['leg_front_left','leg_front_right','tail_middle'],'jigglypuff':['foot_left','foot_right','head'],'wigglytuff':['foot_left','foot_right','torso'],'spearow':['head'],'fearow':['head'],'raticate':['body','head','tail'],'ekans':['head','neck','tail5'],'sandslash':['arm_left','arm_right','tail'],
  'dugtrio':['body1','body2','body3','body3_2'],'meowth':['tail1','tail2','tail3'],'persian':['head','neck','tail1','tail2','tail3','tail4','tail5','tail6'],
  'psyduck':['head','tail','tail2','hair2','hair3'],'golduck':['head','neck','tail','tail2','tail3'],'mankey':['body','ear_left','ear_right','tail1','tail2'],'primeape':['body','ear_left','ear_right'],
- 'growlithe':['body','head','upper_torso','tail'],'arcanine':['body','head','tail','neck'],'poliwag':['tail','tail2','tail3']}
-RUN={'sandshrew':['ball'],'arcanine':['leg_front_left','leg_front_right','leg_back_left','leg_back_right']}
+ 'growlithe':['body','head','upper_torso','tail'],'arcanine':['body','head','tail','neck'],'poliwag':['tail','tail2','tail3'],
+ 'poliwhirl':['body','arm_left','arm_right'],'poliwrath':['body','arm_left1','arm_right1'],'abra':['arm_left','arm_right','body','tail'],
+ 'kadabra':['arm_left','arm_right','head','tail'],'alakazam':['left_upper_arm','right_upper_arm','head','upper_torso'],
+ 'machop':['arm_left','arm_right','torso'],'machoke':['arm_left','arm_right','torso'],'machamp':['arm_left','arm_right','torso'],
+ 'bellsprout':['head','body','arm_left','arm_right'],'weepinbell':['body','stem','stem2','arm_left','arm_right']}
+RUN={'sandshrew':['ball'],'arcanine':['leg_front_left','leg_front_right','leg_back_left','leg_back_right'],
+ 'abra':['leg_left','leg_right','arm_left','arm_right'],'kadabra':['leg_left','leg_right','arm_left','arm_right'],
+ 'alakazam':['left_upper_leg','right_upper_leg','left_upper_arm','right_upper_arm']}
+IDLE.update({'poliwhirl':['body','arm_left','arm_right'],'poliwrath':['body','arm_left1','arm_right1'],
+ 'abra':['body','tail'],'kadabra':['tail','arm_left','arm_right'],
+ 'alakazam':['upper_torso','left_mustache','right_mustache'],
+ 'machop':['torso','arm_left','arm_right','tail'],'machoke':['torso','arm_left','arm_right'],
+ 'machamp':['torso','arm_left','arm_right','arm_back_left','arm_back_right'],
+ 'bellsprout':['body','arm_left','arm_right'],'weepinbell':['body','stem','stem2','arm_left','arm_right']})
 evidence=[]
 for d in defs[start-1:end]:
  slug=d['slug'];n=d['nationalPokedexNumber'];folder=f'{n:04d}_{slug}'
@@ -71,7 +93,10 @@ for d in defs[start-1:end]:
  candidates=[f'{prefix}/models/{folder}/{slug}{suffix}.geo.json' for suffix in ('','_male','_female')]
  model=next((p for p in candidates if p in members),None)
  assert model,'No audited base model: '+slug
- anim=f'{prefix}/animations/{folder}/{slug}.animation.json'
+ variant=Path(model).name.removesuffix('.geo.json')
+ anim_candidates=[f'{prefix}/animations/{folder}/{variant}.animation.json',f'{prefix}/animations/{folder}/{slug}.animation.json']
+ anim=next((p for p in anim_candidates if p in members),None)
+ assert anim,'No animation for selected model variant: '+slug+' '+variant
  tex=f'assets/cobblemon/textures/pokemon/{folder}/{slug}.png'
  license=f'{prefix}/models/{folder}/license'
  suffix=slug+'_cobblemon_1_8_2'
@@ -94,6 +119,10 @@ for d in defs[start-1:end]:
   d['source_rig_adaptation']='Restore two missing native animation group nodes wing_left_rotation/right_rotation at existing wing pivots under wings; original bone pivots/cubes unchanged'
  bones={b['name'] for b in geo['bones']}
  animations=json.loads(z.read(anim))['animations']
+ source_animation_prefix=f'animation.{variant}.'
+ runtime_animation_prefix=f'animation.{slug}.'
+ if variant!=slug:
+  animations={runtime_animation_prefix+name[len(source_animation_prefix):] if name.startswith(source_animation_prefix) else name:clip for name,clip in animations.items()}
  print('SOURCE_EVENTS',slug,json.dumps({name:{k:v for k,v in a.items() if k in ('sound_effects','particle_effects')} for name,a in animations.items() if any(k in a for k in ('sound_effects','particle_effects'))}),flush=True)
  if args.batch==4 and slug=='jigglypuff':
   cry=animations['animation.jigglypuff.cry']
@@ -102,11 +131,12 @@ for d in defs[start-1:end]:
   assert 'animation_length' not in cry or cry['animation_length']==misplaced
   cry['animation_length']=misplaced
   d['source_event_correction']='cry duration 1.25 moved from sound_effects metadata to clip animation_length; timestamp/effect unchanged'
- if args.batch in (5,6):
+ if args.batch in (5,6,7):
   # Retain every native clip. Only normalize syntax / unsupported mounted inputs.
   def adapt(value):
    if isinstance(value,str):
     value=value.replace('Math.','math.')
+    if args.batch==7:value=re.sub(r'\bq\.', 'query.',value)
     if args.batch==5 and slug in ('paras','parasect') and value.startswith('-(math.sin(') and value.endswith(')*0.25'):
      value='-1*'+value[1:]
     if args.batch==5 and slug=='parasect':
@@ -123,6 +153,8 @@ for d in defs[start-1:end]:
    d['source_molang_adaptations']={'Math.':'math.','q.r.yaw_change(0)':'0: neutral non-ridden input; mounted clips not selected by Minemon','q.r.velocity_y(0)':'0: neutral non-ridden input; mounted clips not selected by Minemon'}
   if args.batch==6 and slug=='arcanine':
    d['source_molang_adaptations']={'q.r.yaw_change(n)':'0 for retained ride clips; Minemon has no ride input','q.r.velocity_y(n)':'0 for retained ride clips; Minemon has no ride input'}
+  if args.batch==7:
+   d['source_molang_adaptations']={'q.':'query.'}
   if slug=='zubat':
    poser=json.loads(z.read(f'{prefix}/posers/{folder}/{slug}.json'))
    assert {'part':'wings_folded','isVisible':False} in poser['poses']['hover']['transformedParts']
@@ -246,6 +278,19 @@ for d in defs[start-1:end]:
   assert all(not isinstance(value,dict) for ch in native_idle['bones'].values() for value in ch.values())
   prof['idle_static']=prof['idle']
   d['source_static_idle']=True
+ if args.batch==7 and slug in ('poliwhirl','poliwrath','abra','kadabra','alakazam','machop','machoke','machamp','bellsprout','weepinbell'):
+  dynamic=any(isinstance(value,str) for channel in animations[idle].get('bones',{}).values() for value in channel.values())
+  dynamic=dynamic or any(isinstance(value,dict) and len(value)>1 for channel in animations[idle].get('bones',{}).values() for value in channel.values())
+  if not dynamic:
+   prof['idle_static']=prof['idle'];d['source_static_idle']=True
+  poser_path=f'{prefix}/posers/{folder}/{variant}.json'
+  if poser_path in members:
+   poser=json.loads(z.read(poser_path))
+   look_inputs=sorted({a for pose in poser.get('poses',{}).values() for a in pose.get('animations',[]) if isinstance(a,str) and a.startswith("q.look(")})
+   if look_inputs:
+    look_bones=sorted({re.search(r"q.look\('([^']+)'",a).group(1) for a in look_inputs})
+    available={name:(name if name in bones else 'head' if name=='head_ai' and 'head' in bones else None) for name in look_bones}
+    d['source_procedural_pose']={'poser':poser_path,'look':look_inputs,'look_bones':look_bones,'adapted_geo_bones':available,'adaptation':'Map q.look to the source head bone when present; no locomotion gait is synthesized'}
  for state,joints in prof.items():
   assert set(joints)<=bones,(slug,state,set(joints)-bones)
  profiles[slug]=prof

@@ -26,10 +26,12 @@ public class MinemonModel extends AnimatedGeoModel<MinemonCreature> {
     public void setLivingAnimations(MinemonCreature entity, Integer uniqueID, software.bernie.geckolib3.core.event.predicate.AnimationEvent event) {
         super.setLivingAnimations(entity, uniqueID, event);
         String slug=entity.getSpeciesSlug();
-        if(!(slug.equals("spearow")||slug.equals("fearow"))
-           ||!getModelResource(entity).getPath().contains("_cobblemon_1_8_2/"))return;
-        // The native source standing/walking poser combines a fixed Bedrock
-        // stance with q.look('head'). Apply look only to these two audited rigs.
+        boolean headLook=slug.equals("spearow")||slug.equals("fearow")||slug.equals("abra")
+            ||slug.equals("kadabra")||slug.equals("alakazam")||slug.equals("bellsprout");
+        if(!headLook||!getModelResource(entity).getPath().contains("_cobblemon_1_8_2/"))return;
+        // These source posers declare q.look('head') or q.look('head_ai'). The
+        // imported rigs map both names to their real head bone; no other
+        // articulation is synthesized here.
         var data=event.getExtraDataOfType(software.bernie.geckolib3.model.provider.data.EntityModelData.class);
         var head=getAnimationProcessor().getBone("head");
         if(data.isEmpty()||head==null)return;

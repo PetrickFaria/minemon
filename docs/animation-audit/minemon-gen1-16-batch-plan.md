@@ -1,6 +1,6 @@
 # Plano proposto — 16 lotes de locomoção Gen 1
 
-**Status:** Lotes 1–6 (#001–#060) aprovados automaticamente; o Lote 6 foi aprovado em `9153f58` (Actions 39524383095). O usuário autorizou exclusivamente o Lote 7 (#061–#070), além da correção das asas de Pidgeotto/Pidgeot. O trabalho está na branch `feature/minemon-gen1-batch7-cobblemon`; a Etapa A da correção visual foi preparada e aguarda validação de CI. A avaliação visual manual no Minecraft permanece pendente. O Lote 8 não está autorizado.
+**Status:** Lotes 1–6 (#001–#060) aprovados automaticamente; o Lote 6 foi aprovado em `9153f58` (Actions 39524383095). O usuário autorizou exclusivamente o Lote 7 (#061–#070), além da correção das asas de Pidgeotto/Pidgeot. Branch `feature/minemon-gen1-batch7-cobblemon`; correção de asas publicada em `6739e00`, Actions 39532392621 executando smoke do cliente. Os recursos do Lote 7 e os testes/gates correspondentes foram implementados localmente; CI está pendente de publicação. A avaliação visual manual no Minecraft permanece pendente. O Lote 8 não está autorizado.
 
 ## Regras comuns dos lotes
 

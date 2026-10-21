@@ -1,0 +1,413 @@
+{
+  "batch": 7,
+  "range": [
+    61,
+    70
+  ],
+  "source_url": "https://cdn.modrinth.com/data/MdwFAVRL/versions/GJ2a1b8O/Cobblemon-fabric-1.8.2%2B1.21.1.jar",
+  "source_sha256": "cae8ac328b61354fbe415208b8c6ffc12e7155094d0a87082e85e7914fb380c2",
+  "manual_visual_status": "pending; user will evaluate the authorized batches inside Minecraft",
+  "species": [
+    {
+      "number": 61,
+      "slug": "poliwhirl",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0061_poliwhirl/poliwhirl.geo.json",
+      "idle": "animation.poliwhirl.ground_idle",
+      "movement": "animation.poliwhirl.ground_walk",
+      "mode": "ground",
+      "native_run": null,
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "body",
+          "arm_left",
+          "arm_right"
+        ],
+        "walk": [
+          "leg_left",
+          "leg_right",
+          "foot_left1",
+          "foot_right1"
+        ],
+        "run": [
+          "leg_left",
+          "leg_right",
+          "foot_left1",
+          "foot_right1"
+        ],
+        "idle_static": [
+          "body",
+          "arm_left",
+          "arm_right"
+        ]
+      },
+      "stripped_bones": {
+        "animation.poliwhirl.battle_idle": [
+          "leg_left2",
+          "torso2"
+        ],
+        "animation.poliwhirl.ground_walk": [
+          "foot_left",
+          "foot_right",
+          "leg_left2",
+          "leg_right2",
+          "torso2"
+        ],
+        "animation.poliwhirl.sleep": [
+          "torso_left2"
+        ]
+      }
+    },
+    {
+      "number": 62,
+      "slug": "poliwrath",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0062_poliwrath/poliwrath.geo.json",
+      "idle": "animation.poliwrath.ground_idle",
+      "movement": "animation.poliwrath.ground_walk",
+      "mode": "ground",
+      "native_run": null,
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "body",
+          "arm_left1",
+          "arm_right1"
+        ],
+        "walk": [
+          "leg_left",
+          "leg_right",
+          "arm_left1",
+          "arm_right1"
+        ],
+        "run": [
+          "leg_left",
+          "leg_right",
+          "arm_left1",
+          "arm_right1"
+        ],
+        "idle_static": [
+          "body",
+          "arm_left1",
+          "arm_right1"
+        ]
+      },
+      "stripped_bones": {
+        "animation.poliwrath.sleep": [
+          "foot_right1",
+          "foot_right2"
+        ],
+        "animation.poliwrath.water_idle": [
+          "foot_right1"
+        ],
+        "animation.poliwrath.water_swim": [
+          "foot_right1"
+        ]
+      }
+    },
+    {
+      "number": 63,
+      "slug": "abra",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0063_abra/abra.geo.json",
+      "idle": "animation.abra.ground_idle",
+      "movement": "animation.abra.ground_walk",
+      "mode": "ground",
+      "native_run": "animation.abra.ground_run",
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "body",
+          "tail"
+        ],
+        "walk": [
+          "leg_left",
+          "leg_right",
+          "arm_left",
+          "arm_right",
+          "body",
+          "tail"
+        ],
+        "run": [
+          "leg_left",
+          "leg_right",
+          "arm_left",
+          "arm_right"
+        ],
+        "idle_static": [
+          "body",
+          "tail"
+        ]
+      },
+      "stripped_bones": {}
+    },
+    {
+      "number": 64,
+      "slug": "kadabra",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0064_kadabra/kadabra_male.geo.json",
+      "idle": "animation.kadabra.ground_idle",
+      "movement": "animation.kadabra.ground_walk",
+      "mode": "ground",
+      "native_run": "animation.kadabra.ground_run",
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "tail",
+          "arm_left",
+          "arm_right"
+        ],
+        "walk": [
+          "leg_left",
+          "leg_right",
+          "arm_left",
+          "arm_right",
+          "torso",
+          "tail"
+        ],
+        "run": [
+          "leg_left",
+          "leg_right",
+          "arm_left",
+          "arm_right"
+        ],
+        "idle_static": [
+          "tail",
+          "arm_left",
+          "arm_right"
+        ]
+      },
+      "stripped_bones": {}
+    },
+    {
+      "number": 65,
+      "slug": "alakazam",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0065_alakazam/alakazam_male.geo.json",
+      "idle": "animation.alakazam.ground_idle",
+      "movement": "animation.alakazam.ground_walk",
+      "mode": "ground",
+      "native_run": "animation.alakazam.ground_run",
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "upper_torso",
+          "left_mustache",
+          "right_mustache"
+        ],
+        "walk": [
+          "left_upper_leg",
+          "right_upper_leg",
+          "left_upper_arm",
+          "right_upper_arm",
+          "upper_torso"
+        ],
+        "run": [
+          "left_upper_leg",
+          "right_upper_leg",
+          "left_upper_arm",
+          "right_upper_arm"
+        ],
+        "idle_static": [
+          "upper_torso",
+          "left_mustache",
+          "right_mustache"
+        ]
+      },
+      "stripped_bones": {}
+    },
+    {
+      "number": 66,
+      "slug": "machop",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0066_machop/machop.geo.json",
+      "idle": "animation.machop.ground_idle",
+      "movement": "animation.machop.ground_walk",
+      "mode": "ground",
+      "native_run": null,
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "torso",
+          "arm_left",
+          "arm_right",
+          "tail"
+        ],
+        "walk": [
+          "leg_left",
+          "leg_right",
+          "arm_left",
+          "arm_right",
+          "torso"
+        ],
+        "run": [
+          "leg_left",
+          "leg_right",
+          "arm_left",
+          "arm_right",
+          "torso"
+        ],
+        "idle_static": [
+          "torso",
+          "arm_left",
+          "arm_right",
+          "tail"
+        ]
+      },
+      "stripped_bones": {}
+    },
+    {
+      "number": 67,
+      "slug": "machoke",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0067_machoke/machoke.geo.json",
+      "idle": "animation.machoke.ground_idle",
+      "movement": "animation.machoke.ground_walk",
+      "mode": "ground",
+      "native_run": null,
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "torso",
+          "arm_left",
+          "arm_right"
+        ],
+        "walk": [
+          "leg_left",
+          "leg_right",
+          "arm_left",
+          "arm_right",
+          "torso"
+        ],
+        "run": [
+          "leg_left",
+          "leg_right",
+          "arm_left",
+          "arm_right",
+          "torso"
+        ],
+        "idle_static": [
+          "torso",
+          "arm_left",
+          "arm_right"
+        ]
+      },
+      "stripped_bones": {}
+    },
+    {
+      "number": 68,
+      "slug": "machamp",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0068_machamp/machamp.geo.json",
+      "idle": "animation.machamp.ground_idle",
+      "movement": "animation.machamp.ground_walk",
+      "mode": "ground",
+      "native_run": null,
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "torso",
+          "arm_left",
+          "arm_right",
+          "arm_back_left",
+          "arm_back_right"
+        ],
+        "walk": [
+          "leg_left",
+          "leg_right",
+          "arm_left",
+          "arm_right",
+          "torso"
+        ],
+        "run": [
+          "leg_left",
+          "leg_right",
+          "arm_left",
+          "arm_right",
+          "torso"
+        ],
+        "idle_static": [
+          "torso",
+          "arm_left",
+          "arm_right",
+          "arm_back_left",
+          "arm_back_right"
+        ]
+      },
+      "stripped_bones": {}
+    },
+    {
+      "number": 69,
+      "slug": "bellsprout",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0069_bellsprout/bellsprout.geo.json",
+      "idle": "animation.bellsprout.ground_idle",
+      "movement": "animation.bellsprout.ground_walk",
+      "mode": "ground",
+      "native_run": null,
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "body",
+          "arm_left",
+          "arm_right"
+        ],
+        "walk": [
+          "leg_left_rotation",
+          "leg_right_rotation",
+          "arm_left",
+          "arm_right",
+          "body"
+        ],
+        "run": [
+          "leg_left_rotation",
+          "leg_right_rotation",
+          "arm_left",
+          "arm_right",
+          "body"
+        ],
+        "idle_static": [
+          "body",
+          "arm_left",
+          "arm_right"
+        ]
+      },
+      "stripped_bones": {}
+    },
+    {
+      "number": 70,
+      "slug": "weepinbell",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0070_weepinbell/weepinbell.geo.json",
+      "idle": "animation.weepinbell.ground_idle",
+      "movement": "animation.weepinbell.ground_walk",
+      "mode": "ground",
+      "native_run": null,
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "body",
+          "stem",
+          "stem2",
+          "arm_left",
+          "arm_right"
+        ],
+        "walk": [
+          "body",
+          "body2",
+          "arm_left",
+          "arm_right",
+          "stem",
+          "stem2"
+        ],
+        "run": [
+          "body",
+          "body2",
+          "arm_left",
+          "arm_right",
+          "stem",
+          "stem2"
+        ],
+        "idle_static": [
+          "body",
+          "stem",
+          "stem2",
+          "arm_left",
+          "arm_right"
+        ]
+      },
+      "stripped_bones": {}
+    }
+  ]
+}

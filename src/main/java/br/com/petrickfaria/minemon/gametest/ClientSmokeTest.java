@@ -31,6 +31,7 @@ public final class ClientSmokeTest {
  private static final java.util.Map<String,java.util.List<String>> modelBones=new java.util.HashMap<>();
  private static final java.util.Map<String,float[]> motionRanges=new java.util.HashMap<>();
  private static final java.util.Map<String,float[]> fireStarterArmRanges=new java.util.HashMap<>();
+ private static final java.util.Map<String,float[]> sourceLookRanges=new java.util.HashMap<>();
  private static final java.util.Set<String> walkedSpecies=new java.util.HashSet<>();
  private static final java.util.Set<String> wingVisibilitySpecies=new java.util.HashSet<>();
  private static final java.util.Map<String,net.minecraft.world.phys.Vec3> firstRenderedPositions=new java.util.HashMap<>();
@@ -166,6 +167,11 @@ public final class ClientSmokeTest {
        entity.setXRot((float)Math.sin(entity.tickCount*0.17F)*12.0F);
        entity.yHeadRot=entity.getYRot()+(float)Math.sin(entity.tickCount*0.13F)*25.0F;
       }
+      if(java.util.Set.of("abra","kadabra","alakazam","bellsprout").contains(entity.getSpeciesSlug())) {
+       // Exercise source q.look('head') / q.look('head_ai') adaptations.
+       entity.setXRot((float)Math.sin(entity.tickCount*0.17F)*12.0F);
+       entity.yHeadRot=entity.getYRot()+(float)Math.sin(entity.tickCount*0.13F)*25.0F;
+      }
      }
     };
     MinemonRenderer.validationObserver=(entity,model)->{
@@ -187,6 +193,13 @@ public final class ClientSmokeTest {
        renderedPhaseSpecies=slug;renderedPhase=validationPhase;renderedPhaseFrames=0;
       }
       renderedPhaseFrames++;
+     }
+     if(validationPhase!=null && java.util.Set.of("abra","kadabra","alakazam","bellsprout").contains(slug)) {
+      var lookHead=model.getAnimationProcessor().getBone("head");
+      if(lookHead==null)throw new IllegalStateException("Source q.look head adapter has no GeckoLib head bone for "+slug);
+      float[] range=sourceLookRanges.computeIfAbsent(slug,k->{var v=new float[4];java.util.Arrays.fill(v,0,2,Float.MAX_VALUE);java.util.Arrays.fill(v,2,4,-Float.MAX_VALUE);return v;});
+      float[] values={lookHead.getRotationX(),lookHead.getRotationY()};
+      for(int axis=0;axis<2;axis++){range[axis]=Math.min(range[axis],values[axis]);range[axis+2]=Math.max(range[axis+2],values[axis]);}
      }
      if(validationPhase!=null) {
       if(slug.equals("charmander")||slug.equals("charmeleon")||slug.equals("charizard")) {
@@ -353,10 +366,16 @@ public final class ClientSmokeTest {
       throw new IllegalStateException("Fire-starter arms remained near T-pose during validated movement for "+slug+"; arm rotations="+java.util.Arrays.toString(arms));
     }
     validateArticulationProfiles();
+    for(String slug:java.util.List.of("abra","kadabra","alakazam","bellsprout")) {
+     float[] look=sourceLookRanges.get(slug);
+     if(look==null||look[2]-look[0]<0.05F||look[3]-look[1]<0.05F)
+      throw new IllegalStateException("Source q.look adaptation did not move the head for "+slug+": "+java.util.Arrays.toString(look));
+    }
     if(!wingVisibilitySpecies.containsAll(java.util.Set.of("pidgeotto","pidgeot")))
      throw new IllegalStateException("Pidge wing visibility was not sampled for both models: "+wingVisibilitySpecies);
     Files.writeString(Path.of("client-validation.txt"),"PASS LOCOMOTION: every registered species moved and had changing body bone transforms.\n",StandardOpenOption.APPEND);
     Files.writeString(Path.of("client-validation.txt"),"PASS PIDGE WINGS: Pidgeotto and Pidgeot rendered the open pair only in settled idle/walk/run poses; closed alternatives stayed hidden.\n",StandardOpenOption.APPEND);
+    Files.writeString(Path.of("client-validation.txt"),"PASS SOURCE LOOK: Abra, Kadabra, Alakazam, and Bellsprout head bones respond to their source poser look input.\n",StandardOpenOption.APPEND);
     Files.writeString(Path.of("client-validation.txt"),"PASS FIRE-STARTER ARMS: validated walk and faster-movement poses remain lowered; Charmander uses no source run clip.\n",StandardOpenOption.APPEND);
     Files.writeString(Path.of("client-validation.txt"),"PASS ROSTER: every registered species rendered with its texture in a world: "+renderedSpecies+"\n",StandardOpenOption.APPEND);
     mc.stop();

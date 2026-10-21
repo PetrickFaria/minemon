@@ -919,5 +919,270 @@
       "tail2",
       "tail3"
     ]
+  },
+  "poliwhirl": {
+    "idle": [
+      "body",
+      "arm_left",
+      "arm_right"
+    ],
+    "walk": [
+      "leg_left",
+      "leg_right",
+      "foot_left1",
+      "foot_right1"
+    ],
+    "run": [
+      "leg_left",
+      "leg_right",
+      "foot_left1",
+      "foot_right1"
+    ],
+    "idle_static": [
+      "body",
+      "arm_left",
+      "arm_right"
+    ]
+  },
+  "poliwrath": {
+    "idle": [
+      "body",
+      "arm_left1",
+      "arm_right1"
+    ],
+    "walk": [
+      "leg_left",
+      "leg_right",
+      "arm_left1",
+      "arm_right1"
+    ],
+    "run": [
+      "leg_left",
+      "leg_right",
+      "arm_left1",
+      "arm_right1"
+    ],
+    "idle_static": [
+      "body",
+      "arm_left1",
+      "arm_right1"
+    ]
+  },
+  "abra": {
+    "idle": [
+      "body",
+      "tail"
+    ],
+    "walk": [
+      "leg_left",
+      "leg_right",
+      "arm_left",
+      "arm_right",
+      "body",
+      "tail"
+    ],
+    "run": [
+      "leg_left",
+      "leg_right",
+      "arm_left",
+      "arm_right"
+    ],
+    "idle_static": [
+      "body",
+      "tail"
+    ]
+  },
+  "kadabra": {
+    "idle": [
+      "tail",
+      "arm_left",
+      "arm_right"
+    ],
+    "walk": [
+      "leg_left",
+      "leg_right",
+      "arm_left",
+      "arm_right",
+      "torso",
+      "tail"
+    ],
+    "run": [
+      "leg_left",
+      "leg_right",
+      "arm_left",
+      "arm_right"
+    ],
+    "idle_static": [
+      "tail",
+      "arm_left",
+      "arm_right"
+    ]
+  },
+  "alakazam": {
+    "idle": [
+      "upper_torso",
+      "left_mustache",
+      "right_mustache"
+    ],
+    "walk": [
+      "left_upper_leg",
+      "right_upper_leg",
+      "left_upper_arm",
+      "right_upper_arm",
+      "upper_torso"
+    ],
+    "run": [
+      "left_upper_leg",
+      "right_upper_leg",
+      "left_upper_arm",
+      "right_upper_arm"
+    ],
+    "idle_static": [
+      "upper_torso",
+      "left_mustache",
+      "right_mustache"
+    ]
+  },
+  "machop": {
+    "idle": [
+      "torso",
+      "arm_left",
+      "arm_right",
+      "tail"
+    ],
+    "walk": [
+      "leg_left",
+      "leg_right",
+      "arm_left",
+      "arm_right",
+      "torso"
+    ],
+    "run": [
+      "leg_left",
+      "leg_right",
+      "arm_left",
+      "arm_right",
+      "torso"
+    ],
+    "idle_static": [
+      "torso",
+      "arm_left",
+      "arm_right",
+      "tail"
+    ]
+  },
+  "machoke": {
+    "idle": [
+      "torso",
+      "arm_left",
+      "arm_right"
+    ],
+    "walk": [
+      "leg_left",
+      "leg_right",
+      "arm_left",
+      "arm_right",
+      "torso"
+    ],
+    "run": [
+      "leg_left",
+      "leg_right",
+      "arm_left",
+      "arm_right",
+      "torso"
+    ],
+    "idle_static": [
+      "torso",
+      "arm_left",
+      "arm_right"
+    ]
+  },
+  "machamp": {
+    "idle": [
+      "torso",
+      "arm_left",
+      "arm_right",
+      "arm_back_left",
+      "arm_back_right"
+    ],
+    "walk": [
+      "leg_left",
+      "leg_right",
+      "arm_left",
+      "arm_right",
+      "torso"
+    ],
+    "run": [
+      "leg_left",
+      "leg_right",
+      "arm_left",
+      "arm_right",
+      "torso"
+    ],
+    "idle_static": [
+      "torso",
+      "arm_left",
+      "arm_right",
+      "arm_back_left",
+      "arm_back_right"
+    ]
+  },
+  "bellsprout": {
+    "idle": [
+      "body",
+      "arm_left",
+      "arm_right"
+    ],
+    "walk": [
+      "leg_left_rotation",
+      "leg_right_rotation",
+      "arm_left",
+      "arm_right",
+      "body"
+    ],
+    "run": [
+      "leg_left_rotation",
+      "leg_right_rotation",
+      "arm_left",
+      "arm_right",
+      "body"
+    ],
+    "idle_static": [
+      "body",
+      "arm_left",
+      "arm_right"
+    ]
+  },
+  "weepinbell": {
+    "idle": [
+      "body",
+      "stem",
+      "stem2",
+      "arm_left",
+      "arm_right"
+    ],
+    "walk": [
+      "body",
+      "body2",
+      "arm_left",
+      "arm_right",
+      "stem",
+      "stem2"
+    ],
+    "run": [
+      "body",
+      "body2",
+      "arm_left",
+      "arm_right",
+      "stem",
+      "stem2"
+    ],
+    "idle_static": [
+      "body",
+      "stem",
+      "stem2",
+      "arm_left",
+      "arm_right"
+    ]
   }
 }

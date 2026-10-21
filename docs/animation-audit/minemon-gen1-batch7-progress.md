@@ -23,7 +23,15 @@ Verificação automatizada incluída:
 
 ## Etapa B — Lote 7
 
-Ainda pendente nesta revisão. Importar apenas #061–#070 do pacote auditado Cobblemon 1.8.2; auditar modelos, texturas, clips, expressões Molang, poses procedurais, eventos e referências. Atualizar perfis e gates para validar 70 espécies, sem alterar o registro de 151.
+Recursos importados do mesmo pacote verificado, exclusivamente para #061–#070. Os modelos e texturas correspondem aos arquivos de `0061_poliwhirl` até `0070_weepinbell`; Kadabra e Alakazam usam os rigs masculinos originais porque o Minemon seleciona um único par modelo/textura por espécie e não tem seleção visual por gênero. As animações correspondentes ao rig masculino foram renomeadas para os identificadores de espécie usados pelo Minemon.
+
+Todos os dez possuem clipes nativos de repouso e caminhada. Só Abra, Kadabra e Alakazam têm `ground_run` nativo; para os outros sete o estado de corrida continua usando a caminhada, sem criar uma corrida inventada. Os dez clipes nativos de repouso não têm movimento temporal e foram classificados como poses estáticas; nenhum balanço artificial foi adicionado. Poliwhirl/Poliwrath mantêm seus clipes aquáticos nativos. Poliwrath usa `q.biped_walk`/`q.bimanual_swing` na pose aquática do Cobblemon, mas Minemon não tem seleção runtime de natação; essa pose e os clipes foram preservados sem adicionar sistema aquático novo.
+
+As posers de Abra, Kadabra, Alakazam e Bellsprout chamam `q.look` para o osso cabeça; o Minemon aplica o input de cabeça GeckoLib ao osso `head` correspondente (Bellsprout mapeia o alias `head_ai`). O smoke de cliente injeta entradas de olhar e mede os dois eixos da cabeça para esses quatro modelos. Weepinbell declara `q.look('head_ai')`, mas seu rig não contém `head_ai` nem `head`; a chamada é registrada como não adaptável sem inventar uma articulação.
+
+O adaptador mantém os clipes e eventos sonoros originais e normaliza `q.*` para `query.*`, incluindo `Math.*` para `math.*`. `tools/verify_batch7.py` exige exatamente #061–#070, byte-preservação dos recursos aprovados #001–#060, 81 definições posteriores inalteradas, hierarquias/ossos/texturas/clipes válidos e 151 registros no JAR. O teste Java novo desserializa todos os clipes e verifica suas expressões no parser GeckoLib 3.
+
+Etapa B está implementada; as verificações locais de recursos e preservação passaram. A compilação/testes integrados e o smoke de cliente permanecem pendentes no Actions.
 
 ## Etapa C — validação final
 
@@ -33,4 +41,4 @@ Ainda pendente: compilação, testes Java, GameTests do servidor, smoke do clien
 
 - Testes de recursos locais: passaram para a correção das asas e preservação do Lote 6.
 - Execução Gradle local: não disponível porque o wrapper precisa baixar Gradle 7.5.1 e esta sessão não tem conexão de saída para `services.gradle.org`; a validação de build seguirá no GitHub Actions após publicação.
-- Próxima etapa: publicar commit específico da Etapa A e acompanhar sua execução do Actions antes de importar o Lote 7.
+- Próxima etapa: publicar commit específico da Etapa B e acompanhar seu Actions; depois revisar logs, relatório de articulação e conteúdo do JAR antes da entrega.
