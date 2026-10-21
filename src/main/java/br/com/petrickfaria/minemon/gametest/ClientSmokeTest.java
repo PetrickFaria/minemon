@@ -42,14 +42,27 @@ public final class ClientSmokeTest {
  private static int direction=1;
  private static String renderedPhaseSpecies;
  private static int renderedPhase=-1,renderedPhaseFrames;
+ private static final long smokeStartedNanos=System.nanoTime();
+ private static final java.util.Set<String> loggedProgress=java.util.concurrent.ConcurrentHashMap.newKeySet();
+ private static volatile int completedSpeciesWindows;
+ private static volatile String lastApprovedCheck="Minecraft client initialized";
+ private static void reportProgress(String slug,String phase) {
+  if(!loggedProgress.add(slug+":"+phase))return;
+  var definition=SpeciesDefinitions.get(slug);
+  int dex=definition==null?0:definition.nationalPokedexNumber();
+  int index=species.indexOf(slug)+1;
+  double elapsed=(System.nanoTime()-smokeStartedNanos)/60_000_000_000.0D;
+  System.out.printf(java.util.Locale.ROOT,"[CLIENT SMOKE] %d/%d — #%03d %s — %s — concluídas=%d/%d — duração=%.1f min — última=%s%n",
+    index,species.size(),dex,slug,phase,completedSpeciesWindows,species.size(),elapsed,lastApprovedCheck);
+  System.out.flush();
+ }
  private static final int SPECIES_TEST_WINDOW=80;
  private static final int BULBASAUR_VALIDATION_TICK=430;
  private static final int COMBAT_VALIDATION_TICK=BULBASAUR_VALIDATION_TICK+100;
  private static final int SPECIES_START_TICK=COMBAT_VALIDATION_TICK+10;
  private static final java.util.Set<String> renderedSpecies=java.util.concurrent.ConcurrentHashMap.newKeySet();
- private static final java.util.List<String> species=SpeciesDefinitions.ALL.values().stream()
-   .sorted(java.util.Comparator.comparingInt(SpeciesDefinitions.Definition::nationalPokedexNumber))
-   .map(SpeciesDefinitions.Definition::slug).toList();
+ private static final java.util.List<String> species=SmokeSpeciesSelection.select(
+   SpeciesDefinitions.ALL.values(),System.getProperty("minemon.clientSmokeSpecies"));
   // Profiles use exact joints from each selected model skeleton, not one global bone-name list.
   // The active ten-species development batch receives detailed gait validation;
   // the general render, texture, movement and roster smoke continues to cover all 151.
@@ -177,6 +190,7 @@ public final class ClientSmokeTest {
     MinemonRenderer.validationObserver=(entity,model)->{
      if(mc.getResourceManager().getResource(model.getTextureResource(entity)).isEmpty())throw new IllegalStateException("Missing rendered texture "+entity.getSpeciesSlug());
      String slug=entity.getSpeciesSlug();renderedSpecies.add(slug);
+     if(validationPhase(entity)!=null)reportProgress(slug,"renderização");
      var position=entity.position();var origin=firstRenderedPositions.putIfAbsent(slug,position);
      // Rendering can interpolate one server step over several frames. Measure
      // net movement from the first rendered position instead of requiring a
@@ -297,6 +311,21 @@ public final class ClientSmokeTest {
        && (!active.equals(renderedPhaseSpecies)||renderedPhase!=appliedPhase||renderedPhaseFrames<2))return;
    }
    worldTicks++;
+   if(worldTicks>=SPECIES_START_TICK&&worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW) {
+    int index=(worldTicks-SPECIES_START_TICK)/SPECIES_TEST_WINDOW;
+    int phase=(worldTicks-SPECIES_START_TICK)%SPECIES_TEST_WINDOW;
+    if(phase==0&&index>completedSpeciesWindows) {
+     completedSpeciesWindows=index;
+     String previous=species.get(index-1);
+     lastApprovedCheck=previous+" teve a janela de renderização e movimento coletada";
+     System.out.printf("[CLIENT SMOKE] %d/%d — %s — janela concluída; verificações de renderização e movimento coletadas.%n",
+       index,species.size(),previous);
+     System.out.flush();
+    }
+    String slug=species.get(index);
+    String stage=phase<8?"repouso inicial":phase<27?"caminhada":phase<34?"repouso após caminhada":phase<54?"corrida":"repouso final";
+    reportProgress(slug,"Validando "+stage);
+   }
    if(worldTicks==70||worldTicks==170)Screenshot.grab(mc.gameDirectory,mc.getMainRenderTarget(),message->{});
    if(worldTicks>=100&&worldTicks<BULBASAUR_VALIDATION_TICK)mc.getSingleplayerServer().execute(()->{
     var b=(MinemonCreature)mc.getSingleplayerServer().overworld().getEntity(testEntity);if(b!=null){b.setNoAi(true);b.getNavigation().stop();if(b.getX()>2.5)direction=-1;if(b.getX()< -2.5)direction=1;b.moveTo(b.getX()+direction*0.08,b.getY(),b.getZ(),b.getYRot(),b.getXRot());}
@@ -319,6 +348,7 @@ public final class ClientSmokeTest {
    });
    if(worldTicks>=SPECIES_START_TICK && worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW && (worldTicks-SPECIES_START_TICK)%SPECIES_TEST_WINDOW==0) {
     String slug=species.get((worldTicks-SPECIES_START_TICK)/SPECIES_TEST_WINDOW);
+    reportProgress(slug,"carregamento");
     mc.getSingleplayerServer().execute(()->{
      var level=mc.getSingleplayerServer().overworld();var previous=level.getEntity(testEntity);if(previous!=null)previous.discard();
     var next=ModEntities.SPECIES.get(slug).get().create(level);next.moveTo(0,101,4,180,0);next.setNoAi(false);next.goalSelector.removeAllGoals();next.targetSelector.removeAllGoals();setValidationPhase(next,0);level.addFreshEntity(next);testEntity=next.getUUID();
@@ -360,6 +390,7 @@ public final class ClientSmokeTest {
      if(!walkedSpecies.contains(slug)||(!staticFallback&&!bodyMoved))throw new IllegalStateException("No rendered movement for "+slug+"; displacement="+walkedSpecies.contains(slug)+" bodyChanged="+bodyMoved+" staticFallback="+staticFallback);
     }
     for(String slug:java.util.List.of("charmander","charmeleon","charizard")) {
+     if(!species.contains(slug))continue;
      float[] arms=fireStarterArmRanges.get(slug);
      boolean walkArms=arms!=null&&arms[0]>=0.35F&&arms[1]>=0.35F;
      boolean fasterArms=slug.equals("charmander")||(arms!=null&&arms[2]>=0.35F&&arms[3]>=0.35F);
@@ -368,17 +399,23 @@ public final class ClientSmokeTest {
     }
     validateArticulationProfiles();
     for(String slug:java.util.List.of("abra","kadabra","alakazam","bellsprout","geodude","golem","slowpoke","slowbro")) {
+     if(!species.contains(slug))continue;
      float[] look=sourceLookRanges.get(slug);
      if(look==null||look[2]-look[0]<0.05F||look[3]-look[1]<0.05F)
       throw new IllegalStateException("Source q.look adaptation did not move the head for "+slug+": "+java.util.Arrays.toString(look));
     }
-    if(!wingVisibilitySpecies.containsAll(java.util.Set.of("pidgeotto","pidgeot")))
-     throw new IllegalStateException("Pidge wing visibility was not sampled for both models: "+wingVisibilitySpecies);
-    Files.writeString(Path.of("client-validation.txt"),"PASS LOCOMOTION: every registered species moved and had changing body bone transforms.\n",StandardOpenOption.APPEND);
-    Files.writeString(Path.of("client-validation.txt"),"PASS PIDGE WINGS: Pidgeotto and Pidgeot rendered the open pair only in settled idle/walk/run poses; closed alternatives stayed hidden.\n",StandardOpenOption.APPEND);
-    Files.writeString(Path.of("client-validation.txt"),"PASS SOURCE LOOK: Abra, Kadabra, Alakazam, Bellsprout, Geodude, Golem, Slowpoke, and Slowbro head bones respond to their source poser look input.\n",StandardOpenOption.APPEND);
-    Files.writeString(Path.of("client-validation.txt"),"PASS FIRE-STARTER ARMS: validated walk and faster-movement poses remain lowered; Charmander uses no source run clip.\n",StandardOpenOption.APPEND);
-    Files.writeString(Path.of("client-validation.txt"),"PASS ROSTER: every registered species rendered with its texture in a world: "+renderedSpecies+"\n",StandardOpenOption.APPEND);
+    var selectedPidge=java.util.Set.of("pidgeotto","pidgeot").stream().filter(species::contains).collect(java.util.stream.Collectors.toSet());
+    if(!wingVisibilitySpecies.containsAll(selectedPidge))
+     throw new IllegalStateException("Pidge wing visibility was not sampled for selected models "+selectedPidge+": "+wingVisibilitySpecies);
+    Files.writeString(Path.of("client-validation.txt"),"PASS LOCOMOTION: every selected species moved and had changing body bone transforms.\n",StandardOpenOption.APPEND);
+    if(!selectedPidge.isEmpty())Files.writeString(Path.of("client-validation.txt"),"PASS PIDGE WINGS: selected Pidgeotto/Pidgeot rendered the open pair only in settled idle/walk/run poses; closed alternatives stayed hidden.\n",StandardOpenOption.APPEND);
+    var selectedLook=java.util.List.of("abra","kadabra","alakazam","bellsprout","geodude","golem","slowpoke","slowbro").stream().filter(species::contains).toList();
+    if(!selectedLook.isEmpty())Files.writeString(Path.of("client-validation.txt"),"PASS SOURCE LOOK: selected head bones respond to source poser look input: "+selectedLook+"\n",StandardOpenOption.APPEND);
+    var selectedStarters=java.util.List.of("charmander","charmeleon","charizard").stream().filter(species::contains).toList();
+    if(!selectedStarters.isEmpty())Files.writeString(Path.of("client-validation.txt"),"PASS FIRE-STARTER ARMS: validated walk and faster-movement poses remain lowered: "+selectedStarters+"; Charmander uses no source run clip.\n",StandardOpenOption.APPEND);
+    Files.writeString(Path.of("client-validation.txt"),"PASS ROSTER: every selected species rendered with its texture in a world: "+renderedSpecies+"\n",StandardOpenOption.APPEND);
+    completedSpeciesWindows=species.size();
+    lastApprovedCheck="all selected species completed render/movement sampling";
     mc.stop();
    }
   }catch(Exception e){throw new IllegalStateException("Minemon client validation failed",e);}
@@ -467,12 +504,13 @@ public final class ClientSmokeTest {
    StringBuilder report=new StringBuilder();
    int passed=0,knownFallbacks=0;
    var flameIdle=charmFlameRanges.get("idle");var flameWalk=charmFlameRanges.get("walk");
+   boolean checkCharmander=species.contains("charmander");
    boolean animatedFlame=flameIdle!=null&&flameWalk!=null&&charmFlameClips.contains("animation.charmander.minemon_tail_flame");
    for(int axis=0;axis<3&&animatedFlame;axis++)animatedFlame=flameIdle[axis+3]-flameIdle[axis]>0.01F&&flameWalk[axis+3]-flameWalk[axis]>0.01F;
-   if(!animatedFlame)throw new IllegalStateException("Charmander tail flame did not animate independently during idle and walk; idle="+java.util.Arrays.toString(flameIdle)+" walk="+java.util.Arrays.toString(flameWalk)+" selected="+charmFlameClips);
+   if(checkCharmander&&!animatedFlame)throw new IllegalStateException("Charmander tail flame did not animate independently during idle and walk; idle="+java.util.Arrays.toString(flameIdle)+" walk="+java.util.Arrays.toString(flameWalk)+" selected="+charmFlameClips);
    for(var entry:ARTICULATION_PROFILES.entrySet()) {
     String slug=entry.getKey();
-    if(!ARTICULATION_VALIDATION_SPECIES.contains(slug))continue;
+    if(!ARTICULATION_VALIDATION_SPECIES.contains(slug)||!species.contains(slug))continue;
     var definition=SpeciesDefinitions.get(slug);
     if(definition==null)throw new IllegalStateException("Missing test profile species "+slug);
     String fallback=definition.movementFallback();
@@ -521,7 +559,8 @@ public final class ClientSmokeTest {
       .append(idleJoints).append(" walk=").append(walkJoints).append(" run=").append(runJoints).append("; transition samples=")
       .append(articulationClips.get(slug)).append("; synchronized inputs=").append(articulationInputs.get(slug)).append(".\n");
    }
-   Files.writeString(Path.of("client-validation.txt"),"PASS CHARMANDER TAIL FLAME: independent clip="+charmFlameClips+" changed in idle range="+java.util.Arrays.toString(flameIdle)+" and walk range="+java.util.Arrays.toString(flameWalk)+".\n",StandardOpenOption.APPEND);
-   Files.writeString(Path.of("client-validation.txt"),"ARTICULATION PROFILES: passed="+passed+" expected fallback gaps="+knownFallbacks+" profiles="+ARTICULATION_VALIDATION_SPECIES.size()+" detailed scope="+ARTICULATION_VALIDATION_SPECIES+"; other species remain covered by general render/movement checks.\n"+report,StandardOpenOption.APPEND);
+   if(checkCharmander)Files.writeString(Path.of("client-validation.txt"),"PASS CHARMANDER TAIL FLAME: independent clip="+charmFlameClips+" changed in idle range="+java.util.Arrays.toString(flameIdle)+" and walk range="+java.util.Arrays.toString(flameWalk)+".\n",StandardOpenOption.APPEND);
+   var selectedProfiles=ARTICULATION_VALIDATION_SPECIES.stream().filter(species::contains).collect(java.util.stream.Collectors.toSet());
+   Files.writeString(Path.of("client-validation.txt"),"ARTICULATION PROFILES: passed="+passed+" expected fallback gaps="+knownFallbacks+" selected profiles="+selectedProfiles.size()+" detailed scope="+selectedProfiles+"; unselected species were not tested in this targeted run.\n"+report,StandardOpenOption.APPEND);
   }
 }
