@@ -17,15 +17,15 @@ Integrar exclusivamente os recursos Cobblemon Fabric 1.8.2 dos Pokémon #071–#
 | # | Espécie | Estado |
 |---|---|---|
 | 071 | Victreebel | Implementado e publicado; validação parcial aprovada |
-| 072 | Tentacool | Implementado localmente; validação parcial aprovada |
-| 073 | Tentacruel | Implementado localmente; validação parcial aprovada |
-| 074 | Geodude | Implementado localmente; validação parcial aprovada |
-| 075 | Graveler | Implementado localmente; validação parcial aprovada |
-| 076 | Golem | Implementado localmente; validação parcial aprovada |
-| 077 | Ponyta | Implementado localmente; validação parcial aprovada |
-| 078 | Rapidash | Implementado localmente; validação parcial aprovada |
-| 079 | Slowpoke | Implementado localmente; validação parcial aprovada |
-| 080 | Slowbro | Implementado localmente; validação parcial aprovada |
+| 072 | Tentacool | Implementado e publicado; validação parcial aprovada |
+| 073 | Tentacruel | Implementado e publicado; validação parcial aprovada |
+| 074 | Geodude | Implementado e publicado; validação parcial aprovada |
+| 075 | Graveler | Implementado e publicado; validação parcial aprovada |
+| 076 | Golem | Implementado e publicado; validação parcial aprovada |
+| 077 | Ponyta | Implementado e publicado; validação parcial aprovada |
+| 078 | Rapidash | Implementado e publicado; validação parcial aprovada |
+| 079 | Slowpoke | Implementado e publicado; validação parcial aprovada |
+| 080 | Slowbro | Implementado e publicado; validação parcial aprovada |
 
 ## Checkpoint 1 — Preparação concluída
 
@@ -56,19 +56,20 @@ Integrar exclusivamente os recursos Cobblemon Fabric 1.8.2 dos Pokémon #071–#
 - `python3 tools/verify_batch8.py`: passou para #071–#080, conferindo as dez espécies, recursos, perfis, expressões/eventos e fallbacks.
 - `python3 tools/verify_project.py`: passou; 151 espécies runtime, 1.025 registros catalogados e 5.979 referências existentes; JSON/modelos/animações/PNGs/OGGs válidos.
 - `python3 -m py_compile tools/import_cobblemon_182_batch.py tools/verify_batch8.py`: passou.
-- Alterações deste checkpoint ainda não publicadas; nenhum workflow do Lote 8 foi iniciado.
+- Checkpoint publicado em `72d68f4c077f96311a40c265a031c9a221da0072` com `[skip ci]`; nenhum workflow do Lote 8 foi iniciado.
 
-## Etapas pendentes
+## Checkpoint 4 — validação final
 
-1. Publicar o checkpoint #076–#080 com `[skip ci]`.
-2. Atualizar os gates para verificar as 80 espécies preservando os validadores do JAR e as regressões das asas de Pidgeotto/Pidgeot.
-3. Executar compilação, testes Java, GameTests, smoke do cliente, verificadores cumulativos do catálogo/JAR e inspeção do JAR real no GitHub Actions.
-4. Iniciar GitHub Actions após commit final; se continuar em andamento, registrar ID/URL/estado e encerrar o acompanhamento.
-5. Registrar o artefato, hash e expiração após aprovação do CI.
+- Workflow atualizado para executar `verify_batch8.py` contra o commit-base `b77eac9c38aa0d6a1d35c3cfab36a707ac6cab24` e também contra o JAR final; a regressão `verify_pidge_wing_visibility.py` continua nos dois pontos.
+- Esta mudança do workflow e do documento aguarda publicação. Nenhuma execução do Lote 8 foi iniciada até agora.
+- Próximos gates no Actions: build completo, testes Java, GameTests do servidor, smoke do cliente, inspeção cumulativa do JAR e regressão das asas Pidgeotto/Pidgeot.
+- Após publicar o commit final, consultar o estado inicial da execução; se ficar em andamento, registrar ID/URL/estado e encerrar essa etapa de acompanhamento.
+- Disponibilizar JAR, hash e expiração somente após a aprovação.
+
 
 ## Bloqueios e limitações
 
-- A distribuição Gradle 7.5.1 não estava alcançável de `services.gradle.org` no primeiro teste local; por isso os testes Java/build ainda não foram executados localmente. Nenhum teste foi desativado. A URL da fonte Cobblemon ficou acessível e seu arquivo foi novamente baixado/verificado durante a recuperação do workspace.
+- A distribuição Gradle 7.5.1 não estava alcançável de `services.gradle.org` em duas tentativas locais; testes Java/build ainda não foram executados localmente. Nenhum teste foi desativado. A URL da fonte Cobblemon ficou acessível e o seu arquivo foi baixado/verificado durante a recuperação do workspace.
 - Aparência visual manual dentro do Minecraft continuará pendente; os gates automatizados de cliente verificam renderização, movimento e transforms reais dos ossos.
 - Erros de código/testes identificados no checkpoint parcial: nenhum após a correção dos perfis de tentáculos para os nomes de osso reais da fonte.
 

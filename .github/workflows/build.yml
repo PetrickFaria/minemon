@@ -22,10 +22,10 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - name: Verify extracted project resources
         run: python3 tools/verify_project.py
-      - name: Verify exclusive batch 7, prior batches, and Pidge wing rigs
+      - name: Verify exclusive batch 8, prior batches, and Pidge wing rigs
         run: |
-          git fetch --no-tags --depth=1 origin 6739e0019dcf11a61288b8f0b1cff5f1d2cccb7b
-          python3 tools/verify_batch7.py
+          git fetch --no-tags --depth=1 origin b77eac9c38aa0d6a1d35c3cfab36a707ac6cab24
+          python3 tools/verify_batch8.py
           python3 tools/verify_pidge_wing_visibility.py
       - name: Ensure Gradle Wrapper is executable
         run: chmod +x gradlew
@@ -86,7 +86,7 @@ jobs:
           jar tf "$jar_file" | grep -Fx 'assets/minemon_gen1/animations/bulbasaur_cobblemon_1_8_2/bulbasaur.animation.json'
           jar tf "$jar_file" | grep -Fx 'assets/minemon_gen1/models/item/bulbasaur_spawn_egg.json'
           python3 tools/verify_runtime.py "$jar_file"
-          python3 tools/verify_batch7.py "$jar_file"
+          python3 tools/verify_batch8.py "$jar_file"
           python3 tools/verify_pidge_wing_visibility.py "$jar_file"
           unzip -p "$jar_file" META-INF/mods.toml | grep -F 'modId="minemon_gen1"'
           unzip -p "$jar_file" META-INF/mods.toml | grep -F 'versionRange="[1.19.2,1.20)"'
