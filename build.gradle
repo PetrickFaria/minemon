@@ -64,6 +64,7 @@ minecraft {
         client {
             property 'forge.enabledGameTestNamespaces', 'minemon_gen1'
             property 'minemon.clientSmokeTest', project.hasProperty('clientSmokeTest').toString()
+            property 'minemon.clientSmokeSpecies', (findProperty('clientSmokeSpecies') ?: '').toString()
         }
         server { args '--nogui' }
         gameTestServer { property 'forge.enabledGameTestNamespaces', 'minemon_gen1' }
