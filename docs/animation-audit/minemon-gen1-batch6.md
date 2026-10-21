@@ -29,14 +29,14 @@ Escopo: somente #051–#060, conforme o plano de 16 lotes. O Lote 7 não foi ini
 - [x] Passar gate de recursos: 151 registros ordenados, exatamente as espécies 051–060 atualizadas, os 50 anteriores preservados e os 91 registros restantes inalterados.
 - [x] Passar verificação do projeto e preparar uma cópia dos 151 modelos/clipes para validar as transformações de runtime GeckoLib 3.
 - [x] Investigar a falha de `Batch6AnimationCompatibilityTest` na execução `39523351214`: o parser GeckoLib 3 rejeitou o operador unário aplicado a uma expressão parentetizada no movimento da pata esquerda de Psyduck.
-- [x] Reescrever a expressão por identidade algébrica como `20-math.sin(...)*20`, mantendo o mesmo deslocamento e a fase original da animação aquática.
+- [x] Reescrever por identidades algébricas as expressões iniciadas por `-(...)` nos clips importados de Psyduck, Golduck, Mankey, Primeape e Arcanine; manter valores, fases e amplitudes originais em formas aceitas pelo parser GeckoLib 3.
 - [ ] Reexecutar Actions após publicar a correção; completar compilação/testes Java, GameTests, smoke do cliente e inspeção do JAR.
 
 O `./gradlew clean test build` não pôde ser executado neste ambiente local: o Gradle Wrapper 7.5.1 tentou baixar sua distribuição e a conexão de saída foi recusada. A validação completa será feita no GitHub Actions antes da entrega.
 
 A janela máxima do smoke do cliente foi ampliada de 35 para 45 minutos com as asserções, velocidades e fases intactas. O smoke cumulativo do Lote 5 levou cerca de 31 minutos para 50 perfis detalhados; a janela maior comporta a cobertura de 60 sem encurtar os testes.
 
-A execução `39523351214` passou os dois gates de recursos e todos os testes Java anteriores; um dos quatro testes do Lote 6 falhou ao analisar uma expressão Molang de `water_swim` de Psyduck. A correção mantém a função matemática da expressão original, removendo a forma de negação parentetizada que o parser da versão GeckoLib do projeto não aceita. Os GameTests, o smoke de cliente e o empacotamento do JAR foram pulados após essa falha; aguardam a próxima execução aprovada.
+A execução `39523351214` passou os dois gates de recursos e todos os testes Java anteriores; um dos quatro testes do Lote 6 falhou ao analisar uma expressão Molang do clip `water_swim` de Psyduck. A execução posterior detectou a mesma forma de negação parentetizada em clips de Golduck. A auditoria de todos os dez arquivos encontrou e adaptou todas essas expressões iniciais sem alterar as suas funções matemáticas. Os GameTests, o smoke do cliente e o empacotamento do JAR foram pulados nas duas execuções; aguardam a próxima validação.
 
 ## Adaptações e limites conhecidos
 
