@@ -136,7 +136,11 @@ for d in defs[start-1:end]:
   def adapt(value):
    if isinstance(value,str):
     value=value.replace('Math.','math.')
-    if args.batch==7:value=re.sub(r'\bq\.', 'query.',value)
+    if args.batch==7:
+     value=re.sub(r'\bq\.', 'query.',value)
+     # GeckoLib 3.1.40's Molang parser rejects a unary minus directly before
+     # a grouped expression; multiplying the complete group by -1 is equal.
+     if value.startswith('-('):value='-1*'+value[1:]
     if args.batch==5 and slug in ('paras','parasect') and value.startswith('-(math.sin(') and value.endswith(')*0.25'):
      value='-1*'+value[1:]
     if args.batch==5 and slug=='parasect':

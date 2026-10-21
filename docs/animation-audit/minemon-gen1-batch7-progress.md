@@ -29,9 +29,9 @@ Todos os dez possuem clipes nativos de repouso e caminhada. Só Abra, Kadabra e 
 
 As posers de Abra, Kadabra, Alakazam e Bellsprout chamam `q.look` para o osso cabeça; o Minemon aplica o input de cabeça GeckoLib ao osso `head` correspondente (Bellsprout mapeia o alias `head_ai`). O smoke de cliente injeta entradas de olhar e mede os dois eixos da cabeça para esses quatro modelos. Weepinbell declara `q.look('head_ai')`, mas seu rig não contém `head_ai` nem `head`; a chamada é registrada como não adaptável sem inventar uma articulação.
 
-O adaptador mantém os clipes e eventos sonoros originais e normaliza `q.*` para `query.*`, incluindo `Math.*` para `math.*`. `tools/verify_batch7.py` exige exatamente #061–#070, byte-preservação dos recursos aprovados #001–#060, 81 definições posteriores inalteradas, hierarquias/ossos/texturas/clipes válidos e 151 registros no JAR. O teste Java novo desserializa todos os clipes e verifica suas expressões no parser GeckoLib 3.
+O adaptador mantém os clipes e eventos sonoros originais e normaliza `q.*` para `query.*` e `Math.*` para `math.*`. A primeira execução de CI encontrou uma incompatibilidade real do parser GeckoLib 3.1.40 com expressões source no formato `-(...)`; elas agora são expressas como `-1*(...)`, matematicamente equivalente e sem alteração dos keyframes. `tools/verify_batch7.py` exige exatamente #061–#070, byte-preservação dos recursos aprovados #001–#060, 81 definições posteriores inalteradas, hierarquias/ossos/texturas/clipes válidos e 151 registros no JAR. O teste Java novo desserializa todos os clipes e verifica suas expressões no parser GeckoLib 3.
 
-Etapa B está implementada; as verificações locais de recursos e preservação passaram. A compilação/testes integrados e o smoke de cliente permanecem pendentes no Actions.
+Etapa B está implementada; as verificações locais de recursos e preservação passaram. A execução `39533874912` encontrou e reportou a incompatibilidade Molang acima na nova prova Java; a correção de adaptação está preparada e será revalidada por uma nova execução do commit corretivo. O smoke de cliente e os gates posteriores ainda precisam passar no Actions.
 
 ## Etapa C — validação final
 
