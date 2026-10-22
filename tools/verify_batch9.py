@@ -58,7 +58,9 @@ for p in prior_paths:
   assert current==expected,'Weedle parser-compatibility adjustment must remain algebraically equivalent and isolated'
  elif p=='assets/minemon/animations/pidgeotto_cobblemon_1_8_2/pidgeotto.animation.json':
   expected=original.replace(b'"+math.cos(q.anim_time*90*16/6-60)*3"',b'"math.cos(q.anim_time*90*16/6-60)*3"')
+  expected=expected.replace(b'"-math.sin(q.anim_time*90*16/3-60)*+9.5"',b'"-math.sin(q.anim_time*90*16/3-60)*9.5"')
   assert original.count(b'"+math.cos(q.anim_time*90*16/6-60)*3"')==2
+  assert original.count(b'"-math.sin(q.anim_time*90*16/3-60)*+9.5"')==2
   assert current==expected,'Pidgeotto Molang unary-plus fix must be isolated to its two invalid active expressions'
  else:assert current==original,'Prior approved asset changed: '+p
 
