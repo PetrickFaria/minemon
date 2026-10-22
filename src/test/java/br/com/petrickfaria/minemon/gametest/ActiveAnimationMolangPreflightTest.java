@@ -25,7 +25,7 @@ public class ActiveAnimationMolangPreflightTest {
         parser.setValue("query.anim_time",0.0);
         int checkedSpecies=0;
         for(var definition:SpeciesDefinitions.ALL.values()) {
-            if(definition.nationalPokedexNumber()<1||definition.nationalPokedexNumber()>110)continue;
+            if(definition.nationalPokedexNumber()<1||definition.nationalPokedexNumber()>120)continue;
             checkedSpecies++;
             String path=definition.animation().replace("assets/minemon/","assets/minemon_gen1/");
             Path animationPath=RESOURCES.resolve(path);
@@ -45,7 +45,7 @@ public class ActiveAnimationMolangPreflightTest {
                 if(clip.has("bones"))parsedExpressions+=parse(clip.get("bones"),parser,definition.slug()+"/"+clipName);
             }
         }
-        assertEquals("Every updated species through batch 11 must be covered",110,checkedSpecies);
+        assertEquals("Every updated species through batch 12 must be covered",120,checkedSpecies);
         assertTrue("At least one active expression should be validated",parsedExpressions>0);
     }
 

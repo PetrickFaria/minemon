@@ -13,23 +13,38 @@
 
 | # | Espécie | Estado |
 |---:|---|---|
-| 111 | Rhyhorn | Pendente de integração |
-| 112 | Rhydon | Pendente de integração |
-| 113 | Chansey | Pendente de integração |
-| 114 | Tangela | Pendente de integração |
-| 115 | Kangaskhan | Pendente de integração |
-| 116 | Horsea | Pendente de integração |
-| 117 | Seadra | Pendente de integração |
-| 118 | Goldeen | Pendente de integração |
-| 119 | Seaking | Pendente de integração |
-| 120 | Staryu | Pendente de integração |
+| 111 | Rhyhorn | Recursos integrados; validação CI pendente |
+| 112 | Rhydon | Recursos integrados; validação CI pendente |
+| 113 | Chansey | Recursos integrados; validação CI pendente |
+| 114 | Tangela | Bind-pose fallback documentado; validação CI pendente |
+| 115 | Kangaskhan | Recursos integrados; validação CI pendente |
+| 116 | Horsea | Recursos integrados; validação CI pendente |
+| 117 | Seadra | Recursos integrados; validação CI pendente |
+| 118 | Goldeen | Recursos integrados; validação CI pendente |
+| 119 | Seaking | Recursos integrados; validação CI pendente |
+| 120 | Staryu | Recursos integrados; validação CI pendente |
 
 Fonte local auditada: Cobblemon Fabric 1.8.2, SHA-256 `cae8ac328b61354fbe415208b8c6ffc12e7155094d0a87082e85e7914fb380c2`. A auditoria preliminar encontrou clips nativos de locomoção, animações aquáticas e anatomia articulada; os clips ativos e a compatibilidade GeckoLib serão registrados após inspeção e importação por espécie. Não selecionar animação de corrida sintética nem inventar movimento ausente.
 
+## Checkpoint B/C — integração e auditoria por espécie
+
+- Integrados os modelos, texturas, licenças e animações das dez espécies a partir do arquivo de origem com o SHA acima. Modelos fêmea/macho mantêm a variante masculina Kanto quando a fonte não tem um modelo neutro; os clips compartilhados permanecem associados ao rig importado.
+- Atualizadas somente as definições/perfis #111–#120; os dez arquivos de modelo, animação e textura #001–#110 foram comparados byte a byte com o commit-base e permanecem intactos.
+- Corridas nativas selecionadas apenas para Rhyhorn, Rhydon, Chansey e Staryu. Kangaskhan, Horsea, Seadra, Goldeen e Seaking não receberam corrida inventada.
+- Clips aquáticos nativos `water_idle`/`water_swim` foram preservados quando disponíveis para Horsea, Seadra, Goldeen, Seaking e Staryu; o controller atual usa os estados terrestres existentes e não foi expandido.
+- Tangela não tem clips de idle/walk/run nem poser na fonte. Foi adicionado somente um canal neutro de bind pose para manter o modelo estável; fallback `idle` explicitado, sem movimento sintetizado.
+- `tools/verify_batch12.py`, verificadores cumulativos dos Lotes 8–11, `verify_project.py`, `verify_runtime.py` e o preflight Molang passaram localmente.
+- Os perfis de Goldeen e Seaking foram ajustados para joints presentes nos clips nativos selecionados após a primeira checagem estrutural apontar divergências.
+
+## Testes pendentes e próximo passo
+
+- Tentativa de testes Java direcionados localmente não iniciou: o wrapper Gradle precisa baixar Gradle 7.5.1 e o ambiente retornou `Network is unreachable`. Nenhum servidor, GameTest ou cliente foi iniciado.
+- Próxima etapa: publicar este checkpoint de código e usar uma única execução do GitHub Actions para testar Molang/Java, compilação, GameTests, smoke completo, inspeção e artefato. Se falhar, corrigir a causa com testes direcionados antes de nova execução.
+- Commit de implementação/Actions/JAR do Lote 12: pendentes.
+
 ## Validações e publicações
 
-- Até este checkpoint: sem alterações nos recursos do projeto; nenhum teste novo iniciado.
-- Próxima etapa: selecionar os clips e perfis de articulação da fonte, integrar #111–#120 e estender os verificadores cumulativos sem alterar recursos #001–#110.
+- Próxima etapa: aprovação automatizada de #111–#120 na mesma base preservada dos 110 anteriores.
 - GitHub Actions/artefato Lote 12: ainda não executados.
 - JAR Lote 12: ainda não gerado.
 

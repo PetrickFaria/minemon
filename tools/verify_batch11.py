@@ -10,6 +10,7 @@ MP='data/minemon_gen1/runtime_species.json'
 VP='data/minemon_gen1/animation_validation_profiles.json'
 REPORT=ROOT/'docs/animation-audit/minemon-gen1-batch11-source-evidence.json'
 EXPECTED=['electrode','exeggcute','exeggutor','cubone','marowak','hitmonlee','hitmonchan','lickitung','koffing','weezing']
+BATCH12=['rhyhorn','rhydon','chansey','tangela','kangaskhan','horsea','seadra','goldeen','seaking','staryu']
 ANATOMY={
  'electrode':['body'],
  'exeggcute':['egg1','egg2','egg3','egg4','egg5','egg6'],
@@ -33,8 +34,9 @@ old_defs=json.loads(base_file('src/main/resources/'+MP));old_profiles=json.loads
 assert len(defs)==151 and [d['nationalPokedexNumber'] for d in defs]==list(range(1,152))
 assert [d['slug'] for d in defs[100:110]]==EXPECTED
 assert defs[:100]==old_defs[:100],'One of the approved first 100 definitions changed'
-assert defs[110:]==old_defs[110:],'A species after #110 changed'
-assert set(profiles)==set(old_profiles)|set(EXPECTED),'Unexpected or missing articulation profile'
+assert [d['slug'] for d in defs[110:120]]==BATCH12,'Batch 12 must remain the planned #111-120 sequence'
+assert defs[120:]==old_defs[120:],'A species after #120 changed'
+assert set(profiles)==set(old_profiles)|set(EXPECTED)|set(BATCH12),'Unexpected or missing articulation profile'
 assert all(profiles[s]==p for s,p in old_profiles.items()),'An earlier profile changed'
 
 report=json.loads(REPORT.read_text())
@@ -97,6 +99,9 @@ for d in defs[100:110]:
  if slug=='hitmonchan':
   assert 'animation.hitmonchan.ground_run_WIP' in animations
   assert 'ground_run' not in d['clips']
+for d in defs[110:120]:
+ slug=d['slug'];paths=[d['model'],d['texture'],d['animation']]+d.get('licenses',[])
+ allowed.update('src/main/resources/'+p for p in paths)
 
 changed=subprocess.check_output(['git','diff','--name-only',BASE,'--','src/main/resources'],cwd=ROOT,text=True).splitlines()
 changed+=subprocess.check_output(['git','ls-files','--others','--exclude-standard','--','src/main/resources'],cwd=ROOT,text=True).splitlines()
@@ -112,7 +117,7 @@ if args.jar:
   assert packed==defs and packed_profiles==profiles
   assert len(dex)==151 and [d['nationalPokedexNumber'] for d in dex]==list(range(1,152))
   assert {d['slug'] for d in packed}=={d['slug'] for d in dex if d['registered']}
-  for d in defs[:110]:
+  for d in defs[:120]:
    for key in ('model','texture','animation'):assert packed_path(d,key) in names,(d['slug'],key,packed_path(d,key))
   for d in defs[100:110]:
    packed_animation=json.loads(jar.read(packed_path(d,'animation')))['animations']
@@ -124,4 +129,4 @@ if args.jar:
      if key in ('sound_effects','particle_effects') and (not isinstance(value,dict) or any(not isinstance(v,dict) for v in value.values())):
       assert key not in packed_animation[name],(d['slug'],name,key,'unsupported runtime event block')
      else:assert packed_animation[name].get(key)==value,(d['slug'],name,key,'event payload')
-  print('PASS JAR BATCH 11: first 110 updated species, 151 Pokédex entries, and batch 11 source events verified')
+  print('PASS JAR BATCH 11 cumulative: first 120 updated species, 151 Pokédex entries, and batch 11 source events verified')

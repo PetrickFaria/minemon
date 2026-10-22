@@ -2110,5 +2110,374 @@
       "middle_body",
       "small_body"
     ]
+  },
+  "rhyhorn": {
+    "idle": [
+      "head",
+      "left_back_leg",
+      "left_front_leg",
+      "right_back_leg",
+      "right_front_leg",
+      "torso"
+    ],
+    "walk": [
+      "body",
+      "head",
+      "left_back_foot",
+      "left_back_leg",
+      "left_front_foot",
+      "left_front_leg",
+      "right_back_foot",
+      "right_back_leg",
+      "right_front_foot",
+      "right_front_leg",
+      "torso"
+    ],
+    "run": [
+      "head",
+      "left_back_foot",
+      "left_back_leg",
+      "left_front_foot",
+      "left_front_leg",
+      "right_back_foot",
+      "right_back_leg",
+      "right_front_foot",
+      "right_front_leg",
+      "torso"
+    ]
+  },
+  "rhydon": {
+    "idle": [
+      "head",
+      "left_lower_arm",
+      "left_lower_leg",
+      "left_shoulder",
+      "left_upper_arm",
+      "left_upper_leg",
+      "right_lower_arm",
+      "right_shoulder",
+      "right_upper_arm",
+      "right_upper_leg",
+      "tail",
+      "tail2",
+      "tail3",
+      "tail4",
+      "torso",
+      "upper_torso"
+    ],
+    "walk": [
+      "body",
+      "head",
+      "left_foot",
+      "left_lower_leg",
+      "left_upper_leg",
+      "right_foot",
+      "right_lower_leg",
+      "right_upper_leg",
+      "tail",
+      "tail2",
+      "tail3",
+      "tail4",
+      "torso",
+      "upper_torso"
+    ],
+    "run": [
+      "head",
+      "left_foot",
+      "left_lower_arm",
+      "left_lower_leg",
+      "left_upper_arm",
+      "left_upper_leg",
+      "right_foot",
+      "right_lower_arm",
+      "right_lower_leg",
+      "right_upper_arm",
+      "right_upper_leg",
+      "tail",
+      "tail2",
+      "tail3",
+      "tail4",
+      "torso",
+      "upper_torso"
+    ]
+  },
+  "chansey": {
+    "idle": [
+      "egg_torso",
+      "head",
+      "left_arm",
+      "left_tendril_front",
+      "pouch",
+      "right_arm",
+      "tail1",
+      "tail2",
+      "torso"
+    ],
+    "walk": [
+      "egg_torso",
+      "head",
+      "left_arm",
+      "left_foot",
+      "left_tendril_front",
+      "pouch",
+      "right_arm",
+      "right_foot",
+      "tail1",
+      "tail2",
+      "torso"
+    ],
+    "run": [
+      "egg_torso",
+      "head",
+      "left_arm",
+      "left_foot",
+      "left_tendril_front",
+      "pouch",
+      "right_arm",
+      "right_foot",
+      "tail1",
+      "tail2",
+      "torso"
+    ]
+  },
+  "tangela": {
+    "idle": [
+      "body"
+    ],
+    "walk": [
+      "body"
+    ],
+    "run": [
+      "body"
+    ],
+    "idle_static": [
+      "body"
+    ]
+  },
+  "kangaskhan": {
+    "idle": [
+      "arm_left",
+      "arm_right",
+      "body",
+      "head",
+      "kid",
+      "kid_head",
+      "leg_left",
+      "leg_right",
+      "pouch",
+      "pouch_kid",
+      "tail",
+      "tail2",
+      "tail3",
+      "tail4",
+      "tail5",
+      "torso",
+      "torso_kid"
+    ],
+    "walk": [
+      "body",
+      "head",
+      "kid",
+      "kid_head",
+      "kid_leg_left",
+      "kid_leg_right",
+      "leg_left",
+      "leg_right",
+      "tail",
+      "tail2",
+      "tail3",
+      "tail4",
+      "tail5",
+      "torso"
+    ],
+    "run": [
+      "body",
+      "head",
+      "kid",
+      "kid_head",
+      "kid_leg_left",
+      "kid_leg_right",
+      "leg_left",
+      "leg_right",
+      "tail",
+      "tail2",
+      "tail3",
+      "tail4",
+      "tail5",
+      "torso"
+    ]
+  },
+  "horsea": {
+    "idle": [
+      "body",
+      "fin",
+      "head",
+      "neck",
+      "tail",
+      "tail2",
+      "torso"
+    ],
+    "walk": [
+      "body",
+      "fin",
+      "head",
+      "neck",
+      "tail",
+      "tail2",
+      "torso"
+    ],
+    "run": [
+      "body",
+      "fin",
+      "head",
+      "neck",
+      "tail",
+      "tail2",
+      "torso"
+    ]
+  },
+  "seadra": {
+    "idle": [
+      "body",
+      "fin_left",
+      "fin_right",
+      "head",
+      "tail",
+      "torso"
+    ],
+    "walk": [
+      "body",
+      "fin_left",
+      "fin_right",
+      "head",
+      "tail",
+      "torso"
+    ],
+    "run": [
+      "body",
+      "fin_left",
+      "fin_right",
+      "head",
+      "tail",
+      "torso"
+    ]
+  },
+  "goldeen": {
+    "idle": [
+      "eyes",
+      "fin_left1",
+      "fin_left2",
+      "fin_left3",
+      "fin_right1",
+      "fin_right2",
+      "fin_right3",
+      "head",
+      "tail_left1",
+      "tail_left2",
+      "tail_left3",
+      "tail_middle1",
+      "tail_middle2",
+      "tail_right1",
+      "tail_right2",
+      "tail_right3",
+      "torso"
+    ],
+    "walk": [
+      "body",
+      "fin_left1",
+      "fin_left2",
+      "fin_left3",
+      "fin_right1",
+      "fin_right2",
+      "fin_right3",
+      "head",
+      "tail_left1",
+      "tail_left2",
+      "tail_middle1",
+      "tail_right1",
+      "torso"
+    ],
+    "run": [
+      "body",
+      "fin_left1",
+      "fin_left2",
+      "fin_left3",
+      "fin_right1",
+      "fin_right2",
+      "fin_right3",
+      "head",
+      "tail_left1",
+      "tail_left2",
+      "tail_middle1",
+      "tail_right1",
+      "torso"
+    ]
+  },
+  "seaking": {
+    "idle": [
+      "body",
+      "fin_left1",
+      "fin_left2",
+      "fin_right1",
+      "fin_right2",
+      "tail",
+      "tail_back_left1",
+      "tail_back_right1",
+      "tail_bottom_left",
+      "tail_bottom_right",
+      "torso",
+      "torso_end"
+    ],
+    "walk": [
+      "body",
+      "fin_left1",
+      "fin_left2",
+      "fin_right1",
+      "fin_right2",
+      "head",
+      "tail",
+      "tail_back_left1",
+      "tail_back_right1",
+      "tail_bottom_left",
+      "tail_bottom_right",
+      "torso",
+      "torso_end"
+    ],
+    "run": [
+      "body",
+      "fin_left1",
+      "fin_left2",
+      "fin_right1",
+      "fin_right2",
+      "head",
+      "tail",
+      "tail_back_left1",
+      "tail_back_right1",
+      "tail_bottom_left",
+      "tail_bottom_right",
+      "torso",
+      "torso_end"
+    ]
+  },
+  "staryu": {
+    "idle": [
+      "body",
+      "body_limb_bottom_left",
+      "body_limb_bottom_right",
+      "body_limb_left",
+      "body_limb_right",
+      "body_limb_top"
+    ],
+    "walk": [
+      "body",
+      "body_limb_bottom_left",
+      "body_limb_bottom_right",
+      "body_limb_left",
+      "body_limb_right",
+      "body_limb_top"
+    ],
+    "run": [
+      "body"
+    ]
   }
 }

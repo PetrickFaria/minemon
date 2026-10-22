@@ -11,6 +11,7 @@ VP='data/minemon_gen1/animation_validation_profiles.json'
 REPORT=ROOT/'docs/animation-audit/minemon-gen1-batch10-source-evidence.json'
 EXPECTED=['cloyster','gastly','haunter','gengar','onix','drowzee','hypno','krabby','kingler','voltorb']
 BATCH11=['electrode','exeggcute','exeggutor','cubone','marowak','hitmonlee','hitmonchan','lickitung','koffing','weezing']
+BATCH12=['rhyhorn','rhydon','chansey','tangela','kangaskhan','horsea','seadra','goldeen','seaking','staryu']
 ACTIVE_RUNS={'drowzee','hypno'}
 ANATOMY={
  'cloyster':['shell_left','shell_right','shell_back_left','shell_back_right','inner_shell','inner_shell_left','inner_shell_right','inner_spike'],
@@ -37,8 +38,9 @@ assert len(defs)==151 and [d['nationalPokedexNumber'] for d in defs]==list(range
 assert [d['slug'] for d in defs[90:100]]==EXPECTED
 assert defs[:100]==old_defs[:100],'An approved definition through #100 changed'
 assert [d['slug'] for d in defs[100:110]]==BATCH11,'Batch 11 must remain the planned #101-110 sequence'
-assert defs[110:]==old_defs[110:],'A species after #110 changed'
-assert set(profiles)==set(old_profiles)|set(BATCH11),'Unexpected or missing articulation profile'
+assert [d['slug'] for d in defs[110:120]]==BATCH12,'Batch 12 must remain the planned #111-120 sequence'
+assert defs[120:]==old_defs[120:],'A species after #120 changed'
+assert set(profiles)==set(old_profiles)|set(BATCH11)|set(BATCH12),'Unexpected or missing articulation profile'
 assert all(profiles[s]==p for s,p in old_profiles.items()),'An earlier profile changed'
 assert json.loads(base_file('src/main/resources/'+VP))==old_profiles
 
@@ -122,6 +124,8 @@ voltorb=read_json(source_path(defs[99],'animation'))['animations']
 assert all('body' in voltorb[name]['bones'] for name in ('animation.voltorb.ground_idle','animation.voltorb.ground_walk'))
 
 for d in defs[100:110]:
+ paths=[d['model'],d['texture'],d['animation']]+d.get('licenses',[]);allowed.update('src/main/resources/'+p for p in paths)
+for d in defs[110:120]:
  paths=[d['model'],d['texture'],d['animation']]+d.get('licenses',[]);allowed.update('src/main/resources/'+p for p in paths)
 changed=subprocess.check_output(['git','diff','--name-only',BASE,'--','src/main/resources'],cwd=ROOT,text=True).splitlines()
 assert set(changed)<=allowed,set(changed)-allowed

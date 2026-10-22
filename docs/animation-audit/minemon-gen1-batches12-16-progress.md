@@ -10,14 +10,15 @@
 - Lote ativo: 12 (#111–#120), branch `feature/minemon-gen1-batch12-cobblemon`.
 - Base: `0816533addee80e9e17a684c94bed399f4a9488f`.
 - Lotes 1–11/110 espécies: preservados e validados na base aprovada.
-- Lotes 12–16: ainda não concluídos.
-- Próximo passo: auditar/importar e validar #111–#120; somente depois iniciar o Lote 13.
+- Lote 12: recursos #111–#120 integrados e verificações estruturais cumulativas locais passaram; Java/CI e artefato ainda pendentes.
+- Lotes 13–16: ainda não iniciados.
+- Próximo passo: validar/publicar o Lote 12; somente depois iniciar o Lote 13.
 
 ## Sequência autorizada
 
 | Lote | Pokémon | Branch | Estado |
 |---:|---:|---|---|
-| 12 | #111–#120 | `feature/minemon-gen1-batch12-cobblemon` | Em preparação |
+| 12 | #111–#120 | `feature/minemon-gen1-batch12-cobblemon` | Validação Java/Actions pendente |
 | 13 | #121–#130 | `feature/minemon-gen1-batch13-cobblemon` | Não iniciado |
 | 14 | #131–#140 | `feature/minemon-gen1-batch14-cobblemon` | Não iniciado |
 | 15 | #141–#150 | `feature/minemon-gen1-batch15-cobblemon` | Não iniciado |

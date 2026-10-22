@@ -4,7 +4,7 @@ import argparse,copy,hashlib,io,json,math,re,urllib.request,zipfile
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 R=ROOT/'src/main/resources'
-ap=argparse.ArgumentParser();ap.add_argument('--batch',type=int,choices=(2,3,4,5,6,7,8,9,10,11),required=True);ap.add_argument('--segment',choices=('first','second'));ap.add_argument('--source-jar',type=Path);args=ap.parse_args()
+ap=argparse.ArgumentParser();ap.add_argument('--batch',type=int,choices=(2,3,4,5,6,7,8,9,10,11,12),required=True);ap.add_argument('--segment',choices=('first','second'));ap.add_argument('--source-jar',type=Path);args=ap.parse_args()
 start,end=(args.batch-1)*10+1,args.batch*10
 if args.batch in (8,9) and args.segment:
  start,end=(((71,75) if args.segment=='first' else (76,80)) if args.batch==8 else ((81,85) if args.segment=='first' else (86,90)))
@@ -175,6 +175,36 @@ IDLE.update({
  'koffing':['body','body_inflate','craters','eyes'],
  'weezing':['main_body','middle_body']
 })
+GAIT.update({
+ 'rhyhorn':['body','head','left_back_foot','left_back_leg','left_front_foot','left_front_leg','right_back_foot','right_back_leg','right_front_foot','right_front_leg','torso'],
+ 'rhydon':['body','head','left_foot','left_lower_leg','left_upper_leg','right_foot','right_lower_leg','right_upper_leg','tail','tail2','tail3','tail4','torso','upper_torso'],
+ 'chansey':['egg_torso','head','left_arm','left_foot','left_tendril_front','pouch','right_arm','right_foot','tail1','tail2','torso'],
+ 'tangela':['body','leftfoot','rightfoot'],
+ 'kangaskhan':['body','head','kid','kid_head','kid_leg_left','kid_leg_right','leg_left','leg_right','tail','tail2','tail3','tail4','tail5','torso'],
+ 'horsea':['body','fin','head','neck','tail','tail2','torso'],
+ 'seadra':['body','fin_left','fin_right','head','tail','torso'],
+ 'goldeen':['body','fin_left1','fin_left2','fin_left3','fin_right1','fin_right2','fin_right3','head','tail_left1','tail_left2','tail_middle1','tail_right1','torso'],
+ 'seaking':['body','fin_left1','fin_left2','fin_right1','fin_right2','head','tail','tail_back_left1','tail_back_right1','tail_bottom_left','tail_bottom_right','torso','torso_end'],
+ 'staryu':['body','body_limb_bottom_left','body_limb_bottom_right','body_limb_left','body_limb_right','body_limb_top']
+})
+IDLE.update({
+ 'rhyhorn':['head','left_back_leg','left_front_leg','right_back_leg','right_front_leg','torso'],
+ 'rhydon':['head','left_lower_arm','left_lower_leg','left_shoulder','left_upper_arm','left_upper_leg','right_lower_arm','right_shoulder','right_upper_arm','right_upper_leg','tail','tail2','tail3','tail4','torso','upper_torso'],
+ 'chansey':['egg_torso','head','left_arm','left_tendril_front','pouch','right_arm','tail1','tail2','torso'],
+ 'tangela':[],
+ 'kangaskhan':['arm_left','arm_right','body','head','kid','kid_head','leg_left','leg_right','pouch','pouch_kid','tail','tail2','tail3','tail4','tail5','torso','torso_kid'],
+ 'horsea':['body','fin','head','neck','tail','tail2','torso'],
+ 'seadra':['body','fin_left','fin_right','head','tail','torso'],
+ 'goldeen':['eyes','fin_left1','fin_left2','fin_left3','fin_right1','fin_right2','fin_right3','head','tail_left1','tail_left2','tail_left3','tail_middle1','tail_middle2','tail_right1','tail_right2','tail_right3','torso'],
+ 'seaking':['body','fin_left1','fin_left2','fin_right1','fin_right2','tail','tail_back_left1','tail_back_right1','tail_bottom_left','tail_bottom_right','torso','torso_end'],
+ 'staryu':['body','body_limb_bottom_left','body_limb_bottom_right','body_limb_left','body_limb_right','body_limb_top']
+})
+RUN.update({
+ 'rhyhorn':['head','left_back_foot','left_back_leg','left_front_foot','left_front_leg','right_back_foot','right_back_leg','right_front_foot','right_front_leg','torso'],
+ 'rhydon':['head','left_foot','left_lower_arm','left_lower_leg','left_upper_arm','left_upper_leg','right_foot','right_lower_arm','right_lower_leg','right_upper_arm','right_upper_leg','tail','tail2','tail3','tail4','torso','upper_torso'],
+ 'chansey':['egg_torso','head','left_arm','left_foot','left_tendril_front','pouch','right_arm','right_foot','tail1','tail2','torso'],
+ 'staryu':['body']
+})
 RUN.update({'lickitung':['left_leg','right_leg','left_foot','right_foot','tongue2','tongue3','tongue4','tail_1','tail_2','tail_3']})
 evidence=[]
 for d in defs[start-1:end]:
@@ -221,12 +251,12 @@ for d in defs[start-1:end]:
   assert 'animation_length' not in cry or cry['animation_length']==misplaced
   cry['animation_length']=misplaced
   d['source_event_correction']='cry duration 1.25 moved from sound_effects metadata to clip animation_length; timestamp/effect unchanged'
- if args.batch in (5,6,7,8,9,10,11):
+ if args.batch in (5,6,7,8,9,10,11,12):
   # Retain every native clip. Only normalize syntax / unsupported mounted inputs.
   def adapt(value):
    if isinstance(value,str):
     value=value.replace('Math.','math.')
-    if args.batch in (7,8,9,10,11):
+    if args.batch in (7,8,9,10,11,12):
      value=re.sub(r'\bq\.', 'query.',value)
      # GeckoLib 3.1.40's Molang parser rejects a unary minus directly before
      # a grouped expression; multiplying the complete group by -1 is equal.
@@ -251,7 +281,7 @@ for d in defs[start-1:end]:
    d['source_molang_adaptations']={'q.':'query.'}
   if args.batch==8:
    d['source_molang_adaptations']={'q.':'query.','Math.':'math.'}
-  if args.batch in (9,10,11):
+  if args.batch==12:
    d['source_molang_adaptations']={'q.':'query.','Math.':'math.'}
   if slug=='zubat':
    poser=json.loads(z.read(f'{prefix}/posers/{folder}/{slug}.json'))
@@ -273,7 +303,7 @@ for d in defs[start-1:end]:
  d['source_model_variant']=Path(model).name
  d['source_cobblemon_version']='1.8.2'
  d.pop('generated_static_animation',None);d.pop('movement_fallback',None)
- if args.batch==11:
+ if args.batch in (11,12):
   source_species=json.loads(z.read(f'data/cobblemon/species/generation1/{slug}.json'))
   moving=source_species.get('behaviour',{}).get('moving',{})
   can_fly=bool(moving.get('fly',{}).get('canFly',False))
@@ -286,6 +316,13 @@ for d in defs[start-1:end]:
   flying=False
  idle=(names.get('air_idle') or names.get('ground_idle') or names.get('idle') or names.get('ground_idle_placeholder')) if flying else (names.get('ground_idle') or names.get('idle') or names.get('ground_idle_placeholder'))
  walk=(names.get('air_fly') or names.get('ground_walk') or names.get('ground_walk_placeholder')) if flying else (names.get('ground_walk') or names.get('ground_walk_placeholder'))
+ if args.batch==12 and slug=='tangela':
+  # Cobblemon 1.8.2 provides Tangela's model and cry but no locomotion clip
+  # or poser. A bind-pose hold is a transparent fallback, not invented motion.
+  idle=walk='animation.tangela.minemon_static'
+  animations[idle]={'animation_length':4.0,'loop':True,'bones':{'body':{'rotation':[0,0,0]}}}
+  (R/paths['animation']).write_text(json.dumps({'format_version':'1.8.0','animations':animations},indent=2)+'\n')
+  d['movement_fallback']='idle';d['source_static_idle']=True
  assert idle,'Missing source idle '+slug
  if slug in ('spearow','fearow'):
   poser_path=f'{prefix}/posers/{folder}/{slug}.json'
@@ -409,7 +446,7 @@ for d in defs[start-1:end]:
     look_bones=sorted({re.search(r"q.look\('([^']+)'",a).group(1) for a in look_inputs})
     available={name:(name if name in bones else 'head' if name=='head_ai' and 'head' in bones else None) for name in look_bones}
     d['source_procedural_pose']={'poser':poser_path,'look':look_inputs,'look_bones':look_bones,'adapted_geo_bones':available,'adaptation':'Map q.look to the source head bone when present; no locomotion gait is synthesized'}
- if args.batch in (8,9,10):
+ if args.batch in (8,9,10,11,12):
   poser_path=f'{prefix}/posers/{folder}/{variant}.json'
   if poser_path in members:
    poser=json.loads(z.read(poser_path))
@@ -418,7 +455,7 @@ for d in defs[start-1:end]:
     look_bones=sorted({re.search(r"q.look\('([^']+)'",a).group(1) for a in look_inputs})
     available={name:(name if name in bones else 'head' if name=='head_ai' and 'head' in bones else None) for name in look_bones}
     d['source_procedural_pose']={'poser':poser_path,'look':look_inputs,'look_bones':look_bones,'adapted_geo_bones':available,'adaptation':'Map q.look to a real compatible source head bone in MinemonModel; no locomotion gait is synthesized'}
- if args.batch==11:
+ if args.batch in (11,12):
   # Never create a run clip from walk or synthesize action poses for this batch.
   # Keep only native action clips; runtime safely leaves the selected pose active
   # if a species has no source clip for an optional action.
@@ -433,7 +470,11 @@ for d in defs[start-1:end]:
   dynamic=dynamic or any(isinstance(value,dict) and len(value)>1 for channel in native_idle.get('bones',{}).values() for value in channel.values())
   if not dynamic:
    prof['idle_static']=prof['idle'];d['source_static_idle']=True
-  d['source_molang_adaptations']={'q.':'query.','Math.':'math.'}
+   d['source_molang_adaptations']={'q.':'query.','Math.':'math.'}
+  if args.batch==12 and slug=='tangela':
+   prof={'idle':['body'],'walk':['body'],'run':['body'],'idle_static':['body']}
+   d['source_static_idle']=True
+   d['source_resource_limit']='Cobblemon 1.8.2 Tangela includes a cry clip but no idle/walk/run clip or poser; Minemon selects a four-second looping bind-pose hold with no synthesized movement.'
  for state,joints in prof.items():
   assert set(joints)<=bones,(slug,state,set(joints)-bones)
  profiles[slug]=prof
