@@ -160,3 +160,13 @@ Aguardar o run legado `39658750383` encerrar sem iniciá-lo novamente. Depois, e
 - Workflow ajustado para executar os dois testes focados antes do comando de suíte/build. Como o preflight falhou, servidor/cliente ainda não foram iniciados. Nenhum recurso, modelo, textura ou animação dos primeiros 80 foi alterado nesta correção.
 - Teste Java local direcionado não iniciou: o wrapper tentou baixar Gradle 7.5.1 e o ambiente respondeu `Network is unreachable`. Validação local de compilação, suíte e runtime ainda pendente do Actions. Nenhum teste foi removido ou marcado como aprovado por timeout.
 - Próximo checkpoint: enviar um único commit focado para a branch do Lote 8; acompanhar os dois testes direcionados. Se passarem, o mesmo workflow segue para suíte Java, GameTests do servidor, um smoke completo do cliente, inspeção do JAR e upload. Se falharem, parar antes de qualquer lançamento do Minecraft e corrigir com base no relatório XML.
+
+
+## Checkpoint 13 — validação em andamento (2026-10-21)
+
+- Código sob validação: `901fedc42758fa472edeb551987906e423829306` na branch `feature/minemon-gen1-batch8-cobblemon`.
+- GitHub Actions [39700680502](https://github.com/PetrickFaria/minemon/actions/runs/39700680502): testes Java direcionados passaram; `buildEnvironment clean test build` e GameTests do servidor passaram; etapa única de smoke completo do cliente segue `in_progress`.
+- O smoke percorre as 151 espécies sob timeout de 2700 s (45 min). Não foi iniciado retry nem execução paralela. O conector ainda não expõe logs/progresso enquanto a etapa está ativa.
+- Inspeção do JAR, verificação cumulativa final no JAR e upload ainda não começaram. Nenhum JAR desta revisão deve ser anunciado como aprovado até o workflow terminar verde.
+- Os verificadores locais de recursos, Lote 8 e asas de Pidgeotto/Pidgeot passaram. O wrapper Gradle local permanece bloqueado ao tentar baixar 7.5.1; a execução remota aprovou os testes Java.
+- Próxima ação: acompanhar a mesma execução `39700680502`; se o cliente passar, conferir a inspeção e o artefato de download desse run. Se falhar ou expirar, usar seus logs para um reparo específico antes de nova validação.
