@@ -56,12 +56,22 @@ Fonte local auditada: Cobblemon Fabric 1.8.2, SHA-256 `cae8ac328b61354fbe415208b
 - Commit da correção: `52abd5e93bf1f8da41d74702baf138380f991d09` (`Fix static Tangela smoke fallback classification`).
 - Próximo passo: aguardar o Actions #39850003592; Java/build e GameTests passaram; smoke está em andamento.
 
+## Segundo diagnóstico de smoke — Actions #39850003592
+
+- Java/build e GameTests: PASS. O smoke do cliente falhou na verificação de articulação para Alakazam: `idle=0 walk=5 run=4 required=1`.
+- Causa: o clip nativo `animation.alakazam.ground_idle` contém movimento real em pés, pernas, mãos, quadris e torso. O perfil de repouso observava apenas torso e bigodes; as variações medidas nesses joints ficaram abaixo do limiar do smoke, embora o clip seja animado.
+- Correção preparada: perfil de repouso agora mede `foot_left`, `foot_right`, `left_lower_leg`, `right_lower_leg`, `hand_left` e `hand_right`, todos presentes e animados no clip-fonte. Nenhuma animação, modelo ou textura de Alakazam foi alterada; a exigência do smoke continua sendo pelo menos uma articulação em movimento.
+- Os verificadores cumulativos dos Lotes 8–12 foram ajustados para permitir somente essa alteração pontual de perfil e validar o conjunto exato; recursos anteriores permanecem byte a byte preservados.
+- Run #39850003592: smoke falhou deterministicamente no perfil de Alakazam; inspeção e JAR foram corretamente pulados. Diagnóstico artifact #12459171999.
+- Verificadores direcionados Batch 12, cumulativos Batch 8–11, runtime e preflight Molang: PASS localmente após a correção. Build Java local indisponível por ausência de distribuição Gradle 7.5.1 no cache e rede de dependências bloqueada; CI é a validação oficial.
+- Próxima etapa: publicar este ajuste pontual e executar uma única validação GitHub Actions sequencial. Não iniciar o Lote 13 até o smoke e a publicação do JAR passarem.
+
 ## Validações e publicações
 
-- Actions #39841242841: Java/build e GameTests PASS; smoke falhou no teste geral de deslocamento, por classificação incorreta do fallback estático de Tangela.
-- Actions #39850003592 após a correção: Java/build e GameTests PASS; smoke do cliente em andamento.
+- Actions #39841242841: Java/build e GameTests PASS; smoke falhou na classificação do fallback estático de Tangela.
+- Actions #39850003592: Java/build e GameTests PASS; smoke falhou no perfil de repouso de Alakazam; não houve retry automático nem JAR.
 - Artefato de JAR do Lote 12: ainda não gerado.
-- Próxima etapa: aguardar aprovação integral antes de iniciar o Lote 13.
+- Próxima etapa: validar a correção do perfil e concluir todas as verificações antes de iniciar o Lote 13.
 
 ## Correções visuais protegidas
 

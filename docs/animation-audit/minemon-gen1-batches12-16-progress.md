@@ -10,7 +10,7 @@
 - Lote ativo: 12 (#111–#120), branch `feature/minemon-gen1-batch12-cobblemon`.
 - Base: `0816533addee80e9e17a684c94bed399f4a9488f`.
 - Lotes 1–11/110 espécies: preservados e validados na base aprovada.
-- Lote 12: recursos #111–#120 integrados; verificadores estruturais, suíte Java/build e GameTests passaram no Actions #39841242841. Smoke falhou somente na classificação da pose estática de Tangela; correção `movement_fallback=static` publicada no commit `52abd5e93bf1f8da41d74702baf138380f991d09`. Actions #39850003592: Java/build e GameTests PASS, smoke em andamento; JAR pendente.
+- Lote 12: recursos #111–#120 integrados; Java/build e GameTests passaram nas execuções #39841242841 e #39850003592. O primeiro smoke apontou fallback de Tangela classificado incorretamente; corrigido para `static` no commit `52abd5e93bf1f8da41d74702baf138380f991d09`. O segundo smoke apontou que o perfil de repouso de Alakazam observava joints com movimento abaixo do limiar, apesar de o clip nativo movimentar pés/pernas/mãos. Ajuste de perfil preparado com joints comprovadamente animados; verificação cumulativa local PASS. Actions final, JAR e artefato ainda pendentes.
 - Diagnósticos do primeiro run: artifact #12456257638 (expira 2026-10-29 20:30:07 UTC); logs do servidor #12452159446 (expira 2026-10-29 19:37:33 UTC). Nenhum JAR foi publicado para esse run.
 - Lotes 13–16: ainda não iniciados.
 - Próximo passo: validar/publicar o Lote 12; somente depois iniciar o Lote 13.
@@ -19,7 +19,7 @@
 
 | Lote | Pokémon | Branch | Estado |
 |---:|---:|---|---|
-| 12 | #111–#120 | `feature/minemon-gen1-batch12-cobblemon` | Corrigindo classificação do fallback estático; nova validação pendente |
+| 12 | #111–#120 | `feature/minemon-gen1-batch12-cobblemon` | Ajustando perfil do idle nativo de Alakazam; Actions final pendente |
 | 13 | #121–#130 | `feature/minemon-gen1-batch13-cobblemon` | Não iniciado |
 | 14 | #131–#140 | `feature/minemon-gen1-batch14-cobblemon` | Não iniciado |
 | 15 | #141–#150 | `feature/minemon-gen1-batch15-cobblemon` | Não iniciado |

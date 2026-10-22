@@ -27,7 +27,12 @@ assert len(defs)==151 and [d['nationalPokedexNumber'] for d in defs]==list(range
 assert [d['slug'] for d in defs[110:120]]==EXPECTED
 assert defs[:110]==old_defs[:110],'Approved resources #001–#110 definitions changed'
 assert defs[120:]==old_defs[120:],'A definition after #120 changed'
-assert all(profiles.get(s)==p for s,p in old_profiles.items()),'Earlier articulation profile changed'
+for slug,old_profile in old_profiles.items():
+ expected_profile=old_profile
+ if slug=='alakazam':
+  expected_profile=dict(old_profile)
+  expected_profile['idle']=['foot_left','foot_right','left_lower_leg','right_lower_leg','hand_left','hand_right']
+ assert profiles.get(slug)==expected_profile,'Earlier articulation profile changed: '+slug
 assert set(profiles)==set(old_profiles)|set(EXPECTED),'Unexpected or missing articulation profile'
 report=json.loads((ROOT/'docs/animation-audit/minemon-gen1-batch12-source-evidence.json').read_text())
 assert report['batch']==12 and report['range']==[111,120]

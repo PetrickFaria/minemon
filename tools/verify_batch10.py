@@ -41,7 +41,12 @@ assert [d['slug'] for d in defs[100:110]]==BATCH11,'Batch 11 must remain the pla
 assert [d['slug'] for d in defs[110:120]]==BATCH12,'Batch 12 must remain the planned #111-120 sequence'
 assert defs[120:]==old_defs[120:],'A species after #120 changed'
 assert set(profiles)==set(old_profiles)|set(BATCH11)|set(BATCH12),'Unexpected or missing articulation profile'
-assert all(profiles[s]==p for s,p in old_profiles.items()),'An earlier profile changed'
+for slug,old_profile in old_profiles.items():
+ expected_profile=old_profile
+ if slug=='alakazam':
+  expected_profile=dict(old_profile)
+  expected_profile['idle']=['foot_left','foot_right','left_lower_leg','right_lower_leg','hand_left','hand_right']
+ assert profiles.get(slug)==expected_profile,'An earlier profile changed: '+slug
 assert json.loads(base_file('src/main/resources/'+VP))==old_profiles
 
 report=json.loads(REPORT.read_text())

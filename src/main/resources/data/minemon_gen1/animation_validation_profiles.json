@@ -1001,9 +1001,12 @@
   },
   "alakazam": {
     "idle": [
-      "upper_torso",
-      "left_mustache",
-      "right_mustache"
+      "foot_left",
+      "foot_right",
+      "left_lower_leg",
+      "right_lower_leg",
+      "hand_left",
+      "hand_right"
     ],
     "walk": [
       "left_upper_leg",
