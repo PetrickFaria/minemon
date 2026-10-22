@@ -38,9 +38,12 @@ Fonte local auditada: Cobblemon Fabric 1.8.2, SHA-256 `cae8ac328b61354fbe415208b
 
 ## Testes pendentes e próximo passo
 
-- Tentativa de testes Java direcionados localmente não iniciou: o wrapper Gradle precisa baixar Gradle 7.5.1 e o ambiente retornou `Network is unreachable`. Nenhum servidor, GameTest ou cliente foi iniciado.
-- Próxima etapa: publicar este checkpoint de código e usar uma única execução do GitHub Actions para testar Molang/Java, compilação, GameTests, smoke completo, inspeção e artefato. Se falhar, corrigir a causa com testes direcionados antes de nova execução.
-- Commit de implementação/Actions/JAR do Lote 12: pendentes.
+- Testes Java direcionados e suíte Java/build completos: PASS no Actions #39841242841, commit `4c314bf5b3537689b6813e873a4b723ff80aed36`.
+- GameTests do servidor: PASS no mesmo run.
+- Smoke completo do cliente: em andamento na etapa 15/19 do mesmo run; ainda sem aprovação, falha ou retry.
+- Inspeção do JAR e publicação do artefato: aguardam o smoke.
+- Próxima etapa: aguardar o run #39841242841; se falhar, consultar logs e corrigir somente a causa comprovada.
+- Commit de implementação do Lote 12: `4c314bf5b3537689b6813e873a4b723ff80aed36`.
 
 ## Validações e publicações
 
