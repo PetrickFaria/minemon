@@ -152,10 +152,10 @@ public class Batch8AnimationCompatibilityTest {
         var profile=json("data/minemon_gen1/animation_validation_profiles.json").getAsJsonObject()
             .getAsJsonObject("geodude");
         assertEquals("Idle remains measured on the natively moving arms",List.of("arm_left","arm_right"),
-            profile.getAsJsonArray("idle").asList().stream().map(JsonElement::getAsString).toList());
+            strings(profile.getAsJsonArray("idle")));
         for(String state:List.of("walk","run"))
             assertEquals("Geodude "+state+" must measure joints animated by its source clip",
-                List.of("body","torso"),profile.getAsJsonArray(state).asList().stream().map(JsonElement::getAsString).toList());
+                List.of("body","torso"),strings(profile.getAsJsonArray(state)));
 
         var clips=animations("geodude");
         for(String gait:List.of("ground_walk","ground_run")) {
@@ -165,6 +165,12 @@ public class Batch8AnimationCompatibilityTest {
             assertTrue("Geodude "+gait+" torso channel must vary with animation time",
                 changesWithTime(bones.getAsJsonObject("torso"),new MolangParser()));
         }
+    }
+
+    private static List<String> strings(JsonArray values) {
+        var result=new java.util.ArrayList<String>();
+        for(JsonElement value:values)result.add(value.getAsString());
+        return result;
     }
 
     private static int index(String slug) { return SPECIES.indexOf(slug)+70; }

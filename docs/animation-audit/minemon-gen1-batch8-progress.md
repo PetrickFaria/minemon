@@ -180,3 +180,11 @@ Aguardar o run legado `39658750383` encerrar sem iniciá-lo novamente. Depois, e
 - A regressão das asas de Pidgeotto/Pidgeot passou. Logs e diagnóstico: artefato [minemon-test-diagnostics](https://github.com/PetrickFaria/minemon/actions/runs/39700680502/artifacts/12394186988), expira em 2026-10-29.
 - Verificações locais após a correção do perfil: `verify_project.py`, `verify_molang_compatibility.py`, `verify_batch8.py`, `verify_pidge_wing_visibility.py`, compilação Python e `git diff --check` passaram. Java/cliente locais permanecem sem Gradle 7.5.1 disponível.
 - Próxima execução única: testar Geodude/Graveler/Golem por smoke direcionado depois de Java e servidor; em seguida, executar um único smoke completo do cliente. Não há JAR aprovado ainda.
+
+
+## Checkpoint 15 — teste focado recompilável (2026-10-22)
+
+- A execução [39704680754](https://github.com/PetrickFaria/minemon/actions/runs/39704680754) falhou em `:compileTestJava` antes dos testes e antes de iniciar Minecraft. O erro foi de compatibilidade com a versão Gson do Forge: `JsonArray.asList()` não existe no Gson incluído pelo projeto.
+- As verificações de recursos, auditoria Molang, lote 8 e asas Pidge passaram nessa execução; o smoke direcionado e o completo foram corretamente pulados. Não houve nova tentativa longa nem JAR.
+- Corrigi o teste Java para ler os elementos de `JsonArray` por iteração, sem depender de API indisponível. Perfil Geodude segue body/torso na caminhada e corrida; clips, modelos e texturas permanecem intactos.
+- Próxima ação: executar novamente os dois testes focados, a suíte Java e, se aprovados, servidor, smoke de Geodude/Graveler/Golem e smoke completo. A correção ainda aguarda Actions.
