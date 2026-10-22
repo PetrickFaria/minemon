@@ -9,6 +9,7 @@ MP='src/main/resources/data/minemon_gen1/runtime_species.json'
 VP='src/main/resources/data/minemon_gen1/animation_validation_profiles.json'
 EXPECTED=['magnemite','magneton','farfetchd','doduo','dodrio','seel','dewgong','grimer','muk','shellder']
 BATCH10=['cloyster','gastly','haunter','gengar','onix','drowzee','hypno','krabby','kingler','voltorb']
+BATCH11=['electrode','exeggcute','exeggutor','cubone','marowak','hitmonlee','hitmonchan','lickitung','koffing','weezing']
 ap=argparse.ArgumentParser()
 ap.add_argument('--segment',choices=('first','second'))
 ap.add_argument('jar',nargs='?')
@@ -36,7 +37,8 @@ assert defs[:80]==old_defs[:80],'One of the first 80 species definitions changed
 allowed_l9=set(EXPECTED[:end-80])
 assert all(defs[i]==old_defs[i] for i in range(80,90) if defs[i]['slug'] not in allowed_l9),'Unimplemented Batch 9 species definition changed'
 assert [d['slug'] for d in defs[90:100]]==BATCH10,'Batch 10 must remain the planned #091-100 sequence'
-assert defs[100:]==old_defs[100:],'Species after Batch 10 changed'
+assert [d['slug'] for d in defs[100:110]]==BATCH11,'Batch 11 must remain the planned #101-110 sequence'
+assert defs[110:]==old_defs[110:],'Species after Batch 11 changed'
 for slug,old_profile in old_profiles.items():
  expected_profile=old_profile
  if slug=='geodude':
@@ -44,7 +46,7 @@ for slug,old_profile in old_profiles.items():
   expected_profile['walk']=['body','torso']
   expected_profile['run']=['body','torso']
  assert profiles.get(slug)==expected_profile,'Earlier animation profile changed: '+slug
-assert set(profiles)==set(old_profiles)|set(EXPECTED[:end-80])|{s for s in BATCH10 if s in profiles},'Unexpected articulation profile set'
+assert set(profiles)==set(old_profiles)|set(EXPECTED[:end-80])|{s for s in BATCH10+BATCH11 if s in profiles},'Unexpected articulation profile set'
 source_report=json.loads((ROOT/'docs/animation-audit/minemon-gen1-batch9-source-evidence.json').read_text())
 assert source_report['source_sha256']=='cae8ac328b61354fbe415208b8c6ffc12e7155094d0a87082e85e7914fb380c2'
 assert [s['slug'] for s in source_report['species']]==EXPECTED[:end-80]
@@ -72,6 +74,8 @@ for d in defs[80:80+len(authorized)]:
  assert all('_cobblemon_1_8_2/' in d[k] for k in ('model','texture','animation'))
  allowed.update([d['model'],d['texture'],d['animation']]+d['licenses'])
 for d in defs[90:100]:
+ if d.get('source_cobblemon_version')=='1.8.2':allowed.update([d['model'],d['texture'],d['animation']]+d['licenses'])
+for d in defs[100:110]:
  if d.get('source_cobblemon_version')=='1.8.2':allowed.update([d['model'],d['texture'],d['animation']]+d['licenses'])
 allowed_paths={str(Path('src/main/resources')/p) for p in allowed}
 geo_by_slug={};anim_by_slug={}
@@ -139,7 +143,7 @@ if not args.segment:
  assert {d['slug'] for d in defs[80:90] if d.get('source_static_idle')}=={'seel','muk'},'Only source-verified static idle clips may use the stable-pose profile'
 
 changed=subprocess.check_output(['git','diff','--name-only',BASE,'--','src/main/resources'],cwd=ROOT,text=True).splitlines()
-allowed_resources=allowed_paths|{MP,VP,'docs/animation-audit/minemon-gen1-batch9-source-evidence.json','docs/animation-audit/minemon-gen1-batch10-source-evidence.json','src/main/resources/assets/minemon/animations/weedle_cobblemon_1_8_2/weedle.animation.json','src/main/resources/assets/minemon/animations/pidgeotto_cobblemon_1_8_2/pidgeotto.animation.json'}
+allowed_resources=allowed_paths|{MP,VP,'docs/animation-audit/minemon-gen1-batch9-source-evidence.json','docs/animation-audit/minemon-gen1-batch10-source-evidence.json','docs/animation-audit/minemon-gen1-batch11-source-evidence.json','src/main/resources/assets/minemon/animations/weedle_cobblemon_1_8_2/weedle.animation.json','src/main/resources/assets/minemon/animations/pidgeotto_cobblemon_1_8_2/pidgeotto.animation.json'}
 assert set(changed)<=allowed_resources,set(changed)-allowed_resources
 print(f'PASS BATCH 9 {start}-{end}: source 1.8.2, rig/texture/clips/events, selected profile joints, and previous 80 resource preservation')
 if args.jar:

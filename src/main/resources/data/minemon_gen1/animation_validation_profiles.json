@@ -1853,5 +1853,262 @@
     "run": [
       "body"
     ]
+  },
+  "electrode": {
+    "idle": [
+      "body"
+    ],
+    "walk": [
+      "body"
+    ],
+    "run": [
+      "body"
+    ]
+  },
+  "exeggcute": {
+    "idle": [
+      "egg1",
+      "egg2",
+      "egg3",
+      "egg4",
+      "egg5",
+      "egg6"
+    ],
+    "walk": [
+      "egg1",
+      "egg2",
+      "egg3",
+      "egg4",
+      "egg5",
+      "egg6",
+      "yoke"
+    ],
+    "run": [
+      "egg1",
+      "egg2",
+      "egg3",
+      "egg4",
+      "egg5",
+      "egg6",
+      "yoke"
+    ]
+  },
+  "exeggutor": {
+    "idle": [
+      "body",
+      "head",
+      "head2",
+      "head3",
+      "torso"
+    ],
+    "walk": [
+      "body",
+      "head",
+      "head2",
+      "head3",
+      "leg_left",
+      "leg_right",
+      "foot_left",
+      "foot_right"
+    ],
+    "run": [
+      "body",
+      "head",
+      "head2",
+      "head3",
+      "leg_left",
+      "leg_right",
+      "foot_left",
+      "foot_right"
+    ]
+  },
+  "cubone": {
+    "idle": [
+      "bone_torso",
+      "bone_upper_torso",
+      "left_upper_arm",
+      "right_upper_arm",
+      "head",
+      "bone"
+    ],
+    "walk": [
+      "bone_torso",
+      "bone_upper_torso",
+      "left_upper_arm",
+      "right_upper_arm",
+      "left_leg",
+      "right_leg"
+    ],
+    "run": [
+      "bone_torso",
+      "bone_upper_torso",
+      "left_upper_arm",
+      "right_upper_arm",
+      "left_leg",
+      "right_leg"
+    ],
+    "idle_static": [
+      "bone_torso",
+      "bone_upper_torso",
+      "left_upper_arm",
+      "right_upper_arm",
+      "head",
+      "bone"
+    ]
+  },
+  "marowak": {
+    "idle": [
+      "bone_torso",
+      "bone_upper_torso",
+      "right_upper_arm",
+      "right_lower_arm",
+      "right_hand",
+      "head"
+    ],
+    "walk": [
+      "bone_torso",
+      "bone_upper_torso",
+      "left_upper_arm",
+      "right_upper_arm",
+      "right_hand",
+      "left_hand"
+    ],
+    "run": [
+      "bone_torso",
+      "bone_upper_torso",
+      "left_upper_arm",
+      "right_upper_arm",
+      "right_hand",
+      "left_hand"
+    ],
+    "idle_static": [
+      "bone_torso",
+      "bone_upper_torso",
+      "right_upper_arm",
+      "right_lower_arm",
+      "right_hand",
+      "head"
+    ]
+  },
+  "hitmonlee": {
+    "idle": [
+      "arm_left",
+      "arm_right",
+      "leg_left",
+      "leg_right",
+      "torso"
+    ],
+    "walk": [
+      "leg_left",
+      "leg_right",
+      "foot_left",
+      "foot_right",
+      "arm_left",
+      "arm_right"
+    ],
+    "run": [
+      "leg_left",
+      "leg_right",
+      "foot_left",
+      "foot_right",
+      "arm_left",
+      "arm_right"
+    ]
+  },
+  "hitmonchan": {
+    "idle": [
+      "arm_left2",
+      "arm_right2",
+      "head",
+      "torso"
+    ],
+    "walk": [
+      "body",
+      "foot_left",
+      "foot_right",
+      "arm_left",
+      "arm_right",
+      "hand_left",
+      "hand_right"
+    ],
+    "run": [
+      "body",
+      "foot_left",
+      "foot_right",
+      "arm_left",
+      "arm_right",
+      "hand_left",
+      "hand_right"
+    ]
+  },
+  "lickitung": {
+    "idle": [
+      "head",
+      "left_foot",
+      "left_leg",
+      "right_foot",
+      "right_leg",
+      "tongue2",
+      "tongue3",
+      "tongue4",
+      "torso"
+    ],
+    "walk": [
+      "head",
+      "left_foot",
+      "right_foot",
+      "left_leg",
+      "right_leg",
+      "tongue2",
+      "tongue3",
+      "tongue4",
+      "tail_1"
+    ],
+    "run": [
+      "left_leg",
+      "right_leg",
+      "left_foot",
+      "right_foot",
+      "tongue2",
+      "tongue3",
+      "tongue4",
+      "tail_1",
+      "tail_2",
+      "tail_3"
+    ]
+  },
+  "koffing": {
+    "idle": [
+      "body",
+      "body_inflate",
+      "craters",
+      "eyes"
+    ],
+    "walk": [
+      "body",
+      "craters",
+      "crater_top1"
+    ],
+    "run": [
+      "body",
+      "craters",
+      "crater_top1"
+    ]
+  },
+  "weezing": {
+    "idle": [
+      "main_body",
+      "middle_body"
+    ],
+    "walk": [
+      "body",
+      "middle_body",
+      "small_body"
+    ],
+    "run": [
+      "body",
+      "middle_body",
+      "small_body"
+    ]
   }
 }

@@ -31,10 +31,23 @@ Estado inicial: todos os Pokémon do Lote 11 estão pendentes de integração. A
 
 A tabela acima é inventário preliminar do repositório e não substitui a inspeção dos arquivos do Cobblemon 1.8.2. Corrigir o inventário se a fonte efetiva divergir.
 
-## Pokémon implementados / pendentes
+## Checkpoint 2/3 — integração #101–#110
 
-- Implementados no Lote 11: nenhum.
-- Pendentes: #101–#110.
+- Importados os dez modelos, texturas, licenças e arquivos de animação do JAR Cobblemon Fabric 1.8.2 com SHA-256 `cae8ac328b61354fbe415208b8c6ffc12e7155094d0a87082e85e7914fb380c2`.
+- Selecionadas as variantes Kanto canônicas (`<slug>.geo.json`); nenhum arquivo Alolan, Galarian ou Hisuian foi usado como modelo principal.
+- Atualizadas somente as definições #101–#110 e os perfis correspondentes. Verificador estrutural confirmou preservação das definições #001–#100 e dos demais registros.
+- #101 Electrode: `ground_idle` e `ground_walk` nativos; sem corrida nativa.
+- #102 Exeggcute: preservados os seis ovos e clips nativos; sem corrida nativa.
+- #103 Exeggutor: forma Kanto com três cabeças e clips terrestres nativos; sem corrida nativa.
+- #104 Cubone e #105 Marowak: clip `idle` é uma pose estática; movimento usa fallback para o próprio idle e está classificado como tal nos perfis. Não foi inventada caminhada ou corrida.
+- #106 Hitmonlee: idle/walk nativos; sem corrida nativa.
+- #107 Hitmonchan: idle/walk nativos; clips `ground_run_WIP` e `physical_attack_WIP` preservados mas não selecionados.
+- #108 Lickitung: idle/walk/run nativos; perfil inclui os segmentos articulados da língua.
+- #109 Koffing e #110 Weezing: comportamento da espécie no Cobblemon define voo e ausência de caminhada terrestre; clips `air_fly` usados no estado de movimento. Weezing segue `flying`, corrigindo o modo legado `ground`.
+- Clips opcionais de sentar/dormir/ataque só são referenciados quando a fonte contém clip correspondente. O importador não cria substitutos `.minemon_*` para o Lote 11.
+- Adaptados aliases Molang Bedrock `q.` → `query.` e namespace `Math.` → `math.` para os clips importados.
+
+Pokémon implementados no checkout: #101–#110. A verificação estrutural preliminar passou. Ainda faltam os testes Java direcionados, a suíte completa, GameTests do servidor, smoke do cliente, compilação/JAR e Actions final.
 
 ## Correções e recursos protegidos
 
@@ -45,7 +58,9 @@ A tabela acima é inventário preliminar do repositório e não substitui a insp
 ## Validações e próxima etapa
 
 - Aprovação base do Lote 10 confirmada no Actions e no JAR do artefato.
-- Validações do Lote 11: ainda não executadas.
-- Próximo passo: obter/confirmar os arquivos da fonte Cobblemon 1.8.2 para os dez alvos Kanto; comparar modelos, texturas, poses e clips com o inventário; depois implementar #101–#105 e executar verificações direcionadas antes do commit intermediário.
-- GitHub Actions do Lote 11: ainda não iniciado.
+- `tools/verify_batch11.py`: PASS local — hierarquias, ossos, pivôs/valores finitos, textura/UV, clips/events, modo e fallbacks; preservação dos primeiros 100 recursos conferida contra a base aprovada.
+- `tools/verify_molang_compatibility.py`: PASS dos clips ativos existentes (reporta somente funções de montaria incompatíveis em clips não selecionados já conhecidos; sem alteração desse escopo).
+- Ainda não executados: testes Java, GameTests, smoke completo do cliente, build final e inspeção do JAR do Lote 11.
+- Próximo passo: executar testes Molang e de compatibilidade do Batch 11 direcionados; corrigir apenas erros demonstrados antes da suíte inteira.
+- GitHub Actions do Lote 11: ainda não iniciado; evitar push/workflow até os testes locais direcionados aprovarem.
 - Avaliação visual manual dos novos Pokémon: pendente após entrega técnica.

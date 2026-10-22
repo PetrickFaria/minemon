@@ -4,7 +4,7 @@ import argparse,copy,hashlib,io,json,math,re,urllib.request,zipfile
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 R=ROOT/'src/main/resources'
-ap=argparse.ArgumentParser();ap.add_argument('--batch',type=int,choices=(2,3,4,5,6,7,8,9,10),required=True);ap.add_argument('--segment',choices=('first','second'));ap.add_argument('--source-jar',type=Path);args=ap.parse_args()
+ap=argparse.ArgumentParser();ap.add_argument('--batch',type=int,choices=(2,3,4,5,6,7,8,9,10,11),required=True);ap.add_argument('--segment',choices=('first','second'));ap.add_argument('--source-jar',type=Path);args=ap.parse_args()
 start,end=(args.batch-1)*10+1,args.batch*10
 if args.batch in (8,9) and args.segment:
  start,end=(((71,75) if args.segment=='first' else (76,80)) if args.batch==8 else ((81,85) if args.segment=='first' else (86,90)))
@@ -151,6 +151,31 @@ RUN.update({
  'drowzee':['leg_left','leg_right','arm_left','arm_right','torso','upper_torso'],
  'hypno':['left_upper_leg','right_upper_leg','left_upper_arm','right_upper_arm','pendulum','weight','torso','upper_torso']
 })
+GAIT.update({
+ 'electrode':['body'],
+ 'exeggcute':['egg1','egg2','egg3','egg4','egg5','egg6','yoke'],
+ 'exeggutor':['body','head','head2','head3','leg_left','leg_right','foot_left','foot_right'],
+ 'cubone':['bone_torso','bone_upper_torso','left_upper_arm','right_upper_arm','left_leg','right_leg'],
+ 'marowak':['bone_torso','bone_upper_torso','left_upper_arm','right_upper_arm','right_hand','left_hand'],
+ 'hitmonlee':['leg_left','leg_right','foot_left','foot_right','arm_left','arm_right'],
+ 'hitmonchan':['body','foot_left','foot_right','arm_left','arm_right','hand_left','hand_right'],
+ 'lickitung':['head','left_foot','right_foot','left_leg','right_leg','tongue2','tongue3','tongue4','tail_1'],
+ 'koffing':['body','craters','crater_top1'],
+ 'weezing':['body','middle_body','small_body']
+})
+IDLE.update({
+ 'electrode':['body'],
+ 'exeggcute':['egg1','egg2','egg3','egg4','egg5','egg6'],
+ 'exeggutor':['body','head','head2','head3','torso'],
+ 'cubone':['bone_torso','bone_upper_torso','left_upper_arm','right_upper_arm','head','bone'],
+ 'marowak':['bone_torso','bone_upper_torso','right_upper_arm','right_lower_arm','right_hand','head'],
+ 'hitmonlee':['arm_left','arm_right','leg_left','leg_right','torso'],
+ 'hitmonchan':['arm_left2','arm_right2','head','torso'],
+ 'lickitung':['head','left_foot','left_leg','right_foot','right_leg','tongue2','tongue3','tongue4','torso'],
+ 'koffing':['body','body_inflate','craters','eyes'],
+ 'weezing':['main_body','middle_body']
+})
+RUN.update({'lickitung':['left_leg','right_leg','left_foot','right_foot','tongue2','tongue3','tongue4','tail_1','tail_2','tail_3']})
 evidence=[]
 for d in defs[start-1:end]:
  slug=d['slug'];n=d['nationalPokedexNumber'];folder=f'{n:04d}_{slug}'
@@ -196,12 +221,12 @@ for d in defs[start-1:end]:
   assert 'animation_length' not in cry or cry['animation_length']==misplaced
   cry['animation_length']=misplaced
   d['source_event_correction']='cry duration 1.25 moved from sound_effects metadata to clip animation_length; timestamp/effect unchanged'
- if args.batch in (5,6,7,8,9,10):
+ if args.batch in (5,6,7,8,9,10,11):
   # Retain every native clip. Only normalize syntax / unsupported mounted inputs.
   def adapt(value):
    if isinstance(value,str):
     value=value.replace('Math.','math.')
-    if args.batch in (7,8,9,10):
+    if args.batch in (7,8,9,10,11):
      value=re.sub(r'\bq\.', 'query.',value)
      # GeckoLib 3.1.40's Molang parser rejects a unary minus directly before
      # a grouped expression; multiplying the complete group by -1 is equal.
@@ -226,7 +251,7 @@ for d in defs[start-1:end]:
    d['source_molang_adaptations']={'q.':'query.'}
   if args.batch==8:
    d['source_molang_adaptations']={'q.':'query.','Math.':'math.'}
-  if args.batch in (9,10):
+  if args.batch in (9,10,11):
    d['source_molang_adaptations']={'q.':'query.','Math.':'math.'}
   if slug=='zubat':
    poser=json.loads(z.read(f'{prefix}/posers/{folder}/{slug}.json'))
@@ -248,6 +273,12 @@ for d in defs[start-1:end]:
  d['source_model_variant']=Path(model).name
  d['source_cobblemon_version']='1.8.2'
  d.pop('generated_static_animation',None);d.pop('movement_fallback',None)
+ if args.batch==11:
+  source_species=json.loads(z.read(f'data/cobblemon/species/generation1/{slug}.json'))
+  moving=source_species.get('behaviour',{}).get('moving',{})
+  can_fly=bool(moving.get('fly',{}).get('canFly',False))
+  can_walk=bool(moving.get('walk',{}).get('canWalk',False))
+  d['mode']='flying' if can_fly and not can_walk else 'ground'
  flying=d['mode']=='flying'
  if slug in ('spearow','fearow'):
   # These sources use procedural poser wing motion; no native gait is invented.
@@ -387,6 +418,22 @@ for d in defs[start-1:end]:
     look_bones=sorted({re.search(r"q.look\('([^']+)'",a).group(1) for a in look_inputs})
     available={name:(name if name in bones else 'head' if name=='head_ai' and 'head' in bones else None) for name in look_bones}
     d['source_procedural_pose']={'poser':poser_path,'look':look_inputs,'look_bones':look_bones,'adapted_geo_bones':available,'adaptation':'Map q.look to a real compatible source head bone in MinemonModel; no locomotion gait is synthesized'}
+ if args.batch==11:
+  # Never create a run clip from walk or synthesize action poses for this batch.
+  # Keep only native action clips; runtime safely leaves the selected pose active
+  # if a species has no source clip for an optional action.
+  if 'ground_run' not in names:
+   d['clips'].pop('ground_run',None)
+  for key in ('sit','sleep','physical_attack'):
+   native=names.get(key) or (names.get('air_sleep') if key=='sleep' and flying else None) or (names.get('physical') or names.get('attack') if key=='physical_attack' else None)
+   if native:d['clips'][key]=native
+   else:d['clips'].pop(key,None)
+  native_idle=animations[idle]
+  dynamic=bool(re.search(r'\b(?:query|q)\.(?:anim_time|life_time)\b',json.dumps(native_idle.get('bones',{}))))
+  dynamic=dynamic or any(isinstance(value,dict) and len(value)>1 for channel in native_idle.get('bones',{}).values() for value in channel.values())
+  if not dynamic:
+   prof['idle_static']=prof['idle'];d['source_static_idle']=True
+  d['source_molang_adaptations']={'q.':'query.','Math.':'math.'}
  for state,joints in prof.items():
   assert set(joints)<=bones,(slug,state,set(joints)-bones)
  profiles[slug]=prof

@@ -48,6 +48,10 @@ def validate(read,definitions,prepared=False,packed=False):
   if prepared:
    for state,keys in {'run':('ground_run','run'),'sit':('sit',),'sleep':('sleep',),'attack':('physical_attack','physical','attack')}.items():
     if state=='run' and not any(d['clips'].get(k) in a for k in keys):continue
+    if 101<=number<=110 and state in ('sit','sleep','attack') and not any(d['clips'].get(k) in a for k in keys):
+     # Batch 11 follows the native Cobblemon action inventory. Do not synthesize
+     # a replacement pose solely to satisfy a generic runtime-resource check.
+     continue
     if not any(d['clips'].get(k) in a for k in keys):raise ValueError('Missing prepared '+state+' animation '+d['slug'])
    if d['slug'] in ('charmander','charmeleon','charizard'):
     anchor=d.get('flame_anchor');flame=next((b for b in g['minecraft:geometry'][0]['bones'] if b['name']=='tail_flame'),None)

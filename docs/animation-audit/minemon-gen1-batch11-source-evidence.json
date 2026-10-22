@@ -1,0 +1,385 @@
+{
+  "batch": 11,
+  "range": [
+    101,
+    110
+  ],
+  "source_url": "https://cdn.modrinth.com/data/MdwFAVRL/versions/GJ2a1b8O/Cobblemon-fabric-1.8.2%2B1.21.1.jar",
+  "source_sha256": "cae8ac328b61354fbe415208b8c6ffc12e7155094d0a87082e85e7914fb380c2",
+  "manual_visual_status": "pending; user will evaluate the authorized batches inside Minecraft",
+  "species": [
+    {
+      "number": 101,
+      "slug": "electrode",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0101_electrode/electrode.geo.json",
+      "idle": "animation.electrode.ground_idle",
+      "movement": "animation.electrode.ground_walk",
+      "mode": "ground",
+      "native_run": null,
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "body"
+        ],
+        "walk": [
+          "body"
+        ],
+        "run": [
+          "body"
+        ]
+      },
+      "stripped_bones": {}
+    },
+    {
+      "number": 102,
+      "slug": "exeggcute",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0102_exeggcute/exeggcute.geo.json",
+      "idle": "animation.exeggcute.ground_idle",
+      "movement": "animation.exeggcute.ground_walk",
+      "mode": "ground",
+      "native_run": null,
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "egg1",
+          "egg2",
+          "egg3",
+          "egg4",
+          "egg5",
+          "egg6"
+        ],
+        "walk": [
+          "egg1",
+          "egg2",
+          "egg3",
+          "egg4",
+          "egg5",
+          "egg6",
+          "yoke"
+        ],
+        "run": [
+          "egg1",
+          "egg2",
+          "egg3",
+          "egg4",
+          "egg5",
+          "egg6",
+          "yoke"
+        ]
+      },
+      "stripped_bones": {}
+    },
+    {
+      "number": 103,
+      "slug": "exeggutor",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0103_exeggutor/exeggutor.geo.json",
+      "idle": "animation.exeggutor.ground_idle",
+      "movement": "animation.exeggutor.ground_walk",
+      "mode": "ground",
+      "native_run": null,
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "body",
+          "head",
+          "head2",
+          "head3",
+          "torso"
+        ],
+        "walk": [
+          "body",
+          "head",
+          "head2",
+          "head3",
+          "leg_left",
+          "leg_right",
+          "foot_left",
+          "foot_right"
+        ],
+        "run": [
+          "body",
+          "head",
+          "head2",
+          "head3",
+          "leg_left",
+          "leg_right",
+          "foot_left",
+          "foot_right"
+        ]
+      },
+      "stripped_bones": {
+        "animation.exeggutor.cry": [
+          "jaw",
+          "mouth",
+          "mouth2"
+        ]
+      }
+    },
+    {
+      "number": 104,
+      "slug": "cubone",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0104_cubone/cubone.geo.json",
+      "idle": "animation.cubone.idle",
+      "movement": "animation.cubone.idle",
+      "mode": "ground",
+      "native_run": null,
+      "fallback": "idle",
+      "profiles": {
+        "idle": [
+          "bone_torso",
+          "bone_upper_torso",
+          "left_upper_arm",
+          "right_upper_arm",
+          "head",
+          "bone"
+        ],
+        "walk": [
+          "bone_torso",
+          "bone_upper_torso",
+          "left_upper_arm",
+          "right_upper_arm",
+          "left_leg",
+          "right_leg"
+        ],
+        "run": [
+          "bone_torso",
+          "bone_upper_torso",
+          "left_upper_arm",
+          "right_upper_arm",
+          "left_leg",
+          "right_leg"
+        ],
+        "idle_static": [
+          "bone_torso",
+          "bone_upper_torso",
+          "left_upper_arm",
+          "right_upper_arm",
+          "head",
+          "bone"
+        ]
+      },
+      "stripped_bones": {}
+    },
+    {
+      "number": 105,
+      "slug": "marowak",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0105_marowak/marowak.geo.json",
+      "idle": "animation.marowak.idle",
+      "movement": "animation.marowak.idle",
+      "mode": "ground",
+      "native_run": null,
+      "fallback": "idle",
+      "profiles": {
+        "idle": [
+          "bone_torso",
+          "bone_upper_torso",
+          "right_upper_arm",
+          "right_lower_arm",
+          "right_hand",
+          "head"
+        ],
+        "walk": [
+          "bone_torso",
+          "bone_upper_torso",
+          "left_upper_arm",
+          "right_upper_arm",
+          "right_hand",
+          "left_hand"
+        ],
+        "run": [
+          "bone_torso",
+          "bone_upper_torso",
+          "left_upper_arm",
+          "right_upper_arm",
+          "right_hand",
+          "left_hand"
+        ],
+        "idle_static": [
+          "bone_torso",
+          "bone_upper_torso",
+          "right_upper_arm",
+          "right_lower_arm",
+          "right_hand",
+          "head"
+        ]
+      },
+      "stripped_bones": {}
+    },
+    {
+      "number": 106,
+      "slug": "hitmonlee",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0106_hitmonlee/hitmonlee.geo.json",
+      "idle": "animation.hitmonlee.ground_idle",
+      "movement": "animation.hitmonlee.ground_walk",
+      "mode": "ground",
+      "native_run": null,
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "arm_left",
+          "arm_right",
+          "leg_left",
+          "leg_right",
+          "torso"
+        ],
+        "walk": [
+          "leg_left",
+          "leg_right",
+          "foot_left",
+          "foot_right",
+          "arm_left",
+          "arm_right"
+        ],
+        "run": [
+          "leg_left",
+          "leg_right",
+          "foot_left",
+          "foot_right",
+          "arm_left",
+          "arm_right"
+        ]
+      },
+      "stripped_bones": {}
+    },
+    {
+      "number": 107,
+      "slug": "hitmonchan",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0107_hitmonchan/hitmonchan.geo.json",
+      "idle": "animation.hitmonchan.ground_idle",
+      "movement": "animation.hitmonchan.ground_walk",
+      "mode": "ground",
+      "native_run": null,
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "arm_left2",
+          "arm_right2",
+          "head",
+          "torso"
+        ],
+        "walk": [
+          "body",
+          "foot_left",
+          "foot_right",
+          "arm_left",
+          "arm_right",
+          "hand_left",
+          "hand_right"
+        ],
+        "run": [
+          "body",
+          "foot_left",
+          "foot_right",
+          "arm_left",
+          "arm_right",
+          "hand_left",
+          "hand_right"
+        ]
+      },
+      "stripped_bones": {}
+    },
+    {
+      "number": 108,
+      "slug": "lickitung",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0108_lickitung/lickitung.geo.json",
+      "idle": "animation.lickitung.ground_idle",
+      "movement": "animation.lickitung.ground_walk",
+      "mode": "ground",
+      "native_run": "animation.lickitung.ground_run",
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "head",
+          "left_foot",
+          "left_leg",
+          "right_foot",
+          "right_leg",
+          "tongue2",
+          "tongue3",
+          "tongue4",
+          "torso"
+        ],
+        "walk": [
+          "head",
+          "left_foot",
+          "right_foot",
+          "left_leg",
+          "right_leg",
+          "tongue2",
+          "tongue3",
+          "tongue4",
+          "tail_1"
+        ],
+        "run": [
+          "left_leg",
+          "right_leg",
+          "left_foot",
+          "right_foot",
+          "tongue2",
+          "tongue3",
+          "tongue4",
+          "tail_1",
+          "tail_2",
+          "tail_3"
+        ]
+      },
+      "stripped_bones": {}
+    },
+    {
+      "number": 109,
+      "slug": "koffing",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0109_koffing/koffing.geo.json",
+      "idle": "animation.koffing.air_idle",
+      "movement": "animation.koffing.air_fly",
+      "mode": "flying",
+      "native_run": null,
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "body",
+          "body_inflate",
+          "craters",
+          "eyes"
+        ],
+        "walk": [
+          "body",
+          "craters",
+          "crater_top1"
+        ],
+        "run": [
+          "body",
+          "craters",
+          "crater_top1"
+        ]
+      },
+      "stripped_bones": {}
+    },
+    {
+      "number": 110,
+      "slug": "weezing",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0110_weezing/weezing.geo.json",
+      "idle": "animation.weezing.ground_idle",
+      "movement": "animation.weezing.air_fly",
+      "mode": "flying",
+      "native_run": null,
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "main_body",
+          "middle_body"
+        ],
+        "walk": [
+          "body",
+          "middle_body",
+          "small_body"
+        ],
+        "run": [
+          "body",
+          "middle_body",
+          "small_body"
+        ]
+      },
+      "stripped_bones": {}
+    }
+  ]
+}

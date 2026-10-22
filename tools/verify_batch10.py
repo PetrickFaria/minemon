@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
-"""Verify Batch 10 Cobblemon assets, the first 90 entries, and packaged JAR."""
+"""Verify Batch 10 assets and preservation on later cumulative batch branches."""
 import argparse,json,math,struct,subprocess,zipfile
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[1]
-BASE='eeb3054e6b461dbd713d28029a717f31fa098492'
+BASE='b7b81592f4e2e0097a32f9342e3890f7257182e5'
 RESOURCE=ROOT/'src/main/resources'
 MP='data/minemon_gen1/runtime_species.json'
 VP='data/minemon_gen1/animation_validation_profiles.json'
 REPORT=ROOT/'docs/animation-audit/minemon-gen1-batch10-source-evidence.json'
 EXPECTED=['cloyster','gastly','haunter','gengar','onix','drowzee','hypno','krabby','kingler','voltorb']
+BATCH11=['electrode','exeggcute','exeggutor','cubone','marowak','hitmonlee','hitmonchan','lickitung','koffing','weezing']
 ACTIVE_RUNS={'drowzee','hypno'}
 ANATOMY={
  'cloyster':['shell_left','shell_right','shell_back_left','shell_back_right','inner_shell','inner_shell_left','inner_shell_right','inner_spike'],
@@ -34,9 +35,10 @@ defs=read_json(MP);profiles=read_json(VP)
 old_defs=json.loads(base_file('src/main/resources/'+MP));old_profiles=json.loads(base_file('src/main/resources/'+VP))
 assert len(defs)==151 and [d['nationalPokedexNumber'] for d in defs]==list(range(1,152))
 assert [d['slug'] for d in defs[90:100]]==EXPECTED
-assert defs[:90]==old_defs[:90],'One of the approved first 90 definitions changed'
-assert defs[100:]==old_defs[100:],'A species after #100 changed'
-assert set(profiles)==set(old_profiles)|set(EXPECTED),'Unexpected or missing articulation profile'
+assert defs[:100]==old_defs[:100],'An approved definition through #100 changed'
+assert [d['slug'] for d in defs[100:110]]==BATCH11,'Batch 11 must remain the planned #101-110 sequence'
+assert defs[110:]==old_defs[110:],'A species after #110 changed'
+assert set(profiles)==set(old_profiles)|set(BATCH11),'Unexpected or missing articulation profile'
 assert all(profiles[s]==p for s,p in old_profiles.items()),'An earlier profile changed'
 assert json.loads(base_file('src/main/resources/'+VP))==old_profiles
 
@@ -46,7 +48,7 @@ assert report['source_sha256']=='cae8ac328b61354fbe415208b8c6ffc12e7155094d0a870
 assert [item['slug'] for item in report['species']]==EXPECTED
 
 prior_paths=set()
-for d in old_defs[:90]:prior_paths.update([d['model'],d['texture'],d['animation']]+d.get('licenses',[]))
+for d in old_defs[:100]:prior_paths.update([d['model'],d['texture'],d['animation']]+d.get('licenses',[]))
 for path in prior_paths:
  assert read_local(path)==base_file('src/main/resources/'+path),'Previous approved resource changed: '+path
 
@@ -119,6 +121,8 @@ assert {'animation.krabby.snip_left','animation.krabby.snip_right'}<=set(krabby)
 voltorb=read_json(source_path(defs[99],'animation'))['animations']
 assert all('body' in voltorb[name]['bones'] for name in ('animation.voltorb.ground_idle','animation.voltorb.ground_walk'))
 
+for d in defs[100:110]:
+ paths=[d['model'],d['texture'],d['animation']]+d.get('licenses',[]);allowed.update('src/main/resources/'+p for p in paths)
 changed=subprocess.check_output(['git','diff','--name-only',BASE,'--','src/main/resources'],cwd=ROOT,text=True).splitlines()
 assert set(changed)<=allowed,set(changed)-allowed
 print('PASS BATCH 10 #091-100: Cobblemon 1.8.2 rigs, textures, native animations/events, fallback, and exact first-90 preservation')
