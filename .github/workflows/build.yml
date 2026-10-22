@@ -24,23 +24,25 @@ jobs:
         run: python3 tools/verify_project.py
       - name: Preflight active animation Molang compatibility
         run: python3 tools/verify_molang_compatibility.py
-      - name: Verify batches 8 to 12, prior assets, and Pidge wing rigs
+      - name: Verify batches 8 to 13, prior assets, and Pidge wing rigs
         run: |
           git fetch --no-tags --depth=1 origin b77eac9c38aa0d6a1d35c3cfab36a707ac6cab24
           git fetch --no-tags --depth=1 origin 2503dd085402211ec2e9c6287fca83ab4747d2d5
           git fetch --no-tags --depth=1 origin eeb3054e6b461dbd713d28029a717f31fa098492
           git fetch --no-tags --depth=1 origin b7b81592f4e2e0097a32f9342e3890f7257182e5
           git fetch --no-tags --depth=1 origin 0816533addee80e9e17a684c94bed399f4a9488f
+          git fetch --no-tags --depth=1 origin 364fab1caf136d2e645f6ca77c4199570230eabd
           python3 tools/verify_batch8.py
           python3 tools/verify_batch9.py
           python3 tools/verify_batch10.py
           python3 tools/verify_batch11.py
           python3 tools/verify_batch12.py
+          python3 tools/verify_batch13.py
           python3 tools/verify_pidge_wing_visibility.py
       - name: Ensure Gradle Wrapper is executable
         run: chmod +x gradlew
       - name: Run focused species selection and active Molang tests
-        run: ./gradlew --no-daemon test --tests 'br.com.petrickfaria.minemon.gametest.SmokeSpeciesSelectionTest' --tests 'br.com.petrickfaria.minemon.gametest.ActiveAnimationMolangPreflightTest' --tests 'br.com.petrickfaria.minemon.Batch10AnimationCompatibilityTest' --tests 'br.com.petrickfaria.minemon.Batch11AnimationCompatibilityTest' --tests 'br.com.petrickfaria.minemon.Batch12AnimationCompatibilityTest'
+        run: ./gradlew --no-daemon test --tests 'br.com.petrickfaria.minemon.gametest.SmokeSpeciesSelectionTest' --tests 'br.com.petrickfaria.minemon.gametest.ActiveAnimationMolangPreflightTest' --tests 'br.com.petrickfaria.minemon.Batch10AnimationCompatibilityTest' --tests 'br.com.petrickfaria.minemon.Batch11AnimationCompatibilityTest' --tests 'br.com.petrickfaria.minemon.Batch12AnimationCompatibilityTest' --tests 'br.com.petrickfaria.minemon.Batch13AnimationCompatibilityTest'
       - name: Report ForgeGradle and build/run tests
         id: compile
         run: ./gradlew --no-daemon buildEnvironment clean test build
@@ -110,6 +112,7 @@ jobs:
           python3 tools/verify_batch10.py "$jar_file"
           python3 tools/verify_batch11.py "$jar_file"
           python3 tools/verify_batch12.py "$jar_file"
+          python3 tools/verify_batch13.py "$jar_file"
           python3 tools/verify_pidge_wing_visibility.py "$jar_file"
           unzip -p "$jar_file" META-INF/mods.toml | grep -F 'modId="minemon_gen1"'
           unzip -p "$jar_file" META-INF/mods.toml | grep -F 'versionRange="[1.19.2,1.20)"'

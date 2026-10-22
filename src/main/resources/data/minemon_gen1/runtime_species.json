@@ -8576,9 +8576,9 @@
     "nationalPokedexNumber": 126,
     "slug": "magmar",
     "name": "Magmar",
-    "model": "assets/minemon/geo/magmar/magmar.geo.json",
-    "texture": "assets/minemon/textures/pokemon/magmar/magmar.png",
-    "animation": "assets/minemon/animations/magmar/magmar.animation.json",
+    "model": "assets/minemon/geo/magmar_cobblemon_1_8_2/magmar.geo.json",
+    "texture": "assets/minemon/textures/pokemon/magmar_cobblemon_1_8_2/magmar.png",
+    "animation": "assets/minemon/animations/magmar_cobblemon_1_8_2/magmar.animation.json",
     "mode": "ground",
     "scale": 0.8,
     "width": 0.7,
@@ -8587,16 +8587,17 @@
     "attack": 7.916666666666667,
     "speed": 0.293,
     "clips": {
+      "angry": "animation.magmar.angry",
+      "blink": "animation.magmar.blink",
+      "cry": "animation.magmar.cry",
       "ground_idle": "animation.magmar.ground_idle",
-      "ground_run": "animation.magmar.minemon_run",
-      "sit": "animation.magmar.minemon_sit",
-      "sleep": "animation.magmar.minemon_sleep",
-      "physical_attack": "animation.magmar.minemon_physical_attack"
+      "happy": "animation.magmar.happy",
+      "mouth_open": "animation.magmar.mouth_open",
+      "sad": "animation.magmar.sad",
+      "surprised": "animation.magmar.surprised"
     },
     "idle": "animation.magmar.ground_idle",
     "walk": "animation.magmar.ground_idle",
-    "movement_fallback": "static",
-    "generated_static_animation": false,
     "attackTicks": 12,
     "excluded_clips": [],
     "stripped_bones": {},
@@ -8605,18 +8606,51 @@
       "assets/minemon/sounds/pokemon/magmar/magmar_cry.ogg"
     ],
     "licenses": [
-      "assets/minemon/licenses/pokemon/magmar/model-license.txt"
+      "assets/minemon/licenses/pokemon/magmar/model-license.txt",
+      "assets/minemon/licenses/pokemon/magmar/cobblemon-1.8.2-model-license.txt"
     ],
     "eggBase": 13145692,
-    "eggSpots": 13649455
+    "eggSpots": 13649455,
+    "source_molang_adaptations": {
+      "q.": "query.",
+      "Math.": "math."
+    },
+    "source_event_evidence": {
+      "animation.magmar.cry": {
+        "sound_effects": {
+          "0.04": {
+            "effect": "pokemon.magmar.cry"
+          }
+        }
+      }
+    },
+    "geckolib3_bedrock_keyframes": true,
+    "strip_bedrock_locators": true,
+    "source_model_variant": "magmar.geo.json",
+    "source_cobblemon_version": "1.8.2",
+    "movement_fallback": "idle",
+    "source_procedural_pose": {
+      "poser": "assets/cobblemon/bedrock/pokemon/posers/0126_magmar/magmar.json",
+      "look": [
+        "q.look('head')"
+      ],
+      "look_bones": [
+        "head"
+      ],
+      "adapted_geo_bones": {
+        "head": "head"
+      },
+      "adaptation": "Map q.look to a real compatible source head bone in MinemonModel; no locomotion gait is synthesized"
+    },
+    "source_static_idle": true
   },
   {
     "nationalPokedexNumber": 127,
     "slug": "pinsir",
     "name": "Pinsir",
-    "model": "assets/minemon/geo/pinsir/pinsir.geo.json",
-    "texture": "assets/minemon/textures/pokemon/pinsir/pinsir.png",
-    "animation": "assets/minemon/animations/pinsir/pinsir.animation.json",
+    "model": "assets/minemon/geo/pinsir_cobblemon_1_8_2/pinsir.geo.json",
+    "texture": "assets/minemon/textures/pokemon/pinsir_cobblemon_1_8_2/pinsir.png",
+    "animation": "assets/minemon/animations/pinsir_cobblemon_1_8_2/pinsir.animation.json",
     "mode": "ground",
     "scale": 0.75,
     "width": 1,
@@ -8625,15 +8659,12 @@
     "attack": 10.416666666666666,
     "speed": 0.285,
     "clips": {
-      "ground_idle": "animation.pinsir.ground_idle",
-      "sleep": "animation.pinsir.sleep",
-      "ground_walk": "animation.pinsir.ground_walk",
       "battle_idle": "animation.pinsir.battle_idle",
       "blink": "animation.pinsir.blink",
       "cry": "animation.pinsir.cry",
-      "ground_run": "animation.pinsir.minemon_run",
-      "sit": "animation.pinsir.minemon_sit",
-      "physical_attack": "animation.pinsir.minemon_physical_attack"
+      "ground_idle": "animation.pinsir.ground_idle",
+      "ground_walk": "animation.pinsir.ground_walk",
+      "sleep": "animation.pinsir.sleep"
     },
     "idle": "animation.pinsir.ground_idle",
     "walk": "animation.pinsir.ground_walk",
@@ -8644,18 +8675,50 @@
       "assets/minemon/sounds/pokemon/pinsir/pinsir_cry.ogg"
     ],
     "licenses": [
-      "assets/minemon/licenses/pokemon/pinsir/model-license.txt"
+      "assets/minemon/licenses/pokemon/pinsir/model-license.txt",
+      "assets/minemon/licenses/pokemon/pinsir/cobblemon-1.8.2-model-license.txt"
     ],
     "eggBase": 9466978,
-    "eggSpots": 10848114
+    "eggSpots": 10848114,
+    "source_molang_adaptations": {
+      "q.": "query.",
+      "Math.": "math."
+    },
+    "source_event_evidence": {
+      "animation.pinsir.cry": {
+        "sound_effects": {
+          "0.2083": {
+            "effect": "pokemon.pinsir.cry"
+          }
+        }
+      }
+    },
+    "stripped_bones": {},
+    "geckolib3_bedrock_keyframes": true,
+    "strip_bedrock_locators": true,
+    "source_model_variant": "pinsir.geo.json",
+    "source_cobblemon_version": "1.8.2",
+    "source_procedural_pose": {
+      "poser": "assets/cobblemon/bedrock/pokemon/posers/0127_pinsir/pinsir.json",
+      "look": [
+        "q.look('head')"
+      ],
+      "look_bones": [
+        "head"
+      ],
+      "adapted_geo_bones": {
+        "head": null
+      },
+      "adaptation": "Map q.look to a real compatible source head bone in MinemonModel; no locomotion gait is synthesized"
+    }
   },
   {
     "nationalPokedexNumber": 128,
     "slug": "tauros",
     "name": "Tauros",
-    "model": "assets/minemon/geo/tauros/tauros.geo.json",
-    "texture": "assets/minemon/textures/pokemon/tauros/tauros.png",
-    "animation": "assets/minemon/animations/tauros/tauros.animation.json",
+    "model": "assets/minemon/geo/tauros_cobblemon_1_8_2/tauros.geo.json",
+    "texture": "assets/minemon/textures/pokemon/tauros_cobblemon_1_8_2/tauros.png",
+    "animation": "assets/minemon/animations/tauros_cobblemon_1_8_2/tauros.animation.json",
     "mode": "ground",
     "scale": 1.3,
     "width": 1.3,
@@ -8664,15 +8727,15 @@
     "attack": 8.333333333333334,
     "speed": 0.31,
     "clips": {
-      "ground_walk": "animation.tauros.ground_walk",
-      "ground_run": "animation.tauros.ground_run",
-      "ground_idle": "animation.tauros.ground_idle",
-      "cry": "animation.tauros.cry",
-      "render": "animation.tauros.render",
       "blink": "animation.tauros.blink",
-      "sit": "animation.tauros.minemon_sit",
-      "sleep": "animation.tauros.minemon_sleep",
-      "physical_attack": "animation.tauros.minemon_physical_attack"
+      "cry": "animation.tauros.cry",
+      "ground_idle": "animation.tauros.ground_idle",
+      "ground_run": "animation.tauros.ground_run",
+      "ground_walk": "animation.tauros.ground_walk",
+      "render": "animation.tauros.render",
+      "ride_ground_run": "animation.tauros.ride_ground_run",
+      "ride_ground_walk": "animation.tauros.ride_ground_walk",
+      "ride_jump": "animation.tauros.ride_jump"
     },
     "idle": "animation.tauros.ground_idle",
     "walk": "animation.tauros.ground_walk",
@@ -8683,18 +8746,50 @@
       "assets/minemon/sounds/pokemon/tauros/tauros_cry.ogg"
     ],
     "licenses": [
-      "assets/minemon/licenses/pokemon/tauros/model-license.txt"
+      "assets/minemon/licenses/pokemon/tauros/model-license.txt",
+      "assets/minemon/licenses/pokemon/tauros/cobblemon-1.8.2-model-license.txt"
     ],
     "eggBase": 10445384,
-    "eggSpots": 12289371
+    "eggSpots": 12289371,
+    "source_molang_adaptations": {
+      "q.": "query.",
+      "Math.": "math."
+    },
+    "source_event_evidence": {
+      "animation.tauros.cry": {
+        "sound_effects": {
+          "0.625": {
+            "effect": "pokemon.tauros.cry"
+          }
+        }
+      }
+    },
+    "stripped_bones": {},
+    "geckolib3_bedrock_keyframes": true,
+    "strip_bedrock_locators": true,
+    "source_model_variant": "tauros.geo.json",
+    "source_cobblemon_version": "1.8.2",
+    "source_procedural_pose": {
+      "poser": "assets/cobblemon/bedrock/pokemon/posers/0128_tauros/tauros.json",
+      "look": [
+        "q.look('head')"
+      ],
+      "look_bones": [
+        "head"
+      ],
+      "adapted_geo_bones": {
+        "head": "head"
+      },
+      "adaptation": "Map q.look to a real compatible source head bone in MinemonModel; no locomotion gait is synthesized"
+    }
   },
   {
     "nationalPokedexNumber": 129,
     "slug": "magikarp",
     "name": "Magikarp",
-    "model": "assets/minemon/geo/magikarp/magikarp_female.geo.json",
-    "texture": "assets/minemon/textures/pokemon/magikarp/magikarp.png",
-    "animation": "assets/minemon/animations/magikarp/magikarp.animation.json",
+    "model": "assets/minemon/geo/magikarp_cobblemon_1_8_2/magikarp.geo.json",
+    "texture": "assets/minemon/textures/pokemon/magikarp_cobblemon_1_8_2/magikarp.png",
+    "animation": "assets/minemon/animations/magikarp_cobblemon_1_8_2/magikarp.animation.json",
     "mode": "ground",
     "scale": 1,
     "width": 1,
@@ -8703,48 +8798,63 @@
     "attack": 3,
     "speed": 0.28,
     "clips": {
+      "blink": "animation.magikarp.blink",
+      "cry": "animation.magikarp.cry",
+      "ground_faint": "animation.magikarp.ground_faint",
       "ground_idle": "animation.magikarp.ground_idle",
+      "ground_sleep_quirk": "animation.magikarp.ground_sleep_quirk",
       "ground_walk": "animation.magikarp.ground_walk",
       "sleep": "animation.magikarp.sleep",
-      "ground_sleep_quirk": "animation.magikarp.ground_sleep_quirk",
-      "water_idle": "animation.magikarp.water_idle",
-      "water_swim": "animation.magikarp.water_swim",
-      "water_swimfast": "animation.magikarp.water_swimfast",
-      "water_sleep": "animation.magikarp.water_sleep",
       "surfacewater_idle": "animation.magikarp.surfacewater_idle",
+      "surfacewater_quirk": "animation.magikarp.surfacewater_quirk",
       "surfacewater_swim": "animation.magikarp.surfacewater_swim",
       "surfacewater_swimfast": "animation.magikarp.surfacewater_swimfast",
-      "surfacewater_quirk": "animation.magikarp.surfacewater_quirk",
-      "ground_faint": "animation.magikarp.ground_faint",
       "water_faint": "animation.magikarp.water_faint",
-      "cry": "animation.magikarp.cry",
-      "ground_run": "animation.magikarp.minemon_run",
-      "sit": "animation.magikarp.minemon_sit",
-      "physical_attack": "animation.magikarp.minemon_physical_attack"
+      "water_idle": "animation.magikarp.water_idle",
+      "water_sleep": "animation.magikarp.water_sleep",
+      "water_swim": "animation.magikarp.water_swim",
+      "water_swimfast": "animation.magikarp.water_swimfast"
     },
     "idle": "animation.magikarp.ground_idle",
     "walk": "animation.magikarp.ground_walk",
     "attackTicks": 12,
-    "excluded_clips": [
-      "animation.magikarp.blink"
-    ],
+    "excluded_clips": [],
     "sounds": [
       "assets/minemon/sounds/pokemon/magikarp/magikarp_ambient.ogg",
       "assets/minemon/sounds/pokemon/magikarp/magikarp_cry.ogg"
     ],
     "licenses": [
-      "assets/minemon/licenses/pokemon/magikarp/model-license.txt"
+      "assets/minemon/licenses/pokemon/magikarp/model-license.txt",
+      "assets/minemon/licenses/pokemon/magikarp/cobblemon-1.8.2-model-license.txt"
     ],
     "eggBase": 13844022,
-    "eggSpots": 14968380
+    "eggSpots": 14968380,
+    "source_molang_adaptations": {
+      "q.": "query.",
+      "Math.": "math."
+    },
+    "source_event_evidence": {
+      "animation.magikarp.cry": {
+        "sound_effects": {
+          "0.0": {
+            "effect": "pokemon.magikarp.cry"
+          }
+        }
+      }
+    },
+    "stripped_bones": {},
+    "geckolib3_bedrock_keyframes": true,
+    "strip_bedrock_locators": true,
+    "source_model_variant": "magikarp_male.geo.json",
+    "source_cobblemon_version": "1.8.2"
   },
   {
     "nationalPokedexNumber": 130,
     "slug": "gyarados",
     "name": "Gyarados",
-    "model": "assets/minemon/geo/gyarados/gyarados_female.geo.json",
-    "texture": "assets/minemon/textures/pokemon/gyarados/gyarados.png",
-    "animation": "assets/minemon/animations/gyarados/gyarados.animation.json",
+    "model": "assets/minemon/geo/gyarados_cobblemon_1_8_2/gyarados.geo.json",
+    "texture": "assets/minemon/textures/pokemon/gyarados_cobblemon_1_8_2/gyarados.png",
+    "animation": "assets/minemon/animations/gyarados_cobblemon_1_8_2/gyarados.animation.json",
     "mode": "ground",
     "scale": 2,
     "width": 1.5,
@@ -8753,32 +8863,195 @@
     "attack": 10.416666666666666,
     "speed": 0.281,
     "clips": {
-      "ground_idle": "animation.gyarados.ground_idle",
-      "water_idle": "animation.gyarados.water_idle",
-      "water_swim": "animation.gyarados.water_swim",
-      "surface_idle": "animation.gyarados.surface_idle",
+      "air_battle_idle": "animation.gyarados.air_battle_idle",
+      "air_fly": "animation.gyarados.air_fly",
+      "air_idle": "animation.gyarados.air_idle",
+      "battle_cry": "animation.gyarados.battle_cry",
+      "battle_idle": "animation.gyarados.battle_idle",
       "blink": "animation.gyarados.blink",
-      "ground_run": "animation.gyarados.minemon_run",
-      "sit": "animation.gyarados.minemon_sit",
-      "sleep": "animation.gyarados.minemon_sleep",
-      "physical_attack": "animation.gyarados.minemon_physical_attack"
+      "cry": "animation.gyarados.cry",
+      "fin_quirk": "animation.gyarados.fin_quirk",
+      "ground_idle": "animation.gyarados.ground_idle",
+      "ground_walk": "animation.gyarados.ground_walk",
+      "idle_quirk": "animation.gyarados.idle_quirk",
+      "look_quirk": "animation.gyarados.look_quirk",
+      "mouth_quirk": "animation.gyarados.mouth_quirk",
+      "recoil": "animation.gyarados.recoil",
+      "ride_air_fly": "animation.gyarados.ride_air_fly",
+      "ride_ground_jump": "animation.gyarados.ride_ground_jump",
+      "ride_ground_walk": "animation.gyarados.ride_ground_walk",
+      "ride_surface_water": "animation.gyarados.ride_surface_water",
+      "ride_surface_water_jump": "animation.gyarados.ride_surface_water_jump",
+      "ride_water_swim": "animation.gyarados.ride_water_swim",
+      "sleep": "animation.gyarados.sleep",
+      "surface_swim_test": "animation.gyarados.surface_swim_test",
+      "surface_water_battle_idle": "animation.gyarados.surface_water_battle_idle",
+      "surface_water_idle": "animation.gyarados.surface_water_idle",
+      "surface_water_swim": "animation.gyarados.surface_water_swim",
+      "swim_test": "animation.gyarados.swim_test",
+      "tail_slap_battle_quirk": "animation.gyarados.tail_slap_battle_quirk",
+      "walk_test": "animation.gyarados.walk_test",
+      "water_battle_idle": "animation.gyarados.water_battle_idle",
+      "water_cry": "animation.gyarados.water_cry",
+      "water_idle": "animation.gyarados.water_idle",
+      "water_placement": "animation.gyarados.water_placement",
+      "water_swim": "animation.gyarados.water_swim",
+      "wild_sleep": "animation.gyarados.wild_sleep"
     },
     "idle": "animation.gyarados.ground_idle",
-    "walk": "animation.gyarados.ground_idle",
-    "movement_fallback": "static",
-    "generated_static_animation": false,
+    "walk": "animation.gyarados.ground_walk",
     "attackTicks": 12,
     "excluded_clips": [],
-    "stripped_bones": {},
+    "stripped_bones": {
+      "animation.gyarados.air_fly": [
+        "ride_segment1"
+      ],
+      "animation.gyarados.ground_idle": [
+        "ride_segment1",
+        "ride_segment10",
+        "ride_segment11",
+        "ride_segment12",
+        "ride_segment13",
+        "ride_segment2",
+        "ride_segment3",
+        "ride_segment4",
+        "ride_segment5",
+        "ride_segment6",
+        "ride_segment7",
+        "ride_segment8",
+        "ride_segment9",
+        "ride_tail2",
+        "ride_tail3"
+      ],
+      "animation.gyarados.ride_ground_jump": [
+        "ride_segment1",
+        "ride_segment11",
+        "ride_segment12",
+        "ride_segment13",
+        "ride_tail2",
+        "ride_tail3"
+      ],
+      "animation.gyarados.ride_surface_water_jump": [
+        "ride_segment1",
+        "ride_segment11",
+        "ride_segment12",
+        "ride_segment13",
+        "ride_tail2",
+        "ride_tail3"
+      ],
+      "animation.gyarados.surface_water_battle_idle": [
+        "ride_segment1",
+        "ride_segment10",
+        "ride_segment11",
+        "ride_segment12",
+        "ride_segment13",
+        "ride_segment2",
+        "ride_segment3",
+        "ride_segment4",
+        "ride_segment5",
+        "ride_segment6",
+        "ride_segment7",
+        "ride_segment8",
+        "ride_segment9",
+        "ride_tail2",
+        "ride_tail3"
+      ],
+      "animation.gyarados.surface_water_idle": [
+        "ride_segment1",
+        "ride_segment10",
+        "ride_segment11",
+        "ride_segment12",
+        "ride_segment13",
+        "ride_segment2",
+        "ride_segment3",
+        "ride_segment4",
+        "ride_segment5",
+        "ride_segment6",
+        "ride_segment7",
+        "ride_segment8",
+        "ride_segment9",
+        "ride_tail2",
+        "ride_tail3"
+      ],
+      "animation.gyarados.surface_water_swim": [
+        "ride_segment1",
+        "ride_segment10",
+        "ride_segment11",
+        "ride_segment12",
+        "ride_segment13",
+        "ride_segment2",
+        "ride_segment3",
+        "ride_segment4",
+        "ride_segment5",
+        "ride_segment6",
+        "ride_segment7",
+        "ride_segment8",
+        "ride_segment9",
+        "ride_tail2",
+        "ride_tail3"
+      ],
+      "animation.gyarados.water_swim": [
+        "ride_segment1"
+      ],
+      "animation.gyarados.wild_sleep": [
+        "ride_segment1",
+        "ride_segment10",
+        "ride_segment11",
+        "ride_segment12",
+        "ride_segment13",
+        "ride_segment2",
+        "ride_segment3",
+        "ride_segment4",
+        "ride_segment5",
+        "ride_segment6",
+        "ride_segment7",
+        "ride_segment8",
+        "ride_segment9",
+        "ride_tail2",
+        "ride_tail3"
+      ]
+    },
     "sounds": [
       "assets/minemon/sounds/pokemon/gyarados/gyarados_ambient.ogg",
       "assets/minemon/sounds/pokemon/gyarados/gyarados_cry.ogg"
     ],
     "licenses": [
-      "assets/minemon/licenses/pokemon/gyarados/model-license.txt"
+      "assets/minemon/licenses/pokemon/gyarados/model-license.txt",
+      "assets/minemon/licenses/pokemon/gyarados/cobblemon-1.8.2-model-license.txt"
     ],
     "eggBase": 1011112,
-    "eggSpots": 1673397
+    "eggSpots": 1673397,
+    "source_molang_adaptations": {
+      "q.": "query.",
+      "Math.": "math."
+    },
+    "source_event_evidence": {
+      "animation.gyarados.battle_cry": {
+        "sound_effects": {
+          "0.0": {
+            "effect": "pokemon.gyarados.cry"
+          }
+        }
+      },
+      "animation.gyarados.cry": {
+        "sound_effects": {
+          "0.0": {
+            "effect": "pokemon.gyarados.cry"
+          }
+        }
+      },
+      "animation.gyarados.water_cry": {
+        "sound_effects": {
+          "0.0": {
+            "effect": "pokemon.gyarados.cry"
+          }
+        }
+      }
+    },
+    "geckolib3_bedrock_keyframes": true,
+    "strip_bedrock_locators": true,
+    "source_model_variant": "gyarados_male.geo.json",
+    "source_cobblemon_version": "1.8.2"
   },
   {
     "nationalPokedexNumber": 131,

@@ -11,6 +11,7 @@ VP='data/minemon_gen1/animation_validation_profiles.json'
 REPORT=ROOT/'docs/animation-audit/minemon-gen1-batch11-source-evidence.json'
 EXPECTED=['electrode','exeggcute','exeggutor','cubone','marowak','hitmonlee','hitmonchan','lickitung','koffing','weezing']
 BATCH12=['rhyhorn','rhydon','chansey','tangela','kangaskhan','horsea','seadra','goldeen','seaking','staryu']
+BATCH13=['starmie','mrmime','scyther','jynx','electabuzz','magmar','pinsir','tauros','magikarp','gyarados']
 ANATOMY={
  'electrode':['body'],
  'exeggcute':['egg1','egg2','egg3','egg4','egg5','egg6'],
@@ -35,8 +36,8 @@ assert len(defs)==151 and [d['nationalPokedexNumber'] for d in defs]==list(range
 assert [d['slug'] for d in defs[100:110]]==EXPECTED
 assert defs[:100]==old_defs[:100],'One of the approved first 100 definitions changed'
 assert [d['slug'] for d in defs[110:120]]==BATCH12,'Batch 12 must remain the planned #111-120 sequence'
-assert defs[120:]==old_defs[120:],'A species after #120 changed'
-assert set(profiles)==set(old_profiles)|set(EXPECTED)|set(BATCH12),'Unexpected or missing articulation profile'
+assert [d['slug'] for d in defs[120:130]]==BATCH13 and defs[130:]==old_defs[130:],'Batch 13 plan or later species changed'
+assert set(profiles)==set(old_profiles)|set(EXPECTED)|set(BATCH12)|set(BATCH13),'Unexpected or missing articulation profile'
 for slug,old_profile in old_profiles.items():
  expected_profile=old_profile
  if slug=='alakazam':
@@ -104,7 +105,7 @@ for d in defs[100:110]:
  if slug=='hitmonchan':
   assert 'animation.hitmonchan.ground_run_WIP' in animations
   assert 'ground_run' not in d['clips']
-for d in defs[110:120]:
+for d in defs[110:120]+defs[120:130]:
  slug=d['slug'];paths=[d['model'],d['texture'],d['animation']]+d.get('licenses',[])
  allowed.update('src/main/resources/'+p for p in paths)
 

@@ -6,11 +6,12 @@
 - Commit-base: `64a0164bfd2a2dba28dc7b24a3e508f8fcb2b95e`, checkpoint documental do Lote 12 após aprovação.
 - Código-base aprovado: `364fab1caf136d2e645f6ca77c4199570230eabd`.
 - Lote 12: Actions #39865755919 aprovado; artefato JAR #12466881117.
-- Checkpoint publicado agora: primeira metade (#121–#125), aguardando o SHA do commit.
-- Pokémon integrados neste checkpoint: Starmie, Mr. Mime, Scyther, Jynx e Electabuzz.
-- Pokémon restantes: Magmar, Pinsir, Tauros, Magikarp e Gyarados.
-- Nenhum teste Java, GameTest ou smoke do Lote 13 foi executado ainda. Nenhum JAR do Lote 13 foi gerado.
-- A validação completa será executada uma vez, após integrar a segunda metade.
+- Checkpoint remoto da primeira metade (#121–#125): `a2d838460bd3c8aaafc823f1c94273f9bb29bd2a`.
+- Primeira metade publicada: Starmie, Mr. Mime, Scyther, Jynx e Electabuzz.
+- Segunda metade (#126–#130) integrada localmente: Magmar, Pinsir, Tauros, Magikarp e Gyarados.
+- Todos os dez recursos estão integrados localmente; aguardam commit cumulativo e validação Java/Actions.
+- Nenhum GameTest ou smoke do Lote 13 foi executado; nenhum JAR do Lote 13 foi gerado.
+- Verificações estruturais cumulativas locais passaram. A validação completa será executada uma vez após o commit cumulativo.
 
 ## Fonte e decisões de adaptação
 
@@ -32,12 +33,18 @@
 - `git diff --check`: PASS.
 - Testes Java/build, GameTests e smoke completo: pendentes para o checkpoint cumulativo #121–#130.
 
+## Verificações cumulativas locais
+
+- Importador Python e verificadores: compilação sintática PASS.
+- `verify_project.py`, `verify_runtime.py`, verificadores Batch 8–13, `verify_pidge_wing_visibility.py`, preflight Molang e `git diff --check`: PASS.
+- Primeiro commit remoto parcial usa `[skip ci]`; nenhum workflow foi iniciado para uma metade incompleta.
+- Testes Java/build, GameTests, smoke do cliente e inspeção do JAR permanecem pendentes para o commit cumulativo #121–#130.
+
 ## Próxima etapa
 
-1. Integrar #126–#130: Magmar, Pinsir, Tauros, Magikarp e Gyarados.
-2. Atualizar os verificadores cumulativos dos Lotes 8–12 e adicionar o teste de compatibilidade do Lote 13.
-3. Executar os verificadores estruturais e Molang direcionados.
-4. Publicar o commit completo e executar uma validação GitHub Actions; não iniciar workflows duplicados.
+1. Revisar o diff cumulativo, confirmar que só #121–#130 e os verificadores correspondentes mudaram.
+2. Publicar commit final de implementação incluindo teste Java, verificador Batch 13 e workflow.
+3. Consultar essa única execução, corrigir apenas falhas comprovadas e publicar JAR após todos os gates passarem.
 
 ## Correções visuais protegidas
 

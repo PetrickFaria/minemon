@@ -2605,5 +2605,178 @@
       "tail",
       "tail2"
     ]
+  },
+  "magmar": {
+    "idle": [
+      "arm_left",
+      "arm_right",
+      "leg_left",
+      "leg_right",
+      "tail",
+      "tail2"
+    ],
+    "walk": [
+      "arm_left",
+      "arm_right",
+      "tail",
+      "tail2",
+      "tail3",
+      "tail4"
+    ],
+    "run": [
+      "arm_left",
+      "arm_right",
+      "tail",
+      "tail2",
+      "tail3",
+      "tail4"
+    ],
+    "idle_static": [
+      "arm_left",
+      "arm_right",
+      "leg_left",
+      "leg_right",
+      "tail",
+      "tail2"
+    ]
+  },
+  "pinsir": {
+    "idle": [
+      "body",
+      "leg_left",
+      "leg_right",
+      "pincer_left",
+      "pincer_right"
+    ],
+    "walk": [
+      "leg_left",
+      "leg_right",
+      "pincer_left",
+      "pincer_right"
+    ],
+    "run": [
+      "leg_left",
+      "leg_right",
+      "pincer_left",
+      "pincer_right"
+    ]
+  },
+  "tauros": {
+    "idle": [
+      "head",
+      "torso",
+      "leg_front_left",
+      "leg_front_right",
+      "leg_back_left",
+      "leg_back_right",
+      "tail_left",
+      "tail_middle",
+      "tail_right"
+    ],
+    "walk": [
+      "leg_front_left",
+      "leg_front_right",
+      "leg_back_left",
+      "leg_back_right",
+      "tail_left",
+      "tail_middle",
+      "tail_right"
+    ],
+    "run": [
+      "leg_front_left",
+      "leg_front_right",
+      "leg_back_left",
+      "leg_back_right",
+      "tail_left",
+      "tail_middle",
+      "tail_right"
+    ]
+  },
+  "magikarp": {
+    "idle": [
+      "body",
+      "fin_left",
+      "fin_right",
+      "tail",
+      "tail2",
+      "tail3"
+    ],
+    "walk": [
+      "body",
+      "fin_left",
+      "fin_right",
+      "tail",
+      "tail2",
+      "tail3"
+    ],
+    "run": [
+      "body",
+      "fin_left",
+      "fin_right",
+      "tail",
+      "tail2",
+      "tail3"
+    ]
+  },
+  "gyarados": {
+    "idle": [
+      "body",
+      "head",
+      "neck1",
+      "neck2",
+      "neck3",
+      "neck4",
+      "neck5",
+      "segment",
+      "segment2",
+      "segment3",
+      "segment4",
+      "segment5",
+      "segment6",
+      "segment7",
+      "segment8",
+      "segment9",
+      "tail1",
+      "tail2",
+      "tail3"
+    ],
+    "walk": [
+      "body",
+      "neck1",
+      "neck2",
+      "neck3",
+      "neck4",
+      "segment",
+      "segment2",
+      "segment3",
+      "segment4",
+      "segment5",
+      "segment6",
+      "segment7",
+      "segment8",
+      "segment9",
+      "tail1",
+      "tail2",
+      "tail3"
+    ],
+    "run": [
+      "body",
+      "neck1",
+      "neck2",
+      "neck3",
+      "neck4",
+      "segment",
+      "segment2",
+      "segment3",
+      "segment4",
+      "segment5",
+      "segment6",
+      "segment7",
+      "segment8",
+      "segment9",
+      "tail1",
+      "tail2",
+      "tail3"
+    ]
   }
 }
