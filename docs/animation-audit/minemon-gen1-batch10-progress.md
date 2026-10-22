@@ -88,8 +88,8 @@ O documento de evidência da fonte é `docs/animation-audit/minemon-gen1-batch10
 ## Correção após smoke de cliente #39802299460
 
 - A falha do Gengar não representa ausência dos movimentos de origem: os clips selecionados são poses nativas fixas e diferem em cinco articulações do corpo, braços e pernas.
-- A correção preparada adiciona ao perfil a lista explícita dessas articulações de transição, mantém as poses dentro de cada fase settled obrigatoriamente estáveis e exige mudança entre `IDLE_FINAL` e `WALK_STEADY`. O teste Java também fixa que os dois clips continuam sendo poses estáticas distintas; nenhum clip foi alterado ou inventado.
-- A correção aguarda publicação e nova validação direcionada. O branch recebeu entretanto o checkpoint documental `8dbb8125fbd1392223e55c7c4acab48b12169431`. Só após o Java passar deve ocorrer uma única nova validação completa do cliente.
+- Correção publicada em `891d5514af5a47f8ca531368647bc80a8c64761c`: o perfil lista as articulações de transição, exige estabilidade dentro de cada fase settled e mudança entre `IDLE_FINAL` e `WALK_STEADY`. O teste Java confirma que os dois clips continuam poses estáticas distintas; nenhum clip foi alterado ou inventado.
+- Execução única para esse commit: [Build Minemon #39806866639](https://github.com/PetrickFaria/minemon/actions/runs/39806866639), em fila. O workflow executará primeiro Java completo e GameTests; só então iniciará um smoke completo do cliente.
 
 ## Correção após a execução #39801348003
 
@@ -108,4 +108,6 @@ Publicar a correção específica de validação das poses nativas do Gengar. Ex
 - Último commit de código: `d64abd231c5910d8c71312e1527f0a5a26e3e9ca`; último checkpoint documental remoto: `8dbb8125fbd1392223e55c7c4acab48b12169431`.
 - Último workflow `39802299460`: falhou somente no perfil de articulação do smoke do cliente por tratamento inadequado das poses estáticas do Gengar. Java, build e GameTests passaram.
 - JAR não foi gerado nem publicado porque o smoke falhou; inspeção e upload foram pulados.
-- Próximo gate: publicar e validar a correção do perfil estático de transição do Gengar; depois repetir uma vez o workflow completo e inspecionar o JAR se o smoke aprovar.
+- Commit de código atual: `891d5514af5a47f8ca531368647bc80a8c64761c`.
+- Workflow atual: `39806866639`, em fila.
+- Próximo gate: acompanhar Java, GameTests e uma única validação completa do cliente dessa execução; inspecionar o JAR somente se o smoke aprovar.
