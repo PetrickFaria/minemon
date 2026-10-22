@@ -266,13 +266,19 @@ public final class ClientSmokeTest {
          throw new IllegalStateException("Pidge wing poser visibility failed for "+slug+"/"+entity.getSelectedAnimationForValidation()+": closed hierarchy must be hidden and open hierarchy visible; scales="+(closed==null?"missing":closed.getScaleX())+"/"+(open==null?"missing":open.getScaleX()));
         wingVisibilitySpecies.add(slug);
        }
-       var perSpecies=articulationRanges.computeIfAbsent(slug,k->new java.util.HashMap<>());
-       for(String joint:profileJoints(slug,state)) {
-        var bone=model.getAnimationProcessor().getBone(joint);
-        if(bone==null)throw new IllegalStateException("Locomotion profile references missing bone "+slug+":"+joint);
-        float[] values={bone.getRotationX(),bone.getRotationY(),bone.getRotationZ(),bone.getPositionX(),bone.getPositionY(),bone.getPositionZ()};
-        var range=perSpecies.computeIfAbsent(state+":"+joint,k->{var v=new float[12];java.util.Arrays.fill(v,0,6,Float.MAX_VALUE);java.util.Arrays.fill(v,6,12,-Float.MAX_VALUE);return v;});
-        for(int axis=0;axis<6;axis++){range[axis]=Math.min(range[axis],values[axis]);range[axis+6]=Math.max(range[axis+6],values[axis]);}
+       // Measure articulation only after the current phase has settled. The
+       // selected-clip/input records already use this gate; applying it to pose
+       // ranges prevents transition blend frames from contaminating static-idle
+       // checks (notably Nidoqueen's native fixed ground_idle stance).
+       if(isSettledClipSample(phase)) {
+        var perSpecies=articulationRanges.computeIfAbsent(slug,k->new java.util.HashMap<>());
+        for(String joint:profileJoints(slug,state)) {
+         var bone=model.getAnimationProcessor().getBone(joint);
+         if(bone==null)throw new IllegalStateException("Locomotion profile references missing bone "+slug+":"+joint);
+         float[] values={bone.getRotationX(),bone.getRotationY(),bone.getRotationZ(),bone.getPositionX(),bone.getPositionY(),bone.getPositionZ()};
+         var range=perSpecies.computeIfAbsent(state+":"+joint,k->{var v=new float[12];java.util.Arrays.fill(v,0,6,Float.MAX_VALUE);java.util.Arrays.fill(v,6,12,-Float.MAX_VALUE);return v;});
+         for(int axis=0;axis<6;axis++){range[axis]=Math.min(range[axis],values[axis]);range[axis+6]=Math.max(range[axis+6],values[axis]);}
+        }
        }
        if(slug.equals("charmander")) {
         var flame=model.getAnimationProcessor().getBone("tail_flame");

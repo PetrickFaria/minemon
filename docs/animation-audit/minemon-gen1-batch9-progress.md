@@ -92,3 +92,12 @@ A validação completa continuará pendente até compilação, testes Java, Game
 - Inspeção e upload do JAR: pendentes até o smoke do cliente concluir.
 
 - O smoke do cliente no run `39770065634` terminou com sucesso (11:25:18–11:55:28 UTC). A inspeção do JAR confirmou metadados, classe, catálogo/151 registros, recursos do lote e integridade cumulativa; o verificador do Lote 9 então lançou `KeyError: particle_effects` para Magneton. Diagnóstico: `prepare_runtime_assets.py` remove intencionalmente blocos GeckoLib de efeitos cujos timestamps têm valores não-objecto (as listas nativas de partículas do Magneton). A fonte permanece intacta; a asserção do JAR foi corrigida para exigir essa remoção apenas quando a regra real de preparo a determina e comparar fielmente eventos compatíveis. O JAR não foi enviado porque a inspeção falhou; um único workflow final é necessário para repetir a inspeção e publicar o artefato.
+
+
+## Checkpoint do smoke do cliente — 2026-10-22
+
+- A execução `39774691363` (commit `b22f3e6eb6c7c73b47ada7493ac468c6805a49d6`) passou preflight, compilação, suíte Java e GameTests do servidor, mas falhou na validação final de pose estática de Nidoqueen.
+- O artefato de diagnóstico foi preservado: [minemon-test-diagnostics #12426130422](https://github.com/PetrickFaria/minemon/actions/runs/39774691363/artifacts/12426130422), expira em 2026-10-29 12:28 UTC. O log confirma roster renderizado até 151/151 e mostra a falha em `ClientSmokeTest.validateSourceStaticIdle`; nenhum JAR foi gerado/publicado nesse run.
+- Comparação com o smoke completo aprovado no run `39770065634`: a mesma pose e perfil de Nidoqueen passaram, com `ground_idle` selecionado. A fonte da animação registra as articulações estáticas; a falha não aponta incompatibilidade Molang nem recurso corrompido.
+- Causa no coletor: o clip/input era registrado somente nos frames estabilizados, mas o intervalo de transformações era acumulado também durante os frames iniciais de transição run→idle. A alteração corretiva limita a medição dos perfis aos mesmos frames estabilizados definidos por `isSettledClipSample`; mantém articulações, limites, e exigências de movimento de walk/run sem relaxamento.
+- Próximo passo: uma execução única do workflow após compilar e aprovar a suíte Java, GameTests e então smoke integral; não iniciar outro smoke completo até a confirmação dessa causa no código. Inspecionar/publicar o JAR apenas depois que todas as etapas passarem.
