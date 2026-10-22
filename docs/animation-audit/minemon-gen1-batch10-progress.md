@@ -12,7 +12,10 @@ O planejamento original de 16 lotes confirma que o Lote 10 é #091–#100: Cloys
 - Base: checkpoint documental mais recente do Lote 9, `eeb3054e6b461dbd713d28029a717f31fa098492` (pai do código aprovado).
 - Commit de código aprovado do Lote 9: `637afd0a572e16f175a04b4614bd7369805530f0`.
 - Actions aprovado do Lote 9: [39779248077](https://github.com/PetrickFaria/minemon/actions/runs/39779248077), artefato #12428477962.
-- Commit publicado do Lote 10: pendente; a branch foi criada a partir do checkpoint correto.
+- Checkpoint documental: `117c0b5d583bb25c789cf378822b1f0d79df1b61` (`[skip ci] Record batch 10 preparation checkpoint`).
+- Commit de implementação publicado: `3efec0c410a759d78018b0533c4e52e4050db515` (`Implement Gen 1 batch 10 Cobblemon assets and validation`).
+- Último commit publicado no branch no momento deste checkpoint: `3efec0c410a759d78018b0533c4e52e4050db515`.
+- Actions: [Build Minemon #39800529455](https://github.com/PetrickFaria/minemon/actions/runs/39800529455), SHA `3efec0c410a759d78018b0533c4e52e4050db515`; estado `queued` na última consulta. Não iniciar outro workflow.
 
 ## Fonte e auditoria
 
@@ -43,11 +46,11 @@ O planejamento original de 16 lotes confirma que o Lote 10 é #091–#100: Cloys
 - `tools/verify_pidge_wing_visibility.py`: aprovado.
 - `tools/verify_project.py`: aprovado; 151 registros e referências a recursos presentes.
 - `tools/verify_molang_compatibility.py`: aprovado para clips ativos; continua reportando queries de montaria somente em clips retidos não selecionados, sem suprimir ou reescrever esses casos.
-- O teste Gradle direcionado ainda não executou: a distribuição Gradle 7.5.1 não está em cache local e o host recusou a conexão de rede. Não foram iniciados GameTests nem Minecraft.
+- O teste Gradle direcionado não executou localmente: a distribuição Gradle 7.5.1 não está em cache e o host recusou a conexão de rede. A compilação/testes Java aguardam a execução Actions acima. Não foram iniciados GameTests nem Minecraft.
 
 ## Pokémon implementados
 
-Os dez recursos do Lote 10 foram importados na árvore de trabalho e passaram as verificações estruturais. Os primeiros 90 manifestos, perfis, modelos, texturas e animações foram comparados com a base `eeb3054` e permaneceram inalterados.
+Os dez recursos do Lote 10 foram importados e publicados no commit `3efec0c`. Os primeiros 90 manifestos, perfis, modelos, texturas e animações foram comparados com a base `eeb3054` e permaneceram inalterados.
 
 O documento de evidência da fonte é `docs/animation-audit/minemon-gen1-batch10-source-evidence.json`.
 
@@ -66,11 +69,11 @@ O documento de evidência da fonte é `docs/animation-audit/minemon-gen1-batch10
 
 ## Próxima etapa
 
-Publicar o checkpoint de implementação no branch do Lote 10 e validar em GitHub Actions. Ordem: testes direcionados Molang/espécies/Lote 10; suíte Java completa; GameTests do servidor; um smoke completo do cliente; inspeção do JAR e upload do artefato. Se a suíte Java falhar, corrigir a causa antes de iniciar qualquer cliente.
+Acompanhar a execução Actions `39800529455`, já iniciada para o commit `3efec0c`. Ordem: testes direcionados Molang/espécies/Lote 10; suíte Java completa; GameTests do servidor; um smoke completo do cliente; inspeção do JAR e upload do artefato. Se a suíte Java falhar, corrigir a causa antes de iniciar qualquer cliente.
 
 ## Estado atual
 
-- Pokémon implementados na árvore de trabalho: #091–#100.
-- Commit final publicado: não há ainda.
-- Workflow do Lote 10: não iniciado.
+- Pokémon implementados e publicados: #091–#100.
+- Commit de implementação em validação: `3efec0c410a759d78018b0533c4e52e4050db515`.
+- Workflow do Lote 10: `39800529455`, em fila na última consulta.
 - Validação automatizada total e JAR do Lote 10: pendentes.
