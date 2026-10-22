@@ -140,7 +140,7 @@ public final class CompanionTests {
   MinemonCreature b=spawn(h);b.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED).setBaseValue(0);
   Cow c=h.spawn(EntityType.COW,new BlockPos(11,1,5));c.setNoAi(true);b.hurt(DamageSource.mobAttack(c),1);
   check(h,b.getTarget()==c,"Initial provocation must acquire target");
-  h.runAfterDelay(430,()->{check(h,b.getTarget()==null,"Expired aggression must not be reacquired by HurtByTargetGoal");h.succeed();});
+  h.runAfterDelay(430,()->{check(h,b.getTarget()==null,"Expired aggression must not be reacquired by HurtByTargetGoal"+state(b,c));h.succeed();});
  }
 
  @GameTest(template="test_arena",timeoutTicks=100)

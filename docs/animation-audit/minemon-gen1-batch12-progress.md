@@ -38,12 +38,12 @@ Fonte local auditada: Cobblemon Fabric 1.8.2, SHA-256 `cae8ac328b61354fbe415208b
 
 ## Testes pendentes e próximo passo
 
-- Testes Java direcionados e suíte Java/build completos: PASS no Actions #39841242841, commit `4c314bf5b3537689b6813e873a4b723ff80aed36`.
-- GameTests do servidor: PASS no mesmo run.
-- Smoke completo do cliente: em andamento na etapa 15/19 do mesmo run; ainda sem aprovação, falha ou retry.
-- Inspeção do JAR e publicação do artefato: aguardam o smoke.
-- Próxima etapa: aguardar o run #39841242841; se falhar, consultar logs e corrigir somente a causa comprovada.
-- Commit de implementação do Lote 12: `4c314bf5b3537689b6813e873a4b723ff80aed36`.
+- A execução #39855369559 terminou em falha no GameTest `wildaggressionactuallyexpires`; 12 dos 13 GameTests passaram.
+- Os testes focados, suíte Java e build passaram. O smoke completo do cliente também concluiu com sucesso (etapa 15/19).
+- A inspeção do JAR e o upload foram pulados devido à falha do GameTest; nenhum JAR do Lote 12 foi publicado por essa execução.
+- Diagnóstico #12462837662 (expira 2026-10-29 22:20:33 UTC); logs do servidor #12460040102 (expira 2026-10-29 21:15:41 UTC).
+- Falha observada: `Expired aggression must not be reacquired by HurtByTargetGoal`. Corrigindo a invariável para limpar qualquer alvo residual de criatura selvagem quando o contador de agressividade chega a zero; o teste mantém a asserção e agora inclui estado da entidade na mensagem de erro.
+- Correção em preparação sobre o checkpoint `20893c4684e99789461a9526ff424bae74cb316e`; ainda não validada por CI. Próximo passo: executar os testes e workflow uma única vez após publicar a correção. O Lote 13 permanece não iniciado.
 
 ## Diagnóstico do primeiro smoke
 
@@ -69,11 +69,11 @@ Fonte local auditada: Cobblemon Fabric 1.8.2, SHA-256 `cae8ac328b61354fbe415208b
 ## Validações e publicações
 
 - Último commit de código em validação: `d20a00bdd60c05f5b04c89fbddf3f68f867f97c1`.
-- Actions #39855369559: testes focados e suíte Java/build PASS; GameTests do servidor PASS; smoke completo do cliente em execução.
+- Actions #39855369559: testes focados e suíte Java/build PASS; smoke completo do cliente PASS; GameTests 12/13 PASS, com falha em `wildaggressionactuallyexpires`; não houve JAR.
 - Actions #39841242841: Java/build e GameTests PASS; smoke falhou na classificação do fallback estático de Tangela.
 - Actions #39850003592: Java/build e GameTests PASS; smoke falhou no perfil de repouso de Alakazam; não houve retry automático nem JAR.
 - Artefato de JAR do Lote 12: ainda não gerado.
-- Próxima etapa: aguardar o smoke no Actions #39855369559; inspecionar/publicar JAR somente se passar; não iniciar o Lote 13 antes disso.
+- Correção de alvo residual preparada localmente após o run; ainda pendente de publicação e validação. Inspecionar/publicar JAR somente após todos os GameTests e smokes passarem; não iniciar o Lote 13 antes disso.
 
 ## Correções visuais protegidas
 
