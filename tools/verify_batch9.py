@@ -154,5 +154,14 @@ if args.jar:
    packed_anim=json.loads(jar.read(path))['animations']
    for name,clip in anim_by_slug[d['slug']].items():
     for key in ('sound_effects','particle_effects','timeline'):
-     if key in clip:assert packed_anim[name][key]==normalize(clip[key]),(d['slug'],name,key)
+     if key not in clip:continue
+     if key in ('sound_effects','particle_effects'):
+      events=clip[key]
+      # prepare_runtime_assets.py removes GeckoLib 3 event blocks when any
+      # timestamp carries a non-object value (for example Magneton's particle
+      # arrays), while retaining the untouched source resource in the repo.
+      if not isinstance(events,dict) or any(not isinstance(value,dict) for value in events.values()):
+       assert key not in packed_anim[name],(d['slug'],name,key,'unsupported event block should be removed at runtime')
+       continue
+     assert packed_anim[name].get(key)==normalize(clip[key]),(d['slug'],name,key)
   print('PASS JAR BATCH 9: 90 updated species assets, 151-entry Pokédex, source events, and cumulative resources verified')

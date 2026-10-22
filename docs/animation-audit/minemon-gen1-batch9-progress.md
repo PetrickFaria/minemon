@@ -90,3 +90,5 @@ A validação completa continuará pendente até compilação, testes Java, Game
 - GameTests do servidor: aprovados.
 - Smoke completo do cliente: em andamento no run `39770065634` (https://github.com/PetrickFaria/minemon/actions/runs/39770065634). Não considerar timeout como sucesso; não iniciar repetição automática.
 - Inspeção e upload do JAR: pendentes até o smoke do cliente concluir.
+
+- O smoke do cliente no run `39770065634` terminou com sucesso (11:25:18–11:55:28 UTC). A inspeção do JAR confirmou metadados, classe, catálogo/151 registros, recursos do lote e integridade cumulativa; o verificador do Lote 9 então lançou `KeyError: particle_effects` para Magneton. Diagnóstico: `prepare_runtime_assets.py` remove intencionalmente blocos GeckoLib de efeitos cujos timestamps têm valores não-objecto (as listas nativas de partículas do Magneton). A fonte permanece intacta; a asserção do JAR foi corrigida para exigir essa remoção apenas quando a regra real de preparo a determina e comparar fielmente eventos compatíveis. O JAR não foi enviado porque a inspeção falhou; um único workflow final é necessário para repetir a inspeção e publicar o artefato.
