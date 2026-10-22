@@ -80,3 +80,13 @@ A validação completa continuará pendente até compilação, testes Java, Game
 - Terceira execução, `39769345922`: a comparação estrita do conteúdo passou, mas a lista de caminhos permitidos dos dois verificadores ainda não incluía o arquivo do Pidgeotto. O ajuste desta etapa adiciona somente esse caminho, cuja diferença já é validada byte a byte contra a correção Molang esperada. Testes Java seguem pendentes.
 
 - Quarta execução, `39769581001`, passou as validações cumulativas e o teste do seletor, mas o preflight Molang encontrou outra sintaxe inválida no clip ativo `animation.pidgeotto.air_fly`: as rotações X dos ossos `foot_left` e `foot_right` usavam `*+9.5`. A varredura das animações dos primeiros 90 confirmou que esses são os dois casos remanescentes do mesmo tipo. Removido apenas o sinal unário antes de `9.5`; os verificadores exigem essa correção exata e preservam os demais bytes.
+
+
+## Checkpoint Java e servidor — 2026-10-22
+
+- Commit de código em validação: `2f6dc55d58cbee0f56da77ce9f878ba809e7ac62`.
+- Os testes direcionados `SmokeSpeciesSelectionTest` e `ActiveAnimationMolangPreflightTest` passaram; o preflight verificou os clips ativos dos #001–#090 após a correção das quatro ocorrências Molang inválidas no Pidgeotto (cauda e pés).
+- Compilação completa e suíte Java: aprovadas.
+- GameTests do servidor: aprovados.
+- Smoke completo do cliente: em andamento no run `39770065634` (https://github.com/PetrickFaria/minemon/actions/runs/39770065634). Não considerar timeout como sucesso; não iniciar repetição automática.
+- Inspeção e upload do JAR: pendentes até o smoke do cliente concluir.
