@@ -80,7 +80,7 @@ for index,d in enumerate(defs[110:120]):
  if run:assert set(profiles[slug]['run'])<=set(animations[run].get('bones',{})),(slug,'run profile not animated')
  assert all('.minemon_' not in clip for clip in d.get('clips',{}).values()),(slug,'generated action placeholder selected')
  if slug=='tangela':
-  assert d.get('movement_fallback')=='idle' and d.get('source_static_idle') is True
+  assert d.get('movement_fallback')=='static' and d.get('source_static_idle') is True
   assert d.get('idle')==d.get('walk')=='animation.tangela.minemon_static'
   assert animations[d['idle']]['bones']=={'body':{'rotation':[0,0,0]}}
   assert d.get('source_resource_limit') and 'no idle/walk/run clip or poser' in d['source_resource_limit']

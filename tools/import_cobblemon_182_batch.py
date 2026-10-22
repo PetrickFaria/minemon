@@ -322,7 +322,7 @@ for d in defs[start-1:end]:
   idle=walk='animation.tangela.minemon_static'
   animations[idle]={'animation_length':4.0,'loop':True,'bones':{'body':{'rotation':[0,0,0]}}}
   (R/paths['animation']).write_text(json.dumps({'format_version':'1.8.0','animations':animations},indent=2)+'\n')
-  d['movement_fallback']='idle';d['source_static_idle']=True
+  d['movement_fallback']='static';d['source_static_idle']=True
  assert idle,'Missing source idle '+slug
  if slug in ('spearow','fearow'):
   poser_path=f'{prefix}/posers/{folder}/{slug}.json'

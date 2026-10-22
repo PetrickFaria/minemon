@@ -42,7 +42,7 @@ public class Batch12AnimationCompatibilityTest {
         for(String slug:List.of("tangela","kangaskhan","horsea","seadra","goldeen","seaking"))
             assertFalse("Do not invent a source run for "+slug,defs().get(SPECIES.indexOf(slug)+110).getAsJsonObject().getAsJsonObject("clips").has("ground_run"));
         var tangela=definitions.get(113).getAsJsonObject();
-        assertEquals("idle",tangela.get("movement_fallback").getAsString());
+        assertEquals("static",tangela.get("movement_fallback").getAsString());
         assertTrue(tangela.get("source_static_idle").getAsBoolean());
         assertEquals(tangela.get("idle").getAsString(),tangela.get("walk").getAsString());
         assertTrue(tangela.get("source_resource_limit").getAsString().contains("no idle/walk/run clip or poser"));

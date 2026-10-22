@@ -188,7 +188,7 @@
       "movement": "animation.tangela.minemon_static",
       "mode": "ground",
       "native_run": null,
-      "fallback": "idle",
+      "fallback": "static",
       "profiles": {
         "idle": [
           "body"

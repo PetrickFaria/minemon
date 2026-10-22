@@ -32,7 +32,7 @@ Fonte local auditada: Cobblemon Fabric 1.8.2, SHA-256 `cae8ac328b61354fbe415208b
 - Atualizadas somente as definições/perfis #111–#120; os dez arquivos de modelo, animação e textura #001–#110 foram comparados byte a byte com o commit-base e permanecem intactos.
 - Corridas nativas selecionadas apenas para Rhyhorn, Rhydon, Chansey e Staryu. Kangaskhan, Horsea, Seadra, Goldeen e Seaking não receberam corrida inventada.
 - Clips aquáticos nativos `water_idle`/`water_swim` foram preservados quando disponíveis para Horsea, Seadra, Goldeen, Seaking e Staryu; o controller atual usa os estados terrestres existentes e não foi expandido.
-- Tangela não tem clips de idle/walk/run nem poser na fonte. Foi adicionado somente um canal neutro de bind pose para manter o modelo estável; fallback `idle` explicitado, sem movimento sintetizado.
+- Tangela não tem clips de idle/walk/run nem poser na fonte. Foi adicionado somente um canal neutro de bind pose para manter o modelo estável; fallback `static` explícito, sem movimento sintetizado.
 - `tools/verify_batch12.py`, verificadores cumulativos dos Lotes 8–11, `verify_project.py`, `verify_runtime.py` e o preflight Molang passaram localmente.
 - Os perfis de Goldeen e Seaking foram ajustados para joints presentes nos clips nativos selecionados após a primeira checagem estrutural apontar divergências.
 
@@ -45,11 +45,22 @@ Fonte local auditada: Cobblemon Fabric 1.8.2, SHA-256 `cae8ac328b61354fbe415208b
 - Próxima etapa: aguardar o run #39841242841; se falhar, consultar logs e corrigir somente a causa comprovada.
 - Commit de implementação do Lote 12: `4c314bf5b3537689b6813e873a4b723ff80aed36`.
 
+## Diagnóstico do primeiro smoke
+
+- Run #39841242841: preflight, testes Java, build e GameTests PASS; smoke processou os 151 registros e as janelas de renderização/movimento, mas falhou na verificação final de deslocamento de Tangela.
+- Erro: `No rendered movement for tangela; displacement=true bodyChanged=false staticFallback=false`.
+- Causa: perfil do manifesto classificava como `idle`; o smoke geral reconhece a pose sem gait somente quando `movement_fallback` é `static`.
+- Correção local: o manifesto/importador agora classificam Tangela como `movement_fallback=static`; o fallback permanece uma pose neutra, sem animação de movimento nova.
+- Verificadores estruturais e cumulativos reexecutados após a correção: PASS; build Java direcionado local não está disponível neste container porque a distribuição Gradle 7.5.1 não pôde ser baixada.
+- Diagnósticos do run #39841242841: artifact #12456257638 (expira em 2026-10-29 20:30:07 UTC); logs de GameTests #12452159446 (expira em 2026-10-29 19:37:33 UTC). Esse run não publicou JAR porque falhou antes da inspeção.
+- Próximo passo: publicar a correção e deixar a execução sequencial verificar testes Java direcionados/completos, GameTests, smoke e JAR antes de qualquer lote seguinte.
+
 ## Validações e publicações
 
-- Próxima etapa: aprovação automatizada de #111–#120 na mesma base preservada dos 110 anteriores.
-- GitHub Actions/artefato Lote 12: ainda não executados.
-- JAR Lote 12: ainda não gerado.
+- Actions #39841242841: Java/build e GameTests PASS; smoke falhou no teste geral de deslocamento, por classificação incorreta do fallback estático de Tangela.
+- Actions após correção do fallback: ainda não executado.
+- Artefato de JAR do Lote 12: ainda não gerado.
+- Próxima etapa: publicar a correção e aguardar aprovação integral antes de iniciar o Lote 13.
 
 ## Correções visuais protegidas
 

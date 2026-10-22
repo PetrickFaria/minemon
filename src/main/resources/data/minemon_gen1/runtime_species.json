@@ -7732,7 +7732,7 @@
     "source_cobblemon_version": "1.8.2",
     "source_static_idle": true,
     "source_resource_limit": "Cobblemon 1.8.2 Tangela includes a cry clip but no idle/walk/run clip or poser; Minemon selects a four-second looping bind-pose hold with no synthesized movement.",
-    "movement_fallback": "idle"
+    "movement_fallback": "static"
   },
   {
     "nationalPokedexNumber": 115,
