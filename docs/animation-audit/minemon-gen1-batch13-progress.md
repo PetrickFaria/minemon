@@ -46,6 +46,14 @@
 2. Publicar commit final de implementação incluindo teste Java, verificador Batch 13 e workflow.
 3. Consultar essa única execução, corrigir apenas falhas comprovadas e publicar JAR após todos os gates passarem.
 
+## Diagnóstico da primeira validação do Lote 13
+
+- Actions #39874294212, commit `225944d5615137c96f75912bc0960735f38c9e19`: falhou na etapa 6 (`verify_project.py`), antes dos testes Java; GameTests, smoke e inspeção do JAR foram pulados.
+- Erro: `UnicodeDecodeError` ao ler `assets/minemon/animations/gyarados_cobblemon_1_8_2/gyarados.animation.json`.
+- Causa confirmada: o arquivo local correto tinha 486.334 bytes; o blob remoto tinha 450.060 bytes, por truncamento na transmissão da API. A comparação SHA dos demais arquivos alterados não encontrou divergências.
+- Ação corretiva: restaurar exatamente o blob local validado do Gyarados, sem modificar animação, testes ou critérios; reenviar o arquivo em blocos e validar que o SHA do blob remoto corresponda ao arquivo local.
+- Próximo passo: publicar a correção pontual e executar uma nova validação completa, única, do commit corrigido.
+
 ## Correções visuais protegidas
 
 - Graveler e Golem: corrida aprovada.
