@@ -9,6 +9,7 @@ MP='src/main/resources/data/minemon_gen1/runtime_species.json'
 VP='src/main/resources/data/minemon_gen1/animation_validation_profiles.json'
 EXPECTED=['victreebel','tentacool','tentacruel','geodude','graveler','golem','ponyta','rapidash','slowpoke','slowbro']
 BATCH9=['magnemite','magneton','farfetchd','doduo','dodrio','seel','dewgong','grimer','muk','shellder']
+BATCH10=['cloyster','gastly','haunter','gengar','onix','drowzee','hypno','krabby','kingler','voltorb']
 parser=argparse.ArgumentParser()
 parser.add_argument('--segment',choices=('first','second'))
 parser.add_argument('jar',nargs='?')
@@ -38,10 +39,10 @@ assert len(defs)==151 and [d['nationalPokedexNumber'] for d in defs]==list(range
 assert [d['slug'] for d in defs[70:80]]==EXPECTED
 assert defs[:70]==old_defs[:70],'One of the first 70 manifest entries changed'
 later_changes=[d['slug'] for i,d in enumerate(defs[end:],start=end) if d!=old_defs[i]]
-assert set(later_changes)<=set(BATCH9),'A manifest entry outside Batch 9 changed: '+repr(later_changes)
-assert all(d['model']==old_defs[i]['model'] and d['texture']==old_defs[i]['texture'] and d['animation']==old_defs[i]['animation'] for i,d in enumerate(defs) if d['slug'] not in authorized_species and d['slug'] not in BATCH9),'Out-of-scope paths changed'
+assert set(later_changes)<=set(BATCH9+BATCH10),'A manifest entry outside Batches 9 and 10 changed: '+repr(later_changes)
+assert all(d['model']==old_defs[i]['model'] and d['texture']==old_defs[i]['texture'] and d['animation']==old_defs[i]['animation'] for i,d in enumerate(defs) if d['slug'] not in authorized_species and d['slug'] not in BATCH9+BATCH10),'Out-of-scope paths changed'
 assert all(profiles.get(k)==v for k,v in old_profiles.items()),'Earlier articulation profiles changed'
-assert set(profiles)==set(old_profiles)|set(EXPECTED[:end-70])|{s for s in BATCH9 if s in profiles},'Unexpected articulation profile set'
+assert set(profiles)==set(old_profiles)|set(EXPECTED[:end-70])|{s for s in BATCH9+BATCH10 if s in profiles},'Unexpected articulation profile set'
 
 old_paths=set()
 for d in old_defs[:70]:old_paths.update([d['model'],d['texture'],d['animation']]+d['licenses'])
@@ -66,6 +67,8 @@ for d in defs[70:70+len(authorized_species)]:
  allowed.update([d['model'],d['texture'],d['animation']]+d['licenses'])
 allowed_paths={str(Path('src/main/resources')/p) for p in allowed}
 for d in defs[80:90]:
+ if d.get('source_cobblemon_version')=='1.8.2':allowed.update([d['model'],d['texture'],d['animation']]+d['licenses'])
+for d in defs[90:100]:
  if d.get('source_cobblemon_version')=='1.8.2':allowed.update([d['model'],d['texture'],d['animation']]+d['licenses'])
 allowed_paths={str(Path('src/main/resources')/p) for p in allowed}
 allowed_paths.add('src/main/resources/assets/minemon/animations/weedle_cobblemon_1_8_2/weedle.animation.json')

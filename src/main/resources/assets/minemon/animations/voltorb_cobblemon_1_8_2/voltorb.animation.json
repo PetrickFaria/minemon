@@ -1,0 +1,90 @@
+{
+  "format_version": "1.8.0",
+  "animations": {
+    "animation.voltorb.blink": {
+      "animation_length": 0.1667,
+      "bones": {
+        "eyelid_left": {
+          "position": {
+            "0.0": [
+              0,
+              0,
+              -0.1
+            ],
+            "0.125": [
+              0,
+              0,
+              -0.1
+            ],
+            "0.1667": [
+              0,
+              0,
+              0
+            ]
+          }
+        },
+        "eyelid_right": {
+          "position": {
+            "0.0": [
+              0,
+              0,
+              -0.1
+            ],
+            "0.125": [
+              0,
+              0,
+              -0.1
+            ],
+            "0.1667": [
+              0,
+              0,
+              0
+            ]
+          }
+        }
+      }
+    },
+    "animation.voltorb.cry": {
+      "animation_length": 0.08333,
+      "sound_effects": {
+        "0.0417": {
+          "effect": "pokemon.voltorb.cry"
+        }
+      }
+    },
+    "animation.voltorb.ground_idle": {
+      "bones": {
+        "body": {
+          "position": [
+            "math.sin(query.anim_time*90*3)*0.2",
+            0.25,
+            "math.sin(query.anim_time*90*3+90)*0.5"
+          ],
+          "rotation": [
+            "5-math.clamp(math.sin(query.anim_time*90*3+90)*8,-6,8)",
+            "math.sin(query.anim_time*90*45)*1*math.sin(query.anim_time*90*20)*1",
+            "math.sin(query.anim_time*90*3)*2"
+          ]
+        }
+      },
+      "loop": true
+    },
+    "animation.voltorb.ground_walk": {
+      "bones": {
+        "body": {
+          "position": [
+            0,
+            "math.clamp((math.sin(query.anim_time*90*4*2.5-90)*1+1)*5,0,0.7)+math.clamp((math.sin(query.anim_time*90*4*2.5-90)*1+1)*0.5,0,2)",
+            0
+          ],
+          "rotation": [
+            "query.anim_time*90*2.5",
+            0,
+            0
+          ]
+        }
+      },
+      "loop": true
+    }
+  }
+}

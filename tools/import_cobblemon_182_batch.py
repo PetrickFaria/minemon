@@ -4,14 +4,14 @@ import argparse,copy,hashlib,io,json,math,re,urllib.request,zipfile
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 R=ROOT/'src/main/resources'
-ap=argparse.ArgumentParser();ap.add_argument('--batch',type=int,choices=(2,3,4,5,6,7,8,9),required=True);ap.add_argument('--segment',choices=('first','second'));ap.add_argument('--source-jar',type=Path);args=ap.parse_args()
+ap=argparse.ArgumentParser();ap.add_argument('--batch',type=int,choices=(2,3,4,5,6,7,8,9,10),required=True);ap.add_argument('--segment',choices=('first','second'));ap.add_argument('--source-jar',type=Path);args=ap.parse_args()
 start,end=(args.batch-1)*10+1,args.batch*10
 if args.batch in (8,9) and args.segment:
  start,end=(((71,75) if args.segment=='first' else (76,80)) if args.batch==8 else ((81,85) if args.segment=='first' else (86,90)))
 mp=R/'data/minemon_gen1/runtime_species.json'
 defs=json.loads(mp.read_text());before=copy.deepcopy(defs)
 assert len(defs)==151 and [d['nationalPokedexNumber'] for d in defs]==list(range(1,152))
-assert all('_cobblemon_1_8_2/' in d['model'] for d in defs[:min(start-1,80 if args.batch==9 else 70)]),'Previous batch must be imported and validated first'
+assert all('_cobblemon_1_8_2/' in d['model'] for d in defs[:start-1]),'Previous species must be imported and validated first'
 url='https://cdn.modrinth.com/data/MdwFAVRL/versions/GJ2a1b8O/Cobblemon-fabric-1.8.2%2B1.21.1.jar'
 raw=args.source_jar.read_bytes() if args.source_jar else urllib.request.urlopen(url,timeout=180).read()
 digest=hashlib.sha256(raw).hexdigest()
@@ -101,6 +101,18 @@ RUN={'sandshrew':['ball'],'arcanine':['leg_front_left','leg_front_right','leg_ba
  'alakazam':['left_upper_leg','right_upper_leg','left_upper_arm','right_upper_arm'],
  'geodude':['body','torso'],'graveler':['arm_bottom_left','arm_bottom_right'],
  'golem':['left_upper_arm','right_upper_arm'],'rapidash':['leg_front_left','leg_front_right','leg_back_left','leg_back_right']}
+GAIT.update({
+ 'cloyster':['body','head','shell_left','shell_right','inner_shell_left','inner_shell_right','inner_spike'],
+ 'gastly':['body','tongue'],
+ 'haunter':['hand_left1','hand_left2','hand_right1','hand_right2','tail1','tail2','tail3','jaw'],
+ 'gengar':['body','arm_left','arm_left2','arm_right','arm_right2','leg_left','leg_left2','leg_right','leg_right2'],
+ 'onix':['segment2','segment4','segment5','segment6','segment7','segment8','segment9','segment10','segment11','segment12','segment13','segment14','head','body'],
+ 'drowzee':['leg_left','leg_left2','leg_right','leg_right2','arm_left','arm_right','torso','upper_torso'],
+ 'hypno':['left_upper_leg','right_upper_leg','left_upper_arm','right_upper_arm','pendulum','string_1','string_2','string_3','torso','upper_torso'],
+ 'krabby':['leg_left_front','leg_right_front','leg_left_back','leg_right_back','arm_left','arm_right','claw_left','claw_right','body'],
+ 'kingler':['leg_left_front','leg_right_front','leg_left_back','leg_right_back','arm_left','arm_right','claw_left','claw_right','body'],
+ 'voltorb':['body']
+})
 IDLE.update({'poliwhirl':['body','arm_left','arm_right'],'poliwrath':['body','arm_left1','arm_right1'],
  'abra':['body','tail'],'kadabra':['tail','arm_left','arm_right'],
  'alakazam':['upper_torso','left_mustache','right_mustache'],
@@ -123,6 +135,22 @@ IDLE.update({'poliwhirl':['body','arm_left','arm_right'],'poliwrath':['body','ar
  'muk':['body','arm_left','arm_right','mouth_sludge'],
  'shellder':['body','shell_top','shell_bottom','tongue']})
 RUN.update({'grimer':['body','arm_left','arm_right','back_tail','front_tail']})
+IDLE.update({
+ 'cloyster':['body','head','shell_left','shell_right','inner_shell_left','inner_shell_right','inner_spike'],
+ 'gastly':['body','tongue'],
+ 'haunter':['hand_left1','hand_left2','hand_right1','hand_right2','tail1','tail2','tail3','jaw'],
+ 'gengar':['arm_left','arm_left2','arm_right','arm_right2'],
+ 'onix':['body','head','segment2','segment4','segment5','segment6','segment9','segment13','segment14'],
+ 'drowzee':['arm_left','arm_right','head','jaw','torso','upper_torso'],
+ 'hypno':['pendulum','string_1','string_2','string_3','left_hand','right_hand','torso','upper_torso'],
+ 'krabby':['arm_left','arm_right','claw_left','claw_right','leg_left_front','leg_right_front'],
+ 'kingler':['arm_left','arm_right','claw_left','claw_right','leg_left_front','leg_right_front'],
+ 'voltorb':['body']
+})
+RUN.update({
+ 'drowzee':['leg_left','leg_right','arm_left','arm_right','torso','upper_torso'],
+ 'hypno':['left_upper_leg','right_upper_leg','left_upper_arm','right_upper_arm','pendulum','weight','torso','upper_torso']
+})
 evidence=[]
 for d in defs[start-1:end]:
  slug=d['slug'];n=d['nationalPokedexNumber'];folder=f'{n:04d}_{slug}'
@@ -168,12 +196,12 @@ for d in defs[start-1:end]:
   assert 'animation_length' not in cry or cry['animation_length']==misplaced
   cry['animation_length']=misplaced
   d['source_event_correction']='cry duration 1.25 moved from sound_effects metadata to clip animation_length; timestamp/effect unchanged'
- if args.batch in (5,6,7,8,9):
+ if args.batch in (5,6,7,8,9,10):
   # Retain every native clip. Only normalize syntax / unsupported mounted inputs.
   def adapt(value):
    if isinstance(value,str):
     value=value.replace('Math.','math.')
-    if args.batch in (7,8,9):
+    if args.batch in (7,8,9,10):
      value=re.sub(r'\bq\.', 'query.',value)
      # GeckoLib 3.1.40's Molang parser rejects a unary minus directly before
      # a grouped expression; multiplying the complete group by -1 is equal.
@@ -198,7 +226,7 @@ for d in defs[start-1:end]:
    d['source_molang_adaptations']={'q.':'query.'}
   if args.batch==8:
    d['source_molang_adaptations']={'q.':'query.','Math.':'math.'}
-  if args.batch==9:
+  if args.batch in (9,10):
    d['source_molang_adaptations']={'q.':'query.','Math.':'math.'}
   if slug=='zubat':
    poser=json.loads(z.read(f'{prefix}/posers/{folder}/{slug}.json'))
@@ -225,8 +253,8 @@ for d in defs[start-1:end]:
   # These sources use procedural poser wing motion; no native gait is invented.
   # Preserve the existing ground mode until the source-backed adapter is audited.
   flying=False
- idle=names.get('air_idle') if flying else (names.get('ground_idle') or names.get('idle') or names.get('ground_idle_placeholder'))
- walk=names.get('air_fly') if flying else (names.get('ground_walk') or names.get('ground_walk_placeholder'))
+ idle=(names.get('air_idle') or names.get('ground_idle') or names.get('idle') or names.get('ground_idle_placeholder')) if flying else (names.get('ground_idle') or names.get('idle') or names.get('ground_idle_placeholder'))
+ walk=(names.get('air_fly') or names.get('ground_walk') or names.get('ground_walk_placeholder')) if flying else (names.get('ground_walk') or names.get('ground_walk_placeholder'))
  assert idle,'Missing source idle '+slug
  if slug in ('spearow','fearow'):
   poser_path=f'{prefix}/posers/{folder}/{slug}.json'
@@ -318,6 +346,12 @@ for d in defs[start-1:end]:
   # Keep their pose and make the client smoke assert stability, not motion.
   prof['idle_static']=prof['idle']
   d['source_static_idle']=True
+ if args.batch==10 and slug=='haunter':
+  # The source poser explicitly reuses a static ground_idle for standing and walking.
+  # Preserve Haunter's floating mode; do not fabricate locomotion.
+  assert walk==idle and all(not isinstance(value,dict) for channel in animations[idle]['bones'].values() for value in channel.values())
+  prof['idle_static']=prof['idle']
+  d['source_static_idle']=True
  if args.batch==6 and slug in ('meowth','persian','growlithe','poliwag'):
   native_idle=animations[idle]
   assert not any(token in json.dumps(native_idle) for token in ('math.','q.','query.'))
@@ -344,7 +378,7 @@ for d in defs[start-1:end]:
     look_bones=sorted({re.search(r"q.look\('([^']+)'",a).group(1) for a in look_inputs})
     available={name:(name if name in bones else 'head' if name=='head_ai' and 'head' in bones else None) for name in look_bones}
     d['source_procedural_pose']={'poser':poser_path,'look':look_inputs,'look_bones':look_bones,'adapted_geo_bones':available,'adaptation':'Map q.look to the source head bone when present; no locomotion gait is synthesized'}
- if args.batch in (8,9):
+ if args.batch in (8,9,10):
   poser_path=f'{prefix}/posers/{folder}/{variant}.json'
   if poser_path in members:
    poser=json.loads(z.read(poser_path))

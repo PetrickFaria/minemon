@@ -1544,5 +1544,302 @@
       "head",
       "tongue"
     ]
+  },
+  "cloyster": {
+    "idle": [
+      "body",
+      "head",
+      "shell_left",
+      "shell_right",
+      "inner_shell_left",
+      "inner_shell_right",
+      "inner_spike"
+    ],
+    "walk": [
+      "body",
+      "head",
+      "shell_left",
+      "shell_right",
+      "inner_shell_left",
+      "inner_shell_right",
+      "inner_spike"
+    ],
+    "run": [
+      "body",
+      "head",
+      "shell_left",
+      "shell_right",
+      "inner_shell_left",
+      "inner_shell_right",
+      "inner_spike"
+    ]
+  },
+  "gastly": {
+    "idle": [
+      "body",
+      "tongue"
+    ],
+    "walk": [
+      "body",
+      "tongue"
+    ],
+    "run": [
+      "body",
+      "tongue"
+    ]
+  },
+  "haunter": {
+    "idle": [
+      "hand_left1",
+      "hand_left2",
+      "hand_right1",
+      "hand_right2",
+      "tail1",
+      "tail2",
+      "tail3",
+      "jaw"
+    ],
+    "walk": [
+      "hand_left1",
+      "hand_left2",
+      "hand_right1",
+      "hand_right2",
+      "tail1",
+      "tail2",
+      "tail3",
+      "jaw"
+    ],
+    "run": [
+      "hand_left1",
+      "hand_left2",
+      "hand_right1",
+      "hand_right2",
+      "tail1",
+      "tail2",
+      "tail3",
+      "jaw"
+    ],
+    "idle_static": [
+      "hand_left1",
+      "hand_left2",
+      "hand_right1",
+      "hand_right2",
+      "tail1",
+      "tail2",
+      "tail3",
+      "jaw"
+    ]
+  },
+  "gengar": {
+    "idle": [
+      "arm_left",
+      "arm_left2",
+      "arm_right",
+      "arm_right2"
+    ],
+    "walk": [
+      "body",
+      "arm_left",
+      "arm_left2",
+      "arm_right",
+      "arm_right2",
+      "leg_left",
+      "leg_left2",
+      "leg_right",
+      "leg_right2"
+    ],
+    "run": [
+      "body",
+      "arm_left",
+      "arm_left2",
+      "arm_right",
+      "arm_right2",
+      "leg_left",
+      "leg_left2",
+      "leg_right",
+      "leg_right2"
+    ]
+  },
+  "onix": {
+    "idle": [
+      "body",
+      "head",
+      "segment2",
+      "segment4",
+      "segment5",
+      "segment6",
+      "segment9",
+      "segment13",
+      "segment14"
+    ],
+    "walk": [
+      "segment2",
+      "segment4",
+      "segment5",
+      "segment6",
+      "segment7",
+      "segment8",
+      "segment9",
+      "segment10",
+      "segment11",
+      "segment12",
+      "segment13",
+      "segment14",
+      "head",
+      "body"
+    ],
+    "run": [
+      "segment2",
+      "segment4",
+      "segment5",
+      "segment6",
+      "segment7",
+      "segment8",
+      "segment9",
+      "segment10",
+      "segment11",
+      "segment12",
+      "segment13",
+      "segment14",
+      "head",
+      "body"
+    ]
+  },
+  "drowzee": {
+    "idle": [
+      "arm_left",
+      "arm_right",
+      "head",
+      "jaw",
+      "torso",
+      "upper_torso"
+    ],
+    "walk": [
+      "leg_left",
+      "leg_left2",
+      "leg_right",
+      "leg_right2",
+      "arm_left",
+      "arm_right",
+      "torso",
+      "upper_torso"
+    ],
+    "run": [
+      "leg_left",
+      "leg_right",
+      "arm_left",
+      "arm_right",
+      "torso",
+      "upper_torso"
+    ]
+  },
+  "hypno": {
+    "idle": [
+      "pendulum",
+      "string_1",
+      "string_2",
+      "string_3",
+      "left_hand",
+      "right_hand",
+      "torso",
+      "upper_torso"
+    ],
+    "walk": [
+      "left_upper_leg",
+      "right_upper_leg",
+      "left_upper_arm",
+      "right_upper_arm",
+      "pendulum",
+      "string_1",
+      "string_2",
+      "string_3",
+      "torso",
+      "upper_torso"
+    ],
+    "run": [
+      "left_upper_leg",
+      "right_upper_leg",
+      "left_upper_arm",
+      "right_upper_arm",
+      "pendulum",
+      "weight",
+      "torso",
+      "upper_torso"
+    ]
+  },
+  "krabby": {
+    "idle": [
+      "arm_left",
+      "arm_right",
+      "claw_left",
+      "claw_right",
+      "leg_left_front",
+      "leg_right_front"
+    ],
+    "walk": [
+      "leg_left_front",
+      "leg_right_front",
+      "leg_left_back",
+      "leg_right_back",
+      "arm_left",
+      "arm_right",
+      "claw_left",
+      "claw_right",
+      "body"
+    ],
+    "run": [
+      "leg_left_front",
+      "leg_right_front",
+      "leg_left_back",
+      "leg_right_back",
+      "arm_left",
+      "arm_right",
+      "claw_left",
+      "claw_right",
+      "body"
+    ]
+  },
+  "kingler": {
+    "idle": [
+      "arm_left",
+      "arm_right",
+      "claw_left",
+      "claw_right",
+      "leg_left_front",
+      "leg_right_front"
+    ],
+    "walk": [
+      "leg_left_front",
+      "leg_right_front",
+      "leg_left_back",
+      "leg_right_back",
+      "arm_left",
+      "arm_right",
+      "claw_left",
+      "claw_right",
+      "body"
+    ],
+    "run": [
+      "leg_left_front",
+      "leg_right_front",
+      "leg_left_back",
+      "leg_right_back",
+      "arm_left",
+      "arm_right",
+      "claw_left",
+      "claw_right",
+      "body"
+    ]
+  },
+  "voltorb": {
+    "idle": [
+      "body"
+    ],
+    "walk": [
+      "body"
+    ],
+    "run": [
+      "body"
+    ]
   }
 }
