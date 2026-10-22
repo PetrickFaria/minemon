@@ -10,7 +10,9 @@ Implementar exclusivamente as espécies Kanto #101–#110 com modelos, texturas,
 - Commit-base íntegro: `b7b81592f4e2e0097a32f9342e3890f7257182e5` — aprovação do Lote 10.
 - Actions do Lote 10: [Build Minemon #39815820789](https://github.com/PetrickFaria/minemon/actions/runs/39815820789), sucesso; artefato #12443109947.
 - Artefato do Lote 10 contém `Minemon-1.19.2-2.0.0.jar`; expira em 2026-11-05.
-- Commit documental inicial do Lote 11 será registrado nesta branch. Nenhum recurso dos lotes anteriores será reimportado nem modificado sem causa técnica comprovada.
+- Commit de implementação aprovado: `c0cfdc43f80df32bac99a44b1375464c40087561` (`Implement Gen 1 batch 11 Cobblemon assets`).
+- Checkpoint documental inicial: `b1bbf6b9697f44f1aa230717153aac5712c0f3a3`.
+- Nenhum recurso dos lotes anteriores foi reimportado; as verificações cumulativas confirmaram preservação.
 
 ## Checkpoint 1 — preparação e auditoria da fonte
 
@@ -29,7 +31,7 @@ Estado inicial: todos os Pokémon do Lote 11 estão pendentes de integração. A
 | 109 | Koffing | Idle existe sem referência; walk/run ausentes; fonte aceita hover/flutuação, separado de corrida terrestre. |
 | 110 | Weezing | Idle nativo ativo; walk/run ausentes; fonte aceita hover/flutuação, separado de corrida. Preservar as duas cabeças Kanto. |
 
-A tabela acima é inventário preliminar do repositório e não substitui a inspeção dos arquivos do Cobblemon 1.8.2. Corrigir o inventário se a fonte efetiva divergir.
+A tabela acima registra o inventário preliminar e foi corrigida abaixo após inspeção dos arquivos exatos do Cobblemon 1.8.2.
 
 ## Checkpoint 2/3 — integração #101–#110
 
@@ -47,7 +49,20 @@ A tabela acima é inventário preliminar do repositório e não substitui a insp
 - Clips opcionais de sentar/dormir/ataque só são referenciados quando a fonte contém clip correspondente. O importador não cria substitutos `.minemon_*` para o Lote 11.
 - Adaptados aliases Molang Bedrock `q.` → `query.` e namespace `Math.` → `math.` para os clips importados.
 
-Pokémon implementados no checkout: #101–#110. A verificação estrutural preliminar passou. Ainda faltam os testes Java direcionados, a suíte completa, GameTests do servidor, smoke do cliente, compilação/JAR e Actions final.
+Pokémon implementados e publicados: #101–#110.
+
+## Checkpoint 4 — validação, JAR e Actions
+
+- GitHub Actions [Build Minemon #39828753587](https://github.com/PetrickFaria/minemon/actions/runs/39828753587): **success** no commit `c0cfdc43f80df32bac99a44b1375464c40087561`.
+- Testes Java direcionados: PASS (`SmokeSpeciesSelectionTest`, `ActiveAnimationMolangPreflightTest`, Batch 10 e Batch 11).
+- Suíte Java completa e compilação/build: PASS.
+- GameTests do servidor: PASS.
+- Smoke completo do cliente: PASS; nenhuma repetição automática foi iniciada.
+- Inspeção do JAR no workflow: PASS; verificadores de runtime, Lotes 8–11, registros/recursos e asas de Pidge passaram.
+- Artefato Actions: [Minemon-1.19.2-2.0.0-gen1 #12450059381](https://github.com/PetrickFaria/minemon/actions/runs/39828753587/artifacts/12450059381), expira em **2026-11-05 18:57:57 UTC**.
+- ZIP baixado e inspecionado: contém `Minemon-1.19.2-2.0.0.jar` (6.027.397 bytes). A validação local do JAR repetiu `verify_runtime`, `verify_batch8`, `verify_batch9`, `verify_batch10`, `verify_batch11` e `verify_pidge_wing_visibility`: todos PASS.
+- `META-INF/mods.toml`: Forge `[43.5.0,44)`, Minecraft `[1.19.2,1.20)`, GeckoLib `[3.1.40,4)`; inclui `pack.mcmeta`, `mods.toml`, classes e recursos. O JAR contém 151 espécies e os recursos atualizados dos primeiros 110 Pokémon.
+- Próxima etapa: apenas avaliação visual manual dos dez Pokémon novos, caso o usuário solicite. Não iniciar o Lote 12.
 
 ## Correções e recursos protegidos
 
@@ -60,7 +75,7 @@ Pokémon implementados no checkout: #101–#110. A verificação estrutural prel
 - Aprovação base do Lote 10 confirmada no Actions e no JAR do artefato.
 - `tools/verify_batch11.py`: PASS local — hierarquias, ossos, pivôs/valores finitos, textura/UV, clips/events, modo e fallbacks; preservação dos primeiros 100 recursos conferida contra a base aprovada.
 - `tools/verify_molang_compatibility.py`: PASS dos clips ativos existentes (reporta somente funções de montaria incompatíveis em clips não selecionados já conhecidos; sem alteração desse escopo).
-- Ainda não executados: testes Java, GameTests, smoke completo do cliente, build final e inspeção do JAR do Lote 11.
-- Próximo passo: executar testes Molang e de compatibilidade do Batch 11 direcionados; corrigir apenas erros demonstrados antes da suíte inteira.
-- GitHub Actions do Lote 11: ainda não iniciado; evitar push/workflow até os testes locais direcionados aprovarem.
+- `tools/verify_batch8.py`, `verify_batch9.py`, `verify_batch10.py`, `verify_batch11.py`, `verify_pidge_wing_visibility.py` e `verify_runtime.py`: PASS no JAR publicado.
+- Não houve falhas de teste pendentes no Actions aprovado.
+- A checagem local Gradle não foi necessária para aprovar o resultado; nesta sessão o wrapper não conseguiu baixar a distribuição por bloqueio de rede. Testes e build foram executados no runner GitHub Actions.
 - Avaliação visual manual dos novos Pokémon: pendente após entrega técnica.
