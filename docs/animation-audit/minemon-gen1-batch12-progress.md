@@ -53,14 +53,15 @@ Fonte local auditada: Cobblemon Fabric 1.8.2, SHA-256 `cae8ac328b61354fbe415208b
 - Correção local: o manifesto/importador agora classificam Tangela como `movement_fallback=static`; o fallback permanece uma pose neutra, sem animação de movimento nova.
 - Verificadores estruturais e cumulativos reexecutados após a correção: PASS; build Java direcionado local não está disponível neste container porque a distribuição Gradle 7.5.1 não pôde ser baixada.
 - Diagnósticos do run #39841242841: artifact #12456257638 (expira em 2026-10-29 20:30:07 UTC); logs de GameTests #12452159446 (expira em 2026-10-29 19:37:33 UTC). Esse run não publicou JAR porque falhou antes da inspeção.
-- Próximo passo: publicar a correção e deixar a execução sequencial verificar testes Java direcionados/completos, GameTests, smoke e JAR antes de qualquer lote seguinte.
+- Commit da correção: `52abd5e93bf1f8da41d74702baf138380f991d09` (`Fix static Tangela smoke fallback classification`).
+- Próximo passo: aguardar o Actions #39850003592; Java/build e GameTests passaram; smoke está em andamento.
 
 ## Validações e publicações
 
 - Actions #39841242841: Java/build e GameTests PASS; smoke falhou no teste geral de deslocamento, por classificação incorreta do fallback estático de Tangela.
-- Actions após correção do fallback: ainda não executado.
+- Actions #39850003592 após a correção: Java/build e GameTests PASS; smoke do cliente em andamento.
 - Artefato de JAR do Lote 12: ainda não gerado.
-- Próxima etapa: publicar a correção e aguardar aprovação integral antes de iniciar o Lote 13.
+- Próxima etapa: aguardar aprovação integral antes de iniciar o Lote 13.
 
 ## Correções visuais protegidas
 

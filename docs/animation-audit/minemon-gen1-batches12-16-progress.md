@@ -10,7 +10,7 @@
 - Lote ativo: 12 (#111–#120), branch `feature/minemon-gen1-batch12-cobblemon`.
 - Base: `0816533addee80e9e17a684c94bed399f4a9488f`.
 - Lotes 1–11/110 espécies: preservados e validados na base aprovada.
-- Lote 12: recursos #111–#120 integrados; verificadores estruturais, suíte Java/build e GameTests passaram no Actions #39841242841. Smoke falhou somente na classificação da pose estática de Tangela; correção local `movement_fallback=static` já passou nos verificadores estruturais. Nova aprovação Java/Actions e JAR pendentes.
+- Lote 12: recursos #111–#120 integrados; verificadores estruturais, suíte Java/build e GameTests passaram no Actions #39841242841. Smoke falhou somente na classificação da pose estática de Tangela; correção `movement_fallback=static` publicada no commit `52abd5e93bf1f8da41d74702baf138380f991d09`. Actions #39850003592: Java/build e GameTests PASS, smoke em andamento; JAR pendente.
 - Diagnósticos do primeiro run: artifact #12456257638 (expira 2026-10-29 20:30:07 UTC); logs do servidor #12452159446 (expira 2026-10-29 19:37:33 UTC). Nenhum JAR foi publicado para esse run.
 - Lotes 13–16: ainda não iniciados.
 - Próximo passo: validar/publicar o Lote 12; somente depois iniciar o Lote 13.
