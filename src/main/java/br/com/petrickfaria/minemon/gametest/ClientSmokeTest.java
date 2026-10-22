@@ -498,6 +498,35 @@ public final class ClientSmokeTest {
   private static boolean sourceStaticIdle(String slug) {
    return ADDITIONAL_PROFILES.getOrDefault(slug,java.util.Map.of()).containsKey("idle_static");
   }
+  private static boolean sourcePoseTransition(String slug) {
+   return ADDITIONAL_PROFILES.getOrDefault(slug,java.util.Map.of()).containsKey("pose_transition");
+  }
+  private static int validateSourcePoseTransition(String slug,String idleState,String movementState) {
+   var profile=ADDITIONAL_PROFILES.getOrDefault(slug,java.util.Map.of()).get("pose_transition");
+   if(profile==null||profile.isEmpty())throw new IllegalStateException("Missing source pose transition profile for "+slug);
+   if(articulationSampleCounts.getOrDefault(slug,java.util.Map.of()).getOrDefault(idleState,0)<2
+      ||articulationSampleCounts.getOrDefault(slug,java.util.Map.of()).getOrDefault(movementState,0)<2)
+    throw new IllegalStateException("Insufficient settled pose samples for "+slug+" states="+idleState+"/"+movementState);
+   int transitioned=0;
+   for(String joint:profile) {
+    float[] idle=articulationRanges.getOrDefault(slug,java.util.Map.of()).get(idleState+":"+joint);
+    float[] movement=articulationRanges.getOrDefault(slug,java.util.Map.of()).get(movementState+":"+joint);
+    if(idle==null||movement==null)throw new IllegalStateException("Missing settled source pose "+slug+":"+joint);
+    for(int axis=0;axis<6;axis++) {
+     float tolerance=axis<3?0.02F:0.05F;
+     if(!Float.isFinite(idle[axis])||!Float.isFinite(idle[axis+6])||idle[axis+6]<idle[axis]
+        ||idle[axis+6]-idle[axis]>tolerance||!Float.isFinite(movement[axis])
+        ||!Float.isFinite(movement[axis+6])||movement[axis+6]<movement[axis]
+        ||movement[axis+6]-movement[axis]>tolerance)
+      throw new IllegalStateException("Native source pose should settle without invented cyclic movement for "+slug+":"+joint);
+     float idlePose=(idle[axis]+idle[axis+6])*0.5F;
+     float movementPose=(movement[axis]+movement[axis+6])*0.5F;
+     if(Math.abs(movementPose-idlePose)>tolerance){transitioned++;break;}
+    }
+   }
+   if(transitioned<1)throw new IllegalStateException("Native movement pose did not articulate any profiled joint for "+slug);
+   return transitioned;
+  }
   private static void validateSourceStaticIdle(String slug) {
    if(articulationSampleCounts.getOrDefault(slug,java.util.Map.of()).getOrDefault("IDLE_FINAL",0)<2)
     throw new IllegalStateException("Insufficient static idle samples for "+slug);
@@ -561,9 +590,13 @@ public final class ClientSmokeTest {
     int idleJoints=movingJointCount(slug,"IDLE_FINAL");
     boolean staticIdle=sourceStaticIdle(slug);
     if(staticIdle)validateSourceStaticIdle(slug);
-    if((!staticIdle&&idleJoints<minimum)||walkJoints<minimum||(run!=null&&runJoints<minimum))
+    boolean poseTransition=sourcePoseTransition(slug);
+    int transitionedJoints=poseTransition?validateSourcePoseTransition(slug,"IDLE_FINAL","WALK_STEADY"):0;
+    if((!staticIdle&&!poseTransition&&idleJoints<minimum)||(!poseTransition&&walkJoints<minimum)
+       ||(poseTransition&&(idleJoints!=0||walkJoints!=0))||(run!=null&&runJoints<minimum))
      throw new IllegalStateException("Relevant locomotion joints did not animate for "+slug+" idle="+idleJoints+" walk="+walkJoints+" run="+runJoints+" required="+minimum);
     if(staticIdle)report.append("SOURCE STATIC IDLE ").append(slug).append(": native stance stable; no idle oscillation claimed.\n");
+    if(poseTransition)report.append("SOURCE STATIC POSE TRANSITION ").append(slug).append(": native idle and movement clips are stable poses; profiled joints changed between settled poses=").append(transitionedJoints).append(".\n");
     passed++;
     report.append("PASS ").append(slug).append(": idle/walk").append(run==null?" (no source run clip)":"/run").append(" clips selected; profile joints changed idle=")
       .append(idleJoints).append(" walk=").append(walkJoints).append(" run=").append(runJoints).append("; transition samples=")

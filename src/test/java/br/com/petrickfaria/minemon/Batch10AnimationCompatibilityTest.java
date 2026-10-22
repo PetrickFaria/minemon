@@ -116,6 +116,24 @@ public class Batch10AnimationCompatibilityTest {
         assertTrue(animations("krabby").has("animation.krabby.snip_right"));
     }
 
+    @Test public void gengarNativeFlightClipsAreStableDistinctPoses() throws Exception {
+        var profiles=json("data/minemon_gen1/animation_validation_profiles.json").getAsJsonObject("gengar");
+        var joints=strings(profiles.getAsJsonArray("pose_transition"));
+        assertEquals(Set.of("arm_left","arm_right","body","leg_left","leg_right"),joints);
+        var clips=animations("gengar");
+        var idle=clips.getAsJsonObject("animation.gengar.air_idle");
+        var flight=clips.getAsJsonObject("animation.gengar.air_fly");
+        for(String joint:joints) {
+            var idleRotation=idle.getAsJsonObject("bones").getAsJsonObject(joint).getAsJsonArray("rotation");
+            var flightRotation=flight.getAsJsonObject("bones").getAsJsonObject(joint).getAsJsonArray("rotation");
+            assertEquals("Native Gengar idle rotation must remain a fixed pose",3,idleRotation.size());
+            assertEquals("Native Gengar flight rotation must remain a fixed pose",3,flightRotation.size());
+            assertNotEquals("Gengar's native movement pose must articulate "+joint,
+                idle.getAsJsonObject("bones").getAsJsonObject(joint).get("rotation"),
+                flight.getAsJsonObject("bones").getAsJsonObject(joint).get("rotation"));
+        }
+    }
+
     private static void checkExpressions(JsonElement value,MolangParser parser,String source) throws Exception {
         if(value==null||value.isJsonNull())return;
         if(value.isJsonArray()) {

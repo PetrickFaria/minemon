@@ -80,8 +80,16 @@ O documento de evidência da fonte é `docs/animation-audit/minemon-gen1-batch10
 - Testes Java focados: aprovados (species selector, preflight Molang e compatibilidade Batch 10).
 - `clean test build`: aprovado; portanto compilação e suíte Java completa passaram.
 - GameTests do servidor: aprovados.
-- Smoke completo do cliente: em andamento, passo 15 do job `119906024322`; não repetir nem iniciar outro workflow. Após sucesso, o mesmo workflow inspecionará e publicará o JAR. Estado deve ser retomado pela URL acima.
-- Ainda sem artefato de JAR, aguardando smoke do cliente, inspeção do JAR e upload.
+- Smoke completo do cliente: terminou com falha no Gengar, e por isso inspeção/upload do JAR foram pulados. A execução não está aprovada e não publicou JAR.
+- Relatório: menu e carga GeckoLib aprovados, ordem dos 151 spawn eggs aprovada, mundo e combate aprovados. Falha no perfil de articulação: `gengar idle=0 walk=0`, pois o smoke exigiu oscilação temporal nos clips.
+- Diagnóstico dos recursos nativos Cobblemon: `animation.gengar.air_idle` e `animation.gengar.air_fly` são loops compostos por rotações constantes (arrays), não ciclos com movimento temporal. Contudo, entre os dois clips há mudanças reais em braços, corpo e pernas. A checagem atual mediu ranges dentro de cada fase settled e, corretamente, encontrou poses estáticas; ela não comparou as poses distintas entre os estados.
+- Artefatos de diagnóstico: [#12438655006](https://github.com/PetrickFaria/minemon/actions/runs/39802299460/artifacts/12438655006), expira 2026-10-29 15:33 UTC. Não contém JAR.
+
+## Correção após smoke de cliente #39802299460
+
+- A falha do Gengar não representa ausência dos movimentos de origem: os clips selecionados são poses nativas fixas e diferem em cinco articulações do corpo, braços e pernas.
+- A correção preparada adiciona ao perfil a lista explícita dessas articulações de transição, mantém as poses dentro de cada fase settled obrigatoriamente estáveis e exige mudança entre `IDLE_FINAL` e `WALK_STEADY`. O teste Java também fixa que os dois clips continuam sendo poses estáticas distintas; nenhum clip foi alterado ou inventado.
+- A correção aguarda publicação e nova validação direcionada. O branch recebeu entretanto o checkpoint documental `8dbb8125fbd1392223e55c7c4acab48b12169431`. Só após o Java passar deve ocorrer uma única nova validação completa do cliente.
 
 ## Correção após a execução #39801348003
 
@@ -92,11 +100,12 @@ O documento de evidência da fonte é `docs/animation-audit/minemon-gen1-batch10
 
 ## Próxima etapa
 
-Acompanhar a execução #39802299460, atualmente no smoke do cliente. Se passar, verificar inspeção real e artefato JAR do mesmo commit; se falhar, usar logs/diagnósticos desse run e corrigir a causa sem repetir automaticamente o smoke completo.
+Publicar a correção específica de validação das poses nativas do Gengar. Executar os testes Java direcionados e suíte completa, GameTests do servidor e então uma única nova validação completa do cliente. Se passar, confirmar inspeção real e artefato JAR; se falhar, usar os diagnósticos dessa execução, sem retry automático.
 
 ## Estado atual
 
 - Pokémon implementados e publicados: #091–#100.
-- Último commit de código: `d64abd231c5910d8c71312e1527f0a5a26e3e9ca`; último commit remoto confirmado antes deste checkpoint documental: `5237c1ee64f0ad14350f8bf897b107ce1b12e5cd`.
-- Workflow de validação em andamento: `39802299460`; Java, build e GameTests passaram; smoke do cliente continua ativo.
-- JAR ainda não publicado; aguardar smoke, inspeção e upload nesta mesma execução.
+- Último commit de código: `d64abd231c5910d8c71312e1527f0a5a26e3e9ca`; último checkpoint documental remoto: `8dbb8125fbd1392223e55c7c4acab48b12169431`.
+- Último workflow `39802299460`: falhou somente no perfil de articulação do smoke do cliente por tratamento inadequado das poses estáticas do Gengar. Java, build e GameTests passaram.
+- JAR não foi gerado nem publicado porque o smoke falhou; inspeção e upload foram pulados.
+- Próximo gate: publicar e validar a correção do perfil estático de transição do Gengar; depois repetir uma vez o workflow completo e inspecionar o JAR se o smoke aprovar.

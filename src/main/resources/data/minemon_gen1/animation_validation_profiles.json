@@ -1632,10 +1632,22 @@
   },
   "gengar": {
     "idle": [
+      "body",
       "arm_left",
       "arm_left2",
       "arm_right",
-      "arm_right2"
+      "arm_right2",
+      "leg_left",
+      "leg_left2",
+      "leg_right",
+      "leg_right2"
+    ],
+    "pose_transition": [
+      "arm_left",
+      "arm_right",
+      "body",
+      "leg_left",
+      "leg_right"
     ],
     "walk": [
       "body",

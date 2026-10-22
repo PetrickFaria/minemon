@@ -170,7 +170,15 @@
           "leg_right2"
         ]
       },
-      "stripped_bones": {}
+      "stripped_bones": {},
+      "pose_transition_profile": [
+        "arm_left",
+        "arm_right",
+        "body",
+        "leg_left",
+        "leg_right"
+      ],
+      "animation_note": "Native air_idle and air_fly clips are fixed looping poses; validation compares their settled articulated poses instead of expecting time-varying keys."
     },
     {
       "number": 95,
