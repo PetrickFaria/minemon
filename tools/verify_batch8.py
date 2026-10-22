@@ -67,6 +67,7 @@ for d in defs[80:90]:
  if d.get('source_cobblemon_version')=='1.8.2':allowed.update([d['model'],d['texture'],d['animation']]+d['licenses'])
 allowed_paths={str(Path('src/main/resources')/p) for p in allowed}
 allowed_paths.add('src/main/resources/assets/minemon/animations/weedle_cobblemon_1_8_2/weedle.animation.json')
+allowed_paths.add('src/main/resources/assets/minemon/animations/pidgeotto_cobblemon_1_8_2/pidgeotto.animation.json')
 geo_by_slug={}; anim_by_slug={}
 for d in defs[70:70+len(authorized_species)]:
  slug=d['slug']
