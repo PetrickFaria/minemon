@@ -1182,12 +1182,12 @@
       "arm_right"
     ],
     "walk": [
-      "arm_left",
-      "arm_right"
+      "body",
+      "torso"
     ],
     "run": [
-      "arm_left",
-      "arm_right"
+      "body",
+      "torso"
     ]
   },
   "graveler": {

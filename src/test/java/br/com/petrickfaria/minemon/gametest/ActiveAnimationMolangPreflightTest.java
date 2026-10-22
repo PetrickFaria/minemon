@@ -20,7 +20,13 @@ public class ActiveAnimationMolangPreflightTest {
 
     @Test public void selectedIdleWalkAndRunClipsParseInGeckoLib31() throws Exception {
         int parsedExpressions=0;
+        // Match GeckoLibCache: initialize and reuse the same parser context for active clips.
+        MolangParser parser=new MolangParser();
+        parser.setValue("query.anim_time",0.0);
+        int checkedSpecies=0;
         for(var definition:SpeciesDefinitions.ALL.values()) {
+            if(definition.nationalPokedexNumber()<1||definition.nationalPokedexNumber()>90)continue;
+            checkedSpecies++;
             String path=definition.animation().replace("assets/minemon/","assets/minemon_gen1/");
             Path animationPath=RESOURCES.resolve(path);
             if(!Files.isRegularFile(animationPath)) {
@@ -36,9 +42,10 @@ public class ActiveAnimationMolangPreflightTest {
             for(String clipName:selected) {
                 assertTrue(definition.slug()+" missing selected clip "+clipName,clips.has(clipName));
                 JsonObject clip=clips.getAsJsonObject(clipName);
-                if(clip.has("bones"))parsedExpressions+=parse(clip.get("bones"),new MolangParser(),definition.slug()+"/"+clipName);
+                if(clip.has("bones"))parsedExpressions+=parse(clip.get("bones"),parser,definition.slug()+"/"+clipName);
             }
         }
+        assertEquals("Every updated species through batch 9 must be covered",90,checkedSpecies);
         assertTrue("At least one active expression should be validated",parsedExpressions>0);
     }
 

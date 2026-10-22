@@ -27,6 +27,13 @@ public class Batch8AnimationCompatibilityTest {
         return json("assets/minemon_gen1/animations/"+slug+"_cobblemon_1_8_2/"+slug+".animation.json").getAsJsonObject("animations");
     }
 
+    private static JsonObject nativeAnimations(String slug) throws Exception {
+        Path path=Path.of("src/main/resources/assets/minemon/animations/"+slug+"_cobblemon_1_8_2/"+slug+".animation.json");
+        try(var reader=Files.newBufferedReader(path)) {
+            return JsonParser.parseReader(reader).getAsJsonObject().getAsJsonObject("animations");
+        }
+    }
+
     private static void checkExpressions(JsonElement value,MolangParser parser) throws Exception {
         if(value.isJsonArray()) {
             for(var item:value.getAsJsonArray())checkExpressions(item,parser);
@@ -146,6 +153,32 @@ public class Batch8AnimationCompatibilityTest {
             assertEquals("head",pose.getAsJsonObject("adapted_geo_bones").get("head").getAsString());
             assertTrue(definition.getAsJsonObject("source_molang_adaptations").has("q."));
         }
+    }
+
+    @Test public void geodudeGaitProfileUsesNativeAnimatedBodyAndTorso() throws Exception {
+        var profile=json("data/minemon_gen1/animation_validation_profiles.json").getAsJsonObject()
+            .getAsJsonObject("geodude");
+        assertEquals("Idle remains measured on the natively moving arms",List.of("arm_left","arm_right"),
+            strings(profile.getAsJsonArray("idle")));
+        for(String state:List.of("walk","run"))
+            assertEquals("Geodude "+state+" must measure joints animated by its source clip",
+                List.of("body","torso"),strings(profile.getAsJsonArray(state)));
+
+        var clips=nativeAnimations("geodude");
+        for(String gait:List.of("ground_walk","ground_run")) {
+            var bones=clips.getAsJsonObject("animation.geodude."+gait).getAsJsonObject("bones");
+            var bodyPosition=bones.getAsJsonObject("body").get("position");
+            assertTrue("Geodude "+gait+" body position must contain native motion",
+                bodyPosition.isJsonArray()||bodyPosition.isJsonObject()&&bodyPosition.getAsJsonObject().size()>1);
+            assertTrue("Geodude "+gait+" torso channel must vary with animation time",
+                changesWithTime(bones.getAsJsonObject("torso"),new MolangParser()));
+        }
+    }
+
+    private static List<String> strings(JsonArray values) {
+        var result=new java.util.ArrayList<String>();
+        for(JsonElement value:values)result.add(value.getAsString());
+        return result;
     }
 
     private static int index(String slug) { return SPECIES.indexOf(slug)+70; }

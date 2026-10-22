@@ -62,3 +62,13 @@ Acompanhar a execução #39696750113 já existente a partir do checkout. Se surg
 Preservar integralmente os 80 Pokémon anteriores, a chama do Charmander, os braços do Charizard, as asas de Pidgeotto/Pidgeot, os perfis Golem/Graveler, as otimizações de validação, os recursos não atualizados e os registros das 151 espécies.
 
 A validação completa continuará pendente até compilação, testes Java, GameTests, smoke integral do cliente, regressões cumulativas, inspeção real do JAR e publicação do artefato. A avaliação visual manual dentro do Minecraft será documentada como pendência separada.
+
+
+## Recuperação de validação — 2026-10-22
+
+- Branch: `feature/minemon-gen1-batch9-cobblemon`; ponto inicial: `bae3dcb65b46b3ddbc105fbeb9e85e08b0c3da60`.
+- Diagnóstico da execução `39696750113`: o preflight do GeckoLib falhou ao analisar a rotação Z da cauda nos clips `animation.pidgeotto.air_idle` e `animation.pidgeotto.air_fly`, arquivo `assets/minemon/animations/pidgeotto_cobblemon_1_8_2/pidgeotto.animation.json`. A expressão iniciava com unário `+`, que o parser Molang do GeckoLib 3.1.40 rejeita. A expressão equivalente sem o sinal inicial preserva o movimento nativo.
+- Integrada a inicialização/reutilização de contexto Molang aprovada no Lote 8; a cobertura do preflight agora é cumulativa para #001–#090. O seletor recebe uma asserção isolada para `#076 -> golem`.
+- Integradas as correções aprovadas de perfil do Geodude: walk/run medem `body` e `torso`; idle conserva os braços animados. O verificador e o gerador foram alinhados. Os testes existentes de Golem e Graveler continuam exigindo movimento real de `body`/presença de `body_roll`.
+- O workflow executa os dois testes Java direcionados antes da suíte completa. Recursos de Pokémon #081–#090 não foram substituídos.
+- Estado ao registrar este checkpoint: alterações preparadas para validação; testes Java, GameTests, smoke do cliente, inspeção de JAR e publicação ainda pendentes. Não há aprovação automática declarada nesta etapa.

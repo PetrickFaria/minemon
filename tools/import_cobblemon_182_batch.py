@@ -71,7 +71,7 @@ GAIT={
  'bellsprout':['leg_left_rotation','leg_right_rotation','arm_left','arm_right','body'],
  'weepinbell':['body','body2','arm_left','arm_right','stem','stem2'],
  'victreebel':['body','head_stem','head_leaf'],'tentacool':['tentacle_left_3','tentacle_right_3'],
- 'tentacruel':['tentacle_left_3','tentacle_right_3'],'geodude':['arm_left','arm_right'],
+ 'tentacruel':['tentacle_left_3','tentacle_right_3'],'geodude':['body','torso'],
  'graveler':['arm_bottom_left','arm_bottom_right'],'golem':['left_upper_arm','right_upper_arm'],
  'ponyta':['leg_front_left','leg_front_right','leg_back_left','leg_back_right','fire_mane_head','tail'],
  'rapidash':['leg_front_left','leg_front_right','leg_back_left','leg_back_right','fire_mane_head_flame','tail'],
@@ -99,7 +99,7 @@ IDLE={'oddish':["leaf_center3","leaf_inner_left3","leaf_inner_right3"],'gloom':[
 RUN={'sandshrew':['ball'],'arcanine':['leg_front_left','leg_front_right','leg_back_left','leg_back_right'],
  'abra':['leg_left','leg_right','arm_left','arm_right'],'kadabra':['leg_left','leg_right','arm_left','arm_right'],
  'alakazam':['left_upper_leg','right_upper_leg','left_upper_arm','right_upper_arm'],
- 'geodude':['arm_left','arm_right'],'graveler':['arm_bottom_left','arm_bottom_right'],
+ 'geodude':['body','torso'],'graveler':['arm_bottom_left','arm_bottom_right'],
  'golem':['left_upper_arm','right_upper_arm'],'rapidash':['leg_front_left','leg_front_right','leg_back_left','leg_back_right']}
 IDLE.update({'poliwhirl':['body','arm_left','arm_right'],'poliwrath':['body','arm_left1','arm_right1'],
  'abra':['body','tail'],'kadabra':['tail','arm_left','arm_right'],

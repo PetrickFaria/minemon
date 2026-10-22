@@ -18,6 +18,7 @@ public class SmokeSpeciesSelectionTest {
     @Test public void acceptsSlugNumberAndNationalDexPrefix() {
         var selected = SmokeSpeciesSelection.select(SpeciesDefinitions.ALL.values(), "graveler,#076,Farfetch'd");
         assertEquals(List.of("graveler", "golem", "farfetchd"), selected);
+        assertEquals(List.of("golem"), SmokeSpeciesSelection.select(SpeciesDefinitions.ALL.values(), "#076"));
     }
 
     @Test public void unknownSpeciesFailsBeforeClientStartup() {
