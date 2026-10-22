@@ -73,6 +73,16 @@ O documento de evidência da fonte é `docs/animation-audit/minemon-gen1-batch10
 - Charmeleon e Charizard: chamas da cauda ainda não estão visualmente satisfatórias.
 - A avaliação visual manual dos dez Pokémon novos continua pendente. Nenhuma dessas pendências impede o gate técnico.
 
+## Checkpoint após commit `d64abd231c5910d8c71312e1527f0a5a26e3e9ca`
+
+- Commit de correção publicado: `d64abd231c5910d8c71312e1527f0a5a26e3e9ca` (`Fix Batch 10 active Drowzee Molang and manifest test parsing`).
+- Nova execução única: [Build Minemon #39802299460](https://github.com/PetrickFaria/minemon/actions/runs/39802299460), SHA `d64abd231c5910d8c71312e1527f0a5a26e3e9ca`.
+- Testes Java focados: aprovados (species selector, preflight Molang e compatibilidade Batch 10).
+- `clean test build`: aprovado; portanto compilação e suíte Java completa passaram.
+- GameTests do servidor: aprovados.
+- Smoke completo do cliente: em andamento, passo 15 do job `119906024322`; não repetir nem iniciar outro workflow. Após sucesso, o mesmo workflow inspecionará e publicará o JAR. Estado deve ser retomado pela URL acima.
+- Ainda sem artefato de JAR, aguardando smoke do cliente, inspeção do JAR e upload.
+
 ## Correção após a execução #39801348003
 
 - Causa Molang identificada: no clip `animation.drowzee.ground_run`, osso `arm_left`, rotação no tempo 0.5, a expressão `-18.4733+ath.sin(query.anim_time*90*4+75)*20` continha o typo `ath.sin`. Corrigido para `math.sin`; o parser GeckoLib 3.1.40 rejeitou corretamente a expressão original.
@@ -82,11 +92,11 @@ O documento de evidência da fonte é `docs/animation-audit/minemon-gen1-batch10
 
 ## Próxima etapa
 
-Publicar somente as correções e este checkpoint documental. Executar primeiro os testes Java direcionados (seletor, preflight Molang e compatibilidade do Batch 10); se aprovarem, executar a suíte Java completa, depois GameTests do servidor, um smoke completo do cliente, inspeção do JAR e upload do artefato. Não iniciar cliente antes da aprovação Java.
+Acompanhar a execução #39802299460, atualmente no smoke do cliente. Se passar, verificar inspeção real e artefato JAR do mesmo commit; se falhar, usar logs/diagnósticos desse run e corrigir a causa sem repetir automaticamente o smoke completo.
 
 ## Estado atual
 
 - Pokémon implementados e publicados: #091–#100.
-- Último commit remoto confirmado: `5237c1ee64f0ad14350f8bf897b107ce1b12e5cd`.
-- Workflow mais recente: `39801348003`, concluído com falha nos testes Java direcionados.
-- Validação automatizada total e JAR do Lote 10: pendentes; nenhum GameTest ou smoke do cliente foi iniciado e nenhum JAR foi gerado.
+- Último commit de código: `d64abd231c5910d8c71312e1527f0a5a26e3e9ca`; último commit remoto confirmado antes deste checkpoint documental: `5237c1ee64f0ad14350f8bf897b107ce1b12e5cd`.
+- Workflow de validação em andamento: `39802299460`; Java, build e GameTests passaram; smoke do cliente continua ativo.
+- JAR ainda não publicado; aguardar smoke, inspeção e upload nesta mesma execução.
