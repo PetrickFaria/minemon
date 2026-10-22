@@ -50,6 +50,9 @@ O planejamento original de 16 lotes confirma que o Lote 10 é #091–#100: Cloys
 - Primeira execução `39800529455`: falhou em `verify_project.py` antes do Gradle. O log identificou `UnicodeDecodeError` ao ler `runtime_species.json`; os outros verificadores foram pulados.
 - Causa confirmada no envio do commit: o blob do manifesto no GitHub tinha 300,060 bytes e conteúdo inválido, enquanto o arquivo local tem 314,741 bytes. O conector truncou o conteúdo base64 grande no transporte. O recurso local é JSON válido; não há falha no parser ou nos dados.
 - Correção de transporte preparada: o blob foi recriado em chunks e seu SHA GitHub `c628e42506c7a46bce68e18593cc3b3fd846e2b1` corresponde exatamente ao SHA calculado sobre o arquivo local. A próxima execução usará esse conteúdo integral; ainda precisa validar.
+- Correção publicada no commit `fdc57c5483e34320ac92b5351b7cd01aef70d204` (`Fix complete Batch 10 manifest publication`).
+- Nova execução única: [Build Minemon #39801348003](https://github.com/PetrickFaria/minemon/actions/runs/39801348003), SHA `fdc57c5483e34320ac92b5351b7cd01aef70d204`; estado `queued` na última consulta.
+- Artefatos de diagnóstico da execução inicial foram mantidos pelo GitHub até 2026-10-29 14:59 UTC: [logs de testes](https://github.com/PetrickFaria/minemon/actions/runs/39800529455/artifacts/12435801254) e [logs do servidor](https://github.com/PetrickFaria/minemon/actions/runs/39800529455/artifacts/12434573908). Não contêm JAR.
 
 ## Pokémon implementados
 
@@ -77,6 +80,6 @@ Acompanhar a execução Actions `39800529455`, já iniciada para o commit `3efec
 ## Estado atual
 
 - Pokémon implementados e publicados: #091–#100.
-- Commit de implementação em validação: `3efec0c410a759d78018b0533c4e52e4050db515`.
-- Workflow do Lote 10: `39800529455`, em fila na última consulta.
+- Último commit de código: `fdc57c5483e34320ac92b5351b7cd01aef70d204`.
+- Workflow atual do Lote 10: `39801348003`, em fila na última consulta.
 - Validação automatizada total e JAR do Lote 10: pendentes. A falha inicial não alcançou Java, GameTests ou cliente e não gerou JAR.
