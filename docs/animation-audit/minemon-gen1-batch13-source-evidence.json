@@ -1,0 +1,214 @@
+{
+  "batch": 13,
+  "range": [
+    121,
+    125
+  ],
+  "source_url": "https://cdn.modrinth.com/data/MdwFAVRL/versions/GJ2a1b8O/Cobblemon-fabric-1.8.2%2B1.21.1.jar",
+  "source_sha256": "cae8ac328b61354fbe415208b8c6ffc12e7155094d0a87082e85e7914fb380c2",
+  "manual_visual_status": "pending; user will evaluate the authorized batches inside Minecraft",
+  "species": [
+    {
+      "number": 121,
+      "slug": "starmie",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0121_starmie/starmie.geo.json",
+      "idle": "animation.starmie.ground_idle",
+      "movement": "animation.starmie.ground_walk",
+      "mode": "ground",
+      "native_run": "animation.starmie.ground_run",
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "body",
+          "body_back",
+          "body_limb_top",
+          "body_limb_left",
+          "body_limb_right",
+          "body_limb_bottom_left",
+          "body_limb_bottom_right"
+        ],
+        "walk": [
+          "body",
+          "body_back",
+          "body_limb_top",
+          "body_limb_left",
+          "body_limb_right",
+          "body_limb_bottom_left",
+          "body_limb_bottom_right"
+        ],
+        "run": [
+          "body",
+          "body_back"
+        ]
+      },
+      "stripped_bones": {
+        "animation.starmie.ground_walk": [
+          "body_limb_bottom_left3",
+          "body_limb_bottom_right3",
+          "body_limb_left3",
+          "body_limb_top3"
+        ],
+        "animation.starmie.surfacewater_swim": [
+          "body_limb_bottom_left3",
+          "body_limb_bottom_right3",
+          "body_limb_left3",
+          "body_limb_top3"
+        ],
+        "animation.starmie.water_idle": [
+          "body_limb_bottom_left3",
+          "body_limb_bottom_right3",
+          "body_limb_left3",
+          "body_limb_top3"
+        ]
+      }
+    },
+    {
+      "number": 122,
+      "slug": "mrmime",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0122_mrmime/mr_mime.geo.json",
+      "idle": "animation.mrmime.ground_idle",
+      "movement": "animation.mrmime.ground_walk",
+      "mode": "ground",
+      "native_run": "animation.mrmime.ground_run",
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "body",
+          "head",
+          "torso",
+          "arm_left",
+          "arm_right",
+          "foot_left",
+          "foot_right"
+        ],
+        "walk": [
+          "foot_left",
+          "foot_right",
+          "arm_left",
+          "arm_right"
+        ],
+        "run": [
+          "foot_left",
+          "foot_right",
+          "arm_left",
+          "arm_right"
+        ]
+      },
+      "stripped_bones": {}
+    },
+    {
+      "number": 123,
+      "slug": "scyther",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0123_scyther/scyther_male.geo.json",
+      "idle": "animation.scyther.air_idle",
+      "movement": "animation.scyther.air_idle",
+      "mode": "flying",
+      "native_run": null,
+      "fallback": "idle",
+      "profiles": {
+        "idle": [
+          "abdomen",
+          "body",
+          "left_wing",
+          "right_wing",
+          "left_upper_wing",
+          "right_upper_wing",
+          "head"
+        ],
+        "walk": [
+          "left_wing",
+          "right_wing",
+          "left_upper_wing",
+          "right_upper_wing"
+        ],
+        "run": [
+          "left_wing",
+          "right_wing",
+          "left_upper_wing",
+          "right_upper_wing"
+        ]
+      },
+      "stripped_bones": {
+        "animation.scyther.blink": [
+          "left_eyelid",
+          "right_eyelid"
+        ]
+      }
+    },
+    {
+      "number": 124,
+      "slug": "jynx",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0124_jynx/jynx.geo.json",
+      "idle": "animation.jynx.ground_idle",
+      "movement": "animation.jynx.ground_idle",
+      "mode": "ground",
+      "native_run": null,
+      "fallback": "idle",
+      "profiles": {
+        "idle": [
+          "arm_left",
+          "arm_right",
+          "hair_left",
+          "hair_right",
+          "dress_front"
+        ],
+        "walk": [
+          "arm_left",
+          "arm_right",
+          "hair_left",
+          "hair_right",
+          "dress_front"
+        ],
+        "run": [
+          "arm_left",
+          "arm_right",
+          "hair_left",
+          "hair_right",
+          "dress_front"
+        ],
+        "idle_static": [
+          "arm_left",
+          "arm_right",
+          "hair_left",
+          "hair_right",
+          "dress_front"
+        ]
+      },
+      "stripped_bones": {}
+    },
+    {
+      "number": 125,
+      "slug": "electabuzz",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0125_electabuzz/electabuzz.geo.json",
+      "idle": "animation.electabuzz.ground_idle",
+      "movement": "animation.electabuzz.ground_walk",
+      "mode": "ground",
+      "native_run": null,
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "body",
+          "head",
+          "leg_left",
+          "leg_right",
+          "arm_left",
+          "arm_right",
+          "tail"
+        ],
+        "walk": [
+          "leg_left",
+          "leg_right",
+          "tail",
+          "tail2"
+        ],
+        "run": [
+          "leg_left",
+          "leg_right",
+          "tail",
+          "tail2"
+        ]
+      },
+      "stripped_bones": {}
+    }
+  ]
+}

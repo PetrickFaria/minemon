@@ -2482,5 +2482,128 @@
     "run": [
       "body"
     ]
+  },
+  "starmie": {
+    "idle": [
+      "body",
+      "body_back",
+      "body_limb_top",
+      "body_limb_left",
+      "body_limb_right",
+      "body_limb_bottom_left",
+      "body_limb_bottom_right"
+    ],
+    "walk": [
+      "body",
+      "body_back",
+      "body_limb_top",
+      "body_limb_left",
+      "body_limb_right",
+      "body_limb_bottom_left",
+      "body_limb_bottom_right"
+    ],
+    "run": [
+      "body",
+      "body_back"
+    ]
+  },
+  "mrmime": {
+    "idle": [
+      "body",
+      "head",
+      "torso",
+      "arm_left",
+      "arm_right",
+      "foot_left",
+      "foot_right"
+    ],
+    "walk": [
+      "foot_left",
+      "foot_right",
+      "arm_left",
+      "arm_right"
+    ],
+    "run": [
+      "foot_left",
+      "foot_right",
+      "arm_left",
+      "arm_right"
+    ]
+  },
+  "scyther": {
+    "idle": [
+      "abdomen",
+      "body",
+      "left_wing",
+      "right_wing",
+      "left_upper_wing",
+      "right_upper_wing",
+      "head"
+    ],
+    "walk": [
+      "left_wing",
+      "right_wing",
+      "left_upper_wing",
+      "right_upper_wing"
+    ],
+    "run": [
+      "left_wing",
+      "right_wing",
+      "left_upper_wing",
+      "right_upper_wing"
+    ]
+  },
+  "jynx": {
+    "idle": [
+      "arm_left",
+      "arm_right",
+      "hair_left",
+      "hair_right",
+      "dress_front"
+    ],
+    "walk": [
+      "arm_left",
+      "arm_right",
+      "hair_left",
+      "hair_right",
+      "dress_front"
+    ],
+    "run": [
+      "arm_left",
+      "arm_right",
+      "hair_left",
+      "hair_right",
+      "dress_front"
+    ],
+    "idle_static": [
+      "arm_left",
+      "arm_right",
+      "hair_left",
+      "hair_right",
+      "dress_front"
+    ]
+  },
+  "electabuzz": {
+    "idle": [
+      "body",
+      "head",
+      "leg_left",
+      "leg_right",
+      "arm_left",
+      "arm_right",
+      "tail"
+    ],
+    "walk": [
+      "leg_left",
+      "leg_right",
+      "tail",
+      "tail2"
+    ],
+    "run": [
+      "leg_left",
+      "leg_right",
+      "tail",
+      "tail2"
+    ]
   }
 }
