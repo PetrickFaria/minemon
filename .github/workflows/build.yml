@@ -31,6 +31,11 @@ jobs:
           python3 tools/verify_pidge_wing_visibility.py
       - name: Ensure Gradle Wrapper is executable
         run: chmod +x gradlew
+      - name: Run focused Java regressions before the complete suite
+        run: >-
+          ./gradlew --no-daemon test
+          --tests br.com.petrickfaria.minemon.gametest.SmokeSpeciesSelectionTest
+          --tests br.com.petrickfaria.minemon.gametest.ActiveAnimationMolangPreflightTest
       - name: Report ForgeGradle and build/run tests
         id: compile
         run: ./gradlew --no-daemon buildEnvironment clean test build

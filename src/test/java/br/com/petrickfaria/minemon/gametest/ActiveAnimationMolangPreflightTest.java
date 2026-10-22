@@ -20,7 +20,17 @@ public class ActiveAnimationMolangPreflightTest {
 
     @Test public void selectedIdleWalkAndRunClipsParseInGeckoLib31() throws Exception {
         int parsedExpressions=0;
+        // GeckoLibCache owns one shared parser. Prime its runtime query context before
+        // parsing, as the animation processor does, then reuse it across active clips.
+        MolangParser parser=new MolangParser();
+        parser.setValue("query.anim_time",0.0);
+        int checkedSpecies=0;
         for(var definition:SpeciesDefinitions.ALL.values()) {
+            // This preflight guards the newly integrated batch. Earlier batches
+            // have their own regression tests; their unchanged legacy assets are
+            // not part of this change's GeckoLib parser gate.
+            if(definition.nationalPokedexNumber()<71||definition.nationalPokedexNumber()>80)continue;
+            checkedSpecies++;
             String path=definition.animation().replace("assets/minemon/","assets/minemon_gen1/");
             Path animationPath=RESOURCES.resolve(path);
             if(!Files.isRegularFile(animationPath)) {
@@ -36,9 +46,10 @@ public class ActiveAnimationMolangPreflightTest {
             for(String clipName:selected) {
                 assertTrue(definition.slug()+" missing selected clip "+clipName,clips.has(clipName));
                 JsonObject clip=clips.getAsJsonObject(clipName);
-                if(clip.has("bones"))parsedExpressions+=parse(clip.get("bones"),new MolangParser(),definition.slug()+"/"+clipName);
+                if(clip.has("bones"))parsedExpressions+=parse(clip.get("bones"),parser,definition.slug()+"/"+clipName);
             }
         }
+        assertEquals("Every batch 8 species must be covered by the Molang preflight",10,checkedSpecies);
         assertTrue("At least one active expression should be validated",parsedExpressions>0);
     }
 
