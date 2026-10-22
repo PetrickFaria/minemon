@@ -1,3 +1,6 @@
+Warning: truncated output (original token count: 6157)
+Total output lines: 169
+
 # Minemon Gen 1 — Lote 8
 
 ## Objetivo
@@ -39,7 +42,7 @@ Integrar exclusivamente os recursos Cobblemon Fabric 1.8.2 dos Pokémon #071–#
 
 - Integrados modelo, textura, animação e licença fonte para Victreebel, Tentacool, Tentacruel, Geodude e Graveler.
 - Mantidos clips de água e fallback de repouso terrestre de Tentacool/Tentacruel; nenhum comportamento de natação foi introduzido.
-- As expressões Molang `q.`/`Math.` são adaptadas para GeckoLib 3.1.40 preservando a expressão. O perfil de Geodude mantém os membros que se movem no repouso/caminhada/corrida.
+- As expressões Molang `q.`/`Math.` são adaptadas para GeckoLib 3.1.40 preservando a expressão. Perfil de Geodude: braços no repouso; body/torso na caminhada e corrida, seguindo os canais animados pelo clip nativo.
 - Adaptado `q.look('head', ...)` de Geodude ao osso `head`, com limites de pitch/yaw do poser; o smoke do cliente mede a resposta renderizada. Victreebel usa `head_ai`, sem osso compatível, e Graveler não tem osso `head`; esses posers não são falsamente declarados como adaptados.
 - `python3 tools/verify_batch8.py --segment first`: passou, verificando a faixa #071–#075, hierarquia dos ossos, dimensões de textura, referências/expressões/eventos das animações e preservação byte a byte dos recursos dos primeiros 70.
 - `python3 tools/verify_project.py`: passou; 151 espécies runtime em ordem, 1.025 registros de espécies no catálogo, 5.979 referências existentes, JSON/modelos/animações/PNGs/OGGs válidos.
@@ -94,28 +97,7 @@ Integrar exclusivamente os recursos Cobblemon Fabric 1.8.2 dos Pokémon #071–#
 
 ## Bloqueios e limitações
 
-- A distribuição Gradle 7.5.1 não estava alcançável de `services.gradle.org` em duas tentativas locais; testes Java/build ainda não foram executados localmente. Nenhum teste foi desativado. A URL da fonte Cobblemon ficou acessível e o seu arquivo foi baixado/verificado durante a recuperação do workspace.
-- Aparência visual manual dentro do Minecraft continuará pendente; os gates automatizados de cliente verificam renderização, movimento e transforms reais dos ossos.
-- Erros de código/testes identificados no checkpoint parcial: nenhum após a correção dos perfis de tentáculos para os nomes de osso reais da fonte.
-
-## Checkpoint 7 — auditoria da otimização do smoke (2026-10-21)
-
-- Última referência de código: `a9c2cd6d226c404f0bc7d29eb65829f586314fea`; a branch recebeu o commit documental `747f344a3ebe2da7d1136309fc72ee28468903ae` após a atualização do código.
-- Actions existente [39658750383](https://github.com/PetrickFaria/minemon/actions/runs/39658750383) segue `in_progress`; gates de recursos, perfis Pidge, Gradle `clean test build` e GameTests do servidor passaram. O smoke do cliente continua ativo; inspeção/upload do JAR permanecem pendentes. Não foi iniciada uma execução duplicada.
-- Auditoria do workflow confirmou que qualquer falha do cliente reinicia o smoke inteiro com outro timeout de 2700 s, sem classificar falha transitória.
-- O smoke completo percorre as 151 espécies com janela de 80 ticks por espécie, guarda captura de tela por espécie, e só escreve os relatórios de aprovação detalhados no final. O teste seletivo e progresso por espécie/fase ainda não existem.
-- Verificação local dos recursos encontrou expressões Cobblemon `q.r.*` nos arquivos de animação de Charizard e Blastoise, incluindo `q.r.velocity_forward`. Seus efeitos de runtime ainda precisam ser classificados e verificados contra o parser GeckoLib 3.1.40; nenhuma expressão foi alterada nem silenciada nesta auditoria.
-- Perfis do Golem e Graveler usam agora `body`/`body_roll` para corrida e têm regressões publicadas; o smoke real para confirmar esses perfis está dentro do mesmo run ativo.
-- Etapa seguinte: após o run atual encerrar, implementar seleção de espécies usando as mesmas verificações, logs de progresso por transição de fase, preflight Molang acionável e remoção do retry integral; manter o smoke completo como gate final. Nenhum Lote 9 será iniciado.
-
-## Checkpoint 8 — seletor, preflight e remoção de retry (2026-10-21)
-
-- Branch: `feature/minemon-gen1-batch8-cobblemon`. Commits de implementação publicados desde o checkpoint 7: `189879b` (seletor de espécies), `be1edfd` (filtro + relatórios de progresso no smoke), `385f7b2` (encaminha `-PclientSmokeSpecies`), `f77c3ea` (remove retry integral), `ba0eea4`/`c53ee6b` (preflight Molang estático e teste Java com o parser GeckoLib), `23e2933`/`e8e8fed` (preflight antes de iniciar Minecraft e ajuste da expressão regular), `7cf65baa` (progresso de inicialização), `9fd6744` (combina o relatório ForgeGradle com o build em uma única invocação Gradle). Commits `[skip ci]` para não duplicar o Actions em andamento.
-- Seleção direcionada: `./gradlew --no-daemon runClient -PclientSmokeTest -PclientSmokeSpecies=golem,graveler`; aceita slug, nome de espécie ou número da Pokédex (ex.: `#076`). Omitir a propriedade executa todas as 151 espécies. A seleção passa pelos mesmos carregamentos, renderização, textura, movimento, fases, verificações de articulação e regressões das espécies selecionadas. O setup comum, roster, mundo e combate continuam ativos.
-- Validação rápida de diagnóstico (não aprova o lote): `python3 tools/verify_project.py`, `python3 tools/verify_molang_compatibility.py`, testes Java direcionados `./gradlew --no-daemon test --tests br.com.petrickfaria.minemon.gametest.SmokeSpeciesSelectionTest --tests br.com.petrickfaria.minemon.gametest.ActiveAnimationMolangPreflightTest` e cliente seletivo sob `xvfb-run`.
-- Validação completa de aprovação: workflow completo executa `buildEnvironment clean test build`, GameTests do servidor, cliente sem `clientSmokeSpecies` (151 espécies), verificações de regressão, inspeção do JAR e upload. O modo rápido nunca substitui esses gates.
-- O client smoke agora emite linhas `[CLIENT SMOKE]` uma vez por transição de carregamento/renderização/repouso/caminhada/corrida, com número/N, Pokédex, contagem de janelas, duração e última janela concluída. O modo completo permanece sem filtro e todos os gates finais continuam obrigatórios.
-- Workflow: removido o segundo lançamento integral; timeout único permanece em 2700 s, reporta timeout versus exit code, imprime cauda de `client-validation.txt` e `latest.log`, e falha sem retry.
+- A distribuição Gradle 7.5.1 não estava alcançável…1157 tokens truncated…orta timeout versus exit code, imprime cauda de `client-validation.txt` e `latest.log`, e falha sem retry.
 - Otimização de preparação: `buildEnvironment` agora roda junto de `clean test build`, preservando o relatório e removendo uma inicialização separada do Gradle.
 - Molang: `verify_molang_compatibility.py` passou localmente. Achou 783 chamadas `q.r.*` em seis arquivos: Arbok, Blastoise, Charizard, Ekans, Pidgeot e Venusaur; nenhuma nas seleções ativas de repouso/caminhada/corrida. Estão em clips alternativos `snake_*` não selecionados ou `ride_*`/montaria. GeckoLib 3.1.40 realmente registra exceções “Function 'query.r.…' couldn't be found” ao desserializar essas expressões; o carregamento prossegue, mas os keyframes que dependem dessas funções não têm avaliação válida. O preflight as mostra explicitamente e falha se aparecerem em clipes ativos; não as silencia nem reescreve.
 - Regressões de Golem/Graveler, Pidgeotto/Pidgeot, chama do Charmander, braços dos iniciais e verificações do roster continuam no caminho completo. O filtro só omite verificações específicas de espécies que não foram selecionadas; não reduz critérios para as selecionadas.
@@ -161,30 +143,9 @@ Aguardar o run legado `39658750383` encerrar sem iniciá-lo novamente. Depois, e
 - Teste Java local direcionado não iniciou: o wrapper tentou baixar Gradle 7.5.1 e o ambiente respondeu `Network is unreachable`. Validação local de compilação, suíte e runtime ainda pendente do Actions. Nenhum teste foi removido ou marcado como aprovado por timeout.
 - Próximo checkpoint: enviar um único commit focado para a branch do Lote 8; acompanhar os dois testes direcionados. Se passarem, o mesmo workflow segue para suíte Java, GameTests do servidor, um smoke completo do cliente, inspeção do JAR e upload. Se falharem, parar antes de qualquer lançamento do Minecraft e corrigir com base no relatório XML.
 
+## Checkpoint 16 — inspeção do clip nativo do Geodude (2026-10-22)
 
-## Checkpoint 13 — validação em andamento (2026-10-21)
-
-- Código sob validação: `901fedc42758fa472edeb551987906e423829306` na branch `feature/minemon-gen1-batch8-cobblemon`.
-- GitHub Actions [39700680502](https://github.com/PetrickFaria/minemon/actions/runs/39700680502): testes Java direcionados passaram; `buildEnvironment clean test build` e GameTests do servidor passaram; etapa única de smoke completo do cliente segue `in_progress`.
-- O smoke percorre as 151 espécies sob timeout de 2700 s (45 min). Não foi iniciado retry nem execução paralela. O conector ainda não expõe logs/progresso enquanto a etapa está ativa.
-- Inspeção do JAR, verificação cumulativa final no JAR e upload ainda não começaram. Nenhum JAR desta revisão deve ser anunciado como aprovado até o workflow terminar verde.
-- Os verificadores locais de recursos, Lote 8 e asas de Pidgeotto/Pidgeot passaram. O wrapper Gradle local permanece bloqueado ao tentar baixar 7.5.1; a execução remota aprovou os testes Java.
-- Próxima ação: acompanhar a mesma execução `39700680502`; se o cliente passar, conferir a inspeção e o artefato de download desse run. Se falhar ou expirar, usar seus logs para um reparo específico antes de nova validação.
-
-
-## Checkpoint 14 — falha do smoke localizada e perfil Geodude corrigido (2026-10-22)
-
-- A execução [39700680502](https://github.com/PetrickFaria/minemon/actions/runs/39700680502), no commit de código `901fedc42758fa472edeb551987906e423829306`, passou nos testes Java focados, suíte Java, GameTests de servidor, verificações dos recursos, dos 151 registros, do Lote 8 e das asas de Pidgeotto/Pidgeot. O smoke completo do cliente falhou no #074 Geodude após percorrer 86 espécies; não foi timeout (Gradle reportou 33m31s). JAR não foi inspecionado nem publicado.
-- Diagnóstico: falha de articulação `geodude idle=2 walk=0 run=1 required=1`. O clip nativo `ground_walk` mantém `arm_left/arm_right` rígidos; anima `body.position` por keyframes e `torso` via Molang. O clip nativo `ground_run` também anima `body/torso`, não os braços. A falha ocorreu antes de #075 Graveler e #076 Golem, então esses dois ainda precisam de validação.
-- Ajuste feito somente nos perfis de teste: Geodude mede braços no repouso e `body/torso` na caminhada e corrida. Atualizados também o gerador do lote e as verificações Java/Python para manter o perfil ligado aos canais nativos. Critério continua exigindo movimento real; modelos, texturas e animações não foram alterados.
-- A regressão das asas de Pidgeotto/Pidgeot passou. Logs e diagnóstico: artefato [minemon-test-diagnostics](https://github.com/PetrickFaria/minemon/actions/runs/39700680502/artifacts/12394186988), expira em 2026-10-29.
-- Verificações locais após a correção do perfil: `verify_project.py`, `verify_molang_compatibility.py`, `verify_batch8.py`, `verify_pidge_wing_visibility.py`, compilação Python e `git diff --check` passaram. Java/cliente locais permanecem sem Gradle 7.5.1 disponível.
-- Próxima execução única: testar Geodude/Graveler/Golem por smoke direcionado depois de Java e servidor; em seguida, executar um único smoke completo do cliente. Não há JAR aprovado ainda.
-
-
-## Checkpoint 15 — teste focado recompilável (2026-10-22)
-
-- A execução [39704680754](https://github.com/PetrickFaria/minemon/actions/runs/39704680754) falhou em `:compileTestJava` antes dos testes e antes de iniciar Minecraft. O erro foi de compatibilidade com a versão Gson do Forge: `JsonArray.asList()` não existe no Gson incluído pelo projeto.
-- As verificações de recursos, auditoria Molang, lote 8 e asas Pidge passaram nessa execução; o smoke direcionado e o completo foram corretamente pulados. Não houve nova tentativa longa nem JAR.
-- Corrigi o teste Java para ler os elementos de `JsonArray` por iteração, sem depender de API indisponível. Perfil Geodude segue body/torso na caminhada e corrida; clips, modelos e texturas permanecem intactos.
-- Próxima ação: executar novamente os dois testes focados, a suíte Java e, se aprovados, servidor, smoke de Geodude/Graveler/Golem e smoke completo. A correção ainda aguarda Actions.
+- A execução [39704892307](https://github.com/PetrickFaria/minemon/actions/runs/39704892307) passou os dois testes Java focados, mas a suíte completa revelou `ClassCastException` no teste novo de perfil do Geodude, antes dos GameTests e de qualquer inicialização do Minecraft.
+- A causa foi a verificação ler o JSON já transformado para runtime como se sua posição fosse sempre um objeto de keyframes. A transformação converte canais nativos válidos para formas diferentes (vetores Molang e keyframes Bedrock), portanto a asserção estava examinando a representação errada.
+- Ajustei a regressão para ler diretamente o arquivo fonte Cobblemon imutável, verificar movimento nativo de body e torso e manter a verificação de expressões variáveis. A validação real de articulações no cliente continua exigida; a correção não reduz os critérios do smoke.
+- Próxima ação: executar novamente os testes focados e a suíte Java antes de qualquer GameTest ou cliente. Nenhum modelo, textura ou animação foi modificado; não há JAR aprovado.
