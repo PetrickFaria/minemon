@@ -57,6 +57,10 @@ jobs:
             build/diagnostics/
           if-no-files-found: ignore
           retention-days: 7
+      - name: Focused client smoke for Geodude, Graveler, and Golem
+        run: |
+          python3 tools/prepare_client_world.py
+          timeout --kill-after=30s 600s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeSpecies=geodude,graveler,golem
       - name: Launch Minecraft client and validate GeckoLib cache
         if: ${{ !cancelled() && steps.compile.outcome == 'success' }}
         run: |

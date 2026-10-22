@@ -170,3 +170,13 @@ Aguardar o run legado `39658750383` encerrar sem iniciá-lo novamente. Depois, e
 - Inspeção do JAR, verificação cumulativa final no JAR e upload ainda não começaram. Nenhum JAR desta revisão deve ser anunciado como aprovado até o workflow terminar verde.
 - Os verificadores locais de recursos, Lote 8 e asas de Pidgeotto/Pidgeot passaram. O wrapper Gradle local permanece bloqueado ao tentar baixar 7.5.1; a execução remota aprovou os testes Java.
 - Próxima ação: acompanhar a mesma execução `39700680502`; se o cliente passar, conferir a inspeção e o artefato de download desse run. Se falhar ou expirar, usar seus logs para um reparo específico antes de nova validação.
+
+
+## Checkpoint 14 — falha do smoke localizada e perfil Geodude corrigido (2026-10-22)
+
+- A execução [39700680502](https://github.com/PetrickFaria/minemon/actions/runs/39700680502), no commit de código `901fedc42758fa472edeb551987906e423829306`, passou nos testes Java focados, suíte Java, GameTests de servidor, verificações dos recursos, dos 151 registros, do Lote 8 e das asas de Pidgeotto/Pidgeot. O smoke completo do cliente falhou no #074 Geodude após percorrer 86 espécies; não foi timeout (Gradle reportou 33m31s). JAR não foi inspecionado nem publicado.
+- Diagnóstico: falha de articulação `geodude idle=2 walk=0 run=1 required=1`. O clip nativo `ground_walk` mantém `arm_left/arm_right` rígidos; anima `body.position` por keyframes e `torso` via Molang. O clip nativo `ground_run` também anima `body/torso`, não os braços. A falha ocorreu antes de #075 Graveler e #076 Golem, então esses dois ainda precisam de validação.
+- Ajuste feito somente nos perfis de teste: Geodude mede braços no repouso e `body/torso` na caminhada e corrida. Atualizados também o gerador do lote e as verificações Java/Python para manter o perfil ligado aos canais nativos. Critério continua exigindo movimento real; modelos, texturas e animações não foram alterados.
+- A regressão das asas de Pidgeotto/Pidgeot passou. Logs e diagnóstico: artefato [minemon-test-diagnostics](https://github.com/PetrickFaria/minemon/actions/runs/39700680502/artifacts/12394186988), expira em 2026-10-29.
+- Verificações locais após a correção do perfil: `verify_project.py`, `verify_molang_compatibility.py`, `verify_batch8.py`, `verify_pidge_wing_visibility.py`, compilação Python e `git diff --check` passaram. Java/cliente locais permanecem sem Gradle 7.5.1 disponível.
+- Próxima execução única: testar Geodude/Graveler/Golem por smoke direcionado depois de Java e servidor; em seguida, executar um único smoke completo do cliente. Não há JAR aprovado ainda.

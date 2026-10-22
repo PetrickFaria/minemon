@@ -91,7 +91,7 @@ for d in defs[70:70+len(authorized_species)]:
 # Source-backed anatomy profiles: inspect the same chains that define these rigs.
 required={
  'victreebel':('head_leaf','head_stem'),'tentacool':('tentacle_left_3','tentacle_right_3'),
- 'tentacruel':('tentacle_left_3','tentacle_right_3'),'geodude':('arm_left','arm_right'),
+ 'tentacruel':('tentacle_left_3','tentacle_right_3'),'geodude':('body','torso'),
  'graveler':('arm_bottom_left','arm_bottom_right'),'golem':('left_upper_arm','right_upper_arm'),
  'ponyta':('fire_mane','fire_mane_head','tail'),'rapidash':('fire_mane_head_flame','tail'),
  'slowpoke':('tail','tail2','tail4'),'slowbro':('shell','shell_jaw','tail')}

@@ -148,6 +148,25 @@ public class Batch8AnimationCompatibilityTest {
         }
     }
 
+    @Test public void geodudeGaitProfileUsesNativeAnimatedBodyAndTorso() throws Exception {
+        var profile=json("data/minemon_gen1/animation_validation_profiles.json").getAsJsonObject()
+            .getAsJsonObject("geodude");
+        assertEquals("Idle remains measured on the natively moving arms",List.of("arm_left","arm_right"),
+            profile.getAsJsonArray("idle").asList().stream().map(JsonElement::getAsString).toList());
+        for(String state:List.of("walk","run"))
+            assertEquals("Geodude "+state+" must measure joints animated by its source clip",
+                List.of("body","torso"),profile.getAsJsonArray(state).asList().stream().map(JsonElement::getAsString).toList());
+
+        var clips=animations("geodude");
+        for(String gait:List.of("ground_walk","ground_run")) {
+            var bones=clips.getAsJsonObject("animation.geodude."+gait).getAsJsonObject("bones");
+            var bodyPosition=bones.getAsJsonObject("body").getAsJsonObject("position");
+            assertTrue("Geodude "+gait+" body position must retain native keyframes",bodyPosition.size()>1);
+            assertTrue("Geodude "+gait+" torso channel must vary with animation time",
+                changesWithTime(bones.getAsJsonObject("torso"),new MolangParser()));
+        }
+    }
+
     private static int index(String slug) { return SPECIES.indexOf(slug)+70; }
 
     private static JsonArray defs() throws Exception {
