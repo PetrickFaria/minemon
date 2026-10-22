@@ -63,12 +63,12 @@ jobs:
         run: |
           python3 tools/prepare_client_world.py
           set +e
-          timeout --kill-after=30s 2700s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest
+          timeout --kill-after=30s 5400s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest
           smoke_status=$?
           set -e
           if [ "$smoke_status" -ne 0 ]; then
             if [ "$smoke_status" -eq 124 ]; then
-              echo "[CLIENT SMOKE] FAIL timeout after 2700s; last phase and species progress follow."
+              echo "[CLIENT SMOKE] FAIL timeout after 5400s; last phase and species progress follow."
             else
               echo "[CLIENT SMOKE] FAIL exit=$smoke_status; no automatic full-client retry will be started."
             fi

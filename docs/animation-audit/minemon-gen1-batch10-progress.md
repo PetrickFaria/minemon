@@ -89,7 +89,7 @@ O documento de evidência da fonte é `docs/animation-audit/minemon-gen1-batch10
 
 - A falha do Gengar não representa ausência dos movimentos de origem: os clips selecionados são poses nativas fixas e diferem em cinco articulações do corpo, braços e pernas.
 - Correção publicada em `891d5514af5a47f8ca531368647bc80a8c64761c`: o perfil lista as articulações de transição, exige estabilidade dentro de cada fase settled e mudança entre `IDLE_FINAL` e `WALK_STEADY`. O teste Java confirma que os dois clips continuam poses estáticas distintas; nenhum clip foi alterado ou inventado.
-- Execução única para esse commit: [Build Minemon #39806866639](https://github.com/PetrickFaria/minemon/actions/runs/39806866639), em fila. O workflow executará primeiro Java completo e GameTests; só então iniciará um smoke completo do cliente.
+- Execução única para esse commit: [Build Minemon #39806866639](https://github.com/PetrickFaria/minemon/actions/runs/39806866639). Java completo e GameTests passaram; o smoke iniciou e foi interrompido pelo limite de 2700 s em 95/151 espécies, antes da inspeção do JAR.
 
 ## Correção após a execução #39801348003
 
@@ -109,5 +109,17 @@ Publicar a correção específica de validação das poses nativas do Gengar. Ex
 - Último workflow `39802299460`: falhou somente no perfil de articulação do smoke do cliente por tratamento inadequado das poses estáticas do Gengar. Java, build e GameTests passaram.
 - JAR não foi gerado nem publicado porque o smoke falhou; inspeção e upload foram pulados.
 - Commit de código atual: `891d5514af5a47f8ca531368647bc80a8c64761c`.
-- Workflow atual: `39806866639`, em fila.
-- Próximo gate: acompanhar Java, GameTests e uma única validação completa do cliente dessa execução; inspecionar o JAR somente se o smoke aprovar.
+- Último workflow: `39806866639`, concluído com falha por timeout no smoke. Nenhum artefato JAR foi publicado.
+- Próximo gate: publicar somente o ajuste de timeout (5400 s) e este checkpoint; então permitir uma execução única e completa e inspecionar o JAR se o smoke aprovar.
+
+
+## Retomada e checkpoint — 2026-10-22
+
+- Último commit remoto confirmado antes deste checkpoint: `5cee29e6a42ed3a0c0e424a63ee258fd647d277e`; execução associada ao código `891d5514af5a47f8ca531368647bc80a8c64761c`: [Build Minemon #39806866639](https://github.com/PetrickFaria/minemon/actions/runs/39806866639).
+- A execução passou verificações estruturais, testes Java direcionados, `clean test build` e GameTests do servidor. O smoke iniciou corretamente, passou menu, ordem dos 151 itens, mundo e combate.
+- A falha foi exclusivamente o limite fixo de 2700 s: o cliente estava validando a espécie #095 Onix (95/151) em 44,6 min, sem erro de espécie registrado. Não concluiu a janela do Onix; o passo de inspeção e upload do JAR foi corretamente ignorado. Não existe JAR aprovado nesta execução.
+- Evidência: os registros do job `119922315311` mostram progresso contínuo por espécie; encerramento em `2026-10-22T16:27:32Z` com código 124 após 2700 s. Pela cadência observada (~28 s por espécie, mais inicialização), a cobertura cumulativa de 151 registros necessita de mais de 70 min.
+- Ajuste mínimo do workflow: ampliar somente o limite do smoke completo para 5400 s (90 min), preservando verificações, critérios, ausência de retry automático e a ordem dos gates. Nenhum recurso ou teste foi removido/afrouxado.
+- Próxima etapa: publicar um único commit de workflow e checkpoint, deixando iniciar uma única execução completa. Aguardar Java, GameTests, smoke até roster completo, inspeção do JAR e upload. Se houver falha de validação em espécie, diagnosticar pelos logs, sem reiniciar automaticamente.
+- Pokémon #091–#100 continuam implementados; verificadores cumulativos de lotes 8, 9, 10 e Pidgeotto/Pidgeot passaram na execução anterior. A avaliação visual manual do novo lote permanece pendente.
+- Correções visuais aprovadas e preservadas: corrida de Golem e Graveler, asas de Pidgeotto/Pidgeot e braços de Charizard. Chamas de Charmander, Charmeleon e Charizard não foram alteradas e seguem como pendências visuais futuras.
