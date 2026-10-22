@@ -7,22 +7,26 @@
 - Commit aprovado de código do Lote 11: `c0cfdc43f80df32bac99a44b1375464c40087561`.
 - GitHub Actions #39828753587: sucesso; artefato #12450059381, expiração 2026-11-05 18:57:57 UTC.
 - Progresso confirmado antes de iniciar: #001–#110 integrados e validados; registros #001–#151 preservados.
-- Nenhuma branch dos Lotes 12–16 existia na consulta inicial.
+- Branch do Lote 12: `feature/minemon-gen1-batch12-cobblemon`.
+- Commit final de código aprovado: `364fab1caf136d2e645f6ca77c4199570230eabd`.
+- Actions #39865755919: sucesso em compilação/testes Java, GameTests, smoke completo do cliente, inspeção do JAR e publicação do artefato.
+- Artefato #12466881117 (`Minemon-1.19.2-2.0.0-gen1.zip`), expira em 2026-11-05 23:23:57 UTC.
+- Nenhuma branch dos Lotes 13–16 existia no início da preparação do Lote 12.
 
 ## Escopo exclusivo deste lote
 
 | # | Espécie | Estado |
 |---:|---|---|
-| 111 | Rhyhorn | Recursos integrados; validação CI pendente |
-| 112 | Rhydon | Recursos integrados; validação CI pendente |
-| 113 | Chansey | Recursos integrados; validação CI pendente |
-| 114 | Tangela | Bind-pose fallback documentado; validação CI pendente |
-| 115 | Kangaskhan | Recursos integrados; validação CI pendente |
-| 116 | Horsea | Recursos integrados; validação CI pendente |
-| 117 | Seadra | Recursos integrados; validação CI pendente |
-| 118 | Goldeen | Recursos integrados; validação CI pendente |
-| 119 | Seaking | Recursos integrados; validação CI pendente |
-| 120 | Staryu | Recursos integrados; validação CI pendente |
+| 111 | Rhyhorn | Recursos integrados; validação técnica completa aprovada no Actions #39865755919 |
+| 112 | Rhydon | Recursos integrados; validação técnica completa aprovada no Actions #39865755919 |
+| 113 | Chansey | Recursos integrados; validação técnica completa aprovada no Actions #39865755919 |
+| 114 | Tangela | Bind-pose fallback documentado; validação técnica completa aprovada no Actions #39865755919 |
+| 115 | Kangaskhan | Recursos integrados; validação técnica completa aprovada no Actions #39865755919 |
+| 116 | Horsea | Recursos integrados; validação técnica completa aprovada no Actions #39865755919 |
+| 117 | Seadra | Recursos integrados; validação técnica completa aprovada no Actions #39865755919 |
+| 118 | Goldeen | Recursos integrados; validação técnica completa aprovada no Actions #39865755919 |
+| 119 | Seaking | Recursos integrados; validação técnica completa aprovada no Actions #39865755919 |
+| 120 | Staryu | Recursos integrados; validação técnica completa aprovada no Actions #39865755919 |
 
 Fonte local auditada: Cobblemon Fabric 1.8.2, SHA-256 `cae8ac328b61354fbe415208b8c6ffc12e7155094d0a87082e85e7914fb380c2`. A auditoria preliminar encontrou clips nativos de locomoção, animações aquáticas e anatomia articulada; os clips ativos e a compatibilidade GeckoLib serão registrados após inspeção e importação por espécie. Não selecionar animação de corrida sintética nem inventar movimento ausente.
 
@@ -36,14 +40,14 @@ Fonte local auditada: Cobblemon Fabric 1.8.2, SHA-256 `cae8ac328b61354fbe415208b
 - `tools/verify_batch12.py`, verificadores cumulativos dos Lotes 8–11, `verify_project.py`, `verify_runtime.py` e o preflight Molang passaram localmente.
 - Os perfis de Goldeen e Seaking foram ajustados para joints presentes nos clips nativos selecionados após a primeira checagem estrutural apontar divergências.
 
-## Testes pendentes e próximo passo
+## Testes e resolução da regressão
 
-- A execução #39855369559 terminou em falha no GameTest `wildaggressionactuallyexpires`; 12 dos 13 GameTests passaram.
-- Os testes focados, suíte Java e build passaram. O smoke completo do cliente também concluiu com sucesso (etapa 15/19).
-- A inspeção do JAR e o upload foram pulados devido à falha do GameTest; nenhum JAR do Lote 12 foi publicado por essa execução.
-- Diagnóstico #12462837662 (expira 2026-10-29 22:20:33 UTC); logs do servidor #12460040102 (expira 2026-10-29 21:15:41 UTC).
-- Falha observada: `Expired aggression must not be reacquired by HurtByTargetGoal`. Corrigindo a invariável para limpar qualquer alvo residual de criatura selvagem quando o contador de agressividade chega a zero; o teste mantém a asserção e agora inclui estado da entidade na mensagem de erro.
-- Correção em preparação sobre o checkpoint `20893c4684e99789461a9526ff424bae74cb316e`; ainda não validada por CI. Próximo passo: executar os testes e workflow uma única vez após publicar a correção. O Lote 13 permanece não iniciado.
+- Actions #39855369559 reprovou 1 de 13 GameTests: `wildaggressionactuallyexpires` (12/13 passaram). A suíte Java/build e o smoke do cliente passaram, mas o workflow não publicou JAR.
+- A correção no commit `364fab1caf136d2e645f6ca77c4199570230eabd` limpa o alvo residual quando a agressividade selvagem expira; a asserção do GameTest permaneceu ativa.
+- Actions #39865755919 aprovou o teste Java/build completo, os 13 GameTests e o smoke do cliente com 151/151 espécies processadas, incluindo `PASS WORLD`, `PASS LOCOMOTION`, `PASS ROSTER`, `PASS PIDGE WINGS` e `PASS FIRE-STARTER ARMS`.
+- A inspeção do JAR passou: estrutura Forge/mod, `pack.mcmeta`, `mods.toml`, classe principal, catálogo e Pokédex, verificadores cumulativos dos Lotes 8–12 e recursos/151 registros.
+- JAR publicado como `Minemon-1.19.2-2.0.0.jar`, dentro do ZIP `Minemon-1.19.2-2.0.0-gen1.zip` (artefato #12466881117; SHA-256 do JAR `5f287937ee3a21eb47fd5c78ed2e3e8eb462e7296915d083c50e4ecfddb186d0`; expiração 2026-11-05 23:23:57 UTC).
+- Próxima etapa: usar esse commit aprovado como base do Lote 13; não há falha técnica bloqueante no Lote 12.
 
 ## Diagnóstico do primeiro smoke
 
@@ -68,12 +72,12 @@ Fonte local auditada: Cobblemon Fabric 1.8.2, SHA-256 `cae8ac328b61354fbe415208b
 
 ## Validações e publicações
 
-- Último commit de código em validação: `d20a00bdd60c05f5b04c89fbddf3f68f867f97c1`.
-- Actions #39855369559: testes focados e suíte Java/build PASS; smoke completo do cliente PASS; GameTests 12/13 PASS, com falha em `wildaggressionactuallyexpires`; não houve JAR.
-- Actions #39841242841: Java/build e GameTests PASS; smoke falhou na classificação do fallback estático de Tangela.
-- Actions #39850003592: Java/build e GameTests PASS; smoke falhou no perfil de repouso de Alakazam; não houve retry automático nem JAR.
-- Artefato de JAR do Lote 12: ainda não gerado.
-- Correção de alvo residual preparada localmente após o run; ainda pendente de publicação e validação. Inspecionar/publicar JAR somente após todos os GameTests e smokes passarem; não iniciar o Lote 13 antes disso.
+- Actions #39865755919, commit `364fab1caf136d2e645f6ca77c4199570230eabd`: aprovado.
+- Testes Java/build: PASS. GameTests: PASS, 13/13. Smoke completo: PASS, roster 151/151; mundo, locomoção, roster, asas de Pidgeotto/Pidgeot e braços dos três iniciais validados automaticamente.
+- Inspeção do JAR: PASS, incluindo `pack.mcmeta`, `META-INF/mods.toml`, classe principal, catálogo, Pokédex, compatibilidade declarada com Minecraft 1.19.2/GeckoLib 3.1.40 e verificadores cumulativos dos Lotes 8–12.
+- Artefato: `Minemon-1.19.2-2.0.0-gen1.zip` (#12466881117), contendo `Minemon-1.19.2-2.0.0.jar`; expiração 2026-11-05 23:23:57 UTC. SHA-256 do ZIP `8faf19d838f5dff3004ed47d5108b1c5cc56b628274b6e377a336e8543898391`; SHA-256 do JAR `5f287937ee3a21eb47fd5c78ed2e3e8eb462e7296915d083c50e4ecfddb186d0`.
+- Histórico: #39841242841 falhou no fallback estático de Tangela; #39850003592 falhou no perfil de repouso de Alakazam; #39855369559 falhou em `wildaggressionactuallyexpires`. Essas falhas foram corrigidas seletivamente antes do run aprovado.
+- Avaliação visual manual continua separada; as três chamas permanecem pendentes e inalteradas.
 
 ## Correções visuais protegidas
 
