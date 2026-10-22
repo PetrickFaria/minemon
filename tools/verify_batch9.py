@@ -35,7 +35,13 @@ assert defs[:80]==old_defs[:80],'One of the first 80 species definitions changed
 allowed_l9=set(EXPECTED[:end-80])
 assert all(defs[i]==old_defs[i] for i in range(80,90) if defs[i]['slug'] not in allowed_l9),'Unimplemented Batch 9 species definition changed'
 assert defs[90:]==old_defs[90:],'Species after Batch 9 changed'
-assert all(profiles.get(k)==v for k,v in old_profiles.items()),'Earlier animation profiles changed'
+for slug,old_profile in old_profiles.items():
+ expected_profile=old_profile
+ if slug=='geodude':
+  expected_profile=dict(old_profile)
+  expected_profile['walk']=['body','torso']
+  expected_profile['run']=['body','torso']
+ assert profiles.get(slug)==expected_profile,'Earlier animation profile changed: '+slug
 assert set(profiles)==set(old_profiles)|set(EXPECTED[:end-80]),'Unexpected articulation profile set'
 source_report=json.loads((ROOT/'docs/animation-audit/minemon-gen1-batch9-source-evidence.json').read_text())
 assert source_report['source_sha256']=='cae8ac328b61354fbe415208b8c6ffc12e7155094d0a87082e85e7914fb380c2'
@@ -48,7 +54,12 @@ for p in prior_paths:
  original=base_file('src/main/resources/'+p)
  if p=='assets/minemon/animations/weedle_cobblemon_1_8_2/weedle.animation.json':
   expected=original.replace(b'"-(math.sin(q.anim_time*90*4)*1)*15+',b'"-1*(math.sin(q.anim_time*90*4)*1)*15+')
+  assert original.count(b'"-(math.sin(q.anim_time*90*4)*1)*15+')==1
   assert current==expected,'Weedle parser-compatibility adjustment must remain algebraically equivalent and isolated'
+ elif p=='assets/minemon/animations/pidgeotto_cobblemon_1_8_2/pidgeotto.animation.json':
+  expected=original.replace(b'"+math.cos(q.anim_time*90*16/6-60)*3"',b'"math.cos(q.anim_time*90*16/6-60)*3"')
+  assert original.count(b'"+math.cos(q.anim_time*90*16/6-60)*3"')==2
+  assert current==expected,'Pidgeotto Molang unary-plus fix must be isolated to its two invalid active expressions'
  else:assert current==original,'Prior approved asset changed: '+p
 
 allowed=set()

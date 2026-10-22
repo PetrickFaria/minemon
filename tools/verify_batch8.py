@@ -49,7 +49,12 @@ for p in old_paths:
  current=(resources/p).read_bytes();original=base_file('src/main/resources/'+p)
  if p=='assets/minemon/animations/weedle_cobblemon_1_8_2/weedle.animation.json':
   expected_bytes=original.replace(b'"-(math.sin(q.anim_time*90*4)*1)*15+',b'"-1*(math.sin(q.anim_time*90*4)*1)*15+')
+  assert original.count(b'"-(math.sin(q.anim_time*90*4)*1)*15+')==1
   assert current==expected_bytes,'Weedle parser fix must remain algebraically equivalent and isolated'
+ elif p=='assets/minemon/animations/pidgeotto_cobblemon_1_8_2/pidgeotto.animation.json':
+  expected_bytes=original.replace(b'"+math.cos(q.anim_time*90*16/6-60)*3"',b'"math.cos(q.anim_time*90*16/6-60)*3"')
+  assert original.count(b'"+math.cos(q.anim_time*90*16/6-60)*3"')==2
+  assert current==expected_bytes,'Pidgeotto Molang unary-plus fix must be isolated to its two invalid active expressions'
  else:assert current==original,'Prior approved asset changed: '+p
 
 allowed=set()
