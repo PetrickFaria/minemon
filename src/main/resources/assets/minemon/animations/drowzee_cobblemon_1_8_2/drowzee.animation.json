@@ -4120,7 +4120,7 @@
               "30+math.sin(query.anim_time*90*4+75)*25"
             ],
             "0.5": [
-              "-18.4733+ath.sin(query.anim_time*90*4+75)*20",
+              "-18.4733+math.sin(query.anim_time*90*4+75)*20",
               "29.4572+math.sin(query.anim_time*90*4+255)*20",
               "16.7572+math.sin(query.anim_time*90*4+75)*25"
             ],

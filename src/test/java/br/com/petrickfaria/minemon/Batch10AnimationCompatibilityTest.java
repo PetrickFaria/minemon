@@ -24,6 +24,12 @@ public class Batch10AnimationCompatibilityTest {
         }
     }
 
+    private static JsonArray jsonArray(String path) throws Exception {
+        try(var reader=Files.newBufferedReader(RESOURCES.resolve(path))) {
+            return JsonParser.parseReader(reader).getAsJsonArray();
+        }
+    }
+
     private static JsonObject animations(String slug) throws Exception {
         return json("assets/minemon_gen1/animations/"+slug+"_cobblemon_1_8_2/"+slug+".animation.json")
             .getAsJsonObject("animations");
@@ -36,7 +42,7 @@ public class Batch10AnimationCompatibilityTest {
     }
 
     @Test public void exactBatchTenSpeciesAndNativeRunAvailabilityAreDeclared() throws Exception {
-        var defs=json("data/minemon_gen1/runtime_species.json").getAsJsonArray();
+        var defs=jsonArray("data/minemon_gen1/runtime_species.json");
         var profiles=json("data/minemon_gen1/animation_validation_profiles.json");
         Set<String> nativeRuns=Set.of("drowzee","hypno");
         for(int number=91;number<=100;number++) {
@@ -61,7 +67,7 @@ public class Batch10AnimationCompatibilityTest {
     }
 
     @Test public void activeIdleWalkAndNativeRunClipsParseAndLoadInGeckoLib31() throws Exception {
-        var defs=json("data/minemon_gen1/runtime_species.json").getAsJsonArray();
+        var defs=jsonArray("data/minemon_gen1/runtime_species.json");
         for(int number=91;number<=100;number++) {
             var def=defs.get(number-1).getAsJsonObject();
             String slug=def.get("slug").getAsString();

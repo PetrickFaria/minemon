@@ -14,7 +14,7 @@ O planejamento original de 16 lotes confirma que o Lote 10 é #091–#100: Cloys
 - Actions aprovado do Lote 9: [39779248077](https://github.com/PetrickFaria/minemon/actions/runs/39779248077), artefato #12428477962.
 - Checkpoint documental: `117c0b5d583bb25c789cf378822b1f0d79df1b61` (`[skip ci] Record batch 10 preparation checkpoint`).
 - Commit de implementação publicado: `3efec0c410a759d78018b0533c4e52e4050db515` (`Implement Gen 1 batch 10 Cobblemon assets and validation`).
-- Último commit publicado no branch no momento deste checkpoint: `3efec0c410a759d78018b0533c4e52e4050db515`.
+- Último commit remoto confirmado: `5237c1ee64f0ad14350f8bf897b107ce1b12e5cd` (`[skip ci] Record corrected batch 10 validation run`).
 - Actions: [Build Minemon #39800529455](https://github.com/PetrickFaria/minemon/actions/runs/39800529455), SHA `3efec0c410a759d78018b0533c4e52e4050db515`; estado `queued` na última consulta. Não iniciar outro workflow.
 
 ## Fonte e auditoria
@@ -51,7 +51,7 @@ O planejamento original de 16 lotes confirma que o Lote 10 é #091–#100: Cloys
 - Causa confirmada no envio do commit: o blob do manifesto no GitHub tinha 300,060 bytes e conteúdo inválido, enquanto o arquivo local tem 314,741 bytes. O conector truncou o conteúdo base64 grande no transporte. O recurso local é JSON válido; não há falha no parser ou nos dados.
 - Correção de transporte preparada: o blob foi recriado em chunks e seu SHA GitHub `c628e42506c7a46bce68e18593cc3b3fd846e2b1` corresponde exatamente ao SHA calculado sobre o arquivo local. A próxima execução usará esse conteúdo integral; ainda precisa validar.
 - Correção publicada no commit `fdc57c5483e34320ac92b5351b7cd01aef70d204` (`Fix complete Batch 10 manifest publication`).
-- Nova execução única: [Build Minemon #39801348003](https://github.com/PetrickFaria/minemon/actions/runs/39801348003), SHA `fdc57c5483e34320ac92b5351b7cd01aef70d204`; estado `queued` na última consulta.
+- [Build Minemon #39801348003](https://github.com/PetrickFaria/minemon/actions/runs/39801348003), SHA `fdc57c5483e34320ac92b5351b7cd01aef70d204`, terminou com falha nos testes Java direcionados em 2026-10-22. Verificações estruturais, Molang estático e regressões anteriores passaram antes disso.
 - Artefatos de diagnóstico da execução inicial foram mantidos pelo GitHub até 2026-10-29 14:59 UTC: [logs de testes](https://github.com/PetrickFaria/minemon/actions/runs/39800529455/artifacts/12435801254) e [logs do servidor](https://github.com/PetrickFaria/minemon/actions/runs/39800529455/artifacts/12434573908). Não contêm JAR.
 
 ## Pokémon implementados
@@ -73,13 +73,20 @@ O documento de evidência da fonte é `docs/animation-audit/minemon-gen1-batch10
 - Charmeleon e Charizard: chamas da cauda ainda não estão visualmente satisfatórias.
 - A avaliação visual manual dos dez Pokémon novos continua pendente. Nenhuma dessas pendências impede o gate técnico.
 
+## Correção após a execução #39801348003
+
+- Causa Molang identificada: no clip `animation.drowzee.ground_run`, osso `arm_left`, rotação no tempo 0.5, a expressão `-18.4733+ath.sin(query.anim_time*90*4+75)*20` continha o typo `ath.sin`. Corrigido para `math.sin`; o parser GeckoLib 3.1.40 rejeitou corretamente a expressão original.
+- Os dois testes de compatibilidade do Batch 10 tentavam converter `runtime_species.json` em `JsonObject`, apesar de o manifesto ser um array. Foi adicionado leitor de `JsonArray`, mantendo intactas as asserções de ordem e conteúdo.
+- Nenhum critério de teste foi removido ou afrouxado. As alterações corrigidas aguardam publicação e nova execução.
+- A etapa Java focada interrompeu corretamente o workflow; não foram iniciados a suíte completa, GameTests nem smoke do cliente e nenhum JAR foi produzido.
+
 ## Próxima etapa
 
-Acompanhar a execução Actions `39800529455`, já iniciada para o commit `3efec0c`. Ordem: testes direcionados Molang/espécies/Lote 10; suíte Java completa; GameTests do servidor; um smoke completo do cliente; inspeção do JAR e upload do artefato. Se a suíte Java falhar, corrigir a causa antes de iniciar qualquer cliente.
+Publicar somente as correções e este checkpoint documental. Executar primeiro os testes Java direcionados (seletor, preflight Molang e compatibilidade do Batch 10); se aprovarem, executar a suíte Java completa, depois GameTests do servidor, um smoke completo do cliente, inspeção do JAR e upload do artefato. Não iniciar cliente antes da aprovação Java.
 
 ## Estado atual
 
 - Pokémon implementados e publicados: #091–#100.
-- Último commit de código: `fdc57c5483e34320ac92b5351b7cd01aef70d204`.
-- Workflow atual do Lote 10: `39801348003`, em fila na última consulta.
-- Validação automatizada total e JAR do Lote 10: pendentes. A falha inicial não alcançou Java, GameTests ou cliente e não gerou JAR.
+- Último commit remoto confirmado: `5237c1ee64f0ad14350f8bf897b107ce1b12e5cd`.
+- Workflow mais recente: `39801348003`, concluído com falha nos testes Java direcionados.
+- Validação automatizada total e JAR do Lote 10: pendentes; nenhum GameTest ou smoke do cliente foi iniciado e nenhum JAR foi gerado.
