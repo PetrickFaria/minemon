@@ -30,7 +30,7 @@ public class Batch8AnimationCompatibilityTest {
     private static JsonObject nativeAnimations(String slug) throws Exception {
         Path path=Path.of("src/main/resources/assets/minemon/animations/"+slug+"_cobblemon_1_8_2/"+slug+".animation.json");
         try(var reader=Files.newBufferedReader(path)) {
-            return JsonParser.parseReader(reader).getAsJsonObject("animations");
+            return JsonParser.parseReader(reader).getAsJsonObject().getAsJsonObject("animations");
         }
     }
 

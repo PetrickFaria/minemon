@@ -1,5 +1,5 @@
-Warning: truncated output (original token count: 6157)
-Total output lines: 169
+Warning: truncated output (original token count: 6272)
+Total output lines: 170
 
 # Minemon Gen 1 — Lote 8
 
@@ -97,7 +97,23 @@ Integrar exclusivamente os recursos Cobblemon Fabric 1.8.2 dos Pokémon #071–#
 
 ## Bloqueios e limitações
 
-- A distribuição Gradle 7.5.1 não estava alcançável…1157 tokens truncated…orta timeout versus exit code, imprime cauda de `client-validation.txt` e `latest.log`, e falha sem retry.
+- A distribuição Gradle 7.5.1 não estava alcançável de `services.gradle.org` em duas tentativas locais; testes Java/build ainda não foram executados localmente. Nenhum teste foi desativado. A URL da fonte Cobblemon ficou acessível e o seu arquivo foi baixado/verificado durante a recuperação do workspace.
+- Aparência visual manual dentro do Minecraft continuará pendente; os gates automatizados de cliente verificam renderização, movimento e transforms reais dos ossos.
+- Erros de código/testes identificados no checkpoint parcial: nenhum após a correção dos perfis de tentáculos para os nomes de osso reais da fonte.
+
+## Checkpoint 7 — auditoria da otimização do smoke (2026-10-21)
+
+- Última referência de código: `a9c2cd6d226c404f0bc7d29eb65829f586314fea`; a branch recebeu o commit documental `747f344a3ebe2da7d1136309fc72ee28468903ae` após a atualização do código.
+- Actions existente [39658750383](https://github.com/PetrickFaria/minemon/actions/runs/39658750383) segue `in_progress`; gates de recursos, perfis Pidge, Gradle `clean test build` e GameTests do servidor passaram. O smoke do cliente continua ativo; inspeção/upload do JAR permanecem pendentes. Não foi iniciada uma execução duplicada.
+- Auditoria do workflow confirmou que qualquer falha do cliente reinicia o smoke inteiro com outro timeout de 2700 s, sem classificar falha transitória.
+- O smoke completo percorre as 151 espécies com janela de 80 ticks por espécie, guarda captura de tela por espécie, e só escreve os relatórios de aprovação detalhados no final. O teste seletivo e progresso por espécie/fase ainda não existem.
+- Verificação local dos recursos encontrou expressões Cobblemon `q.r.*` nos arquivos de animação de Charizard e Blastoise, incluindo `q.r.velocity_forward`. Seus efeitos de runtime ainda precisam ser classificados e verificados contra o parser GeckoLib 3.1.40; nenhuma expressão foi alterada nem silenciada nesta auditoria.
+- Perfis do Golem e Graveler usam agora `body`/`body_roll` para corrida e têm reg…272 tokens truncated…r o Actions em andamento.
+- Seleção direcionada: `./gradlew --no-daemon runClient -PclientSmokeTest -PclientSmokeSpecies=golem,graveler`; aceita slug, nome de espécie ou número da Pokédex (ex.: `#076`). Omitir a propriedade executa todas as 151 espécies. A seleção passa pelos mesmos carregamentos, renderização, textura, movimento, fases, verificações de articulação e regressões das espécies selecionadas. O setup comum, roster, mundo e combate continuam ativos.
+- Validação rápida de diagnóstico (não aprova o lote): `python3 tools/verify_project.py`, `python3 tools/verify_molang_compatibility.py`, testes Java direcionados `./gradlew --no-daemon test --tests br.com.petrickfaria.minemon.gametest.SmokeSpeciesSelectionTest --tests br.com.petrickfaria.minemon.gametest.ActiveAnimationMolangPreflightTest` e cliente seletivo sob `xvfb-run`.
+- Validação completa de aprovação: workflow completo executa `buildEnvironment clean test build`, GameTests do servidor, cliente sem `clientSmokeSpecies` (151 espécies), verificações de regressão, inspeção do JAR e upload. O modo rápido nunca substitui esses gates.
+- O client smoke agora emite linhas `[CLIENT SMOKE]` uma vez por transição de carregamento/renderização/repouso/caminhada/corrida, com número/N, Pokédex, contagem de janelas, duração e última janela concluída. O modo completo permanece sem filtro e todos os gates finais continuam obrigatórios.
+- Workflow: removido o segundo lançamento integral; timeout único permanece em 2700 s, reporta timeout versus exit code, imprime cauda de `client-validation.txt` e `latest.log`, e falha sem retry.
 - Otimização de preparação: `buildEnvironment` agora roda junto de `clean test build`, preservando o relatório e removendo uma inicialização separada do Gradle.
 - Molang: `verify_molang_compatibility.py` passou localmente. Achou 783 chamadas `q.r.*` em seis arquivos: Arbok, Blastoise, Charizard, Ekans, Pidgeot e Venusaur; nenhuma nas seleções ativas de repouso/caminhada/corrida. Estão em clips alternativos `snake_*` não selecionados ou `ride_*`/montaria. GeckoLib 3.1.40 realmente registra exceções “Function 'query.r.…' couldn't be found” ao desserializar essas expressões; o carregamento prossegue, mas os keyframes que dependem dessas funções não têm avaliação válida. O preflight as mostra explicitamente e falha se aparecerem em clipes ativos; não as silencia nem reescreve.
 - Regressões de Golem/Graveler, Pidgeotto/Pidgeot, chama do Charmander, braços dos iniciais e verificações do roster continuam no caminho completo. O filtro só omite verificações específicas de espécies que não foram selecionadas; não reduz critérios para as selecionadas.
@@ -149,3 +165,4 @@ Aguardar o run legado `39658750383` encerrar sem iniciá-lo novamente. Depois, e
 - A causa foi a verificação ler o JSON já transformado para runtime como se sua posição fosse sempre um objeto de keyframes. A transformação converte canais nativos válidos para formas diferentes (vetores Molang e keyframes Bedrock), portanto a asserção estava examinando a representação errada.
 - Ajustei a regressão para ler diretamente o arquivo fonte Cobblemon imutável, verificar movimento nativo de body e torso e manter a verificação de expressões variáveis. A validação real de articulações no cliente continua exigida; a correção não reduz os critérios do smoke.
 - Próxima ação: executar novamente os testes focados e a suíte Java antes de qualquer GameTest ou cliente. Nenhum modelo, textura ou animação foi modificado; não há JAR aprovado.
+- A execução seguinte ([39705264491](https://github.com/PetrickFaria/minemon/actions/runs/39705264491)) confirmou que os recursos e o preflight Molang passaram, mas `compileTestJava` parou antes dos testes: o helper de leitura também usava um overload inexistente de `JsonElement.getAsJsonObject`. Corrigido para obter o objeto raiz e então acessar `animations`. GameTests e smokes foram pulados corretamente; não houve inicialização do cliente nem JAR.
