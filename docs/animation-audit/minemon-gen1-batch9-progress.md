@@ -101,3 +101,14 @@ A validação completa continuará pendente até compilação, testes Java, Game
 - Comparação com o smoke completo aprovado no run `39770065634`: a mesma pose e perfil de Nidoqueen passaram, com `ground_idle` selecionado. A fonte da animação registra as articulações estáticas; a falha não aponta incompatibilidade Molang nem recurso corrompido.
 - Causa no coletor: o clip/input era registrado somente nos frames estabilizados, mas o intervalo de transformações era acumulado também durante os frames iniciais de transição run→idle. A alteração corretiva limita a medição dos perfis aos mesmos frames estabilizados definidos por `isSettledClipSample`; mantém articulações, limites, e exigências de movimento de walk/run sem relaxamento.
 - Próximo passo: uma execução única do workflow após compilar e aprovar a suíte Java, GameTests e então smoke integral; não iniciar outro smoke completo até a confirmação dessa causa no código. Inspecionar/publicar o JAR apenas depois que todas as etapas passarem.
+
+
+## Encerramento da recuperação do Lote 9 — 2026-10-22
+
+- Commit de código aprovado: `637afd0a572e16f175a04b4614bd7369805530f0` (`Measure client articulation only in settled phases`). A execução [Build Minemon #39779248077](https://github.com/PetrickFaria/minemon/actions/runs/39779248077) concluiu com sucesso no mesmo SHA.
+- Aprovaram-se as verificações de recursos, Molang ativo, regressões cumulativas, seletor e testes direcionados, compilação/suíte Java, GameTests do servidor, smoke integral do cliente (151 espécies) e inspeção do JAR.
+- A inspeção registrou 90 Pokémon atualizados com modelos, texturas e animações presentes, os 151 registros da Pokédex/runtime e os metadados Forge 43.5.0, Minecraft 1.19.2 e GeckoLib 3.1.40. O JAR entregue é `Minemon-1.19.2-2.0.0.jar`; SHA-256: `c16b3e8f1dcab31874ea51e002497626fdd7b70fb4da8185518e2be1fd2cb305`.
+- Artefato Actions [#12428477962](https://github.com/PetrickFaria/minemon/actions/runs/39779248077/artifacts/12428477962), expira em 2026-11-05 13:18:53 UTC.
+- As correções aprovadas e verificadas de corrida de Graveler/Golem, seleção das asas de Pidgeotto/Pidgeot e movimento dos braços de Charizard foram preservadas.
+- **Aprovação visual manual das chamas da cauda permanece pendente para tarefa visual futura:** Charmander melhorou, mas requer refinamento; Charmeleon e Charizard continuam visualmente insatisfatórios. O smoke automatizado verificou a animação da chama de Charmander, mas isso não constitui aprovação visual manual. Nenhuma chama foi modificada nesta recuperação.
+- Recuperação encerrada. Não iniciar Lote 10.
