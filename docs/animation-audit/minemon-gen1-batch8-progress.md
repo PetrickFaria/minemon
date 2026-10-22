@@ -1,6 +1,3 @@
-Warning: truncated output (original token count: 6272)
-Total output lines: 170
-
 # Minemon Gen 1 — Lote 8
 
 ## Objetivo
@@ -108,7 +105,12 @@ Integrar exclusivamente os recursos Cobblemon Fabric 1.8.2 dos Pokémon #071–#
 - Auditoria do workflow confirmou que qualquer falha do cliente reinicia o smoke inteiro com outro timeout de 2700 s, sem classificar falha transitória.
 - O smoke completo percorre as 151 espécies com janela de 80 ticks por espécie, guarda captura de tela por espécie, e só escreve os relatórios de aprovação detalhados no final. O teste seletivo e progresso por espécie/fase ainda não existem.
 - Verificação local dos recursos encontrou expressões Cobblemon `q.r.*` nos arquivos de animação de Charizard e Blastoise, incluindo `q.r.velocity_forward`. Seus efeitos de runtime ainda precisam ser classificados e verificados contra o parser GeckoLib 3.1.40; nenhuma expressão foi alterada nem silenciada nesta auditoria.
-- Perfis do Golem e Graveler usam agora `body`/`body_roll` para corrida e têm reg…272 tokens truncated…r o Actions em andamento.
+- Perfis do Golem e Graveler usam agora `body`/`body_roll` para corrida e têm regressões publicadas; o smoke real para confirmar esses perfis está dentro do mesmo run ativo.
+- Etapa seguinte: após o run atual encerrar, implementar seleção de espécies usando as mesmas verificações, logs de progresso por transição de fase, preflight Molang acionável e remoção do retry integral; manter o smoke completo como gate final. Nenhum Lote 9 será iniciado.
+
+## Checkpoint 8 — seletor, preflight e remoção de retry (2026-10-21)
+
+- Branch: `feature/minemon-gen1-batch8-cobblemon`. Commits de implementação publicados desde o checkpoint 7: `189879b` (seletor de espécies), `be1edfd` (filtro + relatórios de progresso no smoke), `385f7b2` (encaminha `-PclientSmokeSpecies`), `f77c3ea` (remove retry integral), `ba0eea4`/`c53ee6b` (preflight Molang estático e teste Java com o parser GeckoLib), `23e2933`/`e8e8fed` (preflight antes de iniciar Minecraft e ajuste da expressão regular), `7cf65baa` (progresso de inicialização), `9fd6744` (combina o relatório ForgeGradle com o build em uma única invocação Gradle). Commits `[skip ci]` para não duplicar o Actions em andamento.
 - Seleção direcionada: `./gradlew --no-daemon runClient -PclientSmokeTest -PclientSmokeSpecies=golem,graveler`; aceita slug, nome de espécie ou número da Pokédex (ex.: `#076`). Omitir a propriedade executa todas as 151 espécies. A seleção passa pelos mesmos carregamentos, renderização, textura, movimento, fases, verificações de articulação e regressões das espécies selecionadas. O setup comum, roster, mundo e combate continuam ativos.
 - Validação rápida de diagnóstico (não aprova o lote): `python3 tools/verify_project.py`, `python3 tools/verify_molang_compatibility.py`, testes Java direcionados `./gradlew --no-daemon test --tests br.com.petrickfaria.minemon.gametest.SmokeSpeciesSelectionTest --tests br.com.petrickfaria.minemon.gametest.ActiveAnimationMolangPreflightTest` e cliente seletivo sob `xvfb-run`.
 - Validação completa de aprovação: workflow completo executa `buildEnvironment clean test build`, GameTests do servidor, cliente sem `clientSmokeSpecies` (151 espécies), verificações de regressão, inspeção do JAR e upload. O modo rápido nunca substitui esses gates.
@@ -166,3 +168,10 @@ Aguardar o run legado `39658750383` encerrar sem iniciá-lo novamente. Depois, e
 - Ajustei a regressão para ler diretamente o arquivo fonte Cobblemon imutável, verificar movimento nativo de body e torso e manter a verificação de expressões variáveis. A validação real de articulações no cliente continua exigida; a correção não reduz os critérios do smoke.
 - Próxima ação: executar novamente os testes focados e a suíte Java antes de qualquer GameTest ou cliente. Nenhum modelo, textura ou animação foi modificado; não há JAR aprovado.
 - A execução seguinte ([39705264491](https://github.com/PetrickFaria/minemon/actions/runs/39705264491)) confirmou que os recursos e o preflight Molang passaram, mas `compileTestJava` parou antes dos testes: o helper de leitura também usava um overload inexistente de `JsonElement.getAsJsonObject`. Corrigido para obter o objeto raiz e então acessar `animations`. GameTests e smokes foram pulados corretamente; não houve inicialização do cliente nem JAR.
+
+## Checkpoint 17 — aprovação final e JAR do Lote 8 (2026-10-22)
+
+- Run [39705505546](https://github.com/PetrickFaria/minemon/actions/runs/39705505546), commit de código `af64c77356f52a5e4e902dc610329dbaf82ba7cb`, concluiu `success` (run #160). Etapas: regressões Java focadas, `buildEnvironment clean test build` com suíte Java completa, GameTests do servidor, smoke direcionado Geodude/Graveler/Golem, um único smoke completo do cliente, inspeção do JAR e upload passaram.
+- Smoke completo concluiu `151/151` espécies em 27m39s. Passaram validações de renderização/locomoção, regressões do lote 8 cumulativo (80 recursos atualizados, primeiros 70 byte-preservados, 151 espécies/ovos), Pidgeotto/Pidgeot, chama do Charmander, pose de braços, perfis de articulação e look nativo. Golem e Graveler passaram no smoke direcionado e nas regressões nativas; Geodude também foi confirmado.
+- JAR: `Minemon-1.19.2-2.0.0.jar`, 5.823.295 bytes, SHA-256 `f790d867bf702a3e930a73650fb59edb1f64751cdb10622b99721879f48cda0b`. Inspeção independente: 1.957 entradas, `pack.mcmeta`, `META-INF/mods.toml`, 15 classes, recursos/perfis do lote 8 e 151 registros. Compatibilidade declarada: Forge `[43.5.0,44)`, Minecraft `[1.19.2,1.20)`, GeckoLib `[3.1.40,4)`.
+- Artefato Actions `Minemon-1.19.2-2.0.0-gen1`, ID `12395972658`, expira em `2026-11-05 01:57:43 UTC`. Download contém o JAR acima. A auditoria visual manual no Minecraft continua pendente; os testes automatizados passaram. Nenhum trabalho do Lote 9 iniciado.
