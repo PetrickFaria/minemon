@@ -409,7 +409,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     }
 
     private boolean canSpontaneouslyRun() {
-        return this.onGround() && !this.isFlyingSpecies() && !this.isAquaticSpecies() && !this.isSleeping() && !this.isOrderedToSit()
+        return this.isOnGround() && !this.isFlyingSpecies() && !this.isAquaticSpecies() && !this.isSleeping() && !this.isOrderedToSit()
                 && !this.isInWaterOrBubble() && !this.isDeadOrDying() && this.getTarget() == null
                 && SpeciesAssetIndex.clip(this.getSpeciesSlug(), "ground_run", "run") != null;
     }
