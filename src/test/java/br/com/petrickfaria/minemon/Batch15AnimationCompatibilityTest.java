@@ -87,7 +87,8 @@ public class Batch15AnimationCompatibilityTest {
             for(String state:List.of("idle","walk")) {
                 String clip=def.get(state).getAsString(); assertTrue(slug+"/"+clip,animation.has(clip));
                 var channelBones=new HashSet<String>(); for(var bone:animation.getAsJsonObject(clip).getAsJsonObject("bones").keySet()) channelBones.add(bone);
-                assertTrue(slug+" "+state+" profile joints must be animated by selected clip",channelBones.containsAll(profile.getAsJsonArray(state).asList().stream().map(JsonElement::getAsString).toList()));
+                var expectedProfileJoints=new HashSet<String>(); for(JsonElement joint:profile.getAsJsonArray(state)) expectedProfileJoints.add(joint.getAsString());
+                assertTrue(slug+" "+state+" profile joints must be animated by selected clip",channelBones.containsAll(expectedProfileJoints));
             }
             for(var bone:geometry.getAsJsonArray("bones")) {
                 var b=bone.getAsJsonObject(); if(b.has("parent")) assertTrue(slug+" parent "+b.get("name"),bones.contains(b.get("parent").getAsString()));
