@@ -44,3 +44,11 @@ Aguardar/consultar #39980988503; registrar no próximo checkpoint a emissividade
 - O Gradle local não iniciou porque o wrapper 7.5.1 não pôde ser baixado (`Network is unreachable`). Assim, Java, GameTests, smoke completo do cliente e inspeção do JAR não foram executados localmente; estão pendentes da próxima execução remota.
 - Próxima etapa: publicar os ajustes do gate e este checkpoint sobre `1922069`; consultar a execução correspondente. Confirmar compilação, testes Java, GameTests, smoke de cliente (incluindo partículas Gastly e cobertura das caudas) e inspeção do JAR antes de declarar aprovação. Nenhum JAR novo foi gerado ou publicado até aqui.
 - Preservações explícitas: roster de 151, Mew, braços do Charizard, asas Pidgeotto/Pidgeot, Graveler/Golem, Moltres, Mewtwo e ativos/funcionalidades existentes.
+
+
+### Checkpoint — Forge API correction and validation #40013606910
+
+- Compile failure in run #40013345746 was traced to using `RegisterParticleProvidersEvent.registerSpriteSet`, which is absent from Forge 43.5.0 / Minecraft 1.19.2. Changed only the registration call to the documented 1.19.2 overload `event.register(type, SpriteParticleRegistration)`. Code commit: `54b345b18ca3716926ea264d1619af998af6c866`.
+- Validation run #40013606910: resource validation, Molang preflight, cumulative checks for Lotes 8–16 and Pidge wings passed; focused Java tests and full build passed; all 13 required server GameTests passed. Full client smoke was still running at checkpoint, so its result, JAR inspection, and artifact publication remain pending. Do not treat this run as approved until those steps complete.
+- The preceding run #40013345746 stopped at Java compilation and did not run GameTests/client smoke or generate a JAR. No new JAR is approved yet.
+- Next step: monitor the existing client smoke in run #40013606910 (job #120619927367). If it passes, verify runtime/JAR inspection and artifact metadata, then record the result here. If it fails, diagnose the specific client error before deciding on a focused correction.
