@@ -1,3 +1,4 @@
+# Audits native animation and animated texture resolver metadata alongside source art.
 name: Audit Cobblemon visual assets and Mew source
 on:
   push:
