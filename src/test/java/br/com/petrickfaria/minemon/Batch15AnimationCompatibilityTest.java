@@ -147,6 +147,9 @@ public class Batch15AnimationCompatibilityTest {
             var transition=new java.util.ArrayList<String>();
             for(JsonElement joint:speciesProfiles.getAsJsonArray("pose_transition"))transition.add(joint.getAsString());
             assertEquals(slug+" uses source aerial joints",entry.getValue(),transition);
+            var movementProfile=new HashSet<String>();
+            for(JsonElement joint:speciesProfiles.getAsJsonArray("walk"))movementProfile.add(joint.getAsString());
+            assertTrue(slug+" movement profile samples every aerial transition joint",movementProfile.containsAll(transition));
             assertEquals(slug+" stable idle profile",speciesProfiles.getAsJsonArray("idle").toString(),speciesProfiles.getAsJsonArray("idle_static").toString());
 
             var clips=animations(slug);

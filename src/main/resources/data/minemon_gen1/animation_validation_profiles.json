@@ -3346,6 +3346,7 @@
       "tail"
     ],
     "walk": [
+      "head",
       "wing_open_left",
       "wing_open_right",
       "head_fire2",

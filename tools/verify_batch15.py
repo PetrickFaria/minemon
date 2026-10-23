@@ -97,6 +97,7 @@ for i,d in enumerate(defs[140:150]):
   assert d['mode']=='flying' and d['idle']=='animation.'+slug+'.air_idle' and d['walk']=='animation.'+slug+'.air_fly'
   expected_transition=(['arm_left','arm_right','tail','tail9'] if slug=='mewtwo' else ['head','wing_open_left','wing_open_right'])
   assert profiles[slug].get('pose_transition')==expected_transition,(slug,'native aerial transition profile mismatch')
+  assert set(expected_transition)<=set(profiles[slug]['walk']),(slug,'movement sampling omits a native aerial transition joint')
   if slug=='mewtwo':assert profiles[slug].get('idle_static')==profiles[slug]['idle'] and d.get('source_static_idle') is True
   for joint in expected_transition:
    idle_channel=a[d['idle']]['bones'][joint].get('rotation')
