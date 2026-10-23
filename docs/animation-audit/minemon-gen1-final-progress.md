@@ -12,3 +12,13 @@
 ## Não marcar como concluído
 
 A conclusão 151/151, smoke final, inspeção do JAR e publicação permanecem pendentes. As chamas continuam sem aprovação visual manual. Os braços Charizard, asas Pidgeotto/Pidgeot, corrida Graveler/Golem, voo Moltres, Mewtwo e os lotes anteriores permanecem protegidos.
+
+
+## Checkpoint atualizado — 2026-10-23
+
+- A execução #39980988503 foi concluída com sucesso para `a94d84f4466d0cb0652adc6add8b386d7de18ca4`, incluindo smoke do cliente e inspeção do JAR. Artefato #12514299352, nome `Minemon-1.19.2-2.0.0.jar`, expiração 2026-11-06 16:17:03 UTC. Como esse commit é anterior ao código de overlay/Mew, o artefato não é a versão final da Primeira Geração.
+- A ponta de código validada estruturalmente está publicada na branch `feature/minemon-gen1-visual-fixes-batch16`, com Mew #151, overlays nativos de Ponyta/Rapidash e clips de cauda dos três iniciais. Verificadores cumulativos locais 8–16 e registros #001–#151 passaram.
+- Commit de validação atual: `0811d6a487b0b89eb71c637d885e9974c85b99f8`. Actions #39985737492 está em andamento: Java/build passaram; GameTests estão em execução; smoke cliente/JAR aguardam. Nenhum artefato final desse commit disponível ainda.
+- O workflow exige linha explícita de saída da articulação de Mew, além das verificações já existentes de cabeça/corpo e roster.
+- Pendências de avaliação visual manual: chamas de Charmander, Charmeleon e Charizard; fogo de Ponyta/Rapidash; inspeção visual de Mew. Os testes automatizados não equivalem à aprovação visual manual.
+- Próximo passo: acompanhar #39985737492; confirmar GameTests, smoke 151, inspeção e artifact. Corrigir somente eventual falha observada; não iniciar workflow duplicado.
