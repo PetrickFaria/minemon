@@ -99,6 +99,7 @@ jobs:
           grep -F 'PASS PIDGE WINGS' run/client-validation.txt
           grep -F 'PASS SOURCE LOOK' run/client-validation.txt
           grep -F 'PASS SOURCE PITCH' run/client-validation.txt
+          grep -F 'PASS SOURCE PITCH: mew source q.pitch_tilt input moves the body bone:' run/client-validation.txt
           grep -F 'ARTICULATION PROFILES:' run/client-validation.txt
       - name: Verify executable mod JAR contents
         shell: bash
