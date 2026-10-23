@@ -34,6 +34,17 @@ for slug in ('charmeleon','charizard'):
  definition=next(d for d in prior_defs if d['slug']==slug)
  definition['clips'].pop('tail_flame',None)
  definition['tail_flame_animation']=False
+# These exact scale changes are the only authorized prior-species definition deltas.
+for slug, expected_scale in {
+ 'gastly': {'scale':0.85,'width':0.2,'height':0.2},
+ 'electabuzz': {'scale':1.8,'width':1.4,'height':3.0},
+}.items():
+ definition=next((d for d in prior_defs if d['slug']==slug),None)
+ if definition is not None:
+  baseline=old_defs[definition['nationalPokedexNumber']-1]
+  for key,value in expected_scale.items():
+   assert definition[key]==value,(slug,key,'unexpected authorized scale',definition[key])
+   definition[key]=baseline[key]
 assert prior_defs==old_defs[:110],'An approved prior definition changed beyond the explicit fire-starter flame adaptation'
 assert [d['slug'] for d in defs[120:130]]==BATCH13 and [d['slug'] for d in defs[130:140]]==BATCH14 and [d['slug'] for d in defs[140:150]]==BATCH15,'Batch 13 plan or later definitions changed'
 for slug,old_profile in old_profiles.items():
