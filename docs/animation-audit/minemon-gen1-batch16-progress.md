@@ -29,3 +29,14 @@ Preservar os braços do Charizard, asas corrigidas de Pidgeotto/Pidgeot, corrida
 ## Próxima ação
 
 Consultar novamente #39980988503 sem lançar retry. Quando concluir, executar uma única validação completa do branch atualizado com Mew e overlays; corrigir falhas reais, inspecionar o JAR e registrar Action/artefato/expiração. Até lá, manter a ressalva de que não há aprovação final nem novo JAR.
+
+
+## Retomada e validação atual — 2026-10-23
+
+- O Actions #39980988503 terminou com sucesso para o commit antigo `a94d84f4466d0cb0652adc6add8b386d7de18ca4`: Java, build, GameTests, smoke completo do cliente e inspeção do JAR passaram. Artefato JAR #12514299352 (`Minemon-1.19.2-2.0.0.jar`), expira em 2026-11-06 16:17:03 UTC. Essa execução antecede as alterações de Mew e do overlay de fogo, portanto não aprova o estado final atual.
+- Última verificação estrutural local do estado com Mew/overlays: `verify_runtime.py`, `verify_batch8.py` a `verify_batch16.py`, `verify_project.py`, `verify_pidge_wing_visibility.py` e `git diff --check` passaram; Java 17 está presente. O Gradle local não iniciou porque a distribuição 7.5.1 precisa de download e a rede do shell bloqueou o wrapper.
+- Commit `0811d6a487b0b89eb71c637d885e9974c85b99f8` torna explícita no workflow a evidência `PASS SOURCE PITCH: mew`. A asserção do smoke já mede cabeça e corpo de Mew e a validação cumulativa verifica os recursos de #151.
+- GitHub Actions #39985737492, commit exato `0811d6a487b0b89eb71c637d885e9974c85b99f8`: em andamento. Aguardando Java, GameTests, smoke dos 151 Pokémon, inspeção do JAR e publicação do artefato. Não iniciar workflow duplicado.
+- Correções de locomotion Geodude/Graveler/Golem: a auditoria de fonte confirmou os clips nativos já selecionados; sem divergência de recurso comprovada, nenhum movimento foi substituído.
+- Próxima ação: acompanhar a execução #39985737492; se aprovada, inspecionar o JAR e registrar artefato/hash/expiração. Se falhar, corrigir a causa observada e executar apenas as verificações necessárias.
+- A aprovação automatizada não substitui avaliação visual manual das chamas de Charmander/Charmeleon/Charizard e dos overlays de Ponyta/Rapidash, nem a revisão visual de Mew.
