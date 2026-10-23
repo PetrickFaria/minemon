@@ -185,35 +185,42 @@ def prepare_tail_flame(root,d):
   for bone in bones:bone.pop('locators',None)
  host=next((b for b in bones if b['name'] in ('fire2','fire') and b.get('cubes')),None)
  if host is None:raise ValueError(slug+' model has no source tail-flame mesh')
- source_cube=host['cubes'][0];origin=source_cube['origin'];size=source_cube['size'];uv=source_cube['uv']
- if len(size)!=3 or size[0]!=0:raise ValueError(slug+' source flame plane did not match the audited zero-width layout')
- fw,fh=int(round(size[2])),int(round(size[1]))
+ source_cubes=host['cubes']
+ if len(source_cubes)!=2:raise ValueError(slug+' source flame did not contain its two native crossing planes')
  source_flame=root/'assets/minemon_gen1'/d['flame_texture'].removeprefix('assets/minemon/')
  sw,sh,flame_rows=decode_png_rgba(source_flame.read_bytes())
- u,v=int(round(uv[0])),int(round(uv[1]))
- if u<0 or v<0 or u+fw>sw or v+fh>sh:raise ValueError(slug+' source flame UV lies outside its flame sheet')
- pad=2;new_w=w+32;x=w+pad;y=2
- sprite=[bytes(flame_rows[v+yy][u*4:(u+fw)*4]) for yy in range(fh)]
- # Box UV side-face rectangles for the thin X-by-Y-by-Z cube are located at
- # (u, v+z) and (u+x+z, v+z); populate both visible sides with the original
- # flame frame. The other box faces remain transparent.
- uv_x=x-1;uv_y=y-1+fw
- for sprite_x in (uv_x,uv_x+1+fw):
-  for yy in range(fh):
-   row=rows[uv_y+yy]
-   if len(row)<new_w*4:row.extend(b'\0'*(new_w*4-len(row)))
-   row[sprite_x*4:(sprite_x+fw)*4]=sprite[yy]
+ pad=2;new_w=w+64;cursor=w+pad;y=2;runtime_cubes=[]
+ # Each zero-width Bedrock plane has an independent flame sprite and, in some
+ # species, its own pivot/rotation. Preserve both native UV regions and poses.
+ for source_cube in source_cubes:
+  origin=source_cube['origin'];size=source_cube['size'];uv=source_cube['uv']
+  if len(size)!=3 or size[0]!=0:raise ValueError(slug+' source flame plane did not match the audited zero-width layout')
+  fw,fh=int(round(size[2])),int(round(size[1]));u,v=int(round(uv[0])),int(round(uv[1]))
+  # Bedrock's zero-width plane selects its visible face from the side UV
+  # rectangles, whose vertical origin includes the depth (z) of the box.
+  source_y=v+fw
+  if u<0 or source_y<0 or u+fw>sw or source_y+fh>sh:raise ValueError(slug+' source flame UV lies outside its flame sheet')
+  sprite=[bytes(flame_rows[source_y+yy][u*4:(u+fw)*4]) for yy in range(fh)]
+  uv_x=cursor;uv_y=y-1+fw
+  # For a thin X-by-Y-by-Z box the visible side faces are (u,v+z) and
+  # (u+x+z,v+z). Fill both with this plane's own original flame pixels.
+  for sprite_x in (uv_x,uv_x+1+fw):
+   for yy in range(fh):
+    row=rows[uv_y+yy]
+    if len(row)<new_w*4:row.extend(b'\0'*(new_w*4-len(row)))
+    row[sprite_x*4:(sprite_x+fw)*4]=sprite[yy]
+  cube={'origin':[-0.5,origin[1],origin[2]],'size':[1,fh,fw],'uv':[uv_x,y-1]}
+  for field in ('pivot','rotation'):
+   if field in source_cube:cube[field]=source_cube[field]
+  runtime_cubes.append(cube)
+  cursor+=2*fw+4
  for row in rows:
   if len(row)<new_w*4:row.extend(b'\0'*(new_w*4-len(row)))
  description=geo['minecraft:geometry'][0]['description'];description['texture_width']=new_w
- # Replace the source zero-width plane by two thin crossing faces. Their
- # vertical/depth bounds and parent come from the exact Cobblemon geometry;
- # the previous hard-coded center moved this flame several units down-tail.
+ # Replace the native zero-width planes with finite meshes while retaining
+ # each source plane's pivot, rotation, dimensions and independent texture UVs.
  pivot=host.get('pivot',[0,0,0]);parent=host['name'];host['cubes']=[]
- cube={'origin':[-0.5,origin[1],origin[2]],'size':[1,fh,fw],'uv':[uv_x,y-1]}
- crossed={'origin':[-0.5,origin[1],origin[2]],'size':[1,fh,fw],'pivot':pivot,
-          'rotation':[0,90,0],'uv':[uv_x,y-1]}
- bones.append({'name':'tail_flame','parent':parent,'pivot':pivot,'cubes':[cube,crossed]})
+ bones.append({'name':'tail_flame','parent':parent,'pivot':pivot,'cubes':runtime_cubes})
  model.write_text(json.dumps(geo,ensure_ascii=False,indent=2)+'\n')
  texture.write_bytes(encode_png_rgba(new_w,h,rows))
  source_flame.unlink()

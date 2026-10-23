@@ -209,6 +209,26 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
             this.setTarget(null);
         }
         if (this.level.isClientSide) {
+            if (this.getSpeciesSlug().equals("gastly") && !this.isSleeping() && !this.isOrderedToSit()
+                    && !this.isDeadOrDying() && this.attackAnimationTicks <= 0) {
+                // Cobblemon ground_idle/ground_walk each emit ghostly_smoke
+                // twice at locator `gas`, with two 10 particles/s emitters.
+                // This one client particle per game tick preserves that rate.
+                double scale = SpeciesDefinitions.get("gastly").scale();
+                double yaw = Math.toRadians(this.getYRot());
+                double locatorForward = 4.0D / 16.0D * scale;
+                double centerX = this.getX() - Math.sin(yaw) * locatorForward;
+                double centerY = this.getY() + 4.0D / 16.0D * scale;
+                double centerZ = this.getZ() + Math.cos(yaw) * locatorForward;
+                double angle = this.getRandom().nextDouble() * Math.PI * 2.0D;
+                double radius = 0.34D * scale;
+                double px = centerX + Math.cos(angle) * radius;
+                double pz = centerZ + Math.sin(angle) * radius;
+                double inwardSpeed = 0.10D * scale;
+                this.level.addParticle(br.com.petrickfaria.minemon.registry.ModParticles.GASTLY_GHOSTLY_SMOKE.get(),
+                        px, centerY, pz, -Math.cos(angle) * inwardSpeed, 0.0D,
+                        -Math.sin(angle) * inwardSpeed);
+            }
             if (this.attackAnimationTicks > 0) this.attackAnimationTicks--;
             if (this.blinkCooldownTicks > 0) this.blinkCooldownTicks--;
             if (this.blinkCooldownTicks == 0) {

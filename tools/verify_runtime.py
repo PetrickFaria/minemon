@@ -1,4 +1,4 @@
-import json,struct,sys,zipfile,re,math,hashlib
+import json,struct,sys,zipfile,re,math,hashlib,zlib
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1];R=ROOT/'src/main/resources'
 SOURCE_PREFIX='assets/minemon/';RUNTIME_PREFIX='assets/minemon_gen1/'
@@ -13,6 +13,95 @@ for slug in SOURCE_FIRE_HASHES:
 if 'floor((entity.tickCount+partialTick)*0.5F)&3' not in renderer_source or 'entityTranslucent(texture)' not in renderer_source or 'renderCopyModel(getEntityModel(),texture,pose,buffers,15728880' not in renderer_source:
  raise ValueError('Ponyta/Rapidash renderer no longer follows the native 10 fps emissive overlay contract')
 def runtime_path(path):return path.replace(SOURCE_PREFIX,RUNTIME_PREFIX,1) if path.startswith(SOURCE_PREFIX) else path
+GASTLY_PARTICLE='assets/minemon_gen1/particles/gastly_ghostly_smoke.json'
+GASTLY_PARTICLE_TEXTURES=[f'assets/minemon_gen1/textures/particle/gastly_ghostly_smoke_{i}.png' for i in range(6)]
+def decode_png_rgba(blob):
+ if blob[:8]!=b'\x89PNG\r\n\x1a\n':raise ValueError('Invalid PNG signature')
+ pos=8;items={};chunks=[]
+ while pos<len(blob):
+  length=struct.unpack('>I',blob[pos:pos+4])[0];kind=blob[pos+4:pos+8];data=blob[pos+8:pos+8+length];pos+=12+length
+  chunks.append((kind,data));items[kind]=data
+  if kind==b'IEND':break
+ w,h,depth,color,_,_,interlace=struct.unpack('>IIBBBBB',items[b'IHDR'])
+ if depth not in (1,2,4,8) or color not in (2,3,6) or interlace or (color!=3 and depth!=8):
+  raise ValueError('Unsupported source PNG format')
+ channels={2:3,3:1,6:4}[color];filter_bpp=max(1,(channels*depth+7)//8);stride=(w*channels*depth+7)//8
+ raw=zlib.decompress(b''.join(data for kind,data in chunks if kind==b'IDAT'));prior=bytearray(stride);rows=[];offset=0
+ for _ in range(h):
+  filt=raw[offset];offset+=1;scan=bytearray(raw[offset:offset+stride]);offset+=stride
+  for i in range(stride):
+   a=scan[i-filter_bpp] if i>=filter_bpp else 0;b=prior[i];c=prior[i-filter_bpp] if i>=filter_bpp else 0
+   if filt==1:scan[i]=(scan[i]+a)&255
+   elif filt==2:scan[i]=(scan[i]+b)&255
+   elif filt==3:scan[i]=(scan[i]+((a+b)//2))&255
+   elif filt==4:
+    p=a+b-c;pa=abs(p-a);pb=abs(p-b);pc=abs(p-c);scan[i]=(scan[i]+(a if pa<=pb and pa<=pc else b if pb<=pc else c))&255
+   elif filt!=0:raise ValueError('Unsupported PNG filter '+str(filt))
+  rows.append(scan);prior=scan
+ palette=items.get(b'PLTE',b'');alpha=items.get(b'tRNS',b'');pixels=[]
+ for row in rows:
+  out=bytearray()
+  if color==6:out.extend(row)
+  elif color==2:
+   for i in range(0,len(row),3):out.extend((row[i],row[i+1],row[i+2],255))
+  else:
+   if depth==8:indices=row[:w]
+   else:
+    mask=(1<<depth)-1;indices=[]
+    for byte in row:
+     for shift in range(8-depth,-1,-depth):
+      if len(indices)<w:indices.append((byte>>shift)&mask)
+   for index in indices:
+    j=index*3
+    if j+2>=len(palette):raise ValueError('PNG palette index outside palette')
+    out.extend((palette[j],palette[j+1],palette[j+2],alpha[index] if index<len(alpha) else 255))
+  pixels.append(out)
+ return w,h,pixels
+def validate_gastly_smoke(read,definitions):
+ gastly=next((d for d in definitions if d['slug']=='gastly'),None)
+ if gastly is None or gastly.get('source_cobblemon_version')!='1.8.2':raise ValueError('Gastly Cobblemon 1.8.2 runtime definition missing')
+ for state in ('animation.gastly.ground_idle','animation.gastly.ground_walk'):
+  events=gastly.get('source_event_evidence',{}).get(state,{}).get('particle_effects',{}).get('0.0',[])
+  if len([e for e in events if e.get('effect')=='ghostly_smoke' and e.get('locator')=='gas'])!=2:
+   raise ValueError('Gastly native ghostly_smoke event evidence changed: '+state)
+ particle=json.loads(read(GASTLY_PARTICLE))
+ expected=[f'minemon_gen1:particle/gastly_ghostly_smoke_{i}' for i in range(6)]
+ if particle.get('textures')!=expected:raise ValueError('Gastly smoke particle does not use the six original Cobblemon smoke frames')
+ for path in GASTLY_PARTICLE_TEXTURES:
+  blob=read(path)
+  if blob[:8]!=b'\x89PNG\r\n\x1a\n' or struct.unpack('>II',blob[16:24])!=(16,16):
+   raise ValueError('Gastly smoke frame is invalid: '+path)
+  _,_,pixels=decode_png_rgba(blob)
+  if not any(row[i]>0 for row in pixels for i in range(3,len(row),4)):
+   raise ValueError('Gastly smoke frame has no visible alpha pixels: '+path)
+ print('PASS Gastly smoke resources: native six-frame Cobblemon sheet and idle/walk locator evidence')
+def validate_prepared_tail_flames(read,definitions):
+ rendered_hashes=[]
+ for d in definitions:
+  if d['slug'] not in ('charmander','charmeleon','charizard'):continue
+  slug=d['slug'];source_model=json.loads((R/d['model']).read_text())['minecraft:geometry'][0]
+  source_bone=next(b for b in source_model['bones'] if b['name']==d['flame_anchor']['host'])
+  source_sheet=decode_png_rgba((R/d['flame_texture']).read_bytes());target_path=runtime_path(d['texture'])
+  target_texture=decode_png_rgba(read(target_path));target_geo=json.loads(read(runtime_path(d['model'])))['minecraft:geometry'][0]
+  flame=next((b for b in target_geo['bones'] if b['name']=='tail_flame'),None)
+  if flame is None or len(source_bone.get('cubes',[]))!=2 or len(flame.get('cubes',[]))!=2:
+   raise ValueError('Tail-flame runtime does not preserve both native planes: '+slug)
+  source_digest=hashlib.sha256()
+  for original,converted in zip(source_bone['cubes'],flame['cubes']):
+   _,_,source_rows=source_sheet;_,_,target_rows=target_texture
+   z=int(original['size'][2]);height=int(original['size'][1]);sx,sy=map(int,original['uv']);sy+=z
+   expected=[bytes(row[sx*4:(sx+z)*4]) for row in source_rows[sy:sy+height]]
+   source_digest.update(b''.join(expected))
+   u,v=map(int,converted['uv']);v+=z
+   for side_u in (u,u+1+z):
+    actual=[bytes(row[side_u*4:(side_u+z)*4]) for row in target_rows[v:v+height]]
+    if actual!=expected:raise ValueError('Tail-flame plane texture differs from its native Cobblemon UV pixels: '+slug)
+   if converted.get('rotation')!=original.get('rotation') or converted.get('pivot')!=original.get('pivot'):
+    raise ValueError('Tail-flame plane pivot/rotation changed from Cobblemon source: '+slug)
+  rendered_hashes.append((slug,source_digest.hexdigest()))
+ if len({digest for _,digest in rendered_hashes})!=3:
+  raise ValueError('Charmander, Charmeleon and Charizard tail flames unexpectedly share identical source pixels')
+ print('PASS tail flames: two independent Cobblemon UV planes, transforms and per-species source pixels preserved')
 def validate(read,definitions,prepared=False,packed=False):
  previous=0
  for d in definitions:
@@ -128,6 +217,8 @@ if __name__=='__main__':
  if len(sys.argv)>1:
   with zipfile.ZipFile(sys.argv[1]) as z:
    defs=json.loads(z.read(manifest));validate(z.read,defs,True,True)
+   validate_gastly_smoke(z.read,defs)
+   validate_prepared_tail_flames(z.read,defs)
    entries=json.loads(z.read(dex));assert len(entries)==151 and [e['nationalPokedexNumber'] for e in entries]==list(range(1,152))
    active={d['slug'] for d in defs};assert active=={e['slug'] for e in entries if e['registered']}
    allowed={runtime_path(p) for d in defs for p in [d['model'],d['texture'],d['animation']]+d['sounds']+d['licenses']}
@@ -137,11 +228,11 @@ if __name__=='__main__':
    if unexpected:raise ValueError('Unexpected assets '+str(unexpected))
    for d in defs:
     egg=json.loads(z.read(f"assets/minemon_gen1/models/item/{d['slug']}_spawn_egg.json"));assert egg['parent']=='minecraft:item/template_spawn_egg'
-   for p in ['pack.mcmeta','META-INF/mods.toml','META-INF/ASSET_LICENSES.md','br/com/petrickfaria/minemon/Minemon.class',manifest,dex]:assert p in z.namelist(),p
+   for p in ['pack.mcmeta','META-INF/mods.toml','META-INF/ASSET_LICENSES.md','br/com/petrickfaria/minemon/Minemon.class','br/com/petrickfaria/minemon/registry/ModParticles.class','br/com/petrickfaria/minemon/client/GastlySmokeParticle.class',GASTLY_PARTICLE,*GASTLY_PARTICLE_TEXTURES,manifest,dex]:assert p in z.namelist(),p
    print('PASS JAR registrations/resources:',len(defs),'eggs; only selected assets packaged')
    meta=z.read('META-INF/mods.toml').decode();assert 'modId="minemon_gen1"' in meta and 'displayName="Minemon (1ª Geração)"' in meta
    print('PASS Minemon (1ª Geração) metadata and minemon_gen1 ID')
  else:
-  defs=json.loads((R/manifest).read_text());validate(lambda p:(R/p).read_bytes(),defs)
+  defs=json.loads((R/manifest).read_text());validate(lambda p:(R/p).read_bytes(),defs);validate_gastly_smoke(lambda p:(R/p).read_bytes(),defs)
   enabled=next(l.split('=',1)[1].split(',') for l in (ROOT/'gradle.properties').read_text().splitlines() if l.startswith('runtime_species='))
   assert enabled==[d['slug'] for d in defs]

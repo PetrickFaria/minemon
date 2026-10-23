@@ -422,6 +422,14 @@ public final class ClientSmokeTest {
       throw new IllegalStateException("Fire-starter arms remained near T-pose during validated movement for "+slug+"; arm rotations="+java.util.Arrays.toString(arms));
     }
     validateArticulationProfiles();
+    if(species.contains("gastly")) {
+     var particleJson=new ResourceLocation(Minemon.MOD_ID,"particles/gastly_ghostly_smoke.json");
+     if(mc.getResourceManager().getResource(particleJson).isEmpty())
+      throw new IllegalStateException("Missing Gastly Cobblemon smoke particle definition");
+     int smokeParticles=br.com.petrickfaria.minemon.client.GastlySmokeParticle.spawnCountForValidation();
+     if(smokeParticles<10)throw new IllegalStateException("Gastly's native idle/walk smoke emitter did not create client particles: "+smokeParticles);
+     Files.writeString(Path.of("client-validation.txt"),"PASS GASTLY SMOKE: Cobblemon ghostly_smoke definition loaded and "+smokeParticles+" client particle instances were created during the full render smoke. Manual appearance review remains separate.\\n",StandardOpenOption.APPEND);
+    }
     for(String slug:java.util.List.of("abra","kadabra","alakazam","bellsprout","geodude","golem","slowpoke","slowbro","mewtwo","mew")) {
      if(!species.contains(slug))continue;
      float[] look=sourceLookRanges.get(slug);
