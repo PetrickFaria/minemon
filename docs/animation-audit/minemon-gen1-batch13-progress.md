@@ -9,8 +9,11 @@
 - Checkpoint remoto da primeira metade (#121–#125): `a2d838460bd3c8aaafc823f1c94273f9bb29bd2a`.
 - Primeira metade publicada: Starmie, Mr. Mime, Scyther, Jynx e Electabuzz.
 - Segunda metade (#126–#130) integrada localmente: Magmar, Pinsir, Tauros, Magikarp e Gyarados.
-- Todos os dez recursos estão integrados localmente; aguardam commit cumulativo e validação Java/Actions.
-- Nenhum GameTest ou smoke do Lote 13 foi executado; nenhum JAR do Lote 13 foi gerado.
+- Todos os dez recursos estão integrados e publicados no commit `f9ebd874fa3bf5a9d28d24b47ac924c5e2ec1279`.
+- O commit anterior `225944d5615137c96f75912bc0960735f38c9e19` falhou na verificação estrutural devido a truncamento de transferência do arquivo de animação de Gyarados; o recurso foi reposto e seu blob remoto foi comparado com o SHA local.
+- A execução atual é a Actions #39874670779, vinculada exatamente ao commit `f9ebd874fa3bf5a9d28d24b47ac924c5e2ec1279`.
+- Verificações estruturais, preflight Molang, regressões dos Lotes 8–13, testes Java/build e GameTests do servidor passaram nessa execução.
+- Smoke completo do cliente ainda está em andamento; inspeção e publicação do JAR aguardam a aprovação dessa etapa. Não há JAR do Lote 13 publicado ainda.
 - Verificações estruturais cumulativas locais passaram. A validação completa será executada uma vez após o commit cumulativo.
 
 ## Fonte e decisões de adaptação
@@ -31,20 +34,25 @@
 - `verify_runtime.py`: PASS; 151 espécies em ordem da Pokédex.
 - Conferência direcionada da presença dos três grupos de recursos (modelo, textura e animação) para os cinco Pokémon: PASS.
 - `git diff --check`: PASS.
-- Testes Java/build, GameTests e smoke completo: pendentes para o checkpoint cumulativo #121–#130.
+- Testes Java/build: PASS na Actions #39874670779.
+- GameTests do servidor: PASS na Actions #39874670779.
+- Smoke completo do cliente: em andamento (etapa 15); não interpretar como aprovado até a conclusão.
+- Inspeção e upload do JAR: pendentes (etapas 16–17).
 
 ## Verificações cumulativas locais
 
 - Importador Python e verificadores: compilação sintática PASS.
 - `verify_project.py`, `verify_runtime.py`, verificadores Batch 8–13, `verify_pidge_wing_visibility.py`, preflight Molang e `git diff --check`: PASS.
 - Primeiro commit remoto parcial usa `[skip ci]`; nenhum workflow foi iniciado para uma metade incompleta.
-- Testes Java/build, GameTests, smoke do cliente e inspeção do JAR permanecem pendentes para o commit cumulativo #121–#130.
+- Testes Java/build e GameTests: PASS no commit cumulativo validado pela execução #39874670779.
+- Smoke do cliente e inspeção do JAR ainda aguardam conclusão na mesma execução; não iniciar workflow duplicado.
 
 ## Próxima etapa
 
-1. Revisar o diff cumulativo, confirmar que só #121–#130 e os verificadores correspondentes mudaram.
-2. Publicar commit final de implementação incluindo teste Java, verificador Batch 13 e workflow.
-3. Consultar essa única execução, corrigir apenas falhas comprovadas e publicar JAR após todos os gates passarem.
+1. Acompanhar a etapa 15 da execução #39874670779, sem reiniciá-la.
+2. Se o smoke passar, confirmar as etapas 16–17, inspecionar o artefato e registrar nome/SHA/expiração do JAR.
+3. Se o smoke falhar, usar os logs e progresso preservados para corrigir somente a causa comprovada e executar as validações necessárias.
+4. Registrar a aprovação ou falha final e o link do artefato neste documento.
 
 ## Diagnóstico da primeira validação do Lote 13
 
@@ -53,6 +61,14 @@
 - Causa confirmada: o arquivo local correto tinha 486.334 bytes; o blob remoto tinha 450.060 bytes, por truncamento na transmissão da API. A comparação SHA dos demais arquivos alterados não encontrou divergências.
 - Ação corretiva: restaurar exatamente o blob local validado do Gyarados, sem modificar animação, testes ou critérios; reenviar o arquivo em blocos e validar que o SHA do blob remoto corresponda ao arquivo local.
 - Próximo passo: publicar a correção pontual e executar uma nova validação completa, única, do commit corrigido.
+
+## Checkpoint da validação corrigida
+
+- Em `2026-10-23`, a Actions #39874670779 (`f9ebd874fa3bf5a9d28d24b47ac924c5e2ec1279`) passou as etapas 6–8 (recursos, Molang e regressões cumulativas), etapa 10 (testes direcionados), etapa 11 (Java/build) e etapa 12 (GameTests do servidor).
+- A etapa 15 (smoke completo do cliente) está em execução. A consulta mais recente ainda não indicava saída final dessa etapa; não houve conclusão nem timeout reportado.
+- As etapas 16 (inspeção real do JAR) e 17 (upload do JAR) ainda não começaram.
+- O log de carregamento registra mensagens do GeckoLib 3.1.40 sobre `query.r.velocity_y`/`query.r.yaw_change` ausentes em expressões não selecionadas. O preflight dos clips ativos selecionados passou; manter isso registrado como diagnóstico e aguardar o smoke antes de classificar a consequência.
+- Artefato disponível até agora: `minemon-server-tests`, ID `12468101600`, expira em `2026-10-29T23:55:16Z`. Não é o JAR final.
 
 ## Correções visuais protegidas
 
