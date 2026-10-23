@@ -47,12 +47,12 @@ def validate(read,definitions,prepared=False,packed=False):
    if d['clips'].get('ground_run')!=expected_run:raise ValueError('Batch 1 source run reference differs from audited poser evidence: '+d['slug'])
   if prepared:
    for state,keys in {'run':('ground_run','run'),'sit':('sit',),'sleep':('sleep',),'attack':('physical_attack','physical','attack')}.items():
-    if state=='run' and not any(d['clips'].get(k) in a for k in keys):continue
-    if 101<=number<=140 and state in ('sit','sleep','attack') and not any(d['clips'].get(k) in a for k in keys):
-     # Batches 11–14 follow the native Cobblemon action inventory. Do not synthesize
-     # a replacement pose solely to satisfy a generic runtime-resource check.
+    declared=[d['clips'][k] for k in keys if d['clips'].get(k)]
+    if not declared:
+     # A state with no clip in the species manifest is not part of that
+     # species' native action inventory. Do not require or synthesize it.
      continue
-    if not any(d['clips'].get(k) in a for k in keys):raise ValueError('Missing prepared '+state+' animation '+d['slug'])
+    if not any(name in a for name in declared):raise ValueError('Missing prepared '+state+' animation '+d['slug'])
    if d['slug'] in ('charmander','charmeleon','charizard'):
     anchor=d.get('flame_anchor');flame=next((b for b in g['minecraft:geometry'][0]['bones'] if b['name']=='tail_flame'),None)
     if not anchor or not flame or flame.get('parent')!=anchor['host']:raise ValueError('Tail flame is not attached to its source flame bone: '+d['slug'])
