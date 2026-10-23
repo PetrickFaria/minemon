@@ -125,7 +125,14 @@ public final class ClientSmokeTest {
   private static java.util.List<String> profileJoints(String slug,String state) {
    if(ADDITIONAL_PROFILES.containsKey(slug)) {
     String key=state.startsWith("IDLE_")?"idle":state.startsWith("RUN_")?"run":"walk";
-    return ADDITIONAL_PROFILES.get(slug).get(key);
+    var joints=ADDITIONAL_PROFILES.get(slug).get(key);
+    if(joints!=null)return joints;
+    // Some native posers map the smoke's faster-motion phase to their fly clip
+    // and have no ground_run articulation profile. Do not invent one; the
+    // final profile validator separately requires movement only when a native
+    // run clip is declared.
+    if(key.equals("run")&&SpeciesAssetIndex.clip(slug,"ground_run","run")==null)return java.util.List.of();
+    throw new IllegalStateException("Missing articulation profile "+slug+"/"+key);
    }
    // Native Blastoise run retracts its limbs and spins the shell/body.
    if(slug.equals("blastoise") && state.startsWith("RUN_"))return java.util.List.of("body","body2");
