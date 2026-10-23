@@ -4,7 +4,7 @@
 
 - Branch: `feature/minemon-gen1-batch15-cobblemon`.
 - Commit-base aprovado: `d0f0cd6ca74bd7dae9139c53cf56b38f25cfbcb4` (checkpoint documental do Lote 14, sobre o commit de código aprovado `76fcb3074cc65c62dea6b94c291de90925494e95`).
-- Commit de código publicado nesta branch: `47dd4781db2e58dd998a9ef14e4b935098539a02` (`Implement Gen 1 batch 15 species 141-150`), tree construído sobre o checkpoint L14 `d0f0cd6ca74bd7dae9139c53cf56b38f25cfbcb4`.
+- Commit de código em validação: `34b9ea1a739012d2a5375a4c1ef30a80f1bab76a` (`Fix batch 15 Gson test compatibility`), sobre `47dd4781db2e58dd998a9ef14e4b935098539a02` e base aprovada do Lote 14 `d0f0cd6ca74bd7dae9139c53cf56b38f25cfbcb4`.
 - Lote 14: GitHub Actions #39885955086 aprovado; artefato #12474937645 publicado e inspecionado.
 - GitHub Actions #39900049407 terminou com falha no passo de compilação Java focada do teste novo: Gson não oferece `JsonArray.asList()` na versão do projeto. Os testes não chegaram a executar, portanto nenhuma aprovação Java/GameTest/smoke foi declarada.
 
@@ -39,7 +39,9 @@
 
 - Base cumulativa do Lote 14: testes Java, GameTests, smoke de todos os 151 registros, verificadores dos Lotes 8–14 e inspeção do JAR aprovados.
 - Verificadores cumulativos locais L8–L15: PASS. `verify_project.py`, `verify_runtime.py`, preflight Molang e `git diff --check`: PASS. O preflight reporta separadamente expressões incompatíveis em clips de montaria retidos do Aerodactyl/Dragonite e espécies antigas; não são clips de locomoção ativos.
-- Teste Java direcionado local: não iniciou porque o wrapper não conseguiu baixar Gradle 7.5.1 (`Network is unreachable`). O Actions confirmou uma falha de compilação determinística no teste novo; foi corrigido com iteração sobre JsonArray, compatível com a API instalada.
-- Próxima ação: publicar esta correção e iniciar uma nova execução única. GameTests, smoke do cliente e JAR permanecem pendentes e só serão executados após aprovação Java.
-- GitHub Actions do Lote 15: #39900049407, commit `47dd4781db2e58dd998a9ef14e4b935098539a02`, concluído com failure na compilação do teste Java.
+- Teste Java direcionado do Lote 15: PASS na execução #39900310676.
+- Suíte Java completa e compilação/build: PASS na execução #39900310676.
+- GameTests do servidor: em andamento. Smoke do cliente, inspeção do JAR e publicação ainda não iniciados; permanecem condicionados à aprovação dos GameTests.
+- GitHub Actions do Lote 15: #39900310676, commit `34b9ea1a739012d2a5375a4c1ef30a80f1bab76a`, `in_progress` na etapa GameTests. A execução anterior #39900049407 terminou com falha de compilação já corrigida.
+- Próxima ação: acompanhar a mesma execução #39900310676 e registrar o resultado dos GameTests antes do smoke.
 - Artefato do Lote 15: ainda não publicado.
