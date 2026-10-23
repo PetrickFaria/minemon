@@ -42,12 +42,24 @@ profiles=json.loads((resources/VP.removeprefix('src/main/resources/')).read_text
 old_profiles=json.loads(base_file(VP))
 assert len(defs)==151 and [d['nationalPokedexNumber'] for d in defs]==list(range(1,152))
 assert [d['slug'] for d in defs[70:80]]==EXPECTED
-assert defs[:70]==old_defs[:70],'One of the first 70 manifest entries changed'
+preserved_batch8_defs=json.loads(json.dumps(defs[:70]))
+for slug in ('charmeleon','charizard'):
+ definition=next(d for d in preserved_batch8_defs if d['slug']==slug)
+ definition['clips'].pop('tail_flame',None)
+ definition['tail_flame_animation']=False
+assert preserved_batch8_defs==old_defs[:70],'An earlier manifest change exceeded the explicit fire-starter flame adaptation'
+for slug in ('charmeleon','charizard'):
+ definition=next(d for d in defs[:70] if d['slug']==slug)
+ assert definition.get('tail_flame_animation') is True
+ assert definition['clips'].get('tail_flame')==f'animation.{slug}.minemon_tail_flame'
 later_changes=[d['slug'] for i,d in enumerate(defs[end:],start=end) if d!=old_defs[i]]
 assert set(later_changes)<=set(BATCH9+BATCH10+BATCH11+BATCH12+BATCH13+BATCH14+BATCH15),'A manifest entry outside Batches 9 to 12 changed: '+repr(later_changes)
 assert all(d['model']==old_defs[i]['model'] and d['texture']==old_defs[i]['texture'] and d['animation']==old_defs[i]['animation'] for i,d in enumerate(defs) if d['slug'] not in authorized_species and d['slug'] not in BATCH9+BATCH10+BATCH11+BATCH12+BATCH13+BATCH14+BATCH15),'Out-of-scope paths changed'
 for slug,old_profile in old_profiles.items():
  expected_profile=old_profile
+ if slug=='rapidash':
+  expected_profile=dict(old_profile)
+  expected_profile['run']=[*old_profile['run'],'fire_mane_head_flame']
  if slug=='alakazam':
   expected_profile=dict(old_profile)
   expected_profile['idle']=['foot_left','foot_right','left_lower_leg','right_lower_leg','hand_left','hand_right']

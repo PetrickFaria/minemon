@@ -136,8 +136,8 @@ public final class ClientSmokeTest {
   private static final java.util.Map<String,java.util.Map<String,java.util.Set<String>>> articulationClips=new java.util.HashMap<>();
   private static final java.util.Map<String,java.util.Map<String,Integer>> articulationSampleCounts=new java.util.HashMap<>();
   private static final java.util.Map<String,java.util.Map<String,java.util.Set<String>>> articulationInputs=new java.util.HashMap<>();
-  private static final java.util.Map<String,float[]> charmFlameRanges=new java.util.HashMap<>();
-  private static final java.util.Set<String> charmFlameClips=java.util.concurrent.ConcurrentHashMap.newKeySet();
+  private static final java.util.Map<String,java.util.Map<String,float[]>> tailFlameRanges=new java.util.HashMap<>();
+  private static final java.util.Map<String,java.util.Set<String>> tailFlameClips=new java.util.HashMap<>();
  @SubscribeEvent public static void tick(TickEvent.ClientTickEvent event) {
   if(!Boolean.getBoolean("minemon.clientSmokeTest")||event.phase!=TickEvent.Phase.END)return;
   Minecraft mc=Minecraft.getInstance();
@@ -287,16 +287,16 @@ public final class ClientSmokeTest {
          for(int axis=0;axis<6;axis++){range[axis]=Math.min(range[axis],values[axis]);range[axis+6]=Math.max(range[axis+6],values[axis]);}
         }
        }
-       if(slug.equals("charmander")) {
+      if(java.util.Set.of("charmander","charmeleon","charizard").contains(slug)) {
         var flame=model.getAnimationProcessor().getBone("tail_flame");
-        if(flame==null)throw new IllegalStateException("Charmander runtime model is missing tail_flame bone");
+        if(flame==null)throw new IllegalStateException(slug+" runtime model is missing tail_flame bone");
         String mode=(phase<8||phase>=54)?"idle":(phase>=8&&phase<27)?"walk":null;
         if(mode!=null) {
-         float[] range=charmFlameRanges.computeIfAbsent(mode,k->{var v=new float[6];java.util.Arrays.fill(v,0,3,Float.MAX_VALUE);java.util.Arrays.fill(v,3,6,-Float.MAX_VALUE);return v;});
+         float[] range=tailFlameRanges.computeIfAbsent(slug,k->new java.util.HashMap<>()).computeIfAbsent(mode,k->{var v=new float[6];java.util.Arrays.fill(v,0,3,Float.MAX_VALUE);java.util.Arrays.fill(v,3,6,-Float.MAX_VALUE);return v;});
          float[] rotations={flame.getRotationX(),flame.getRotationY(),flame.getRotationZ()};
          for(int axis=0;axis<3;axis++){range[axis]=Math.min(range[axis],rotations[axis]);range[axis+3]=Math.max(range[axis+3],rotations[axis]);}
         }
-        String flameClip=entity.getSelectedTailFlameAnimationForValidation();if(flameClip!=null)charmFlameClips.add(flameClip);
+        String flameClip=entity.getSelectedTailFlameAnimationForValidation();if(flameClip!=null)tailFlameClips.computeIfAbsent(slug,k->java.util.concurrent.ConcurrentHashMap.newKeySet()).add(flameClip);
        }
       }
      if(testEntity==null||!entity.getUUID().equals(testEntity)||worldTicks<110||worldTicks>=BULBASAUR_VALIDATION_TICK)return;
@@ -554,11 +554,15 @@ public final class ClientSmokeTest {
   private static void validateArticulationProfiles() throws java.io.IOException {
    StringBuilder report=new StringBuilder();
    int passed=0,knownFallbacks=0;
-   var flameIdle=charmFlameRanges.get("idle");var flameWalk=charmFlameRanges.get("walk");
-   boolean checkCharmander=species.contains("charmander");
-   boolean animatedFlame=flameIdle!=null&&flameWalk!=null&&charmFlameClips.contains("animation.charmander.minemon_tail_flame");
-   for(int axis=0;axis<3&&animatedFlame;axis++)animatedFlame=flameIdle[axis+3]-flameIdle[axis]>0.01F&&flameWalk[axis+3]-flameWalk[axis]>0.01F;
-   if(checkCharmander&&!animatedFlame)throw new IllegalStateException("Charmander tail flame did not animate independently during idle and walk; idle="+java.util.Arrays.toString(flameIdle)+" walk="+java.util.Arrays.toString(flameWalk)+" selected="+charmFlameClips);
+   for(String slug:java.util.List.of("charmander","charmeleon","charizard")) {
+    if(!species.contains(slug))continue;
+    var ranges=tailFlameRanges.getOrDefault(slug,java.util.Map.of());var flameIdle=ranges.get("idle");var flameWalk=ranges.get("walk");
+    String expected="animation."+slug+".minemon_tail_flame";
+    boolean animatedFlame=flameIdle!=null&&flameWalk!=null&&tailFlameClips.getOrDefault(slug,java.util.Set.of()).contains(expected);
+    for(int axis=0;axis<3&&animatedFlame;axis++)animatedFlame=flameIdle[axis+3]-flameIdle[axis]>0.01F&&flameWalk[axis+3]-flameWalk[axis]>0.01F;
+    if(!animatedFlame)throw new IllegalStateException(slug+" tail flame did not animate independently during idle and walk; idle="+java.util.Arrays.toString(flameIdle)+" walk="+java.util.Arrays.toString(flameWalk)+" selected="+tailFlameClips.get(slug));
+    Files.writeString(Path.of("client-validation.txt"),"PASS "+slug.toUpperCase(java.util.Locale.ROOT)+" TAIL FLAME: independent clip="+tailFlameClips.get(slug)+" changed in idle range="+java.util.Arrays.toString(flameIdle)+" and walk range="+java.util.Arrays.toString(flameWalk)+".\n",StandardOpenOption.APPEND);
+   }
    for(var entry:ARTICULATION_PROFILES.entrySet()) {
     String slug=entry.getKey();
     if(!ARTICULATION_VALIDATION_SPECIES.contains(slug)||!species.contains(slug))continue;
@@ -614,7 +618,6 @@ public final class ClientSmokeTest {
       .append(idleJoints).append(" walk=").append(walkJoints).append(" run=").append(runJoints).append("; transition samples=")
       .append(articulationClips.get(slug)).append("; synchronized inputs=").append(articulationInputs.get(slug)).append(".\n");
    }
-   if(checkCharmander)Files.writeString(Path.of("client-validation.txt"),"PASS CHARMANDER TAIL FLAME: independent clip="+charmFlameClips+" changed in idle range="+java.util.Arrays.toString(flameIdle)+" and walk range="+java.util.Arrays.toString(flameWalk)+".\n",StandardOpenOption.APPEND);
    var selectedProfiles=ARTICULATION_VALIDATION_SPECIES.stream().filter(species::contains).collect(java.util.stream.Collectors.toSet());
    Files.writeString(Path.of("client-validation.txt"),"ARTICULATION PROFILES: passed="+passed+" expected fallback gaps="+knownFallbacks+" selected profiles="+selectedProfiles.size()+" detailed scope="+selectedProfiles+"; unselected species were not tested in this targeted run.\n"+report,StandardOpenOption.APPEND);
   }

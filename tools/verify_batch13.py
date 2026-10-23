@@ -33,10 +33,18 @@ defs=readj(MP); profiles=readj(VP)
 old_defs=json.loads(base('src/main/resources/'+MP)); old_profiles=json.loads(base('src/main/resources/'+VP))
 assert len(defs)==151 and [d['nationalPokedexNumber'] for d in defs]==list(range(1,152))
 assert [d['slug'] for d in defs[120:130]]==EXPECTED
-assert defs[:120]==old_defs[:120], 'Approved definitions #001–#120 changed'
+prior_defs=json.loads(json.dumps(defs[:120]))
+for slug in ('charmeleon','charizard'):
+ definition=next(d for d in prior_defs if d['slug']==slug)
+ definition['clips'].pop('tail_flame',None)
+ definition['tail_flame_animation']=False
+assert prior_defs==old_defs[:120],'An approved prior definition changed beyond the explicit fire-starter flame adaptation'
 assert [d['slug'] for d in defs[130:140]]==['lapras','ditto','eevee','vaporeon','jolteon','flareon','porygon','omanyte','omastar','kabuto'] and [d['slug'] for d in defs[140:150]]==BATCH15 and defs[150:]==old_defs[150:], 'Batch 14 plan or a later definition changed'
 assert profiles.keys()==(old_profiles.keys()|set(EXPECTED)|{'lapras','ditto','eevee','vaporeon','jolteon','flareon','porygon','omanyte','omastar','kabuto','kabutops','aerodactyl','snorlax','articuno','zapdos','moltres','dratini','dragonair','dragonite','mewtwo'}), 'Unexpected/missing articulation profile'
-for slug, prior in old_profiles.items(): assert profiles[slug]==prior, 'Earlier profile changed: '+slug
+for slug, prior in old_profiles.items():
+ expected_profile=dict(prior)
+ if slug=='rapidash':expected_profile['run']=[*prior['run'],'fire_mane_head_flame']
+ assert profiles[slug]==expected_profile, 'Earlier profile changed: '+slug
 
 report=json.loads((ROOT/'docs/animation-audit/minemon-gen1-batch13-source-evidence.json').read_text())
 assert report['batch']==13 and report['range']==[121,130]

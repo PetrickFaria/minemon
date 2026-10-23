@@ -62,11 +62,13 @@ def validate(read,definitions,prepared=False,packed=False):
      origin=cube.get('origin',[]);size=cube.get('size',[])
      if len(origin)!=3 or len(size)!=3 or abs(origin[1]-anchor['origin'][1])>0.001 or abs(origin[2]-anchor['origin'][2])>0.001 or abs((origin[1]+size[1])- (anchor['origin'][1]+anchor['size'][1]))>0.001 or abs((origin[2]+size[2])-(anchor['origin'][2]+anchor['size'][2]))>0.001:
       raise ValueError('Tail flame geometry no longer matches the source plane bounds: '+d['slug'])
+   if d['slug'] in ('charmander','charmeleon','charizard'):
+    if not d.get('tail_flame_animation'):
+     raise ValueError('Fire starter has no independent tail-flame animation: '+d['slug'])
+    flame_clip=d['clips'].get('tail_flame');clip=a.get(flame_clip,{})
+    if not flame_clip or not clip.get('loop') or not {'rotation','scale'}.issubset(clip.get('bones',{}).get('tail_flame',{})):
+     raise ValueError('Fire starter has no independent looping tail-flame rotation/scale animation: '+d['slug'])
    if d['slug']=='charmander':
-    if d.get('tail_flame_animation'):
-     flame_clip=d['clips'].get('tail_flame');clip=a.get(flame_clip,{})
-     if not flame_clip or not clip.get('loop') or not {'rotation','scale'}.issubset(clip.get('bones',{}).get('tail_flame',{})):
-      raise ValueError('Charmander has no independent looping tail-flame rotation/scale animation')
     texwidth=g['minecraft:geometry'][0]['description']['texture_width']
     for cube in cubes:
      uv=cube.get('uv',[]);u,v=uv if isinstance(uv,list) and len(uv)==2 else (-1,-1)

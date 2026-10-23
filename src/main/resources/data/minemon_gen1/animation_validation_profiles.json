@@ -1261,7 +1261,8 @@
       "leg_front_left",
       "leg_front_right",
       "leg_back_left",
-      "leg_back_right"
+      "leg_back_right",
+      "fire_mane_head_flame"
     ]
   },
   "slowpoke": {

@@ -232,7 +232,8 @@
       "blink": "animation.charmeleon.blink",
       "cry": "animation.charmeleon.cry",
       "sit": "animation.charmeleon.minemon_sit",
-      "physical_attack": "animation.charmeleon.minemon_physical_attack"
+      "physical_attack": "animation.charmeleon.minemon_physical_attack",
+      "tail_flame": "animation.charmeleon.minemon_tail_flame"
     },
     "idle": "animation.charmeleon.ground_idle",
     "walk": "animation.charmeleon.ground_walk",
@@ -252,7 +253,7 @@
     "strip_bedrock_locators": true,
     "source_model_variant": "default",
     "flame_texture": "assets/minemon/textures/pokemon/charmeleon_cobblemon_1_8_2/charmeleon_flame1.png",
-    "tail_flame_animation": false,
+    "tail_flame_animation": true,
     "flame_anchor": {
       "host": "fire",
       "parent": "tail4",
@@ -316,7 +317,8 @@
       "special": "animation.charizard.special",
       "water_swim": "animation.charizard.surfacewater_swim",
       "surfacewater_idle": "animation.charizard.surfacewater_idle",
-      "sit": "animation.charizard.minemon_sit"
+      "sit": "animation.charizard.minemon_sit",
+      "tail_flame": "animation.charizard.minemon_tail_flame"
     },
     "idle": "animation.charizard.ground_idle",
     "walk": "animation.charizard.ground_walk",
@@ -337,7 +339,7 @@
     "strip_bedrock_locators": true,
     "source_model_variant": "default",
     "flame_texture": "assets/minemon/textures/pokemon/charizard_cobblemon_1_8_2/charizard_flame1.png",
-    "tail_flame_animation": false,
+    "tail_flame_animation": true,
     "flame_anchor": {
       "host": "fire2",
       "parent": "fire",

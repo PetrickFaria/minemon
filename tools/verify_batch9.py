@@ -37,7 +37,12 @@ profiles=json.loads((R/VP.removeprefix('src/main/resources/')).read_text())
 old_profiles=json.loads(base_file(VP))
 assert len(defs)==151 and [d['nationalPokedexNumber'] for d in defs]==list(range(1,152))
 assert [d['slug'] for d in defs[80:90]]==EXPECTED
-assert defs[:80]==old_defs[:80],'One of the first 80 species definitions changed'
+prior_defs=json.loads(json.dumps(defs[:80]))
+for slug in ('charmeleon','charizard'):
+ definition=next(d for d in prior_defs if d['slug']==slug)
+ definition['clips'].pop('tail_flame',None)
+ definition['tail_flame_animation']=False
+assert prior_defs==old_defs[:80],'An approved prior definition changed beyond the explicit fire-starter flame adaptation'
 allowed_l9=set(EXPECTED[:end-80])
 assert all(defs[i]==old_defs[i] for i in range(80,90) if defs[i]['slug'] not in allowed_l9),'Unimplemented Batch 9 species definition changed'
 assert [d['slug'] for d in defs[90:100]]==BATCH10,'Batch 10 must remain the planned #091-100 sequence'
@@ -46,6 +51,9 @@ assert [d['slug'] for d in defs[110:120]]==BATCH12,'Batch 12 must remain the pla
 assert [d['slug'] for d in defs[120:130]]==BATCH13 and [d['slug'] for d in defs[130:140]]==BATCH14 and [d['slug'] for d in defs[140:150]]==BATCH15 and defs[150:]==old_defs[150:],'Batch 13 plan or later species changed'
 for slug,old_profile in old_profiles.items():
  expected_profile=old_profile
+ if slug=='rapidash':
+  expected_profile=dict(old_profile)
+  expected_profile['run']=[*old_profile['run'],'fire_mane_head_flame']
  if slug=='geodude':
   expected_profile=dict(old_profile)
   expected_profile['walk']=['body','torso']

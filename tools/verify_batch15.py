@@ -30,10 +30,18 @@ defs=readj(MP);profiles=readj(VP)
 old_defs=json.loads(base('src/main/resources/'+MP));old_profiles=json.loads(base('src/main/resources/'+VP))
 assert len(defs)==151 and [d['nationalPokedexNumber'] for d in defs]==list(range(1,152))
 assert [d['slug'] for d in defs[140:150]]==EXPECTED
-assert defs[:140]==old_defs[:140],'An approved definition through #140 changed'
+prior_defs=json.loads(json.dumps(defs[:140]))
+for slug in ('charmeleon','charizard'):
+ definition=next(d for d in prior_defs if d['slug']==slug)
+ definition['clips'].pop('tail_flame',None)
+ definition['tail_flame_animation']=False
+assert prior_defs==old_defs[:140],'An approved prior definition changed beyond the explicit fire-starter flame adaptation'
 assert defs[150:]==old_defs[150:],'A post-batch definition changed'
 assert set(profiles)==set(old_profiles)|set(EXPECTED),'Unexpected or missing articulation profile'
-for slug,profile in old_profiles.items():assert profiles[slug]==profile,'Earlier profile changed: '+slug
+for slug,profile in old_profiles.items():
+ expected_profile=dict(profile)
+ if slug=='rapidash':expected_profile['run']=[*profile['run'],'fire_mane_head_flame']
+ assert profiles[slug]==expected_profile,'Earlier profile changed: '+slug
 report=json.loads((ROOT/'docs/animation-audit/minemon-gen1-batch15-source-evidence.json').read_text())
 assert report['batch']==15 and report['range']==[141,150]
 assert report['source_sha256']=='cae8ac328b61354fbe415208b8c6ffc12e7155094d0a87082e85e7914fb380c2'

@@ -36,12 +36,20 @@ defs=read_json(MP);profiles=read_json(VP)
 old_defs=json.loads(base_file('src/main/resources/'+MP));old_profiles=json.loads(base_file('src/main/resources/'+VP))
 assert len(defs)==151 and [d['nationalPokedexNumber'] for d in defs]==list(range(1,152))
 assert [d['slug'] for d in defs[100:110]]==EXPECTED
-assert defs[:100]==old_defs[:100],'One of the approved first 100 definitions changed'
+prior_defs=json.loads(json.dumps(defs[:100]))
+for slug in ('charmeleon','charizard'):
+ definition=next(d for d in prior_defs if d['slug']==slug)
+ definition['clips'].pop('tail_flame',None)
+ definition['tail_flame_animation']=False
+assert prior_defs==old_defs[:100],'An approved prior definition changed beyond the explicit fire-starter flame adaptation'
 assert [d['slug'] for d in defs[110:120]]==BATCH12,'Batch 12 must remain the planned #111-120 sequence'
 assert [d['slug'] for d in defs[120:130]]==BATCH13 and [d['slug'] for d in defs[130:140]]==BATCH14 and [d['slug'] for d in defs[140:150]]==BATCH15 and defs[150:]==old_defs[150:],'Batch 13 plan or later species changed'
 assert set(profiles)==set(old_profiles)|set(EXPECTED)|set(BATCH12)|set(BATCH13)|set(BATCH14)|set(BATCH15),'Unexpected or missing articulation profile'
 for slug,old_profile in old_profiles.items():
  expected_profile=old_profile
+ if slug=='rapidash':
+  expected_profile=dict(old_profile)
+  expected_profile['run']=[*old_profile['run'],'fire_mane_head_flame']
  if slug=='alakazam':
   expected_profile=dict(old_profile)
   expected_profile['idle']=['foot_left','foot_right','left_lower_leg','right_lower_leg','hand_left','hand_right']
