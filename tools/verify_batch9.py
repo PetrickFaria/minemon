@@ -43,6 +43,9 @@ for slug in ('charmeleon','charizard'):
  definition=next(d for d in prior_defs if d['slug']==slug)
  definition['clips'].pop('tail_flame',None)
  definition['tail_flame_animation']=False
+charizard=next(d for d in prior_defs if d['slug']=='charizard')
+charizard['clips'].pop('air_idle',None)
+charizard['clips'].pop('air_fly',None)
 assert prior_defs==old_defs[:80],'An approved prior definition changed beyond the explicit fire-starter flame adaptation'
 allowed_l9=set(EXPECTED[:end-80])
 assert all(defs[i]==old_defs[i] for i in range(80,90) if defs[i]['slug'] not in allowed_l9),'Unimplemented Batch 9 species definition changed'

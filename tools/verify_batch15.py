@@ -35,10 +35,13 @@ for slug in ('charmeleon','charizard'):
  definition=next(d for d in prior_defs if d['slug']==slug)
  definition['clips'].pop('tail_flame',None)
  definition['tail_flame_animation']=False
+charizard=next(d for d in prior_defs if d['slug']=='charizard')
+charizard['clips'].pop('air_idle',None)
+charizard['clips'].pop('air_fly',None)
 # These exact scale changes are the only authorized prior-species definition deltas.
 for slug, expected_scale in {
  'gastly': {'scale':0.85,'width':0.2,'height':0.2},
- 'electabuzz': {'scale':1.8,'width':1.4,'height':3.0},
+ 'electabuzz': {'scale':1.35,'width':1.05,'height':2.25},
 }.items():
  definition=next((d for d in prior_defs if d['slug']==slug),None)
  if definition is not None:

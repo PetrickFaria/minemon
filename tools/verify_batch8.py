@@ -48,6 +48,9 @@ for slug in ('charmeleon','charizard'):
  definition=next(d for d in preserved_batch8_defs if d['slug']==slug)
  definition['clips'].pop('tail_flame',None)
  definition['tail_flame_animation']=False
+charizard=next(d for d in preserved_batch8_defs if d['slug']=='charizard')
+charizard['clips'].pop('air_idle',None)
+charizard['clips'].pop('air_fly',None)
 assert preserved_batch8_defs==old_defs[:70],'An earlier manifest change exceeded the explicit fire-starter flame adaptation'
 for slug in ('charmeleon','charizard'):
  definition=next(d for d in defs[:70] if d['slug']==slug)

@@ -76,7 +76,7 @@ def validate_gastly_smoke(read,definitions):
    raise ValueError('Gastly smoke frame has no visible alpha pixels: '+path)
  print('PASS Gastly smoke resources: native six-frame Cobblemon sheet and idle/walk locator evidence')
 def validate_target_scales(definitions):
- expected={'gastly':(0.85,0.2,0.2),'electabuzz':(1.8,1.4,3.0)}
+ expected={'gastly':(0.85,0.2,0.2),'electabuzz':(1.35,1.05,2.25)}
  by_slug={d['slug']:d for d in definitions}
  for slug,values in expected.items():
   d=by_slug.get(slug)
@@ -88,9 +88,9 @@ def validate_target_scales(definitions):
  if 'this.quadSize = 0.34F * SpeciesDefinitions.get("gastly").scale() * sample;' not in particle:
   raise ValueError('Gastly smoke size no longer follows its model scale')
  renderer=(ROOT/'src/main/java/br/com/petrickfaria/minemon/client/MinemonRenderer.java').read_text()
- if 'case "gastly" -> 0.5F;' not in renderer or 'case "electabuzz" -> 2.0F;' not in renderer:
+ if 'case "gastly" -> 0.5F;' not in renderer or 'case "electabuzz" -> 1.5F;' not in renderer:
   raise ValueError('Target shadow scale no longer follows the requested visual size')
- print('PASS target scales: Gastly 0.5x with proportional smoke/hitbox; Electabuzz 2.0x with proportional hitbox')
+ print('PASS target scales: Gastly 0.5x with proportional smoke/hitbox; Electabuzz 1.5x with proportional hitbox')
 
 def validate_prepared_tail_flames(read,definitions):
  rendered_hashes=[]

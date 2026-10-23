@@ -124,7 +124,8 @@ public final class ClientSmokeTest {
   );
   private static java.util.List<String> profileJoints(String slug,String state) {
    if(ADDITIONAL_PROFILES.containsKey(slug)) {
-    String key=state.startsWith("IDLE_")?"idle":state.startsWith("RUN_")?"run":"walk";
+    String key=state.startsWith("IDLE_")?"idle":state.startsWith("RUN_")
+      &&!SpeciesBehaviorProfiles.isAirborne(slug)&&!SpeciesBehaviorProfiles.isAquatic(slug)?"run":"walk";
     var joints=ADDITIONAL_PROFILES.get(slug).get(key);
     if(joints!=null)return joints;
     // Some native posers map the smoke's faster-motion phase to their fly clip
@@ -375,6 +376,11 @@ public final class ClientSmokeTest {
     reportProgress(slug,"carregamento");
     mc.getSingleplayerServer().execute(()->{
      var level=mc.getSingleplayerServer().overworld();var previous=level.getEntity(testEntity);if(previous!=null)previous.discard();
+    boolean aquatic=SpeciesBehaviorProfiles.isAquatic(slug);
+    for(int x=-8;x<=8;x++)for(int z=3;z<=5;z++){
+     level.setBlockAndUpdate(new BlockPos(x,100,z),(aquatic?Blocks.WATER:Blocks.STONE).defaultBlockState());
+     level.setBlockAndUpdate(new BlockPos(x,101,z),(aquatic?Blocks.WATER:Blocks.AIR).defaultBlockState());
+    }
     var next=ModEntities.SPECIES.get(slug).get().create(level);next.moveTo(0,101,4,180,0);next.setNoAi(false);next.goalSelector.removeAllGoals();next.targetSelector.removeAllGoals();setValidationPhase(next,0);level.addFreshEntity(next);testEntity=next.getUUID();
     });
    }
@@ -489,6 +495,7 @@ public final class ClientSmokeTest {
    if(!Boolean.getBoolean("minemon.clientSmokeTest"))return;
    entity.setCustomName(net.minecraft.network.chat.Component.literal(VALIDATION_PHASE_PREFIX+phase));
    entity.setCustomNameVisible(false);
+   entity.setSpontaneousRunForValidation(phase>=34&&phase<50);
   }
   private static Integer validationPhase(MinemonCreature entity) {
    if(!Boolean.getBoolean("minemon.clientSmokeTest")||entity.getCustomName()==null)return null;
@@ -593,10 +600,10 @@ public final class ClientSmokeTest {
     if(definition==null)throw new IllegalStateException("Missing test profile species "+slug);
     String fallback=definition.movementFallback();
     if("static".equals(fallback)||"idle".equals(fallback)) {
-     String expected=definition.walk();
+    String expected=expectedWalk(slug,definition);
      if(!hasSelectedClip(slug,"WALK_STEADY",expected))throw new IllegalStateException("Fallback classification did not match selected walk clip for "+slug);
      if(ADDITIONAL_PROFILES.containsKey(slug)) {
-      if(!hasSelectedClip(slug,"IDLE_INITIAL",definition.idle())||!hasSelectedClip(slug,"IDLE_FINAL",definition.idle()))
+      if(!hasSelectedClip(slug,"IDLE_INITIAL",expectedIdle(slug,definition))||!hasSelectedClip(slug,"IDLE_FINAL",expectedIdle(slug,definition)))
        throw new IllegalStateException("Source idle fallback did not select the expected clip for "+slug);
       if(sourceStaticIdle(slug))validateSourceStaticIdle(slug);
       else if(movingJointCount(slug,"IDLE_FINAL")<1)
@@ -607,9 +614,10 @@ public final class ClientSmokeTest {
        .append("; selected walk=").append(expected).append("; no gait pass claimed.\n");
      continue;
     }
-    String walk=definition.walk();
-    String run=SpeciesAssetIndex.clip(slug,"ground_run","run");
-    String idle=definition.idle();
+    String walk=expectedWalk(slug,definition);
+    String run=SpeciesBehaviorProfiles.isAirborne(slug)||SpeciesBehaviorProfiles.isAquatic(slug)
+      ?null:SpeciesAssetIndex.clip(slug,"ground_run","run");
+    String idle=expectedIdle(slug,definition);
     if(!hasSelectedClip(slug,"IDLE_INITIAL",idle)||!hasSelectedClip(slug,"IDLE_FINAL",idle)||!hasSelectedClip(slug,"IDLE_RETURN",idle))
      throw new IllegalStateException("Idle state selection did not return to expected clip for "+slug+" expected="+idle+" observed="+articulationClips.get(slug));
     if(!hasSelectedClip(slug,"WALK_STEADY",walk)||!hasSelectedClip(slug,"WALK_START",walk)||!hasSelectedClip(slug,"WALK_DECEL",walk))
@@ -643,5 +651,28 @@ public final class ClientSmokeTest {
    }
    var selectedProfiles=ARTICULATION_VALIDATION_SPECIES.stream().filter(species::contains).collect(java.util.stream.Collectors.toSet());
    Files.writeString(Path.of("client-validation.txt"),"ARTICULATION PROFILES: passed="+passed+" expected fallback gaps="+knownFallbacks+" selected profiles="+selectedProfiles.size()+" detailed scope="+selectedProfiles+"; unselected species were not tested in this targeted run.\n"+report,StandardOpenOption.APPEND);
+  }
+  private static String expectedIdle(String slug,SpeciesDefinitions.Definition definition) {
+   if(SpeciesBehaviorProfiles.isAquatic(slug)) {
+    String water=firstMappedClip(definition,"water_idle","water_surface_idle","surface_water_idle","surfacewater_idle");
+    if(water!=null)return water;
+   }
+   String air=SpeciesBehaviorProfiles.isAirborne(slug)?SpeciesAssetIndex.clip(slug,"air_idle","air_idle"):null;
+   return air==null?definition.idle():air;
+  }
+  private static String expectedWalk(String slug,SpeciesDefinitions.Definition definition) {
+   if(SpeciesBehaviorProfiles.isAquatic(slug)) {
+    String water=firstMappedClip(definition,"water_swim","water_surface_swim","surface_water_swim","surfacewater_swim");
+    if(water!=null)return water;
+   }
+   if(!SpeciesBehaviorProfiles.isAirborne(slug))return definition.walk();
+   String air=SpeciesAssetIndex.clip(slug,"air_fly","air_fly");
+   if(air==null)air=SpeciesAssetIndex.clip(slug,"air_glide","air_glide");
+   if(air==null)air=SpeciesAssetIndex.clip(slug,"air_idle","air_idle");
+   return air==null?definition.walk():air;
+  }
+  private static String firstMappedClip(SpeciesDefinitions.Definition definition,String... keys) {
+   for(String key:keys) {String clip=definition.clips().get(key);if(clip!=null)return clip;}
+   return null;
   }
 }

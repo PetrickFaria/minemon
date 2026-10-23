@@ -18,7 +18,7 @@ public class MinemonRenderer extends GeoEntityRenderer<MinemonCreature> {
   var d=SpeciesDefinitions.get(entity.getSpeciesSlug());
   float shadowScale=switch(entity.getSpeciesSlug()){
    case "gastly" -> 0.5F;
-   case "electabuzz" -> 2.0F;
+   case "electabuzz" -> 1.5F;
    default -> 1.0F;
   };
   this.shadowRadius=0.45F*shadowScale;

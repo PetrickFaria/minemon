@@ -157,4 +157,75 @@ public final class CompanionTests {
   p.discard();h.succeed();
  }
 
+ @GameTest(template="test_arena",timeoutTicks=420)
+ public static void airborneSpeciesStayAboveSurfaceAndLandOnlyToSleep(GameTestHelper h) {
+  floor(h);
+  MinemonCreature bird=h.spawn(ModEntities.SPECIES.get("pidgey").get(),new BlockPos(5,1,5));
+  h.runAfterDelay(100,()->{
+   double altitude=bird.getY()-h.getLevel().getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+       net.minecraft.util.Mth.floor(bird.getX()),net.minecraft.util.Mth.floor(bird.getZ()));
+   check(h,altitude>=3.0D&&altitude<=15.0D,"Airborne species must maintain 3..15 block surface clearance; got "+altitude);
+   bird.setSleeping(true);
+   check(h,!bird.isNoGravity(),"Sleeping airborne species must enable gravity to land");
+   h.runAfterDelay(100,()->{
+    int surface=h.getLevel().getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+        net.minecraft.util.Mth.floor(bird.getX()),net.minecraft.util.Mth.floor(bird.getZ()));
+    check(h,Math.abs(bird.getY()-surface)<=1.1D,"Sleeping airborne species must land on a nearby surface");
+    bird.setSleeping(false);
+    check(h,bird.isNoGravity(),"Awake airborne species must resume flight");
+    h.succeed();
+   });
+  });
+ }
+
+ @GameTest(template="test_arena",timeoutTicks=80)
+ public static void electabuzzScaleAndSelectionBoxShrinkProportionally(GameTestHelper h) {
+  floor(h);
+  MinemonCreature electabuzz=h.spawn(ModEntities.SPECIES.get("electabuzz").get(),new BlockPos(5,1,5));
+  check(h,Math.abs(electabuzz.getBbWidth()-1.05F)<0.001F,"Electabuzz selection width must be 75% of its former 1.4 blocks");
+  check(h,Math.abs(electabuzz.getBbHeight()-2.25F)<0.001F,"Electabuzz selection height must be 75% of its former 3.0 blocks");
+  check(h,Math.abs(br.com.petrickfaria.minemon.entity.SpeciesDefinitions.get("electabuzz").scale()-1.35F)<0.001F,
+      "Electabuzz renderer scale must be 75% of its former 1.8x scale");
+  h.succeed();
+ }
+
+ @GameTest(template="test_arena",timeoutTicks=450)
+ public static void aquaticSpeciesSeekWaterAndSurviveWithoutIt(GameTestHelper h) {
+  floor(h);
+  for(int x=8;x<=10;x++)for(int z=4;z<=6;z++)for(int y=1;y<=2;y++)
+   h.setBlock(new BlockPos(x,y,z),net.minecraft.world.level.block.Blocks.WATER);
+  MinemonCreature goldeen=h.spawn(ModEntities.SPECIES.get("goldeen").get(),new BlockPos(5,1,5));
+  MinemonCreature dryHorsea=h.spawn(ModEntities.SPECIES.get("horsea").get(),new BlockPos(12,1,12));
+  dryHorsea.setNoAi(true);
+  float health=dryHorsea.getHealth();
+  check(h,dryHorsea.canBreatheUnderwater(),"Aquatic species must not drown when temporarily submerged");
+  double initial=goldeen.distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(new BlockPos(9,1,5)));
+  h.runAfterDelay(260,()->{
+   double current=goldeen.distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(new BlockPos(9,1,5)));
+   check(h,goldeen.isInWater()||current<initial,"Aquatic species must navigate toward accessible water");
+   check(h,dryHorsea.isAlive()&&dryHorsea.getHealth()==health,"Aquatic species must survive indefinitely without water");
+   h.succeed();
+  });
+ }
+
+ @GameTest(template="test_arena",timeoutTicks=430)
+ public static void nativeGroundRunnerUsesSpontaneousRunOnlyDuringTravel(GameTestHelper h) {
+  floor(h);
+  MinemonCreature runner=h.spawn(ModEntities.SPECIES.get("geodude").get(),new BlockPos(3,1,5));
+  check(h,br.com.petrickfaria.minemon.entity.SpeciesAssetIndex.clip("geodude","ground_run","run")!=null,
+      "Geodude's native run clip must be selected for spontaneous running");
+  awaitSpontaneousRun(h,runner,0);
+ }
+
+ private static void awaitSpontaneousRun(GameTestHelper h,MinemonCreature runner,int elapsed) {
+  if(runner.getSpontaneousRunCountForValidation()>0) {
+   check(h,runner.getTarget()==null,"Spontaneous running must not take over a combat target");
+   h.succeed();return;
+  }
+  if(elapsed>=360) { h.fail("Eligible native ground runner did not start a spontaneous run during travel");return; }
+  double targetX=runner.getX()>8.0D?3.5D:12.5D;
+  runner.getNavigation().moveTo(targetX,1.0D,5.5D,1.0D);
+  h.runAfterDelay(20,()->awaitSpontaneousRun(h,runner,elapsed+20));
+ }
+
 }

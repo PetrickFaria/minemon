@@ -11,6 +11,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.FollowOwnerGoal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
@@ -18,6 +20,7 @@ import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.SitWhenOrderedToGoal;
+import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.OwnerHurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.OwnerHurtTargetGoal;
@@ -44,6 +47,10 @@ import software.bernie.geckolib3.util.GeckoLibUtil;
 /** Shared wolf-like companion behavior. This first registered species is the integration fixture. */
 public class MinemonCreature extends TamableAnimal implements IAnimatable {
     private static final EntityDataAccessor<Boolean> SLEEPING = SynchedEntityData.defineId(MinemonCreature.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> SPONTANEOUS_RUN = SynchedEntityData.defineId(MinemonCreature.class, EntityDataSerializers.BOOLEAN);
+    private static final java.util.UUID SPONTANEOUS_RUN_SPEED_ID = java.util.UUID.fromString("b4db65e0-39b8-43a6-a454-3c6e9f16d920");
+    private static final AttributeModifier SPONTANEOUS_RUN_SPEED = new AttributeModifier(
+            SPONTANEOUS_RUN_SPEED_ID, "Minemon spontaneous natural run", 0.55D, AttributeModifier.Operation.MULTIPLY_TOTAL);
     private static final int WILD_AGGRESSION_DURATION_TICKS = 20 * 20;
     private static final int WILD_MAX_CHASE_DISTANCE = 24;
     private static final int WILD_UNREACHABLE_LIMIT_TICKS = 20 * 5;
@@ -55,6 +62,9 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     private int attackAnimationTicks;
     private int attackSequence;
     private int playedAttackSequence;
+    private int spontaneousRunTicks;
+    private int spontaneousRunCooldown = 50 + this.getRandom().nextInt(100);
+    private int spontaneousRunCount;
     // Client-only diagnostic sample used by the automated locomotion smoke test.
     private String selectedAnimationForValidation;
     private String selectedTailFlameAnimationForValidation;
@@ -80,17 +90,32 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     public static AttributeSupplier.Builder createAttributes(SpeciesDefinitions.Definition d) {
         return createAttributes().add(Attributes.MAX_HEALTH,d.health()).add(Attributes.ATTACK_DAMAGE,d.attack()).add(Attributes.MOVEMENT_SPEED,d.speed()).add(Attributes.FLYING_SPEED,0.4D);
     }
-    public boolean isFlyingSpecies() { return false; }
+    public boolean isFlyingSpecies() { return SpeciesBehaviorProfiles.isAirborne(this.getSpeciesSlug()); }
+    public boolean isAquaticSpecies() { return SpeciesBehaviorProfiles.isAquatic(this.getSpeciesSlug()); }
+    public boolean isSpontaneouslyRunning() { return this.entityData.get(SPONTANEOUS_RUN); }
+    public void setSpontaneousRunForValidation(boolean running) {
+        if (Boolean.getBoolean("minemon.clientSmokeTest") && !this.level.isClientSide
+                && !this.isFlyingSpecies() && !this.isAquaticSpecies()) {
+            this.entityData.set(SPONTANEOUS_RUN, running);
+            this.spontaneousRunTicks = running ? 100 : 0;
+        }
+    }
 
     public boolean isSleeping() { return this.entityData.get(SLEEPING); }
     public void setSleeping(boolean sleeping) {
         this.entityData.set(SLEEPING, sleeping);
-        if (sleeping) { this.getNavigation().stop(); this.setTarget(null); }
+        if (sleeping) {
+            this.getNavigation().stop(); this.setTarget(null); this.stopSpontaneousRun();
+            if (this instanceof MinemonFlyingCreature) this.setNoGravity(false);
+        } else if (this instanceof MinemonFlyingCreature) {
+            this.setNoGravity(true);
+        }
     }
 
     @Override protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(SLEEPING, false);
+        this.entityData.define(SPONTANEOUS_RUN, false);
     }
 
     @Override public void addAdditionalSaveData(CompoundTag tag) {
@@ -114,9 +139,18 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         this.goalSelector.addGoal(1, new SitWhenOrderedToGoal(this));
         this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.2D, true));
         this.goalSelector.addGoal(3, new FollowOwnerGoal(this, 1.0D, 10.0F, 2.0F, this.isFlyingSpecies()));
-        this.goalSelector.addGoal(4, this.isFlyingSpecies() ? new net.minecraft.world.entity.ai.goal.WaterAvoidingRandomFlyingGoal(this, 0.8D) : new RandomStrollGoal(this, 0.8D));
-        this.goalSelector.addGoal(5, new LookAtPlayerGoal(this, Player.class, 8.0F));
-        this.goalSelector.addGoal(6, new RandomLookAroundGoal(this));
+        if (this.isFlyingSpecies()) {
+            this.goalSelector.addGoal(4, new NaturalMovementGoals.AirPatrol(this));
+        } else if (this.isAquaticSpecies()) {
+            this.getNavigation().setCanFloat(true);
+            this.setPathfindingMalus(BlockPathTypes.WATER, 0.0F);
+            this.goalSelector.addGoal(4, new NaturalMovementGoals.SeekWater(this));
+            this.goalSelector.addGoal(5, new NaturalMovementGoals.AquaticLandWander(this));
+        } else {
+            this.goalSelector.addGoal(4, new RandomStrollGoal(this, 0.8D));
+        }
+        this.goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, 8.0F));
+        this.goalSelector.addGoal(7, new RandomLookAroundGoal(this));
 
         // Wild creatures only acquire a target after being hurt. Tamed creatures also protect
         // their owner and assist against the owner's current target.
@@ -236,6 +270,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
                 this.blinkCooldownTicks = 80 + this.getRandom().nextInt(120);
             }
         } else {
+            if (!this.level.isClientSide) this.tickSpontaneousRun();
             this.tickWildAggression();
         }
     }
@@ -321,22 +356,75 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
             clip = SpeciesAssetIndex.clip(slug, "sleep", "sleep");
         } else if (this.isOrderedToSit()) {
             clip = SpeciesAssetIndex.clip(slug, "sit", "sit");
+        } else if (this.isAquaticSpecies() && this.isInWater()) {
+            String swim = firstClip(slug, "water_swim", "water_surface_swim", "surface_water_swim", "surfacewater_swim");
+            String waterIdle = firstClip(slug, "water_idle", "water_surface_idle", "surface_water_idle", "surfacewater_idle");
+            clip = this.isMoving(event) && swim != null ? swim : (waterIdle != null ? waterIdle : definition.idle());
         } else if (this.isMoving(event)) {
-            clip = definition.walk();
-            String run=SpeciesAssetIndex.clip(slug,"ground_run","run");
-            // A large position delta can linger for a tick after velocity drops.
-            // Keep run selection tied to actual horizontal speed so deceleration
-            // promptly returns to the walk clip instead of sticking on run.
-            if(!this.isFlyingSpecies() && run!=null && this.getDeltaMovement().horizontalDistanceSqr()>0.01D) clip=run;
+            if (this.isFlyingSpecies()) {
+                String fly = firstClip(slug, "air_fly", "air_glide", "air_idle");
+                clip = fly != null ? fly : definition.walk();
+            } else {
+                clip = definition.walk();
+                String run=SpeciesAssetIndex.clip(slug,"ground_run","run");
+                if(this.isSpontaneouslyRunning() && run!=null) clip=run;
+            }
         } else {
-            clip = definition.idle();
+            String airIdle = this.isFlyingSpecies() ? SpeciesAssetIndex.clip(slug, "air_idle", "air_idle") : null;
+            clip = airIdle != null ? airIdle : definition.idle();
         }
         if (clip != null) controller.setAnimation(new AnimationBuilder().addAnimation(clip, loop));
         if (Boolean.getBoolean("minemon.clientSmokeTest")) this.selectedAnimationForValidation = clip;
         return PlayState.CONTINUE;
     }
 
+    private static String firstClip(String slug, String... keys) {
+        for (String key : keys) {
+            String clip = SpeciesAssetIndex.clip(slug, key, key);
+            if (clip != null) return clip;
+        }
+        return null;
+    }
+
+    private void tickSpontaneousRun() {
+        if (this.isSpontaneouslyRunning()) {
+            this.spontaneousRunTicks--;
+            if (this.spontaneousRunTicks <= 0 || !this.canSpontaneouslyRun()) {
+                this.stopSpontaneousRun();
+                this.spontaneousRunCooldown = 180 + this.getRandom().nextInt(520);
+            }
+            return;
+        }
+        if (this.spontaneousRunCooldown > 0) this.spontaneousRunCooldown--;
+        if (this.spontaneousRunCooldown == 0 && this.canSpontaneouslyRun()
+                && this.getNavigation().getPath() != null && !this.getNavigation().isDone()
+                && this.getDeltaMovement().horizontalDistanceSqr() > 0.0004D
+                && this.getRandom().nextInt(80) == 0) {
+            this.entityData.set(SPONTANEOUS_RUN, true);
+            this.spontaneousRunTicks = 40 + this.getRandom().nextInt(51);
+            this.spontaneousRunCount++;
+            AttributeInstance movement = this.getAttribute(Attributes.MOVEMENT_SPEED);
+            if (movement != null && movement.getModifier(SPONTANEOUS_RUN_SPEED_ID) == null) movement.addTransientModifier(SPONTANEOUS_RUN_SPEED);
+        }
+    }
+
+    private boolean canSpontaneouslyRun() {
+        return this.onGround() && !this.isFlyingSpecies() && !this.isAquaticSpecies() && !this.isSleeping() && !this.isOrderedToSit()
+                && !this.isInWaterOrBubble() && !this.isDeadOrDying() && this.getTarget() == null
+                && SpeciesAssetIndex.clip(this.getSpeciesSlug(), "ground_run", "run") != null;
+    }
+
+    private void stopSpontaneousRun() {
+        if (this.entityData.get(SPONTANEOUS_RUN)) this.entityData.set(SPONTANEOUS_RUN, false);
+        this.spontaneousRunTicks = 0;
+        AttributeInstance movement = this.getAttribute(Attributes.MOVEMENT_SPEED);
+        if (movement != null) movement.removeModifier(SPONTANEOUS_RUN_SPEED_ID);
+    }
+
+    @Override public boolean canBreatheUnderwater() { return this.isAquaticSpecies() || super.canBreatheUnderwater(); }
+
     public String getSelectedAnimationForValidation() { return this.selectedAnimationForValidation; }
+    public int getSpontaneousRunCountForValidation() { return this.spontaneousRunCount; }
 
     public String getSelectedTailFlameAnimationForValidation() { return this.selectedTailFlameAnimationForValidation; }
 

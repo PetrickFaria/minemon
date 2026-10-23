@@ -10,6 +10,12 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1] / "src" / "main" / "resources"
 QUERY_R = re.compile(r"\b(?:q|query)\.r\.([A-Za-z_][A-Za-z0-9_]*)\s*\(")
+AIRBORNE = {
+    "butterfree", "beedrill", "pidgey", "pidgeotto", "pidgeot", "charizard", "fearow",
+    "zubat", "golbat", "venomoth", "magnemite", "magneton", "farfetchd", "gastly",
+    "haunter", "gengar", "koffing", "weezing", "scyther", "articuno", "zapdos",
+    "moltres", "aerodactyl", "dragonite", "mewtwo", "mew",
+}
 
 
 def strings(value):
@@ -43,9 +49,18 @@ def main() -> int:
             name for name in (
                 definition.get("idle"),
                 definition.get("walk"),
-                definition.get("clips", {}).get("ground_run"),
+                None if definition["slug"] in AIRBORNE else definition.get("clips", {}).get("ground_run"),
             ) if name
         }
+        # Runtime behavior explicitly selects these native locomotion clips for
+        # airborne/floating and aquatic profiles. Keep the same early rejection
+        # gate for them as for ordinary idle/walk/run clips.
+        for key in ("air_idle", "air_fly", "air_glide", "water_idle", "water_swim",
+                    "water_surface_idle", "water_surface_swim", "surface_water_idle",
+                    "surface_water_swim", "surfacewater_idle", "surfacewater_swim"):
+            clip = definition.get("clips", {}).get(key)
+            if clip:
+                selected.add(clip)
         for clip_name, clip in animations.items():
             if not isinstance(clip, dict):
                 continue
@@ -64,18 +79,18 @@ def main() -> int:
                     unsupported[(definition["slug"], clip_name)][function] += count
 
     if selected_unsupported:
-        print("[MOLANG PREFLIGHT] FAIL: unsupported Cobblemon query.r functions occur in active idle/walk/run clips.")
+        print("[MOLANG PREFLIGHT] FAIL: unsupported Cobblemon query.r functions occur in active locomotion/air/water clips.")
         for definition, clip, functions in selected_unsupported:
             print(f"  #{definition['nationalPokedexNumber']:03d} {definition['slug']} {clip}: {dict(functions)}")
         return 1
 
-    print(f"[MOLANG PREFLIGHT] PASS: checked {checked} query.r references; none occur in selected idle/walk/run clips.")
+    print(f"[MOLANG PREFLIGHT] PASS: checked {checked} query.r references; none occur in selected locomotion/air/water clips.")
     if unsupported:
         print("[MOLANG PREFLIGHT] Existing GeckoLib 3.1.40 parser errors remain in retained, non-selected clips:")
         for (slug, clip), functions in sorted(unsupported.items()):
             dex = next(d["nationalPokedexNumber"] for d in definitions if d["slug"] == slug)
             print(f"  #{dex:03d} {slug} {clip}: {', '.join(sorted(functions))} ({sum(functions.values())} refs)")
-        print("[MOLANG PREFLIGHT] These references are reported, not suppressed or rewritten. Review the runtime logs; no selected locomotion clip uses them.")
+        print("[MOLANG PREFLIGHT] These references are reported, not suppressed or rewritten. Review runtime logs; active locomotion/air/water clips do not use them.")
     else:
         print("[MOLANG PREFLIGHT] No unsupported query.r references found.")
     return 0
