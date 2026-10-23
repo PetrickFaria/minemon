@@ -52,3 +52,11 @@ Aguardar/consultar #39980988503; registrar no próximo checkpoint a emissividade
 - Validation run #40013606910: resource validation, Molang preflight, cumulative checks for Lotes 8–16 and Pidge wings passed; focused Java tests and full build passed; all 13 required server GameTests passed. Full client smoke was still running at checkpoint, so its result, JAR inspection, and artifact publication remain pending. Do not treat this run as approved until those steps complete.
 - The preceding run #40013345746 stopped at Java compilation and did not run GameTests/client smoke or generate a JAR. No new JAR is approved yet.
 - Next step: monitor the existing client smoke in run #40013606910 (job #120619927367). If it passes, verify runtime/JAR inspection and artifact metadata, then record the result here. If it fails, diagnose the specific client error before deciding on a focused correction.
+
+
+### Checkpoint — corrigir o sprite ausente do Gastly
+
+- A execução #40013606910 concluiu com sucesso no commit de código `54b345b18ca3716926ea264d1619af998af6c866`: testes Java direcionados, build, 13 GameTests, smoke de cliente, inspeção do JAR e publicação do artefato `Minemon-1.19.2-2.0.0-gen1` (artefato Actions #12532045749; expira em 6 de novembro de 2026).
+- A captura enviada depois da publicação mostra quads de textura ausente pretos e magenta envolvendo Gastly. Os seis PNGs da fumaça nativa têm alpha e carregam corretamente como arquivos. A causa foi o identificador de sprite no JSON: `minemon_gen1:particle/gastly_ghostly_smoke_N`. No Forge 1.19.2 o caminho depois dos dois-pontos já é relativo a `textures/particle/`; portanto o jogo procurava incorretamente `textures/particle/particle/gastly_ghostly_smoke_N.png`.
+- Correção em preparação: remover o segmento redundante `particle/` nos seis identificadores e ajustar `verify_runtime.py` para exigir o mapeamento correto. Nenhum arquivo de modelo, animação ou outro Pokémon será alterado. O JAR aprovado anterior permanece válido como base, mas contém o efeito Gastly com o caminho incorreto.
+- Próxima etapa: executar verificadores cumulativos e o workflow completo no novo commit; conferir o registro de recursos e a captura de Gastly do smoke, inspecionar o JAR e publicar o artefato somente após a validação.

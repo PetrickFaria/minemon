@@ -65,7 +65,7 @@ def validate_gastly_smoke(read,definitions):
   if len([e for e in events if e.get('effect')=='ghostly_smoke' and e.get('locator')=='gas'])!=2:
    raise ValueError('Gastly native ghostly_smoke event evidence changed: '+state)
  particle=json.loads(read(GASTLY_PARTICLE))
- expected=[f'minemon_gen1:particle/gastly_ghostly_smoke_{i}' for i in range(6)]
+ expected=[f'minemon_gen1:gastly_ghostly_smoke_{i}' for i in range(6)]
  if particle.get('textures')!=expected:raise ValueError('Gastly smoke particle does not use the six original Cobblemon smoke frames')
  for path in GASTLY_PARTICLE_TEXTURES:
   blob=read(path)
