@@ -48,8 +48,8 @@ def validate(read,definitions,prepared=False,packed=False):
   if prepared:
    for state,keys in {'run':('ground_run','run'),'sit':('sit',),'sleep':('sleep',),'attack':('physical_attack','physical','attack')}.items():
     if state=='run' and not any(d['clips'].get(k) in a for k in keys):continue
-    if 101<=number<=120 and state in ('sit','sleep','attack') and not any(d['clips'].get(k) in a for k in keys):
-     # Batches 11–12 follow the native Cobblemon action inventory. Do not synthesize
+    if 101<=number<=130 and state in ('sit','sleep','attack') and not any(d['clips'].get(k) in a for k in keys):
+     # Batches 11–13 follow the native Cobblemon action inventory. Do not synthesize
      # a replacement pose solely to satisfy a generic runtime-resource check.
      continue
     if not any(d['clips'].get(k) in a for k in keys):raise ValueError('Missing prepared '+state+' animation '+d['slug'])

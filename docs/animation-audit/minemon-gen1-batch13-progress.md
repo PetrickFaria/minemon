@@ -8,12 +8,9 @@
 - Lote 12: Actions #39865755919 aprovado; artefato JAR #12466881117.
 - Checkpoint remoto da primeira metade (#121–#125): `a2d838460bd3c8aaafc823f1c94273f9bb29bd2a`.
 - Primeira metade publicada: Starmie, Mr. Mime, Scyther, Jynx e Electabuzz.
-- Segunda metade (#126–#130) integrada localmente: Magmar, Pinsir, Tauros, Magikarp e Gyarados.
-- Todos os dez recursos estão integrados e publicados no commit `f9ebd874fa3bf5a9d28d24b47ac924c5e2ec1279`.
-- O commit anterior `225944d5615137c96f75912bc0960735f38c9e19` falhou na verificação estrutural devido a truncamento de transferência do arquivo de animação de Gyarados; o recurso foi reposto e seu blob remoto foi comparado com o SHA local.
-- A execução atual é a Actions #39874670779, vinculada exatamente ao commit `f9ebd874fa3bf5a9d28d24b47ac924c5e2ec1279`.
-- Verificações estruturais, preflight Molang, regressões dos Lotes 8–13, testes Java/build e GameTests do servidor passaram nessa execução.
-- Smoke completo do cliente ainda está em andamento; inspeção e publicação do JAR aguardam a aprovação dessa etapa. Não há JAR do Lote 13 publicado ainda.
+- Segunda metade (#126–#130) integrada: Magmar, Pinsir, Tauros, Magikarp e Gyarados.
+- Todos os dez recursos estão publicados no commit de implementação `225944d5615137c96f75912bc0960735f38c9e19`, com o recurso completo de Gyarados restaurado no commit `f9ebd874fa3bf5a9d28d24b47ac924c5e2ec1279`.
+- Java/build, GameTests e smoke completo do cliente passaram na Actions #39874670779. A inspeção do JAR falhou no verificador runtime antes do upload; portanto, ainda não há JAR do Lote 13 publicado.
 - Verificações estruturais cumulativas locais passaram. A validação completa será executada uma vez após o commit cumulativo.
 
 ## Fonte e decisões de adaptação
@@ -36,23 +33,24 @@
 - `git diff --check`: PASS.
 - Testes Java/build: PASS na Actions #39874670779.
 - GameTests do servidor: PASS na Actions #39874670779.
-- Smoke completo do cliente: em andamento (etapa 15); não interpretar como aprovado até a conclusão.
-- Inspeção e upload do JAR: pendentes (etapas 16–17).
+- Smoke completo do cliente: PASS (151/151; locomoção, renderização/roster e verificações visuais de regressão passaram).
+- Inspeção do JAR: falhou por critério de ação nativa ausente em Starmie; upload não executado.
 
 ## Verificações cumulativas locais
 
 - Importador Python e verificadores: compilação sintática PASS.
 - `verify_project.py`, `verify_runtime.py`, verificadores Batch 8–13, `verify_pidge_wing_visibility.py`, preflight Molang e `git diff --check`: PASS.
 - Primeiro commit remoto parcial usa `[skip ci]`; nenhum workflow foi iniciado para uma metade incompleta.
-- Testes Java/build e GameTests: PASS no commit cumulativo validado pela execução #39874670779.
-- Smoke do cliente e inspeção do JAR ainda aguardam conclusão na mesma execução; não iniciar workflow duplicado.
+- Testes Java/build, GameTests e smoke do cliente: PASS no commit `f9ebd874fa3bf5a9d28d24b47ac924c5e2ec1279`, execução #39874670779.
+- A inspeção do JAR identificou que o verificador exigia um clip `sit` em Starmie. Esse clip não está selecionado nem existe como ação nativa na fonte; não criar animação artificial para satisfazer essa checagem.
+- Próximo passo: ajustar a validação de ações nativas para o intervalo #101–#130, manter validação obrigatória para todo clip que estiver selecionado e gerar/inspecionar o JAR novamente.
 
 ## Próxima etapa
 
-1. Acompanhar a etapa 15 da execução #39874670779, sem reiniciá-la.
-2. Se o smoke passar, confirmar as etapas 16–17, inspecionar o artefato e registrar nome/SHA/expiração do JAR.
-3. Se o smoke falhar, usar os logs e progresso preservados para corrigir somente a causa comprovada e executar as validações necessárias.
-4. Registrar a aprovação ou falha final e o link do artefato neste documento.
+1. Corrigir o verificador runtime para não exigir ações ausentes da fonte em #101–#130.
+2. Executar a validação direcionada do verificador sobre um JAR local, junto dos verificadores estruturais.
+3. Publicar checkpoint da correção e executar a validação obrigatória pós-correção; não iniciar tentativa antes da correção.
+4. Registrar aprovação, inspecionar o JAR e publicar o link do artefato.
 
 ## Diagnóstico da primeira validação do Lote 13
 
@@ -62,13 +60,16 @@
 - Ação corretiva: restaurar exatamente o blob local validado do Gyarados, sem modificar animação, testes ou critérios; reenviar o arquivo em blocos e validar que o SHA do blob remoto corresponda ao arquivo local.
 - Próximo passo: publicar a correção pontual e executar uma nova validação completa, única, do commit corrigido.
 
-## Checkpoint da validação corrigida
+## Resultado da validação corrigida — Actions #39874670779
 
-- Em `2026-10-23`, a Actions #39874670779 (`f9ebd874fa3bf5a9d28d24b47ac924c5e2ec1279`) passou as etapas 6–8 (recursos, Molang e regressões cumulativas), etapa 10 (testes direcionados), etapa 11 (Java/build) e etapa 12 (GameTests do servidor).
-- A etapa 15 (smoke completo do cliente) está em execução. A consulta mais recente ainda não indicava saída final dessa etapa; não houve conclusão nem timeout reportado.
-- As etapas 16 (inspeção real do JAR) e 17 (upload do JAR) ainda não começaram.
-- O log de carregamento registra mensagens do GeckoLib 3.1.40 sobre `query.r.velocity_y`/`query.r.yaw_change` ausentes em expressões não selecionadas. O preflight dos clips ativos selecionados passou; manter isso registrado como diagnóstico e aguardar o smoke antes de classificar a consequência.
-- Artefato disponível até agora: `minemon-server-tests`, ID `12468101600`, expira em `2026-10-29T23:55:16Z`. Não é o JAR final.
+- Commit testado: `f9ebd874fa3bf5a9d28d24b47ac924c5e2ec1279`.
+- Etapas 6–8 (recursos, Molang e regressões cumulativas): PASS.
+- Testes focados, suíte Java/build e GameTests do servidor: PASS.
+- Smoke do cliente: PASS; concluiu 151/151 espécies e marcou `PASS LOCOMOTION`, `PASS ROSTER`, `PASS CHARMANDER TAIL FLAME`, `PASS FIRE-STARTER ARMS`, `PASS PIDGE WINGS`, `PASS SOURCE LOOK` e perfis de articulação.
+- Etapa 16 (inspeção executável do JAR): FAIL em `verify_runtime.py` com `ValueError: Missing prepared sit animation starmie`.
+- Causa confirmada: o verificador tinha uma exceção para ações nativas ausentes nos Lotes 11–12 (#101–#120), mas não para #121–#130. A definição de Starmie seleciona idle, walk, corrida nativa e sleep, sem clip `sit`; não sintetizar poses de ação inexistentes.
+- Consequência: etapa 17 de upload foi ignorada; não existe artefato JAR aprovado deste run. O artefato de diagnóstico `minemon-test-diagnostics` (#12468769237) expira em `2026-10-30T00:23:52Z` e o pacote auxiliar de testes do servidor (#12468101600) expira em `2026-10-29T23:55:16Z`.
+- Correção em andamento: ampliar o tratamento de ações não selecionadas para #101–#130; clips referenciados continuam sendo exigidos e validados pelo verificador.
 
 ## Correções visuais protegidas
 
