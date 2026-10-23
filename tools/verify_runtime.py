@@ -75,6 +75,23 @@ def validate_gastly_smoke(read,definitions):
   if not any(row[i]>0 for row in pixels for i in range(3,len(row),4)):
    raise ValueError('Gastly smoke frame has no visible alpha pixels: '+path)
  print('PASS Gastly smoke resources: native six-frame Cobblemon sheet and idle/walk locator evidence')
+def validate_target_scales(definitions):
+ expected={'gastly':(0.85,0.2,0.2),'electabuzz':(1.8,1.4,3.0)}
+ by_slug={d['slug']:d for d in definitions}
+ for slug,values in expected.items():
+  d=by_slug.get(slug)
+  if d is None:raise ValueError('Missing scale target '+slug)
+  actual=tuple(float(d.get(key,float('nan'))) for key in ('scale','width','height'))
+  if any(not math.isclose(a,e,rel_tol=0.0,abs_tol=1e-6) for a,e in zip(actual,values)):
+   raise ValueError('Unexpected scale/collision dimensions for '+slug+': '+str(actual))
+ particle=(ROOT/'src/main/java/br/com/petrickfaria/minemon/client/GastlySmokeParticle.java').read_text()
+ if 'this.quadSize = 0.34F * SpeciesDefinitions.get("gastly").scale() * sample;' not in particle:
+  raise ValueError('Gastly smoke size no longer follows its model scale')
+ renderer=(ROOT/'src/main/java/br/com/petrickfaria/minemon/client/MinemonRenderer.java').read_text()
+ if 'case "gastly" -> 0.5F;' not in renderer or 'case "electabuzz" -> 2.0F;' not in renderer:
+  raise ValueError('Target shadow scale no longer follows the requested visual size')
+ print('PASS target scales: Gastly 0.5x with proportional smoke/hitbox; Electabuzz 2.0x with proportional hitbox')
+
 def validate_prepared_tail_flames(read,definitions):
  rendered_hashes=[]
  for d in definitions:
@@ -218,6 +235,7 @@ if __name__=='__main__':
   with zipfile.ZipFile(sys.argv[1]) as z:
    defs=json.loads(z.read(manifest));validate(z.read,defs,True,True)
    validate_gastly_smoke(z.read,defs)
+   validate_target_scales(defs)
    validate_prepared_tail_flames(z.read,defs)
    entries=json.loads(z.read(dex));assert len(entries)==151 and [e['nationalPokedexNumber'] for e in entries]==list(range(1,152))
    active={d['slug'] for d in defs};assert active=={e['slug'] for e in entries if e['registered']}
@@ -234,5 +252,6 @@ if __name__=='__main__':
    print('PASS Minemon (1ª Geração) metadata and minemon_gen1 ID')
  else:
   defs=json.loads((R/manifest).read_text());validate(lambda p:(R/p).read_bytes(),defs);validate_gastly_smoke(lambda p:(R/p).read_bytes(),defs)
+  validate_target_scales(defs)
   enabled=next(l.split('=',1)[1].split(',') for l in (ROOT/'gradle.properties').read_text().splitlines() if l.startswith('runtime_species='))
   assert enabled==[d['slug'] for d in defs]

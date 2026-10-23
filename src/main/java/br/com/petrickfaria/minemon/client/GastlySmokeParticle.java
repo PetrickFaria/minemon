@@ -1,5 +1,7 @@
 package br.com.petrickfaria.minemon.client;
 
+import br.com.petrickfaria.minemon.entity.SpeciesDefinitions;
+
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleProvider;
@@ -52,7 +54,7 @@ public final class GastlySmokeParticle extends TextureSheetParticle {
         int low = (int) position;
         int high = Math.min(nodes.length - 1, low + 1);
         float sample = nodes[low] + (nodes[high] - nodes[low]) * (position - low);
-        this.quadSize = 0.34F * 1.7F * sample;
+        this.quadSize = 0.34F * SpeciesDefinitions.get("gastly").scale() * sample;
     }
 
     private static int lerp(float t, int from, int to) {

@@ -15,7 +15,14 @@ public class MinemonRenderer extends GeoEntityRenderer<MinemonCreature> {
  private MinemonRenderer(EntityRendererProvider.Context context,MinemonModel model){super(context,model);this.minemonModel=model;this.shadowRadius=.45F;this.addLayer(new FireOverlayLayer(this));}
  @Override public void render(MinemonCreature entity,float yaw,float partialTick,com.mojang.blaze3d.vertex.PoseStack pose,net.minecraft.client.renderer.MultiBufferSource buffers,int light){
   if(Boolean.getBoolean("minemon.clientSmokeTest") && validationInput!=null)validationInput.accept(entity);
-  var d=SpeciesDefinitions.get(entity.getSpeciesSlug());pose.pushPose();pose.scale(d.scale(),d.scale(),d.scale());
+  var d=SpeciesDefinitions.get(entity.getSpeciesSlug());
+  float shadowScale=switch(entity.getSpeciesSlug()){
+   case "gastly" -> 0.5F;
+   case "electabuzz" -> 2.0F;
+   default -> 1.0F;
+  };
+  this.shadowRadius=0.45F*shadowScale;
+  pose.pushPose();pose.scale(d.scale(),d.scale(),d.scale());
   try { super.render(entity,yaw,partialTick,pose,buffers,light); }
   finally { pose.popPose(); }
   if(validationObserver!=null)validationObserver.accept(entity,this.minemonModel);
