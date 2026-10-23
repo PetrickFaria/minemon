@@ -9,8 +9,8 @@
 - Checkpoint remoto da primeira metade (#121–#125): `a2d838460bd3c8aaafc823f1c94273f9bb29bd2a`.
 - Primeira metade publicada: Starmie, Mr. Mime, Scyther, Jynx e Electabuzz.
 - Segunda metade (#126–#130) integrada: Magmar, Pinsir, Tauros, Magikarp e Gyarados.
-- Todos os dez recursos estão publicados no commit de implementação `225944d5615137c96f75912bc0960735f38c9e19`, com o recurso completo de Gyarados restaurado no commit `f9ebd874fa3bf5a9d28d24b47ac924c5e2ec1279`.
-- Java/build, GameTests e smoke completo do cliente passaram na Actions #39874670779. A inspeção do JAR falhou no verificador runtime antes do upload; portanto, ainda não há JAR do Lote 13 publicado.
+- Todos os dez recursos estão publicados; o commit final de código aprovado é `c91e12ac3067317f97898a16f5deec3bfa919277`.
+- Actions #39878283990 terminou com sucesso; artefato JAR #12470668831 publicado. O ZIP contém `Minemon-1.19.2-2.0.0.jar` e expira em `2026-11-06T01:07:44Z`.
 - Verificações estruturais cumulativas locais passaram. A validação completa será executada uma vez após o commit cumulativo.
 
 ## Fonte e decisões de adaptação
@@ -34,7 +34,7 @@
 - Testes Java/build: PASS na Actions #39874670779.
 - GameTests do servidor: PASS na Actions #39874670779.
 - Smoke completo do cliente: PASS (151/151; locomoção, renderização/roster e verificações visuais de regressão passaram).
-- Inspeção do JAR: falhou por critério de ação nativa ausente em Starmie; upload não executado.
+- Inspeção do JAR e upload do artefato: PASS na Actions #39878283990.
 
 ## Verificações cumulativas locais
 
@@ -43,14 +43,12 @@
 - Primeiro commit remoto parcial usa `[skip ci]`; nenhum workflow foi iniciado para uma metade incompleta.
 - Testes Java/build, GameTests e smoke do cliente: PASS no commit `f9ebd874fa3bf5a9d28d24b47ac924c5e2ec1279`, execução #39874670779.
 - A inspeção do JAR identificou que o verificador exigia um clip `sit` em Starmie. Esse clip não está selecionado nem existe como ação nativa na fonte; não criar animação artificial para satisfazer essa checagem.
-- Próximo passo: ajustar a validação de ações nativas para o intervalo #101–#130, manter validação obrigatória para todo clip que estiver selecionado e gerar/inspecionar o JAR novamente.
+- Correção aplicada no commit `c91e12ac3067317f97898a16f5deec3bfa919277`: ações não selecionadas da fonte não são exigidas artificialmente para #101–#130; referências selecionadas continuam obrigatórias.
 
 ## Próxima etapa
 
-1. Corrigir o verificador runtime para não exigir ações ausentes da fonte em #101–#130.
-2. Executar a validação direcionada do verificador sobre um JAR local, junto dos verificadores estruturais.
-3. Publicar checkpoint da correção e executar a validação obrigatória pós-correção; não iniciar tentativa antes da correção.
-4. Registrar aprovação, inspecionar o JAR e publicar o link do artefato.
+1. Lote 13 concluído e aprovado; não iniciar o Lote 14 nesta tarefa.
+2. Avaliação visual manual dos dez Pokémon continua pendente.
 
 ## Diagnóstico da primeira validação do Lote 13
 
@@ -69,7 +67,20 @@
 - Etapa 16 (inspeção executável do JAR): FAIL em `verify_runtime.py` com `ValueError: Missing prepared sit animation starmie`.
 - Causa confirmada: o verificador tinha uma exceção para ações nativas ausentes nos Lotes 11–12 (#101–#120), mas não para #121–#130. A definição de Starmie seleciona idle, walk, corrida nativa e sleep, sem clip `sit`; não sintetizar poses de ação inexistentes.
 - Consequência: etapa 17 de upload foi ignorada; não existe artefato JAR aprovado deste run. O artefato de diagnóstico `minemon-test-diagnostics` (#12468769237) expira em `2026-10-30T00:23:52Z` e o pacote auxiliar de testes do servidor (#12468101600) expira em `2026-10-29T23:55:16Z`.
-- Correção em andamento: ampliar o tratamento de ações não selecionadas para #101–#130; clips referenciados continuam sendo exigidos e validados pelo verificador.
+- Correção aprovada: o verificador considera os clips de ação efetivamente selecionados; a validação local do runtime preparado passou para 151 espécies.
+
+## Aprovação final do Lote 13
+
+- Branch de código: `feature/minemon-gen1-batch13-cobblemon`.
+- Commit de código aprovado: `c91e12ac3067317f97898a16f5deec3bfa919277`.
+- GitHub Actions: #39878283990 — sucesso; suíte Java/build, GameTests, smoke cliente, inspeção do JAR e upload aprovados.
+- Artefato: `Minemon-1.19.2-2.0.0-gen1`, ID `12470668831`, expira em `2026-11-06T01:07:44Z`.
+- Arquivo dentro do ZIP: `Minemon-1.19.2-2.0.0.jar`; tamanho 6.283.155 bytes; SHA-256 `cfcb623b7b379b0bca188996f7bd8b46881dfbc3bccca4a5bd4d7cc78b324874`.
+- ZIP do artefato: 3.587.321 bytes; SHA-256 `557437a26d42153b4a242cbe162832126c6021552e0222c807fd131ef4354781`.
+- Inspeção direta do JAR: `pack.mcmeta`, `META-INF/mods.toml`, classe principal, catálogo e Pokédex presentes; 130 espécies têm modelos/texturas/animações atualizados; 151 registros em ordem; verificadores cumulativos Lotes 8–13 e asas de Pidgeotto/Pidgeot aprovados.
+- Smoke cliente: 151/151, com `PASS LOCOMOTION`, `PASS ROSTER`, `PASS CHARMANDER TAIL FLAME`, `PASS FIRE-STARTER ARMS`, `PASS PIDGE WINGS`, `PASS SOURCE LOOK` e perfis de articulação.
+- Golem e Graveler, asas de Pidgeotto/Pidgeot e braços de Charizard preservados. As chamas de Charmander, Charmeleon e Charizard seguem como pendência visual, sem alteração.
+- Avaliação visual manual dos Pokémon #121–#130 permanece pendente e não foi confundida com aprovação automatizada.
 
 ## Correções visuais protegidas
 
