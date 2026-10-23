@@ -33,8 +33,8 @@ old_defs=json.loads(base('src/main/resources/'+MP)); old_profiles=json.loads(bas
 assert len(defs)==151 and [d['nationalPokedexNumber'] for d in defs]==list(range(1,152))
 assert [d['slug'] for d in defs[120:130]]==EXPECTED
 assert defs[:120]==old_defs[:120], 'Approved definitions #001–#120 changed'
-assert defs[130:]==old_defs[130:], 'A definition after #130 changed'
-assert profiles.keys()==(old_profiles.keys()|set(EXPECTED)), 'Unexpected/missing articulation profile'
+assert [d['slug'] for d in defs[130:140]]==['lapras','ditto','eevee','vaporeon','jolteon','flareon','porygon','omanyte','omastar','kabuto'] and defs[140:]==old_defs[140:], 'Batch 14 plan or a later definition changed'
+assert profiles.keys()==(old_profiles.keys()|set(EXPECTED)|{'lapras','ditto','eevee','vaporeon','jolteon','flareon','porygon','omanyte','omastar','kabuto'}), 'Unexpected/missing articulation profile'
 for slug, prior in old_profiles.items(): assert profiles[slug]==prior, 'Earlier profile changed: '+slug
 
 report=json.loads((ROOT/'docs/animation-audit/minemon-gen1-batch13-source-evidence.json').read_text())
@@ -45,7 +45,7 @@ old_resources=set()
 for d in old_defs[:120]: old_resources.update([d['model'],d['texture'],d['animation']]+d.get('licenses',[]))
 for p in old_resources: assert (R/p).read_bytes()==base('src/main/resources/'+p), 'Prior asset changed: '+p
 allowed={'src/main/resources/'+MP,'src/main/resources/'+VP,'tools/import_cobblemon_182_batch.py','tools/verify_batch13.py','src/test/java/br/com/petrickfaria/minemon/Batch13AnimationCompatibilityTest.java','docs/animation-audit/minemon-gen1-batch13-progress.md','docs/animation-audit/minemon-gen1-batch13-source-evidence.json'}
-for d in defs[120:130]: allowed.update('src/main/resources/'+p for p in [d['model'],d['texture'],d['animation']]+d.get('licenses',[]))
+for d in defs[120:140]: allowed.update('src/main/resources/'+p for p in [d['model'],d['texture'],d['animation']]+d.get('licenses',[]))
 changed=subprocess.check_output(['git','diff','--name-only',BASE,'--','src/main/resources'],cwd=ROOT,text=True).splitlines()
 changed+=subprocess.check_output(['git','ls-files','--others','--exclude-standard','--','src/main/resources'],cwd=ROOT,text=True).splitlines()
 assert set(changed)<=allowed, set(changed)-allowed

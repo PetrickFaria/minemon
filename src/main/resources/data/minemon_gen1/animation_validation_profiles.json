@@ -2778,5 +2778,369 @@
       "tail2",
       "tail3"
     ]
+  },
+  "lapras": {
+    "idle": [
+      "body",
+      "head",
+      "neck2",
+      "neck3",
+      "tail",
+      "tail2",
+      "leg_front_left",
+      "leg_front_right",
+      "leg_back_left",
+      "leg_back_right"
+    ],
+    "walk": [
+      "body",
+      "chest",
+      "head",
+      "neck2",
+      "neck3",
+      "leg_front_left",
+      "leg_front_right",
+      "leg_back_left",
+      "leg_back_right",
+      "tail",
+      "tail2"
+    ],
+    "run": [
+      "body",
+      "chest",
+      "head",
+      "neck2",
+      "neck3",
+      "leg_front_left",
+      "leg_front_right",
+      "leg_back_left",
+      "leg_back_right",
+      "tail",
+      "tail2"
+    ]
+  },
+  "ditto": {
+    "idle": [
+      "body",
+      "head",
+      "torso2",
+      "arm_left",
+      "arm_right"
+    ],
+    "walk": [
+      "body",
+      "head",
+      "torso2",
+      "arm_left",
+      "arm_right"
+    ],
+    "run": [
+      "body",
+      "head",
+      "torso2",
+      "arm_left",
+      "arm_right"
+    ]
+  },
+  "eevee": {
+    "idle": [
+      "body",
+      "front_leg_left",
+      "front_leg_right",
+      "back_leg_left",
+      "back_leg_right",
+      "ear_left",
+      "ear_right",
+      "tail1",
+      "tail2",
+      "tail3",
+      "tail4"
+    ],
+    "walk": [
+      "body",
+      "front_leg_left",
+      "front_leg_right",
+      "back_leg_left",
+      "back_leg_right",
+      "tail1",
+      "tail2",
+      "tail3",
+      "tail4"
+    ],
+    "run": [
+      "body",
+      "front_leg_left",
+      "front_leg_right",
+      "back_leg_left",
+      "back_leg_right",
+      "tail1",
+      "tail2",
+      "tail3",
+      "tail4"
+    ],
+    "idle_static": [
+      "body",
+      "front_leg_left",
+      "front_leg_right",
+      "back_leg_left",
+      "back_leg_right",
+      "ear_left",
+      "ear_right",
+      "tail1",
+      "tail2",
+      "tail3",
+      "tail4"
+    ]
+  },
+  "vaporeon": {
+    "idle": [
+      "body",
+      "frontleg_left",
+      "frontleg_right",
+      "back_leg_left",
+      "back_leg_right",
+      "tail",
+      "tail2",
+      "tail3",
+      "tail4",
+      "tail5",
+      "tail6"
+    ],
+    "walk": [
+      "body",
+      "frontleg_left",
+      "frontleg_right",
+      "back_leg_left",
+      "back_leg_right",
+      "tail",
+      "tail2",
+      "tail3",
+      "tail4",
+      "tail5",
+      "tail6"
+    ],
+    "run": [
+      "body",
+      "frontleg_left",
+      "frontleg_right",
+      "back_leg_left",
+      "back_leg_right",
+      "tail",
+      "tail2",
+      "tail3",
+      "tail4",
+      "tail5",
+      "tail6"
+    ],
+    "idle_static": [
+      "body",
+      "frontleg_left",
+      "frontleg_right",
+      "back_leg_left",
+      "back_leg_right",
+      "tail",
+      "tail2",
+      "tail3",
+      "tail4",
+      "tail5",
+      "tail6"
+    ]
+  },
+  "jolteon": {
+    "idle": [
+      "body",
+      "front_leg_left",
+      "front_leg_right",
+      "backleg_left",
+      "backleg_right",
+      "ear_left",
+      "ear_right"
+    ],
+    "walk": [
+      "body",
+      "front_leg_left",
+      "front_leg_right",
+      "backleg_left",
+      "backleg_right",
+      "foot_left",
+      "foot_right"
+    ],
+    "run": [
+      "body",
+      "front_leg_left",
+      "front_leg_right",
+      "backleg_left",
+      "backleg_right",
+      "foot_left",
+      "foot_right"
+    ],
+    "idle_static": [
+      "body",
+      "front_leg_left",
+      "front_leg_right",
+      "backleg_left",
+      "backleg_right",
+      "ear_left",
+      "ear_right"
+    ]
+  },
+  "flareon": {
+    "idle": [
+      "body",
+      "front_leg_left",
+      "front_leg_right",
+      "back_leg_left",
+      "back_leg_right",
+      "tail",
+      "tail4",
+      "tail5",
+      "tail6"
+    ],
+    "walk": [
+      "body",
+      "front_leg_left",
+      "front_leg_right",
+      "back_leg_left",
+      "back_leg_right",
+      "tail",
+      "tail4",
+      "tail5",
+      "tail6"
+    ],
+    "run": [
+      "body",
+      "front_leg_left",
+      "front_leg_right",
+      "back_leg_left",
+      "back_leg_right",
+      "tail",
+      "tail4",
+      "tail5",
+      "tail6"
+    ],
+    "idle_static": [
+      "body",
+      "front_leg_left",
+      "front_leg_right",
+      "back_leg_left",
+      "back_leg_right",
+      "tail",
+      "tail4",
+      "tail5",
+      "tail6"
+    ]
+  },
+  "porygon": {
+    "idle": [
+      "body",
+      "head",
+      "leg_left",
+      "leg_right",
+      "tail2"
+    ],
+    "walk": [
+      "body",
+      "head",
+      "leg_left",
+      "leg_right",
+      "tail2"
+    ],
+    "run": [
+      "body",
+      "leg_left",
+      "leg_right",
+      "tail",
+      "tail2"
+    ]
+  },
+  "omanyte": {
+    "idle": [
+      "body",
+      "shell",
+      "front_leg_left",
+      "front_leg_middle",
+      "front_leg_right",
+      "left_back_leg",
+      "right_back_leg"
+    ],
+    "walk": [
+      "body",
+      "shell",
+      "front_leg_left",
+      "front_leg_middle",
+      "front_leg_right",
+      "left_back_leg",
+      "right_back_leg"
+    ],
+    "run": [
+      "body",
+      "shell",
+      "front_leg_left",
+      "front_leg_middle",
+      "front_leg_right",
+      "left_back_leg",
+      "right_back_leg"
+    ]
+  },
+  "omastar": {
+    "idle": [
+      "body",
+      "shell",
+      "front_left_tentacle_pair",
+      "front_left_tentacle_pair2",
+      "front_right_tentacle_pair",
+      "front_right_tentacle_pair2",
+      "mid_left_tentacle_pair",
+      "mid_right_tentacle_pair",
+      "back_left_tentacle_pair",
+      "back_right_tentacle_pair"
+    ],
+    "walk": [
+      "body",
+      "shell",
+      "front_left_tentacle_pair",
+      "front_left_tentacle_pair2",
+      "front_right_tentacle_pair",
+      "front_right_tentacle_pair2",
+      "mid_left_tentacle_pair",
+      "mid_right_tentacle_pair",
+      "back_left_tentacle_pair",
+      "back_right_tentacle_pair"
+    ],
+    "run": [
+      "body",
+      "shell",
+      "front_left_tentacle_pair",
+      "front_left_tentacle_pair2",
+      "front_right_tentacle_pair",
+      "front_right_tentacle_pair2",
+      "mid_left_tentacle_pair",
+      "mid_right_tentacle_pair",
+      "back_left_tentacle_pair",
+      "back_right_tentacle_pair"
+    ]
+  },
+  "kabuto": {
+    "idle": [
+      "body",
+      "left_front_leg",
+      "right_front_leg",
+      "left_back_leg",
+      "right_back_leg"
+    ],
+    "walk": [
+      "body",
+      "left_front_leg",
+      "right_front_leg",
+      "left_back_leg",
+      "right_back_leg"
+    ],
+    "run": [
+      "body",
+      "left_front_leg",
+      "right_front_leg",
+      "left_back_leg",
+      "right_back_leg"
+    ]
   }
 }

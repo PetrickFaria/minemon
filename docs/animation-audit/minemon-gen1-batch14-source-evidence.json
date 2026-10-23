@@ -1,0 +1,528 @@
+{
+  "batch": 14,
+  "range": [
+    131,
+    140
+  ],
+  "source_url": "https://cdn.modrinth.com/data/MdwFAVRL/versions/GJ2a1b8O/Cobblemon-fabric-1.8.2%2B1.21.1.jar",
+  "source_sha256": "cae8ac328b61354fbe415208b8c6ffc12e7155094d0a87082e85e7914fb380c2",
+  "manual_visual_status": "pending; user will evaluate the authorized batches inside Minecraft",
+  "species": [
+    {
+      "number": 131,
+      "slug": "lapras",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0131_lapras/lapras.geo.json",
+      "idle": "animation.lapras.ground_idle",
+      "movement": "animation.lapras.ground_walk",
+      "mode": "ground",
+      "native_run": null,
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "body",
+          "head",
+          "neck2",
+          "neck3",
+          "tail",
+          "tail2",
+          "leg_front_left",
+          "leg_front_right",
+          "leg_back_left",
+          "leg_back_right"
+        ],
+        "walk": [
+          "body",
+          "chest",
+          "head",
+          "neck2",
+          "neck3",
+          "leg_front_left",
+          "leg_front_right",
+          "leg_back_left",
+          "leg_back_right",
+          "tail",
+          "tail2"
+        ],
+        "run": [
+          "body",
+          "chest",
+          "head",
+          "neck2",
+          "neck3",
+          "leg_front_left",
+          "leg_front_right",
+          "leg_back_left",
+          "leg_back_right",
+          "tail",
+          "tail2"
+        ]
+      },
+      "stripped_bones": {}
+    },
+    {
+      "number": 132,
+      "slug": "ditto",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0132_ditto/ditto.geo.json",
+      "idle": "animation.ditto.ground_idle",
+      "movement": "animation.ditto.ground_walk",
+      "mode": "ground",
+      "native_run": null,
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "body",
+          "head",
+          "torso2",
+          "arm_left",
+          "arm_right"
+        ],
+        "walk": [
+          "body",
+          "head",
+          "torso2",
+          "arm_left",
+          "arm_right"
+        ],
+        "run": [
+          "body",
+          "head",
+          "torso2",
+          "arm_left",
+          "arm_right"
+        ]
+      },
+      "stripped_bones": {}
+    },
+    {
+      "number": 133,
+      "slug": "eevee",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0133_eevee/eevee_male.geo.json",
+      "idle": "animation.eevee.ground_idle",
+      "movement": "animation.eevee.ground_idle",
+      "mode": "ground",
+      "native_run": null,
+      "fallback": "static",
+      "profiles": {
+        "idle": [
+          "body",
+          "front_leg_left",
+          "front_leg_right",
+          "back_leg_left",
+          "back_leg_right",
+          "ear_left",
+          "ear_right",
+          "tail1",
+          "tail2",
+          "tail3",
+          "tail4"
+        ],
+        "walk": [
+          "body",
+          "front_leg_left",
+          "front_leg_right",
+          "back_leg_left",
+          "back_leg_right",
+          "tail1",
+          "tail2",
+          "tail3",
+          "tail4"
+        ],
+        "run": [
+          "body",
+          "front_leg_left",
+          "front_leg_right",
+          "back_leg_left",
+          "back_leg_right",
+          "tail1",
+          "tail2",
+          "tail3",
+          "tail4"
+        ],
+        "idle_static": [
+          "body",
+          "front_leg_left",
+          "front_leg_right",
+          "back_leg_left",
+          "back_leg_right",
+          "ear_left",
+          "ear_right",
+          "tail1",
+          "tail2",
+          "tail3",
+          "tail4"
+        ]
+      },
+      "stripped_bones": {}
+    },
+    {
+      "number": 134,
+      "slug": "vaporeon",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0134_vaporeon/vaporeon.geo.json",
+      "idle": "animation.vaporeon.ground_idle",
+      "movement": "animation.vaporeon.ground_idle",
+      "mode": "ground",
+      "native_run": null,
+      "fallback": "static",
+      "profiles": {
+        "idle": [
+          "body",
+          "frontleg_left",
+          "frontleg_right",
+          "back_leg_left",
+          "back_leg_right",
+          "tail",
+          "tail2",
+          "tail3",
+          "tail4",
+          "tail5",
+          "tail6"
+        ],
+        "walk": [
+          "body",
+          "frontleg_left",
+          "frontleg_right",
+          "back_leg_left",
+          "back_leg_right",
+          "tail",
+          "tail2",
+          "tail3",
+          "tail4",
+          "tail5",
+          "tail6"
+        ],
+        "run": [
+          "body",
+          "frontleg_left",
+          "frontleg_right",
+          "back_leg_left",
+          "back_leg_right",
+          "tail",
+          "tail2",
+          "tail3",
+          "tail4",
+          "tail5",
+          "tail6"
+        ],
+        "idle_static": [
+          "body",
+          "frontleg_left",
+          "frontleg_right",
+          "back_leg_left",
+          "back_leg_right",
+          "tail",
+          "tail2",
+          "tail3",
+          "tail4",
+          "tail5",
+          "tail6"
+        ]
+      },
+      "stripped_bones": {}
+    },
+    {
+      "number": 135,
+      "slug": "jolteon",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0135_jolteon/jolteon.geo.json",
+      "idle": "animation.jolteon.ground_idle",
+      "movement": "animation.jolteon.ground_idle",
+      "mode": "ground",
+      "native_run": null,
+      "fallback": "static",
+      "profiles": {
+        "idle": [
+          "body",
+          "front_leg_left",
+          "front_leg_right",
+          "backleg_left",
+          "backleg_right",
+          "ear_left",
+          "ear_right"
+        ],
+        "walk": [
+          "body",
+          "front_leg_left",
+          "front_leg_right",
+          "backleg_left",
+          "backleg_right",
+          "foot_left",
+          "foot_right"
+        ],
+        "run": [
+          "body",
+          "front_leg_left",
+          "front_leg_right",
+          "backleg_left",
+          "backleg_right",
+          "foot_left",
+          "foot_right"
+        ],
+        "idle_static": [
+          "body",
+          "front_leg_left",
+          "front_leg_right",
+          "backleg_left",
+          "backleg_right",
+          "ear_left",
+          "ear_right"
+        ]
+      },
+      "stripped_bones": {}
+    },
+    {
+      "number": 136,
+      "slug": "flareon",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0136_flareon/flareon.geo.json",
+      "idle": "animation.flareon.ground_idle",
+      "movement": "animation.flareon.ground_idle",
+      "mode": "ground",
+      "native_run": null,
+      "fallback": "static",
+      "profiles": {
+        "idle": [
+          "body",
+          "front_leg_left",
+          "front_leg_right",
+          "back_leg_left",
+          "back_leg_right",
+          "tail",
+          "tail4",
+          "tail5",
+          "tail6"
+        ],
+        "walk": [
+          "body",
+          "front_leg_left",
+          "front_leg_right",
+          "back_leg_left",
+          "back_leg_right",
+          "tail",
+          "tail4",
+          "tail5",
+          "tail6"
+        ],
+        "run": [
+          "body",
+          "front_leg_left",
+          "front_leg_right",
+          "back_leg_left",
+          "back_leg_right",
+          "tail",
+          "tail4",
+          "tail5",
+          "tail6"
+        ],
+        "idle_static": [
+          "body",
+          "front_leg_left",
+          "front_leg_right",
+          "back_leg_left",
+          "back_leg_right",
+          "tail",
+          "tail4",
+          "tail5",
+          "tail6"
+        ]
+      },
+      "stripped_bones": {
+        "animation.flareon.pose": [
+          "ear1_left",
+          "ear1_right",
+          "ear3_left",
+          "ear3_right",
+          "eyelid_halfclosed_left",
+          "eyelid_halfclosed_right",
+          "eyes_closed",
+          "eyes_halfclosed",
+          "eyes_open",
+          "headfur1",
+          "manefur1",
+          "manefur1_left",
+          "manefur1_right",
+          "manefur2_left",
+          "manefur2_right",
+          "manefur3_left",
+          "manefur3_right",
+          "mouth_o",
+          "shoulder_left",
+          "shoulder_right",
+          "tail1",
+          "thigh_left",
+          "thigh_right",
+          "torso1"
+        ]
+      }
+    },
+    {
+      "number": 137,
+      "slug": "porygon",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0137_porygon/porygon.geo.json",
+      "idle": "animation.porygon.ground_idle",
+      "movement": "animation.porygon.ground_walk",
+      "mode": "ground",
+      "native_run": "animation.porygon.ground_run",
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "body",
+          "head",
+          "leg_left",
+          "leg_right",
+          "tail2"
+        ],
+        "walk": [
+          "body",
+          "head",
+          "leg_left",
+          "leg_right",
+          "tail2"
+        ],
+        "run": [
+          "body",
+          "leg_left",
+          "leg_right",
+          "tail",
+          "tail2"
+        ]
+      },
+      "stripped_bones": {}
+    },
+    {
+      "number": 138,
+      "slug": "omanyte",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0138_omanyte/omanyte.geo.json",
+      "idle": "animation.omanyte.ground_idle",
+      "movement": "animation.omanyte.ground_walk",
+      "mode": "ground",
+      "native_run": null,
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "body",
+          "shell",
+          "front_leg_left",
+          "front_leg_middle",
+          "front_leg_right",
+          "left_back_leg",
+          "right_back_leg"
+        ],
+        "walk": [
+          "body",
+          "shell",
+          "front_leg_left",
+          "front_leg_middle",
+          "front_leg_right",
+          "left_back_leg",
+          "right_back_leg"
+        ],
+        "run": [
+          "body",
+          "shell",
+          "front_leg_left",
+          "front_leg_middle",
+          "front_leg_right",
+          "left_back_leg",
+          "right_back_leg"
+        ]
+      },
+      "stripped_bones": {}
+    },
+    {
+      "number": 139,
+      "slug": "omastar",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0139_omastar/omastar.geo.json",
+      "idle": "animation.omastar.ground_idle",
+      "movement": "animation.omastar.ground_walk",
+      "mode": "ground",
+      "native_run": null,
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "body",
+          "shell",
+          "front_left_tentacle_pair",
+          "front_left_tentacle_pair2",
+          "front_right_tentacle_pair",
+          "front_right_tentacle_pair2",
+          "mid_left_tentacle_pair",
+          "mid_right_tentacle_pair",
+          "back_left_tentacle_pair",
+          "back_right_tentacle_pair"
+        ],
+        "walk": [
+          "body",
+          "shell",
+          "front_left_tentacle_pair",
+          "front_left_tentacle_pair2",
+          "front_right_tentacle_pair",
+          "front_right_tentacle_pair2",
+          "mid_left_tentacle_pair",
+          "mid_right_tentacle_pair",
+          "back_left_tentacle_pair",
+          "back_right_tentacle_pair"
+        ],
+        "run": [
+          "body",
+          "shell",
+          "front_left_tentacle_pair",
+          "front_left_tentacle_pair2",
+          "front_right_tentacle_pair",
+          "front_right_tentacle_pair2",
+          "mid_left_tentacle_pair",
+          "mid_right_tentacle_pair",
+          "back_left_tentacle_pair",
+          "back_right_tentacle_pair"
+        ]
+      },
+      "stripped_bones": {
+        "animation.omastar.shell_test": [
+          "back_legs",
+          "front_legs",
+          "left_legs",
+          "right_front_leg",
+          "right_legs"
+        ]
+      }
+    },
+    {
+      "number": 140,
+      "slug": "kabuto",
+      "model": "assets/cobblemon/bedrock/pokemon/models/0140_kabuto/kabuto.geo.json",
+      "idle": "animation.kabuto.ground_idle",
+      "movement": "animation.kabuto.ground_walk",
+      "mode": "ground",
+      "native_run": null,
+      "fallback": null,
+      "profiles": {
+        "idle": [
+          "body",
+          "left_front_leg",
+          "right_front_leg",
+          "left_back_leg",
+          "right_back_leg"
+        ],
+        "walk": [
+          "body",
+          "left_front_leg",
+          "right_front_leg",
+          "left_back_leg",
+          "right_back_leg"
+        ],
+        "run": [
+          "body",
+          "left_front_leg",
+          "right_front_leg",
+          "left_back_leg",
+          "right_back_leg"
+        ]
+      },
+      "stripped_bones": {
+        "animation.kabuto.ground_idle": [
+          "body2"
+        ],
+        "animation.kabuto.ground_walk": [
+          "body2"
+        ]
+      }
+    }
+  ]
+}

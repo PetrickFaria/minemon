@@ -13,6 +13,7 @@ BATCH10=['cloyster','gastly','haunter','gengar','onix','drowzee','hypno','krabby
 BATCH11=['electrode','exeggcute','exeggutor','cubone','marowak','hitmonlee','hitmonchan','lickitung','koffing','weezing']
 BATCH12=['rhyhorn','rhydon','chansey','tangela','kangaskhan','horsea','seadra','goldeen','seaking','staryu']
 BATCH13=['starmie','mrmime','scyther','jynx','electabuzz','magmar','pinsir','tauros','magikarp','gyarados']
+BATCH14=['lapras','ditto','eevee','vaporeon','jolteon','flareon','porygon','omanyte','omastar','kabuto']
 parser=argparse.ArgumentParser()
 parser.add_argument('--segment',choices=('first','second'))
 parser.add_argument('jar',nargs='?')
@@ -42,15 +43,15 @@ assert len(defs)==151 and [d['nationalPokedexNumber'] for d in defs]==list(range
 assert [d['slug'] for d in defs[70:80]]==EXPECTED
 assert defs[:70]==old_defs[:70],'One of the first 70 manifest entries changed'
 later_changes=[d['slug'] for i,d in enumerate(defs[end:],start=end) if d!=old_defs[i]]
-assert set(later_changes)<=set(BATCH9+BATCH10+BATCH11+BATCH12+BATCH13),'A manifest entry outside Batches 9 to 12 changed: '+repr(later_changes)
-assert all(d['model']==old_defs[i]['model'] and d['texture']==old_defs[i]['texture'] and d['animation']==old_defs[i]['animation'] for i,d in enumerate(defs) if d['slug'] not in authorized_species and d['slug'] not in BATCH9+BATCH10+BATCH11+BATCH12+BATCH13),'Out-of-scope paths changed'
+assert set(later_changes)<=set(BATCH9+BATCH10+BATCH11+BATCH12+BATCH13+BATCH14),'A manifest entry outside Batches 9 to 12 changed: '+repr(later_changes)
+assert all(d['model']==old_defs[i]['model'] and d['texture']==old_defs[i]['texture'] and d['animation']==old_defs[i]['animation'] for i,d in enumerate(defs) if d['slug'] not in authorized_species and d['slug'] not in BATCH9+BATCH10+BATCH11+BATCH12+BATCH13+BATCH14),'Out-of-scope paths changed'
 for slug,old_profile in old_profiles.items():
  expected_profile=old_profile
  if slug=='alakazam':
   expected_profile=dict(old_profile)
   expected_profile['idle']=['foot_left','foot_right','left_lower_leg','right_lower_leg','hand_left','hand_right']
  assert profiles.get(slug)==expected_profile,'Earlier articulation profile changed: '+slug
-assert set(profiles)==set(old_profiles)|set(EXPECTED[:end-70])|{s for s in BATCH9+BATCH10+BATCH11+BATCH12+BATCH13 if s in profiles},'Unexpected articulation profile set'
+assert set(profiles)==set(old_profiles)|set(EXPECTED[:end-70])|{s for s in BATCH9+BATCH10+BATCH11+BATCH12+BATCH13+BATCH14 if s in profiles},'Unexpected articulation profile set'
 
 old_paths=set()
 for d in old_defs[:70]:old_paths.update([d['model'],d['texture'],d['animation']]+d['licenses'])
@@ -80,7 +81,7 @@ for d in defs[90:100]:
  if d.get('source_cobblemon_version')=='1.8.2':allowed.update([d['model'],d['texture'],d['animation']]+d['licenses'])
 for d in defs[100:110]:
  if d.get('source_cobblemon_version')=='1.8.2':allowed.update([d['model'],d['texture'],d['animation']]+d['licenses'])
-for d in defs[110:120]+defs[120:130]:
+for d in defs[110:120]+defs[120:130]+defs[130:140]:
  if d.get('source_cobblemon_version')=='1.8.2':allowed.update([d['model'],d['texture'],d['animation']]+d['licenses'])
 allowed_paths={str(Path('src/main/resources')/p) for p in allowed}
 allowed_paths.add('src/main/resources/assets/minemon/animations/weedle_cobblemon_1_8_2/weedle.animation.json')

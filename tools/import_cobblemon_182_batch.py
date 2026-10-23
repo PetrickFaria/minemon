@@ -4,12 +4,14 @@ import argparse,copy,hashlib,io,json,math,re,urllib.request,zipfile
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 R=ROOT/'src/main/resources'
-ap=argparse.ArgumentParser();ap.add_argument('--batch',type=int,choices=(2,3,4,5,6,7,8,9,10,11,12,13),required=True);ap.add_argument('--segment',choices=('first','second'));ap.add_argument('--source-jar',type=Path);args=ap.parse_args()
+ap=argparse.ArgumentParser();ap.add_argument('--batch',type=int,choices=(2,3,4,5,6,7,8,9,10,11,12,13,14),required=True);ap.add_argument('--segment',choices=('first','second'));ap.add_argument('--source-jar',type=Path);args=ap.parse_args()
 start,end=(args.batch-1)*10+1,args.batch*10
 if args.batch in (8,9) and args.segment:
  start,end=(((71,75) if args.segment=='first' else (76,80)) if args.batch==8 else ((81,85) if args.segment=='first' else (86,90)))
 elif args.batch==13 and args.segment:
  start,end=(121,125) if args.segment=='first' else (126,130)
+elif args.batch==14 and args.segment:
+ start,end=(131,135) if args.segment=='first' else (136,140)
 mp=R/'data/minemon_gen1/runtime_species.json'
 defs=json.loads(mp.read_text());before=copy.deepcopy(defs)
 assert len(defs)==151 and [d['nationalPokedexNumber'] for d in defs]==list(range(1,152))
@@ -237,6 +239,31 @@ RUN.update({
  'mrmime':['foot_left','foot_right','arm_left','arm_right'],
  'tauros':['leg_front_left','leg_front_right','leg_back_left','leg_back_right','tail_left','tail_middle','tail_right']
 })
+GAIT.update({
+ 'lapras':['body','chest','head','neck2','neck3','leg_front_left','leg_front_right','leg_back_left','leg_back_right','tail','tail2'],
+ 'ditto':['body','head','torso2','arm_left','arm_right'],
+ 'eevee':['body','front_leg_left','front_leg_right','back_leg_left','back_leg_right','tail1','tail2','tail3','tail4'],
+ 'vaporeon':['body','frontleg_left','frontleg_right','back_leg_left','back_leg_right','tail','tail2','tail3','tail4','tail5','tail6'],
+ 'jolteon':['body','front_leg_left','front_leg_right','backleg_left','backleg_right','foot_left','foot_right'],
+ 'flareon':['body','front_leg_left','front_leg_right','back_leg_left','back_leg_right','tail','tail4','tail5','tail6'],
+ 'porygon':['body','head','leg_left','leg_right','tail2'],
+ 'omanyte':['body','shell','front_leg_left','front_leg_middle','front_leg_right','left_back_leg','right_back_leg'],
+ 'omastar':['body','shell','front_left_tentacle_pair','front_left_tentacle_pair2','front_right_tentacle_pair','front_right_tentacle_pair2','mid_left_tentacle_pair','mid_right_tentacle_pair','back_left_tentacle_pair','back_right_tentacle_pair'],
+ 'kabuto':['body','left_front_leg','right_front_leg','left_back_leg','right_back_leg']
+})
+IDLE.update({
+ 'lapras':['body','head','neck2','neck3','tail','tail2','leg_front_left','leg_front_right','leg_back_left','leg_back_right'],
+ 'ditto':['body','head','torso2','arm_left','arm_right'],
+ 'eevee':['body','front_leg_left','front_leg_right','back_leg_left','back_leg_right','ear_left','ear_right','tail1','tail2','tail3','tail4'],
+ 'vaporeon':['body','frontleg_left','frontleg_right','back_leg_left','back_leg_right','tail','tail2','tail3','tail4','tail5','tail6'],
+ 'jolteon':['body','front_leg_left','front_leg_right','backleg_left','backleg_right','ear_left','ear_right'],
+ 'flareon':['body','front_leg_left','front_leg_right','back_leg_left','back_leg_right','tail','tail4','tail5','tail6'],
+ 'porygon':['body','head','leg_left','leg_right','tail2'],
+ 'omanyte':['body','shell','front_leg_left','front_leg_middle','front_leg_right','left_back_leg','right_back_leg'],
+ 'omastar':['body','shell','front_left_tentacle_pair','front_left_tentacle_pair2','front_right_tentacle_pair','front_right_tentacle_pair2','mid_left_tentacle_pair','mid_right_tentacle_pair','back_left_tentacle_pair','back_right_tentacle_pair'],
+ 'kabuto':['body','left_front_leg','right_front_leg','left_back_leg','right_back_leg']
+})
+RUN.update({'porygon':['body','leg_left','leg_right','tail','tail2']})
 evidence=[]
 for d in defs[start-1:end]:
  slug=d['slug'];n=d['nationalPokedexNumber'];folder=f'{n:04d}_{slug}'
@@ -284,12 +311,12 @@ for d in defs[start-1:end]:
   assert 'animation_length' not in cry or cry['animation_length']==misplaced
   cry['animation_length']=misplaced
   d['source_event_correction']='cry duration 1.25 moved from sound_effects metadata to clip animation_length; timestamp/effect unchanged'
- if args.batch in (5,6,7,8,9,10,11,12,13):
+ if args.batch in (5,6,7,8,9,10,11,12,13,14):
   # Retain every native clip. Only normalize syntax / unsupported mounted inputs.
   def adapt(value):
    if isinstance(value,str):
     value=value.replace('Math.','math.')
-    if args.batch in (7,8,9,10,11,12,13):
+    if args.batch in (7,8,9,10,11,12,13,14):
      value=re.sub(r'\bq\.', 'query.',value)
      # GeckoLib 3.1.40's Molang parser rejects a unary minus directly before
      # a grouped expression; multiplying the complete group by -1 is equal.
@@ -314,7 +341,7 @@ for d in defs[start-1:end]:
    d['source_molang_adaptations']={'q.':'query.'}
   if args.batch==8:
    d['source_molang_adaptations']={'q.':'query.','Math.':'math.'}
-  if args.batch in (12,13):
+  if args.batch in (12,13,14):
    d['source_molang_adaptations']={'q.':'query.','Math.':'math.'}
   if slug=='zubat':
    poser=json.loads(z.read(f'{prefix}/posers/{folder}/{slug}.json'))
@@ -336,12 +363,16 @@ for d in defs[start-1:end]:
  d['source_model_variant']=Path(model).name
  d['source_cobblemon_version']='1.8.2'
  d.pop('generated_static_animation',None);d.pop('movement_fallback',None)
- if args.batch in (11,12,13):
+ if args.batch in (11,12,13,14):
   source_species=json.loads(z.read(f'data/cobblemon/species/generation1/{slug}.json'))
   moving=source_species.get('behaviour',{}).get('moving',{})
   can_fly=bool(moving.get('fly',{}).get('canFly',False))
   can_walk=bool(moving.get('walk',{}).get('canWalk',False))
   d['mode']='flying' if can_fly and not can_walk else 'ground'
+ if args.batch==14:
+  # The selected #131–#140 resources use ground poses even when species data
+  # permits optional flight; keep native terrestrial walk/run clips active.
+  d['mode']='ground'
  flying=d['mode']=='flying'
  if slug in ('spearow','fearow'):
   # These sources use procedural poser wing motion; no native gait is invented.
@@ -431,7 +462,7 @@ for d in defs[start-1:end]:
   (R/paths['animation']).write_text(json.dumps({'format_version':'1.8.0','animations':animations},indent=2)+'\n')
   d['source_procedural_pose']={'poser':poser_path,'walk':source_animations,'adaptation':'native standing channels plus diagonal quadruped X rotations; 42-degree amplitude and 713.299 degrees/second derived from q.quadruped_walk(0.66, 1.4); q.look is not synthesized','joints':signs}
  if walk is None:
-  walk=idle;d['movement_fallback']='idle'
+  walk=idle;d['movement_fallback']='static' if args.batch==14 and slug in ('eevee','vaporeon','jolteon','flareon') else 'idle'
  d['idle']=idle;d['walk']=walk
  if flying:d['clips'].pop('ground_run',None)
  for key in ('sit','sleep','physical_attack'):
@@ -479,7 +510,7 @@ for d in defs[start-1:end]:
     look_bones=sorted({re.search(r"q.look\('([^']+)'",a).group(1) for a in look_inputs})
     available={name:(name if name in bones else 'head' if name=='head_ai' and 'head' in bones else None) for name in look_bones}
     d['source_procedural_pose']={'poser':poser_path,'look':look_inputs,'look_bones':look_bones,'adapted_geo_bones':available,'adaptation':'Map q.look to the source head bone when present; no locomotion gait is synthesized'}
- if args.batch in (8,9,10,11,12,13):
+ if args.batch in (8,9,10,11,12,13,14):
   poser_path=f'{prefix}/posers/{folder}/{variant}.json'
   if poser_path in members:
    poser=json.loads(z.read(poser_path))
@@ -488,7 +519,7 @@ for d in defs[start-1:end]:
     look_bones=sorted({re.search(r"q.look\('([^']+)'",a).group(1) for a in look_inputs})
     available={name:(name if name in bones else 'head' if name=='head_ai' and 'head' in bones else None) for name in look_bones}
     d['source_procedural_pose']={'poser':poser_path,'look':look_inputs,'look_bones':look_bones,'adapted_geo_bones':available,'adaptation':'Map q.look to a real compatible source head bone in MinemonModel; no locomotion gait is synthesized'}
- if args.batch in (11,12,13):
+ if args.batch in (11,12,13,14):
   # Never create a run clip from walk or synthesize action poses for this batch.
   # Keep only native action clips; runtime safely leaves the selected pose active
   # if a species has no source clip for an optional action.
@@ -517,12 +548,12 @@ mp.write_text(json.dumps(defs,ensure_ascii=False,indent=2)+'\n')
 vp.parent.mkdir(parents=True,exist_ok=True);vp.write_text(json.dumps(profiles,indent=2)+'\n')
 report={'batch':args.batch,'range':[start,end],'source_url':url,'source_sha256':digest,'manual_visual_status':'pending; user will evaluate the authorized batches inside Minecraft','species':evidence}
 out=ROOT/f'docs/animation-audit/minemon-gen1-batch{args.batch}-source-evidence.json'
-if args.batch in (8,9,13) and args.segment=='second' and out.exists():
+if args.batch in (8,9,13,14) and args.segment=='second' and out.exists():
  old=json.loads(out.read_text())
  merged={item['number']:item for item in old['species']}
  merged.update({item['number']:item for item in evidence})
  report['species']=[merged[number] for number in sorted(merged)]
- report['range']=([71,80] if args.batch==8 else [81,90] if args.batch==9 else [121,130])
+ report['range']=([71,80] if args.batch==8 else [81,90] if args.batch==9 else [121,130] if args.batch==13 else [131,140])
 out.write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n')
 print(json.dumps(report,ensure_ascii=False,indent=2))
 print(f'PASS PRESERVATION: {151-(end-start+1)} out-of-batch manifest entries unchanged; source originals retained')

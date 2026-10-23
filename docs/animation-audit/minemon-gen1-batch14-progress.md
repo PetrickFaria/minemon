@@ -13,16 +13,16 @@
 
 | # | Pokémon | Estado |
 |---:|---|---|
-| 131 | Lapras | pendente de integração |
-| 132 | Ditto | pendente de integração |
-| 133 | Eevee | pendente de integração |
-| 134 | Vaporeon | pendente de integração |
-| 135 | Jolteon | pendente de integração |
-| 136 | Flareon | pendente de integração |
-| 137 | Porygon | pendente de integração |
-| 138 | Omanyte | pendente de integração |
-| 139 | Omastar | pendente de integração |
-| 140 | Kabuto | pendente de integração |
+| 131 | Lapras | integrado; testes finais pendentes |
+| 132 | Ditto | integrado; testes finais pendentes |
+| 133 | Eevee | integrado; testes finais pendentes |
+| 134 | Vaporeon | integrado; testes finais pendentes |
+| 135 | Jolteon | integrado; testes finais pendentes |
+| 136 | Flareon | integrado; testes finais pendentes |
+| 137 | Porygon | integrado; testes finais pendentes |
+| 138 | Omanyte | integrado; testes finais pendentes |
+| 139 | Omastar | integrado; testes finais pendentes |
+| 140 | Kabuto | integrado; testes finais pendentes |
 
 ### Auditoria inicial da fonte
 
@@ -44,9 +44,36 @@
 
 ### Testes e publicação
 
-- Testes do Lote 14: ainda não executados; recursos ainda pendentes.
-- GitHub Actions do Lote 14: nenhum.
-- Artefato do Lote 14: nenhum.
-- Pokémon concluídos: nenhum.
-- Próximo checkpoint: adaptar o importador e integrar #131–#135 com auditoria de articulações e verificações direcionadas.
+- Verificadores locais cumulativos Lotes 8–14: PASS.
+- Teste direcionado Java: bloqueado antes da execução porque Gradle Wrapper 7.5.1 não pôde ser baixado por restrição de rede local.
+- GitHub Actions do Lote 14: pendente de publicação do commit de código.
+- Artefato do Lote 14: ainda não existe.
+- Pokémon concluídos: 10/10 recursos integrados; aprovação automatizada final pendente.
+- Próximo checkpoint: executar testes Java, GameTests, smoke cliente e inspeção do JAR em uma única execução GitHub Actions após o commit.
 - Avaliação visual manual: pendente para os dez Pokémon novos.
+
+## Checkpoint 2 — Integração #131–#135
+
+- Lapras, Ditto, Eevee, Vaporeon e Jolteon integrados do arquivo Cobblemon auditado.
+- Verificações estáticas dos JSONs, dimensões PNG, hierarquia dos ossos, pivôs e referência de clips passaram.
+- Lapras manteve os clips terrestres, aquáticos e de superfície; Ditto manteve os clips de expressão/locomoção e nenhuma mecânica de transformação foi adicionada.
+- Os três Eeveelutions mantêm os rigs Kanto e o idle nativo. A fonte não fornece walk/run; foram preservados como indisponíveis, com fallback estático documentado.
+
+## Checkpoint 3 — Integração #136–#140
+
+- Flareon, Porygon, Omanyte, Omastar e Kabuto integrados.
+- Porygon preserva seu ground_run nativo; seu modo permanece ground para selecionar os clips terrestres da fonte.
+- Omanyte e Omastar mantêm os clips aquáticos nativos, incluindo idle/swim. Omastar conserva os tentáculos articulados; Kabuto conserva as quatro pernas e os segmentos existentes no rig.
+- O clip de Kabuto referencia body2, ausente no rig; essa referência foi registrada em stripped_bones e o perfil só verifica ossos reais. Nenhum osso ou movimento foi inventado.
+- Verificadores cumulativos dos Lotes 8–14 passaram localmente. verify_project.py, verify_runtime.py, preflight Molang, compilação sintática dos scripts e git diff --check passaram.
+
+## Estado da validação Java
+
+- Java local: OpenJDK 17.0.20.
+- A tentativa direcionada do Gradle não começou: o wrapper tentou baixar Gradle 7.5.1 e o ambiente respondeu Network is unreachable. Isso não é uma falha de teste Java nem aprovação.
+- A suíte direcionada e completa será executada no GitHub Actions depois da publicação do commit. GameTests e cliente permanecem pendentes.
+- Pokémon concluídos: 10/10 recursos integrados; aprovação técnica completa ainda pendente.
+
+## Próximo passo
+
+Publicar o commit de código e executar um único workflow completo do GitHub Actions. Se um gate falhar, investigar o relatório correspondente antes de novo smoke completo. Ainda não iniciar o Lote 15.

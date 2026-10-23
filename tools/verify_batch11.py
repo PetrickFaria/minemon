@@ -12,6 +12,7 @@ REPORT=ROOT/'docs/animation-audit/minemon-gen1-batch11-source-evidence.json'
 EXPECTED=['electrode','exeggcute','exeggutor','cubone','marowak','hitmonlee','hitmonchan','lickitung','koffing','weezing']
 BATCH12=['rhyhorn','rhydon','chansey','tangela','kangaskhan','horsea','seadra','goldeen','seaking','staryu']
 BATCH13=['starmie','mrmime','scyther','jynx','electabuzz','magmar','pinsir','tauros','magikarp','gyarados']
+BATCH14=['lapras','ditto','eevee','vaporeon','jolteon','flareon','porygon','omanyte','omastar','kabuto']
 ANATOMY={
  'electrode':['body'],
  'exeggcute':['egg1','egg2','egg3','egg4','egg5','egg6'],
@@ -36,8 +37,8 @@ assert len(defs)==151 and [d['nationalPokedexNumber'] for d in defs]==list(range
 assert [d['slug'] for d in defs[100:110]]==EXPECTED
 assert defs[:100]==old_defs[:100],'One of the approved first 100 definitions changed'
 assert [d['slug'] for d in defs[110:120]]==BATCH12,'Batch 12 must remain the planned #111-120 sequence'
-assert [d['slug'] for d in defs[120:130]]==BATCH13 and defs[130:]==old_defs[130:],'Batch 13 plan or later species changed'
-assert set(profiles)==set(old_profiles)|set(EXPECTED)|set(BATCH12)|set(BATCH13),'Unexpected or missing articulation profile'
+assert [d['slug'] for d in defs[120:130]]==BATCH13 and [d['slug'] for d in defs[130:140]]==BATCH14 and defs[140:]==old_defs[140:],'Batch 13 plan or later species changed'
+assert set(profiles)==set(old_profiles)|set(EXPECTED)|set(BATCH12)|set(BATCH13)|set(BATCH14),'Unexpected or missing articulation profile'
 for slug,old_profile in old_profiles.items():
  expected_profile=old_profile
  if slug=='alakazam':
@@ -105,7 +106,7 @@ for d in defs[100:110]:
  if slug=='hitmonchan':
   assert 'animation.hitmonchan.ground_run_WIP' in animations
   assert 'ground_run' not in d['clips']
-for d in defs[110:120]+defs[120:130]:
+for d in defs[110:120]+defs[120:130]+defs[130:140]:
  slug=d['slug'];paths=[d['model'],d['texture'],d['animation']]+d.get('licenses',[])
  allowed.update('src/main/resources/'+p for p in paths)
 
