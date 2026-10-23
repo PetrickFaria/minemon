@@ -70,3 +70,12 @@ Aguardar/consultar #39980988503; registrar no próximo checkpoint a emissividade
 - Actions #40025249120 testa exatamente o commit acima. Na última consulta, verificações de recursos, preflight Molang, validadores cumulativos dos Lotes 8–15 e Pidgeotto/Pidgeot, testes Java/build e GameTests (13/13) passaram. O smoke completo do cliente segue em andamento; inspeção do JAR, captura de tela do Gastly e publicação do JAR permanecem pendentes. Não declarar aprovação enquanto esses passos não terminarem.
 - O artefato de logs de GameTests #12532985518 foi criado pela mesma execução; expira em 2026-10-30 21:16:32 UTC. Ainda não há artefato JAR publicado nesta execução.
 - Próxima ação: consultar a execução #40025249120, sem iniciar workflow duplicado. Após sucesso, verificar a captura do Gastly em ângulos disponíveis, confirmar a inspeção do JAR e obter o artefato final. Se o smoke falhar, analisar a evidência antes de uma nova alteração.
+
+
+### Resultado final — fumaça do Gastly
+
+- Actions #40025249120 concluiu com sucesso para o commit de código `3264bd336efc0b3452c402bdeefbc6a91c4ac639`. Passaram preflight e verificadores cumulativos, testes Java/build com Java 17, GameTests do servidor (13/13), smoke do cliente para as 151 espécies, inspeção do JAR e upload dos artefatos.
+- O smoke confirmou que a definição nativa `ghostly_smoke` foi carregada e criou 254 instâncias de partículas; a validação cumulativa confirmou 151 ovos/registros e recursos cumulativos. A inspeção do JAR confirmou `META-INF/mods.toml`, classes, seis quadros `gastly_ghostly_smoke_0..5.png` e JSON com os seis sprites sem o prefixo redundante. SHA-256 do JAR: `f7d55d9db72b133629986091beb55d88fa5a6acb324d4b97e60a4bc113cfb75f`.
+- Evidência visual do smoke: `gastly-smoke-validation.png` (854×480). Em um ângulo, a fumaça roxa está visível ao redor do corpo escuro e os quads de textura ausente preto/magenta não aparecem. A suíte capturou um ângulo do Gastly; uma revisão visual manual em múltiplos ângulos não foi feita, portanto essa parte permanece pendente.
+- JAR: `Minemon-1.19.2-2.0.0.jar`, publicado no artefato `Minemon-1.19.2-2.0.0-gen1`, Actions artifact ID `12533443748`, expira em 2026-11-06 21:50:34 UTC. URL: https://github.com/PetrickFaria/minemon/actions/runs/40025249120/artifacts/12533443748
+- Diagnósticos e capturas do cliente: artifact ID `12534231817`, expira em 2026-10-30 21:50:38 UTC. O commit documental deste registro é posterior ao commit de código aprovado e não altera o JAR nem os arquivos compilados.
