@@ -21,7 +21,7 @@
 - `verify_runtime.py`, `verify_project.py`, verificadores cumulativos 8–16, verificador das asas de Pidgeotto/Pidgeot e `git diff --check` passaram após a integração de Mew e dos overlays.
 - O ambiente local tem Java 17. O Gradle wrapper não iniciou porque a distribuição Gradle 7.5.1 não está disponível localmente e a rede de shell retorna `Network is unreachable`.
 - As validações Java, GameTests e início do smoke de cliente foram aprovados na execução remota #39980988503 para commit a94d84f. O smoke ainda estava em andamento na última consulta; não há ainda conclusão/JAR para esse commit.
-- Checkpoint remoto de código: `b7a2d697711009a1ace42f48543c9c74ade33981` (skip CI) contém Mew, overlays, renderer, smoke e documentação. Commit `60cb2a9de7aca6216af67fa142bdaa30b1acbbd0` apenas atualiza o workflow de auditoria para registrar resolver; Actions #39984162304 passou. Correções finais de emissividade e evidência foram feitas depois desse checkpoint e aguardam commit/build final.
+- Checkpoint remoto de código: `b7a2d697711009a1ace42f48543c9c74ade33981` (skip CI) contém Mew, overlays, renderer, smoke e documentação. Commit `60cb2a9de7aca6216af67fa142bdaa30b1acbbd0` apenas atualiza o workflow de auditoria para registrar resolver; Actions #39984162304 passou. Correções de emissividade, camada overlay de modelo inteiro, evidência e verificação de cadence estão agora publicadas até `3bd1295e465a525f21759db44390028dda94dfa9`; ainda aguardam build/smoke desse commit.
 
 ## Correções protegidas e pendências
 
