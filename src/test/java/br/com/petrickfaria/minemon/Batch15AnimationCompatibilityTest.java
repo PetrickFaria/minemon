@@ -100,6 +100,32 @@ public class Batch15AnimationCompatibilityTest {
             for(String bone:List.of("head_fire2","head_fire3","tail_fire_puff2")) assertTrue(clip+" preserves fire element "+bone,moltres.getAsJsonObject(clip).getAsJsonObject("bones").has(bone));
     }
 
+    @Test public void zapdosUsesItsNativeAerialPoseTransitionInsteadOfGroundGait() throws Exception {
+        var definitions=defs(); var zapdos=definitions.get(144).getAsJsonObject();
+        assertEquals("flying",zapdos.get("mode").getAsString());
+        assertEquals("animation.zapdos.air_idle",zapdos.get("idle").getAsString());
+        assertEquals("animation.zapdos.air_fly",zapdos.get("walk").getAsString());
+        assertFalse("Zapdos has no native ground run",zapdos.getAsJsonObject("clips").has("ground_run"));
+
+        var profiles=json("data/minemon_gen1/animation_validation_profiles.json").getAsJsonObject("zapdos");
+        var expected=List.of("head","wing_open_left","wing_open_right");
+        for(String profile:List.of("idle","idle_static","pose_transition")) {
+            var joints=new java.util.ArrayList<String>();
+            for(JsonElement joint:profiles.getAsJsonArray(profile))joints.add(joint.getAsString());
+            assertEquals(profile,expected,joints);
+        }
+        var clips=animations("zapdos");
+        for(String bone:expected) {
+            var idleTrack=clips.getAsJsonObject("animation.zapdos.air_idle").getAsJsonObject("bones").getAsJsonObject(bone).getAsJsonArray("rotation");
+            var flyTrack=clips.getAsJsonObject("animation.zapdos.air_fly").getAsJsonObject("bones").getAsJsonObject(bone).getAsJsonArray("rotation");
+            assertEquals("source pose vector for "+bone,3,idleTrack.size());
+            assertEquals("source pose vector for "+bone,3,flyTrack.size());
+            boolean changed=false;
+            for(int axis=0;axis<3;axis++) if(Math.abs(idleTrack.get(axis).getAsDouble()-flyTrack.get(axis).getAsDouble())>0.05) changed=true;
+            assertTrue("native aerial transition changes "+bone,idleTrack.size()==3&&changed);
+        }
+    }
+
     private static void checkExpressions(JsonElement value,MolangParser parser,String source) throws Exception {
         if(value==null||value.isJsonNull())return;
         if(value.isJsonArray()) for(var child:value.getAsJsonArray()) checkExpressions(child,parser,source);

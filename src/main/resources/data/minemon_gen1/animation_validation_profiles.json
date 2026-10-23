@@ -3323,6 +3323,11 @@
       "head",
       "wing_open_left",
       "wing_open_right"
+    ],
+    "pose_transition": [
+      "head",
+      "wing_open_left",
+      "wing_open_right"
     ]
   },
   "moltres": {
