@@ -1,13 +1,14 @@
 # Minemon — conclusão da primeira geração
 
-## Checkpoint 2026-10-23
+## Estado de retomada — 2026-10-23
 
-- Base aprovada existente: 150 Pokémon atualizados, Lote 15 aprovado pelo Actions #39963816100 no código `276abc1428c8882a837e770a356f48a8d122bbab`; checkpoint remoto mais recente `731dd5aefde687ca92aa6f5a80678f1417179f0d`.
-- A branch de continuidade `feature/minemon-gen1-visual-fixes-batch16` começou com as correções de chamas e a importação correta de Mew. Mew já está integrado local/remotamente em commit a94d84f, mas seu novo commit ainda não tem aprovação completa de smoke nem JAR final confirmado.
-- O source audit #39980988543 passou. Build #39980988503 passou nas verificações estruturais, Java, build e GameTests; o smoke completo estava em execução na última consulta.
-- Os overlays de Ponyta/Rapidash e código do renderer foram preparados após esse commit, e aguardam publicação e nova validação.
-- Não declarar a primeira geração completa nem publicar novo JAR até confirmar o smoke do commit a94 e depois aprovar a validação do commit que contém os overlays.
+- Base aprovada: 150 Pokémon (Lotes 1–15); Lote 15 foi aprovado no Actions #39963816100 para commit `276abc1428c8882a837e770a356f48a8d122bbab`. O JAR do lote 15 foi o artefato #12510114037, com `Minemon-1.19.2-2.0.0.jar` e expiração informada em 2026-11-06 15:00:35 UTC.
+- Branch atual: `feature/minemon-gen1-visual-fixes-batch16`. Código em checkpoint `b7a2d697711009a1ace42f48543c9c74ade33981`; commit remoto mais recente `60cb2a9de7aca6216af67fa142bdaa30b1acbbd0` apenas atualiza a auditoria de resolvers.
+- Mew (#151) e overlays de fogo de Ponyta/Rapidash estão integrados no checkpoint de código, mas não têm ainda build/smoke/JAR final aprovados.
+- Audit #39984162304 passou e comprovou para Ponyta/Rapidash a textura `emissive`, 4 quadros, loop e 10 fps. Evidência: `minemon-gen1-batch16-visual-source-evidence.json`.
+- Build #39980988503 corresponde ao commit antigo `a94d84f4466d0cb0652adc6add8b386d7de18ca4`; passou Java, build e GameTests, mas o smoke de cliente continua sem conclusão confirmada. Essa execução não aprova Mew nem o renderer adicionado depois.
+- As validações estruturais locais cumulativas 8–16 passaram; Gradle local está bloqueado pela falta de rede para obter 7.5.1.
 
-## Preservação
+## Não marcar como concluído
 
-Braços de Charizard, asas de Pidgeotto/Pidgeot, corrida de Graveler/Golem, voo de Moltres, Mewtwo, Kabutops e recursos dos Lotes 1–15 permanecem protegidos. Chamas seguem sem aprovação visual manual.
+A conclusão 151/151, smoke final, inspeção do JAR e publicação permanecem pendentes. As chamas continuam sem aprovação visual manual. Os braços Charizard, asas Pidgeotto/Pidgeot, corrida Graveler/Golem, voo Moltres, Mewtwo e os lotes anteriores permanecem protegidos.

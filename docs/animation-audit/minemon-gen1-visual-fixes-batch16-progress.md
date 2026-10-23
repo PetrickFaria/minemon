@@ -12,7 +12,7 @@
 
 - Charmander, Charmeleon e Charizard declaram uma animação independente da chama da cauda e o smoke verifica os três. Os braços de Charizard não foram alterados.
 - Auditoria de `ground_walk`/`ground_run` de Geodude, Graveler e Golem confirmou os perfis nativos existentes: Geodude tem walk e run distintos; Graveler e Golem usam corrida rolando por `body_roll`. Nenhuma mudança de movimento foi necessária.
-- Ponyta e Rapidash possuem ossos de fogo com UVs apontando para mapas suplementares. Foram extraídos os quatro quadros normais oficiais de cada espécie do JAR Cobblemon Fabric 1.8.2 (SHA-256 da fonte: `cae8ac328b61354fbe415208b8c6ffc12e7155094d0a87082e85e7914fb380c2`). A integração local renderiza os overlays nos ossos originais, preservando seus transforms e UVs, em quatro quadros por meio de um consumidor de textura no renderer, preservando transforms e UVs. A taxa nativa (fps) está sendo confirmada pelo resolver Cobblemon; a aprovação visual manual permanece pendente.
+- Ponyta e Rapidash possuem ossos de fogo com UVs apontando para mapas suplementares. Foram extraídos os quatro quadros normais oficiais de cada espécie do JAR Cobblemon Fabric 1.8.2 (SHA-256 da fonte: `cae8ac328b61354fbe415208b8c6ffc12e7155094d0a87082e85e7914fb380c2`). A integração local renderiza os overlays nos ossos originais, preservando seus transforms e UVs, em quatro quadros por meio de um consumidor de textura no renderer, preservando transforms e UVs. A auditoria do resolver nativo #39984162304 confirmou `fps: 10`, `loop: true` e `emissive: true`; a implementação acompanha esse ritmo e usa full-bright. Aprovação visual manual permanece pendente.
 - Os oito PNGs de fogo estão em `assets/minemon/textures/pokemon/{ponyta,rapidash}_cobblemon_1_8_2/fire/normal/` e serão copiados ao namespace runtime por `processResources`.
 - Mew (#151) agora usa modelo, textura e animação exatos do Cobblemon 1.8.2. Os clips nativos disponíveis são `ground_idle`, `ground_walk` e `blink`; o poser mapeia hover para idle e fly para walk. Não foram inventados clips aéreos, de corrida, sentar ou dormir. A adaptação de cabeça/corpo reproduz os inputs nativos `q.look` e `q.pitch_tilt`.
 
@@ -21,7 +21,7 @@
 - `verify_runtime.py`, `verify_project.py`, verificadores cumulativos 8–16, verificador das asas de Pidgeotto/Pidgeot e `git diff --check` passaram após a integração de Mew e dos overlays.
 - O ambiente local tem Java 17. O Gradle wrapper não iniciou porque a distribuição Gradle 7.5.1 não está disponível localmente e a rede de shell retorna `Network is unreachable`.
 - As validações Java, GameTests e início do smoke de cliente foram aprovados na execução remota #39980988503 para commit a94d84f. O smoke ainda estava em andamento na última consulta; não há ainda conclusão/JAR para esse commit.
-- As alterações do renderer e dos overlays de fogo são locais neste checkpoint; precisam ser publicadas e validadas por um novo Actions depois de #39980988503 encerrar.
+- Checkpoint remoto de código: `b7a2d697711009a1ace42f48543c9c74ade33981` (skip CI) contém Mew, overlays, renderer, smoke e documentação. Commit `60cb2a9de7aca6216af67fa142bdaa30b1acbbd0` apenas atualiza o workflow de auditoria para registrar resolver; Actions #39984162304 passou. Correções finais de emissividade e evidência foram feitas depois desse checkpoint e aguardam commit/build final.
 
 ## Correções protegidas e pendências
 
@@ -31,4 +31,4 @@
 
 ## Próxima ação
 
-Aguardar/consultar #39980988503 sem duplicá-lo; publicar checkpoint `[skip ci]` das alterações de overlays/Mew/documentação; após a execução atual terminar, disparar uma única validação completa do commit novo e continuar corrigindo causas reais até aprovação.
+Aguardar/consultar #39980988503; registrar no próximo checkpoint a emissividade/10 fps confirmadas e a evidência; após a execução atual terminar, disparar um único build completo do código final, corrigir falhas comprovadas, inspecionar o JAR e só então declarar aprovação.

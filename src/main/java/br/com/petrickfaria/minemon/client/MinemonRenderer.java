@@ -21,7 +21,7 @@ public class MinemonRenderer extends GeoEntityRenderer<MinemonCreature> {
   var d=SpeciesDefinitions.get(entity.getSpeciesSlug());
   String slug=entity.getSpeciesSlug();
   activeFireSpecies=(slug.equals("ponyta")||slug.equals("rapidash"))?slug:null;
-  activeFireFrame=net.minecraft.util.Mth.floor((entity.tickCount+partialTick)*0.5F)&3; // 4 source frames at 10 fps
+  activeFireFrame=net.minecraft.util.Mth.floor((entity.tickCount+partialTick)*0.5F)&3; // Native resolver: loop=true, 10 fps
   baseVertexBuffer=null;
   pose.pushPose();pose.scale(d.scale(),d.scale(),d.scale());
   try { super.render(entity,yaw,partialTick,pose,buffers,light); }
@@ -40,7 +40,9 @@ public class MinemonRenderer extends GeoEntityRenderer<MinemonCreature> {
    var fireBuffer=getCurrentRTB().getBuffer(net.minecraft.client.renderer.RenderType.entityTranslucent(texture));
    fireOverlayFrames.computeIfAbsent(activeFireSpecies,k->java.util.concurrent.ConcurrentHashMap.newKeySet()).add(activeFireFrame);
    fireOverlayBones.computeIfAbsent(activeFireSpecies,k->java.util.concurrent.ConcurrentHashMap.newKeySet()).add(bone.name);
-   super.renderRecursively(bone,pose,fireBuffer,light,overlay,red,green,blue,alpha);
+   // Cobblemon marks these resolver overlays emissive. Keep them fullbright
+   // while retaining the source image alpha and every original bone transform.
+   super.renderRecursively(bone,pose,fireBuffer,15728880,overlay,red,green,blue,alpha);
   } else {
    super.renderRecursively(bone,pose,baseVertexBuffer,light,overlay,red,green,blue,alpha);
   }
