@@ -152,17 +152,14 @@ public class Batch15AnimationCompatibilityTest {
             for(String bone:entry.getValue()) {
                 var idleBone=clips.getAsJsonObject("animation."+slug+".air_idle").getAsJsonObject("bones").getAsJsonObject(bone);
                 var flightBone=clips.getAsJsonObject("animation."+slug+".air_fly").getAsJsonObject("bones").getAsJsonObject(bone);
+                assertTrue(slug+" "+bone+" idle rotation is a native vector",idleBone.get("rotation").isJsonArray());
+                assertTrue(slug+" "+bone+" flight rotation is a native vector",flightBone.get("rotation").isJsonArray());
+                var idleVector=idleBone.getAsJsonArray("rotation");var flightVector=flightBone.getAsJsonArray("rotation");
+                assertEquals(slug+" "+bone+" idle rotation",3,idleVector.size());
+                assertEquals(slug+" "+bone+" flight rotation",3,flightVector.size());
                 boolean changed=false;
-                for(String channel:List.of("rotation","position","scale")) {
-                    if(!idleBone.has(channel)&&!flightBone.has(channel))continue;
-                    assertTrue(slug+" "+bone+" "+channel+" idle is a native vector",idleBone.get(channel).isJsonArray());
-                    assertTrue(slug+" "+bone+" "+channel+" flight is a native vector",flightBone.get(channel).isJsonArray());
-                    var idleVector=idleBone.getAsJsonArray(channel);var flightVector=flightBone.getAsJsonArray(channel);
-                    assertEquals(slug+" "+bone+" "+channel,3,idleVector.size());
-                    assertEquals(slug+" "+bone+" "+channel,3,flightVector.size());
-                    for(int axis=0;axis<3;axis++)if(Math.abs(idleVector.get(axis).getAsDouble()-flightVector.get(axis).getAsDouble())>0.05)changed=true;
-                }
-                assertTrue(slug+" native aerial poses change "+bone,changed);
+                for(int axis=0;axis<3;axis++)if(Math.abs(idleVector.get(axis).getAsDouble()-flightVector.get(axis).getAsDouble())>0.05)changed=true;
+                assertTrue(slug+" native aerial poses rotate "+bone,changed);
             }
         }
     }
