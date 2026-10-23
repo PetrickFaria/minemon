@@ -40,3 +40,13 @@ Consultar novamente #39980988503 sem lançar retry. Quando concluir, executar um
 - Correções de locomotion Geodude/Graveler/Golem: a auditoria de fonte confirmou os clips nativos já selecionados; sem divergência de recurso comprovada, nenhum movimento foi substituído.
 - Próxima ação: acompanhar a execução #39985737492; se aprovada, inspecionar o JAR e registrar artefato/hash/expiração. Se falhar, corrigir a causa observada e executar apenas as verificações necessárias.
 - A aprovação automatizada não substitui avaliação visual manual das chamas de Charmander/Charmeleon/Charizard e dos overlays de Ponyta/Rapidash, nem a revisão visual de Mew.
+
+
+## Checkpoint de recuperação do smoke do Mew — 2026-10-23
+
+- Commit de código: `48f3336c52fa2380a9372a18cf9d1015380e462a` (`Handle native no-run articulation profiles in client smoke`).
+- A execução anterior #39985737492 falhou somente no smoke do cliente, quando o Mew chegou à fase RUN: `profileJoints("mew", "RUN_...")` retornou null e o iterador lançou NPE. A causa era um perfil terrestre inexistente; o Mew nativo não declara `ground_run`.
+- Correção: o smoke aceita lista vazia apenas para o estado RUN quando `SpeciesAssetIndex.clip(slug,"ground_run","run")` confirma que não há clip terrestre nativo. Estados declarados continuam obrigatórios; nenhum movimento foi inventado.
+- A validação única #39991039004 está em andamento para o commit exato acima. Até este checkpoint, verificadores de recursos, testes Java, build e GameTests do servidor passaram; smoke completo do cliente está em andamento. Inspeção e publicação do JAR aguardam o smoke. **Não declarar aprovação nem usar artefato anterior como final.**
+- Próximo passo: acompanhar #39991039004. Se aprovar, verificar os passos de inspeção/upload, inspecionar o JAR e registrar ID, nome e expiração do artefato. Se falhar, corrigir somente a causa registrada.
+- Preservar braços do Charizard, asas de Pidgeotto/Pidgeot, corridas nativas de Graveler/Golem, voo do Moltres, validação opcional do Kabutops, recursos dos Lotes 1–15 e overlays emissivos. Avaliação visual manual continua pendente para as chamas e para Mew.
