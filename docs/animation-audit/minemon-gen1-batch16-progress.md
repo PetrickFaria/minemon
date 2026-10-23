@@ -11,7 +11,7 @@
 ## Ponyta/Rapidash e locomoção
 
 - Actions de auditoria #39984162304 passou e confirmou os resolvers `0_ponyta_base.json` e `0_rapidash_base.json`: camada `emissive`, quatro quadros, `fps: 10`, `loop: true`. A evidência completa está em `minemon-gen1-batch16-visual-source-evidence.json`.
-- O código local usa exatamente os quatro quadros normais da fonte por espécie, seleciona quadro a 10 fps, aplica textura translúcida em ossos `fire_mane*`/`*_fire` e envia-os com luz full-bright. Geometria, UVs e transforms originais ficam intactos. A seleção shiny não existe atualmente no Minemon; os quadros shiny são documentados, mas não usados.
+- O código local usa exatamente os quatro quadros normais da fonte por espécie, seleciona quadro a 10 fps e aplica uma segunda passagem translúcida/emissiva do modelo inteiro. Pixels transparentes preservam a textura base; UVs e transforms nativos mantêm o fogo preso aos ossos originais. A seleção shiny não existe atualmente no Minemon; os quadros shiny são documentados, mas não usados.
 - Auditoria confirmou Geodude com `ground_walk` e `ground_run` distintos; Graveler e Golem usam corrida nativa rolando com `body_roll`. Os perfis anteriores foram preservados, sem novas animações.
 - Charmander, Charmeleon e Charizard têm clips independentes de movimento de chama declarados. Nenhuma edição nos canais dos braços do Charizard.
 

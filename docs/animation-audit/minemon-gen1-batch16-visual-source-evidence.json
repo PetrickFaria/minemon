@@ -48,22 +48,37 @@
     }
   },
   "renderer": {
-    "selection": "per-bone source overlay on fire_mane* and *_fire bones",
+    "selection": "whole-model emissive texture overlay; transparent atlas pixels reveal the base texture and source fire UVs align to fire bones",
     "texture_alpha": "entityTranslucent",
     "emissive_light": 15728880,
     "frame_formula": "floor((tickCount + partialTick) * 10 / 20) mod 4",
     "geometry_uv_transform": "source geometry, UVs and animated bone transforms retained"
   },
   "locomotion_audit": {
-    "geodude": {"walk": "animation.geodude.ground_walk", "run": "animation.geodude.ground_run", "run_kind": "native articulated locomotion"},
-    "graveler": {"walk": "animation.graveler.ground_walk", "run": "animation.graveler.ground_run", "run_kind": "native rolling body_roll"},
-    "golem": {"walk": "animation.golem.ground_walk", "run": "animation.golem.ground_run", "run_kind": "native rolling body_roll"}
+    "geodude": {
+      "walk": "animation.geodude.ground_walk",
+      "run": "animation.geodude.ground_run",
+      "run_kind": "native articulated locomotion"
+    },
+    "graveler": {
+      "walk": "animation.graveler.ground_walk",
+      "run": "animation.graveler.ground_run",
+      "run_kind": "native rolling body_roll"
+    },
+    "golem": {
+      "walk": "animation.golem.ground_walk",
+      "run": "animation.golem.ground_run",
+      "run_kind": "native rolling body_roll"
+    }
   },
   "mew": {
     "source_model": "pokemon/models/0151_mew/mew.geo.json",
     "source_texture": "textures/pokemon/0151_mew/mew.png",
     "source_animation": "pokemon/animations/0151_mew/mew.animation.json",
-    "poser_mapping": {"hover": "ground_idle", "fly": "ground_walk"},
+    "poser_mapping": {
+      "hover": "ground_idle",
+      "fly": "ground_walk"
+    },
     "native_air_idle": false,
     "native_air_fly": false,
     "native_run": false
