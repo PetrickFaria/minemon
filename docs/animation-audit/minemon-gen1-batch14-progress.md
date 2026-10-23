@@ -80,3 +80,16 @@
 - Próximo passo: retomar a mesma execução; depois de `success`, conferir as etapas de inspeção e upload, baixar/inspecionar o artefato real e registrar SHA/expiração. Somente então iniciar o Lote 15.
 
 Avaliação visual manual dos novos Pokémon permanece pendente. As correções visuais aprovadas permanecem protegidas. As chamas de Charmander, Charmeleon e Charizard continuam pendentes de refinamento e não foram alteradas.
+
+
+## Resultado final — Lote 14 aprovado
+
+- GitHub Actions #39885955086: **success**, commit de código testado e aprovado: `76fcb3074cc65c62dea6b94c291de90925494e95`.
+- Compilação e build: PASS; suíte Java completa e testes direcionados: PASS; GameTests do servidor: PASS (13/13); smoke do cliente: PASS para os 151 registros, incluindo renderização, textura, movimento, perfis de articulação e correções protegidas.
+- Inspeção do JAR no workflow e inspeção local do ZIP/JAR baixado: PASS. O ZIP tem um único arquivo, `Minemon-1.19.2-2.0.0.jar` (6,375,442 bytes). Presença confirmada de `pack.mcmeta`, `META-INF/mods.toml`, classe principal, catálogo de espécies, Pokédex e recursos de modelos/animações.
+- Pokédex: 151 registros preservados. Catálogo: 1.025 espécies; os verificadores do JAR confirmam 140 Pokémon atualizados cumulativamente, com os recursos dos 130 anteriores preservados.
+- Verificadores executados no JAR baixado: runtime, Lotes 8–14 e asas de Pidgeotto/Pidgeot — todos PASS.
+- Artefato Actions: [Minemon-1.19.2-2.0.0-gen1](https://github.com/PetrickFaria/minemon/actions/runs/39885955086/artifacts/12474937645), contém `Minemon-1.19.2-2.0.0.jar`, expira em 2026-11-06 02:49:53 UTC.
+- Correções visuais protegidas preservadas: corrida de Golem/Graveler, asas de Pidgeotto/Pidgeot, braços de Charizard. As chamas de Charmander/Charmeleon/Charizard continuam pendentes de aprovação visual; não foram alteradas.
+- Avaliação visual manual dos Pokémon #131–#140 permanece pendente e separada da aprovação automatizada.
+- Próximo passo autorizado: iniciar Lote 15 (#141–#150) a partir desta base aprovada.
