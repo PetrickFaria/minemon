@@ -159,7 +159,11 @@ allowed_paths.update(source_fire_frames)
 changed=subprocess.check_output(['git','diff','--name-only',BASE,'--','src/main/resources/assets/minemon'],cwd=ROOT,text=True).splitlines()
 assert set(changed)<=allowed_paths,set(changed)-allowed_paths
 changed_resources=subprocess.check_output(['git','diff','--name-only',BASE,'--','src/main/resources'],cwd=ROOT,text=True).splitlines()
-allowed_resource_paths=allowed_paths|source_fire_frames|{MP,VP,'src/main/resources/assets/minemon/animations/weedle/weedle.animation.json'}
+gastly_native_smoke={
+ 'src/main/resources/assets/minemon_gen1/particles/gastly_ghostly_smoke.json',
+ *(f'src/main/resources/assets/minemon_gen1/textures/particle/gastly_ghostly_smoke_{frame}.png' for frame in range(6)),
+}
+allowed_resource_paths=allowed_paths|source_fire_frames|gastly_native_smoke|{MP,VP,'src/main/resources/assets/minemon/animations/weedle/weedle.animation.json'}
 assert set(changed_resources)<=allowed_resource_paths,set(changed_resources)-allowed_resource_paths
 print(f'PASS BATCH 8 {start}-{end}: exact authorized definitions; source model hierarchy/texture dimensions/animation bones/expressions/events and special anatomy validated; first 70 resources byte-preserved')
 

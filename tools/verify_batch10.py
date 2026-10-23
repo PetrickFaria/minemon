@@ -146,6 +146,7 @@ for d in defs[110:120]+defs[120:130]+defs[130:140]+defs[140:150]+defs[150:151]:
  paths=[d['model'],d['texture'],d['animation']]+d.get('licenses',[]);allowed.update('src/main/resources/'+p for p in paths)
 source_fire_frames={f'src/main/resources/assets/minemon/textures/pokemon/{slug}_cobblemon_1_8_2/fire/normal/{frame}.png' for slug in ('ponyta','rapidash') for frame in range(1,5)}
 allowed.update(source_fire_frames)
+allowed.update({'src/main/resources/assets/minemon_gen1/particles/gastly_ghostly_smoke.json',*(f'src/main/resources/assets/minemon_gen1/textures/particle/gastly_ghostly_smoke_{i}.png' for i in range(6))})
 changed=subprocess.check_output(['git','diff','--name-only',BASE,'--','src/main/resources'],cwd=ROOT,text=True).splitlines()
 assert set(changed)<=allowed,set(changed)-allowed
 print('PASS BATCH 10 #091-100: Cobblemon 1.8.2 rigs, textures, native animations/events, fallback, and exact first-90 preservation')
