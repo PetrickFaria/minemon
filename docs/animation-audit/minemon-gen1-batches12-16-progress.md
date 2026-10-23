@@ -13,7 +13,7 @@
 | 12 | #111–#120 | `feature/minemon-gen1-batch12-cobblemon` | aprovado; Actions #39865755919; artefato #12466881117 |
 | 13 | #121–#130 | `feature/minemon-gen1-batch13-cobblemon` | aprovado; Actions #39878283990; artefato #12470668831 |
 | 14 | #131–#140 | `feature/minemon-gen1-batch14-cobblemon` | aprovado; Actions #39885955086; artefato #12474937645 |
-| 15 | #141–#150 | `feature/minemon-gen1-batch15-cobblemon` | integração local; verificadores cumulativos L8–L15 PASS; testes Java pendentes; sem commit de código ou Actions |
+| 15 | #141–#150 | `feature/minemon-gen1-batch15-cobblemon` | código publicado em `47dd4781db2e58dd998a9ef14e4b935098539a02`; Actions #39900049407 em andamento; testes obrigatórios ainda pendentes |
 | 16 | #151 | `feature/minemon-gen1-batch16-cobblemon` | não iniciado |
 
 ## Correções preservadas e pendências
@@ -44,5 +44,6 @@ Retomar do commit remoto e da execução de Actions mais recentes; não iniciar 
 - Branch remota/local: `feature/minemon-gen1-batch15-cobblemon`.
 - Os recursos nativos de #141–#150 foram importados da fonte Cobblemon 1.8.2 e a evidência de fonte foi gerada.
 - Verificadores estruturais e de preservação dos Lotes 8–15 passaram localmente; `verify_project.py`, `verify_runtime.py`, preflight Molang e `git diff --check` passaram.
-- Teste Java direcionado ainda pendente; GameTests, smoke do cliente, JAR e publicação ainda não iniciados.
-- Próxima ação: finalizar/rodar testes Java e publicar o checkpoint de implementação antes de iniciar a validação longa.
+- O teste Java direcionado local não iniciou porque o wrapper não conseguiu baixar Gradle 7.5.1 (`Network is unreachable`); a validação Java foi delegada ao workflow. GameTests, smoke do cliente, JAR e publicação ainda não foram aprovados.
+- GitHub Actions #39900049407 está em andamento para o commit de código `47dd4781db2e58dd998a9ef14e4b935098539a02`. Não criar outro workflow equivalente.
+- Próxima ação: acompanhar a mesma execução, confirmar testes Java antes dos GameTests e do smoke, e registrar seus resultados.

@@ -4,9 +4,9 @@
 
 - Branch: `feature/minemon-gen1-batch15-cobblemon`.
 - Commit-base aprovado: `d0f0cd6ca74bd7dae9139c53cf56b38f25cfbcb4` (checkpoint documental do Lote 14, sobre o commit de código aprovado `76fcb3074cc65c62dea6b94c291de90925494e95`).
-- Último commit publicado nesta branch: `d0f0cd6ca74bd7dae9139c53cf56b38f25cfbcb4` (checkpoint de implementação ainda não publicado).
+- Commit de código publicado nesta branch: `47dd4781db2e58dd998a9ef14e4b935098539a02` (`Implement Gen 1 batch 15 species 141-150`), tree construído sobre o checkpoint L14 `d0f0cd6ca74bd7dae9139c53cf56b38f25cfbcb4`.
 - Lote 14: GitHub Actions #39885955086 aprovado; artefato #12474937645 publicado e inspecionado.
-- Lote 15: os dez modelos, texturas e animações de Cobblemon 1.8.2 foram importados localmente. Ainda não há commit de implementação nem execução do workflow.
+- GitHub Actions #39900049407 está em andamento para o commit `47dd4781db2e58dd998a9ef14e4b935098539a02`; ainda sem resultado de testes. Não iniciar outro workflow equivalente.
 
 ## Auditoria da fonte
 
@@ -39,7 +39,7 @@
 
 - Base cumulativa do Lote 14: testes Java, GameTests, smoke de todos os 151 registros, verificadores dos Lotes 8–14 e inspeção do JAR aprovados.
 - Verificadores cumulativos locais L8–L15: PASS. `verify_project.py`, `verify_runtime.py`, preflight Molang e `git diff --check`: PASS. O preflight reporta separadamente expressões incompatíveis em clips de montaria retidos do Aerodactyl/Dragonite e espécies antigas; não são clips de locomoção ativos.
-- Teste Java direcionado do Lote 15: tentativa local bloqueada antes da execução porque o wrapper não conseguiu baixar Gradle 7.5.1 (`Network is unreachable`). Isso não é aprovação nem falha do teste. GameTests e smoke do cliente ainda não iniciados.
-- Próxima ação: publicar o checkpoint de código e usar o GitHub Actions para executar testes direcionados, suíte Java, GameTests e smoke em ordem; só avançar às fases posteriores quando cada fase anterior passar.
-- GitHub Actions do Lote 15: ainda não iniciado.
+- Teste Java direcionado do Lote 15: tentativa local bloqueada antes da execução porque o wrapper não conseguiu baixar Gradle 7.5.1 (`Network is unreachable`). Isso não é aprovação nem falha do teste. O workflow ainda está na inicialização; GameTests e smoke do cliente não começaram.
+- Próxima ação: acompanhar a execução #39900049407 e avançar pelas fases Java, servidor e cliente em ordem, sem duplicar a execução.
+- GitHub Actions do Lote 15: #39900049407, commit `47dd4781db2e58dd998a9ef14e4b935098539a02`, status `in_progress` no último registro.
 - Artefato do Lote 15: ainda não publicado.
