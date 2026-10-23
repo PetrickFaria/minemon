@@ -1,41 +1,34 @@
 # Minemon — correções visuais e Lote 16
 
-## Checkpoint de retomada — 2026-10-23
+## Checkpoint — 2026-10-23
 
-- Branch de trabalho: `feature/minemon-gen1-visual-fixes-batch16`.
-- Base: checkpoint documental `731dd5aefde687ca92aa6f5a80678f1417179f0d`, contendo o código aprovado `276abc1428c8882a837e770a356f48a8d122bbab`.
-- A execução #39963816100 concluiu com sucesso para o commit `276abc1`. O JAR publicado foi baixado e inspecionado: ZIP contém `Minemon-1.19.2-2.0.0.jar` (6.522.319 bytes), `pack.mcmeta`, `META-INF/mods.toml`, 15 classes e os recursos de 151 espécies. Artefato #12510114037, expiração informada pelo GitHub: 2026-11-06 15:00:35 UTC.
-- `main` está no commit `b7dc3b09416546bfdd6c4a27cbfc47f6d010a4fc`, linha separada de testes do arena/smoke. Branches `visual-flames` e `visual-loco` são pilotos/auditorias anteriores ao Lote 15; não foram mescladas.
+- Branch remota: `feature/minemon-gen1-visual-fixes-batch16`.
+- Base técnica aprovada: Lote 15, código `276abc1428c8882a837e770a356f48a8d122bbab`, checkpoint documental `731dd5aefde687ca92aa6f5a80678f1417179f0d`.
+- Lote 15: Actions #39963816100 passou; o ZIP de artefato #12510114037 continha `Minemon-1.19.2-2.0.0.jar`, expiração GitHub 2026-11-06 15:00:35 UTC.
+- A branch `main` está 262 commits atrás do checkpoint aprovado; não contém avanços posteriores e não é base adequada. As branches antigas de pilotos visuais também não superam o checkpoint L15.
+- Commit remoto a94d84f4466d0cb0652adc6add8b386d7de18ca4 já publicou o primeiro checkpoint (caudas e auditoria de fonte Mew). Actions #39980988503 ainda executa o smoke do cliente para esse commit; não foi iniciado outro workflow completo.
 
-## Correções começadas nesta branch
+## Correções e integração em andamento
 
-- O gerador runtime já cria o osso de chama `tail_flame` para Charmander, Charmeleon e Charizard a partir dos planos nativos e seus pivôs. Antes, só Charmander declarava o clip independente gerado; Charmeleon e Charizard ficavam sem a oscilação própria da chama.
-- Manifesto agora declara clips de chama para Charmeleon e Charizard usando o mesmo adaptador runtime `minemon_tail_flame`; os canais dos braços do Charizard não foram tocados.
-- Smoke do cliente agora mede a chama independente de cada inicial em repouso e caminhada e exige seleção do clip correspondente.
-- `verify_runtime.py` valida a chama para os três iniciais. Verificadores cumulativos Lotes 8–15 aceitam somente essas mudanças explícitas no manifesto; a extensão do perfil de corrida de Rapidash acrescenta apenas a articulação de fogo que o clip nativo já anima.
-- O perfil atual confirma corrida nativa para Geodude, Graveler e Golem; Graveler/Golem usam `body_roll` no `ground_run`. Geodude usa `ground_run` próprio e não foi alterado.
-- Ponyta/Rapidash já selecionam clips nativos de idle/walk e Rapidash tem `ground_run`; os clips têm canais Molang nas articulações de fogo. Ainda falta restaurar/confirmar a visibilidade dos planos. A geometria original contém planos de espessura zero e UVs fora do atlas em algumas partes (especialmente Rapidash). O workflow de auditoria existente foi estendido para recuperar do JAR Cobblemon 1.8.2 as texturas suplementares originais de fogo e os recursos completos de Mew antes de fazer adaptação.
+- Charmander, Charmeleon e Charizard declaram uma animação independente da chama da cauda e o smoke verifica os três. Os braços de Charizard não foram alterados.
+- Auditoria de `ground_walk`/`ground_run` de Geodude, Graveler e Golem confirmou os perfis nativos existentes: Geodude tem walk e run distintos; Graveler e Golem usam corrida rolando por `body_roll`. Nenhuma mudança de movimento foi necessária.
+- Ponyta e Rapidash possuem ossos de fogo com UVs apontando para mapas suplementares. Foram extraídos os quatro quadros normais oficiais de cada espécie do JAR Cobblemon Fabric 1.8.2 (SHA-256 da fonte: `cae8ac328b61354fbe415208b8c6ffc12e7155094d0a87082e85e7914fb380c2`). A integração local renderiza os overlays nos ossos originais, preservando seus transforms e UVs, em quatro quadros por meio de um consumidor de textura no renderer, preservando transforms e UVs. A taxa nativa (fps) está sendo confirmada pelo resolver Cobblemon; a aprovação visual manual permanece pendente.
+- Os oito PNGs de fogo estão em `assets/minemon/textures/pokemon/{ponyta,rapidash}_cobblemon_1_8_2/fire/normal/` e serão copiados ao namespace runtime por `processResources`.
+- Mew (#151) agora usa modelo, textura e animação exatos do Cobblemon 1.8.2. Os clips nativos disponíveis são `ground_idle`, `ground_walk` e `blink`; o poser mapeia hover para idle e fly para walk. Não foram inventados clips aéreos, de corrida, sentar ou dormir. A adaptação de cabeça/corpo reproduz os inputs nativos `q.look` e `q.pitch_tilt`.
 
-## Validações locais
+## Verificações locais
 
-- Aprovados: verificadores `verify_batch8.py` a `verify_batch15.py`, `verify_runtime.py`, `verify_project.py` e `git diff --check`.
-- Java local: Java 17.0.20 presente. `./gradlew --version` não chegou a iniciar porque o wrapper precisa baixar Gradle 7.5.1 e a rede do workspace retorna `Network is unreachable`; teste Java/build/smoke aguardam o Actions.
-- Nenhum smoke novo ou Actions desta branch foi iniciado ainda no checkpoint.
-
-## Estado do Lote 16 — Mew (#151)
-
-- Mew já está no manifesto e no render smoke dos 151, mas isso não comprova integração do Lote 16. Os caminhos atuais (`assets/minemon/geo/mew`, `textures/pokemon/mew`, `animations/mew`) remontam ao commit inicial `a6ae739` e não têm fonte Cobblemon 1.8.2 nem licença de modelo do Cobblemon registrada. A definição atual usa fallback estático e não contém `air_idle`/`air_fly`; não deve ser tratada como Lote 16 aprovado.
-- A auditoria foi ampliada para procurar modelo, texturas, animação e poser de Mew no arquivo Fabric 1.8.2 verificado pelo SHA-256 já usado pelo projeto, além dos mapas de fogo Ponyta/Rapidash. Próxima etapa: consultar o run dessa auditoria, recuperar os arquivos exatos e só então substituir a integração antiga de Mew, com verificação cumulativa e smoke.
+- `verify_runtime.py`, `verify_project.py`, verificadores cumulativos 8–16, verificador das asas de Pidgeotto/Pidgeot e `git diff --check` passaram após a integração de Mew e dos overlays.
+- O ambiente local tem Java 17. O Gradle wrapper não iniciou porque a distribuição Gradle 7.5.1 não está disponível localmente e a rede de shell retorna `Network is unreachable`.
+- As validações Java, GameTests e início do smoke de cliente foram aprovados na execução remota #39980988503 para commit a94d84f. O smoke ainda estava em andamento na última consulta; não há ainda conclusão/JAR para esse commit.
+- As alterações do renderer e dos overlays de fogo são locais neste checkpoint; precisam ser publicadas e validadas por um novo Actions depois de #39980988503 encerrar.
 
 ## Correções protegidas e pendências
 
-- Preservar: braços do Charizard; asas de Pidgeotto/Pidgeot; corrida de Graveler/Golem; voo do Moltres; Mewtwo; teste opcional de Kabutops; demais recursos Lotes 1–15.
-- Ainda não visualmente aprovadas: chamas das caudas Charmander, Charmeleon e Charizard; chamas do corpo Ponyta e Rapidash.
-- Avaliação visual manual permanece distinta da aprovação automatizada.
+- Preservar: braços do Charizard; asas corrigidas de Pidgeotto/Pidgeot; corrida de Graveler/Golem; voo do Moltres; correções do Mewtwo; tratamento opcional de Kabutops; recursos dos Lotes 1–15.
+- A avaliação visual das chamas das caudas dos três iniciais e dos overlays de Ponyta/Rapidash permanece manual e não aprovada por este relatório.
+- Pendências técnicas: obter o resultado do smoke de #39980988503; publicar as alterações atuais; executar a validação completa com o renderer de fogo; inspecionar o JAR resultante.
 
 ## Próxima ação
 
-1. Publicar este checkpoint e as alterações da adaptação da chama e auditoria da fonte.
-2. Acompanhar uma única execução do workflow de build e do source audit disparados pelo commit.
-3. Recuperar os recursos oficiais de Mew e fogo suplementar; corrigir integração/render sem alterar corpos ou braços aprovados.
-4. Executar testes direcionados e a validação completa antes de declarar qualquer correção ou Lote 16 concluído.
+Aguardar/consultar #39980988503 sem duplicá-lo; publicar checkpoint `[skip ci]` das alterações de overlays/Mew/documentação; após a execução atual terminar, disparar uma única validação completa do commit novo e continuar corrigindo causas reais até aprovação.

@@ -1,7 +1,10 @@
-import json,struct,sys,zipfile,re,math
+import json,struct,sys,zipfile,re,math,hashlib
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1];R=ROOT/'src/main/resources'
 SOURCE_PREFIX='assets/minemon/';RUNTIME_PREFIX='assets/minemon_gen1/'
+SOURCE_FIRE_HASHES={
+ 'ponyta':['8b1dce1b056345e5c90f7093a7cf84f4c0ddea6394d7e1042ca70bb585c2082c','ff440e9e72be7059acf4527238d5e15ea639ccdfa4aeef4229c882951fae3b09','39a698ac6c8d5a03957b85856d535f14fdef12c6133b746e5b38acb3cce5f50c','f76f69320a221c5fd7afa7b1e2e0aa4dc82e1d8c2696bdd0316014bbaee812df'],
+ 'rapidash':['0870dbda4cf51dd281b3295befbbbe5dcd580fba5a8720fbeba23f124189aa15','ecd0225ae7cec1a10f1c132bb4c1c03946b5933ded380f3a8e576aafb400b78e','1586693cf1eae6be8dbfd6b3b392fc87739f0973c8bee10c58ec09f6ef824455','4da49cbad5fc94c1d61aa1fe0aa01079524964794cd477bf8822b722e160f008']}
 def runtime_path(path):return path.replace(SOURCE_PREFIX,RUNTIME_PREFIX,1) if path.startswith(SOURCE_PREFIX) else path
 def validate(read,definitions,prepared=False,packed=False):
  previous=0
@@ -20,6 +23,15 @@ def validate(read,definitions,prepared=False,packed=False):
   if d.get('generated_static_animation') and not prepared and not packed:
    a.setdefault(d['idle'],{'animation_length':1.0,'loop':True,'bones':{}})
   bone_names={b['name'] for part in g['minecraft:geometry'] for b in part['bones']}
+  if d['slug'] in SOURCE_FIRE_HASHES:
+   slug=d['slug'];frames=[f'assets/minemon/textures/pokemon/{slug}_cobblemon_1_8_2/fire/normal/{i}.png' for i in range(1,5)];hashes=SOURCE_FIRE_HASHES[slug]
+   source_fire_bones={b['name'] for part in g['minecraft:geometry'] for b in part['bones'] if b['name'].startswith('fire_mane') or b['name'].endswith('_fire')}
+   if len(source_fire_bones)<5:raise ValueError('Animated source-fire rig bones missing: '+slug)
+   for path,digest in zip(frames,hashes):
+    b=read(runtime_path(path) if packed else path)
+    if hashlib.sha256(b).hexdigest()!=digest:raise ValueError('Animated source-fire checksum mismatch: '+path)
+    if struct.unpack('>II',b[16:24])!=(g['minecraft:geometry'][0]['description']['texture_width'],g['minecraft:geometry'][0]['description']['texture_height']):raise ValueError('Animated source-fire UV sheet dimensions mismatch: '+path)
+    if len(b)<64:raise ValueError('Animated source-fire frame is truncated: '+path)
   for name in d.get('excluded_clips',[]):
    if prepared and name in a:raise ValueError('Excluded clip packaged '+name)
    a.pop(name,None)
@@ -41,6 +53,13 @@ def validate(read,definitions,prepared=False,packed=False):
   attack=next((d['clips'][n] for n in ('physical_attack','physical','attack') if n in d['clips']),None)
   if attack and attack in a and d.get('attackTicks')!=math.ceil(a[attack]['animation_length']*20):raise ValueError('Attack duration mismatch '+d['slug'])
   if d['idle'] not in a or d['walk'] not in a:raise ValueError('Missing state clip '+d['slug'])
+  if d['slug'] in SOURCE_FIRE_HASHES:
+   fire_bones={b['name'] for part in g['minecraft:geometry'] for b in part['bones'] if b['name'].startswith('fire_mane') or b['name'].endswith('_fire')}
+   for state,clip_name in (('idle',d['idle']),('walk',d['walk'])):
+    if not fire_bones.intersection(a[clip_name].get('bones',{})):raise ValueError('Native fire overlay bones are not animated in '+state+': '+d['slug'])
+   if d['slug']=='rapidash':
+    run=d['clips'].get('ground_run')
+    if not run or not fire_bones.intersection(a[run].get('bones',{})):raise ValueError('Rapidash native running fire mane does not animate')
   if number<=10:
    source_runs={3:'animation.venusaur.ground_run',6:'animation.charizard.ground_run',9:'animation.blastoise.ground_run'}
    expected_run=source_runs.get(number)
@@ -105,6 +124,7 @@ if __name__=='__main__':
    entries=json.loads(z.read(dex));assert len(entries)==151 and [e['nationalPokedexNumber'] for e in entries]==list(range(1,152))
    active={d['slug'] for d in defs};assert active=={e['slug'] for e in entries if e['registered']}
    allowed={runtime_path(p) for d in defs for p in [d['model'],d['texture'],d['animation']]+d['sounds']+d['licenses']}
+   allowed.update(runtime_path(f'assets/minemon/textures/pokemon/{slug}_cobblemon_1_8_2/fire/normal/{i}.png') for slug in SOURCE_FIRE_HASHES for i in range(1,5))
    roots=('assets/minemon_gen1/geo/','assets/minemon_gen1/animations/','assets/minemon_gen1/textures/pokemon/','assets/minemon_gen1/sounds/pokemon/','assets/minemon_gen1/licenses/pokemon/')
    unexpected=[n for n in z.namelist() if not n.endswith('/') and n.startswith(roots) and n not in allowed]
    if unexpected:raise ValueError('Unexpected assets '+str(unexpected))

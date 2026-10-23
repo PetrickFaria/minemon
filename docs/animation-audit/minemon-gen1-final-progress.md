@@ -1,9 +1,13 @@
 # Minemon — conclusão da primeira geração
 
-- Estado recuperado: Lote 15 (#141–#150) aprovado tecnicamente no Actions #39963816100, commit `276abc1428c8882a837e770a356f48a8d122bbab`.
-- Artefato Lote 15: #12510114037; inclui `Minemon-1.19.2-2.0.0.jar`; expira 2026-11-06 15:00:35 UTC.
-- Próxima branch de trabalho: `feature/minemon-gen1-visual-fixes-batch16`.
-- Lote 16 (#151 Mew) não concluído: os recursos encontrados no estado-base são arquivos antigos do Minemon e ainda não foram substituídos por uma integração comprovada de Cobblemon 1.8.2.
-- Pendências antes da entrega final: concluir a chama independente dos três iniciais; resolver a renderização das chamas Ponyta/Rapidash; integrar Mew com os recursos oficiais; executar build, Java, GameTests, smoke completo, inspeção do JAR e publicar artefato.
-- Correções protegidas: braços do Charizard; asas de Pidgeotto/Pidgeot; corrida de Graveler/Golem; animação aérea do Moltres; correções de Mewtwo; validação opcional nativa de Kabutops.
-- Pendências visuais manuais devem continuar separadas dos resultados automatizados.
+## Checkpoint 2026-10-23
+
+- Base aprovada existente: 150 Pokémon atualizados, Lote 15 aprovado pelo Actions #39963816100 no código `276abc1428c8882a837e770a356f48a8d122bbab`; checkpoint remoto mais recente `731dd5aefde687ca92aa6f5a80678f1417179f0d`.
+- A branch de continuidade `feature/minemon-gen1-visual-fixes-batch16` começou com as correções de chamas e a importação correta de Mew. Mew já está integrado local/remotamente em commit a94d84f, mas seu novo commit ainda não tem aprovação completa de smoke nem JAR final confirmado.
+- O source audit #39980988543 passou. Build #39980988503 passou nas verificações estruturais, Java, build e GameTests; o smoke completo estava em execução na última consulta.
+- Os overlays de Ponyta/Rapidash e código do renderer foram preparados após esse commit, e aguardam publicação e nova validação.
+- Não declarar a primeira geração completa nem publicar novo JAR até confirmar o smoke do commit a94 e depois aprovar a validação do commit que contém os overlays.
+
+## Preservação
+
+Braços de Charizard, asas de Pidgeotto/Pidgeot, corrida de Graveler/Golem, voo de Moltres, Mewtwo, Kabutops e recursos dos Lotes 1–15 permanecem protegidos. Chamas seguem sem aprovação visual manual.

@@ -42,6 +42,7 @@ jobs:
           python3 tools/verify_batch13.py
           python3 tools/verify_batch14.py
           python3 tools/verify_batch15.py
+          python3 tools/verify_batch16.py
           python3 tools/verify_pidge_wing_visibility.py
       - name: Ensure Gradle Wrapper is executable
         run: chmod +x gradlew
@@ -91,9 +92,13 @@ jobs:
           grep -F 'PASS LOCOMOTION' run/client-validation.txt
           grep -F 'PASS ROSTER' run/client-validation.txt
           grep -F 'PASS CHARMANDER TAIL FLAME' run/client-validation.txt
+          grep -F 'PASS CHARMELEON TAIL FLAME' run/client-validation.txt
+          grep -F 'PASS CHARIZARD TAIL FLAME' run/client-validation.txt
+          grep -F 'PASS PONYTA/RAPIDASH FIRE OVERLAYS' run/client-validation.txt
           grep -F 'PASS FIRE-STARTER ARMS' run/client-validation.txt
           grep -F 'PASS PIDGE WINGS' run/client-validation.txt
           grep -F 'PASS SOURCE LOOK' run/client-validation.txt
+          grep -F 'PASS SOURCE PITCH' run/client-validation.txt
           grep -F 'ARTICULATION PROFILES:' run/client-validation.txt
       - name: Verify executable mod JAR contents
         shell: bash
@@ -125,6 +130,7 @@ jobs:
           python3 tools/verify_batch13.py "$jar_file"
           python3 tools/verify_batch14.py "$jar_file"
           python3 tools/verify_batch15.py "$jar_file"
+          python3 tools/verify_batch16.py "$jar_file"
           python3 tools/verify_pidge_wing_visibility.py "$jar_file"
           unzip -p "$jar_file" META-INF/mods.toml | grep -F 'modId="minemon_gen1"'
           unzip -p "$jar_file" META-INF/mods.toml | grep -F 'versionRange="[1.19.2,1.20)"'

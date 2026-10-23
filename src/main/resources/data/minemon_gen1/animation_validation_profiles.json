@@ -3584,5 +3584,62 @@
       "tail",
       "tail9"
     ]
+  },
+  "mew": {
+    "idle": [
+      "arm_left",
+      "arm_right",
+      "tail",
+      "tail2",
+      "tail3",
+      "tail4",
+      "tail5",
+      "tail6",
+      "tail7",
+      "tail8",
+      "tail9",
+      "tail10",
+      "tail11"
+    ],
+    "idle_static": [
+      "arm_left",
+      "arm_right",
+      "tail",
+      "tail2",
+      "tail3",
+      "tail4",
+      "tail5",
+      "tail6",
+      "tail7",
+      "tail8",
+      "tail9",
+      "tail10",
+      "tail11"
+    ],
+    "walk": [
+      "arm_left",
+      "arm_right",
+      "leg_left",
+      "leg_right",
+      "foot_left",
+      "foot_right",
+      "tail",
+      "tail2",
+      "tail3",
+      "tail4",
+      "tail5",
+      "tail6",
+      "tail7",
+      "tail8",
+      "tail9",
+      "tail10",
+      "tail11"
+    ],
+    "pose_transition": [
+      "arm_left",
+      "arm_right",
+      "tail",
+      "tail2"
+    ]
   }
 }

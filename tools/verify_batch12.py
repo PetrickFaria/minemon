@@ -9,6 +9,7 @@ EXPECTED=['rhyhorn','rhydon','chansey','tangela','kangaskhan','horsea','seadra',
 BATCH13=['starmie','mrmime','scyther','jynx','electabuzz','magmar','pinsir','tauros','magikarp','gyarados']
 BATCH14=['lapras','ditto','eevee','vaporeon','jolteon','flareon','porygon','omanyte','omastar','kabuto']
 BATCH15=['kabutops','aerodactyl','snorlax','articuno','zapdos','moltres','dratini','dragonair','dragonite','mewtwo']
+BATCH16=['mew']
 ANATOMY={
  'rhyhorn':['left_front_leg','right_front_leg','left_back_leg','right_back_leg'],
  'rhydon':['left_upper_arm','right_upper_arm','left_upper_leg','right_upper_leg','tail','tail2','tail3','tail4'],
@@ -34,7 +35,7 @@ for slug in ('charmeleon','charizard'):
  definition['clips'].pop('tail_flame',None)
  definition['tail_flame_animation']=False
 assert prior_defs==old_defs[:110],'An approved prior definition changed beyond the explicit fire-starter flame adaptation'
-assert [d['slug'] for d in defs[120:130]]==BATCH13 and [d['slug'] for d in defs[130:140]]==BATCH14 and [d['slug'] for d in defs[140:150]]==BATCH15 and defs[150:]==old_defs[150:],'Batch 13 plan or later definitions changed'
+assert [d['slug'] for d in defs[120:130]]==BATCH13 and [d['slug'] for d in defs[130:140]]==BATCH14 and [d['slug'] for d in defs[140:150]]==BATCH15,'Batch 13 plan or later definitions changed'
 for slug,old_profile in old_profiles.items():
  expected_profile=old_profile
  if slug=='rapidash':
@@ -44,7 +45,7 @@ for slug,old_profile in old_profiles.items():
   expected_profile=dict(old_profile)
   expected_profile['idle']=['foot_left','foot_right','left_lower_leg','right_lower_leg','hand_left','hand_right']
  assert profiles.get(slug)==expected_profile,'Earlier articulation profile changed: '+slug
-assert set(profiles)==set(old_profiles)|set(EXPECTED)|set(BATCH13)|set(BATCH14)|set(BATCH15),'Unexpected or missing articulation profile'
+assert set(profiles)==set(old_profiles)|set(EXPECTED)|set(BATCH13)|set(BATCH14)|set(BATCH15)|set(BATCH16),'Unexpected or missing articulation profile'
 report=json.loads((ROOT/'docs/animation-audit/minemon-gen1-batch12-source-evidence.json').read_text())
 assert report['batch']==12 and report['range']==[111,120]
 assert report['source_sha256']=='cae8ac328b61354fbe415208b8c6ffc12e7155094d0a87082e85e7914fb380c2'
@@ -54,7 +55,9 @@ prior=set()
 for d in old_defs[:110]:prior.update([d['model'],d['texture'],d['animation']]+d.get('licenses',[]))
 for path in prior:assert (R/path).read_bytes()==base('src/main/resources/'+path),'Prior approved asset changed: '+path
 allowed={'src/main/resources/'+MP,'src/main/resources/'+VP}
-for d in defs[110:120]+defs[120:130]+defs[130:140]+defs[140:150]:allowed.update('src/main/resources/'+p for p in [d['model'],d['texture'],d['animation']]+d.get('licenses',[]))
+for d in defs[110:120]+defs[120:130]+defs[130:140]+defs[140:150]+defs[150:151]:allowed.update('src/main/resources/'+p for p in [d['model'],d['texture'],d['animation']]+d.get('licenses',[]))
+source_fire_frames={f'src/main/resources/assets/minemon/textures/pokemon/{slug}_cobblemon_1_8_2/fire/normal/{frame}.png' for slug in ('ponyta','rapidash') for frame in range(1,5)}
+allowed.update(source_fire_frames)
 changed=subprocess.check_output(['git','diff','--name-only',BASE,'--','src/main/resources'],cwd=ROOT,text=True).splitlines()
 changed+=subprocess.check_output(['git','ls-files','--others','--exclude-standard','--','src/main/resources'],cwd=ROOT,text=True).splitlines()
 assert set(changed)<=allowed,set(changed)-allowed

@@ -14,6 +14,7 @@ BATCH12=['rhyhorn','rhydon','chansey','tangela','kangaskhan','horsea','seadra','
 BATCH13=['starmie','mrmime','scyther','jynx','electabuzz','magmar','pinsir','tauros','magikarp','gyarados']
 BATCH14=['lapras','ditto','eevee','vaporeon','jolteon','flareon','porygon','omanyte','omastar','kabuto']
 BATCH15=['kabutops','aerodactyl','snorlax','articuno','zapdos','moltres','dratini','dragonair','dragonite','mewtwo']
+BATCH16=['mew']
 ap=argparse.ArgumentParser()
 ap.add_argument('--segment',choices=('first','second'))
 ap.add_argument('jar',nargs='?')
@@ -48,7 +49,7 @@ assert all(defs[i]==old_defs[i] for i in range(80,90) if defs[i]['slug'] not in 
 assert [d['slug'] for d in defs[90:100]]==BATCH10,'Batch 10 must remain the planned #091-100 sequence'
 assert [d['slug'] for d in defs[100:110]]==BATCH11,'Batch 11 must remain the planned #101-110 sequence'
 assert [d['slug'] for d in defs[110:120]]==BATCH12,'Batch 12 must remain the planned #111-120 sequence'
-assert [d['slug'] for d in defs[120:130]]==BATCH13 and [d['slug'] for d in defs[130:140]]==BATCH14 and [d['slug'] for d in defs[140:150]]==BATCH15 and defs[150:]==old_defs[150:],'Batch 13 plan or later species changed'
+assert [d['slug'] for d in defs[120:130]]==BATCH13 and [d['slug'] for d in defs[130:140]]==BATCH14 and [d['slug'] for d in defs[140:150]]==BATCH15,'Batch 13 plan or later species changed'
 for slug,old_profile in old_profiles.items():
  expected_profile=old_profile
  if slug=='rapidash':
@@ -62,7 +63,7 @@ for slug,old_profile in old_profiles.items():
   expected_profile=dict(old_profile)
   expected_profile['idle']=['foot_left','foot_right','left_lower_leg','right_lower_leg','hand_left','hand_right']
  assert profiles.get(slug)==expected_profile,'Earlier animation profile changed: '+slug
-assert set(profiles)==set(old_profiles)|set(EXPECTED[:end-80])|{s for s in BATCH10+BATCH11+BATCH12+BATCH13+BATCH14+BATCH15 if s in profiles},'Unexpected articulation profile set'
+assert set(profiles)==set(old_profiles)|set(EXPECTED[:end-80])|{s for s in BATCH10+BATCH11+BATCH12+BATCH13+BATCH14+BATCH15+BATCH16 if s in profiles},'Unexpected articulation profile set'
 source_report=json.loads((ROOT/'docs/animation-audit/minemon-gen1-batch9-source-evidence.json').read_text())
 assert source_report['source_sha256']=='cae8ac328b61354fbe415208b8c6ffc12e7155094d0a87082e85e7914fb380c2'
 assert [s['slug'] for s in source_report['species']]==EXPECTED[:end-80]
@@ -93,7 +94,7 @@ for d in defs[90:100]:
  if d.get('source_cobblemon_version')=='1.8.2':allowed.update([d['model'],d['texture'],d['animation']]+d['licenses'])
 for d in defs[100:110]:
  if d.get('source_cobblemon_version')=='1.8.2':allowed.update([d['model'],d['texture'],d['animation']]+d['licenses'])
-for d in defs[110:120]+defs[120:130]+defs[130:140]+defs[140:150]:
+for d in defs[110:120]+defs[120:130]+defs[130:140]+defs[140:150]+defs[150:151]:
  if d.get('source_cobblemon_version')=='1.8.2':allowed.update([d['model'],d['texture'],d['animation']]+d['licenses'])
 allowed_paths={str(Path('src/main/resources')/p) for p in allowed}
 geo_by_slug={};anim_by_slug={}
@@ -162,6 +163,8 @@ if not args.segment:
 
 changed=subprocess.check_output(['git','diff','--name-only',BASE,'--','src/main/resources'],cwd=ROOT,text=True).splitlines()
 allowed_resources=allowed_paths|{MP,VP,'docs/animation-audit/minemon-gen1-batch9-source-evidence.json','docs/animation-audit/minemon-gen1-batch10-source-evidence.json','docs/animation-audit/minemon-gen1-batch11-source-evidence.json','src/main/resources/assets/minemon/animations/weedle_cobblemon_1_8_2/weedle.animation.json','src/main/resources/assets/minemon/animations/pidgeotto_cobblemon_1_8_2/pidgeotto.animation.json'}
+source_fire_frames={f'src/main/resources/assets/minemon/textures/pokemon/{slug}_cobblemon_1_8_2/fire/normal/{frame}.png' for slug in ('ponyta','rapidash') for frame in range(1,5)}
+allowed_resources.update(source_fire_frames)
 assert set(changed)<=allowed_resources,set(changed)-allowed_resources
 print(f'PASS BATCH 9 {start}-{end}: source 1.8.2, rig/texture/clips/events, selected profile joints, and previous 80 resource preservation')
 if args.jar:

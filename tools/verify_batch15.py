@@ -36,8 +36,8 @@ for slug in ('charmeleon','charizard'):
  definition['clips'].pop('tail_flame',None)
  definition['tail_flame_animation']=False
 assert prior_defs==old_defs[:140],'An approved prior definition changed beyond the explicit fire-starter flame adaptation'
-assert defs[150:]==old_defs[150:],'A post-batch definition changed'
-assert set(profiles)==set(old_profiles)|set(EXPECTED),'Unexpected or missing articulation profile'
+assert len(defs)==151 and defs[150]['slug']=='mew','Final Pokédex entry must remain Mew'
+assert set(profiles)==set(old_profiles)|set(EXPECTED)|{'mew'},'Unexpected or missing articulation profile'
 for slug,profile in old_profiles.items():
  expected_profile=dict(profile)
  if slug=='rapidash':expected_profile['run']=[*profile['run'],'fire_mane_head_flame']
@@ -55,9 +55,11 @@ allowed={'src/main/resources/'+MP,'src/main/resources/'+VP,'tools/import_cobblem
  'src/main/java/br/com/petrickfaria/minemon/gametest/ClientSmokeTest.java',
  'docs/animation-audit/minemon-gen1-batch15-progress.md','docs/animation-audit/minemon-gen1-batch15-source-evidence.json',
  '.github/workflows/build.yml'}
-for d in defs[140:150]:
+for d in defs[140:150]+defs[150:151]:
  allowed.update('src/main/resources/'+p for p in [d['model'],d['texture'],d['animation']]+d.get('licenses',[]))
  allowed.add('src/main/resources/assets/minemon/models/item/'+d['slug']+'_spawn_egg.json')
+source_fire_frames={f'src/main/resources/assets/minemon/textures/pokemon/{slug}_cobblemon_1_8_2/fire/normal/{frame}.png' for slug in ('ponyta','rapidash') for frame in range(1,5)}
+allowed.update(source_fire_frames)
 changed=subprocess.check_output(['git','diff','--name-only',BASE,'--','src/main/resources'],cwd=ROOT,text=True).splitlines()
 changed+=subprocess.check_output(['git','ls-files','--others','--exclude-standard','--','src/main/resources'],cwd=ROOT,text=True).splitlines()
 assert set(changed)<=allowed,set(changed)-allowed
@@ -123,7 +125,7 @@ if args.jar:
   assert jar_defs==defs and len(dex)==151 and [d['nationalPokedexNumber'] for d in dex]==list(range(1,152))
   for d in defs[:150]:
    for key in ('model','texture','animation'):assert packed(d[key]) in names,(d['slug'],key,packed(d[key]))
-  for d in defs[140:150]:
+  for d in defs[140:150]+defs[150:151]:
    packed_anim=json.loads(z.read(packed(d['animation'])))['animations'];source=readj(d['animation'])['animations']
    for name,clip in source.items():
     for key in ('sound_effects','particle_effects','timeline'):

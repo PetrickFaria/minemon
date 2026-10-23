@@ -1,0 +1,12 @@
+Mew model, texture, and animation source
+---------------------------------------
+Source: Cobblemon Fabric 1.8.2, release asset archive
+Model: assets/cobblemon/bedrock/pokemon/models/0151_mew/mew.geo.json
+Animation: assets/cobblemon/bedrock/pokemon/animations/0151_mew/mew.animation.json
+Texture: assets/cobblemon/textures/pokemon/0151_mew/mew.png
+Archive SHA-256: cae8ac328b61354fbe415208b8c6ffc12e7155094d0a87082e85e7914fb380c2
+
+Cobblemon's model assets are licensed CC BY-NC 3.0 unless an individual asset says otherwise.
+License: https://creativecommons.org/licenses/by-nc/3.0/
+Original asset project: https://gitlab.com/cable-mc/cobblemon-assets
+This file records provenance; it does not grant additional rights beyond the source license.

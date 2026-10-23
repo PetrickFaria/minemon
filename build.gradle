@@ -29,7 +29,9 @@ processResources {
         def sourceRoot = file('src/main/resources')
         def destinationRoot = destinationDir
         def assetPrefix = 'assets/minemon/'
-        def runtimePaths = runtimeDefinitions.collectMany { d -> [d.model,d.texture] + ((d.generated_static_animation && !new File(sourceRoot,d.animation).isFile()) ? [] : [d.animation]) + d.sounds + d.licenses + (d.flame_texture ? [d.flame_texture] : []) }.unique()
+        def sourceFireFrames = ['ponyta','rapidash'].collectMany { slug -> (1..4).collect { frame -> "assets/minemon/textures/pokemon/${slug}_cobblemon_1_8_2/fire/normal/${frame}.png" } }
+        def runtimePaths = runtimeDefinitions.collectMany { d -> [d.model,d.texture] + ((d.generated_static_animation && !new File(sourceRoot,d.animation).isFile()) ? [] : [d.animation]) + d.sounds + d.licenses + (d.flame_texture ? [d.flame_texture] : []) }.unique() + sourceFireFrames
+        runtimePaths = runtimePaths.unique()
         runtimeDefinitions.each { d -> runtimePaths << "assets/minemon/models/item/${d.slug}_spawn_egg.json" }
         runtimePaths.unique().each { path ->
             if (!path.startsWith(assetPrefix)) throw new GradleException("Unexpected source asset path: ${path}")

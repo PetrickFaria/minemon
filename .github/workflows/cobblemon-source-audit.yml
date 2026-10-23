@@ -40,6 +40,10 @@ jobs:
               print('GEOMETRY',slug,p,json.dumps({'description':geo['description'],'bones':[{k:v for k,v in b.items() if k!='cubes'} for b in geo['bones']]}),flush=True)
             posers=[p for p in members if p.startswith(f'assets/cobblemon/bedrock/pokemon/posers/{folder}/') and p.endswith('.json')]
             for p in posers: print('POSER_JSON',slug,z.read(p).decode(),flush=True)
+            if slug in ('ponyta','rapidash'):
+              resolvers=[p for p in members if '/resolvers/' in p and folder in p and p.endswith('.json')]
+              if not resolvers: print('NO_MATCHING_RESOLVER',slug,folder,flush=True)
+              for p in resolvers: print('RESOLVER_JSON',slug,p,z.read(p).decode(),flush=True)
             if not posers:
               for p in members:
                 if p.endswith('/'+slug.capitalize()+'Model.class'):

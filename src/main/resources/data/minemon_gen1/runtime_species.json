@@ -10966,9 +10966,9 @@
     "nationalPokedexNumber": 151,
     "slug": "mew",
     "name": "Mew",
-    "model": "assets/minemon/geo/mew/mew.geo.json",
-    "texture": "assets/minemon/textures/pokemon/mew/mew.png",
-    "animation": "assets/minemon/animations/mew/mew.animation.json",
+    "model": "assets/minemon/geo/mew_cobblemon_1_8_2/mew.geo.json",
+    "texture": "assets/minemon/textures/pokemon/mew_cobblemon_1_8_2/mew.png",
+    "animation": "assets/minemon/animations/mew_cobblemon_1_8_2/mew.animation.json",
     "mode": "flying",
     "scale": 0.5,
     "width": 0.6,
@@ -10979,15 +10979,10 @@
     "clips": {
       "ground_idle": "animation.mew.ground_idle",
       "ground_walk": "animation.mew.ground_walk",
-      "blink": "animation.mew.blink",
-      "ground_run": "animation.mew.minemon_run",
-      "sit": "animation.mew.minemon_sit",
-      "sleep": "animation.mew.minemon_sleep",
-      "physical_attack": "animation.mew.minemon_physical_attack"
+      "blink": "animation.mew.blink"
     },
     "idle": "animation.mew.ground_idle",
-    "walk": "animation.mew.ground_idle",
-    "movement_fallback": "static",
+    "walk": "animation.mew.ground_walk",
     "generated_static_animation": false,
     "attackTicks": 12,
     "excluded_clips": [],
@@ -10997,9 +10992,20 @@
       "assets/minemon/sounds/pokemon/mew/mew_cry.ogg"
     ],
     "licenses": [
-      "assets/minemon/licenses/pokemon/mew/model-license.txt"
+      "assets/minemon/licenses/pokemon/mew/cobblemon-assets-license.txt"
     ],
     "eggBase": 16759237,
-    "eggSpots": 15771310
+    "eggSpots": 15771310,
+    "source_cobblemon_version": "1.8.2",
+    "source_model_variant": "default",
+    "geckolib3_bedrock_keyframes": true,
+    "strip_bedrock_locators": true,
+    "source_asset_sha256": {
+      "model": "30957bd64cc4dc1554ee31f9f7b0b1d804e6460f7bbbf5313eb174f701518037",
+      "texture": "775b18bdd2c09ee18cd7c474b873e19864e69d591fa4b649906eb63fa312164f",
+      "animation": "00792952aba7fefc6dca1d934ae1e3db40710f42433cb3bb40d27e00e9ca2a72"
+    },
+    "source_static_idle": true,
+    "native_poser": "hover/fly: ground_idle/ground_walk; q.look(head, 1, 1, 20, -90, 60, -37); q.pitch_tilt(body)"
   }
 ]

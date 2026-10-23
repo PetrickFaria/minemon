@@ -15,6 +15,7 @@ BATCH12=['rhyhorn','rhydon','chansey','tangela','kangaskhan','horsea','seadra','
 BATCH13=['starmie','mrmime','scyther','jynx','electabuzz','magmar','pinsir','tauros','magikarp','gyarados']
 BATCH14=['lapras','ditto','eevee','vaporeon','jolteon','flareon','porygon','omanyte','omastar','kabuto']
 BATCH15=['kabutops','aerodactyl','snorlax','articuno','zapdos','moltres','dratini','dragonair','dragonite','mewtwo']
+BATCH16=['mew']
 parser=argparse.ArgumentParser()
 parser.add_argument('--segment',choices=('first','second'))
 parser.add_argument('jar',nargs='?')
@@ -53,8 +54,8 @@ for slug in ('charmeleon','charizard'):
  assert definition.get('tail_flame_animation') is True
  assert definition['clips'].get('tail_flame')==f'animation.{slug}.minemon_tail_flame'
 later_changes=[d['slug'] for i,d in enumerate(defs[end:],start=end) if d!=old_defs[i]]
-assert set(later_changes)<=set(BATCH9+BATCH10+BATCH11+BATCH12+BATCH13+BATCH14+BATCH15),'A manifest entry outside Batches 9 to 12 changed: '+repr(later_changes)
-assert all(d['model']==old_defs[i]['model'] and d['texture']==old_defs[i]['texture'] and d['animation']==old_defs[i]['animation'] for i,d in enumerate(defs) if d['slug'] not in authorized_species and d['slug'] not in BATCH9+BATCH10+BATCH11+BATCH12+BATCH13+BATCH14+BATCH15),'Out-of-scope paths changed'
+assert set(later_changes)<=set(BATCH9+BATCH10+BATCH11+BATCH12+BATCH13+BATCH14+BATCH15+BATCH16),'A manifest entry outside Batches 9 to 12 changed: '+repr(later_changes)
+assert all(d['model']==old_defs[i]['model'] and d['texture']==old_defs[i]['texture'] and d['animation']==old_defs[i]['animation'] for i,d in enumerate(defs) if d['slug'] not in authorized_species and d['slug'] not in BATCH9+BATCH10+BATCH11+BATCH12+BATCH13+BATCH14+BATCH15+BATCH16),'Out-of-scope paths changed'
 for slug,old_profile in old_profiles.items():
  expected_profile=old_profile
  if slug=='rapidash':
@@ -64,7 +65,7 @@ for slug,old_profile in old_profiles.items():
   expected_profile=dict(old_profile)
   expected_profile['idle']=['foot_left','foot_right','left_lower_leg','right_lower_leg','hand_left','hand_right']
  assert profiles.get(slug)==expected_profile,'Earlier articulation profile changed: '+slug
-assert set(profiles)==set(old_profiles)|set(EXPECTED[:end-70])|{s for s in BATCH9+BATCH10+BATCH11+BATCH12+BATCH13+BATCH14+BATCH15 if s in profiles},'Unexpected articulation profile set'
+assert set(profiles)==set(old_profiles)|set(EXPECTED[:end-70])|{s for s in BATCH9+BATCH10+BATCH11+BATCH12+BATCH13+BATCH14+BATCH15+BATCH16 if s in profiles},'Unexpected articulation profile set'
 
 old_paths=set()
 for d in old_defs[:70]:old_paths.update([d['model'],d['texture'],d['animation']]+d['licenses'])
@@ -94,7 +95,7 @@ for d in defs[90:100]:
  if d.get('source_cobblemon_version')=='1.8.2':allowed.update([d['model'],d['texture'],d['animation']]+d['licenses'])
 for d in defs[100:110]:
  if d.get('source_cobblemon_version')=='1.8.2':allowed.update([d['model'],d['texture'],d['animation']]+d['licenses'])
-for d in defs[110:120]+defs[120:130]+defs[130:140]+defs[140:150]:
+for d in defs[110:120]+defs[120:130]+defs[130:140]+defs[140:150]+defs[150:151]:
  if d.get('source_cobblemon_version')=='1.8.2':allowed.update([d['model'],d['texture'],d['animation']]+d['licenses'])
 allowed_paths={str(Path('src/main/resources')/p) for p in allowed}
 allowed_paths.add('src/main/resources/assets/minemon/animations/weedle_cobblemon_1_8_2/weedle.animation.json')
@@ -153,10 +154,12 @@ if not args.segment:
  assert all(defs[i]['movement_fallback']=='idle' for i in (71,72)),'Tentacool/Tentacruel have no native ground walk; preserve documented idle fallback'
  assert all(defs[i]['clips'].get('water_swim') for i in (71,72,78,79)),'Preserve source aquatic clips without adding a water-state system'
 
+source_fire_frames={f'src/main/resources/assets/minemon/textures/pokemon/{slug}_cobblemon_1_8_2/fire/normal/{frame}.png' for slug in ('ponyta','rapidash') for frame in range(1,5)}
+allowed_paths.update(source_fire_frames)
 changed=subprocess.check_output(['git','diff','--name-only',BASE,'--','src/main/resources/assets/minemon'],cwd=ROOT,text=True).splitlines()
 assert set(changed)<=allowed_paths,set(changed)-allowed_paths
 changed_resources=subprocess.check_output(['git','diff','--name-only',BASE,'--','src/main/resources'],cwd=ROOT,text=True).splitlines()
-allowed_resource_paths=allowed_paths|{MP,VP,'src/main/resources/assets/minemon/animations/weedle/weedle.animation.json'}
+allowed_resource_paths=allowed_paths|source_fire_frames|{MP,VP,'src/main/resources/assets/minemon/animations/weedle/weedle.animation.json'}
 assert set(changed_resources)<=allowed_resource_paths,set(changed_resources)-allowed_resource_paths
 print(f'PASS BATCH 8 {start}-{end}: exact authorized definitions; source model hierarchy/texture dimensions/animation bones/expressions/events and special anatomy validated; first 70 resources byte-preserved')
 

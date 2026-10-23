@@ -185,7 +185,7 @@ public final class ClientSmokeTest {
        entity.setXRot((float)Math.sin(entity.tickCount*0.17F)*12.0F);
        entity.yHeadRot=entity.getYRot()+(float)Math.sin(entity.tickCount*0.13F)*25.0F;
       }
-      if(java.util.Set.of("abra","kadabra","alakazam","bellsprout","geodude","golem","slowpoke","slowbro","mewtwo").contains(entity.getSpeciesSlug())) {
+      if(java.util.Set.of("abra","kadabra","alakazam","bellsprout","geodude","golem","slowpoke","slowbro","mewtwo","mew").contains(entity.getSpeciesSlug())) {
        // Exercise source q.look('head') / q.look('head_ai') adaptations.
        entity.setXRot((float)Math.sin(entity.tickCount*0.17F)*12.0F);
        entity.yHeadRot=entity.getYRot()+(float)Math.sin(entity.tickCount*0.13F)*25.0F;
@@ -213,16 +213,16 @@ public final class ClientSmokeTest {
       }
       renderedPhaseFrames++;
      }
-     if(validationPhase!=null && java.util.Set.of("abra","kadabra","alakazam","bellsprout","geodude","golem","slowpoke","slowbro","mewtwo").contains(slug)) {
+     if(validationPhase!=null && java.util.Set.of("abra","kadabra","alakazam","bellsprout","geodude","golem","slowpoke","slowbro","mewtwo","mew").contains(slug)) {
       var lookHead=model.getAnimationProcessor().getBone("head");
       if(lookHead==null)throw new IllegalStateException("Source q.look head adapter has no GeckoLib head bone for "+slug);
       float[] range=sourceLookRanges.computeIfAbsent(slug,k->{var v=new float[4];java.util.Arrays.fill(v,0,2,Float.MAX_VALUE);java.util.Arrays.fill(v,2,4,-Float.MAX_VALUE);return v;});
       float[] values={lookHead.getRotationX(),lookHead.getRotationY()};
       for(int axis=0;axis<2;axis++){range[axis]=Math.min(range[axis],values[axis]);range[axis+2]=Math.max(range[axis+2],values[axis]);}
      }
-     if(validationPhase!=null&&slug.equals("mewtwo")) {
+     if(validationPhase!=null&&(slug.equals("mewtwo")||slug.equals("mew"))) {
       var body=model.getAnimationProcessor().getBone("body");
-      if(body==null)throw new IllegalStateException("Source q.pitch_tilt adapter has no GeckoLib body bone for mewtwo");
+      if(body==null)throw new IllegalStateException("Source q.pitch_tilt adapter has no GeckoLib body bone for "+slug);
       float[] range=sourcePitchRanges.computeIfAbsent(slug,k->{var v=new float[2];v[0]=Float.MAX_VALUE;v[1]=-Float.MAX_VALUE;return v;});
       range[0]=Math.min(range[0],body.getRotationX());range[1]=Math.max(range[1],body.getRotationX());
      }
@@ -415,7 +415,7 @@ public final class ClientSmokeTest {
       throw new IllegalStateException("Fire-starter arms remained near T-pose during validated movement for "+slug+"; arm rotations="+java.util.Arrays.toString(arms));
     }
     validateArticulationProfiles();
-    for(String slug:java.util.List.of("abra","kadabra","alakazam","bellsprout","geodude","golem","slowpoke","slowbro","mewtwo")) {
+    for(String slug:java.util.List.of("abra","kadabra","alakazam","bellsprout","geodude","golem","slowpoke","slowbro","mewtwo","mew")) {
      if(!species.contains(slug))continue;
      float[] look=sourceLookRanges.get(slug);
      if(look==null||look[2]-look[0]<0.05F||look[3]-look[1]<0.05F)
@@ -426,15 +426,23 @@ public final class ClientSmokeTest {
      throw new IllegalStateException("Pidge wing visibility was not sampled for selected models "+selectedPidge+": "+wingVisibilitySpecies);
     Files.writeString(Path.of("client-validation.txt"),"PASS LOCOMOTION: every selected species moved and had changing body bone transforms.\n",StandardOpenOption.APPEND);
     if(!selectedPidge.isEmpty())Files.writeString(Path.of("client-validation.txt"),"PASS PIDGE WINGS: selected Pidgeotto/Pidgeot rendered the open pair only in settled idle/walk/run poses; closed alternatives stayed hidden.\n",StandardOpenOption.APPEND);
-    if(species.contains("mewtwo")) {
-     float[] pitch=sourcePitchRanges.get("mewtwo");
-     if(pitch==null||pitch[1]-pitch[0]<0.05F)throw new IllegalStateException("Source q.pitch_tilt adaptation did not move Mewtwo's body: "+java.util.Arrays.toString(pitch));
+    for(String slug:java.util.List.of("mewtwo","mew"))if(species.contains(slug)) {
+     float[] pitch=sourcePitchRanges.get(slug);
+     if(pitch==null||pitch[1]-pitch[0]<0.05F)throw new IllegalStateException("Source q.pitch_tilt adaptation did not move "+slug+"'s body: "+java.util.Arrays.toString(pitch));
     }
-    var selectedLook=java.util.List.of("abra","kadabra","alakazam","bellsprout","geodude","golem","slowpoke","slowbro","mewtwo").stream().filter(species::contains).toList();
+    var selectedLook=java.util.List.of("abra","kadabra","alakazam","bellsprout","geodude","golem","slowpoke","slowbro","mewtwo","mew").stream().filter(species::contains).toList();
     if(!selectedLook.isEmpty())Files.writeString(Path.of("client-validation.txt"),"PASS SOURCE LOOK: selected head bones respond to source poser look input: "+selectedLook+"\n",StandardOpenOption.APPEND);
-    if(species.contains("mewtwo"))Files.writeString(Path.of("client-validation.txt"),"PASS SOURCE PITCH: Mewtwo's source q.pitch_tilt input moves the body bone: "+java.util.Arrays.toString(sourcePitchRanges.get("mewtwo"))+"\n",StandardOpenOption.APPEND);
+    for(String slug:java.util.List.of("mewtwo","mew"))if(species.contains(slug))Files.writeString(Path.of("client-validation.txt"),"PASS SOURCE PITCH: "+slug+" source q.pitch_tilt input moves the body bone: "+java.util.Arrays.toString(sourcePitchRanges.get(slug))+"\n",StandardOpenOption.APPEND);
     var selectedStarters=java.util.List.of("charmander","charmeleon","charizard").stream().filter(species::contains).toList();
     if(!selectedStarters.isEmpty())Files.writeString(Path.of("client-validation.txt"),"PASS FIRE-STARTER ARMS: validated walk and faster-movement poses remain lowered: "+selectedStarters+"; Charmander uses no source run clip.\n",StandardOpenOption.APPEND);
+    var selectedFireHorses=java.util.List.of("ponyta","rapidash").stream().filter(species::contains).toList();
+    for(String slug:selectedFireHorses) {
+     var samples=MinemonRenderer.fireOverlayFrameSamples().getOrDefault(slug,java.util.Set.of());
+     var bones=MinemonRenderer.fireOverlayBoneSamples().getOrDefault(slug,java.util.Set.of());
+     if(!samples.containsAll(java.util.Set.of(0,1,2,3))||bones.isEmpty())
+      throw new IllegalStateException("Animated original fire overlay did not render all frames/bones for "+slug+": frames="+samples+" bones="+bones);
+    }
+    if(!selectedFireHorses.isEmpty())Files.writeString(Path.of("client-validation.txt"),"PASS PONYTA/RAPIDASH FIRE OVERLAYS: source 10 fps atlas frames rendered on source fire bones: "+selectedFireHorses+"; manual visual approval remains separate.\n",StandardOpenOption.APPEND);
     Files.writeString(Path.of("client-validation.txt"),"PASS ROSTER: every selected species rendered with its texture in a world: "+renderedSpecies+"\n",StandardOpenOption.APPEND);
     completedSpeciesWindows=species.size();
     lastApprovedCheck="all selected species completed render/movement sampling";

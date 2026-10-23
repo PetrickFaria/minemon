@@ -14,6 +14,7 @@ BATCH12=['rhyhorn','rhydon','chansey','tangela','kangaskhan','horsea','seadra','
 BATCH13=['starmie','mrmime','scyther','jynx','electabuzz','magmar','pinsir','tauros','magikarp','gyarados']
 BATCH14=['lapras','ditto','eevee','vaporeon','jolteon','flareon','porygon','omanyte','omastar','kabuto']
 BATCH15=['kabutops','aerodactyl','snorlax','articuno','zapdos','moltres','dratini','dragonair','dragonite','mewtwo']
+BATCH16=['mew']
 ANATOMY={
  'electrode':['body'],
  'exeggcute':['egg1','egg2','egg3','egg4','egg5','egg6'],
@@ -43,8 +44,8 @@ for slug in ('charmeleon','charizard'):
  definition['tail_flame_animation']=False
 assert prior_defs==old_defs[:100],'An approved prior definition changed beyond the explicit fire-starter flame adaptation'
 assert [d['slug'] for d in defs[110:120]]==BATCH12,'Batch 12 must remain the planned #111-120 sequence'
-assert [d['slug'] for d in defs[120:130]]==BATCH13 and [d['slug'] for d in defs[130:140]]==BATCH14 and [d['slug'] for d in defs[140:150]]==BATCH15 and defs[150:]==old_defs[150:],'Batch 13 plan or later species changed'
-assert set(profiles)==set(old_profiles)|set(EXPECTED)|set(BATCH12)|set(BATCH13)|set(BATCH14)|set(BATCH15),'Unexpected or missing articulation profile'
+assert [d['slug'] for d in defs[120:130]]==BATCH13 and [d['slug'] for d in defs[130:140]]==BATCH14 and [d['slug'] for d in defs[140:150]]==BATCH15,'Batch 13 plan or later species changed'
+assert set(profiles)==set(old_profiles)|set(EXPECTED)|set(BATCH12)|set(BATCH13)|set(BATCH14)|set(BATCH15)|set(BATCH16),'Unexpected or missing articulation profile'
 for slug,old_profile in old_profiles.items():
  expected_profile=old_profile
  if slug=='rapidash':
@@ -115,10 +116,12 @@ for d in defs[100:110]:
  if slug=='hitmonchan':
   assert 'animation.hitmonchan.ground_run_WIP' in animations
   assert 'ground_run' not in d['clips']
-for d in defs[110:120]+defs[120:130]+defs[130:140]+defs[140:150]:
+for d in defs[110:120]+defs[120:130]+defs[130:140]+defs[140:150]+defs[150:151]:
  slug=d['slug'];paths=[d['model'],d['texture'],d['animation']]+d.get('licenses',[])
  allowed.update('src/main/resources/'+p for p in paths)
 
+source_fire_frames={f'src/main/resources/assets/minemon/textures/pokemon/{slug}_cobblemon_1_8_2/fire/normal/{frame}.png' for slug in ('ponyta','rapidash') for frame in range(1,5)}
+allowed.update(source_fire_frames)
 changed=subprocess.check_output(['git','diff','--name-only',BASE,'--','src/main/resources'],cwd=ROOT,text=True).splitlines()
 changed+=subprocess.check_output(['git','ls-files','--others','--exclude-standard','--','src/main/resources'],cwd=ROOT,text=True).splitlines()
 assert set(changed)<=allowed,set(changed)-allowed
