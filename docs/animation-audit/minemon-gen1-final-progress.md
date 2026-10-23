@@ -31,3 +31,15 @@ A conclusão 151/151, smoke final, inspeção do JAR e publicação permanecem p
 - Execução #39991039004 está em andamento para o SHA de código `48f3336c52fa2380a9372a18cf9d1015380e462a`. Testes Java direcionados, build, verificadores cumulativos e GameTests passaram. Smoke completo do cliente ainda ativo; inspeção e upload do JAR ainda aguardam essa etapa. Sem aprovação ou JAR final confirmado neste checkpoint.
 - Próxima ação: consultar a mesma execução #39991039004; após sucesso, conferir inspeção e artefato. Se houver falha, registrar log e corrigir apenas a causa demonstrada.
 - Preservar correções de Charizard/Pidgeotto/Pidgeot/Graveler/Golem/Moltres/Mewtwo e recursos dos Lotes 1–15. As chamas e o visual de Mew ainda não têm aprovação manual.
+
+## Resultado final — Primeira Geração aprovada — 2026-10-23
+
+- **Pokémon atualizados:** 151/151, incluindo Mew (#151); **registros preservados:** 151.
+- Branch: `feature/minemon-gen1-visual-fixes-batch16`. HEAD documental antes deste registro: `243741275c7a258356e6767f232e97390b25ff91`. Commit de código aprovado e empacotado: `48f3336c52fa2380a9372a18cf9d1015380e462a`.
+- GitHub Actions #39991039004: **success**, commit exato `48f3336c52fa2380a9372a18cf9d1015380e462a`. Passaram verificadores cumulativos/recursos, testes Java, build, GameTests do servidor, smoke completo do cliente/GeckoLib e inspeção do JAR.
+- Download: [artefato Minemon-1.19.2-2.0.0-gen1](https://github.com/PetrickFaria/minemon/actions/runs/39991039004/artifacts/12521409667), contém `Minemon-1.19.2-2.0.0.jar`. Expira em `2026-11-06T18:07:57Z` (15:07:57 BRT). SHA-256 do ZIP: `65b84afc5728af01726769ecc5f7fd46981ae96b7c24c6fb0451cf46287bf015`; SHA-256 do JAR: `d5f84c85fb5a7f9b757b98575e877446efa821d90ba6272d3a3c142851cc74ad`.
+- Conteúdo real inspecionado: `pack.mcmeta`, `META-INF/mods.toml`, classes, runtime species e recursos; 151 espécies, 151 geometrias, 151 animações e 159 texturas. Dependências declaradas: Minecraft 1.19.2, Forge 43.5.0 e GeckoLib 3.1.40.
+- Correções técnicas preservadas: braços do Charizard, asas de Pidgeotto/Pidgeot, corridas nativas de Graveler/Golem, voo de Moltres, correções de Mewtwo e validação opcional de Kabutops.
+- Evidência automatizada cobre movimento das chamas de cauda de Charmander/Charmeleon/Charizard e overlays de fogo de Ponyta/Rapidash, além de renderização/animação e articulação de Mew. Isso não substitui a revisão visual manual.
+- **Pendências visuais manuais:** avaliar as chamas de Charmander, Charmeleon e Charizard; o fogo/overlays de Ponyta e Rapidash; e Mew. A avaliação manual não bloqueia a aprovação técnica do JAR.
+- Próxima ação: nenhuma pendência técnica conhecida para concluir a Primeira Geração. Manter as revisões visuais manuais como follow-up separado.
