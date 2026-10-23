@@ -22,3 +22,12 @@ A conclusão 151/151, smoke final, inspeção do JAR e publicação permanecem p
 - O workflow exige linha explícita de saída da articulação de Mew, além das verificações já existentes de cabeça/corpo e roster.
 - Pendências de avaliação visual manual: chamas de Charmander, Charmeleon e Charizard; fogo de Ponyta/Rapidash; inspeção visual de Mew. Os testes automatizados não equivalem à aprovação visual manual.
 - Próximo passo: acompanhar #39985737492; confirmar GameTests, smoke 151, inspeção e artifact. Corrigir somente eventual falha observada; não iniciar workflow duplicado.
+
+
+## Retomada do smoke final de Mew — 2026-10-23
+
+- Branch de código: `feature/minemon-gen1-visual-fixes-batch16`; correção em validação: `48f3336c52fa2380a9372a18cf9d1015380e462a`. Checkpoint remoto documental: `7006a050c1e6d2955930193cb2fae8c4a4c8efb7`.
+- A validação #39985737492 falhou somente no smoke do cliente ao buscar um perfil RUN inexistente do Mew; os outros testes reportados passaram. A falha NPE foi corrigida com condição limitada à ausência comprovada de `ground_run` nativo; não se adicionou clip.
+- Execução #39991039004 está em andamento para o SHA de código `48f3336c52fa2380a9372a18cf9d1015380e462a`. Testes Java direcionados, build, verificadores cumulativos e GameTests passaram. Smoke completo do cliente ainda ativo; inspeção e upload do JAR ainda aguardam essa etapa. Sem aprovação ou JAR final confirmado neste checkpoint.
+- Próxima ação: consultar a mesma execução #39991039004; após sucesso, conferir inspeção e artefato. Se houver falha, registrar log e corrigir apenas a causa demonstrada.
+- Preservar correções de Charizard/Pidgeotto/Pidgeot/Graveler/Golem/Moltres/Mewtwo e recursos dos Lotes 1–15. As chamas e o visual de Mew ainda não têm aprovação manual.
