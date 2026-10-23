@@ -13,7 +13,7 @@
 | 12 | #111–#120 | `feature/minemon-gen1-batch12-cobblemon` | aprovado; Actions #39865755919; artefato #12466881117 |
 | 13 | #121–#130 | `feature/minemon-gen1-batch13-cobblemon` | aprovado; Actions #39878283990; artefato #12470668831 |
 | 14 | #131–#140 | `feature/minemon-gen1-batch14-cobblemon` | aprovado; Actions #39885955086; artefato #12474937645 |
-| 15 | #141–#150 | `feature/minemon-gen1-batch15-cobblemon` | commit `34b9ea1a739012d2a5375a4c1ef30a80f1bab76a`; Actions #39900310676: teste Java direcionado e suíte/build PASS; GameTests do servidor em andamento; smoke e JAR pendentes |
+| 15 | #141–#150 | `feature/minemon-gen1-batch15-cobblemon` | commit `34b9ea1a739012d2a5375a4c1ef30a80f1bab76a`; Actions #39900310676: Java, build e GameTests PASS; smoke completo do cliente em andamento; JAR pendente |
 | 16 | #151 | `feature/minemon-gen1-batch16-cobblemon` | não iniciado |
 
 ## Correções preservadas e pendências
@@ -46,5 +46,5 @@ Retomar do commit remoto e da execução de Actions mais recentes; não iniciar 
 - Verificadores estruturais e de preservação dos Lotes 8–15 passaram localmente; `verify_project.py`, `verify_runtime.py`, preflight Molang e `git diff --check` passaram.
 - O teste Java direcionado local não iniciou porque o wrapper não conseguiu baixar Gradle 7.5.1 (`Network is unreachable`); a validação Java foi delegada ao workflow. GameTests, smoke do cliente, JAR e publicação ainda não foram aprovados.
 - Actions #39900049407 falhou em `compileTestJava` porque `JsonArray.asList()` não existe na versão de Gson usada; a correção foi publicada em `34b9ea1a…` por iteração explícita.
-- Na execução #39900310676, o teste Java direcionado e a suíte/build passaram; os GameTests estão em andamento. O smoke completo do cliente ainda não começou.
-- Próxima ação: consultar a mesma execução #39900310676 até GameTests e smoke, depois inspecionar o JAR apenas se todas as etapas passarem.
+- Na execução #39900310676, o teste Java direcionado, suíte/build e GameTests do servidor passaram. O smoke completo do cliente está em andamento.
+- Próxima ação: consultar a mesma execução #39900310676 até a conclusão do smoke; inspecionar o JAR apenas se todos os testes passarem.

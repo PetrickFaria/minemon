@@ -41,7 +41,7 @@
 - Verificadores cumulativos locais L8–L15: PASS. `verify_project.py`, `verify_runtime.py`, preflight Molang e `git diff --check`: PASS. O preflight reporta separadamente expressões incompatíveis em clips de montaria retidos do Aerodactyl/Dragonite e espécies antigas; não são clips de locomoção ativos.
 - Teste Java direcionado do Lote 15: PASS na execução #39900310676.
 - Suíte Java completa e compilação/build: PASS na execução #39900310676.
-- GameTests do servidor: em andamento. Smoke do cliente, inspeção do JAR e publicação ainda não iniciados; permanecem condicionados à aprovação dos GameTests.
-- GitHub Actions do Lote 15: #39900310676, commit `34b9ea1a739012d2a5375a4c1ef30a80f1bab76a`, `in_progress` na etapa GameTests. A execução anterior #39900049407 terminou com falha de compilação já corrigida.
-- Próxima ação: acompanhar a mesma execução #39900310676 e registrar o resultado dos GameTests antes do smoke.
+- GameTests do servidor: PASS na execução #39900310676. Smoke completo do cliente: em andamento. Inspeção do JAR e publicação ainda não iniciadas; permanecem condicionadas à aprovação do smoke.
+- GitHub Actions do Lote 15: #39900310676, commit `34b9ea1a739012d2a5375a4c1ef30a80f1bab76a`, `in_progress` na etapa de smoke do cliente. A execução anterior #39900049407 terminou com falha de compilação já corrigida.
+- Próxima ação: acompanhar a mesma execução #39900310676 até o resultado do smoke; só então inspecionar o JAR.
 - Artefato do Lote 15: ainda não publicado.
