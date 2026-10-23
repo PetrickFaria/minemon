@@ -9825,9 +9825,9 @@
     "nationalPokedexNumber": 141,
     "slug": "kabutops",
     "name": "Kabutops",
-    "model": "assets/minemon/geo/kabutops/kabutops.geo.json",
-    "texture": "assets/minemon/textures/pokemon/kabutops/kabutops.png",
-    "animation": "assets/minemon/animations/kabutops/kabutops.animation.json",
+    "model": "assets/minemon/geo/kabutops_cobblemon_1_8_2/kabutops.geo.json",
+    "texture": "assets/minemon/textures/pokemon/kabutops_cobblemon_1_8_2/kabutops.png",
+    "animation": "assets/minemon/animations/kabutops_cobblemon_1_8_2/kabutops.animation.json",
     "mode": "ground",
     "scale": 0.9,
     "width": 1.2,
@@ -9836,15 +9836,12 @@
     "attack": 9.583333333333334,
     "speed": 0.28,
     "clips": {
+      "battle_idle": "animation.kabutops.battle_idle",
+      "blink": "animation.kabutops.blink",
+      "cry": "animation.kabutops.cry",
       "ground_idle": "animation.kabutops.ground_idle",
       "ground_walk": "animation.kabutops.ground_walk",
-      "battle_idle": "animation.kabutops.battle_idle",
-      "sleep": "animation.kabutops.sleep",
-      "cry": "animation.kabutops.cry",
-      "blink": "animation.kabutops.blink",
-      "ground_run": "animation.kabutops.minemon_run",
-      "sit": "animation.kabutops.minemon_sit",
-      "physical_attack": "animation.kabutops.minemon_physical_attack"
+      "sleep": "animation.kabutops.sleep"
     },
     "idle": "animation.kabutops.ground_idle",
     "walk": "animation.kabutops.ground_walk",
@@ -9855,19 +9852,38 @@
       "assets/minemon/sounds/pokemon/kabutops/kabutops_cry.ogg"
     ],
     "licenses": [
-      "assets/minemon/licenses/pokemon/kabutops/model-license.txt"
+      "assets/minemon/licenses/pokemon/kabutops/model-license.txt",
+      "assets/minemon/licenses/pokemon/kabutops/cobblemon-1.8.2-model-license.txt"
     ],
     "eggBase": 10448459,
-    "eggSpots": 9263678
+    "eggSpots": 9263678,
+    "source_molang_adaptations": {
+      "q.": "query.",
+      "Math.": "math."
+    },
+    "source_event_evidence": {
+      "animation.kabutops.cry": {
+        "sound_effects": {
+          "0.0": {
+            "effect": "pokemon.kabutops.cry"
+          }
+        }
+      }
+    },
+    "stripped_bones": {},
+    "geckolib3_bedrock_keyframes": true,
+    "strip_bedrock_locators": true,
+    "source_model_variant": "kabutops.geo.json",
+    "source_cobblemon_version": "1.8.2"
   },
   {
     "nationalPokedexNumber": 142,
     "slug": "aerodactyl",
     "name": "Aerodactyl",
-    "model": "assets/minemon/geo/aerodactyl/aerodactyl.geo.json",
-    "texture": "assets/minemon/textures/pokemon/aerodactyl/aerodactyl.png",
-    "animation": "assets/minemon/animations/aerodactyl/aerodactyl.animation.json",
-    "mode": "flying",
+    "model": "assets/minemon/geo/aerodactyl_cobblemon_1_8_2/aerodactyl.geo.json",
+    "texture": "assets/minemon/textures/pokemon/aerodactyl_cobblemon_1_8_2/aerodactyl.png",
+    "animation": "assets/minemon/animations/aerodactyl_cobblemon_1_8_2/aerodactyl.animation.json",
+    "mode": "ground",
     "scale": 1.8,
     "width": 1,
     "height": 1,
@@ -9875,19 +9891,41 @@
     "attack": 8.75,
     "speed": 0.33,
     "clips": {
-      "ground_idle": "animation.aerodactyl.ground_idle",
-      "ground_walk": "animation.aerodactyl.ground_walk",
-      "air_idle": "animation.aerodactyl.air_idle",
       "air_fly": "animation.aerodactyl.air_fly",
-      "sleep": "animation.aerodactyl.sleep",
+      "air_glide": "animation.aerodactyl.air_glide",
+      "air_idle": "animation.aerodactyl.air_idle",
+      "air_recoil": "animation.aerodactyl.air_recoil",
+      "air_sleep": "animation.aerodactyl.air_sleep",
+      "angry": "animation.aerodactyl.angry",
+      "battle_air_idle": "animation.aerodactyl.battle_air_idle",
+      "battle_cry": "animation.aerodactyl.battle_cry",
+      "battle_idle": "animation.aerodactyl.battle_idle",
+      "battle_sleep": "animation.aerodactyl.battle_sleep",
       "blink": "animation.aerodactyl.blink",
       "cry": "animation.aerodactyl.cry",
-      "ground_run": "animation.aerodactyl.minemon_run",
-      "sit": "animation.aerodactyl.minemon_sit",
-      "physical_attack": "animation.aerodactyl.minemon_physical_attack"
+      "demon": "animation.aerodactyl.demon",
+      "fly_test": "animation.aerodactyl.fly_test",
+      "ground_idle": "animation.aerodactyl.ground_idle",
+      "ground_run": "animation.aerodactyl.ground_run",
+      "ground_walk": "animation.aerodactyl.ground_walk",
+      "item_hold": "animation.aerodactyl.item_hold",
+      "recoil": "animation.aerodactyl.recoil",
+      "ride_air_fly": "animation.aerodactyl.ride_air_fly",
+      "ride_air_glide": "animation.aerodactyl.ride_air_glide",
+      "ride_dive": "animation.aerodactyl.ride_dive",
+      "ride_ground_run": "animation.aerodactyl.ride_ground_run",
+      "ride_ground_walk": "animation.aerodactyl.ride_ground_walk",
+      "ride_jump": "animation.aerodactyl.ride_jump",
+      "rider_quirk_left": "animation.aerodactyl.rider_quirk_left",
+      "rider_quirk_right": "animation.aerodactyl.rider_quirk_right",
+      "run_test": "animation.aerodactyl.run_test",
+      "run_testFAST": "animation.aerodactyl.run_testFAST",
+      "sad": "animation.aerodactyl.sad",
+      "sleep": "animation.aerodactyl.sleep",
+      "walk_test": "animation.aerodactyl.walk_test"
     },
-    "idle": "animation.aerodactyl.air_idle",
-    "walk": "animation.aerodactyl.air_fly",
+    "idle": "animation.aerodactyl.ground_idle",
+    "walk": "animation.aerodactyl.ground_walk",
     "attackTicks": 12,
     "excluded_clips": [],
     "sounds": [
@@ -9895,18 +9933,347 @@
       "assets/minemon/sounds/pokemon/aerodactyl/aerodactyl_cry.ogg"
     ],
     "licenses": [
-      "assets/minemon/licenses/pokemon/aerodactyl/model-license.txt"
+      "assets/minemon/licenses/pokemon/aerodactyl/model-license.txt",
+      "assets/minemon/licenses/pokemon/aerodactyl/cobblemon-1.8.2-model-license.txt"
     ],
     "eggBase": 11448023,
-    "eggSpots": 10329025
+    "eggSpots": 10329025,
+    "source_molang_adaptations": {
+      "q.": "query.",
+      "Math.": "math."
+    },
+    "source_event_evidence": {
+      "animation.aerodactyl.air_fly": {
+        "timeline": {
+          "0.1667": "query.has_entity ? { query.sound('animation.leather.wing_flap.medium'); };",
+          "1.3333": "query.has_entity ? { query.sound('animation.leather.wing_flap.medium'); };"
+        }
+      },
+      "animation.aerodactyl.air_idle": {
+        "timeline": {
+          "0.2083": "query.has_entity ? { query.sound('animation.leather.wing_flap.medium'); };",
+          "1.5417": "query.has_entity ? { query.sound('animation.leather.wing_flap.medium'); };"
+        }
+      },
+      "animation.aerodactyl.air_sleep": {
+        "timeline": {
+          "0.3333": "query.has_entity ? { query.sound('animation.leather.wing_flap.medium'); };",
+          "2.125": "query.has_entity ? { query.sound('animation.leather.wing_flap.medium'); };"
+        }
+      },
+      "animation.aerodactyl.battle_cry": {
+        "sound_effects": {
+          "0.25": {
+            "effect": "pokemon.aerodactyl.cry"
+          }
+        }
+      },
+      "animation.aerodactyl.cry": {
+        "sound_effects": {
+          "0.25": {
+            "effect": "pokemon.aerodactyl.cry"
+          }
+        }
+      }
+    },
+    "stripped_bones": {
+      "animation.aerodactyl.air_glide": [
+        "left_hand",
+        "left_index_finger",
+        "left_index_finger2",
+        "left_lower_arm",
+        "left_middle_finger",
+        "left_middle_finger2",
+        "left_pinky_finger",
+        "left_pinky_finger2",
+        "left_ring_finger",
+        "left_ring_finger2",
+        "left_upper_arm",
+        "left_wing_membrane",
+        "left_wing_membrane2",
+        "right_hand",
+        "right_index_finger",
+        "right_index_finger2",
+        "right_lower_arm",
+        "right_middle_finger",
+        "right_middle_finger2",
+        "right_pinky_finger",
+        "right_pinky_finger2",
+        "right_ring_finger",
+        "right_ring_finger2",
+        "right_upper_arm",
+        "right_wing_membrane",
+        "right_wing_membrane2",
+        "upper_neck"
+      ],
+      "animation.aerodactyl.battle_idle": [
+        "left_hand",
+        "left_index_finger",
+        "left_index_finger2",
+        "left_lower_arm",
+        "left_middle_finger",
+        "left_middle_finger2",
+        "left_pinky_finger",
+        "left_pinky_finger2",
+        "left_ring_finger",
+        "left_ring_finger2",
+        "left_upper_arm",
+        "left_wing_membrane",
+        "left_wing_membrane2",
+        "right_hand",
+        "right_index_finger",
+        "right_index_finger2",
+        "right_lower_arm",
+        "right_middle_finger",
+        "right_middle_finger2",
+        "right_pinky_finger",
+        "right_pinky_finger2",
+        "right_ring_finger",
+        "right_ring_finger2",
+        "right_upper_arm",
+        "right_wing_membrane",
+        "right_wing_membrane2",
+        "upper_neck"
+      ],
+      "animation.aerodactyl.battle_sleep": [
+        "left_hand",
+        "left_index_finger",
+        "left_index_finger2",
+        "left_lower_arm",
+        "left_middle_finger",
+        "left_middle_finger2",
+        "left_pinky_finger",
+        "left_pinky_finger2",
+        "left_ring_finger",
+        "left_ring_finger2",
+        "left_upper_arm",
+        "left_wing_membrane",
+        "left_wing_membrane2",
+        "right_hand",
+        "right_index_finger",
+        "right_index_finger2",
+        "right_lower_arm",
+        "right_middle_finger",
+        "right_middle_finger2",
+        "right_pinky_finger",
+        "right_pinky_finger2",
+        "right_ring_finger",
+        "right_ring_finger2",
+        "right_upper_arm",
+        "right_wing_membrane",
+        "right_wing_membrane2",
+        "upper_neck"
+      ],
+      "animation.aerodactyl.blink": [
+        "left_eyelid",
+        "right_eyelid"
+      ],
+      "animation.aerodactyl.demon": [
+        "left_hand",
+        "left_index_finger",
+        "left_index_finger2",
+        "left_lower_arm",
+        "left_middle_finger",
+        "left_middle_finger2",
+        "left_pinky_finger",
+        "left_pinky_finger2",
+        "left_ring_finger",
+        "left_ring_finger2",
+        "left_upper_arm",
+        "left_wing_membrane",
+        "left_wing_membrane2",
+        "right_hand",
+        "right_index_finger",
+        "right_index_finger2",
+        "right_lower_arm",
+        "right_middle_finger",
+        "right_middle_finger2",
+        "right_pinky_finger",
+        "right_pinky_finger2",
+        "right_ring_finger",
+        "right_ring_finger2",
+        "right_upper_arm",
+        "right_wing_membrane",
+        "right_wing_membrane2",
+        "upper_neck"
+      ],
+      "animation.aerodactyl.ground_idle": [
+        "left_hand",
+        "left_index_finger",
+        "left_index_finger2",
+        "left_lower_arm",
+        "left_middle_finger",
+        "left_middle_finger2",
+        "left_pinky_finger",
+        "left_pinky_finger2",
+        "left_ring_finger",
+        "left_ring_finger2",
+        "left_upper_arm",
+        "left_wing_membrane",
+        "left_wing_membrane2",
+        "right_hand",
+        "right_index_finger",
+        "right_index_finger2",
+        "right_lower_arm",
+        "right_middle_finger",
+        "right_middle_finger2",
+        "right_pinky_finger",
+        "right_pinky_finger2",
+        "right_ring_finger",
+        "right_ring_finger2",
+        "right_upper_arm",
+        "right_wing_membrane",
+        "right_wing_membrane2",
+        "upper_neck"
+      ],
+      "animation.aerodactyl.ground_run": [
+        "left_hand",
+        "left_index_finger",
+        "left_index_finger2",
+        "left_lower_arm",
+        "left_middle_finger",
+        "left_middle_finger2",
+        "left_pinky_finger",
+        "left_pinky_finger2",
+        "left_ring_finger",
+        "left_ring_finger2",
+        "left_upper_arm",
+        "left_wing_membrane",
+        "left_wing_membrane2",
+        "right_hand",
+        "right_index_finger",
+        "right_index_finger2",
+        "right_lower_arm",
+        "right_middle_finger",
+        "right_middle_finger2",
+        "right_pinky_finger",
+        "right_pinky_finger2",
+        "right_ring_finger",
+        "right_ring_finger2",
+        "right_upper_arm",
+        "right_wing_membrane",
+        "right_wing_membrane2",
+        "upper_neck"
+      ],
+      "animation.aerodactyl.ground_walk": [
+        "left_hand",
+        "left_index_finger",
+        "left_index_finger2",
+        "left_lower_arm",
+        "left_middle_finger",
+        "left_middle_finger2",
+        "left_pinky_finger",
+        "left_pinky_finger2",
+        "left_ring_finger",
+        "left_ring_finger2",
+        "left_upper_arm",
+        "left_wing_membrane",
+        "left_wing_membrane2",
+        "right_hand",
+        "right_index_finger",
+        "right_index_finger2",
+        "right_lower_arm",
+        "right_middle_finger",
+        "right_middle_finger2",
+        "right_pinky_finger",
+        "right_pinky_finger2",
+        "right_ring_finger",
+        "right_ring_finger2",
+        "right_upper_arm",
+        "right_wing_membrane",
+        "right_wing_membrane2",
+        "upper_neck"
+      ],
+      "animation.aerodactyl.ride_jump": [
+        "left_hand",
+        "left_index_finger",
+        "left_index_finger2",
+        "left_lower_arm",
+        "left_middle_finger",
+        "left_middle_finger2",
+        "left_pinky_finger",
+        "left_pinky_finger2",
+        "left_ring_finger",
+        "left_ring_finger2",
+        "left_upper_arm",
+        "left_wing_membrane",
+        "left_wing_membrane2",
+        "right_hand",
+        "right_index_finger",
+        "right_index_finger2",
+        "right_lower_arm",
+        "right_middle_finger",
+        "right_middle_finger2",
+        "right_pinky_finger",
+        "right_pinky_finger2",
+        "right_ring_finger",
+        "right_ring_finger2",
+        "right_upper_arm",
+        "right_wing_membrane",
+        "right_wing_membrane2",
+        "upper_neck"
+      ],
+      "animation.aerodactyl.sad": [
+        "undefined"
+      ],
+      "animation.aerodactyl.sleep": [
+        "left_hand",
+        "left_index_finger",
+        "left_index_finger2",
+        "left_lower_arm",
+        "left_middle_finger",
+        "left_middle_finger2",
+        "left_pinky_finger",
+        "left_pinky_finger2",
+        "left_ring_finger",
+        "left_ring_finger2",
+        "left_upper_arm",
+        "left_wing_membrane",
+        "left_wing_membrane2",
+        "right_hand",
+        "right_index_finger",
+        "right_index_finger2",
+        "right_lower_arm",
+        "right_middle_finger",
+        "right_middle_finger2",
+        "right_pinky_finger",
+        "right_pinky_finger2",
+        "right_ring_finger",
+        "right_ring_finger2",
+        "right_upper_arm",
+        "right_wing_membrane",
+        "right_wing_membrane2",
+        "upper_neck"
+      ]
+    },
+    "geckolib3_bedrock_keyframes": true,
+    "strip_bedrock_locators": true,
+    "source_model_variant": "aerodactyl.geo.json",
+    "source_cobblemon_version": "1.8.2",
+    "source_procedural_pose": {
+      "poser": "assets/cobblemon/bedrock/pokemon/posers/0142_aerodactyl/aerodactyl.json",
+      "look": [
+        "q.look('head', 1, 1, 22.5, -10, 15, -15)",
+        "q.look('neck', 1, 1, 25, -20, 20, -20)"
+      ],
+      "look_bones": [
+        "head",
+        "neck"
+      ],
+      "adapted_geo_bones": {
+        "head": "head",
+        "neck": "neck"
+      },
+      "adaptation": "Map q.look to a real compatible source head bone in MinemonModel; no locomotion gait is synthesized"
+    }
   },
   {
     "nationalPokedexNumber": 143,
     "slug": "snorlax",
     "name": "Snorlax",
-    "model": "assets/minemon/geo/snorlax/snorlax.geo.json",
-    "texture": "assets/minemon/textures/pokemon/snorlax/snorlax.png",
-    "animation": "assets/minemon/animations/snorlax/snorlax.animation.json",
+    "model": "assets/minemon/geo/snorlax_cobblemon_1_8_2/snorlax.geo.json",
+    "texture": "assets/minemon/textures/pokemon/snorlax_cobblemon_1_8_2/snorlax.png",
+    "animation": "assets/minemon/animations/snorlax_cobblemon_1_8_2/snorlax.animation.json",
     "mode": "ground",
     "scale": 2,
     "width": 1.2,
@@ -9915,13 +10282,15 @@
     "attack": 9.166666666666666,
     "speed": 0.23,
     "clips": {
+      "battle_idle": "animation.snorlax.battle_idle",
+      "cry": "animation.snorlax.cry",
       "ground_idle": "animation.snorlax.ground_idle",
       "ground_walk": "animation.snorlax.ground_walk",
-      "cry": "animation.snorlax.cry",
-      "ground_run": "animation.snorlax.minemon_run",
-      "sit": "animation.snorlax.minemon_sit",
-      "sleep": "animation.snorlax.minemon_sleep",
-      "physical_attack": "animation.snorlax.minemon_physical_attack"
+      "quirk_idle": "animation.snorlax.quirk_idle",
+      "recoil": "animation.snorlax.recoil",
+      "sleep": "animation.snorlax.sleep",
+      "sleep_intro": "animation.snorlax.sleep_intro",
+      "walkspeedtest": "animation.snorlax.walkspeedtest"
     },
     "idle": "animation.snorlax.ground_idle",
     "walk": "animation.snorlax.ground_walk",
@@ -9933,18 +10302,50 @@
       "assets/minemon/sounds/pokemon/snorlax/snorlax_quirk1.ogg"
     ],
     "licenses": [
-      "assets/minemon/licenses/pokemon/snorlax/model-license.txt"
+      "assets/minemon/licenses/pokemon/snorlax/model-license.txt",
+      "assets/minemon/licenses/pokemon/snorlax/cobblemon-1.8.2-model-license.txt"
     ],
     "eggBase": 1665924,
-    "eggSpots": 1267313
+    "eggSpots": 1267313,
+    "source_molang_adaptations": {
+      "q.": "query.",
+      "Math.": "math."
+    },
+    "source_event_evidence": {
+      "animation.snorlax.cry": {
+        "sound_effects": {
+          "0.1667": {
+            "effect": "pokemon.snorlax.cry"
+          }
+        }
+      }
+    },
+    "stripped_bones": {},
+    "geckolib3_bedrock_keyframes": true,
+    "strip_bedrock_locators": true,
+    "source_model_variant": "snorlax.geo.json",
+    "source_cobblemon_version": "1.8.2",
+    "source_procedural_pose": {
+      "poser": "assets/cobblemon/bedrock/pokemon/posers/0143_snorlax/snorlax.json",
+      "look": [
+        "q.look('head')"
+      ],
+      "look_bones": [
+        "head"
+      ],
+      "adapted_geo_bones": {
+        "head": "head"
+      },
+      "adaptation": "Map q.look to a real compatible source head bone in MinemonModel; no locomotion gait is synthesized"
+    }
   },
   {
     "nationalPokedexNumber": 144,
     "slug": "articuno",
     "name": "Articuno",
-    "model": "assets/minemon/geo/articuno/articuno.geo.json",
-    "texture": "assets/minemon/textures/pokemon/articuno/articuno.png",
-    "animation": "assets/minemon/animations/articuno/articuno.animation.json",
+    "model": "assets/minemon/geo/articuno_cobblemon_1_8_2/articuno.geo.json",
+    "texture": "assets/minemon/textures/pokemon/articuno_cobblemon_1_8_2/articuno.png",
+    "animation": "assets/minemon/animations/articuno_cobblemon_1_8_2/articuno.animation.json",
     "mode": "flying",
     "scale": 1.5,
     "width": 0.7,
@@ -9953,18 +10354,16 @@
     "attack": 7.083333333333333,
     "speed": 0.285,
     "clips": {
-      "ground_idle": "animation.articuno.ground_idle",
-      "air_idle": "animation.articuno.air_idle",
       "air_fly": "animation.articuno.air_fly",
-      "ground_run": "animation.articuno.minemon_run",
-      "sit": "animation.articuno.minemon_sit",
-      "sleep": "animation.articuno.minemon_sleep",
-      "physical_attack": "animation.articuno.minemon_physical_attack"
+      "air_idle": "animation.articuno.air_idle",
+      "blink": "animation.articuno.blink",
+      "ground_idle": "animation.articuno.ground_idle",
+      "hold_item": "animation.articuno.hold_item",
+      "hurt": "animation.articuno.hurt",
+      "pose": "animation.articuno.pose"
     },
     "idle": "animation.articuno.air_idle",
-    "walk": "animation.articuno.air_idle",
-    "movement_fallback": "static",
-    "generated_static_animation": false,
+    "walk": "animation.articuno.air_fly",
     "attackTicks": 12,
     "excluded_clips": [],
     "stripped_bones": {},
@@ -9973,18 +10372,42 @@
       "assets/minemon/sounds/pokemon/articuno/articuno_cry.ogg"
     ],
     "licenses": [
-      "assets/minemon/licenses/pokemon/articuno/model-license.txt"
+      "assets/minemon/licenses/pokemon/articuno/model-license.txt",
+      "assets/minemon/licenses/pokemon/articuno/cobblemon-1.8.2-model-license.txt"
     ],
     "eggBase": 5736888,
-    "eggSpots": 6593991
+    "eggSpots": 6593991,
+    "source_molang_adaptations": {
+      "q.": "query.",
+      "Math.": "math."
+    },
+    "source_event_evidence": {},
+    "geckolib3_bedrock_keyframes": true,
+    "strip_bedrock_locators": true,
+    "source_model_variant": "articuno.geo.json",
+    "source_cobblemon_version": "1.8.2",
+    "source_procedural_pose": {
+      "poser": "assets/cobblemon/bedrock/pokemon/posers/0144_articuno/articuno.json",
+      "look": [
+        "q.look('head_angle', 1, 1, 20, -90, 60, -37)"
+      ],
+      "look_bones": [
+        "head_angle"
+      ],
+      "adapted_geo_bones": {
+        "head_angle": "head_angle"
+      },
+      "adaptation": "Map q.look to a real compatible source head bone in MinemonModel; no locomotion gait is synthesized"
+    },
+    "source_static_idle": true
   },
   {
     "nationalPokedexNumber": 145,
     "slug": "zapdos",
     "name": "Zapdos",
-    "model": "assets/minemon/geo/zapdos/zapdos.geo.json",
-    "texture": "assets/minemon/textures/pokemon/zapdos/zapdos.png",
-    "animation": "assets/minemon/animations/zapdos/zapdos.animation.json",
+    "model": "assets/minemon/geo/zapdos_cobblemon_1_8_2/zapdos.geo.json",
+    "texture": "assets/minemon/textures/pokemon/zapdos_cobblemon_1_8_2/zapdos.png",
+    "animation": "assets/minemon/animations/zapdos_cobblemon_1_8_2/zapdos.animation.json",
     "mode": "flying",
     "scale": 1.5,
     "width": 1.2,
@@ -9993,18 +10416,16 @@
     "attack": 7.5,
     "speed": 0.3,
     "clips": {
-      "ground_idle": "animation.zapdos.ground_idle",
-      "air_idle": "animation.zapdos.air_idle",
       "air_fly": "animation.zapdos.air_fly",
-      "ground_run": "animation.zapdos.minemon_run",
-      "sit": "animation.zapdos.minemon_sit",
-      "sleep": "animation.zapdos.minemon_sleep",
-      "physical_attack": "animation.zapdos.minemon_physical_attack"
+      "air_idle": "animation.zapdos.air_idle",
+      "blink": "animation.zapdos.blink",
+      "ground_idle": "animation.zapdos.ground_idle",
+      "hold_item": "animation.zapdos.hold_item",
+      "hurt": "animation.zapdos.hurt",
+      "pose": "animation.zapdos.pose"
     },
     "idle": "animation.zapdos.air_idle",
-    "walk": "animation.zapdos.air_idle",
-    "movement_fallback": "static",
-    "generated_static_animation": false,
+    "walk": "animation.zapdos.air_fly",
     "attackTicks": 12,
     "excluded_clips": [],
     "stripped_bones": {},
@@ -10013,18 +10434,42 @@
       "assets/minemon/sounds/pokemon/zapdos/zapdos_cry.ogg"
     ],
     "licenses": [
-      "assets/minemon/licenses/pokemon/zapdos/model-license.txt"
+      "assets/minemon/licenses/pokemon/zapdos/model-license.txt",
+      "assets/minemon/licenses/pokemon/zapdos/cobblemon-1.8.2-model-license.txt"
     ],
     "eggBase": 12555348,
-    "eggSpots": 13543518
+    "eggSpots": 13543518,
+    "source_molang_adaptations": {
+      "q.": "query.",
+      "Math.": "math."
+    },
+    "source_event_evidence": {},
+    "geckolib3_bedrock_keyframes": true,
+    "strip_bedrock_locators": true,
+    "source_model_variant": "zapdos.geo.json",
+    "source_cobblemon_version": "1.8.2",
+    "source_procedural_pose": {
+      "poser": "assets/cobblemon/bedrock/pokemon/posers/0145_zapdos/zapdos.json",
+      "look": [
+        "q.look('head', 1, 1, 20, -90, 60, -37)"
+      ],
+      "look_bones": [
+        "head"
+      ],
+      "adapted_geo_bones": {
+        "head": "head"
+      },
+      "adaptation": "Map q.look to a real compatible source head bone in MinemonModel; no locomotion gait is synthesized"
+    },
+    "source_static_idle": true
   },
   {
     "nationalPokedexNumber": 146,
     "slug": "moltres",
     "name": "Moltres",
-    "model": "assets/minemon/geo/moltres/moltres.geo.json",
-    "texture": "assets/minemon/textures/pokemon/moltres/moltres.png",
-    "animation": "assets/minemon/animations/moltres/moltres.animation.json",
+    "model": "assets/minemon/geo/moltres_cobblemon_1_8_2/moltres.geo.json",
+    "texture": "assets/minemon/textures/pokemon/moltres_cobblemon_1_8_2/moltres.png",
+    "animation": "assets/minemon/animations/moltres_cobblemon_1_8_2/moltres.animation.json",
     "mode": "flying",
     "scale": 1.6,
     "width": 0.8,
@@ -10033,18 +10478,16 @@
     "attack": 8.333333333333334,
     "speed": 0.29,
     "clips": {
-      "ground_idle": "animation.moltres.ground_idle",
-      "air_idle": "animation.moltres.air_idle",
       "air_fly": "animation.moltres.air_fly",
-      "ground_run": "animation.moltres.minemon_run",
-      "sit": "animation.moltres.minemon_sit",
-      "sleep": "animation.moltres.minemon_sleep",
-      "physical_attack": "animation.moltres.minemon_physical_attack"
+      "air_idle": "animation.moltres.air_idle",
+      "blink": "animation.moltres.blink",
+      "ground_idle": "animation.moltres.ground_idle",
+      "hold_item": "animation.moltres.hold_item",
+      "hurt": "animation.moltres.hurt",
+      "pose": "animation.moltres.pose"
     },
     "idle": "animation.moltres.air_idle",
-    "walk": "animation.moltres.air_idle",
-    "movement_fallback": "static",
-    "generated_static_animation": false,
+    "walk": "animation.moltres.air_fly",
     "attackTicks": 12,
     "excluded_clips": [],
     "stripped_bones": {},
@@ -10053,18 +10496,45 @@
       "assets/minemon/sounds/pokemon/moltres/moltres_cry.ogg"
     ],
     "licenses": [
-      "assets/minemon/licenses/pokemon/moltres/model-license.txt"
+      "assets/minemon/licenses/pokemon/moltres/model-license.txt",
+      "assets/minemon/licenses/pokemon/moltres/cobblemon-1.8.2-model-license.txt"
     ],
     "eggBase": 12812872,
-    "eggSpots": 13801554
+    "eggSpots": 13801554,
+    "source_molang_adaptations": {
+      "q.": "query.",
+      "Math.": "math."
+    },
+    "source_event_evidence": {},
+    "geckolib3_bedrock_keyframes": true,
+    "strip_bedrock_locators": true,
+    "source_model_variant": "moltres.geo.json",
+    "source_cobblemon_version": "1.8.2",
+    "source_procedural_pose": {
+      "poser": "assets/cobblemon/bedrock/pokemon/posers/0146_moltres/moltres.json",
+      "look": [
+        "q.look('head', 1, 1, 20, -90, 60, -37)",
+        "q.look('neck', 1, 1, 70, -10, 20, -20)"
+      ],
+      "look_bones": [
+        "head",
+        "neck"
+      ],
+      "adapted_geo_bones": {
+        "head": "head",
+        "neck": "neck"
+      },
+      "adaptation": "Map q.look to a real compatible source head bone in MinemonModel; no locomotion gait is synthesized"
+    },
+    "source_static_idle": true
   },
   {
     "nationalPokedexNumber": 147,
     "slug": "dratini",
     "name": "Dratini",
-    "model": "assets/minemon/geo/dratini/dratini.geo.json",
-    "texture": "assets/minemon/textures/pokemon/dratini/dratini.png",
-    "animation": "assets/minemon/animations/dratini/dratini.animation.json",
+    "model": "assets/minemon/geo/dratini_cobblemon_1_8_2/dratini.geo.json",
+    "texture": "assets/minemon/textures/pokemon/dratini_cobblemon_1_8_2/dratini.png",
+    "animation": "assets/minemon/animations/dratini_cobblemon_1_8_2/dratini.animation.json",
     "mode": "ground",
     "scale": 0.6,
     "width": 1,
@@ -10073,19 +10543,23 @@
     "attack": 5.333333333333333,
     "speed": 0.25,
     "clips": {
-      "ground_idle": "animation.dratini.ground_idle",
-      "ground_walk": "animation.dratini.ground_walk",
-      "ground_run": "animation.dratini.ground_run",
+      "angry": "animation.dratini.angry",
       "battle_idle": "animation.dratini.battle_idle",
-      "water_idle": "animation.dratini.water_idle",
-      "water_swim": "animation.dratini.water_swim",
-      "surfacewater_swim": "animation.dratini.surfacewater_swim",
-      "sleep": "animation.dratini.sleep",
-      "water_sleep": "animation.dratini.water_sleep",
-      "cry": "animation.dratini.cry",
       "blink": "animation.dratini.blink",
-      "sit": "animation.dratini.minemon_sit",
-      "physical_attack": "animation.dratini.minemon_physical_attack"
+      "cry": "animation.dratini.cry",
+      "ditto_face": "animation.dratini.ditto_face",
+      "ground_idle": "animation.dratini.ground_idle",
+      "ground_run": "animation.dratini.ground_run",
+      "ground_walk": "animation.dratini.ground_walk",
+      "happy": "animation.dratini.happy",
+      "hurt": "animation.dratini.hurt",
+      "render": "animation.dratini.render",
+      "sad": "animation.dratini.sad",
+      "sleep": "animation.dratini.sleep",
+      "surfacewater_swim": "animation.dratini.surfacewater_swim",
+      "water_idle": "animation.dratini.water_idle",
+      "water_sleep": "animation.dratini.water_sleep",
+      "water_swim": "animation.dratini.water_swim"
     },
     "idle": "animation.dratini.ground_idle",
     "walk": "animation.dratini.ground_walk",
@@ -10096,18 +10570,50 @@
       "assets/minemon/sounds/pokemon/dratini/dratini_cry.ogg"
     ],
     "licenses": [
-      "assets/minemon/licenses/pokemon/dratini/model-license.txt"
+      "assets/minemon/licenses/pokemon/dratini/model-license.txt",
+      "assets/minemon/licenses/pokemon/dratini/cobblemon-1.8.2-model-license.txt"
     ],
     "eggBase": 7176160,
-    "eggSpots": 7968497
+    "eggSpots": 7968497,
+    "source_molang_adaptations": {
+      "q.": "query.",
+      "Math.": "math."
+    },
+    "source_event_evidence": {
+      "animation.dratini.cry": {
+        "sound_effects": {
+          "0.25": {
+            "effect": "pokemon.dratini.cry"
+          }
+        }
+      }
+    },
+    "stripped_bones": {},
+    "geckolib3_bedrock_keyframes": true,
+    "strip_bedrock_locators": true,
+    "source_model_variant": "dratini.geo.json",
+    "source_cobblemon_version": "1.8.2",
+    "source_procedural_pose": {
+      "poser": "assets/cobblemon/bedrock/pokemon/posers/0147_dratini/dratini.json",
+      "look": [
+        "q.look('head')"
+      ],
+      "look_bones": [
+        "head"
+      ],
+      "adapted_geo_bones": {
+        "head": "head"
+      },
+      "adaptation": "Map q.look to a real compatible source head bone in MinemonModel; no locomotion gait is synthesized"
+    }
   },
   {
     "nationalPokedexNumber": 148,
     "slug": "dragonair",
     "name": "Dragonair",
-    "model": "assets/minemon/geo/dragonair/dragonair.geo.json",
-    "texture": "assets/minemon/textures/pokemon/dragonair/dragonair.png",
-    "animation": "assets/minemon/animations/dragonair/dragonair.animation.json",
+    "model": "assets/minemon/geo/dragonair_cobblemon_1_8_2/dragonair.geo.json",
+    "texture": "assets/minemon/textures/pokemon/dragonair_cobblemon_1_8_2/dragonair.png",
+    "animation": "assets/minemon/animations/dragonair_cobblemon_1_8_2/dragonair.animation.json",
     "mode": "ground",
     "scale": 0.9,
     "width": 1.1,
@@ -10116,21 +10622,21 @@
     "attack": 7,
     "speed": 0.27,
     "clips": {
-      "ground_idle": "animation.dragonair.ground_idle",
-      "ground_walk": "animation.dragonair.ground_walk",
-      "ground_run": "animation.dragonair.ground_run",
       "battle_idle": "animation.dragonair.battle_idle",
-      "water_idle": "animation.dragonair.water_idle",
-      "water_swim": "animation.dragonair.water_swim",
+      "blink": "animation.dragonair.blink",
+      "cry": "animation.dragonair.cry",
+      "ditto_face": "animation.dragonair.ditto_face",
+      "ground_idle": "animation.dragonair.ground_idle",
+      "ground_run": "animation.dragonair.ground_run",
+      "ground_walk": "animation.dragonair.ground_walk",
+      "open_wings": "animation.dragonair.open_wings",
+      "render": "animation.dragonair.render",
+      "sleep": "animation.dragonair.sleep",
       "surfacewater_idle": "animation.dragonair.surfacewater_idle",
       "surfacewater_swim": "animation.dragonair.surfacewater_swim",
-      "sleep": "animation.dragonair.sleep",
+      "water_idle": "animation.dragonair.water_idle",
       "water_sleep": "animation.dragonair.water_sleep",
-      "cry": "animation.dragonair.cry",
-      "blink": "animation.dragonair.blink",
-      "new": "animation.dragonair.new",
-      "sit": "animation.dragonair.minemon_sit",
-      "physical_attack": "animation.dragonair.minemon_physical_attack"
+      "water_swim": "animation.dragonair.water_swim"
     },
     "idle": "animation.dragonair.ground_idle",
     "walk": "animation.dragonair.ground_walk",
@@ -10141,19 +10647,51 @@
       "assets/minemon/sounds/pokemon/dragonair/dragonair_cry.ogg"
     ],
     "licenses": [
-      "assets/minemon/licenses/pokemon/dragonair/model-license.txt"
+      "assets/minemon/licenses/pokemon/dragonair/model-license.txt",
+      "assets/minemon/licenses/pokemon/dragonair/cobblemon-1.8.2-model-license.txt"
     ],
     "eggBase": 5799911,
-    "eggSpots": 6658801
+    "eggSpots": 6658801,
+    "source_molang_adaptations": {
+      "q.": "query.",
+      "Math.": "math."
+    },
+    "source_event_evidence": {
+      "animation.dragonair.cry": {
+        "sound_effects": {
+          "0.2083": {
+            "effect": "pokemon.dragonair.cry"
+          }
+        }
+      }
+    },
+    "stripped_bones": {},
+    "geckolib3_bedrock_keyframes": true,
+    "strip_bedrock_locators": true,
+    "source_model_variant": "dragonair.geo.json",
+    "source_cobblemon_version": "1.8.2",
+    "source_procedural_pose": {
+      "poser": "assets/cobblemon/bedrock/pokemon/posers/0148_dragonair/dragonair.json",
+      "look": [
+        "q.look('head')"
+      ],
+      "look_bones": [
+        "head"
+      ],
+      "adapted_geo_bones": {
+        "head": "head"
+      },
+      "adaptation": "Map q.look to a real compatible source head bone in MinemonModel; no locomotion gait is synthesized"
+    }
   },
   {
     "nationalPokedexNumber": 149,
     "slug": "dragonite",
     "name": "Dragonite",
-    "model": "assets/minemon/geo/dragonite/dragonite.geo.json",
-    "texture": "assets/minemon/textures/pokemon/dragonite/dragonite.png",
-    "animation": "assets/minemon/animations/dragonite/dragonite.animation.json",
-    "mode": "flying",
+    "model": "assets/minemon/geo/dragonite_cobblemon_1_8_2/dragonite.geo.json",
+    "texture": "assets/minemon/textures/pokemon/dragonite_cobblemon_1_8_2/dragonite.png",
+    "animation": "assets/minemon/animations/dragonite_cobblemon_1_8_2/dragonite.animation.json",
+    "mode": "ground",
     "scale": 0.9,
     "width": 1.5,
     "height": 3.2,
@@ -10161,24 +10699,29 @@
     "attack": 11.166666666666666,
     "speed": 0.28,
     "clips": {
-      "ground_idle": "animation.dragonite.ground_idle",
-      "battle_idle": "animation.dragonite.battle_idle",
-      "ground_walk": "animation.dragonite.ground_walk",
-      "sleep": "animation.dragonite.sleep",
-      "air_idle": "animation.dragonite.air_idle",
       "air_fly": "animation.dragonite.air_fly",
-      "water_idle": "animation.dragonite.water_idle",
-      "water_swim": "animation.dragonite.water_swim",
-      "surfacewater_idle": "animation.dragonite.surfacewater_idle",
-      "surfacewater_swim": "animation.dragonite.surfacewater_swim",
+      "air_glide": "animation.dragonite.air_glide",
+      "air_idle": "animation.dragonite.air_idle",
+      "battle_idle": "animation.dragonite.battle_idle",
       "blink": "animation.dragonite.blink",
       "cry": "animation.dragonite.cry",
-      "ground_run": "animation.dragonite.minemon_run",
-      "sit": "animation.dragonite.minemon_sit",
-      "physical_attack": "animation.dragonite.minemon_physical_attack"
+      "ditto_face": "animation.dragonite.ditto_face",
+      "ground_idle": "animation.dragonite.ground_idle",
+      "ground_walk": "animation.dragonite.ground_walk",
+      "render": "animation.dragonite.render",
+      "ride_air_dive": "animation.dragonite.ride_air_dive",
+      "ride_air_fly": "animation.dragonite.ride_air_fly",
+      "ride_air_glide": "animation.dragonite.ride_air_glide",
+      "ride_ground_walk": "animation.dragonite.ride_ground_walk",
+      "shock": "animation.dragonite.shock",
+      "sleep": "animation.dragonite.sleep",
+      "surfacewater_idle": "animation.dragonite.surfacewater_idle",
+      "surfacewater_swim": "animation.dragonite.surfacewater_swim",
+      "water_idle": "animation.dragonite.water_idle",
+      "water_swim": "animation.dragonite.water_swim"
     },
-    "idle": "animation.dragonite.air_idle",
-    "walk": "animation.dragonite.air_fly",
+    "idle": "animation.dragonite.ground_idle",
+    "walk": "animation.dragonite.ground_walk",
     "attackTicks": 12,
     "excluded_clips": [],
     "sounds": [
@@ -10186,19 +10729,177 @@
       "assets/minemon/sounds/pokemon/dragonite/dragonite_cry.ogg"
     ],
     "licenses": [
-      "assets/minemon/licenses/pokemon/dragonite/model-license.txt"
+      "assets/minemon/licenses/pokemon/dragonite/model-license.txt",
+      "assets/minemon/licenses/pokemon/dragonite/cobblemon-1.8.2-model-license.txt"
     ],
     "eggBase": 15505731,
-    "eggSpots": 16166731
+    "eggSpots": 16166731,
+    "source_molang_adaptations": {
+      "q.": "query.",
+      "Math.": "math."
+    },
+    "source_event_evidence": {
+      "animation.dragonite.air_fly": {
+        "timeline": {
+          "1.5": "query.has_entity ? { query.sound('animation.leather.wing_flap.medium'); };",
+          "3.5": "query.has_entity ? { query.sound('animation.leather.wing_flap.medium'); };",
+          "5.5": "query.has_entity ? { query.sound('animation.leather.wing_flap.medium'); };",
+          "7.5": "query.has_entity ? { query.sound('animation.leather.wing_flap.medium'); };"
+        }
+      },
+      "animation.dragonite.cry": {
+        "sound_effects": {
+          "0.125": {
+            "effect": "pokemon.dragonite.cry"
+          }
+        }
+      }
+    },
+    "stripped_bones": {
+      "animation.dragonite.air_fly": [
+        "antenna_left3",
+        "antenna_left4",
+        "antenna_left5",
+        "antenna_right3",
+        "antenna_right4",
+        "antenna_right5",
+        "tail6"
+      ],
+      "animation.dragonite.air_glide": [
+        "antenna_left3",
+        "antenna_left4",
+        "antenna_left5",
+        "antenna_right3",
+        "antenna_right4",
+        "antenna_right5",
+        "tail6"
+      ],
+      "animation.dragonite.air_idle": [
+        "antenna_left3",
+        "antenna_left4",
+        "antenna_left5",
+        "antenna_right3",
+        "antenna_right4",
+        "antenna_right5",
+        "tail6"
+      ],
+      "animation.dragonite.battle_idle": [
+        "antenna_left3",
+        "antenna_left4",
+        "antenna_left5",
+        "antenna_right3",
+        "antenna_right4",
+        "antenna_right5",
+        "tail6"
+      ],
+      "animation.dragonite.ground_idle": [
+        "antenna_left3",
+        "antenna_left4",
+        "antenna_left5",
+        "antenna_right3",
+        "antenna_right4",
+        "antenna_right5",
+        "tail6"
+      ],
+      "animation.dragonite.ground_walk": [
+        "antenna_left3",
+        "antenna_left4",
+        "antenna_left5",
+        "antenna_right3",
+        "antenna_right4",
+        "antenna_right5",
+        "tail6"
+      ],
+      "animation.dragonite.render": [
+        "antenna_left3",
+        "antenna_left4",
+        "antenna_right3",
+        "antenna_right4"
+      ],
+      "animation.dragonite.ride_air_fly": [
+        "tail6"
+      ],
+      "animation.dragonite.ride_air_glide": [
+        "tail6"
+      ],
+      "animation.dragonite.ride_ground_walk": [
+        "tail6"
+      ],
+      "animation.dragonite.sleep": [
+        "antenna_left3",
+        "antenna_left4",
+        "antenna_left5",
+        "antenna_right3",
+        "antenna_right4",
+        "antenna_right5",
+        "tail6"
+      ],
+      "animation.dragonite.surfacewater_idle": [
+        "antenna_left3",
+        "antenna_left4",
+        "antenna_left5",
+        "antenna_right3",
+        "antenna_right4",
+        "antenna_right5",
+        "tail6"
+      ],
+      "animation.dragonite.surfacewater_swim": [
+        "antenna_left3",
+        "antenna_left4",
+        "antenna_left5",
+        "antenna_right3",
+        "antenna_right4",
+        "antenna_right5",
+        "tail6"
+      ],
+      "animation.dragonite.water_idle": [
+        "antenna_left3",
+        "antenna_left4",
+        "antenna_left5",
+        "antenna_right3",
+        "antenna_right4",
+        "antenna_right5",
+        "tail6"
+      ],
+      "animation.dragonite.water_swim": [
+        "antenna_left3",
+        "antenna_left4",
+        "antenna_left5",
+        "antenna_right3",
+        "antenna_right4",
+        "antenna_right5",
+        "tail6"
+      ]
+    },
+    "geckolib3_bedrock_keyframes": true,
+    "strip_bedrock_locators": true,
+    "source_model_variant": "dragonite.geo.json",
+    "source_cobblemon_version": "1.8.2",
+    "source_procedural_pose": {
+      "poser": "assets/cobblemon/bedrock/pokemon/posers/0149_dragonite/dragonite.json",
+      "look": [
+        "q.look('head', 1, 0.25, 10, -15, 5, -5)",
+        "q.look('neck', 0.5, 1, 10, -10, 20, -20)"
+      ],
+      "look_bones": [
+        "head",
+        "neck"
+      ],
+      "adapted_geo_bones": {
+        "head": "head",
+        "neck": "neck"
+      },
+      "adaptation": "Map q.look to a real compatible source head bone in MinemonModel; no locomotion gait is synthesized"
+    }
   },
   {
     "nationalPokedexNumber": 150,
     "slug": "mewtwo",
     "name": "Mewtwo",
-    "model": "assets/minemon/geo/mewtwo/mewtwo.geo.json",
-    "texture": "assets/minemon/textures/pokemon/mewtwo/mewtwo.png",
-    "animation": "assets/minemon/animations/mewtwo/mewtwo.animation.json",
-    "mode": "flying",
+    "model": "assets/minemon/geo/mewtwo_cobblemon_1_8_2/mewtwo.geo.json",
+    "texture": "assets/minemon/textures/pokemon/mewtwo_cobblemon_1_8_2/mewtwo.png",
+    "animation": "assets/minemon/animations/mewtwo_cobblemon_1_8_2/mewtwo.animation.json",
+    "mode": "ground",
     "scale": 1.2,
     "width": 0.75,
     "height": 1.7,
@@ -10206,71 +10907,54 @@
     "attack": 9.166666666666666,
     "speed": 0.33,
     "clips": {
-      "air_idle": "animation.mewtwo.air_idle",
       "air_fly": "animation.mewtwo.air_fly",
+      "air_idle": "animation.mewtwo.air_idle",
       "blink": "animation.mewtwo.blink",
-      "ground_run": "animation.mewtwo.minemon_run",
-      "sit": "animation.mewtwo.minemon_sit",
-      "sleep": "animation.mewtwo.minemon_sleep",
-      "physical_attack": "animation.mewtwo.minemon_physical_attack"
+      "ground_idle": "animation.mewtwo.ground_idle",
+      "ground_walk": "animation.mewtwo.ground_walk",
+      "hurt": "animation.mewtwo.hurt",
+      "pose": "animation.mewtwo.pose",
+      "surprised": "animation.mewtwo.surprised",
+      "tubed": "animation.mewtwo.tubed",
+      "unamused": "animation.mewtwo.unamused"
     },
-    "idle": "animation.mewtwo.air_idle",
-    "walk": "animation.mewtwo.air_fly",
+    "idle": "animation.mewtwo.ground_idle",
+    "walk": "animation.mewtwo.ground_walk",
     "attackTicks": 12,
-    "excluded_clips": [
-      "animation.mewtwo.ground_idle"
-    ],
-    "stripped_bones": {
-      "animation.mewtwo.air_idle": [
-        "finger",
-        "finger2",
-        "finger3",
-        "finger4",
-        "finger5",
-        "finger6",
-        "leftarm",
-        "leftfoot",
-        "leftforearm",
-        "lefthand",
-        "leftknee",
-        "leftleg",
-        "rightarm",
-        "rightfoot",
-        "rightforearm",
-        "righthand",
-        "rightknee",
-        "rightleg"
-      ],
-      "animation.mewtwo.air_fly": [
-        "finger",
-        "finger2",
-        "finger3",
-        "finger4",
-        "finger5",
-        "finger6",
-        "leftarm",
-        "leftfoot",
-        "leftforearm",
-        "lefthand",
-        "leftknee",
-        "leftleg",
-        "rightarm",
-        "rightfoot",
-        "rightforearm",
-        "righthand",
-        "rightknee",
-        "rightleg"
-      ]
-    },
+    "excluded_clips": [],
+    "stripped_bones": {},
     "sounds": [
       "assets/minemon/sounds/pokemon/mewtwo/mewtwo_ambient.ogg",
       "assets/minemon/sounds/pokemon/mewtwo/mewtwo_cry.ogg"
     ],
     "licenses": [
-      "assets/minemon/licenses/pokemon/mewtwo/model-license.txt"
+      "assets/minemon/licenses/pokemon/mewtwo/model-license.txt",
+      "assets/minemon/licenses/pokemon/mewtwo/cobblemon-1.8.2-model-license.txt"
     ],
     "eggBase": 13678290,
-    "eggSpots": 12691139
+    "eggSpots": 12691139,
+    "source_molang_adaptations": {
+      "q.": "query.",
+      "Math.": "math."
+    },
+    "source_event_evidence": {},
+    "geckolib3_bedrock_keyframes": true,
+    "strip_bedrock_locators": true,
+    "source_model_variant": "mewtwo.geo.json",
+    "source_cobblemon_version": "1.8.2",
+    "source_procedural_pose": {
+      "poser": "assets/cobblemon/bedrock/pokemon/posers/0150_mewtwo/mewtwo.json",
+      "look": [
+        "q.look('head', 1, 1, 20, -90, 60, -37)"
+      ],
+      "look_bones": [
+        "head"
+      ],
+      "adapted_geo_bones": {
+        "head": "head"
+      },
+      "adaptation": "Map q.look to a real compatible source head bone in MinemonModel; no locomotion gait is synthesized"
+    }
   },
   {
     "nationalPokedexNumber": 151,

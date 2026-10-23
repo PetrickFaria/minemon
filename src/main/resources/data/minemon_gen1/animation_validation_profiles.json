@@ -3142,5 +3142,409 @@
       "left_back_leg",
       "right_back_leg"
     ]
+  },
+  "kabutops": {
+    "idle": [
+      "body",
+      "head",
+      "left_arm",
+      "right_arm",
+      "left_claw",
+      "right_claw",
+      "left_upper_leg",
+      "right_upper_leg",
+      "tail"
+    ],
+    "walk": [
+      "left_upper_leg",
+      "right_upper_leg",
+      "left_lower_leg",
+      "right_lower_leg",
+      "left_arm",
+      "right_arm",
+      "left_claw",
+      "right_claw",
+      "tail",
+      "fin_upper_left",
+      "fin_upper_right"
+    ],
+    "run": [
+      "left_upper_leg",
+      "right_upper_leg",
+      "left_lower_leg",
+      "right_lower_leg",
+      "left_arm",
+      "right_arm",
+      "left_claw",
+      "right_claw",
+      "tail",
+      "fin_upper_left",
+      "fin_upper_right"
+    ]
+  },
+  "aerodactyl": {
+    "idle": [
+      "body",
+      "head",
+      "wing_ground_left",
+      "wing_ground_right",
+      "tail_1",
+      "tail_2",
+      "tail_3",
+      "tail_4",
+      "tail_5"
+    ],
+    "walk": [
+      "left_upper_leg",
+      "right_upper_leg",
+      "wing_ground_left",
+      "wing_ground_right",
+      "wing_ground_left2",
+      "wing_ground_right2",
+      "tail_1",
+      "tail_2",
+      "tail_3",
+      "tail_4",
+      "tail_5",
+      "head"
+    ],
+    "run": [
+      "left_upper_leg",
+      "right_upper_leg",
+      "wing_ground_left",
+      "wing_ground_right",
+      "wing_ground_left2",
+      "wing_ground_right2",
+      "tail_1",
+      "tail_2",
+      "tail_3",
+      "tail_4",
+      "tail_5",
+      "head",
+      "body"
+    ]
+  },
+  "snorlax": {
+    "idle": [
+      "head",
+      "belly",
+      "belly2",
+      "arm_left",
+      "arm_right",
+      "leg_left",
+      "leg_right",
+      "torso"
+    ],
+    "walk": [
+      "leg_left",
+      "leg_right",
+      "foot_left",
+      "foot_right",
+      "arm_left",
+      "arm_right",
+      "belly",
+      "belly2",
+      "torso"
+    ],
+    "run": [
+      "leg_left",
+      "leg_right",
+      "foot_left",
+      "foot_right",
+      "arm_left",
+      "arm_right",
+      "belly",
+      "belly2",
+      "torso"
+    ]
+  },
+  "articuno": {
+    "idle": [
+      "body",
+      "head",
+      "wing_open_left",
+      "wing_open_right",
+      "tail",
+      "feathers_left_hidden",
+      "feathers_right_hidden"
+    ],
+    "walk": [
+      "wing_open_left",
+      "wing_open_right",
+      "wing_open_left3",
+      "wing_open_right3",
+      "tail",
+      "head",
+      "body"
+    ],
+    "run": [
+      "wing_open_left",
+      "wing_open_right",
+      "wing_open_left3",
+      "wing_open_right3",
+      "tail_base",
+      "tail",
+      "head",
+      "body"
+    ],
+    "idle_static": [
+      "body",
+      "head",
+      "wing_open_left",
+      "wing_open_right",
+      "tail",
+      "feathers_left_hidden",
+      "feathers_right_hidden"
+    ]
+  },
+  "zapdos": {
+    "idle": [
+      "head",
+      "wing_open_left",
+      "wing_open_right"
+    ],
+    "walk": [
+      "wing_open_left",
+      "wing_open_right",
+      "tail",
+      "head",
+      "body"
+    ],
+    "run": [
+      "wing_open_left",
+      "wing_open_right",
+      "wing_open_left_anti",
+      "wing_open_right_anti",
+      "tail",
+      "head",
+      "body"
+    ],
+    "idle_static": [
+      "head",
+      "wing_open_left",
+      "wing_open_right"
+    ]
+  },
+  "moltres": {
+    "idle": [
+      "head",
+      "wing_open_left",
+      "wing_open_right",
+      "head_fire2",
+      "head_fire3",
+      "tail_fire_puff2",
+      "tail"
+    ],
+    "walk": [
+      "wing_open_left",
+      "wing_open_right",
+      "head_fire2",
+      "head_fire3",
+      "tail_fire_puff2",
+      "tail",
+      "body"
+    ],
+    "run": [
+      "wing_open_left",
+      "wing_open_right",
+      "head_fire2",
+      "head_fire3",
+      "tail_fire_puff2",
+      "tail",
+      "body"
+    ],
+    "idle_static": [
+      "head",
+      "wing_open_left",
+      "wing_open_right",
+      "head_fire2",
+      "head_fire3",
+      "tail_fire_puff2",
+      "tail"
+    ]
+  },
+  "dratini": {
+    "idle": [
+      "body",
+      "head",
+      "neck",
+      "segment1",
+      "segment2",
+      "segment3",
+      "segment4",
+      "segment5",
+      "segment6",
+      "segment7",
+      "segment8"
+    ],
+    "walk": [
+      "segment1",
+      "segment2",
+      "segment3",
+      "segment4",
+      "segment5",
+      "segment6",
+      "segment7",
+      "segment8",
+      "head",
+      "neck"
+    ],
+    "run": [
+      "segment1",
+      "segment2",
+      "segment3",
+      "segment4",
+      "segment5",
+      "segment6",
+      "segment7",
+      "segment8",
+      "head",
+      "neck"
+    ]
+  },
+  "dragonair": {
+    "idle": [
+      "body",
+      "head",
+      "head_rotation",
+      "neck",
+      "segment1",
+      "segment2",
+      "segment3",
+      "segment4",
+      "segment5",
+      "segment6",
+      "segment7",
+      "segment8",
+      "segment9",
+      "segment10",
+      "segment11",
+      "gem",
+      "gem_tail1",
+      "gem_tail2"
+    ],
+    "walk": [
+      "segment1",
+      "segment2",
+      "segment3",
+      "segment5",
+      "segment6",
+      "segment8",
+      "segment9",
+      "segment10",
+      "head",
+      "neck",
+      "gem",
+      "gem_tail1",
+      "gem_tail2"
+    ],
+    "run": [
+      "segment1",
+      "segment2",
+      "segment3",
+      "segment5",
+      "segment6",
+      "segment8",
+      "segment9",
+      "segment10",
+      "head",
+      "neck",
+      "gem",
+      "gem_tail1",
+      "gem_tail2"
+    ]
+  },
+  "dragonite": {
+    "idle": [
+      "head",
+      "arm_left",
+      "arm_right",
+      "leg_left",
+      "leg_right",
+      "wing_left",
+      "wing_right",
+      "tail1",
+      "tail2",
+      "tail3",
+      "tail4",
+      "tail5"
+    ],
+    "walk": [
+      "arm_left",
+      "arm_right",
+      "leg_left",
+      "leg_right",
+      "wing_left",
+      "wing_right",
+      "tail1",
+      "tail2",
+      "tail3",
+      "tail4",
+      "tail5",
+      "torso"
+    ],
+    "run": [
+      "arm_left",
+      "arm_right",
+      "leg_left",
+      "leg_right",
+      "wing_left",
+      "wing_right",
+      "tail1",
+      "tail2",
+      "tail3",
+      "tail4",
+      "tail5",
+      "torso"
+    ]
+  },
+  "mewtwo": {
+    "idle": [
+      "arm_left",
+      "arm_right",
+      "leg_left",
+      "leg_right",
+      "tail",
+      "tail2",
+      "tail3",
+      "tail4",
+      "tail5",
+      "tail6",
+      "tail7",
+      "tail8",
+      "tail9"
+    ],
+    "walk": [
+      "arm_left",
+      "arm_right",
+      "leg_left",
+      "leg_right",
+      "tail",
+      "tail2",
+      "tail3",
+      "tail4",
+      "tail5",
+      "tail6",
+      "tail7",
+      "tail8",
+      "tail9",
+      "torso"
+    ],
+    "run": [
+      "arm_left",
+      "arm_right",
+      "leg_left",
+      "leg_right",
+      "tail",
+      "tail2",
+      "tail3",
+      "tail4",
+      "tail5",
+      "tail6",
+      "tail7",
+      "tail8",
+      "tail9",
+      "torso"
+    ]
   }
 }

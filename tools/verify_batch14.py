@@ -9,6 +9,7 @@ R=ROOT/'src/main/resources'
 MP='data/minemon_gen1/runtime_species.json'
 VP='data/minemon_gen1/animation_validation_profiles.json'
 EXPECTED=['lapras','ditto','eevee','vaporeon','jolteon','flareon','porygon','omanyte','omastar','kabuto']
+BATCH15=['kabutops','aerodactyl','snorlax','articuno','zapdos','moltres','dratini','dragonair','dragonite','mewtwo']
 ACTIVE_RUNS={'porygon'}
 STATIC_IDLE={'eevee','vaporeon','jolteon','flareon'}
 ANATOMY={
@@ -31,8 +32,8 @@ old_defs=json.loads(base('src/main/resources/'+MP));old_profiles=json.loads(base
 assert len(defs)==151 and [d['nationalPokedexNumber'] for d in defs]==list(range(1,152))
 assert [d['slug'] for d in defs[130:140]]==EXPECTED
 assert defs[:130]==old_defs[:130],'Approved definitions #001–#130 changed'
-assert defs[140:]==old_defs[140:],'A post-batch definition changed'
-assert set(profiles)==set(old_profiles)|set(EXPECTED),'Unexpected or missing articulation profile'
+assert [d['slug'] for d in defs[140:150]]==BATCH15 and defs[150:]==old_defs[150:],'A post-batch definition changed'
+assert set(profiles)==set(old_profiles)|set(EXPECTED)|{'kabutops','aerodactyl','snorlax','articuno','zapdos','moltres','dratini','dragonair','dragonite','mewtwo'},'Unexpected or missing articulation profile'
 for slug,profile in old_profiles.items():assert profiles[slug]==profile,'Earlier profile changed: '+slug
 report=json.loads((ROOT/'docs/animation-audit/minemon-gen1-batch14-source-evidence.json').read_text())
 assert report['batch']==14 and report['range']==[131,140]
@@ -43,7 +44,7 @@ for d in old_defs[:130]:prior_paths.update([d['model'],d['texture'],d['animation
 for path in prior_paths:assert (R/path).read_bytes()==base('src/main/resources/'+path),'Earlier asset changed: '+path
 allowed={'src/main/resources/'+MP,'src/main/resources/'+VP,'src/main/resources/data/minemon_gen1/pokedex.json',
  'src/main/resources/assets/minemon/lang/en_us.json','src/main/resources/assets/minemon/lang/pt_br.json'}
-for d in defs[130:140]:
+for d in defs[130:140]+defs[140:150]:
  allowed.update('src/main/resources/'+p for p in [d['model'],d['texture'],d['animation']]+d.get('licenses',[]))
  allowed.add('src/main/resources/assets/minemon/models/item/'+d['slug']+'_spawn_egg.json')
 changed=subprocess.check_output(['git','diff','--name-only',BASE,'--','src/main/resources'],cwd=ROOT,text=True).splitlines()
@@ -98,9 +99,9 @@ if args.jar:
  with zipfile.ZipFile(args.jar) as z:
   names=set(z.namelist());jar_defs=json.loads(z.read('data/minemon_gen1/runtime_species.json'));dex=json.loads(z.read('data/minemon_gen1/pokedex.json'))
   assert jar_defs==defs and len(dex)==151 and [d['nationalPokedexNumber'] for d in dex]==list(range(1,152))
-  for d in defs[:140]:
+  for d in defs[:150]:
    for key in ('model','texture','animation'):assert packed(d[key]) in names,(d['slug'],key,packed(d[key]))
-  for d in defs[130:140]:
+  for d in defs[130:140]+defs[140:150]:
    packed_anim=json.loads(z.read(packed(d['animation'])))['animations'];source=readj(d['animation'])['animations']
    for name,clip in source.items():
     for key in ('sound_effects','particle_effects','timeline'):

@@ -14,6 +14,7 @@ BATCH11=['electrode','exeggcute','exeggutor','cubone','marowak','hitmonlee','hit
 BATCH12=['rhyhorn','rhydon','chansey','tangela','kangaskhan','horsea','seadra','goldeen','seaking','staryu']
 BATCH13=['starmie','mrmime','scyther','jynx','electabuzz','magmar','pinsir','tauros','magikarp','gyarados']
 BATCH14=['lapras','ditto','eevee','vaporeon','jolteon','flareon','porygon','omanyte','omastar','kabuto']
+BATCH15=['kabutops','aerodactyl','snorlax','articuno','zapdos','moltres','dratini','dragonair','dragonite','mewtwo']
 ACTIVE_RUNS={'drowzee','hypno'}
 ANATOMY={
  'cloyster':['shell_left','shell_right','shell_back_left','shell_back_right','inner_shell','inner_shell_left','inner_shell_right','inner_spike'],
@@ -41,8 +42,8 @@ assert [d['slug'] for d in defs[90:100]]==EXPECTED
 assert defs[:100]==old_defs[:100],'An approved definition through #100 changed'
 assert [d['slug'] for d in defs[100:110]]==BATCH11,'Batch 11 must remain the planned #101-110 sequence'
 assert [d['slug'] for d in defs[110:120]]==BATCH12,'Batch 12 must remain the planned #111-120 sequence'
-assert [d['slug'] for d in defs[120:130]]==BATCH13 and [d['slug'] for d in defs[130:140]]==BATCH14 and defs[140:]==old_defs[140:],'Batch 13 plan or later species changed'
-assert set(profiles)==set(old_profiles)|set(BATCH11)|set(BATCH12)|set(BATCH13)|set(BATCH14),'Unexpected or missing articulation profile'
+assert [d['slug'] for d in defs[120:130]]==BATCH13 and [d['slug'] for d in defs[130:140]]==BATCH14 and [d['slug'] for d in defs[140:150]]==BATCH15 and defs[150:]==old_defs[150:],'Batch 13 plan or later species changed'
+assert set(profiles)==set(old_profiles)|set(BATCH11)|set(BATCH12)|set(BATCH13)|set(BATCH14)|set(BATCH15),'Unexpected or missing articulation profile'
 for slug,old_profile in old_profiles.items():
  expected_profile=old_profile
  if slug=='alakazam':
@@ -132,7 +133,7 @@ assert all('body' in voltorb[name]['bones'] for name in ('animation.voltorb.grou
 
 for d in defs[100:110]:
  paths=[d['model'],d['texture'],d['animation']]+d.get('licenses',[]);allowed.update('src/main/resources/'+p for p in paths)
-for d in defs[110:120]+defs[120:130]+defs[130:140]:
+for d in defs[110:120]+defs[120:130]+defs[130:140]+defs[140:150]:
  paths=[d['model'],d['texture'],d['animation']]+d.get('licenses',[]);allowed.update('src/main/resources/'+p for p in paths)
 changed=subprocess.check_output(['git','diff','--name-only',BASE,'--','src/main/resources'],cwd=ROOT,text=True).splitlines()
 assert set(changed)<=allowed,set(changed)-allowed

@@ -24,7 +24,7 @@ jobs:
         run: python3 tools/verify_project.py
       - name: Preflight active animation Molang compatibility
         run: python3 tools/verify_molang_compatibility.py
-      - name: Verify batches 8 to 14, prior assets, and Pidge wing rigs
+      - name: Verify batches 8 to 15, prior assets, and Pidge wing rigs
         run: |
           git fetch --no-tags --depth=1 origin b77eac9c38aa0d6a1d35c3cfab36a707ac6cab24
           git fetch --no-tags --depth=1 origin 2503dd085402211ec2e9c6287fca83ab4747d2d5
@@ -33,6 +33,7 @@ jobs:
           git fetch --no-tags --depth=1 origin 0816533addee80e9e17a684c94bed399f4a9488f
           git fetch --no-tags --depth=1 origin 364fab1caf136d2e645f6ca77c4199570230eabd
           git fetch --no-tags --depth=1 origin c91e12ac3067317f97898a16f5deec3bfa919277
+          git fetch --no-tags --depth=1 origin 76fcb3074cc65c62dea6b94c291de90925494e95
           python3 tools/verify_batch8.py
           python3 tools/verify_batch9.py
           python3 tools/verify_batch10.py
@@ -40,11 +41,12 @@ jobs:
           python3 tools/verify_batch12.py
           python3 tools/verify_batch13.py
           python3 tools/verify_batch14.py
+          python3 tools/verify_batch15.py
           python3 tools/verify_pidge_wing_visibility.py
       - name: Ensure Gradle Wrapper is executable
         run: chmod +x gradlew
       - name: Run focused species selection and active Molang tests
-        run: ./gradlew --no-daemon test --tests 'br.com.petrickfaria.minemon.gametest.SmokeSpeciesSelectionTest' --tests 'br.com.petrickfaria.minemon.gametest.ActiveAnimationMolangPreflightTest' --tests 'br.com.petrickfaria.minemon.Batch10AnimationCompatibilityTest' --tests 'br.com.petrickfaria.minemon.Batch11AnimationCompatibilityTest' --tests 'br.com.petrickfaria.minemon.Batch12AnimationCompatibilityTest' --tests 'br.com.petrickfaria.minemon.Batch13AnimationCompatibilityTest' --tests 'br.com.petrickfaria.minemon.Batch14AnimationCompatibilityTest'
+        run: ./gradlew --no-daemon test --tests 'br.com.petrickfaria.minemon.gametest.SmokeSpeciesSelectionTest' --tests 'br.com.petrickfaria.minemon.gametest.ActiveAnimationMolangPreflightTest' --tests 'br.com.petrickfaria.minemon.Batch10AnimationCompatibilityTest' --tests 'br.com.petrickfaria.minemon.Batch11AnimationCompatibilityTest' --tests 'br.com.petrickfaria.minemon.Batch12AnimationCompatibilityTest' --tests 'br.com.petrickfaria.minemon.Batch13AnimationCompatibilityTest' --tests 'br.com.petrickfaria.minemon.Batch14AnimationCompatibilityTest' --tests 'br.com.petrickfaria.minemon.Batch15AnimationCompatibilityTest'
       - name: Report ForgeGradle and build/run tests
         id: compile
         run: ./gradlew --no-daemon buildEnvironment clean test build
@@ -111,6 +113,9 @@ jobs:
           jar tf "$jar_file" | grep -Fx 'assets/minemon_gen1/geo/lapras_cobblemon_1_8_2/lapras.geo.json'
           jar tf "$jar_file" | grep -Fx 'assets/minemon_gen1/textures/pokemon/lapras_cobblemon_1_8_2/lapras.png'
           jar tf "$jar_file" | grep -Fx 'assets/minemon_gen1/animations/lapras_cobblemon_1_8_2/lapras.animation.json'
+          jar tf "$jar_file" | grep -Fx 'assets/minemon_gen1/geo/aerodactyl_cobblemon_1_8_2/aerodactyl.geo.json'
+          jar tf "$jar_file" | grep -Fx 'assets/minemon_gen1/textures/pokemon/moltres_cobblemon_1_8_2/moltres.png'
+          jar tf "$jar_file" | grep -Fx 'assets/minemon_gen1/animations/dragonair_cobblemon_1_8_2/dragonair.animation.json'
           python3 tools/verify_runtime.py "$jar_file"
           python3 tools/verify_batch8.py "$jar_file"
           python3 tools/verify_batch9.py "$jar_file"
@@ -119,6 +124,7 @@ jobs:
           python3 tools/verify_batch12.py "$jar_file"
           python3 tools/verify_batch13.py "$jar_file"
           python3 tools/verify_batch14.py "$jar_file"
+          python3 tools/verify_batch15.py "$jar_file"
           python3 tools/verify_pidge_wing_visibility.py "$jar_file"
           unzip -p "$jar_file" META-INF/mods.toml | grep -F 'modId="minemon_gen1"'
           unzip -p "$jar_file" META-INF/mods.toml | grep -F 'versionRange="[1.19.2,1.20)"'
