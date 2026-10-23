@@ -5,6 +5,13 @@ SOURCE_PREFIX='assets/minemon/';RUNTIME_PREFIX='assets/minemon_gen1/'
 SOURCE_FIRE_HASHES={
  'ponyta':['8b1dce1b056345e5c90f7093a7cf84f4c0ddea6394d7e1042ca70bb585c2082c','ff440e9e72be7059acf4527238d5e15ea639ccdfa4aeef4229c882951fae3b09','39a698ac6c8d5a03957b85856d535f14fdef12c6133b746e5b38acb3cce5f50c','f76f69320a221c5fd7afa7b1e2e0aa4dc82e1d8c2696bdd0316014bbaee812df'],
  'rapidash':['0870dbda4cf51dd281b3295befbbbe5dcd580fba5a8720fbeba23f124189aa15','ecd0225ae7cec1a10f1c132bb4c1c03946b5933ded380f3a8e576aafb400b78e','1586693cf1eae6be8dbfd6b3b392fc87739f0973c8bee10c58ec09f6ef824455','4da49cbad5fc94c1d61aa1fe0aa01079524964794cd477bf8822b722e160f008']}
+fire_evidence=json.loads((ROOT/'docs/animation-audit/minemon-gen1-batch16-visual-source-evidence.json').read_text())['fire_overlays']
+renderer_source=(ROOT/'src/main/java/br/com/petrickfaria/minemon/client/MinemonRenderer.java').read_text()
+for slug in SOURCE_FIRE_HASHES:
+ layer=fire_evidence[slug]
+ if (layer.get('fps'),layer.get('loop'),layer.get('emissive'))!=(10,True,True):raise ValueError('Source resolver fire-layer settings changed: '+slug)
+if 'floor((entity.tickCount+partialTick)*0.5F)&3' not in renderer_source or 'entityTranslucent(texture)' not in renderer_source or 'renderCopyModel(getEntityModel(),texture,pose,buffers,15728880' not in renderer_source:
+ raise ValueError('Ponyta/Rapidash renderer no longer follows the native 10 fps emissive overlay contract')
 def runtime_path(path):return path.replace(SOURCE_PREFIX,RUNTIME_PREFIX,1) if path.startswith(SOURCE_PREFIX) else path
 def validate(read,definitions,prepared=False,packed=False):
  previous=0
