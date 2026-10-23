@@ -2,20 +2,18 @@
 
 ## Estado atual
 
-- Último lote concluído e aprovado: Lote 13 (#121–#130), código aprovado `c91e12ac3067317f97898a16f5deec3bfa919277`; checkpoint documental `2b65cc53c61821111e2a2b9a5b9919066a698f74`.
-- Actions #39878283990: sucesso; artefato JAR #12470668831, `Minemon-1.19.2-2.0.0.jar`, expira em 2026-11-06 01:07:44 UTC.
-- Próximo lote ativo: Lote 14 (#131–#140), branch `feature/minemon-gen1-batch14-cobblemon`, criada sobre a base íntegra aprovada do Lote 13.
-- Lotes 1–13 e 130 Pokémon preservados.
-- Lote 14: recursos #131–#140 integrados. Commit de código em validação `76fcb3074cc65c62dea6b94c291de90925494e95`; Actions #39885955086 está `in_progress`. Verificadores estruturais, Molang, compilação, testes Java e 13 GameTests do servidor passaram; smoke do cliente em execução, inspeção/upload do JAR pendentes.
-- Último checkpoint documental publicado: `eb05d98ced1fed881a66ba399652f8c6e39e8bcf`.
-- Lotes 15–16: não iniciados; aguardar aprovação e inspeção do JAR do Lote 14.
+- Último lote concluído e aprovado: Lote 14 (#131–#140), commit de código `76fcb3074cc65c62dea6b94c291de90925494e95`; execução #39885955086 concluída com sucesso.
+- Artefato aprovado: [Actions artifact #12474937645](https://github.com/PetrickFaria/minemon/actions/runs/39885955086/artifacts/12474937645), ZIP `Minemon-1.19.2-2.0.0-gen1`, contendo `Minemon-1.19.2-2.0.0.jar`; expira 2026-11-06 02:49:53 UTC.
+- JAR baixado e inspecionado; runtime e verificadores cumulativos dos Lotes 8–14 passaram, 140 Pokémon atualizados e 151 registros preservados.
+- Lotes 1–14 aprovados; 140 Pokémon preservados cumulativamente.
+- Próximo lote ativo: Lote 15 (#141–#150), branch `feature/minemon-gen1-batch15-cobblemon`, a criar sobre o checkpoint documental final do Lote 14.
 
 | Lote | Pokédex | Branch | Estado |
 |---:|---|---|---|
 | 12 | #111–#120 | `feature/minemon-gen1-batch12-cobblemon` | aprovado; Actions #39865755919; artefato #12466881117 |
 | 13 | #121–#130 | `feature/minemon-gen1-batch13-cobblemon` | aprovado; Actions #39878283990; artefato #12470668831 |
-| 14 | #131–#140 | `feature/minemon-gen1-batch14-cobblemon` | Actions #39885955086 em andamento (commit de código `76fcb307…`); smoke cliente pendente; JAR não publicado |
-| 15 | #141–#150 | `feature/minemon-gen1-batch15-cobblemon` | não iniciado |
+| 14 | #131–#140 | `feature/minemon-gen1-batch14-cobblemon` | aprovado; Actions #39885955086; artefato #12474937645 |
+| 15 | #141–#150 | `feature/minemon-gen1-batch15-cobblemon` | próximo lote autorizado; base Lote 14 aprovada |
 | 16 | #151 | `feature/minemon-gen1-batch16-cobblemon` | não iniciado |
 
 ## Correções preservadas e pendências
@@ -29,3 +27,13 @@
 ## Regra de retomada
 
 Retomar do commit remoto e da execução de Actions mais recentes; não iniciar lote seguinte sobre falha técnica bloqueante. Cada lote recebe seu documento próprio, checkpoints remotos, validação automatizada completa, inspeção do JAR e artefato antes do próximo.
+
+
+## Checkpoint aprovado do Lote 14 — 2026-10-23
+
+- Branch Lote 14: `feature/minemon-gen1-batch14-cobblemon`.
+- Commit de código aprovado: `76fcb3074cc65c62dea6b94c291de90925494e95`; Actions #39885955086 success.
+- JAR: `Minemon-1.19.2-2.0.0.jar`, dentro de [artefato ZIP #12474937645](https://github.com/PetrickFaria/minemon/actions/runs/39885955086/artifacts/12474937645); expira em 2026-11-06 02:49:53 UTC.
+- Testes: compilação/build, suíte Java, 13 GameTests, smoke cliente e inspeção real do JAR passaram. Verificadores runtime e cumulativos L8–14 passaram; 140 espécies atualizadas, 151 registros.
+- Correções aprovadas preservadas; avaliação manual dos Pokémon novos pendente; chamas dos três iniciais de fogo continuam pendentes e intactas.
+- Próximo passo: iniciar Lote 15 #141–#150 a partir do commit documental final do Lote 14.
