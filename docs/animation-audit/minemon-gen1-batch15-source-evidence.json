@@ -880,9 +880,9 @@
       "number": 150,
       "slug": "mewtwo",
       "model": "assets/cobblemon/bedrock/pokemon/models/0150_mewtwo/mewtwo.geo.json",
-      "idle": "animation.mewtwo.ground_idle",
-      "movement": "animation.mewtwo.ground_walk",
-      "mode": "ground",
+      "idle": "animation.mewtwo.air_idle",
+      "movement": "animation.mewtwo.air_fly",
+      "mode": "flying",
       "native_run": null,
       "fallback": null,
       "profiles": {
@@ -932,9 +932,45 @@
           "tail8",
           "tail9",
           "torso"
+        ],
+        "idle_static": [
+          "arm_left",
+          "arm_right",
+          "leg_left",
+          "leg_right",
+          "tail",
+          "tail2",
+          "tail3",
+          "tail4",
+          "tail5",
+          "tail6",
+          "tail7",
+          "tail8",
+          "tail9"
+        ],
+        "pose_transition": [
+          "arm_left",
+          "arm_right",
+          "tail",
+          "tail9"
         ]
       },
-      "stripped_bones": {}
+      "stripped_bones": {},
+      "source_behavior": {
+        "canFly": true,
+        "canWalk": false,
+        "poser_flight": [
+          "q.pitch_tilt('body')",
+          "q.look('head', 1, 1, 20, -90, 60, -37)",
+          "q.bedrock('mewtwo', 'air_fly')"
+        ],
+        "poser_hover": [
+          "q.pitch_tilt('body')",
+          "q.look('head', 1, 1, 20, -90, 60, -37)",
+          "q.bedrock('mewtwo', 'air_idle')"
+        ],
+        "native_ground_clips_not_selected": "The poser defines ground_idle/ground_walk for standing/walking, but species behavior is flying-only; default flying behavior selects the native air_idle/air_fly clips."
+      }
     }
   ]
 }

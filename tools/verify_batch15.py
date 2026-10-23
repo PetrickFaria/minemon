@@ -10,7 +10,7 @@ MP='data/minemon_gen1/runtime_species.json'
 VP='data/minemon_gen1/animation_validation_profiles.json'
 EXPECTED=['kabutops','aerodactyl','snorlax','articuno','zapdos','moltres','dratini','dragonair','dragonite','mewtwo']
 RUNS={'aerodactyl','dratini','dragonair'}
-FLYING={'articuno','zapdos','moltres'}
+FLYING={'articuno','zapdos','moltres','mewtwo'}
 ANATOMY={
  'kabutops':['left_arm','right_arm','left_claw','right_claw','left_upper_leg','right_upper_leg','tail','fin_upper_left','fin_upper_right'],
  'aerodactyl':['wing_ground_left','wing_ground_right','wing_air_left','wing_air_right','tail_1','tail_tip','left_upper_leg','right_upper_leg'],
@@ -43,6 +43,8 @@ for d in old_defs[:140]:prior_paths.update([d['model'],d['texture'],d['animation
 for path in prior_paths:assert (R/path).read_bytes()==base('src/main/resources/'+path),'Earlier asset changed: '+path
 allowed={'src/main/resources/'+MP,'src/main/resources/'+VP,'tools/import_cobblemon_182_batch.py','tools/verify_batch15.py',
  'src/test/java/br/com/petrickfaria/minemon/Batch15AnimationCompatibilityTest.java',
+ 'src/main/java/br/com/petrickfaria/minemon/client/MinemonModel.java',
+ 'src/main/java/br/com/petrickfaria/minemon/gametest/ClientSmokeTest.java',
  'docs/animation-audit/minemon-gen1-batch15-progress.md','docs/animation-audit/minemon-gen1-batch15-source-evidence.json',
  '.github/workflows/build.yml'}
 for d in defs[140:150]:
@@ -90,11 +92,12 @@ for i,d in enumerate(defs[140:150]):
  if d.get('source_static_idle'):
   assert profiles[slug].get('idle_static')==profiles[slug]['idle'],(slug,'source static idle profile is not exact')
  assert all('.minemon_' not in c for c in d.get('clips',{}).values()),(slug,'synthetic optional action selected')
- for slug in ('articuno','zapdos','moltres'):
+ for slug in ('articuno','zapdos','moltres','mewtwo'):
   d=defs[140+EXPECTED.index(slug)];a=readj(d['animation'])['animations']
-  assert d['idle']=='animation.'+slug+'.air_idle' and d['walk']=='animation.'+slug+'.air_fly'
-  expected_transition=['head','wing_open_left','wing_open_right']
+  assert d['mode']=='flying' and d['idle']=='animation.'+slug+'.air_idle' and d['walk']=='animation.'+slug+'.air_fly'
+  expected_transition=(['arm_left','arm_right','tail','tail9'] if slug=='mewtwo' else ['head','wing_open_left','wing_open_right'])
   assert profiles[slug].get('pose_transition')==expected_transition,(slug,'native aerial transition profile mismatch')
+  if slug=='mewtwo':assert profiles[slug].get('idle_static')==profiles[slug]['idle'] and d.get('source_static_idle') is True
   for joint in expected_transition:
    idle_channel=a[d['idle']]['bones'][joint].get('rotation')
    fly_channel=a[d['walk']]['bones'][joint].get('rotation')

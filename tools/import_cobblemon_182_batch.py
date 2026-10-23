@@ -403,9 +403,9 @@ for d in defs[start-1:end]:
   d['mode']='ground'
  if args.batch==15:
   # For #141–#150 prefer native terrestrial clips when the source includes
-  # ground locomotion; use native flight clips only for the three birds whose
-  # source rig has no ground walk/run cycle.
-  d['mode']='flying' if slug in ('articuno','zapdos','moltres') else 'ground'
+  # ground locomotion; use the source flight poser for species whose behavior
+  # is flying-only, including Mewtwo (which has no walk behavior).
+  d['mode']='flying' if slug in ('articuno','zapdos','moltres','mewtwo') else 'ground'
  flying=d['mode']=='flying'
  if slug in ('spearow','fearow'):
   # These sources use procedural poser wing motion; no native gait is invented.
@@ -524,14 +524,15 @@ for d in defs[start-1:end]:
   }
   for state,joints in excluded.get(slug,{}).items():
    prof[state]=[joint for joint in prof[state] if joint not in joints]
-  if slug in ('articuno','zapdos','moltres'):
+  if slug in ('articuno','zapdos','moltres','mewtwo'):
    # Cobblemon selects stable aerial source poses for idle and flight. These
-   # birds have no native ground gait; validate the settled air_idle -> air_fly
-   # pose transition on real head/wing channels instead of demanding a cycle.
+   # flying-only species have no native ground gait; validate the settled
+   # air_idle -> air_fly transition on real source channels instead of inventing a cycle.
    transition={
     'articuno':['head','wing_open_left','wing_open_right'],
     'zapdos':['head','wing_open_left','wing_open_right'],
     'moltres':['head','wing_open_left','wing_open_right'],
+    'mewtwo':['arm_left','arm_right','tail','tail9'],
    }[slug]
    idle_clip=animations[idle]['bones'];flight_clip=animations[walk]['bones']
    for joint in transition:
@@ -545,6 +546,11 @@ for d in defs[start-1:end]:
       assert isinstance(left,list) and isinstance(right,list) and len(left)==len(right)==3,(slug,joint,channel,'expected stable source vectors')
    assert any(idle_clip[joint]!=flight_clip[joint] for joint in transition),(slug,'native aerial poses are identical')
    prof['pose_transition']=transition
+   if slug=='mewtwo':
+    # The only time-varying locator in air_idle is non-rendered; validate the
+    # actual visible idle articulation as a stable native pose.
+    prof['idle_static']=prof['idle']
+    d['source_static_idle']=True
  if args.batch==9 and slug in ('seel','muk'):
   # Source inspection: these native idle clips contain only static vectors.
   # Keep their pose and make the client smoke assert stability, not motion.
@@ -591,6 +597,10 @@ for d in defs[start-1:end]:
     look_bones=sorted({re.search(r"q.look\('([^']+)'",a).group(1) for a in look_inputs})
     available={name:(name if name in bones else 'head' if name=='head_ai' and 'head' in bones else None) for name in look_bones}
     d['source_procedural_pose']={'poser':poser_path,'look':look_inputs,'look_bones':look_bones,'adapted_geo_bones':available,'adaptation':'Map q.look to a real compatible source head bone in MinemonModel; no locomotion gait is synthesized'}
+    if args.batch==15 and slug=='mewtwo':
+     pitch_inputs=sorted({a for pose in poser.get('poses',{}).values() for a in pose.get('animations',[]) if isinstance(a,str) and a.startswith("q.pitch_tilt('body')")})
+     d['source_procedural_pose']['pitch_tilt']=pitch_inputs
+     d['source_procedural_pose']['adaptation']='Map source q.look to the real head bone and q.pitch_tilt to the body pitch in MinemonModel; use native air_idle/air_fly poses without a synthesized ground gait'
  if args.batch in (11,12,13,14,15):
   # Never create a run clip from walk or synthesize action poses for this batch.
   # Keep only native action clips; runtime safely leaves the selected pose active

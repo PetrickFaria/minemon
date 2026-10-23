@@ -41,10 +41,11 @@ public class Batch15AnimationCompatibilityTest {
         assertEquals("ground",definitions.get(141).getAsJsonObject().get("mode").getAsString());
         assertEquals("ground",definitions.get(142).getAsJsonObject().get("mode").getAsString());
         for(int i=143;i<=145;i++) assertEquals("flying",definitions.get(i).getAsJsonObject().get("mode").getAsString());
-        for(int i=146;i<=149;i++) assertEquals("ground",definitions.get(i).getAsJsonObject().get("mode").getAsString());
+        for(int i=146;i<=148;i++) assertEquals("ground",definitions.get(i).getAsJsonObject().get("mode").getAsString());
+        assertEquals("flying",definitions.get(149).getAsJsonObject().get("mode").getAsString());
         for(String slug:List.of("aerodactyl","dratini","dragonair")) assertTrue(slug,definitions.get(SPECIES.indexOf(slug)+140).getAsJsonObject().getAsJsonObject("clips").has("ground_run"));
         for(String slug:List.of("kabutops","snorlax","articuno","zapdos","moltres","dragonite","mewtwo")) assertFalse(slug,definitions.get(SPECIES.indexOf(slug)+140).getAsJsonObject().getAsJsonObject("clips").has("ground_run"));
-        for(String slug:List.of("articuno","zapdos","moltres")) {
+        for(String slug:List.of("articuno","zapdos","moltres","mewtwo")) {
             var clips=definitions.get(SPECIES.indexOf(slug)+140).getAsJsonObject().getAsJsonObject("clips");
             assertTrue(slug+" native flight idle",clips.has("air_idle")); assertTrue(slug+" native flight",clips.has("air_fly"));
         }
@@ -162,6 +163,38 @@ public class Batch15AnimationCompatibilityTest {
                 assertTrue(slug+" native aerial poses rotate "+bone,changed);
             }
         }
+    }
+
+    @Test public void mewtwoUsesItsNativeFlyingPosesAndSourceTransition() throws Exception {
+        var definition=defs().get(149).getAsJsonObject();
+        assertEquals("flying",definition.get("mode").getAsString());
+        assertEquals("animation.mewtwo.air_idle",definition.get("idle").getAsString());
+        assertEquals("animation.mewtwo.air_fly",definition.get("walk").getAsString());
+        assertFalse("Mewtwo has no native ground run",definition.getAsJsonObject("clips").has("ground_run"));
+
+        var profiles=json("data/minemon_gen1/animation_validation_profiles.json").getAsJsonObject().getAsJsonObject("mewtwo");
+        assertEquals("Mewtwo visible idle pose is static",profiles.getAsJsonArray("idle").toString(),profiles.getAsJsonArray("idle_static").toString());
+        var transition=List.of("arm_left","arm_right","tail","tail9");
+        var actual=new java.util.ArrayList<String>();
+        for(JsonElement joint:profiles.getAsJsonArray("pose_transition"))actual.add(joint.getAsString());
+        assertEquals("Mewtwo uses real source flight joints",transition,actual);
+
+        var clips=animations("mewtwo");
+        for(String bone:transition) {
+            var idle=clips.getAsJsonObject("animation.mewtwo.air_idle").getAsJsonObject("bones").getAsJsonObject(bone).getAsJsonArray("rotation");
+            var fly=clips.getAsJsonObject("animation.mewtwo.air_fly").getAsJsonObject("bones").getAsJsonObject(bone).getAsJsonArray("rotation");
+            assertEquals(bone+" idle rotation",3,idle.size()); assertEquals(bone+" flight rotation",3,fly.size());
+            boolean changed=false;
+            for(int axis=0;axis<3;axis++)if(Math.abs(idle.get(axis).getAsDouble()-fly.get(axis).getAsDouble())>0.05)changed=true;
+            assertTrue("native Mewtwo pose changes "+bone,changed);
+        }
+        var poser=definition.getAsJsonObject("source_procedural_pose");
+        assertEquals(List.of("q.pitch_tilt('body')"),stringArray(poser.getAsJsonArray("pitch_tilt")));
+        assertEquals(List.of("q.look('head', 1, 1, 20, -90, 60, -37)"),stringArray(poser.getAsJsonArray("look")));
+    }
+
+    private static List<String> stringArray(JsonArray array) {
+        var result=new java.util.ArrayList<String>(); for(JsonElement value:array)result.add(value.getAsString()); return result;
     }
 
     private static void checkExpressions(JsonElement value,MolangParser parser,String source) throws Exception {

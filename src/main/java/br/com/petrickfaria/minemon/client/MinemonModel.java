@@ -29,20 +29,27 @@ public class MinemonModel extends AnimatedGeoModel<MinemonCreature> {
         String slug=entity.getSpeciesSlug();
         boolean headLook=slug.equals("spearow")||slug.equals("fearow")||slug.equals("abra")
             ||slug.equals("kadabra")||slug.equals("alakazam")||slug.equals("bellsprout")
-            ||slug.equals("geodude")||slug.equals("golem")||slug.equals("slowpoke")||slug.equals("slowbro");
-        if(!headLook||!getModelResource(entity).getPath().contains("_cobblemon_1_8_2/"))return;
+            ||slug.equals("geodude")||slug.equals("golem")||slug.equals("slowpoke")||slug.equals("slowbro")||slug.equals("mewtwo");
+        boolean bodyPitch=slug.equals("mewtwo");
+        if((!headLook&&!bodyPitch)||!getModelResource(entity).getPath().contains("_cobblemon_1_8_2/"))return;
         // These source posers declare q.look('head') or q.look('head_ai'). The
         // imported rigs map both names to their real head bone; no other
         // articulation is synthesized here.
         var data=event.getExtraDataOfType(software.bernie.geckolib3.model.provider.data.EntityModelData.class);
-        var head=getAnimationProcessor().getBone("head");
-        if(data.isEmpty()||head==null)return;
+        var head=headLook?getAnimationProcessor().getBone("head"):null;
+        if(data.isEmpty())return;
         var input=(software.bernie.geckolib3.model.provider.data.EntityModelData)data.get(0);
-        float basePitch=slug.equals("fearow")?-10.0F:0.0F;
-        float pitchLimit=slug.equals("geodude")?15.0F:25.0F;
-        float yawLimit=slug.equals("geodude")?15.0F:60.0F;
-        head.setRotationX((basePitch+net.minecraft.util.Mth.clamp(input.headPitch,-pitchLimit,pitchLimit))*(float)Math.PI/180.0F);
-        head.setRotationY(net.minecraft.util.Mth.clamp(input.netHeadYaw,-yawLimit,yawLimit)*(float)Math.PI/180.0F);
+        if(head!=null) {
+            float basePitch=slug.equals("fearow")?-10.0F:0.0F;
+            float pitchLimit=slug.equals("geodude")?15.0F:25.0F;
+            float yawLimit=slug.equals("geodude")?15.0F:60.0F;
+            head.setRotationX((basePitch+net.minecraft.util.Mth.clamp(input.headPitch,-pitchLimit,pitchLimit))*(float)Math.PI/180.0F);
+            head.setRotationY(net.minecraft.util.Mth.clamp(input.netHeadYaw,-yawLimit,yawLimit)*(float)Math.PI/180.0F);
+        }
+        if(bodyPitch) {
+            var body=getAnimationProcessor().getBone("body");
+            if(body!=null)body.setRotationX(body.getRotationX()+input.headPitch*(float)Math.PI/180.0F);
+        }
     }
 
     private void applyPidgeWingVisibility(MinemonCreature entity) {

@@ -3560,6 +3560,27 @@
       "tail8",
       "tail9",
       "torso"
+    ],
+    "idle_static": [
+      "arm_left",
+      "arm_right",
+      "leg_left",
+      "leg_right",
+      "tail",
+      "tail2",
+      "tail3",
+      "tail4",
+      "tail5",
+      "tail6",
+      "tail7",
+      "tail8",
+      "tail9"
+    ],
+    "pose_transition": [
+      "arm_left",
+      "arm_right",
+      "tail",
+      "tail9"
     ]
   }
 }

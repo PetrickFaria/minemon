@@ -10899,7 +10899,7 @@
     "model": "assets/minemon/geo/mewtwo_cobblemon_1_8_2/mewtwo.geo.json",
     "texture": "assets/minemon/textures/pokemon/mewtwo_cobblemon_1_8_2/mewtwo.png",
     "animation": "assets/minemon/animations/mewtwo_cobblemon_1_8_2/mewtwo.animation.json",
-    "mode": "ground",
+    "mode": "flying",
     "scale": 1.2,
     "width": 0.75,
     "height": 1.7,
@@ -10918,8 +10918,8 @@
       "tubed": "animation.mewtwo.tubed",
       "unamused": "animation.mewtwo.unamused"
     },
-    "idle": "animation.mewtwo.ground_idle",
-    "walk": "animation.mewtwo.ground_walk",
+    "idle": "animation.mewtwo.air_idle",
+    "walk": "animation.mewtwo.air_fly",
     "attackTicks": 12,
     "excluded_clips": [],
     "stripped_bones": {},
@@ -10953,8 +10953,12 @@
       "adapted_geo_bones": {
         "head": "head"
       },
-      "adaptation": "Map q.look to a real compatible source head bone in MinemonModel; no locomotion gait is synthesized"
-    }
+      "pitch_tilt": [
+        "q.pitch_tilt('body')"
+      ],
+      "adaptation": "Map source q.look to the real head bone and q.pitch_tilt to body pitch in MinemonModel; use native air_idle/air_fly poses without a synthesized ground gait"
+    },
+    "source_static_idle": true
   },
   {
     "nationalPokedexNumber": 151,
