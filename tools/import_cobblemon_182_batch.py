@@ -524,6 +524,27 @@ for d in defs[start-1:end]:
   }
   for state,joints in excluded.get(slug,{}).items():
    prof[state]=[joint for joint in prof[state] if joint not in joints]
+  if slug in ('articuno','zapdos','moltres'):
+   # Cobblemon selects stable aerial source poses for idle and flight. These
+   # birds have no native ground gait; validate the settled air_idle -> air_fly
+   # pose transition on real head/wing channels instead of demanding a cycle.
+   transition={
+    'articuno':['head','wing_open_left','wing_open_right'],
+    'zapdos':['head','wing_open_left','wing_open_right'],
+    'moltres':['head','wing_open_left','wing_open_right'],
+   }[slug]
+   idle_clip=animations[idle]['bones'];flight_clip=animations[walk]['bones']
+   for joint in transition:
+    assert joint in idle_clip and joint in flight_clip,(slug,joint,'missing aerial pose channel')
+    idle_rotation=idle_clip[joint].get('rotation');flight_rotation=flight_clip[joint].get('rotation')
+    assert isinstance(idle_rotation,list) and isinstance(flight_rotation,list) and len(idle_rotation)==len(flight_rotation)==3,(slug,joint,'expected stable source rotation vectors')
+    assert any(abs(float(left)-float(right))>0.05 for left,right in zip(idle_rotation,flight_rotation)),(slug,joint,'source aerial joint does not change between poses')
+    for channel in ('rotation','position','scale'):
+     left=idle_clip[joint].get(channel);right=flight_clip[joint].get(channel)
+     if left is not None or right is not None:
+      assert isinstance(left,list) and isinstance(right,list) and len(left)==len(right)==3,(slug,joint,channel,'expected stable source vectors')
+   assert any(idle_clip[joint]!=flight_clip[joint] for joint in transition),(slug,'native aerial poses are identical')
+   prof['pose_transition']=transition
  if args.batch==9 and slug in ('seel','muk'):
   # Source inspection: these native idle clips contain only static vectors.
   # Keep their pose and make the client smoke assert stability, not motion.

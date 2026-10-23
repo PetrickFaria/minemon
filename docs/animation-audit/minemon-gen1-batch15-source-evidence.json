@@ -471,9 +471,19 @@
           "tail",
           "feathers_left_hidden",
           "feathers_right_hidden"
+        ],
+        "pose_transition": [
+          "head",
+          "wing_open_left",
+          "wing_open_right"
         ]
       },
-      "stripped_bones": {}
+      "stripped_bones": {},
+      "aerial_pose_transition": {
+        "idle": "animation.articuno.air_idle",
+        "movement": "animation.articuno.air_fly",
+        "validation": "stable native air_idle and air_fly poses; profile only source joints with a changed static vector; no terrestrial gait synthesized"
+      }
     },
     {
       "number": 145,
@@ -510,9 +520,19 @@
           "head",
           "wing_open_left",
           "wing_open_right"
+        ],
+        "pose_transition": [
+          "head",
+          "wing_open_left",
+          "wing_open_right"
         ]
       },
-      "stripped_bones": {}
+      "stripped_bones": {},
+      "aerial_pose_transition": {
+        "idle": "animation.zapdos.air_idle",
+        "movement": "animation.zapdos.air_fly",
+        "validation": "stable native air_idle and air_fly poses; profile only source joints with a changed static vector; no terrestrial gait synthesized"
+      }
     },
     {
       "number": 146,
@@ -559,9 +579,19 @@
           "head_fire3",
           "tail_fire_puff2",
           "tail"
+        ],
+        "pose_transition": [
+          "head",
+          "wing_open_left",
+          "wing_open_right"
         ]
       },
-      "stripped_bones": {}
+      "stripped_bones": {},
+      "aerial_pose_transition": {
+        "idle": "animation.moltres.air_idle",
+        "movement": "animation.moltres.air_fly",
+        "validation": "stable native air_idle and air_fly poses; profile only source joints with a changed static vector; no terrestrial gait synthesized"
+      }
     },
     {
       "number": 147,

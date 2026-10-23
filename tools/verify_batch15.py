@@ -93,6 +93,14 @@ for i,d in enumerate(defs[140:150]):
  for slug in ('articuno','zapdos','moltres'):
   d=defs[140+EXPECTED.index(slug)];a=readj(d['animation'])['animations']
   assert d['idle']=='animation.'+slug+'.air_idle' and d['walk']=='animation.'+slug+'.air_fly'
+  expected_transition=['head','wing_open_left','wing_open_right']
+  assert profiles[slug].get('pose_transition')==expected_transition,(slug,'native aerial transition profile mismatch')
+  for joint in expected_transition:
+   idle_channel=a[d['idle']]['bones'][joint].get('rotation')
+   fly_channel=a[d['walk']]['bones'][joint].get('rotation')
+   assert isinstance(idle_channel,list) and isinstance(fly_channel,list),(slug,joint,'stable native rotation vectors required')
+   assert len(idle_channel)==len(fly_channel)==3,(slug,joint,'native vector length')
+   assert any(abs(float(x)-float(y))>0.05 for x,y in zip(idle_channel,fly_channel)),(slug,joint,'source aerial poses must change')
   if slug=='moltres':
    for clip in ('animation.moltres.air_idle','animation.moltres.air_fly'):
     assert {'head_fire2','head_fire3','tail_fire_puff2'}<=set(a[clip].get('bones',{})),(clip,'flame parts absent from native clip')

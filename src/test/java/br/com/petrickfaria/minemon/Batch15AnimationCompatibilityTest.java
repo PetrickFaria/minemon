@@ -126,6 +126,47 @@ public class Batch15AnimationCompatibilityTest {
         }
     }
 
+    @Test public void legendaryBirdsUseNativeAerialPoseTransitionsInsteadOfGroundGaits() throws Exception {
+        var definitions=defs();
+        var profiles=json("data/minemon_gen1/animation_validation_profiles.json").getAsJsonObject();
+        var expected=Map.of(
+            "articuno",List.of("head","wing_open_left","wing_open_right"),
+            "zapdos",List.of("head","wing_open_left","wing_open_right"),
+            "moltres",List.of("head","wing_open_left","wing_open_right")
+        );
+        for(var entry:expected.entrySet()) {
+            String slug=entry.getKey();
+            var definition=definitions.get(SPECIES.indexOf(slug)+140).getAsJsonObject();
+            assertEquals(slug,"flying",definition.get("mode").getAsString());
+            assertEquals(slug+" native idle", "animation."+slug+".air_idle",definition.get("idle").getAsString());
+            assertEquals(slug+" native flight", "animation."+slug+".air_fly",definition.get("walk").getAsString());
+            assertFalse(slug+" has no native ground run",definition.getAsJsonObject("clips").has("ground_run"));
+
+            var speciesProfiles=profiles.getAsJsonObject(slug);
+            var transition=new java.util.ArrayList<String>();
+            for(JsonElement joint:speciesProfiles.getAsJsonArray("pose_transition"))transition.add(joint.getAsString());
+            assertEquals(slug+" uses source aerial joints",entry.getValue(),transition);
+            assertEquals(slug+" stable idle profile",speciesProfiles.getAsJsonArray("idle").toString(),speciesProfiles.getAsJsonArray("idle_static").toString());
+
+            var clips=animations(slug);
+            for(String bone:entry.getValue()) {
+                var idleBone=clips.getAsJsonObject("animation."+slug+".air_idle").getAsJsonObject("bones").getAsJsonObject(bone);
+                var flightBone=clips.getAsJsonObject("animation."+slug+".air_fly").getAsJsonObject("bones").getAsJsonObject(bone);
+                boolean changed=false;
+                for(String channel:List.of("rotation","position","scale")) {
+                    if(!idleBone.has(channel)&&!flightBone.has(channel))continue;
+                    assertTrue(slug+" "+bone+" "+channel+" idle is a native vector",idleBone.get(channel).isJsonArray());
+                    assertTrue(slug+" "+bone+" "+channel+" flight is a native vector",flightBone.get(channel).isJsonArray());
+                    var idleVector=idleBone.getAsJsonArray(channel);var flightVector=flightBone.getAsJsonArray(channel);
+                    assertEquals(slug+" "+bone+" "+channel,3,idleVector.size());
+                    assertEquals(slug+" "+bone+" "+channel,3,flightVector.size());
+                    for(int axis=0;axis<3;axis++)if(Math.abs(idleVector.get(axis).getAsDouble()-flightVector.get(axis).getAsDouble())>0.05)changed=true;
+                }
+                assertTrue(slug+" native aerial poses change "+bone,changed);
+            }
+        }
+    }
+
     private static void checkExpressions(JsonElement value,MolangParser parser,String source) throws Exception {
         if(value==null||value.isJsonNull())return;
         if(value.isJsonArray()) for(var child:value.getAsJsonArray()) checkExpressions(child,parser,source);

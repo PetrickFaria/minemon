@@ -3295,6 +3295,11 @@
       "tail",
       "feathers_left_hidden",
       "feathers_right_hidden"
+    ],
+    "pose_transition": [
+      "head",
+      "wing_open_left",
+      "wing_open_right"
     ]
   },
   "zapdos": {
@@ -3366,6 +3371,11 @@
       "head_fire3",
       "tail_fire_puff2",
       "tail"
+    ],
+    "pose_transition": [
+      "head",
+      "wing_open_left",
+      "wing_open_right"
     ]
   },
   "dratini": {
