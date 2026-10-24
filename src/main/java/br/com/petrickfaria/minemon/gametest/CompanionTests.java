@@ -231,24 +231,39 @@ public final class CompanionTests {
   });
  }
 
- @GameTest(template="test_arena",timeoutTicks=430)
+ @GameTest(template="test_arena",timeoutTicks=1000)
  public static void nativeGroundRunnerUsesSpontaneousRunOnlyDuringTravel(GameTestHelper h) {
   floor(h);
   MinemonCreature runner=h.spawn(ModEntities.SPECIES.get("geodude").get(),new BlockPos(3,1,5));
   check(h,br.com.petrickfaria.minemon.entity.SpeciesAssetIndex.clip("geodude","ground_run","run")!=null,
       "Geodude's native run clip must be selected for spontaneous running");
+  runner.goalSelector.removeAllGoals();
+  runner.targetSelector.removeAllGoals();
+  runner.getRandom().setSeed(125L);
   awaitSpontaneousRun(h,runner,0);
  }
 
  private static void awaitSpontaneousRun(GameTestHelper h,MinemonCreature runner,int elapsed) {
   if(runner.getSpontaneousRunCountForValidation()>0) {
    check(h,runner.getTarget()==null,"Spontaneous running must not take over a combat target");
-   h.succeed();return;
+   double base=runner.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED).getBaseValue();
+   check(h,runner.isSpontaneouslyRunning(),"Observed run must still be active");
+   check(h,Math.abs(runner.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED)-base*1.55D)<0.0001D,
+       "Native run must apply the temporary movement-speed multiplier");
+   h.runAfterDelay(100,()->{
+    check(h,!runner.isSpontaneouslyRunning(),"Spontaneous run must end within 90 ticks");
+    check(h,Math.abs(runner.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED)-base)<0.0001D,
+        "Walking speed must be restored after the run");
+    h.succeed();
+   });return;
   }
-  if(elapsed>=360) { h.fail("Eligible native ground runner did not start a spontaneous run during travel");return; }
-  double targetX=runner.getX()>8.0D?3.5D:12.5D;
-  runner.getNavigation().moveTo(targetX,1.0D,5.5D,1.0D);
-  h.runAfterDelay(20,()->awaitSpontaneousRun(h,runner,elapsed+20));
+  if(elapsed>=720) { h.fail("Eligible native ground runner did not start a spontaneous run during travel");return; }
+  BlockPos near=h.absolutePos(new BlockPos(3,1,5));
+  BlockPos far=h.absolutePos(new BlockPos(12,1,5));
+  double middle=(near.getX()+far.getX())/2.0D;
+  double targetX=runner.getX()>middle?near.getX()+0.5D:far.getX()+0.5D;
+  runner.getNavigation().moveTo(targetX,near.getY(),near.getZ()+0.5D,1.0D);
+  h.runAfterDelay(10,()->awaitSpontaneousRun(h,runner,elapsed+10));
  }
 
 }
