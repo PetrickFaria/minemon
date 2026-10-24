@@ -14,14 +14,28 @@ public final class SpeciesDefinitions {
     JsonObject o=element.getAsJsonObject();Map<String,String> clips=new HashMap<>();o.getAsJsonObject("clips").entrySet().forEach(e->clips.put(e.getKey(),e.getValue().getAsString()));
     String slug=str(o,"slug");
     CompatibleLocomotion.apply(slug,clips);
-    float factor=slug.equals("seaking")?0.75F:1.0F;
+    // Jynx/Magmar/Victreebel factors were derived from the selected geo mesh:
+    // sum cube volume and vertical extent, balanced geometrically against the
+    // approved Electabuzz/Rhydon render bounds. The source manifest stays raw.
+    float factor=switch(slug){
+     case "seaking" -> 0.75F;
+     case "dewgong" -> 0.50F;
+     case "kangaskhan","snorlax" -> 0.75F;
+     case "jynx" -> 0.965F/o.get("scale").getAsFloat();
+     case "magmar" -> 1.47F/o.get("scale").getAsFloat();
+     case "victreebel" -> 1.46F/o.get("scale").getAsFloat();
+     default -> 1.0F;
+    };
     var profile=SpeciesBehaviorProfiles.profile(slug);
     boolean ground=profile==SpeciesBehaviorProfiles.Profile.GROUND||profile==SpeciesBehaviorProfiles.Profile.GROUND_FLIGHT
         ||profile==SpeciesBehaviorProfiles.Profile.WATER_VISITOR;
     String idle=ground?clips.getOrDefault("ground_idle",str(o,"idle")):str(o,"idle");
     String walk=ground?clips.getOrDefault("ground_walk",str(o,"walk")):str(o,"walk");
     String fallback=CompatibleLocomotion.groundGait(slug)?null:o.has("movement_fallback")&&!o.get("movement_fallback").isJsonNull()?o.get("movement_fallback").getAsString():null;
-    Definition d=new Definition(o.get("nationalPokedexNumber").getAsInt(),str(o,"slug"),str(o,"model"),str(o,"texture"),str(o,"animation"),str(o,"mode"),o.get("scale").getAsFloat()*factor,o.get("width").getAsFloat()*factor,o.get("height").getAsFloat()*factor,o.get("health").getAsDouble(),o.get("attack").getAsDouble(),o.get("speed").getAsDouble(),o.get("eggBase").getAsInt(),o.get("eggSpots").getAsInt(),idle,walk,fallback,o.has("attackTicks")?o.get("attackTicks").getAsInt():0,Collections.unmodifiableMap(clips));
+    float width=o.get("width").getAsFloat()*factor,height=o.get("height").getAsFloat()*factor;
+    if(slug.equals("jynx")||slug.equals("magmar")){width=1.05F;height=2.25F;}
+    else if(slug.equals("victreebel")){width=1.10F;height=1.70F;}
+    Definition d=new Definition(o.get("nationalPokedexNumber").getAsInt(),str(o,"slug"),str(o,"model"),str(o,"texture"),str(o,"animation"),str(o,"mode"),o.get("scale").getAsFloat()*factor,width,height,o.get("health").getAsDouble(),o.get("attack").getAsDouble(),o.get("speed").getAsDouble(),o.get("eggBase").getAsInt(),o.get("eggSpots").getAsInt(),idle,walk,fallback,o.has("attackTicks")?o.get("attackTicks").getAsInt():0,Collections.unmodifiableMap(clips));
     if(result.put(d.slug(),d)!=null)throw new IllegalStateException("Duplicate species "+d.slug());
    }
   }catch(Exception e){throw new IllegalStateException("Could not load runtime species",e);}

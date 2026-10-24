@@ -96,6 +96,7 @@ jobs:
           grep -F 'PASS CHARMELEON TAIL FLAME' run/client-validation.txt
           grep -F 'PASS CHARIZARD TAIL FLAME' run/client-validation.txt
           grep -F 'PASS PONYTA/RAPIDASH FIRE OVERLAYS' run/client-validation.txt
+          grep -F 'PASS EMISSIVE FIRE' run/client-validation.txt
           grep -F 'PASS FIRE-STARTER ARMS' run/client-validation.txt
           grep -F 'PASS PIDGE WINGS' run/client-validation.txt
           grep -F 'PASS SOURCE LOOK' run/client-validation.txt
@@ -108,7 +109,7 @@ jobs:
           for scenario in air water; do
             python3 tools/prepare_client_world.py
             if [ "$scenario" = air ]; then
-              timeout --kill-after=30s 600s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeAir -PclientSmokeSpecies=charizard,scyther
+              timeout --kill-after=30s 600s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeAir -PclientSmokeSpecies=charizard,scyther,dragonite,articuno,zapdos,moltres,fearow
             else
               timeout --kill-after=30s 600s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeWater -PclientSmokeSpecies=vaporeon
             fi

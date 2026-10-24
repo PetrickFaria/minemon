@@ -69,6 +69,40 @@ def compatible_locomotion(data,geo,d):
    if tail:
     ch=channels.setdefault(tail,{});rot=list(ch.get('rotation',[0,0,0]));rot[1]=sinus(rot[1],4 if kind=='walk' else 7,freq);ch['rotation']=rot
    put(kind,clip)
+ if slug in ('meowth','persian'):
+  # These two retained rigs have no locomotion clips. Animate their real
+  # upper-leg bones with a reciprocal walk/run stride and a small body bob.
+  joints={'meowth':['leg_left','leg_right'],
+          'persian':['leg_front_left1','leg_front_right1','leg_back_left1','leg_back_right1']}[slug]
+  for kind,freq,amp in [('walk',1.5,17),('run',2.5,27)]:
+   clip=source('ground_idle');clip.update(loop=True,animation_length=1/freq)
+   channels=clip.setdefault('bones',{})
+   for i,joint in enumerate(joints):
+    if joint not in {b['name'] for g in geo['minecraft:geometry'] for b in g['bones']}:continue
+    channels.setdefault(joint,{})['rotation']=[sinus(0,amp,freq,0 if i%2==0 else 180),0,0]
+   body=channels.setdefault('body',{})
+   body['position']=[0,sinus(0,0.12 if kind=='walk' else 0.2,freq*2),0]
+   put(kind,clip)
+ if slug in ('articuno','zapdos','moltres','fearow'):
+  # The native `air_fly` clips contain a static open-wing pose. Preserve
+  # them in the copied runtime file and give the controller a compatible
+  # loop that actually changes the selected rig's wing angles.
+  roots={
+   'articuno':['wing_open_left','wing_open_right'],
+   'zapdos':['wing_open_left','wing_open_right'],
+   'moltres':['wing_open_left','wing_open_right'],
+   'fearow':['wing_open_left','wing_open_right'],
+  }[slug]
+  present={b['name'] for g in geo['minecraft:geometry'] for b in g['bones']}
+  clip=source('air_idle') or source('ground_idle');clip.update(loop=True,animation_length=0.8)
+  channels=clip.setdefault('bones',{})
+  for side,bone in zip(('left','right'),roots):
+   if bone not in present:continue
+   sign=1 if side=='left' else -1
+   channels.setdefault(bone,{})['rotation']=[sinus(0,24,1.25),0,sinus(0,sign*7,1.25)]
+  # Several native rigs group the wings beneath a pose root. Keep the flight
+  # body pose and add only low amplitude follow-through to the primary wings.
+  put('fly',clip)
  if slug=='vaporeon':
   clip=source('ground_idle');clip.update(loop=True,animation_length=1.0)
   channels=clip['bones']

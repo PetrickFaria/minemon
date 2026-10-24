@@ -72,7 +72,7 @@ public final class MinemonAquaticCreature extends MinemonCreature {
         double top=this.waterSurface();
         if(!Double.isFinite(top))return;
         boolean surface=this.isNaturalSurface();
-        double target=surface?top-Math.min(0.8D,this.getBbHeight()*0.3D):top-this.getBbHeight()-0.3D;
+        double target=surface?top-WaterMovementGoal.preferredSurfaceDepth(this):top-this.getBbHeight()-0.3D;
         // Surface and submerged correction share the swimming controller; do not
         // add another navigation goal or override horizontal pursuit.
         if(surface||this.getY()>target){

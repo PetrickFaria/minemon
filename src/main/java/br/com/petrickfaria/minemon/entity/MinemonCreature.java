@@ -160,6 +160,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         this.goalSelector.addGoal(1, new SitWhenOrderedToGoal(this));
         this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.2D, true));
         this.goalSelector.addGoal(3, new FollowOwnerGoal(this, 1.0D, 10.0F, 2.0F, this.isFlyingSpecies()));
+        this.goalSelector.addGoal(4, new NaturalSeparationGoal(this));
         if (SpeciesBehaviorProfiles.canFly(this.getSpeciesSlug())) {
             this.goalSelector.addGoal(0, new NaturalMovementGoals.SleepLanding(this));
             this.goalSelector.addGoal(4, new NaturalMovementGoals.AirPatrol(this));
@@ -270,11 +271,14 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
             if ((this.getSpeciesSlug().equals("koffing")||this.getSpeciesSlug().equals("weezing"))
                     && !this.isDeadOrDying() && this.tickCount%5==Math.floorMod(this.getId(),5)) {
                 double radius=this.getBbWidth()*0.35D;
-                double angle=this.random.nextDouble()*Math.PI*2.0D;
-                this.level.addParticle(net.minecraft.core.particles.ParticleTypes.SMOKE,
-                    this.getX()+Math.cos(angle)*radius,this.getY()+this.getBbHeight()*0.55D,
-                    this.getZ()+Math.sin(angle)*radius,0.0D,0.015D,0.0D);
-                this.smokeParticles++;
+                for(int i=0;i<2;i++){
+                    double angle=this.random.nextDouble()*Math.PI*2.0D;
+                    double spread=radius*(0.5D+this.random.nextDouble()*0.8D);
+                    this.level.addParticle(net.minecraft.core.particles.ParticleTypes.SMOKE,
+                        this.getX()+Math.cos(angle)*spread,this.getY()+this.getBbHeight()*(0.30D+this.random.nextDouble()*0.42D),
+                        this.getZ()+Math.sin(angle)*spread,0.0D,0.015D+this.random.nextDouble()*0.02D,0.0D);
+                    this.smokeParticles++;
+                }
             }
             if (this.getSpeciesSlug().equals("gastly") && !this.isSleeping() && !this.isOrderedToSit()
                     && !this.isDeadOrDying() && this.attackAnimationTicks <= 0) {
@@ -492,7 +496,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         boolean band=flying&&altitude>=this.naturalCycle.minimumAltitude()&&altitude<=this.naturalCycle.maximumAltitude();
         boolean submerged=wet&&this.level.getFluidState(new net.minecraft.core.BlockPos(this.getX(),this.getY()+this.getBbHeight()+0.1D,this.getZ())).is(net.minecraft.tags.FluidTags.WATER);
         double waterTop=wet&&this instanceof MinemonAquaticCreature water?water.waterSurface():this.getY();
-        boolean surface=wet&&Math.abs(this.getY()-(waterTop-Math.min(0.8D,this.getBbHeight()*0.3D)))<0.3D;
+        boolean surface=wet&&Math.abs(this.getY()-(waterTop-WaterMovementGoal.preferredSurfaceDepth(this)))<0.3D;
         boolean canDive=wet&&this.naturalCycle.phase()==BehaviorCycle.Phase.SEEK_WATER&&WaterMovementGoal.canDive(this,this.blockPosition());
         var previousPhase=this.naturalCycle.phase();int previousStage=this.naturalCycle.stage();
         this.naturalCycle.tick(new BehaviorCycle.Observation(this.naturalBehaviorActive(),

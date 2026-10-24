@@ -9,6 +9,7 @@ import net.minecraft.world.phys.Vec3;
 
 /** One navigation owner for seeking water, depth/surface swimming and shore exit. */
 public final class WaterMovementGoal extends Goal {
+ public static final int SEARCH_RADIUS=100;
  private final MinemonCreature mob;
  private int scanIndex,scanYIndex,delay,stalled;
  private Vec3 lastPosition;
@@ -17,7 +18,7 @@ public final class WaterMovementGoal extends Goal {
  private static final List<BlockPos> OFFSETS=offsets();
  private static List<BlockPos> offsets(){
   List<BlockPos> out=new ArrayList<>();
-  for(int x=-25;x<=25;x++)for(int z=-25;z<=25;z++)if(x*x+z*z<=625)out.add(new BlockPos(x,0,z));
+  for(int x=-SEARCH_RADIUS;x<=SEARCH_RADIUS;x++)for(int z=-SEARCH_RADIUS;z<=SEARCH_RADIUS;z++)if(x*x+z*z<=SEARCH_RADIUS*SEARCH_RADIUS)out.add(new BlockPos(x,0,z));
   out.sort(Comparator.comparingDouble(p->p.distSqr(BlockPos.ZERO)));return List.copyOf(out);
  }
  public WaterMovementGoal(MinemonCreature mob){this.mob=mob;delay=5+mob.getRandom().nextInt(15);setFlags(EnumSet.of(Flag.MOVE));}
@@ -76,8 +77,8 @@ public final class WaterMovementGoal extends Goal {
    int dy=scanYIndex==0?0:((scanYIndex+1)/2)*(scanYIndex%2==1?-1:1);
    if(++scanYIndex>50){scanYIndex=0;scanIndex=(scanIndex+1)%OFFSETS.size();}
    BlockPos p=origin.offset(offset.getX(),dy,offset.getZ());
-   if(p.distSqr(origin)>625||!mob.level.hasChunkAt(p)||blocked.containsKey(p))continue;
-   if(dry?!safeDry(mob,p):!waterFits(mob,p,SpeciesBehaviorProfiles.profile(mob.getSpeciesSlug())!=SpeciesBehaviorProfiles.Profile.SURFACE))continue;
+   if(!withinSearchRadius(origin,p)||!mob.level.hasChunkAt(p)||blocked.containsKey(p))continue;
+   if(dry?!safeDry(mob,p):!waterRegion(mob,p)||!waterFits(mob,p,SpeciesBehaviorProfiles.profile(mob.getSpeciesSlug())!=SpeciesBehaviorProfiles.Profile.SURFACE))continue;
    paths++;
    var path=mob.getNavigation().createPath(p,0);
    if(path!=null&&path.canReach())return p;
@@ -89,16 +90,16 @@ public final class WaterMovementGoal extends Goal {
  private BlockPos swimDestination(){
   boolean surface=mob.isNaturalSurface();
   for(int n=0;n<12;n++){
-   int dx=mob.getRandom().nextInt(15)-7,dz=mob.getRandom().nextInt(15)-7;
+   int dx=mob.getRandom().nextInt(49)-24,dz=mob.getRandom().nextInt(49)-24;
    if(dx*dx+dz*dz<4)continue;
    int x=mob.blockPosition().getX()+dx,z=mob.blockPosition().getZ()+dz;
    BlockPos column=new BlockPos(x,mob.getY(),z);
    double top=surfaceAt(mob,column);
    if(!Double.isFinite(top))continue;
-   double y=surface?top-Math.min(0.8D,mob.getBbHeight()*0.3D)
+   double y=surface?top-preferredSurfaceDepth(mob)
        :Math.min(top-mob.getBbHeight()-0.3D,mob.getY()+mob.getRandom().nextInt(5)-2);
    BlockPos p=new BlockPos(x,y,z);
-   if(blocked.containsKey(p)||!waterFits(mob,p,!surface))continue;
+   if(blocked.containsKey(p)||!waterRegion(mob,p)||!waterFits(mob,p,!surface))continue;
    boolean clear=true;
    for(int step=1;step<=4;step++){
     Vec3 point=mob.position().lerp(Vec3.atCenterOf(p),step/4.0D);
@@ -121,7 +122,7 @@ public final class WaterMovementGoal extends Goal {
  static boolean waterFits(MinemonCreature mob,BlockPos p,boolean deep){
   if(!mob.level.getFluidState(p).is(FluidTags.WATER))return false;
   double top=surfaceAt(mob,p);if(!Double.isFinite(top))return false;
-  double y=deep?p.getY():top-Math.min(0.8D,mob.getBbHeight()*0.3D);
+  double y=deep?p.getY():top-preferredSurfaceDepth(mob);
   var box=mob.getBoundingBox().move(p.getX()+0.5D-mob.getX(),y-mob.getY(),p.getZ()+0.5D-mob.getZ());
   if(!mob.level.noCollision(mob,box))return false;
   if(deep&&y+mob.getBbHeight()+0.15D>=top)return false;
@@ -132,6 +133,21 @@ public final class WaterMovementGoal extends Goal {
     if(deep&&!mob.level.getFluidState(new BlockPos(x,y+mob.getBbHeight()-0.05D,z)).is(FluidTags.WATER))return false;
    }
   return true;
+ }
+ public static double preferredSurfaceDepth(MinemonCreature mob){
+  // The generic surface depth is measured from the feet; Gyarados instead
+  // keeps its body center 1.5 blocks below the surface and its full hitbox wet.
+  return mob.getSpeciesSlug().equals("gyarados")?1.5D+mob.getBbHeight()*0.5D:Math.min(0.8D,mob.getBbHeight()*0.3D);
+ }
+ public static boolean withinSearchRadius(BlockPos origin,BlockPos candidate){return origin.distSqr(candidate)<=SEARCH_RADIUS*SEARCH_RADIUS;}
+ public static boolean isNavigableWaterRegion(BlockPos center,java.util.function.Predicate<BlockPos> water){
+  for(int x=-1;x<=1;x++)for(int y=-1;y<=1;y++)for(int z=-1;z<=1;z++)if(!water.test(center.offset(x,y,z)))return false;
+  return true;
+ }
+ private static boolean waterRegion(MinemonCreature mob,BlockPos center){
+  return isNavigableWaterRegion(center,cell->mob.level.hasChunkAt(cell)
+      &&mob.level.getFluidState(cell).is(FluidTags.WATER)
+      &&mob.level.getBlockState(cell).getCollisionShape(mob.level,cell).isEmpty());
  }
  public static boolean canDive(MinemonCreature mob,BlockPos p){
   if(!mob.level.getFluidState(p).is(FluidTags.WATER))return false;
