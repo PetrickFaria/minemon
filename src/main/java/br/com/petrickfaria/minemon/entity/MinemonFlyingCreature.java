@@ -10,6 +10,17 @@ public final class MinemonFlyingCreature extends MinemonCreature {
  public MinemonFlyingCreature(EntityType<? extends TamableAnimal> type,Level level){super(type,level);this.moveControl=new FlyingMoveControl(this,20,true);this.setNoGravity(true);}
  @Override public boolean isFlyingSpecies(){return true;}
  @Override protected PathNavigation createNavigation(Level level){FlyingPathNavigation n=new FlyingPathNavigation(this,level);n.setCanOpenDoors(false);n.setCanFloat(true);n.setCanPassDoors(true);return n;}
+ @Override public void travel(net.minecraft.world.phys.Vec3 input){
+  if(!this.level.isClientSide&&!this.isSleeping()){
+   double support=NaturalMovementGoals.surfaceBelow(this.level,this.getX(),this.getY(),this.getZ());
+   double clearance=this.getY()-support;
+   double allowedDrop=Math.max(0.0D,clearance-0.6D);
+   double vertical=Math.max(this.getDeltaMovement().y,-allowedDrop);
+   if(clearance<0.6D)vertical=Math.max(vertical,0.08D);
+   this.setDeltaMovement(this.getDeltaMovement().x,vertical,this.getDeltaMovement().z);
+  }
+  super.travel(input);
+ }
  @Override public void tick(){
   super.tick();
   boolean sleeping=this.isSleeping();
@@ -37,7 +48,13 @@ public final class MinemonFlyingCreature extends MinemonCreature {
    double altitude=this.getY()-surface;
    // Correct only excursions outside the natural band; normal navigation remains
    // responsible for smooth altitude changes and collision avoidance.
-   if(altitude<3.0D||altitude>15.0D){
+   boolean combat=this.getTarget()!=null&&this.getTarget().isAlive();
+   if(combat&&altitude<1.25D){
+    // Preserve native melee pursuit: small fliers must approach a ground
+    // target without being pushed back into the normal patrol band.
+    double lift=net.minecraft.util.Mth.clamp((1.25D-altitude)*0.1D,0.02D,0.10D);
+    this.setDeltaMovement(this.getDeltaMovement().x,Math.max(this.getDeltaMovement().y,lift),this.getDeltaMovement().z);
+   }else if(!combat&&(altitude<3.0D||altitude>15.0D)){
     double desired=surface+(altitude<3.0D?7.0D:11.0D);
     double correction=net.minecraft.util.Mth.clamp((desired-this.getY())*0.035D,-0.12D,0.12D);
     this.setDeltaMovement(this.getDeltaMovement().x,
