@@ -37,6 +37,61 @@ public final class NaturalMovementGoals {
         return level.getMinBuildHeight();
     }
 
+    /** Sleep has priority over patrol, following and combat, but descent still uses a real path. */
+    static final class SleepLanding extends Goal {
+        private final MinemonCreature mob;
+        private Path landingPath;
+        private int retryDelay;
+
+        SleepLanding(MinemonCreature mob) {
+            this.mob = mob;
+            this.setFlags(EnumSet.of(Goal.Flag.MOVE));
+        }
+
+        @Override public boolean canUse() {
+            if (!this.mob.isSleeping() || this.mob.isOnGround() || this.mob.isPassenger()) return false;
+            if (this.retryDelay > 0) { this.retryDelay--; return false; }
+            this.landingPath = findLandingPath();
+            if (this.landingPath == null) this.retryDelay = 40;
+            return this.landingPath != null;
+        }
+
+        @Override public boolean canContinueToUse() {
+            return this.mob.isSleeping() && !this.mob.isOnGround()
+                    && !this.mob.getNavigation().isDone();
+        }
+
+        @Override public void start() { this.mob.getNavigation().moveTo(this.landingPath, 0.7D); }
+        @Override public void stop() { this.mob.getNavigation().stop(); this.landingPath = null; }
+
+        private Path findLandingPath() {
+            BlockPos origin = this.mob.blockPosition();
+            // Prefer the closest safe dry surface, and expand only if obstructed.
+            for (int radius = 0; radius <= 8; radius++) {
+                for (int dx = -radius; dx <= radius; dx++) for (int dz = -radius; dz <= radius; dz++) {
+                    if (Math.max(Math.abs(dx), Math.abs(dz)) != radius) continue;
+                    double x = origin.getX() + dx + 0.5D, z = origin.getZ() + dz + 0.5D;
+                    double surface = surfaceBelow(this.mob.level, x, this.mob.getY(), z);
+                    BlockPos floor = new BlockPos(x, surface - 0.001D, z);
+                    if (!this.mob.level.hasChunkAt(floor) || !this.mob.level.getFluidState(floor).isEmpty()) continue;
+                    BlockState state = this.mob.level.getBlockState(floor);
+                    if (state.is(net.minecraft.world.level.block.Blocks.MAGMA_BLOCK)
+                            || state.is(net.minecraft.world.level.block.Blocks.CACTUS)
+                            || state.is(net.minecraft.world.level.block.Blocks.CAMPFIRE)
+                            || state.is(net.minecraft.world.level.block.Blocks.SOUL_CAMPFIRE)) continue;
+                    BlockPos feet = new BlockPos(x, surface, z);
+                    if (!this.mob.level.getFluidState(feet).isEmpty()
+                            || !this.mob.level.getBlockState(feet).isAir()
+                            || !this.mob.level.noCollision(this.mob, this.mob.getBoundingBox().move(
+                                    x - this.mob.getX(), surface - this.mob.getY(), z - this.mob.getZ()))) continue;
+                    Path path = this.mob.getNavigation().createPath(feet, 0);
+                    if (path != null && path.canReach()) return path;
+                }
+            }
+            return null;
+        }
+    }
+
     static final class AirPatrol extends Goal {
         private final MinemonCreature mob;
         private BlockPos destination;

@@ -13,8 +13,22 @@ public final class MinemonFlyingCreature extends MinemonCreature {
  @Override public void tick(){
   super.tick();
   boolean sleeping=this.isSleeping();
-  this.setNoGravity(!sleeping);
-  if(sleeping){this.fallDistance=0;return;}
+  // Hover safely until a dry landing path is available; follow that path
+  // instead of dropping blindly into water, lava, or an obstructed column.
+  if(sleeping){
+  double support=NaturalMovementGoals.surfaceBelow(this.level,this.getX(),this.getY(),this.getZ());
+  net.minecraft.core.BlockPos floor=new net.minecraft.core.BlockPos(this.getX(),support-0.001D,this.getZ());
+  var state=this.level.getBlockState(floor);
+  boolean safe=this.level.getFluidState(floor).isEmpty()
+      && !state.isAir() && !state.is(net.minecraft.world.level.block.Blocks.MAGMA_BLOCK)
+      && !state.is(net.minecraft.world.level.block.Blocks.CACTUS)
+      && !state.is(net.minecraft.world.level.block.Blocks.CAMPFIRE)
+      && !state.is(net.minecraft.world.level.block.Blocks.SOUL_CAMPFIRE);
+  boolean settling=safe && this.getY()-support<=1.25D && this.getNavigation().isDone();
+  this.setNoGravity(!sleeping || !this.isOnGround() && !settling);
+  this.fallDistance=0;return;
+  }
+  this.setNoGravity(true);
   if(!this.level.isClientSide){
    double surface=NaturalMovementGoals.surfaceBelow(this.level,this.getX(),this.getY(),this.getZ());
    double altitude=this.getY()-surface;

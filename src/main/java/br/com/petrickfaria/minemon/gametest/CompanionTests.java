@@ -181,6 +181,22 @@ public final class CompanionTests {
   });
  }
 
+ @GameTest(template="test_arena",timeoutTicks=260)
+ public static void sleepingFlyerFindsDryLandingInsteadOfDroppingIntoWater(GameTestHelper h) {
+  floor(h);
+  for(int x=4;x<=6;x++)for(int z=4;z<=6;z++){
+   h.setBlock(new BlockPos(x,-1,z),net.minecraft.world.level.block.Blocks.STONE);
+   h.setBlock(new BlockPos(x,0,z),net.minecraft.world.level.block.Blocks.WATER);
+  }
+  MinemonCreature bird=h.spawn(ModEntities.SPECIES.get("pidgey").get(),new BlockPos(5,8,5));
+  bird.setSleeping(true);
+  h.runAfterDelay(200,()->{
+   check(h,bird.isOnGround()&&!bird.isInWater(),"Sleeping flyer must follow a path to dry ground");
+   check(h,h.getLevel().noCollision(bird,bird.getBoundingBox()),"Landing must not clip the entity into solid terrain");
+   h.succeed();
+  });
+ }
+
  @GameTest(template="test_arena",timeoutTicks=40)
  public static void flightClearanceUsesWaterSurfaceAndIgnoresOverheadRoof(GameTestHelper h) {
   floor(h);

@@ -140,6 +140,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.2D, true));
         this.goalSelector.addGoal(3, new FollowOwnerGoal(this, 1.0D, 10.0F, 2.0F, this.isFlyingSpecies()));
         if (this.isFlyingSpecies()) {
+            this.goalSelector.addGoal(0, new NaturalMovementGoals.SleepLanding(this));
             this.goalSelector.addGoal(4, new NaturalMovementGoals.AirPatrol(this));
         } else if (this.isAquaticSpecies()) {
             this.getNavigation().setCanFloat(true);
@@ -239,7 +240,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     public void tick() {
         super.tick();
         if (this.isSleeping()) {
-            this.getNavigation().stop();
+            if (!this.isFlyingSpecies()) this.getNavigation().stop();
             this.setTarget(null);
         }
         if (this.level.isClientSide) {
@@ -352,7 +353,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         } else if (this.attackAnimationTicks>0 && attack!=null) {
             clip=attack;loop=false;
             if(this.playedAttackSequence!=this.attackSequence){controller.markNeedsReload();this.playedAttackSequence=this.attackSequence;}
-        } else if (this.isSleeping()) {
+        } else if (this.isSleeping() && (!this.isFlyingSpecies() || this.isOnGround())) {
             clip = SpeciesAssetIndex.clip(slug, "sleep", "sleep");
         } else if (this.isOrderedToSit()) {
             clip = SpeciesAssetIndex.clip(slug, "sit", "sit");
