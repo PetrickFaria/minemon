@@ -222,6 +222,11 @@ public final class CompanionTests {
   h.setBlock(new BlockPos(5,1,5),net.minecraft.world.level.block.Blocks.OAK_FENCE);
   double edge=NaturalMovementGoals.surfaceBelow(h.getLevel(),column.getX()+0.05D,column.getY(),column.getZ()+0.05D);
   check(h,Math.abs(edge-slab)<0.001D,"A fence must not replace the surface of an empty part of its column");
+  h.setBlock(new BlockPos(5,1,5),net.minecraft.world.level.block.Blocks.OAK_FENCE.defaultBlockState()
+      .setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.WATERLOGGED,true));
+  double fence=NaturalMovementGoals.surfaceBelow(h.getLevel(),column.getX()+0.5D,column.getY(),column.getZ()+0.5D);
+  check(h,Math.abs(fence-(h.absolutePos(new BlockPos(5,1,5)).getY()+1.5D))<0.001D,
+      "A waterlogged fence's solid top must take precedence over its water surface");
   h.succeed();
  }
 

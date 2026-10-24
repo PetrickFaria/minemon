@@ -24,12 +24,12 @@ public final class NaturalMovementGoals {
             if (!level.hasChunkAt(pos)) return level.getMinBuildHeight();
             // Open water is a navigable surface too. Measuring from the seabed
             // would otherwise pull flyers underwater above deep lakes/oceans.
-            if (level.getFluidState(pos).is(FluidTags.WATER))
-                return y + level.getFluidState(pos).getHeight(level, pos);
+            double top=level.getFluidState(pos).is(FluidTags.WATER)
+                    ? level.getFluidState(pos).getHeight(level, pos) : Double.NEGATIVE_INFINITY;
             BlockState state = level.getBlockState(pos);
             VoxelShape shape = state.getCollisionShape(level, pos);
             if (!shape.isEmpty()) {
-                double localX=x-blockX, localZ=z-blockZ, top=Double.NEGATIVE_INFINITY;
+                double localX=x-blockX, localZ=z-blockZ;
                 // Use the actual support under this column. A bottom slab has
                 // no sturdy block-boundary UP face, but its half-height top is
                 // still walkable; narrow fence shapes must not fill the column.
@@ -37,8 +37,8 @@ public final class NaturalMovementGoals {
                     if (localX>=box.minX&&localX<=box.maxX&&localZ>=box.minZ&&localZ<=box.maxZ)
                         top=Math.max(top,box.maxY);
                 }
-                if (top>0.0D) return y+top;
             }
+            if (top>0.0D) return y+top;
         }
         return level.getMinBuildHeight();
     }
