@@ -1,5 +1,6 @@
 package br.com.petrickfaria.minemon.gametest;
 import br.com.petrickfaria.minemon.entity.MinemonCreature;
+import br.com.petrickfaria.minemon.entity.NaturalMovementGoals;
 import br.com.petrickfaria.minemon.registry.ModEntities;
 import com.mojang.authlib.GameProfile;
 import java.util.UUID;
@@ -162,14 +163,12 @@ public final class CompanionTests {
   floor(h);
   MinemonCreature bird=h.spawn(ModEntities.SPECIES.get("pidgey").get(),new BlockPos(5,1,5));
   h.runAfterDelay(100,()->{
-   double altitude=bird.getY()-h.getLevel().getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
-       net.minecraft.util.Mth.floor(bird.getX()),net.minecraft.util.Mth.floor(bird.getZ()));
+   double altitude=bird.getY()-NaturalMovementGoals.surfaceBelow(h.getLevel(),bird.getX(),bird.getY(),bird.getZ());
    check(h,altitude>=3.0D&&altitude<=15.0D,"Airborne species must maintain 3..15 block surface clearance; got "+altitude);
    bird.setSleeping(true);
    check(h,!bird.isNoGravity(),"Sleeping airborne species must enable gravity to land");
    h.runAfterDelay(100,()->{
-    int surface=h.getLevel().getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
-        net.minecraft.util.Mth.floor(bird.getX()),net.minecraft.util.Mth.floor(bird.getZ()));
+    double surface=NaturalMovementGoals.surfaceBelow(h.getLevel(),bird.getX(),bird.getY(),bird.getZ());
     check(h,Math.abs(bird.getY()-surface)<=1.1D,"Sleeping airborne species must land on a nearby surface");
     bird.setSleeping(false);
     check(h,bird.isNoGravity(),"Awake airborne species must resume flight");

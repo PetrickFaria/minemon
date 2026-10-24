@@ -2,14 +2,36 @@ package br.com.petrickfaria.minemon.entity;
 
 import java.util.EnumSet;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.level.pathfinder.Path;
 
 /** Small, path-navigation based goals for non-combat natural movement. */
-final class NaturalMovementGoals {
+public final class NaturalMovementGoals {
     private NaturalMovementGoals() {}
+
+    /** Finds the nearest real support surface beneath an entity, ignoring roofs above it. */
+    public static double surfaceBelow(Level level, double x, double feetY, double z) {
+        int blockX = Mth.floor(x);
+        int blockZ = Mth.floor(z);
+        for (int y = Mth.floor(feetY - 0.001D); y >= level.getMinBuildHeight(); y--) {
+            BlockPos pos = new BlockPos(blockX, y, blockZ);
+            if (!level.hasChunkAt(pos)) return level.getMinBuildHeight();
+            BlockState state = level.getBlockState(pos);
+            VoxelShape shape = state.getCollisionShape(level, pos);
+            if (!shape.isEmpty() && shape.max(Direction.Axis.Y) > 0.0D
+                    && state.isFaceSturdy(level, pos, Direction.UP)) {
+                return y + shape.max(Direction.Axis.Y);
+            }
+        }
+        return level.getMinBuildHeight();
+    }
 
     static final class AirPatrol extends Goal {
         private final MinemonCreature mob;

@@ -16,8 +16,7 @@ public final class MinemonFlyingCreature extends MinemonCreature {
   this.setNoGravity(!sleeping);
   if(sleeping){this.fallDistance=0;return;}
   if(!this.level.isClientSide){
-   int surface=this.level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
-       net.minecraft.util.Mth.floor(this.getX()),net.minecraft.util.Mth.floor(this.getZ()));
+   double surface=NaturalMovementGoals.surfaceBelow(this.level,this.getX(),this.getY(),this.getZ());
    double altitude=this.getY()-surface;
    // Correct only excursions outside the natural band; normal navigation remains
    // responsible for smooth altitude changes and collision avoidance.
