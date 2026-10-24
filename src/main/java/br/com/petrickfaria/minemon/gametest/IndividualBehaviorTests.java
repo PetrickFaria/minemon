@@ -126,11 +126,20 @@ public final class IndividualBehaviorTests {
    var path=fish.getNavigation().createPath(destination,0);
    check(h,path!=null&&path.canReach()&&path.getEndNode().y==destination.getY(),"Deep water must have an exact reachable higher node"+state(fish));
    check(h,fish.getNavigation().moveTo(path,1.0D),"Deep water ascent path must start"+state(fish));
+   traceAscent(h,fish,0);
    h.runAfterDelay(200,()->{
     check(h,fish.isInWater()&&fish.getY()>start+1.0D,"Swimming controller must actually ascend, not continually sink"+state(fish));
     h.succeed();
    });
   },40,"Ascent fixture must first enter its real water volume");
+ }
+ private static void traceAscent(GameTestHelper h,MinemonCreature fish,int elapsed){
+  var path=fish.getNavigation().getPath();
+  com.mojang.logging.LogUtils.getLogger().info("MINEMON ASCENT TRACE sample="+elapsed+state(fish)
+   +" velocity="+fish.getDeltaMovement()+" input="+fish.yya+","+fish.zza+" pitch="+fish.getXRot()
+   +" speed="+fish.getSpeed()+" gravity="+!fish.isNoGravity()+" wanted="+fish.getMoveControl().getWantedX()+","+fish.getMoveControl().getWantedY()+","+fish.getMoveControl().getWantedZ()
+   +" navDone="+fish.getNavigation().isDone()+" path="+(path==null?"null":path.getNextNodeIndex()+"/"+path.getNodeCount()+" end="+path.getEndNode()));
+  if(elapsed<180)h.runAfterDelay(20,()->traceAscent(h,fish,elapsed+20));
  }
  @GameTest(template="test_arena",timeoutTicks=60)
  public static void seakingScaleAndNaturalCycleStatePersist(GameTestHelper h){
