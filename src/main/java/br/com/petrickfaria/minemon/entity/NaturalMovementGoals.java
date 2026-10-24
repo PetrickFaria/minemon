@@ -23,6 +23,10 @@ public final class NaturalMovementGoals {
         for (int y = Mth.floor(feetY - 0.001D); y >= level.getMinBuildHeight(); y--) {
             BlockPos pos = new BlockPos(blockX, y, blockZ);
             if (!level.hasChunkAt(pos)) return level.getMinBuildHeight();
+            // Open water is a navigable surface too. Measuring from the seabed
+            // would otherwise pull flyers underwater above deep lakes/oceans.
+            if (level.getFluidState(pos).is(FluidTags.WATER))
+                return y + level.getFluidState(pos).getHeight(level, pos);
             BlockState state = level.getBlockState(pos);
             VoxelShape shape = state.getCollisionShape(level, pos);
             if (!shape.isEmpty() && shape.max(Direction.Axis.Y) > 0.0D

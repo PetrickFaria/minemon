@@ -181,6 +181,18 @@ public final class CompanionTests {
   });
  }
 
+ @GameTest(template="test_arena",timeoutTicks=40)
+ public static void flightClearanceUsesWaterSurfaceAndIgnoresOverheadRoof(GameTestHelper h) {
+  floor(h);
+  for(int y=1;y<=3;y++)h.setBlock(new BlockPos(5,y,5),net.minecraft.world.level.block.Blocks.WATER);
+  h.setBlock(new BlockPos(5,12,5),net.minecraft.world.level.block.Blocks.STONE);
+  BlockPos column=h.absolutePos(new BlockPos(5,8,5));
+  double surface=NaturalMovementGoals.surfaceBelow(h.getLevel(),column.getX()+0.5D,column.getY(),column.getZ()+0.5D);
+  check(h,Math.abs(surface-h.absolutePos(new BlockPos(5,4,5)).getY())<0.001D,
+      "Flight clearance must use water top below the entity, not seabed or overhead roof; got "+surface);
+  h.succeed();
+ }
+
  @GameTest(template="test_arena",timeoutTicks=80)
  public static void electabuzzScaleAndSelectionBoxShrinkProportionally(GameTestHelper h) {
   floor(h);
