@@ -370,6 +370,17 @@ public final class ClientSmokeTest {
     });
    }
    if(mc.screen!=null || (worldTicks==0 && (initialEntityId==0 || mc.level.getEntity(initialEntityId)==null || mc.player.getY()<100)))return;
+   if(worldTicks>=SPECIES_START_TICK&&worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW&&testEntity!=null) {
+    // Keep real airborne/swimming specimens in view during the longer idle
+    // observation; camera movement does not alter their pose or physics.
+    for(var tracked:mc.level.entitiesForRendering())if(tracked.getUUID().equals(testEntity)) {
+     double dx=tracked.getX()-mc.player.getX(),dz=tracked.getZ()-mc.player.getZ();
+     double dy=tracked.getY()+tracked.getBbHeight()*0.5D-mc.player.getEyeY();
+     mc.player.setYRot((float)(Math.toDegrees(Math.atan2(dz,dx))-90.0D));
+     mc.player.setXRot((float)-Math.toDegrees(Math.atan2(dy,Math.sqrt(dx*dx+dz*dz))));
+     break;
+    }
+   }
    // Do not skip a short input phase when the client batches ticks between
    // render frames. Keep every original phase and assertion, and require two
    // rendered observations before advancing the ten-species fixture.
