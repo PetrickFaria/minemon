@@ -47,6 +47,17 @@ public final class ClientSmokeTest {
  private static final java.util.Map<String,String> lastRenderedClip=new java.util.HashMap<>();
  private static final java.util.Map<String,Integer> clipChangedTick=new java.util.HashMap<>();
  private static final java.util.Map<String,Integer> lastRenderedEntityTick=new java.util.HashMap<>();
+ private static final java.util.Map<String,Integer> finalIdleFirstTick=new java.util.HashMap<>();
+ private static boolean finalIdleObserved(String slug) {
+  if(sourceStaticIdle(slug)||sourcePoseTransition(slug)||slug.equals("fearow"))return true;
+  var definition=SpeciesDefinitions.get(slug);
+  if(definition!=null&&"static".equals(definition.movementFallback()))return true;
+  Integer first=finalIdleFirstTick.get(slug),last=lastRenderedEntityTick.get(slug);
+  // Keep every threshold; collect enough real idle time for slow native
+  // breathing. Rhyhorn's original idle is a four-second cycle.
+  int required=slug.equals("rhyhorn")?80:40;
+  return first!=null&&last!=null&&last-first>=required;
+ }
  private static boolean clipHasSettled(String slug) {
   Integer changed=clipChangedTick.get(slug);
   Integer observed=lastRenderedEntityTick.get(slug);
@@ -237,6 +248,7 @@ public final class ClientSmokeTest {
        renderedPhaseSpecies=slug;renderedPhase=validationPhase;renderedPhaseFrames=0;
       }
       renderedPhaseFrames++;
+      if(validationPhase>=68&&clipHasSettled(slug))finalIdleFirstTick.putIfAbsent(slug,entity.tickCount);
      }
      if(validationPhase!=null && java.util.Set.of("abra","kadabra","alakazam","bellsprout","geodude","golem","slowpoke","slowbro","mewtwo","mew").contains(slug)) {
       var lookHead=model.getAnimationProcessor().getBone("head");
@@ -365,7 +377,11 @@ public final class ClientSmokeTest {
     String active=species.get((worldTicks-SPECIES_START_TICK)/SPECIES_TEST_WINDOW);
     int appliedPhase=(worldTicks-SPECIES_START_TICK)%SPECIES_TEST_WINDOW;
     if(ARTICULATION_VALIDATION_SPECIES.contains(active)
-       && (!active.equals(renderedPhaseSpecies)||renderedPhase!=appliedPhase||renderedPhaseFrames<2||!clipHasSettled(active)))return;
+       && (!active.equals(renderedPhaseSpecies)||renderedPhase!=appliedPhase||renderedPhaseFrames<2
+           ||!clipHasSettled(active)||appliedPhase==79&&!finalIdleObserved(active))) {
+     applyValidationInput(mc,appliedPhase);
+     return;
+    }
    }
    worldTicks++;
    if(worldTicks>=SPECIES_START_TICK&&worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW) {
@@ -420,33 +436,8 @@ public final class ClientSmokeTest {
     var next=ModEntities.SPECIES.get(slug).get().create(level);next.moveTo(0,aquatic?100.5D:101.0D,4,180,0);next.setNoAi(false);next.goalSelector.removeAllGoals();next.targetSelector.removeAllGoals();setValidationPhase(next,0);level.addFreshEntity(next);testEntity=next.getUUID();
     });
    }
-   if(worldTicks>=SPECIES_START_TICK && worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW) {
-    // Carry the client phase into the entity before sampling; server tasks can lag
-    // a client tick, so rereading worldTicks there mislabels the applied input.
-    int phase=Math.floorMod(worldTicks-SPECIES_START_TICK,SPECIES_TEST_WINDOW);
-    mc.getSingleplayerServer().execute(()->{
-    var current=(MinemonCreature)mc.getSingleplayerServer().overworld().getEntity(testEntity);
-     if(current!=null){
-     setValidationPhase(current,phase);
-     // Keep the fixture's movement deterministic while still exercising its real travel
-     // and render path. The goals are removed at spawn, so no pathfinding competes with
-     // the controlled velocity used to select the locomotion clips.
-     current.setNoAi(false);current.getNavigation().stop();
-     if(current.getX()>2.5)direction=-1;if(current.getX()<-2.5)direction=1;
-     double animationVelocity=animationVelocity(phase);
-     // Preserve ordinary land gravity: resetting Y to zero on every server
-     // update prevents the negative collision step that maintains onGround,
-     // which correctly disqualifies a production creature from ground runs.
-     double vertical=current.isFlyingSpecies()||current.isAquaticSpecies()?0.0D:current.getDeltaMovement().y;
-     if(animationVelocity>0.0D){
-      current.setDeltaMovement(direction*animationVelocity,vertical,0);
-      current.hasImpulse=true;
-     } else {
-      current.setDeltaMovement(0,vertical,0);
-     }
-    }
-    });
-   }
+   if(worldTicks>=SPECIES_START_TICK && worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW)
+    applyValidationInput(mc,Math.floorMod(worldTicks-SPECIES_START_TICK,SPECIES_TEST_WINDOW));
    if(worldTicks>=SPECIES_START_TICK+20 && worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW && (worldTicks-(SPECIES_START_TICK+20))%SPECIES_TEST_WINDOW==0)Screenshot.grab(mc.gameDirectory,mc.getMainRenderTarget(),message->{});
    if(worldTicks>=SPECIES_START_TICK && worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW && ((worldTicks-SPECIES_START_TICK)%SPECIES_TEST_WINDOW)==40
        && java.util.Set.of("charmander","charmeleon","charizard").contains(species.get((worldTicks-SPECIES_START_TICK)/SPECIES_TEST_WINDOW)))Screenshot.grab(mc.gameDirectory,mc.getMainRenderTarget(),message->{});
@@ -517,6 +508,30 @@ public final class ClientSmokeTest {
    }
   }catch(Exception e){throw new IllegalStateException("Minemon client validation failed",e);}
  }
+  private static void applyValidationInput(Minecraft mc,int phase) {
+    mc.getSingleplayerServer().execute(()->{
+    var current=(MinemonCreature)mc.getSingleplayerServer().overworld().getEntity(testEntity);
+     if(current!=null){
+     setValidationPhase(current,phase);
+     // Keep the fixture's movement deterministic while still exercising its real travel
+     // and render path. The goals are removed at spawn, so no pathfinding competes with
+     // the controlled velocity used to select the locomotion clips.
+     current.setNoAi(false);current.getNavigation().stop();
+     if(current.getX()>2.5)direction=-1;if(current.getX()<-2.5)direction=1;
+     double animationVelocity=animationVelocity(phase);
+     // Preserve ordinary land gravity: resetting Y to zero on every server
+     // update prevents the negative collision step that maintains onGround,
+     // which correctly disqualifies a production creature from ground runs.
+     double vertical=current.isFlyingSpecies()||current.isAquaticSpecies()?0.0D:current.getDeltaMovement().y;
+     if(animationVelocity>0.0D){
+      current.setDeltaMovement(direction*animationVelocity,vertical,0);
+      current.hasImpulse=true;
+     } else {
+      current.setDeltaMovement(0,vertical,0);
+     }
+    }
+    });
+  }
   private static double animationVelocity(int phase) {
    if(phase<8 || phase>=54)return 0.0D;
    if(phase<16)return (phase-7)*0.00625D;
