@@ -48,6 +48,17 @@ public final class ClientSmokeTest {
  private static final java.util.Map<String,Integer> clipChangedTick=new java.util.HashMap<>();
  private static final java.util.Map<String,Integer> lastRenderedEntityTick=new java.util.HashMap<>();
  private static final java.util.Map<String,Integer> finalIdleFirstTick=new java.util.HashMap<>();
+ private static final java.util.Map<String,Integer> steadyWalkFirstTick=new java.util.HashMap<>();
+ private static final java.util.Map<String,Integer> steadyRunFirstTick=new java.util.HashMap<>();
+ private static boolean steadyMotionObserved(String slug,boolean running) {
+  if(running&&(SpeciesBehaviorProfiles.isAirborne(slug)||SpeciesBehaviorProfiles.isAquatic(slug)
+      ||SpeciesAssetIndex.clip(slug,"ground_run","run")==null))return true;
+  var definition=SpeciesDefinitions.get(slug);
+  if(!running&&(sourcePoseTransition(slug)||slug.equals("fearow")
+      ||definition!=null&&java.util.Set.of("static","idle").contains(definition.movementFallback())))return true;
+  Integer first=(running?steadyRunFirstTick:steadyWalkFirstTick).get(slug),last=lastRenderedEntityTick.get(slug);
+  return first!=null&&last!=null&&last-first>=40;
+ }
  private static boolean finalIdleObserved(String slug) {
   if(sourceStaticIdle(slug)||sourcePoseTransition(slug)||slug.equals("fearow"))return true;
   var definition=SpeciesDefinitions.get(slug);
@@ -248,7 +259,11 @@ public final class ClientSmokeTest {
        renderedPhaseSpecies=slug;renderedPhase=validationPhase;renderedPhaseFrames=0;
       }
       renderedPhaseFrames++;
-      if(validationPhase>=68&&clipHasSettled(slug))finalIdleFirstTick.putIfAbsent(slug,entity.tickCount);
+      if(clipHasSettled(slug)) {
+       if(validationPhase>=68)finalIdleFirstTick.putIfAbsent(slug,entity.tickCount);
+       if(validationPhase>=18&&validationPhase<24)steadyWalkFirstTick.putIfAbsent(slug,entity.tickCount);
+       if(validationPhase>=41&&validationPhase<47)steadyRunFirstTick.putIfAbsent(slug,entity.tickCount);
+      }
      }
      if(validationPhase!=null && java.util.Set.of("abra","kadabra","alakazam","bellsprout","geodude","golem","slowpoke","slowbro","mewtwo","mew").contains(slug)) {
       var lookHead=model.getAnimationProcessor().getBone("head");
@@ -389,7 +404,9 @@ public final class ClientSmokeTest {
     int appliedPhase=(worldTicks-SPECIES_START_TICK)%SPECIES_TEST_WINDOW;
     if(ARTICULATION_VALIDATION_SPECIES.contains(active)
        && (!active.equals(renderedPhaseSpecies)||renderedPhase!=appliedPhase||renderedPhaseFrames<2
-           ||!clipHasSettled(active)||appliedPhase==79&&!finalIdleObserved(active))) {
+           ||!clipHasSettled(active)||appliedPhase==79&&!finalIdleObserved(active)
+           ||appliedPhase==23&&!steadyMotionObserved(active,false)
+           ||appliedPhase==46&&!steadyMotionObserved(active,true))) {
      applyValidationInput(mc,appliedPhase);
      return;
     }
