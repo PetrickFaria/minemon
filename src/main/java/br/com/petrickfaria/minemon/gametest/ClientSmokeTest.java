@@ -422,8 +422,14 @@ public final class ClientSmokeTest {
     for(String slug:java.util.List.of("charmander","charmeleon","charizard")) {
      if(!species.contains(slug))continue;
      float[] arms=fireStarterArmRanges.get(slug);
-     boolean walkArms=arms!=null&&arms[0]>=0.35F&&arms[1]>=0.35F;
-     boolean fasterArms=slug.equals("charmander")||(arms!=null&&arms[2]>=0.35F&&arms[3]>=0.35F);
+     // Native Charizard air_fly arms are 17.5 +/- 1 degrees;
+     // the adapted ground gait uses 55 degrees. Validate the active source
+     // flight pose without weakening the other starters' ground regression.
+     float minimumArm=slug.equals("charizard")?(float)Math.toRadians(16.0D):0.35F;
+     float maximumArm=slug.equals("charizard")?(float)Math.toRadians(19.0D):Float.MAX_VALUE;
+     boolean walkArms=arms!=null&&arms[0]>=minimumArm&&arms[1]>=minimumArm
+       &&arms[0]<=maximumArm&&arms[1]<=maximumArm;
+     boolean fasterArms=slug.equals("charmander")||(arms!=null&&arms[2]>=minimumArm&&arms[3]>=minimumArm&&arms[2]<=maximumArm&&arms[3]<=maximumArm);
      if(!walkArms||!fasterArms)
       throw new IllegalStateException("Fire-starter arms remained near T-pose during validated movement for "+slug+"; arm rotations="+java.util.Arrays.toString(arms));
     }
