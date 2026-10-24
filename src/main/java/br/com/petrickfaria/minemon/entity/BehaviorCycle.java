@@ -5,7 +5,7 @@ import br.com.petrickfaria.minemon.entity.SpeciesBehaviorProfiles.Profile;
 /** Tick-exact state machine; observation, navigation and persistence stay in the entity. */
 public final class BehaviorCycle {
  public enum Phase { LAND, TAKEOFF, AIR, LANDING, SEEK_WATER, SUBMERGED, SURFACE, EXIT_WATER, COOLDOWN }
- public record Observation(boolean active,boolean walking,boolean flightBand,boolean wet,
+ public record Observation(boolean active,boolean ground,boolean flightBand,boolean wet,
                            boolean submerged,boolean surface,boolean dryGround,boolean canDive) {}
  private final Profile profile;
  private Phase phase;
@@ -25,7 +25,7 @@ public final class BehaviorCycle {
    if(o.flightBand()&&++ticks>=new int[]{6000,1800,1200}[stage]){stage=(stage+1)%3;ticks=0;}
   }else if(profile==Profile.GROUND_FLIGHT){
    switch(phase){
-    case LAND -> {if(o.walking()&&++ticks>=6000)enter(Phase.TAKEOFF);}
+    case LAND -> {if(o.ground()&&++ticks>=6000)enter(Phase.TAKEOFF);}
     case TAKEOFF -> {if(o.flightBand())enter(Phase.AIR);}
     case AIR -> {if(o.flightBand()&&++ticks>=1200)enter(Phase.LANDING);}
     case LANDING -> {if(o.dryGround())enter(Phase.LAND);}

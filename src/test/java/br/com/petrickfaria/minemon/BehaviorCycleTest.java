@@ -27,13 +27,19 @@ public class BehaviorCycleTest {
   repeat(c,1800,flight);assertEquals(2,c.stage());assertEquals(10,c.maximumAltitude(),0);
   repeat(c,1200,flight);assertEquals(0,c.stage());assertEquals(0,c.ticks());
  }
- @Test public void fiveMinuteWalkThenRealTakeoffOneMinuteFlightAndRealLanding(){
+ @Test public void fiveMinuteActiveGroundPhaseThenRealTakeoffOneMinuteFlightAndRealLanding(){
   var c=new BehaviorCycle(GROUND_FLIGHT);var walk=observe(true,true,false,false,false,false,true,false);
   repeat(c,5999,walk);assertEquals(LAND,c.phase());c.tick(walk);assertEquals(TAKEOFF,c.phase());
   repeat(c,200,observe(true,false,false,false,false,false,false,false));assertEquals(0,c.ticks());
   var fly=observe(true,false,true,false,false,false,false,false);c.tick(fly);assertEquals(AIR,c.phase());
   repeat(c,1199,fly);assertEquals(AIR,c.phase());c.tick(fly);assertEquals(LANDING,c.phase());
   repeat(c,200,fly);assertEquals(LANDING,c.phase());c.tick(walk);assertEquals(LAND,c.phase());
+ }
+ @Test public void ordinaryGroundIdleCountsButPriorityPausesDoNot(){
+  var c=new BehaviorCycle(GROUND_FLIGHT);
+  var ground=observe(true,true,false,false,false,false,true,false);
+  repeat(c,100,ground);assertEquals(100,c.ticks());
+  repeat(c,500,observe(false,true,false,false,false,false,true,false));assertEquals(100,c.ticks());
  }
  @Test public void waterVisitRequires600SubmergedAnd600SurfaceThen6000TicksActuallyOnLand(){
   var c=new BehaviorCycle(WATER_VISITOR);var dive=observe(true,false,false,true,true,false,false,true);
@@ -56,6 +62,15 @@ public class BehaviorCycleTest {
  @Test public void onlySeakingReceivesExactly25PercentReduction(){
   var s=SpeciesDefinitions.get("seaking");assertEquals(1.35,s.scale(),0.00001);assertEquals(.525,s.width(),0.00001);assertEquals(.45,s.height(),0.00001);
   assertEquals(.6,SpeciesDefinitions.get("goldeen").width(),0.00001);
+ }
+ @Test public void groundProfilesSelectExistingGroundClipsIncludingFarfetchd(){
+  for(var d:SpeciesDefinitions.ALL.values()){
+   var p=SpeciesBehaviorProfiles.profile(d.slug());
+   if(p!=GROUND&&p!=GROUND_FLIGHT&&p!=WATER_VISITOR)continue;
+   if(d.clips().containsKey("ground_idle"))assertEquals(d.slug()+" ground idle",d.clips().get("ground_idle"),d.idle());
+   if(d.clips().containsKey("ground_walk"))assertEquals(d.slug()+" ground walk",d.clips().get("ground_walk"),d.walk());
+  }
+  assertEquals("animation.farfetchd.ground_walk",SpeciesDefinitions.get("farfetchd").walk());
  }
  @Test public void absentGaitsAreExplicitAdditionsWhileOriginalSourceClipsRemain(){
   for(String s:java.util.List.of("eevee","jolteon","flareon","vaporeon")){

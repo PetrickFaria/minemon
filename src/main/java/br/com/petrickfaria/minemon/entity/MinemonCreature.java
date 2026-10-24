@@ -496,7 +496,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         boolean canDive=wet&&this.naturalCycle.phase()==BehaviorCycle.Phase.SEEK_WATER&&WaterMovementGoal.canDive(this,this.blockPosition());
         var previousPhase=this.naturalCycle.phase();int previousStage=this.naturalCycle.stage();
         this.naturalCycle.tick(new BehaviorCycle.Observation(this.naturalBehaviorActive(),
-            this.isOnGround()&&!wet&&this.getDeltaMovement().horizontalDistanceSqr()>0.0001D,
+            this.isOnGround()&&!wet,
             band,wet,submerged,surface,this.isOnGround()&&!wet,canDive));
         if(previousPhase!=this.naturalCycle.phase()||previousStage!=this.naturalCycle.stage())this.getNavigation().stop();
         this.syncNaturalState();
