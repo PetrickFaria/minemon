@@ -37,6 +37,7 @@ public final class ClientSmokeTest {
  private static final java.util.Map<String,java.util.List<String>> modelBones=new java.util.HashMap<>();
  private static final java.util.Map<String,float[]> motionRanges=new java.util.HashMap<>();
  private static final java.util.Map<String,float[]> fireStarterArmRanges=new java.util.HashMap<>();
+ private static boolean fearowNativeAirPoseObserved;
  private static final java.util.Map<String,float[]> sourceLookRanges=new java.util.HashMap<>();
  private static final java.util.Map<String,float[]> sourcePitchRanges=new java.util.HashMap<>();
  private static final java.util.Set<String> walkedSpecies=new java.util.HashSet<>();
@@ -59,13 +60,13 @@ public final class ClientSmokeTest {
   if(running&&(fixtureAir(slug)||fixtureWater(slug)
       ||SpeciesAssetIndex.clip(slug,"ground_run","run")==null))return true;
   var definition=SpeciesDefinitions.get(slug);
-  if(!running&&(sourcePoseTransition(slug)
+  if(!running&&(sourcePoseTransition(slug)||slug.equals("fearow")
       ||definition!=null&&("static".equals(definition.movementFallback())||"idle".equals(definition.movementFallback()))))return true;
   Integer first=(running?steadyRunFirstTick:steadyWalkFirstTick).get(slug),last=lastRenderedEntityTick.get(slug);
   return first!=null&&last!=null&&last-first>=40;
  }
  private static boolean finalIdleObserved(String slug) {
-  if(sourceStaticIdle(slug)||sourcePoseTransition(slug))return true;
+  if(sourceStaticIdle(slug)||sourcePoseTransition(slug)||slug.equals("fearow"))return true;
   var definition=SpeciesDefinitions.get(slug);
   if(definition!=null&&"static".equals(definition.movementFallback()))return true;
   Integer first=finalIdleFirstTick.get(slug),last=lastRenderedEntityTick.get(slug);
@@ -357,6 +358,20 @@ public final class ClientSmokeTest {
          var range=perSpecies.computeIfAbsent(state+":"+joint,k->{var v=new float[12];java.util.Arrays.fill(v,0,6,Float.MAX_VALUE);java.util.Arrays.fill(v,6,12,-Float.MAX_VALUE);return v;});
          for(int axis=0;axis<6;axis++){range[axis]=Math.min(range[axis],values[axis]);range[axis+6]=Math.max(range[axis+6],values[axis]);}
         }
+       }
+       if(slug.equals("fearow")&&isSettledClipSample(phase)) {
+        var body=model.getAnimationProcessor().getBone("body");
+        var left=model.getAnimationProcessor().getBone("wing_open_left");
+        var right=model.getAnimationProcessor().getBone("wing_open_right");
+        // Keep the source's static open-wing air pose; no native flap cycle exists.
+        float pitch=(float)Math.toRadians(52.5D),wing=(float)Math.toRadians(52.07555D);
+        if(body==null||left==null||right==null
+           ||Math.abs(Math.abs(body.getRotationX())-pitch)>0.02F
+           ||Math.abs(Math.abs(left.getRotationZ())-wing)>0.02F
+           ||Math.abs(Math.abs(right.getRotationZ())-wing)>0.02F
+           ||left.getRotationZ()*right.getRotationZ()>=0.0F)
+         throw new IllegalStateException("Fearow did not render its native static open-wing air pose");
+        fearowNativeAirPoseObserved=true;
        }
       if(java.util.Set.of("charmander","charmeleon","charizard").contains(slug)) {
         var flame=model.getAnimationProcessor().getBone("tail_flame");
@@ -723,6 +738,17 @@ public final class ClientSmokeTest {
     var definition=SpeciesDefinitions.get(slug);
     if(definition==null)throw new IllegalStateException("Missing test profile species "+slug);
     String fallback=definition.movementFallback();
+    if(slug.equals("fearow")&&fixtureAir(slug)) {
+     String air="animation.fearow.air_idle";
+     for(String state:java.util.List.of("IDLE_INITIAL","WALK_START","WALK_STEADY","WALK_DECEL",
+         "IDLE_RETURN","RUN_START","RUN_STEADY","RUN_DECEL","IDLE_FINAL"))
+      if(!hasSelectedClip(slug,state,air))throw new IllegalStateException("Fearow native air pose missing in "+state);
+     if(!fearowNativeAirPoseObserved)throw new IllegalStateException("Fearow native air pose was not rendered");
+     validateSourceStaticIdle(slug);
+     knownFallbacks++;
+     report.append("SOURCE STATIC AIR POSE fearow: native air_idle selected in all phases; actual body pitch and opposite open-wing angles verified; no native fly cycle exists and no animated aerial gait pass is claimed.\n");
+     continue;
+    }
     if("static".equals(fallback)||"idle".equals(fallback)) {
     String expected=expectedWalk(slug,definition);
      if(!hasSelectedClip(slug,"WALK_STEADY",expected))throw new IllegalStateException("Fallback classification did not match selected walk clip for "+slug);

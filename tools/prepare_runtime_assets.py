@@ -83,26 +83,6 @@ def compatible_locomotion(data,geo,d):
    body=channels.setdefault('body',{})
    body['position']=[0,sinus(0,0.12 if kind=='walk' else 0.2,freq*2),0]
    put(kind,clip)
- if slug in ('articuno','zapdos','moltres','fearow'):
-  # The native `air_fly` clips contain a static open-wing pose. Preserve
-  # them in the copied runtime file and give the controller a compatible
-  # loop that actually changes the selected rig's wing angles.
-  roots={
-   'articuno':['wing_open_left','wing_open_right'],
-   'zapdos':['wing_open_left','wing_open_right'],
-   'moltres':['wing_open_left','wing_open_right'],
-   'fearow':['wing_open_left','wing_open_right'],
-  }[slug]
-  present={b['name'] for g in geo['minecraft:geometry'] for b in g['bones']}
-  clip=source('air_idle') or source('ground_idle');clip.update(loop=True,animation_length=0.8)
-  channels=clip.setdefault('bones',{})
-  for side,bone in zip(('left','right'),roots):
-   if bone not in present:continue
-   sign=1 if side=='left' else -1
-   channels.setdefault(bone,{})['rotation']=[sinus(0,24,1.25),0,sinus(0,sign*7,1.25)]
-  # Several native rigs group the wings beneath a pose root. Keep the flight
-  # body pose and add only low amplitude follow-through to the primary wings.
-  put('fly',clip)
  if slug=='vaporeon':
   clip=source('ground_idle');clip.update(loop=True,animation_length=1.0)
   channels=clip['bones']
@@ -112,13 +92,6 @@ def compatible_locomotion(data,geo,d):
   for i,joint in enumerate(('frontleg_left','frontleg_right','back_leg_left','back_leg_right')):
    ch=channels.setdefault(joint,{});rot=list(ch.get('rotation',[0,0,0]));rot[0]=sinus(25,14,1.0,0 if i%2==0 else 180);ch['rotation']=rot
   put('swim',clip)
- if slug=='spearow':
-  clip=source('ground_idle');clip.update(loop=True,animation_length=0.5)
-  channels=clip['bones'];channels['wings_open']={'scale':[1,1,1]};channels['wings_closed']={'scale':[0,0,0]}
-  for side,sign in [('left',1),('right',-1)]:
-   channels['wing_open_'+side]={'rotation':[0,0,sinus(0,sign*24,2.0)]}
-   channels['leg_'+side]={'rotation':[25,0,0]}
-  put('fly',clip)
 
 def build_runtime_clips(data,geo,d):
  animations=data.setdefault('animations',{});clips=d.get('clips',{})

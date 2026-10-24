@@ -37,17 +37,28 @@ public final class NaturalMovementAssetTest {
   }
  }
 
- @Test public void allFourRequestedFlightRigsHaveAnimatedWingsAndKeepNativeIdle() throws Exception {
-  var roots=java.util.Map.of(
-      "articuno",List.of("wing_open_left","wing_open_right"),
-      "zapdos",List.of("wing_open_left","wing_open_right"),
-      "moltres",List.of("wing_open_left","wing_open_right"),
-      "fearow",List.of("wing_open_left","wing_open_right"));
-  for(var entry:roots.entrySet()) {
-   var animations=animations(entry.getKey());
-   String flight=SpeciesAssetIndex.clip(entry.getKey(),"air_fly","air_fly");
-   for(String bone:entry.getValue())assertDynamicBone(animations,flight,bone);
-   assertTrue(entry.getKey()+" retains its source idle",animations.has("animation."+entry.getKey()+".air_idle"));
+ @Test public void sourceFlightPosesStayStaticAndNoWingCycleIsSynthesized() throws Exception {
+  for(String slug:List.of("articuno","zapdos","moltres")) {
+   var animations=animations(slug);
+   assertTrue(slug+" keeps its source flight clip",animations.has("animation."+slug+".air_fly"));
+   assertTrue(slug+" keeps its source air idle",animations.has("animation."+slug+".air_idle"));
+   assertFalse(slug+" has no generated wing cycle",animations.has("animation."+slug+".minemon_fly"));
+   for(String bone:List.of("wing_open_left","wing_open_right")) {
+    var track=animations.getAsJsonObject("animation."+slug+".air_fly").getAsJsonObject("bones").getAsJsonObject(bone).get("rotation");
+    assertNotNull(slug+" native pose for "+bone,track);
+    assertTrue(slug+" source pose remains a static vector for "+bone,track.isJsonArray()&&track.getAsJsonArray().size()==3);
+   }
+   var clips=new java.util.HashMap<>(SpeciesDefinitions.get(slug).clips());
+   String nativeFlight=clips.get("air_fly");CompatibleLocomotion.apply(slug,clips);
+   assertEquals(slug+" still selects native air_fly",nativeFlight,clips.get("air_fly"));
   }
+  var fearow=animations("fearow");
+  assertTrue("Fearow keeps its native static air pose",fearow.has("animation.fearow.air_idle"));
+  assertFalse("Fearow has no invented air cycle",fearow.has("animation.fearow.minemon_fly"));
+  var fearowClips=new java.util.HashMap<>(SpeciesDefinitions.get("fearow").clips());
+  CompatibleLocomotion.apply("fearow",fearowClips);
+  assertFalse("Fearow does not get a synthetic air_fly mapping",fearowClips.containsKey("air_fly"));
+  var spearow=animations("spearow");
+  assertFalse("Spearow has no generated air cycle",spearow.has("animation.spearow.minemon_fly"));
  }
 }

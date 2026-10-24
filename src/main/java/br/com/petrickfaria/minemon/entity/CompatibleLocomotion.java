@@ -10,13 +10,9 @@ public final class CompatibleLocomotion {
  public static void apply(String slug,Map<String,String> clips){
   if(groundGait(slug))clips.putIfAbsent("ground_walk",clip(slug,"walk"));
   if(quadruped(slug)||slug.equals("meowth")||slug.equals("persian"))clips.putIfAbsent("ground_run",clip(slug,"run"));
-  if(Set.of("articuno","zapdos","moltres","fearow").contains(slug))clips.put("air_fly",clip(slug,"fly"));
   if(slug.equals("vaporeon")){
    clips.putIfAbsent("water_swim",clip(slug,"swim"));
    clips.putIfAbsent("water_idle",clips.get("ground_idle"));
-  }
-  if(slug.equals("spearow")){
-   clips.putIfAbsent("air_fly",clip(slug,"fly"));clips.putIfAbsent("air_idle",clip(slug,"fly"));
   }
  }
  public static List<String> gaitJoints(String slug){

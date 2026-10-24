@@ -84,8 +84,10 @@ public class BehaviorCycleTest {
    assertEquals(CompatibleLocomotion.clip(s,"walk"),d.clips().get("ground_walk"));
    assertEquals(CompatibleLocomotion.clip(s,"run"),d.clips().get("ground_run"));
   }
-  for(String s:java.util.List.of("articuno","zapdos","moltres","fearow"))
-   assertEquals(CompatibleLocomotion.clip(s,"fly"),SpeciesDefinitions.get(s).clips().get("air_fly"));
+  for(String s:java.util.List.of("articuno","zapdos","moltres"))
+   assertEquals("native air fly remains selected for "+s,"animation."+s+".air_fly",SpeciesDefinitions.get(s).clips().get("air_fly"));
+  assertFalse("Fearow has no source air_fly and receives no invented mapping",SpeciesDefinitions.get("fearow").clips().containsKey("air_fly"));
+  assertFalse("Spearow has no source air_fly and receives no invented mapping",SpeciesDefinitions.get("spearow").clips().containsKey("air_fly"));
  }
  @Test public void requestedScaleAndHitboxAdjustmentsAreAppliedOnlyAtRuntime(){
   assertEquals(1.0,SpeciesDefinitions.get("dewgong").scale(),.0001);
