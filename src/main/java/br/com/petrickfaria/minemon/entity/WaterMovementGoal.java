@@ -78,7 +78,8 @@ public final class WaterMovementGoal extends Goal {
    if(++scanYIndex>50){scanYIndex=0;scanIndex=(scanIndex+1)%OFFSETS.size();}
    BlockPos p=origin.offset(offset.getX(),dy,offset.getZ());
    if(!withinSearchRadius(origin,p)||!mob.level.hasChunkAt(p)||blocked.containsKey(p))continue;
-   if(dry?!safeDry(mob,p):!waterRegion(mob,p)||!waterFits(mob,p,SpeciesBehaviorProfiles.profile(mob.getSpeciesSlug())!=SpeciesBehaviorProfiles.Profile.SURFACE))continue;
+   if(dry?!safeDry(mob,p):!waterFits(mob,p,SpeciesBehaviorProfiles.profile(mob.getSpeciesSlug())!=SpeciesBehaviorProfiles.Profile.SURFACE)
+       ||requiresNavigableVolume(mob.getSpeciesSlug())&&!waterRegion(mob,p))continue;
    paths++;
    var path=mob.getNavigation().createPath(p,0);
    if(path!=null&&path.canReach())return p;
@@ -99,7 +100,8 @@ public final class WaterMovementGoal extends Goal {
    double y=surface?top-preferredSurfaceDepth(mob)
        :Math.min(top-mob.getBbHeight()-0.3D,mob.getY()+mob.getRandom().nextInt(5)-2);
    BlockPos p=new BlockPos(x,y,z);
-   if(blocked.containsKey(p)||!waterRegion(mob,p)||!waterFits(mob,p,!surface))continue;
+   if(blocked.containsKey(p)||!waterFits(mob,p,!surface)
+       ||requiresNavigableVolume(mob.getSpeciesSlug())&&!waterRegion(mob,p))continue;
    boolean clear=true;
    for(int step=1;step<=4;step++){
     Vec3 point=mob.position().lerp(Vec3.atCenterOf(p),step/4.0D);
@@ -140,6 +142,7 @@ public final class WaterMovementGoal extends Goal {
   return mob.getSpeciesSlug().equals("gyarados")?1.5D+mob.getBbHeight()*0.5D:Math.min(0.8D,mob.getBbHeight()*0.3D);
  }
  public static boolean withinSearchRadius(BlockPos origin,BlockPos candidate){return origin.distSqr(candidate)<=SEARCH_RADIUS*SEARCH_RADIUS;}
+ public static boolean requiresNavigableVolume(String speciesSlug){return SpeciesBehaviorProfiles.isVisitor(speciesSlug);}
  public static boolean isNavigableWaterRegion(BlockPos center,java.util.function.Predicate<BlockPos> water){
   for(int x=-1;x<=1;x++)for(int y=-1;y<=1;y++)for(int z=-1;z<=1;z++)if(!water.test(center.offset(x,y,z)))return false;
   return true;

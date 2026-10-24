@@ -283,14 +283,14 @@ public final class CompanionTests {
  @GameTest(template="test_arena",timeoutTicks=1300)
  public static void aquaticSpeciesSeekWaterAndSurviveWithoutIt(GameTestHelper h) {
   floor(h);
-  // A broad, deep basin keeps navigable shore approaches and a full-body
-  // 3x3x3 swimming volume for the real amphibious pathfinder.
-  for(int x=4;x<=13;x++)for(int z=3;z<=13;z++){
+  // A small accessible pond exercises permanent swimmers independently of
+  // the 3x3x3 volume requirement used only by aquatic visitors.
+  for(int x=8;x<=10;x++)for(int z=4;z<=6;z++){
    h.setBlock(new BlockPos(x,-1,z),net.minecraft.world.level.block.Blocks.STONE);
-   for(int y=0;y<=4;y++)h.setBlock(new BlockPos(x,y,z),net.minecraft.world.level.block.Blocks.WATER);
+   h.setBlock(new BlockPos(x,0,z),net.minecraft.world.level.block.Blocks.WATER);
   }
-  MinemonCreature goldeen=h.spawn(ModEntities.SPECIES.get("goldeen").get(),new BlockPos(2,1,7));
-  BlockPos pond=h.absolutePos(new BlockPos(9,2,8));
+  MinemonCreature goldeen=h.spawn(ModEntities.SPECIES.get("goldeen").get(),new BlockPos(5,1,5));
+  BlockPos pond=h.absolutePos(new BlockPos(9,0,5));
   var directPath=goldeen.getNavigation().createPath(pond,0);
   com.mojang.logging.LogUtils.getLogger().info("MINEMON AQUATIC SEEK FIXTURE target="+pond
       +" targetWater="+h.getLevel().getFluidState(pond).is(net.minecraft.tags.FluidTags.WATER)
@@ -298,7 +298,9 @@ public final class CompanionTests {
           p->h.getLevel().getFluidState(p).is(net.minecraft.tags.FluidTags.WATER))
       +" directPath="+(directPath==null?"null":directPath.canReach()+" nodes="+directPath.getNodeCount())
       +" state="+goldeen.position()+" nav="+goldeen.getNavigation().getClass().getSimpleName());
-  MinemonCreature adjacent=h.spawn(ModEntities.SPECIES.get("goldeen").get(),new BlockPos(14,1,10));
+  h.setBlock(new BlockPos(13,-1,10),net.minecraft.world.level.block.Blocks.STONE);
+  h.setBlock(new BlockPos(13,0,10),net.minecraft.world.level.block.Blocks.WATER);
+  MinemonCreature adjacent=h.spawn(ModEntities.SPECIES.get("goldeen").get(),new BlockPos(12,1,10));
   // NoAI does not disable physical pushing. Keep the dry-survival specimen
   // away from the two roaming water seekers, with a real dry enclosure;
   // otherwise incidental pushes can invalidate the dry-land precondition.
