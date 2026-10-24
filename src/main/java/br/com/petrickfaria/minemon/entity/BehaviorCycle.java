@@ -14,8 +14,8 @@ public final class BehaviorCycle {
  public Phase phase(){return phase;}
  public int ticks(){return ticks;}
  public int stage(){return stage;}
- public double minimumAltitude(){return profile==Profile.ALTITUDE_CYCLE||profile==Profile.GROUND_FLIGHT?new double[]{1,4}[Math.min(stage,1)]:3;}
- public double maximumAltitude(){return profile==Profile.ALTITUDE_CYCLE||profile==Profile.GROUND_FLIGHT?new double[]{3,9}[Math.min(stage,1)]:10;}
+ public double minimumAltitude(){return profile==Profile.ALTITUDE_CYCLE||profile==Profile.GROUND_FLIGHT?new double[]{3,8}[Math.min(stage,1)]:3;}
+ public double maximumAltitude(){return profile==Profile.ALTITUDE_CYCLE||profile==Profile.GROUND_FLIGHT?new double[]{7,15}[Math.min(stage,1)]:15;}
  public boolean flying(){return profile==Profile.ALTITUDE_CYCLE||profile==Profile.GROUND_FLIGHT&&phase!=Phase.LAND;}
  public boolean landing(){return profile==Profile.GROUND_FLIGHT&&phase==Phase.LANDING;}
  private void enter(Phase next){phase=next;ticks=0;}

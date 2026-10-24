@@ -23,15 +23,15 @@ public class BehaviorCycleTest {
  @Test public void altitudeCountsOnlyActualTimeInsideEachBand(){
   var c=new BehaviorCycle(ALTITUDE_CYCLE);var flight=observe(true,false,true,false,false,false,false,false);
   repeat(c,6000,observe(true,false,false,false,false,false,false,false));assertEquals(0,c.ticks());
-  repeat(c,5999,flight);assertEquals(0,c.stage());c.tick(flight);assertEquals(1,c.stage());assertEquals(4,c.minimumAltitude(),0);
-  assertEquals(9,c.maximumAltitude(),0);repeat(c,3000,flight);assertEquals(0,c.stage());assertEquals(0,c.ticks());
+  repeat(c,5999,flight);assertEquals(0,c.stage());c.tick(flight);assertEquals(1,c.stage());assertEquals(8,c.minimumAltitude(),0);
+  assertEquals(15,c.maximumAltitude(),0);repeat(c,3000,flight);assertEquals(0,c.stage());assertEquals(0,c.ticks());
  }
  @Test public void twentyMinuteGroundLowFlightHighFlightLandingCycle(){
   var c=new BehaviorCycle(GROUND_FLIGHT);var walk=observe(true,true,false,false,false,false,true,false);
   repeat(c,5999,walk);assertEquals(LAND,c.phase());c.tick(walk);assertEquals(TAKEOFF,c.phase());
   repeat(c,200,observe(true,false,false,false,false,false,false,false));assertEquals(0,c.ticks());
   var fly=observe(true,false,true,false,false,false,false,false);c.tick(fly);assertEquals(AIR,c.phase());
-  repeat(c,5999,fly);assertEquals(AIR,c.phase());c.tick(fly);assertEquals(1,c.stage());assertEquals(4,c.minimumAltitude(),0);
+  repeat(c,5999,fly);assertEquals(AIR,c.phase());c.tick(fly);assertEquals(1,c.stage());assertEquals(8,c.minimumAltitude(),0);
   repeat(c,5999,fly);assertEquals(AIR,c.phase());c.tick(fly);assertEquals(LANDING,c.phase());
   repeat(c,200,fly);assertEquals(LANDING,c.phase());c.tick(walk);assertEquals(LAND,c.phase());
  }
