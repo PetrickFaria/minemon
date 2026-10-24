@@ -10,8 +10,8 @@ renderer_source=(ROOT/'src/main/java/br/com/petrickfaria/minemon/client/MinemonR
 for slug in SOURCE_FIRE_HASHES:
  layer=fire_evidence[slug]
  if (layer.get('fps'),layer.get('loop'),layer.get('emissive'))!=(10,True,True):raise ValueError('Source resolver fire-layer settings changed: '+slug)
-if 'floor((entity.tickCount+partialTick)*0.5F)&3' not in renderer_source or 'entityTranslucent(texture)' not in renderer_source or 'renderCopyModel(getEntityModel(),texture,pose,buffers,15728880' not in renderer_source:
- raise ValueError('Ponyta/Rapidash renderer no longer follows the native 10 fps emissive overlay contract')
+if 'floor((entity.tickCount+partialTick)*0.5F)&3' not in renderer_source or 'renderSelectedBones(model,selected,texture' not in renderer_source or 'textures/emissive/' not in renderer_source:
+ raise ValueError('Fire renderer no longer uses 10 fps animated selective emissive masks')
 def runtime_path(path):return path.replace(SOURCE_PREFIX,RUNTIME_PREFIX,1) if path.startswith(SOURCE_PREFIX) else path
 GASTLY_PARTICLE='assets/minemon_gen1/particles/gastly_ghostly_smoke.json'
 GASTLY_PARTICLE_TEXTURES=[f'assets/minemon_gen1/textures/particle/gastly_ghostly_smoke_{i}.png' for i in range(6)]
@@ -99,26 +99,54 @@ def validate_prepared_tail_flames(read,definitions):
   slug=d['slug'];source_model=json.loads((R/d['model']).read_text())['minecraft:geometry'][0]
   source_bone=next(b for b in source_model['bones'] if b['name']==d['flame_anchor']['host'])
   source_sheet=decode_png_rgba((R/d['flame_texture']).read_bytes());target_path=runtime_path(d['texture'])
-  target_texture=decode_png_rgba(read(target_path));target_geo=json.loads(read(runtime_path(d['model'])))['minecraft:geometry'][0]
+  base_blob=read(target_path);target_texture=decode_png_rgba(base_blob);target_geo=json.loads(read(runtime_path(d['model'])))['minecraft:geometry'][0]
+  if hashlib.sha256(base_blob).digest()!=hashlib.sha256((R/d['texture']).read_bytes()).digest():
+   raise ValueError('Base texture changed while preparing tail flames: '+slug)
+  if (target_texture[0],target_texture[1])!=(target_geo['description']['texture_width'],target_geo['description']['texture_height']):
+   raise ValueError('Tail-flame preparation changed original texture dimensions: '+slug)
+  mask_path=f'assets/minemon_gen1/textures/emissive/{slug}_tail_flame.png';mask=decode_png_rgba(read(mask_path))
   flame=next((b for b in target_geo['bones'] if b['name']=='tail_flame'),None)
   if flame is None or len(source_bone.get('cubes',[]))!=2 or len(flame.get('cubes',[]))!=2:
    raise ValueError('Tail-flame runtime does not preserve both native planes: '+slug)
-  source_digest=hashlib.sha256()
+  source_digest=hashlib.sha256();allowed=set()
   for original,converted in zip(source_bone['cubes'],flame['cubes']):
-   _,_,source_rows=source_sheet;_,_,target_rows=target_texture
+   _,_,source_rows=source_sheet
    z=int(original['size'][2]);height=int(original['size'][1]);sx,sy=map(int,original['uv']);sy+=z
    expected=[bytes(row[sx*4:(sx+z)*4]) for row in source_rows[sy:sy+height]]
    source_digest.update(b''.join(expected))
-   u,v=map(int,converted['uv']);v+=z
+   u,v=map(int,converted['uv'])
+   if u<0 or v<0 or u+1+2*z>mask[0] or v+z+height>mask[1]:
+    raise ValueError('Tail-flame mask UV lies outside the unchanged model atlas: '+slug)
    for side_u in (u,u+1+z):
-    actual=[bytes(row[side_u*4:(side_u+z)*4]) for row in target_rows[v:v+height]]
+    actual=[bytes(row[side_u*4:(side_u+z)*4]) for row in mask[2][v+z:v+z+height]]
     if actual!=expected:raise ValueError('Tail-flame plane texture differs from its native Cobblemon UV pixels: '+slug)
+    for yy in range(v+z,v+z+height):allowed.update((side_u+xx,yy) for xx in range(z))
    if converted.get('rotation')!=original.get('rotation') or converted.get('pivot')!=original.get('pivot'):
     raise ValueError('Tail-flame plane pivot/rotation changed from Cobblemon source: '+slug)
+  if any(mask[2][y][x*4+3] and (x,y) not in allowed for y in range(mask[1]) for x in range(mask[0])):
+   raise ValueError('Tail-flame mask has visible pixels outside the two flame planes: '+slug)
   rendered_hashes.append((slug,source_digest.hexdigest()))
  if len({digest for _,digest in rendered_hashes})!=3:
   raise ValueError('Charmander, Charmeleon and Charizard tail flames unexpectedly share identical source pixels')
  print('PASS tail flames: two independent Cobblemon UV planes, transforms and per-species source pixels preserved')
+def validate_emissive_masks(read,definitions):
+ for d in definitions:
+  if d['slug'] not in ('charmander','charmeleon','charizard'):continue
+  path=f"assets/minemon_gen1/textures/emissive/{d['slug']}_tail_flame.png"
+  w,h,pixels=decode_png_rgba(read(path))
+  source_geo=json.loads((R/d['model']).read_text())['minecraft:geometry'][0]['description']
+  if (w,h)!=(source_geo['texture_width'],source_geo['texture_height']):raise ValueError('Starter flame mask dimensions differ from the unchanged model atlas: '+d['slug'])
+  if not any(row[i] for row in pixels for i in range(3,len(row),4)):
+   raise ValueError('Starter flame mask is fully transparent: '+d['slug'])
+ moltres=decode_png_rgba(read('assets/minemon_gen1/textures/emissive/moltres_fire.png'))
+ moltres_definition=next(d for d in definitions if d['slug']=='moltres')
+ source_geo=json.loads((R/moltres_definition['model']).read_text())['minecraft:geometry'][0]['description']
+ if (moltres[0],moltres[1])!=(source_geo['texture_width'],source_geo['texture_height']):raise ValueError('Moltres fire mask dimensions differ from its original atlas')
+ for row in moltres[2]:
+  for i in range(0,len(row),4):
+   r,g,b,a=row[i:i+4]
+   if a and not (r>=180 and g>=55 and g<=r*0.82 and b<=105 and r-b>=85):raise ValueError('Moltres emissive mask includes non-fire colors')
+ print('PASS selective emissive masks: starter flame atlases are isolated; Moltres mask contains fire-palette pixels only')
 def validate(read,definitions,prepared=False,packed=False):
  previous=0
  for d in definitions:
@@ -237,16 +265,20 @@ if __name__=='__main__':
    validate_gastly_smoke(z.read,defs)
    validate_target_scales(defs)
    validate_prepared_tail_flames(z.read,defs)
+   validate_emissive_masks(z.read,defs)
    entries=json.loads(z.read(dex));assert len(entries)==151 and [e['nationalPokedexNumber'] for e in entries]==list(range(1,152))
    active={d['slug'] for d in defs};assert active=={e['slug'] for e in entries if e['registered']}
    allowed={runtime_path(p) for d in defs for p in [d['model'],d['texture'],d['animation']]+d['sounds']+d['licenses']}
    allowed.update(runtime_path(f'assets/minemon/textures/pokemon/{slug}_cobblemon_1_8_2/fire/normal/{i}.png') for slug in SOURCE_FIRE_HASHES for i in range(1,5))
+   allowed.update(f'assets/minemon_gen1/textures/emissive/{slug}_tail_flame.png' for slug in ('charmander','charmeleon','charizard'))
+   allowed.add('assets/minemon_gen1/textures/emissive/moltres_fire.png')
    roots=('assets/minemon_gen1/geo/','assets/minemon_gen1/animations/','assets/minemon_gen1/textures/pokemon/','assets/minemon_gen1/sounds/pokemon/','assets/minemon_gen1/licenses/pokemon/')
+   roots=roots+('assets/minemon_gen1/textures/emissive/',)
    unexpected=[n for n in z.namelist() if not n.endswith('/') and n.startswith(roots) and n not in allowed]
    if unexpected:raise ValueError('Unexpected assets '+str(unexpected))
    for d in defs:
     egg=json.loads(z.read(f"assets/minemon_gen1/models/item/{d['slug']}_spawn_egg.json"));assert egg['parent']=='minecraft:item/template_spawn_egg'
-   for p in ['pack.mcmeta','META-INF/mods.toml','META-INF/ASSET_LICENSES.md','br/com/petrickfaria/minemon/Minemon.class','br/com/petrickfaria/minemon/registry/ModParticles.class','br/com/petrickfaria/minemon/client/GastlySmokeParticle.class',GASTLY_PARTICLE,*GASTLY_PARTICLE_TEXTURES,manifest,dex]:assert p in z.namelist(),p
+   for p in ['pack.mcmeta','META-INF/mods.toml','META-INF/ASSET_LICENSES.md','br/com/petrickfaria/minemon/Minemon.class','br/com/petrickfaria/minemon/registry/ModParticles.class','br/com/petrickfaria/minemon/client/GastlySmokeParticle.class',GASTLY_PARTICLE,*GASTLY_PARTICLE_TEXTURES,'assets/minemon_gen1/textures/emissive/charmander_tail_flame.png','assets/minemon_gen1/textures/emissive/charmeleon_tail_flame.png','assets/minemon_gen1/textures/emissive/charizard_tail_flame.png','assets/minemon_gen1/textures/emissive/moltres_fire.png',manifest,dex]:assert p in z.namelist(),p
    print('PASS JAR registrations/resources:',len(defs),'eggs; only selected assets packaged')
    meta=z.read('META-INF/mods.toml').decode();assert 'modId="minemon_gen1"' in meta and 'displayName="Minemon (1ª Geração)"' in meta
    print('PASS Minemon (1ª Geração) metadata and minemon_gen1 ID')
