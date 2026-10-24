@@ -290,6 +290,12 @@ public final class CompanionTests {
    h.setBlock(new BlockPos(x,0,z),net.minecraft.world.level.block.Blocks.WATER);
   }
   MinemonCreature goldeen=h.spawn(ModEntities.SPECIES.get("goldeen").get(),new BlockPos(5,1,5));
+  int waterPriority=goldeen.goalSelector.getAvailableGoals().stream()
+      .filter(goal->goal.getGoal() instanceof WaterMovementGoal).mapToInt(goal->goal.getPriority()).findFirst().orElse(Integer.MAX_VALUE);
+  int spacingPriority=goldeen.goalSelector.getAvailableGoals().stream()
+      .filter(goal->goal.getGoal().getClass().getSimpleName().equals("NaturalSeparationGoal"))
+      .mapToInt(goal->goal.getPriority()).findFirst().orElse(Integer.MIN_VALUE);
+  check(h,waterPriority<spacingPriority,"Species-specific water navigation must take priority over optional spacing: water="+waterPriority+" spacing="+spacingPriority);
   BlockPos pond=h.absolutePos(new BlockPos(9,0,5));
   var directPath=goldeen.getNavigation().createPath(pond,0);
   com.mojang.logging.LogUtils.getLogger().info("MINEMON AQUATIC SEEK FIXTURE target="+pond

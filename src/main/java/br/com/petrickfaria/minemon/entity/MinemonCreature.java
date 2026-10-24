@@ -160,7 +160,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         this.goalSelector.addGoal(1, new SitWhenOrderedToGoal(this));
         this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.2D, true));
         this.goalSelector.addGoal(3, new FollowOwnerGoal(this, 1.0D, 10.0F, 2.0F, this.isFlyingSpecies()));
-        this.goalSelector.addGoal(4, new NaturalSeparationGoal(this));
+        this.goalSelector.addGoal(6, new NaturalSeparationGoal(this));
         if (SpeciesBehaviorProfiles.canFly(this.getSpeciesSlug())) {
             this.goalSelector.addGoal(0, new NaturalMovementGoals.SleepLanding(this));
             this.goalSelector.addGoal(4, new NaturalMovementGoals.AirPatrol(this));
