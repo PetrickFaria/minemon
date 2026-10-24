@@ -491,8 +491,8 @@ public final class ClientSmokeTest {
    if(worldTicks>=SPECIES_START_TICK && worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW)
     applyValidationInput(mc,Math.floorMod(worldTicks-SPECIES_START_TICK,SPECIES_TEST_WINDOW));
    if(worldTicks>=SPECIES_START_TICK+20 && worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW && (worldTicks-(SPECIES_START_TICK+20))%SPECIES_TEST_WINDOW==0)Screenshot.grab(mc.gameDirectory,mc.getMainRenderTarget(),message->{});
-   if(worldTicks>=SPECIES_START_TICK && worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW && ((worldTicks-SPECIES_START_TICK)%SPECIES_TEST_WINDOW)==40
-       && java.util.Set.of("charmander","charmeleon","charizard").contains(species.get((worldTicks-SPECIES_START_TICK)/SPECIES_TEST_WINDOW)))Screenshot.grab(mc.gameDirectory,mc.getMainRenderTarget(),message->{});
+   if(worldTicks>=SPECIES_START_TICK && worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW && ((worldTicks-SPECIES_START_TICK)%SPECIES_TEST_WINDOW)==42
+       && java.util.Set.of("charmander","charmeleon","charizard","moltres","ponyta","rapidash").contains(species.get((worldTicks-SPECIES_START_TICK)/SPECIES_TEST_WINDOW)))Screenshot.grab(mc.gameDirectory,mc.getMainRenderTarget(),message->{});
    if(worldTicks==SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW) {
     if(!combatPassed)throw new IllegalStateException("Survival combat check did not pass");
     if(!renderedSpecies.containsAll(species))throw new IllegalStateException("Some species were not rendered: expected="+species+" actual="+renderedSpecies);
@@ -551,15 +551,24 @@ public final class ClientSmokeTest {
      var bones=MinemonRenderer.fireOverlayBoneSamples().getOrDefault(slug,java.util.Set.of());
      if(!samples.containsAll(java.util.Set.of(0,1,2,3))||bones.isEmpty())
       throw new IllegalStateException("Animated original fire overlay did not render all frames/bones for "+slug+": frames="+samples+" bones="+bones);
+     if(!bones.contains("tail")||bones.stream().noneMatch(name->name.startsWith("fire_mane")||name.endsWith("_fire")))
+      throw new IllegalStateException("Selective fire overlay lost the "+slug+" tail or mane bone: "+bones);
     }
-    if(!selectedFireHorses.isEmpty())Files.writeString(Path.of("client-validation.txt"),"PASS PONYTA/RAPIDASH FIRE OVERLAYS: source 10 fps atlas frames rendered on source fire bones: "+selectedFireHorses+"; manual visual approval remains separate.\n",StandardOpenOption.APPEND);
+    if(!selectedFireHorses.isEmpty())Files.writeString(Path.of("client-validation.txt"),"PASS PONYTA/RAPIDASH FIRE OVERLAYS: source 10 fps atlas frames rendered only on mane, tail and fire bones: "+selectedFireHorses+".\n",StandardOpenOption.APPEND);
     var selectedEmissive=java.util.List.of("charmander","charmeleon","charizard","moltres").stream().filter(species::contains).toList();
     for(String slug:selectedEmissive) {
      var samples=MinemonRenderer.fireOverlayFrameSamples().getOrDefault(slug,java.util.Set.of());
      var bones=MinemonRenderer.fireOverlayBoneSamples().getOrDefault(slug,java.util.Set.of());
      if(!samples.contains(0)||bones.isEmpty())throw new IllegalStateException("Full-bright flame atlas did not render on fire rig for "+slug+": frames="+samples+" bones="+bones);
+     if(slug.equals("moltres")) {
+      if(!bones.containsAll(java.util.Set.of("wing_open_left","wing_open_right"))||bones.contains("chest")||bones.contains("torso"))
+       throw new IllegalStateException("Moltres full-bright pass escaped the wing/fire branches: "+bones);
+     } else if(!bones.equals(java.util.Set.of("tail_flame")))
+      throw new IllegalStateException(slug+" full-bright pass must render the isolated tail_flame bone only: "+bones);
+     var mask=new net.minecraft.resources.ResourceLocation(Minemon.MOD_ID,"textures/emissive/"+(slug.equals("moltres")?"moltres_fire":slug+"_tail_flame")+".png");
+     if(mc.getResourceManager().getResource(mask).isEmpty())throw new IllegalStateException("Missing selective emissive mask "+mask);
     }
-    if(!selectedEmissive.isEmpty())Files.writeString(Path.of("client-validation.txt"),"PASS EMISSIVE FIRE: full-bright native flame atlas rendered on starter tails and Moltres wings: "+selectedEmissive+".\n",StandardOpenOption.APPEND);
+    if(!selectedEmissive.isEmpty())Files.writeString(Path.of("client-validation.txt"),"PASS EMISSIVE FIRE: isolated masks loaded; starter tail_flame bones and Moltres wing/fire branches rendered selectively: "+selectedEmissive+".\n",StandardOpenOption.APPEND);
     Files.writeString(Path.of("client-validation.txt"),"PASS ROSTER: every selected species rendered with its texture in a world: "+renderedSpecies+"\n",StandardOpenOption.APPEND);
     completedSpeciesWindows=species.size();
     lastApprovedCheck="all selected species completed render/movement sampling";
@@ -577,6 +586,8 @@ public final class ClientSmokeTest {
     var current=(MinemonCreature)mc.getSingleplayerServer().overworld().getEntity(testEntity);
      if(current!=null){
      setValidationPhase(current,phase);
+     if(java.util.Set.of("charmander","charmeleon","charizard","moltres","ponyta","rapidash").contains(current.getSpeciesSlug()))
+      mc.getSingleplayerServer().overworld().setDayTime(phase>=27&&phase<54?18000L:1000L);
      // Keep the fixture's movement deterministic while still exercising its real travel
      // and render path. The goals are removed at spawn, so no pathfinding competes with
      // the controlled velocity used to select the locomotion clips.
