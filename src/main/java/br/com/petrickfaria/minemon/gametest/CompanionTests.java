@@ -184,10 +184,13 @@ public final class CompanionTests {
  @GameTest(template="test_arena",timeoutTicks=420)
  public static void airborneCombatHitsGroundTargetsWithoutLanding(GameTestHelper h) {
   floor(h);
-  MinemonCreature bird=h.spawn(ModEntities.SPECIES.get("pidgey").get(),new BlockPos(5,1,5));
+  MinemonCreature bird=h.spawn(ModEntities.SPECIES.get("pidgey").get(),new BlockPos(5,5,5));
   Cow cow=h.spawn(EntityType.COW,new BlockPos(7,1,5));cow.setNoAi(true);
   float health=cow.getHealth();
-  h.runAfterDelay(80,()->{
+  // Start already airborne and provoke before an unrelated random patrol
+  // can leave the finite arena. Takeoff/patrol are covered by the separate
+  // altitude test; this fixture exercises real melee navigation and damage.
+  h.runAfterDelay(1,()->{
    check(h,bird.hurt(DamageSource.mobAttack(cow),1),"Flying creature must accept provocation");
    checkAirborneAttack(h,bird,cow,health,0);
   });
@@ -196,7 +199,7 @@ public final class CompanionTests {
  private static void checkAirborneAttack(GameTestHelper h,MinemonCreature bird,Cow cow,float health,int elapsed) {
   check(h,!bird.isOnGround(),"An awake flying attacker must remain airborne");
   if(cow.getHealth()<health){h.succeed();return;}
-  if(elapsed>=240){h.fail("Flying melee AI must actually hit a terrestrial target");return;}
+  if(elapsed>=240){h.fail("Flying melee AI must actually hit a terrestrial target;"+state(bird,cow));return;}
   h.runAfterDelay(5,()->checkAirborneAttack(h,bird,cow,health,elapsed+5));
  }
 
