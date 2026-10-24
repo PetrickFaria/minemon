@@ -184,13 +184,17 @@ public final class CompanionTests {
     check(h,Math.abs(bird.getY()-surface)<=1.1D,"Sleeping airborne species must land on a nearby surface");
     bird.setSleeping(false);
     check(h,bird.isNoGravity(),"Awake airborne species must resume flight");
-    h.runAfterDelay(100,()->{
-     double awakeAltitude=bird.getY()-NaturalMovementGoals.surfaceBelow(h.getLevel(),bird.getX(),bird.getY(),bird.getZ());
-     check(h,awakeAltitude>=3.0D&&awakeAltitude<=15.0D,"Awakened bird must actually take off into the altitude band; got "+awakeAltitude);
-     h.succeed();
-    });
+    awaitAwakeFlightBand(h,bird,180,0);
    });
   });
+ }
+
+ private static void awaitAwakeFlightBand(GameTestHelper h,MinemonCreature bird,int remaining,int stable){
+  double altitude=bird.getY()-NaturalMovementGoals.surfaceBelow(h.getLevel(),bird.getX(),bird.getY(),bird.getZ());
+  int nextStable=altitude>=3.0D&&altitude<=15.0D&&!bird.isOnGround()?stable+5:0;
+  if(nextStable>=20){h.succeed();return;}
+  check(h,remaining>0,"Awakened bird must actually take off and remain in the altitude band; got "+altitude);
+  h.runAfterDelay(5,()->awaitAwakeFlightBand(h,bird,remaining-5,nextStable));
  }
 
  @GameTest(template="test_arena",timeoutTicks=420)

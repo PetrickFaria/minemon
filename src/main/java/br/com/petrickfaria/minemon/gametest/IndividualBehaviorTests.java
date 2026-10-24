@@ -119,7 +119,13 @@ public final class IndividualBehaviorTests {
   fish.goalSelector.removeAllGoals();fish.targetSelector.removeAllGoals();
   await(h,fish::isInWater,()->{
    double start=fish.getY();
-   check(h,fish.getNavigation().moveTo(fish.getX(),start+2.0D,fish.getZ(),1.0D),"Deep water must have a reachable higher node"+state(fish));
+   // moveTo(x,y,z) permits a path ending one block short; combined
+   // with the normal waypoint tolerance that can finish without ascending.
+   // Require an exact higher endpoint so this probe exercises real 3D travel.
+   var destination=new BlockPos(fish.getX(),start+2.0D,fish.getZ());
+   var path=fish.getNavigation().createPath(destination,0);
+   check(h,path!=null&&path.canReach()&&path.getEndNode().y==destination.getY(),"Deep water must have an exact reachable higher node"+state(fish));
+   check(h,fish.getNavigation().moveTo(path,1.0D),"Deep water ascent path must start"+state(fish));
    h.runAfterDelay(200,()->{
     check(h,fish.isInWater()&&fish.getY()>start+1.0D,"Swimming controller must actually ascend, not continually sink"+state(fish));
     h.succeed();
