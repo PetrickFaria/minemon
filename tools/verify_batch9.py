@@ -46,6 +46,9 @@ for slug in ('charmeleon','charizard'):
 charizard=next(d for d in prior_defs if d['slug']=='charizard')
 charizard['clips'].pop('air_idle',None)
 charizard['clips'].pop('air_fly',None)
+for slug in ('squirtle','wartortle'):
+ definition=next(d for d in prior_defs if d['slug']==slug)
+ assert definition['clips'].pop('ground_run',None)==f'animation.{slug}.ground_run','Only the existing native turtle run may be newly selected'
 assert prior_defs==old_defs[:80],'An approved prior definition changed beyond the explicit fire-starter flame adaptation'
 allowed_l9=set(EXPECTED[:end-80])
 assert all(defs[i]==old_defs[i] for i in range(80,90) if defs[i]['slug'] not in allowed_l9),'Unimplemented Batch 9 species definition changed'

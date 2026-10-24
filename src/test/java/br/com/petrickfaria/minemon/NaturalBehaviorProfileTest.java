@@ -26,6 +26,11 @@ public final class NaturalBehaviorProfileTest {
         assertEquals(151, SpeciesDefinitions.ALL.size());
     }
 
+    @Test public void existingNativeTurtleRunsAreSelectedWithoutChangingTheirAssets() {
+        for(String slug:java.util.List.of("squirtle","wartortle"))
+            assertEquals("animation."+slug+".ground_run",SpeciesDefinitions.get(slug).clips().get("ground_run"));
+    }
+
     @Test public void everyProfileEntryHasARegisteredSpeciesDefinition() {
         SpeciesBehaviorProfiles.airborneSpecies().forEach(slug -> assertNotNull(slug, SpeciesDefinitions.get(slug)));
         SpeciesBehaviorProfiles.aquaticSpecies().forEach(slug -> assertNotNull(slug, SpeciesDefinitions.get(slug)));

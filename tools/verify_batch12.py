@@ -37,6 +37,9 @@ for slug in ('charmeleon','charizard'):
 charizard=next(d for d in prior_defs if d['slug']=='charizard')
 charizard['clips'].pop('air_idle',None)
 charizard['clips'].pop('air_fly',None)
+for slug in ('squirtle','wartortle'):
+ definition=next(d for d in prior_defs if d['slug']==slug)
+ assert definition['clips'].pop('ground_run',None)==f'animation.{slug}.ground_run','Only the existing native turtle run may be newly selected'
 # These exact scale changes are the only authorized prior-species definition deltas.
 for slug, expected_scale in {
  'gastly': {'scale':0.85,'width':0.2,'height':0.2},

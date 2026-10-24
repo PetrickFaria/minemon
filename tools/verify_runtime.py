@@ -174,9 +174,9 @@ def validate(read,definitions,prepared=False,packed=False):
     run=d['clips'].get('ground_run')
     if not run or not fire_bones.intersection(a[run].get('bones',{})):raise ValueError('Rapidash native running fire mane does not animate')
   if number<=10:
-   source_runs={3:'animation.venusaur.ground_run',6:'animation.charizard.ground_run',9:'animation.blastoise.ground_run'}
+   source_runs={3:'animation.venusaur.ground_run',6:'animation.charizard.ground_run',7:'animation.squirtle.ground_run',8:'animation.wartortle.ground_run',9:'animation.blastoise.ground_run'}
    expected_run=source_runs.get(number)
-   if d['clips'].get('ground_run')!=expected_run:raise ValueError('Batch 1 source run reference differs from audited poser evidence: '+d['slug'])
+   if d['clips'].get('ground_run')!=expected_run:raise ValueError('Batch 1 selected run differs from the audited native animation inventory: '+d['slug'])
   if prepared:
    for state,keys in {'run':('ground_run','run'),'sit':('sit',),'sleep':('sleep',),'attack':('physical_attack','physical','attack')}.items():
     declared=[d['clips'][k] for k in keys if d['clips'].get(k)]

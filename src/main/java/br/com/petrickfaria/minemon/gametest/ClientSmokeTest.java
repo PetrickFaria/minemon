@@ -135,8 +135,8 @@ public final class ClientSmokeTest {
     if(key.equals("run")&&SpeciesAssetIndex.clip(slug,"ground_run","run")==null)return java.util.List.of();
     throw new IllegalStateException("Missing articulation profile "+slug+"/"+key);
    }
-   // Native Blastoise run retracts its limbs and spins the shell/body.
-   if(slug.equals("blastoise") && state.startsWith("RUN_"))return java.util.List.of("body","body2");
+   // Native turtle runs retract their limbs and spin the shell/body.
+   if(java.util.Set.of("squirtle","wartortle","blastoise").contains(slug) && state.startsWith("RUN_"))return java.util.List.of("body","body2");
    return state.startsWith("IDLE_") && IDLE_PROFILES.containsKey(slug)
     ? IDLE_PROFILES.get(slug) : ARTICULATION_PROFILES.getOrDefault(slug,java.util.List.of());
   }

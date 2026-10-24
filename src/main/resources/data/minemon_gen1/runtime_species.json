@@ -383,6 +383,7 @@
     "clips": {
       "ground_idle": "animation.squirtle.ground_idle",
       "ground_walk": "animation.squirtle.ground_walk",
+      "ground_run": "animation.squirtle.ground_run",
       "sleep": "animation.squirtle.sleep",
       "blink": "animation.squirtle.blink",
       "faint": "animation.squirtle.faint",
@@ -432,6 +433,7 @@
     "clips": {
       "ground_idle": "animation.wartortle.ground_idle",
       "ground_walk": "animation.wartortle.ground_walk",
+      "ground_run": "animation.wartortle.ground_run",
       "sleep": "animation.wartortle.sleep",
       "blink": "animation.wartortle.blink",
       "faint": "animation.wartortle.faint",
