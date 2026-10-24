@@ -1,6 +1,7 @@
 package br.com.petrickfaria.minemon.gametest;
 import br.com.petrickfaria.minemon.entity.MinemonCreature;
 import br.com.petrickfaria.minemon.entity.NaturalMovementGoals;
+import br.com.petrickfaria.minemon.entity.WaterMovementGoal;
 import br.com.petrickfaria.minemon.registry.ModEntities;
 import com.mojang.authlib.GameProfile;
 import java.util.UUID;
