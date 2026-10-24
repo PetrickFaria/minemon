@@ -273,7 +273,13 @@ public final class CompanionTests {
   h.setBlock(new BlockPos(13,-1,10),net.minecraft.world.level.block.Blocks.STONE);
   h.setBlock(new BlockPos(13,0,10),net.minecraft.world.level.block.Blocks.WATER);
   MinemonCreature adjacent=h.spawn(ModEntities.SPECIES.get("goldeen").get(),new BlockPos(12,1,10));
-  MinemonCreature dryHorsea=h.spawn(ModEntities.SPECIES.get("horsea").get(),new BlockPos(12,1,12));
+  // NoAI does not disable physical pushing. Keep the dry-survival specimen
+  // away from the two roaming water seekers, with a real dry enclosure;
+  // otherwise incidental pushes can invalidate the dry-land precondition.
+  for(int x=2;x<=4;x++)for(int z=11;z<=13;z++)for(int y=1;y<=3;y++)
+   if(x==2||x==4||z==11||z==13)
+    h.setBlock(new BlockPos(x,y,z),net.minecraft.world.level.block.Blocks.STONE);
+  MinemonCreature dryHorsea=h.spawn(ModEntities.SPECIES.get("horsea").get(),new BlockPos(3,1,12));
   dryHorsea.setNoAi(true);
   float health=dryHorsea.getHealth();
   check(h,dryHorsea.canBreatheUnderwater(),"Aquatic species must not drown when temporarily submerged");
@@ -284,7 +290,9 @@ public final class CompanionTests {
    check(h,adjacent.isInWater(),"Aquatic species must also enter an accessible water block immediately beside it");
   });
   h.runAfterDelay(1200,()->{
-   check(h,!dryHorsea.isInWater()&&dryHorsea.isAlive()&&dryHorsea.getHealth()==health,"Aquatic species must retain full health after 1200 ticks on dry land");
+   check(h,!dryHorsea.isInWater()&&dryHorsea.isAlive()&&dryHorsea.getHealth()==health,"Aquatic species must retain full health after 1200 ticks on dry land; position="+dryHorsea.position()
+       +" water="+dryHorsea.isInWater()+" alive="+dryHorsea.isAlive()+" removed="+dryHorsea.isRemoved()
+       +" health="+dryHorsea.getHealth()+" expected="+health);
    h.succeed();
   });
  }
