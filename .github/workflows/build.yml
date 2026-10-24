@@ -70,7 +70,7 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
       - name: Launch Minecraft client and validate GeckoLib cache
-        if: ${{ !cancelled() && steps.compile.outcome == 'success' }}
+        if: ${{ success() && steps.compile.outcome == 'success' }}
         run: |
           python3 tools/prepare_client_world.py
           set +e

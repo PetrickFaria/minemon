@@ -188,7 +188,9 @@ public final class CompanionTests {
   h.setBlock(new BlockPos(5,12,5),net.minecraft.world.level.block.Blocks.STONE);
   BlockPos column=h.absolutePos(new BlockPos(5,8,5));
   double surface=NaturalMovementGoals.surfaceBelow(h.getLevel(),column.getX()+0.5D,column.getY(),column.getZ()+0.5D);
-  check(h,Math.abs(surface-h.absolutePos(new BlockPos(5,4,5)).getY())<0.001D,
+  BlockPos waterTop=h.absolutePos(new BlockPos(5,3,5));
+  double expected=waterTop.getY()+h.getLevel().getFluidState(waterTop).getHeight(h.getLevel(),waterTop);
+  check(h,Math.abs(surface-expected)<0.001D,
       "Flight clearance must use water top below the entity, not seabed or overhead roof; got "+surface);
   h.succeed();
  }
