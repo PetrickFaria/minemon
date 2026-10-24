@@ -3,6 +3,7 @@ package br.com.petrickfaria.minemon.entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.control.SmoothSwimmingMoveControl;
+import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.level.pathfinder.AmphibiousNodeEvaluator;
 import net.minecraft.world.level.pathfinder.PathFinder;
@@ -13,7 +14,31 @@ import net.minecraft.world.level.Level;
 public final class MinemonAquaticCreature extends MinemonCreature {
     public MinemonAquaticCreature(EntityType<? extends TamableAnimal> type, Level level) {
         super(type, level);
-        this.moveControl = new SmoothSwimmingMoveControl(this, 85, 10, 0.1F, 0.5F, false);
+        this.moveControl = new SmoothSwimmingMoveControl(this, 85, 10, 0.1F, 0.5F, false) {
+            private final MoveControl land = new MoveControl(MinemonAquaticCreature.this);
+
+            @Override public void setWantedPosition(double x, double y, double z, double speed) {
+                super.setWantedPosition(x, y, z, speed);
+                this.land.setWantedPosition(x, y, z, speed);
+            }
+
+            @Override public boolean hasWanted() {
+                return MinemonAquaticCreature.this.isInWater() ? super.hasWanted() : this.land.hasWanted();
+            }
+
+            @Override public void strafe(float forward, float sideways) {
+                super.strafe(forward, sideways);
+                this.land.strafe(forward, sideways);
+            }
+
+            @Override public void tick() {
+                // Swimming control alone does not perform ordinary land jumps.
+                // Use Minecraft's land controller on shores/steps and smooth
+                // three-dimensional steering after entering the water.
+                if (MinemonAquaticCreature.this.isInWater()) super.tick();
+                else this.land.tick();
+            }
+        };
     }
 
     @Override protected PathNavigation createNavigation(Level level) {

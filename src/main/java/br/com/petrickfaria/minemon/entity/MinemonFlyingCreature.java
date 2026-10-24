@@ -16,6 +16,9 @@ public final class MinemonFlyingCreature extends MinemonCreature {
   // Hover safely until a dry landing path is available; follow that path
   // instead of dropping blindly into water, lava, or an obstructed column.
   if(sleeping){
+  // Gravity is synchronized by the server. The client has no active landing
+  // navigation and must not override that decision during interpolation.
+  if(this.level.isClientSide){this.fallDistance=0;return;}
   double support=NaturalMovementGoals.surfaceBelow(this.level,this.getX(),this.getY(),this.getZ());
   net.minecraft.core.BlockPos floor=new net.minecraft.core.BlockPos(this.getX(),support-0.001D,this.getZ());
   var state=this.level.getBlockState(floor);
