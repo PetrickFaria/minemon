@@ -416,11 +416,15 @@ public final class ClientSmokeTest {
      current.setNoAi(false);current.getNavigation().stop();
      if(current.getX()>2.5)direction=-1;if(current.getX()<-2.5)direction=1;
      double animationVelocity=animationVelocity(phase);
+     // Preserve ordinary land gravity: resetting Y to zero on every server
+     // update prevents the negative collision step that maintains onGround,
+     // which correctly disqualifies a production creature from ground runs.
+     double vertical=current.isFlyingSpecies()||current.isAquaticSpecies()?0.0D:current.getDeltaMovement().y;
      if(animationVelocity>0.0D){
-      current.setDeltaMovement(direction*animationVelocity,0,0);
+      current.setDeltaMovement(direction*animationVelocity,vertical,0);
       current.hasImpulse=true;
      } else {
-      current.setDeltaMovement(0,0,0);
+      current.setDeltaMovement(0,vertical,0);
      }
     }
     });
