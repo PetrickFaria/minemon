@@ -211,6 +211,20 @@ public final class CompanionTests {
   h.succeed();
  }
 
+ @GameTest(template="test_arena",timeoutTicks=40)
+ public static void flightClearanceUsesPartialCollisionSurfaces(GameTestHelper h) {
+  floor(h);
+  h.setBlock(new BlockPos(5,0,5),net.minecraft.world.level.block.Blocks.STONE_SLAB);
+  BlockPos column=h.absolutePos(new BlockPos(5,8,5));
+  double slab=NaturalMovementGoals.surfaceBelow(h.getLevel(),column.getX()+0.5D,column.getY(),column.getZ()+0.5D);
+  check(h,Math.abs(slab-(h.absolutePos(new BlockPos(5,0,5)).getY()+0.5D))<0.001D,
+      "Flight must measure from the actual half-height slab surface");
+  h.setBlock(new BlockPos(5,1,5),net.minecraft.world.level.block.Blocks.OAK_FENCE);
+  double edge=NaturalMovementGoals.surfaceBelow(h.getLevel(),column.getX()+0.05D,column.getY(),column.getZ()+0.05D);
+  check(h,Math.abs(edge-slab)<0.001D,"A fence must not replace the surface of an empty part of its column");
+  h.succeed();
+ }
+
  @GameTest(template="test_arena",timeoutTicks=80)
  public static void electabuzzScaleAndSelectionBoxShrinkProportionally(GameTestHelper h) {
   floor(h);

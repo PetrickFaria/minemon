@@ -2,7 +2,6 @@ package br.com.petrickfaria.minemon.entity;
 
 import java.util.EnumSet;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.ai.goal.Goal;
@@ -29,9 +28,16 @@ public final class NaturalMovementGoals {
                 return y + level.getFluidState(pos).getHeight(level, pos);
             BlockState state = level.getBlockState(pos);
             VoxelShape shape = state.getCollisionShape(level, pos);
-            if (!shape.isEmpty() && shape.max(Direction.Axis.Y) > 0.0D
-                    && state.isFaceSturdy(level, pos, Direction.UP)) {
-                return y + shape.max(Direction.Axis.Y);
+            if (!shape.isEmpty()) {
+                double localX=x-blockX, localZ=z-blockZ, top=Double.NEGATIVE_INFINITY;
+                // Use the actual support under this column. A bottom slab has
+                // no sturdy block-boundary UP face, but its half-height top is
+                // still walkable; narrow fence shapes must not fill the column.
+                for (net.minecraft.world.phys.AABB box : shape.toAabbs()) {
+                    if (localX>=box.minX&&localX<=box.maxX&&localZ>=box.minZ&&localZ<=box.maxZ)
+                        top=Math.max(top,box.maxY);
+                }
+                if (top>0.0D) return y+top;
             }
         }
         return level.getMinBuildHeight();
