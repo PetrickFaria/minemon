@@ -55,7 +55,7 @@ public final class ClientSmokeTest {
       ||SpeciesAssetIndex.clip(slug,"ground_run","run")==null))return true;
   var definition=SpeciesDefinitions.get(slug);
   if(!running&&(sourcePoseTransition(slug)||slug.equals("fearow")
-      ||definition!=null&&java.util.Set.of("static","idle").contains(definition.movementFallback())))return true;
+      ||definition!=null&&("static".equals(definition.movementFallback())||"idle".equals(definition.movementFallback()))))return true;
   Integer first=(running?steadyRunFirstTick:steadyWalkFirstTick).get(slug),last=lastRenderedEntityTick.get(slug);
   return first!=null&&last!=null&&last-first>=40;
  }
