@@ -31,6 +31,7 @@ public final class ClientSmokeTest {
  private static final java.util.Map<String,java.util.List<String>> modelBones=new java.util.HashMap<>();
  private static final java.util.Map<String,float[]> motionRanges=new java.util.HashMap<>();
  private static final java.util.Map<String,float[]> fireStarterArmRanges=new java.util.HashMap<>();
+ private static boolean fearowNativeAirPoseObserved;
  private static final java.util.Map<String,float[]> sourceLookRanges=new java.util.HashMap<>();
  private static final java.util.Map<String,float[]> sourcePitchRanges=new java.util.HashMap<>();
  private static final java.util.Set<String> walkedSpecies=new java.util.HashSet<>();
@@ -133,6 +134,8 @@ public final class ClientSmokeTest {
    "wartortle",java.util.List.of("arm_left","arm_right","torso")
   );
   private static java.util.List<String> profileJoints(String slug,String state) {
+   if(slug.equals("fearow")&&SpeciesBehaviorProfiles.isAirborne(slug))
+    return java.util.List.of("body","wing_open_left","wing_open_right");
    if(ADDITIONAL_PROFILES.containsKey(slug)) {
     String key=state.startsWith("IDLE_")?"idle":state.startsWith("RUN_")
       &&!SpeciesBehaviorProfiles.isAirborne(slug)&&!SpeciesBehaviorProfiles.isAquatic(slug)?"run":"walk";
@@ -280,6 +283,21 @@ public final class ClientSmokeTest {
         double displacementSqr=(entity.getX()-entity.xo)*(entity.getX()-entity.xo)+(entity.getZ()-entity.zo)*(entity.getZ()-entity.zo);
         articulationInputs.computeIfAbsent(slug,k->new java.util.HashMap<>())
          .computeIfAbsent(state,k->new java.util.HashSet<>()).add("phase="+phase+",clip="+entity.getSelectedAnimationForValidation()+",velocitySqr="+velocitySqr+",positionDeltaSqr="+displacementSqr);
+       }
+       if(slug.equals("fearow")&&isSettledClipSample(phase)) {
+        var body=model.getAnimationProcessor().getBone("body");
+        var left=model.getAnimationProcessor().getBone("wing_open_left");
+        var right=model.getAnimationProcessor().getBone("wing_open_right");
+        // The source air_idle has a static 52.5-degree body pitch and
+        // opposite 52.07555-degree open-wing Z rotations (zero bind Z).
+        float pitch=(float)Math.toRadians(52.5D),wing=(float)Math.toRadians(52.07555D);
+        if(body==null||left==null||right==null
+           ||Math.abs(Math.abs(body.getRotationX())-pitch)>0.02F
+           ||Math.abs(Math.abs(left.getRotationZ())-wing)>0.02F
+           ||Math.abs(Math.abs(right.getRotationZ())-wing)>0.02F
+           ||left.getRotationZ()*right.getRotationZ()>=0.0F)
+         throw new IllegalStateException("Fearow did not render its native static open-wing air pose");
+        fearowNativeAirPoseObserved=true;
        }
        if(slug.equals("zubat")&&isSettledClipSample(phase)) {
         var folded=model.getAnimationProcessor().getBone("wings_folded");
@@ -637,6 +655,17 @@ public final class ClientSmokeTest {
     var definition=SpeciesDefinitions.get(slug);
     if(definition==null)throw new IllegalStateException("Missing test profile species "+slug);
     String fallback=definition.movementFallback();
+    if(slug.equals("fearow")&&SpeciesBehaviorProfiles.isAirborne(slug)) {
+     String air="animation.fearow.air_idle";
+     for(String state:java.util.List.of("IDLE_INITIAL","WALK_START","WALK_STEADY","WALK_DECEL",
+         "IDLE_RETURN","RUN_START","RUN_STEADY","RUN_DECEL","IDLE_FINAL"))
+      if(!hasSelectedClip(slug,state,air))throw new IllegalStateException("Fearow native air pose missing in "+state);
+     if(!fearowNativeAirPoseObserved)throw new IllegalStateException("Fearow native air pose was not rendered");
+     validateSourceStaticIdle(slug);
+     knownFallbacks++;
+     report.append("SOURCE STATIC AIR POSE fearow: native air_idle selected in all phases; actual body pitch and opposite open-wing angles verified; no native fly cycle exists and no animated aerial gait pass is claimed.\n");
+     continue;
+    }
     if("static".equals(fallback)||"idle".equals(fallback)) {
     String expected=expectedWalk(slug,definition);
      if(!hasSelectedClip(slug,"WALK_STEADY",expected))throw new IllegalStateException("Fallback classification did not match selected walk clip for "+slug);
