@@ -44,23 +44,23 @@ public final class IndividualBehaviorTests {
  }
  @GameTest(template="test_arena",timeoutTicks=700)
  public static void flyerAlternatesTwoAltitudeBandsAndPausesForSleep(GameTestHelper h){
-  arena(h,false);var bird=spawn(h,"pidgey",5,1,5);
-  await(h,bird::isOnGround,()->{
-   restore(bird,"LAND",5999,0);
-   await(h,()->bird.naturalCycle().phase()==AIR&&band(bird,3,7),()->{
-    restore(bird,"AIR",5999,0);
-    await(h,()->bird.naturalCycle().stage()==1&&band(bird,8,15),()->{
-     restore(bird,"AIR",2999,1);
-     await(h,()->bird.naturalCycle().stage()==0&&band(bird,3,7),()->{
-      int ticks=bird.naturalCycle().ticks();bird.setSleeping(true);
-      h.runAfterDelay(20,()->{
-       check(h,bird.naturalCycle().ticks()==ticks,"Sleep must pause the exact altitude clock");
-       bird.setSleeping(false);h.succeed();
-      });
-     },200,"Flight must return smoothly to the 3..7 band"+state(bird));
-    },200,"Flight must reach the 8..15 band"+state(bird));
-   },200,"Flight must enter its first 3..7 band after real takeoff"+state(bird));
-  },40,"Flyer fixture must settle on the ground before its land timer starts"+state(bird));
+  arena(h,false);var bird=spawn(h,"pidgey",5,3,5);
+  // Continuous fliers stay airborne; observe the real patrol band rather than
+  // forcing a grounded state that this species must never enter.
+  restore(bird,"AIR",0,0);
+  await(h,()->bird.naturalCycle().stage()==0&&band(bird,3,7),()->{
+   restore(bird,"AIR",5999,0);
+   await(h,()->bird.naturalCycle().stage()==1&&band(bird,8,15),()->{
+    restore(bird,"AIR",2999,1);
+    await(h,()->bird.naturalCycle().stage()==0&&band(bird,3,7),()->{
+     int ticks=bird.naturalCycle().ticks();bird.setSleeping(true);
+     h.runAfterDelay(20,()->{
+      check(h,bird.naturalCycle().ticks()==ticks,"Sleep must pause the exact altitude clock");
+      bird.setSleeping(false);h.succeed();
+     });
+    },200,"Flight must return smoothly to the 3..7 band"+state(bird));
+   },200,"Flight must reach the 8..15 band"+state(bird));
+  },200,"Continuous flyer must patrol at 3..7 blocks above terrain"+state(bird));
  }
  private static boolean band(MinemonCreature m,double low,double high){double a=m.getY()-m.naturalSurface();return a>=low&&a<=high;}
  @GameTest(template="test_arena",timeoutTicks=700)
