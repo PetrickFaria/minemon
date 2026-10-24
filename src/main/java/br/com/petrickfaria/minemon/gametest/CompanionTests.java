@@ -172,7 +172,11 @@ public final class CompanionTests {
     check(h,Math.abs(bird.getY()-surface)<=1.1D,"Sleeping airborne species must land on a nearby surface");
     bird.setSleeping(false);
     check(h,bird.isNoGravity(),"Awake airborne species must resume flight");
-    h.succeed();
+    h.runAfterDelay(100,()->{
+     double awakeAltitude=bird.getY()-NaturalMovementGoals.surfaceBelow(h.getLevel(),bird.getX(),bird.getY(),bird.getZ());
+     check(h,awakeAltitude>=3.0D&&awakeAltitude<=15.0D,"Awakened bird must actually take off into the altitude band; got "+awakeAltitude);
+     h.succeed();
+    });
    });
   });
  }
@@ -188,7 +192,7 @@ public final class CompanionTests {
   h.succeed();
  }
 
- @GameTest(template="test_arena",timeoutTicks=450)
+ @GameTest(template="test_arena",timeoutTicks=1300)
  public static void aquaticSpeciesSeekWaterAndSurviveWithoutIt(GameTestHelper h) {
   floor(h);
   for(int x=8;x<=10;x++)for(int z=4;z<=6;z++)for(int y=1;y<=2;y++)
@@ -201,8 +205,10 @@ public final class CompanionTests {
   double initial=goldeen.distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(new BlockPos(9,1,5)));
   h.runAfterDelay(260,()->{
    double current=goldeen.distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(new BlockPos(9,1,5)));
-   check(h,goldeen.isInWater()||current<initial,"Aquatic species must navigate toward accessible water");
-   check(h,dryHorsea.isAlive()&&dryHorsea.getHealth()==health,"Aquatic species must survive indefinitely without water");
+   check(h,goldeen.isInWater(),"Aquatic species must actually enter reachable water; initial distance="+initial+" current="+current);
+  });
+  h.runAfterDelay(1200,()->{
+   check(h,dryHorsea.isAlive()&&dryHorsea.getHealth()==health,"Aquatic species must retain full health after 1200 ticks on dry land");
    h.succeed();
   });
  }
