@@ -41,6 +41,29 @@ public final class MinemonAquaticCreature extends MinemonCreature {
         };
     }
 
+    private BlockPosCache waterCache;
+    private record BlockPosCache(net.minecraft.core.BlockPos column,int tick,double top){}
+    public double waterSurface(){
+        var column=this.blockPosition();
+        if(this.waterCache==null||!column.equals(this.waterCache.column())||this.tickCount-this.waterCache.tick()>10)
+            this.waterCache=new BlockPosCache(column,this.tickCount,WaterMovementGoal.surfaceAt(this,column));
+        return this.waterCache.top();
+    }
+    @Override public void tick(){
+        super.tick();
+        if(this.level.isClientSide||!this.isInWater()||!this.naturalBehaviorActive())return;
+        double top=this.waterSurface();
+        if(!Double.isFinite(top))return;
+        boolean surface=this.isNaturalSurface();
+        double target=surface?top-Math.min(0.8D,this.getBbHeight()*0.3D):top-this.getBbHeight()-0.3D;
+        // Surface and submerged correction share the swimming controller; do not
+        // add another navigation goal or override horizontal pursuit.
+        if(surface||this.getY()>target){
+            double vy=net.minecraft.util.Mth.clamp(this.getDeltaMovement().y*0.5D+(target-this.getY())*0.05D,-0.09D,0.09D);
+            this.setDeltaMovement(this.getDeltaMovement().x,vy,this.getDeltaMovement().z);
+        }
+    }
+
     @Override protected PathNavigation createNavigation(Level level) {
         // FollowOwnerGoal in 1.19.2 accepts only GroundPathNavigation or
         // FlyingPathNavigation. Retain that contract while using amphibious

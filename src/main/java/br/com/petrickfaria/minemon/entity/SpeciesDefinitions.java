@@ -12,7 +12,13 @@ public final class SpeciesDefinitions {
    if(in==null)throw new IllegalStateException("Missing runtime species manifest");
    for(JsonElement element:JsonParser.parseReader(new InputStreamReader(in,StandardCharsets.UTF_8)).getAsJsonArray()) {
     JsonObject o=element.getAsJsonObject();Map<String,String> clips=new HashMap<>();o.getAsJsonObject("clips").entrySet().forEach(e->clips.put(e.getKey(),e.getValue().getAsString()));
-    Definition d=new Definition(o.get("nationalPokedexNumber").getAsInt(),str(o,"slug"),str(o,"model"),str(o,"texture"),str(o,"animation"),str(o,"mode"),o.get("scale").getAsFloat(),o.get("width").getAsFloat(),o.get("height").getAsFloat(),o.get("health").getAsDouble(),o.get("attack").getAsDouble(),o.get("speed").getAsDouble(),o.get("eggBase").getAsInt(),o.get("eggSpots").getAsInt(),str(o,"idle"),str(o,"walk"),o.has("movement_fallback")&&!o.get("movement_fallback").isJsonNull()?o.get("movement_fallback").getAsString():null,o.has("attackTicks")?o.get("attackTicks").getAsInt():0,Collections.unmodifiableMap(clips));
+    String slug=str(o,"slug");
+    CompatibleLocomotion.apply(slug,clips);
+    float factor=slug.equals("seaking")?0.75F:1.0F;
+    String idle=slug.equals("scyther")?clips.get("ground_idle"):str(o,"idle");
+    String walk=CompatibleLocomotion.groundGait(slug)?clips.get("ground_walk"):str(o,"walk");
+    String fallback=CompatibleLocomotion.groundGait(slug)?null:o.has("movement_fallback")&&!o.get("movement_fallback").isJsonNull()?o.get("movement_fallback").getAsString():null;
+    Definition d=new Definition(o.get("nationalPokedexNumber").getAsInt(),str(o,"slug"),str(o,"model"),str(o,"texture"),str(o,"animation"),str(o,"mode"),o.get("scale").getAsFloat()*factor,o.get("width").getAsFloat()*factor,o.get("height").getAsFloat()*factor,o.get("health").getAsDouble(),o.get("attack").getAsDouble(),o.get("speed").getAsDouble(),o.get("eggBase").getAsInt(),o.get("eggSpots").getAsInt(),idle,walk,fallback,o.has("attackTicks")?o.get("attackTicks").getAsInt():0,Collections.unmodifiableMap(clips));
     if(result.put(d.slug(),d)!=null)throw new IllegalStateException("Duplicate species "+d.slug());
    }
   }catch(Exception e){throw new IllegalStateException("Could not load runtime species",e);}

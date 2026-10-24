@@ -55,7 +55,7 @@ public class MinemonModel extends AnimatedGeoModel<MinemonCreature> {
 
     private void applyPidgeWingVisibility(MinemonCreature entity) {
         String slug=entity.getSpeciesSlug();
-        if(!slug.equals("pidgeotto")&&!slug.equals("pidgeot"))return;
+        if(!slug.equals("pidgeotto")&&!slug.equals("pidgeot")&&!slug.equals("spearow"))return;
         var closed=getAnimationProcessor().getBone("wings_closed");
         var open=getAnimationProcessor().getBone("wings_open");
         if(closed==null||open==null)return;

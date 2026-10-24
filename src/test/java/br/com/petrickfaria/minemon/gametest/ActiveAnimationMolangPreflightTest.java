@@ -40,10 +40,10 @@ public class ActiveAnimationMolangPreflightTest {
             if(definition.walk()!=null)selected.add(definition.walk());
             String run=SpeciesBehaviorProfiles.isAirborne(definition.slug())?null:definition.clips().get("ground_run");
             if(run!=null)selected.add(run);
-            if(SpeciesBehaviorProfiles.isAirborne(definition.slug())) {
+            if(SpeciesBehaviorProfiles.canFly(definition.slug())) {
                 addSelected(selected,definition,"air_idle","air_fly","air_glide");
             }
-            if(SpeciesBehaviorProfiles.isAquatic(definition.slug())) {
+            if(SpeciesBehaviorProfiles.waterCapable(definition.slug())) {
                 addSelected(selected,definition,"water_idle","water_swim","water_surface_idle","water_surface_swim",
                         "surface_water_idle","surface_water_swim","surfacewater_idle","surfacewater_swim");
             }

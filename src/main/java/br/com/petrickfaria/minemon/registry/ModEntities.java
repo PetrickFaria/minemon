@@ -15,8 +15,8 @@ public final class ModEntities {
  private static Map<String,RegistryObject<EntityType<MinemonCreature>>> register(){
   Map<String,RegistryObject<EntityType<MinemonCreature>>> map=new LinkedHashMap<>();
   for(var d:SpeciesDefinitions.ALL.values())map.put(d.slug(),ENTITIES.register(d.slug(),()->{
-   EntityType.EntityFactory<MinemonCreature> factory=SpeciesBehaviorProfiles.isAirborne(d.slug())?MinemonFlyingCreature::new:
-       SpeciesBehaviorProfiles.isAquatic(d.slug())?MinemonAquaticCreature::new:MinemonCreature::new;
+   EntityType.EntityFactory<MinemonCreature> factory=SpeciesBehaviorProfiles.canFly(d.slug())?MinemonFlyingCreature::new:
+       SpeciesBehaviorProfiles.waterCapable(d.slug())?MinemonAquaticCreature::new:MinemonCreature::new;
    return EntityType.Builder.of(factory,MobCategory.CREATURE).sized(d.width(),d.height()).clientTrackingRange(10).build(Minemon.MOD_ID+":"+d.slug());
   }));
   return Collections.unmodifiableMap(map);

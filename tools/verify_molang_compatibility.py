@@ -10,12 +10,11 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1] / "src" / "main" / "resources"
 QUERY_R = re.compile(r"\b(?:q|query)\.r\.([A-Za-z_][A-Za-z0-9_]*)\s*\(")
-AIRBORNE = {
-    "butterfree", "beedrill", "pidgey", "pidgeotto", "pidgeot", "charizard", "fearow",
-    "zubat", "golbat", "venomoth", "magnemite", "magneton", "farfetchd", "gastly",
-    "haunter", "gengar", "koffing", "weezing", "scyther", "articuno", "zapdos",
-    "moltres", "aerodactyl", "dragonite", "mewtwo", "mew",
-}
+# Read the explicit production assignments rather than duplicating the species list.
+PROFILE_SOURCE=(Path(__file__).resolve().parents[1]/"src/main/java/br/com/petrickfaria/minemon/entity/SpeciesBehaviorProfiles.java").read_text()
+PROFILE_GROUPS={kind:set(names.split(",")) for kind,names in re.findall(r'assign\(Profile\.([A-Z_]+), "([^\"]+)"\)',PROFILE_SOURCE)}
+AIRBORNE=PROFILE_GROUPS["ALTITUDE_CYCLE"]
+
 
 
 def strings(value):

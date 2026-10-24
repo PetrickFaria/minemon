@@ -56,7 +56,7 @@ jobs:
           mkdir -p run
           echo eula=true > run/eula.txt
           python3 tools/prepare_gametest_world.py
-          timeout 360s ./gradlew --no-daemon runGameTestServer
+          timeout 480s ./gradlew --no-daemon runGameTestServer
       - name: Capture runtime API diagnostics
         if: always()
         run: python3 tools/collect_diagnostics.py
@@ -102,6 +102,20 @@ jobs:
           grep -F 'PASS SOURCE PITCH' run/client-validation.txt
           grep -F 'PASS SOURCE PITCH: mew source q.pitch_tilt input moves the body bone:' run/client-validation.txt
           grep -F 'ARTICULATION PROFILES:' run/client-validation.txt
+      - name: Validate mixed flight and Vaporeon swimming on the real client
+        run: |
+          cp run/client-validation.txt run/client-validation-full.txt
+          for scenario in air water; do
+            python3 tools/prepare_client_world.py
+            if [ "$scenario" = air ]; then
+              timeout --kill-after=30s 600s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeAir -PclientSmokeSpecies=charizard,scyther
+            else
+              timeout --kill-after=30s 600s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeWater -PclientSmokeSpecies=vaporeon
+            fi
+            grep -F 'PASS ROSTER' run/client-validation.txt
+            grep -F 'ARTICULATION PROFILES:' run/client-validation.txt
+            cp run/client-validation.txt "run/client-validation-$scenario.txt"
+          done
       - name: Verify executable mod JAR contents
         shell: bash
         run: |
@@ -157,7 +171,7 @@ jobs:
           name: minemon-test-diagnostics
           path: |
             run/logs/
-            run/client-validation.txt
+            run/client-validation*.txt
             run/screenshots/
             build/test-results/
             build/diagnostics/

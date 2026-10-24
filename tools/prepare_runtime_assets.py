@@ -42,6 +42,50 @@ def add_pose_animation(data, geo, d, name, kind):
     channels.setdefault(n,{})['rotation']={'0.0':{'vector':[0,0,0]},'0.15':{'vector':[angle,0,0]},'0.32':{'vector':[-angle*0.45,0,0]},'0.6':{'vector':[0,0,0]}}
  animations[name]=animation
 
+def compatible_locomotion(data,geo,d):
+ """Skeleton-specific new gaits. Every original animation remains byte-equivalent after normal adaptation."""
+ import copy
+ slug=d['slug'];animations=data['animations']
+ def source(name):return copy.deepcopy(animations.get('animation.'+slug+'.'+name,{}))
+ def put(kind,clip):animations['animation.'+slug+'.minemon_'+kind]=clip
+ def sinus(base,amplitude,freq,phase=0):return f'({base})+{amplitude}*math.sin(query.anim_time*360*{freq}+{phase})'
+ if slug in ('eevee','jolteon','flareon','vaporeon','scyther'):
+  front='frontleg_' if slug=='vaporeon' else 'front_leg_'
+  back='backleg_' if slug=='jolteon' else 'back_leg_'
+  joints=[front+'left',front+'right',back+'left',back+'right'] if slug!='scyther' else ['left_upper_leg','right_upper_leg']
+  for kind,freq,amp in [('walk',1.6,18),('run',2.7,30)]:
+   if slug=='scyther' and kind=='run':continue
+   clip=source('ground_idle');clip.update(loop=True,animation_length=1/freq)
+   channels=clip.setdefault('bones',{})
+   for i,joint in enumerate(joints):
+    ch=channels.setdefault(joint,{})
+    rotation=ch.get('rotation',[0,0,0]);rotation=list(rotation) if isinstance(rotation,list) else [0,0,0]
+    rotation[0]=sinus(rotation[0],amp,freq,0 if i in (0,3) else 180)
+    ch['rotation']=rotation
+   body=channels.setdefault('body',{});position=body.get('position',[0,0,0]);position=list(position) if isinstance(position,list) else [0,0,0]
+   position[1]=sinus(position[1],0.18 if kind=='walk' else 0.32,freq*2)
+   body['position']=position
+   tail=next((n for n in ('tail1','tail','abdomen') if n in {b['name'] for g in geo['minecraft:geometry'] for b in g['bones']}),None)
+   if tail:
+    ch=channels.setdefault(tail,{});rot=list(ch.get('rotation',[0,0,0]));rot[1]=sinus(rot[1],4 if kind=='walk' else 7,freq);ch['rotation']=rot
+   put(kind,clip)
+ if slug=='vaporeon':
+  clip=source('ground_idle');clip.update(loop=True,animation_length=1.0)
+  channels=clip['bones']
+  for i in range(1,7):
+   name='tail' if i==1 else 'tail'+str(i)
+   ch=channels.setdefault(name,{});rot=list(ch.get('rotation',[0,0,0]));rot[1]=sinus(rot[1],10+i*2,1.0,-i*25);ch['rotation']=rot
+  for i,joint in enumerate(('frontleg_left','frontleg_right','back_leg_left','back_leg_right')):
+   ch=channels.setdefault(joint,{});rot=list(ch.get('rotation',[0,0,0]));rot[0]=sinus(25,14,1.0,0 if i%2==0 else 180);ch['rotation']=rot
+  put('swim',clip)
+ if slug=='spearow':
+  clip=source('ground_idle');clip.update(loop=True,animation_length=0.5)
+  channels=clip['bones'];channels['wings_open']={'scale':[1,1,1]};channels['wings_closed']={'scale':[0,0,0]}
+  for side,sign in [('left',1),('right',-1)]:
+   channels['wing_open_'+side]={'rotation':[0,0,sinus(0,sign*24,2.0)]}
+   channels['leg_'+side]={'rotation':[25,0,0]}
+  put('fly',clip)
+
 def build_runtime_clips(data,geo,d):
  animations=data.setdefault('animations',{});clips=d.get('clips',{})
  walk_name=d.get('walk')
@@ -253,7 +297,10 @@ for p in (root/'assets/minemon_gen1/animations').rglob('*.animation.json'):
    for bone in missing_bones: channels.pop(bone,None)
   # Files in the processed resource tree keep the normal assets/minemon root.
   model=root/'assets/minemon_gen1'/definition['model'].removeprefix('assets/minemon/')
-  if model.exists():build_runtime_clips(data,json.loads(model.read_text()),definition)
+  if model.exists():
+   geometry=json.loads(model.read_text())
+   build_runtime_clips(data,geometry,definition)
+   compatible_locomotion(data,geometry,definition)
   prepare_tail_flame(root,definition)
  # GeckoLib 3.1.40 dereferences this field while parsing every clip, including
  # expression-only looping clips. Keep the source untouched and add a runtime fallback.

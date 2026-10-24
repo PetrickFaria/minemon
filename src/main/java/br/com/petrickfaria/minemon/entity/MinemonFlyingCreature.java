@@ -7,12 +7,27 @@ import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.damagesource.DamageSource;
 public final class MinemonFlyingCreature extends MinemonCreature {
- public MinemonFlyingCreature(EntityType<? extends TamableAnimal> type,Level level){super(type,level);this.moveControl=new FlyingMoveControl(this,20,true);this.setNoGravity(true);}
- @Override public boolean isFlyingSpecies(){return true;}
+ private final PathNavigation airNavigation;
+ private final PathNavigation groundNavigation;
+ private final net.minecraft.world.entity.ai.control.MoveControl airControl;
+ private final net.minecraft.world.entity.ai.control.MoveControl groundControl;
+ public MinemonFlyingCreature(EntityType<? extends TamableAnimal> type,Level level){
+  super(type,level);this.airNavigation=this.navigation;
+  this.groundNavigation=new net.minecraft.world.entity.ai.navigation.GroundPathNavigation(this,level);
+  this.airControl=new FlyingMoveControl(this,20,true);
+  this.groundControl=new net.minecraft.world.entity.ai.control.MoveControl(this);
+  this.updateLocomotion();
+ }
+ private void updateLocomotion(){
+  boolean flying=this.isFlyingSpecies();PathNavigation desired=flying?this.airNavigation:this.groundNavigation;
+  if(this.navigation!=desired){this.navigation.stop();this.navigation=desired;}
+  this.moveControl=flying?this.airControl:this.groundControl;
+  if(!this.level.isClientSide||!this.wantsNaturalLanding())this.setNoGravity(flying);
+ }
  @Override protected PathNavigation createNavigation(Level level){FlyingPathNavigation n=new FlyingPathNavigation(this,level);n.setCanOpenDoors(false);n.setCanFloat(true);n.setCanPassDoors(true);return n;}
  @Override public void travel(net.minecraft.world.phys.Vec3 input){
-  if(!this.level.isClientSide&&!this.isSleeping()){
-   double support=NaturalMovementGoals.surfaceBelow(this.level,this.getX(),this.getY(),this.getZ());
+  if(this.isFlyingSpecies()&&!this.level.isClientSide&&!this.wantsNaturalLanding()){
+   double support=this.naturalSurface();
    double clearance=this.getY()-support;
    double allowedDrop=Math.max(0.0D,clearance-0.6D);
    double vertical=Math.max(this.getDeltaMovement().y,-allowedDrop);
@@ -23,14 +38,16 @@ public final class MinemonFlyingCreature extends MinemonCreature {
  }
  @Override public void tick(){
   super.tick();
-  boolean sleeping=this.isSleeping();
+  this.updateLocomotion();
+  if(!this.isFlyingSpecies()){return;}
+  boolean sleeping=this.wantsNaturalLanding();
   // Hover safely until a dry landing path is available; follow that path
   // instead of dropping blindly into water, lava, or an obstructed column.
   if(sleeping){
   // Gravity is synchronized by the server. The client has no active landing
   // navigation and must not override that decision during interpolation.
   if(this.level.isClientSide){this.fallDistance=0;return;}
-  double support=NaturalMovementGoals.surfaceBelow(this.level,this.getX(),this.getY(),this.getZ());
+  double support=this.naturalSurface();
   net.minecraft.core.BlockPos floor=new net.minecraft.core.BlockPos(this.getX(),support-0.001D,this.getZ());
   var state=this.level.getBlockState(floor);
   boolean safe=this.level.getFluidState(floor).isEmpty()
@@ -44,7 +61,7 @@ public final class MinemonFlyingCreature extends MinemonCreature {
   }
   this.setNoGravity(true);
   if(!this.level.isClientSide){
-   double surface=NaturalMovementGoals.surfaceBelow(this.level,this.getX(),this.getY(),this.getZ());
+   double surface=this.naturalSurface();
    double altitude=this.getY()-surface;
    // Correct only excursions outside the natural band; normal navigation remains
    // responsible for smooth altitude changes and collision avoidance.
@@ -56,14 +73,14 @@ public final class MinemonFlyingCreature extends MinemonCreature {
     // navigation stopping distance keeps Pidgey outside vanilla melee reach.
     double lift=net.minecraft.util.Mth.clamp((0.6D-altitude)*0.1D,0.02D,0.10D);
     this.setDeltaMovement(this.getDeltaMovement().x,Math.max(this.getDeltaMovement().y,lift),this.getDeltaMovement().z);
-   }else if(!combat&&(altitude<3.0D||altitude>15.0D)){
-    double desired=surface+(altitude<3.0D?7.0D:11.0D);
-    double correction=net.minecraft.util.Mth.clamp((desired-this.getY())*0.035D,-0.12D,0.12D);
+   }else if(!combat&&this.naturalBehaviorActive()&&(altitude<this.naturalCycle().minimumAltitude()||altitude>this.naturalCycle().maximumAltitude())){
+    double desired=surface+(this.naturalCycle().minimumAltitude()+this.naturalCycle().maximumAltitude())*0.5D;
+    double correction=net.minecraft.util.Mth.clamp((desired-this.getY())*0.025D-this.getDeltaMovement().y*0.15D,-0.08D,0.08D);
     this.setDeltaMovement(this.getDeltaMovement().x,
-        net.minecraft.util.Mth.clamp(this.getDeltaMovement().y+correction,-0.18D,0.18D),this.getDeltaMovement().z);
+        net.minecraft.util.Mth.clamp(this.getDeltaMovement().y+correction,-0.12D,0.12D),this.getDeltaMovement().z);
    }
   }
   this.fallDistance=0;
  }
- @Override public boolean causeFallDamage(float distance,float multiplier,DamageSource source){return false;}
+ @Override public boolean causeFallDamage(float distance,float multiplier,DamageSource source){return this.isFlyingSpecies()?false:super.causeFallDamage(distance,multiplier,source);}
 }

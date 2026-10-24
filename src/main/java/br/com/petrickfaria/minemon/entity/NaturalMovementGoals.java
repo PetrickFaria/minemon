@@ -55,7 +55,7 @@ public final class NaturalMovementGoals {
         }
 
         @Override public boolean canUse() {
-            if (!this.mob.isSleeping() || this.mob.isOnGround() || this.mob.isPassenger()) return false;
+            if (!this.mob.wantsNaturalLanding() || (!this.mob.isSleeping()&&!this.mob.naturalBehaviorActive()) || this.mob.isOnGround() || this.mob.isPassenger()) return false;
             if (this.retryDelay > 0) { this.retryDelay--; return false; }
             this.landingPath = findLandingPath();
             if (this.landingPath == null) this.retryDelay = 40;
@@ -63,7 +63,7 @@ public final class NaturalMovementGoals {
         }
 
         @Override public boolean canContinueToUse() {
-            return this.mob.isSleeping() && !this.mob.isOnGround()
+            return this.mob.wantsNaturalLanding() && (this.mob.isSleeping()||this.mob.naturalBehaviorActive()) && !this.mob.isOnGround()
                     && !this.mob.getNavigation().isDone();
         }
 
@@ -133,8 +133,7 @@ public final class NaturalMovementGoals {
         }
 
         private boolean eligible() {
-            return !this.mob.isSleeping() && !this.mob.isOrderedToSit() && !this.mob.isPassenger()
-                    && !this.mob.isDeadOrDying() && !this.mob.isNoAi();
+            return this.mob.isFlyingSpecies() && !this.mob.wantsNaturalLanding() && this.mob.naturalBehaviorActive();
         }
 
         private boolean chooseDestination() {
@@ -146,7 +145,8 @@ public final class NaturalMovementGoals {
                 if (!this.mob.level.hasChunkAt(new BlockPos(x, this.mob.blockPosition().getY(), z))) continue;
                 int surfaceY = this.mob.level.getHeight(
                         net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
-                int altitude = 4 + this.mob.getRandom().nextInt(9);
+                int low=(int)this.mob.naturalCycle().minimumAltitude(),high=(int)this.mob.naturalCycle().maximumAltitude();
+                int altitude=low+this.mob.getRandom().nextInt(high-low+1);
                 int y = Math.min(this.mob.level.getMaxBuildHeight() - 2, surfaceY + altitude);
                 BlockPos candidate = new BlockPos(x, y, z);
                 if (!this.mob.level.hasChunkAt(candidate)
@@ -159,92 +159,29 @@ public final class NaturalMovementGoals {
         }
     }
 
-    static final class SeekWater extends Goal {
+    static final class GroundWander extends RandomStrollGoal {
         private final MinemonCreature mob;
-        private BlockPos destination;
-        private int retryDelay;
-
-        SeekWater(MinemonCreature mob) {
-            this.mob = mob;
-            this.setFlags(EnumSet.of(Goal.Flag.MOVE));
-        }
-
-        @Override public boolean canUse() {
-            if (this.retryDelay > 0) { this.retryDelay--; return false; }
-            if (!eligible() || this.mob.getTarget() != null || !this.mob.getNavigation().isDone()) return false;
-            this.destination = findWaterDestination();
-            return this.destination != null;
-        }
-
-        @Override public boolean canContinueToUse() {
-            return eligible() && this.mob.getTarget() == null && !this.mob.getNavigation().isDone()
-                    && this.destination != null;
-        }
-
-        @Override public void start() {
-            Path path = this.mob.getNavigation().createPath(this.destination, 0);
-            if (path == null || !path.canReach()) this.mob.getNavigation().stop();
-            else this.mob.getNavigation().moveTo(path, 0.85D);
-        }
-
-        @Override public void stop() {
-            this.destination = null;
-            this.retryDelay = 35 + this.mob.getRandom().nextInt(45);
-        }
-
-        private boolean eligible() {
-            return !this.mob.isSleeping() && !this.mob.isOrderedToSit() && !this.mob.isPassenger()
-                    && !this.mob.isDeadOrDying() && !this.mob.isNoAi();
-        }
-
-        private BlockPos findWaterDestination() {
-            BlockPos origin = this.mob.blockPosition();
-            BlockPos best = null;
-            double bestDistance = Double.MAX_VALUE;
-            int localRadius = this.mob.isInWater() ? 4 : 5;
-            java.util.List<BlockPos> nearbyWater = new java.util.ArrayList<>();
-            for (int dx = -localRadius; dx <= localRadius; dx++) for (int dz = -localRadius; dz <= localRadius; dz++) {
-                int x = origin.getX() + dx, z = origin.getZ() + dz;
-                for (int dy = -3; dy <= 3; dy++) {
-                    BlockPos candidate = new BlockPos(x, origin.getY() + dy, z);
-                    if (!this.mob.level.hasChunkAt(candidate)
-                            || !this.mob.level.getFluidState(candidate).is(FluidTags.WATER)) continue;
-                    double distance = candidate.distSqr(origin);
-                    if (!this.mob.isInWater() || distance >= 4.0D) nearbyWater.add(candidate.immutable());
-                }
-            }
-            nearbyWater.sort(java.util.Comparator.comparingDouble(candidate -> candidate.distSqr(origin)));
-            for (int i = 0; i < Math.min(8, nearbyWater.size()); i++) {
-                BlockPos candidate = nearbyWater.get(i);
-                Path path = this.mob.getNavigation().createPath(candidate, 0);
-                if (path != null && path.canReach()) return candidate;
-            }
-            for (int attempt = 0; attempt < 36; attempt++) {
-                int radius = this.mob.isInWater() ? 7 : 16;
-                int x = origin.getX() + this.mob.getRandom().nextInt(radius * 2 + 1) - radius;
-                int z = origin.getZ() + this.mob.getRandom().nextInt(radius * 2 + 1) - radius;
-                int y = origin.getY() + this.mob.getRandom().nextInt(9) - 4;
-                for (int dy = -4; dy <= 4; dy++) {
-                    BlockPos candidate = new BlockPos(x, y + dy, z);
-                    if (!this.mob.level.hasChunkAt(candidate)
-                            || !this.mob.level.getFluidState(candidate).is(FluidTags.WATER)) continue;
-                    double distance = candidate.distSqr(origin);
-                    if ((this.mob.isInWater() && distance < 20.0D) || distance >= bestDistance) continue;
-                    Path path = this.mob.getNavigation().createPath(candidate, 0);
-                    if (path != null && path.canReach()) { best = candidate.immutable(); bestDistance = distance; }
-                    break;
-                }
-            }
-            return best;
-        }
+        GroundWander(MinemonCreature mob){super(mob,0.8D);this.mob=mob;}
+        @Override public boolean canUse(){return !this.mob.isFlyingSpecies()&&this.mob.naturalBehaviorActive()&&super.canUse();}
+        @Override public boolean canContinueToUse(){return !this.mob.isFlyingSpecies()&&this.mob.naturalBehaviorActive()&&super.canContinueToUse();}
     }
-
-    static final class AquaticLandWander extends RandomStrollGoal {
+    static final class AquaticLandWander extends net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal {
         private final MinemonCreature mob;
         AquaticLandWander(MinemonCreature mob) { super(mob, 0.65D); this.mob = mob; }
+        @Override protected net.minecraft.world.phys.Vec3 getPosition(){
+            var candidate=super.getPosition();if(candidate==null)return null;
+            if(SpeciesBehaviorProfiles.isVisitor(this.mob.getSpeciesSlug())&&this.mob.naturalCycle().phase()==BehaviorCycle.Phase.COOLDOWN){
+                var path=this.mob.getNavigation().createPath(new BlockPos(candidate),0);
+                if(path==null||!path.canReach())return null;
+                for(int i=0;i<path.getNodeCount();i++){
+                    var node=path.getNode(i);
+                    if(!this.mob.level.getFluidState(new BlockPos(node.x,node.y,node.z)).isEmpty())return null;
+                }
+            }
+            return candidate;
+        }
         @Override public boolean canUse() {
-            return !this.mob.isInWater() && !this.mob.isSleeping() && !this.mob.isOrderedToSit()
-                    && this.mob.getTarget() == null && super.canUse();
+            return !this.mob.isInWater() && this.mob.naturalBehaviorActive() && super.canUse();
         }
     }
 }
