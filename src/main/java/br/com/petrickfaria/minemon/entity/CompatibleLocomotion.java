@@ -8,14 +8,14 @@ public final class CompatibleLocomotion {
  public static boolean groundGait(String slug){return quadruped(slug)||slug.equals("scyther");}
  public static String clip(String slug,String key){return "animation."+slug+".minemon_"+key;}
  public static void apply(String slug,Map<String,String> clips){
-  if(groundGait(slug))clips.put("ground_walk",clip(slug,"walk"));
-  if(quadruped(slug))clips.put("ground_run",clip(slug,"run"));
+  if(groundGait(slug))clips.putIfAbsent("ground_walk",clip(slug,"walk"));
+  if(quadruped(slug))clips.putIfAbsent("ground_run",clip(slug,"run"));
   if(slug.equals("vaporeon")){
-   clips.put("water_swim",clip(slug,"swim"));
-   clips.put("water_idle",clips.get("ground_idle"));
+   clips.putIfAbsent("water_swim",clip(slug,"swim"));
+   clips.putIfAbsent("water_idle",clips.get("ground_idle"));
   }
   if(slug.equals("spearow")){
-   clips.put("air_fly",clip(slug,"fly"));clips.put("air_idle",clip(slug,"fly"));
+   clips.putIfAbsent("air_fly",clip(slug,"fly"));clips.putIfAbsent("air_idle",clip(slug,"fly"));
   }
  }
  public static List<String> gaitJoints(String slug){

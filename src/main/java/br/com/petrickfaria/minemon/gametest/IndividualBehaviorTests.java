@@ -20,12 +20,12 @@ public final class IndividualBehaviorTests {
  private static void arena(GameTestHelper h,boolean pond){
   for(int x=0;x<16;x++)for(int z=0;z<16;z++){
    boolean water=pond&&x>=4&&x<=13&&z>=3&&z<=13;
-   h.setBlock(new BlockPos(x,-5,z),Blocks.STONE);
-   for(int y=-4;y<=0;y++)h.setBlock(new BlockPos(x,y,z),water?Blocks.WATER:Blocks.STONE);
-   for(int y=1;y<=17;y++)h.setBlock(new BlockPos(x,y,z),Blocks.AIR);
+   h.setBlock(new BlockPos(x,3,z),Blocks.STONE);
+   for(int y=4;y<=8;y++)h.setBlock(new BlockPos(x,y,z),water?Blocks.WATER:Blocks.STONE);
+   for(int y=9;y<=25;y++)h.setBlock(new BlockPos(x,y,z),Blocks.AIR);
   }
  }
- private static MinemonCreature spawn(GameTestHelper h,String slug,int x,int y,int z){return h.spawn(ModEntities.SPECIES.get(slug).get(),new BlockPos(x,y,z));}
+ private static MinemonCreature spawn(GameTestHelper h,String slug,int x,int y,int z){return h.spawn(ModEntities.SPECIES.get(slug).get(),new BlockPos(x,y+8,z));}
  private static void check(GameTestHelper h,boolean ok,String reason){if(!ok)h.fail(reason);}
  private static void restore(MinemonCreature mob,String phase,int ticks,int stage){
   CompoundTag tag=new CompoundTag();mob.addAdditionalSaveData(tag);
@@ -34,7 +34,12 @@ public final class IndividualBehaviorTests {
  private static String state(MinemonCreature m){return " species="+m.getSpeciesSlug()+" phase="+m.naturalCycle().phase()+" ticks="+m.naturalCycle().ticks()+" pos="+m.position()+" wet="+m.isInWater()+" grounded="+m.isOnGround()+" target="+m.getTarget()+" nav="+m.getNavigation().getTargetPos();}
  private static void await(GameTestHelper h,BooleanSupplier condition,Runnable next,int remaining,String error){
   if(condition.getAsBoolean()){next.run();return;}
-  if(remaining<=0){h.fail(error);return;}
+  if(remaining<=0){
+   var origin=h.absolutePos(BlockPos.ZERO);
+   for(var m:h.getLevel().getEntitiesOfClass(MinemonCreature.class,new net.minecraft.world.phys.AABB(origin).inflate(22)))
+    com.mojang.logging.LogUtils.getLogger().error("INDIVIDUAL BEHAVIOR FAILURE"+state(m)+" velocity="+m.getDeltaMovement()+" gravity="+!m.isNoGravity()+" navigation="+m.getNavigation().getClass().getSimpleName());
+   h.fail(error);return;
+  }
   h.runAfterDelay(5,()->await(h,condition,next,remaining-5,error));
  }
  @GameTest(template="test_arena",timeoutTicks=700)
@@ -59,9 +64,11 @@ public final class IndividualBehaviorTests {
  @GameTest(template="test_arena",timeoutTicks=700)
  public static void charizardAndScytherSwitchNavigationAndLandWithoutTeleport(GameTestHelper h){
   arena(h,false);var first=spawn(h,"charizard",3,1,5);var second=spawn(h,"scyther",10,1,10);
+  await(h,()->first.isOnGround()&&second.isOnGround(),()->{
   for(var mob:java.util.List.of(first,second)){
    check(h,!mob.isFlyingSpecies(),"Mixed species must begin on land"+state(mob));
-   restore(mob,"LAND",5999,0);mob.getNavigation().moveTo(mob.getX()+2, mob.getY(),mob.getZ(),0.8D);
+   restore(mob,"LAND",5999,0);
+   check(h,mob.getNavigation().moveTo(mob.getX()+2,mob.getY(),mob.getZ(),0.8D),"Grounded mixed species must accept the real walk route"+state(mob));
   }
   await(h,()->first.naturalCycle().phase()==AIR&&second.naturalCycle().phase()==AIR,()->{
    for(var mob:java.util.List.of(first,second)){
@@ -72,6 +79,7 @@ public final class IndividualBehaviorTests {
     h.succeed();
    },400,"Mixed species must complete safe landing");
   },250,"Both mixed species must enter their real flight phase");
+  },30,"Mixed species must first settle on their physical ground support");
  }
  @GameTest(template="test_arena",timeoutTicks=1200)
  public static void visitorDivesSurfacesExitsAndHonorsLandCooldown(GameTestHelper h){

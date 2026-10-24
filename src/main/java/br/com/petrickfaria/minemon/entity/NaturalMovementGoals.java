@@ -73,7 +73,7 @@ public final class NaturalMovementGoals {
         private Path findLandingPath() {
             BlockPos origin = this.mob.blockPosition();
             // Prefer the closest safe dry surface, and expand only if obstructed.
-            for (int radius = 0; radius <= 8; radius++) {
+            for (int radius = 0; radius <= 25; radius++) {
                 for (int dx = -radius; dx <= radius; dx++) for (int dz = -radius; dz <= radius; dz++) {
                     if (Math.max(Math.abs(dx), Math.abs(dz)) != radius) continue;
                     double x = origin.getX() + dx + 0.5D, z = origin.getZ() + dz + 0.5D;
@@ -85,7 +85,7 @@ public final class NaturalMovementGoals {
                             || state.is(net.minecraft.world.level.block.Blocks.CACTUS)
                             || state.is(net.minecraft.world.level.block.Blocks.CAMPFIRE)
                             || state.is(net.minecraft.world.level.block.Blocks.SOUL_CAMPFIRE)) continue;
-                    BlockPos feet = new BlockPos(x, surface, z);
+                    BlockPos feet = new BlockPos(x, Math.ceil(surface), z);
                     if (!this.mob.level.getFluidState(feet).isEmpty()
                             || !this.mob.level.getBlockState(feet).isAir()
                             || !this.mob.level.noCollision(this.mob, this.mob.getBoundingBox().move(

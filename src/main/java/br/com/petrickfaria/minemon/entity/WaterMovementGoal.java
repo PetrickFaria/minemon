@@ -10,7 +10,7 @@ import net.minecraft.world.phys.Vec3;
 /** One navigation owner for seeking water, depth/surface swimming and shore exit. */
 public final class WaterMovementGoal extends Goal {
  private final MinemonCreature mob;
- private int scanIndex,delay,stalled;
+ private int scanIndex,scanYIndex,delay,stalled;
  private Vec3 lastPosition;
  private BlockPos destination;
  private final Map<BlockPos,Integer> blocked=new HashMap<>();
@@ -62,19 +62,21 @@ public final class WaterMovementGoal extends Goal {
  }
  private BlockPos scan(boolean dry){
   BlockPos origin=mob.blockPosition();int paths=0;
-  // Bounded work: at most 64 columns/20 ticks, two path computations per batch.
-  // The sorted cursor eventually covers every column inside radius 25.
-  for(int n=0;n<64;n++){
-   BlockPos offset=OFFSETS.get(scanIndex++%OFFSETS.size());
-   for(int dy=-6;dy<=6;dy++){
-    BlockPos p=origin.offset(offset.getX(),dy,offset.getZ());
-    if(p.distSqr(origin)>625||!mob.level.hasChunkAt(p)||blocked.containsKey(p))continue;
-    if(dry?!safeDry(mob,p):!waterFits(mob,p,SpeciesBehaviorProfiles.profile(mob.getSpeciesSlug())!=SpeciesBehaviorProfiles.Profile.SURFACE))continue;
-    if(paths++>=2)return null;
-    var path=mob.getNavigation().createPath(p,0);
-    if(path!=null&&path.canReach())return p;
-    blocked.put(p.immutable(),mob.tickCount+200);
-   }
+  // Bounded batches cover the full three-dimensional radius, including
+  // water farther above/below than a shore step. Both cursors survive retries;
+  // a blocked deep node cannot restart the same column indefinitely.
+  for(int n=0;n<2048;n++){
+   BlockPos offset=OFFSETS.get(scanIndex%OFFSETS.size());
+   int dy=scanYIndex==0?0:((scanYIndex+1)/2)*(scanYIndex%2==1?-1:1);
+   if(++scanYIndex>50){scanYIndex=0;scanIndex=(scanIndex+1)%OFFSETS.size();}
+   BlockPos p=origin.offset(offset.getX(),dy,offset.getZ());
+   if(p.distSqr(origin)>625||!mob.level.hasChunkAt(p)||blocked.containsKey(p))continue;
+   if(dry?!safeDry(mob,p):!waterFits(mob,p,SpeciesBehaviorProfiles.profile(mob.getSpeciesSlug())!=SpeciesBehaviorProfiles.Profile.SURFACE))continue;
+   paths++;
+   var path=mob.getNavigation().createPath(p,0);
+   if(path!=null&&path.canReach())return p;
+   blocked.put(p.immutable(),mob.tickCount+200);
+   if(paths>=2)return null;
   }
   return null;
  }
@@ -106,7 +108,7 @@ public final class WaterMovementGoal extends Goal {
  static boolean safeDry(MinemonCreature mob,BlockPos feet){
   var floor=mob.level.getBlockState(feet.below());
   return mob.level.getFluidState(feet).isEmpty()&&mob.level.getFluidState(feet.below()).isEmpty()
-      &&floor.isFaceSturdy(mob.level,feet.below(),net.minecraft.core.Direction.UP)
+      &&!floor.getCollisionShape(mob.level,feet.below()).isEmpty()
       &&!floor.is(Blocks.MAGMA_BLOCK)&&!floor.is(Blocks.CACTUS)&&!floor.is(Blocks.CAMPFIRE)&&!floor.is(Blocks.SOUL_CAMPFIRE)
       &&mob.level.noCollision(mob,mob.getBoundingBox().move(feet.getX()+0.5D-mob.getX(),feet.getY()-mob.getY(),feet.getZ()+0.5D-mob.getZ()));
  }
