@@ -44,12 +44,14 @@ public final class ClientSmokeTest {
  private static String renderedPhaseSpecies;
  private static int renderedPhase=-1,renderedPhaseFrames;
  private static final java.util.Map<String,String> lastRenderedClip=new java.util.HashMap<>();
- private static final java.util.Map<String,Long> clipChangedNanos=new java.util.HashMap<>();
+ private static final java.util.Map<String,Integer> clipChangedTick=new java.util.HashMap<>();
+ private static final java.util.Map<String,Integer> lastRenderedEntityTick=new java.util.HashMap<>();
  private static boolean clipHasSettled(String slug) {
-  Long changed=clipChangedNanos.get(slug);
+  Integer changed=clipChangedTick.get(slug);
+  Integer observed=lastRenderedEntityTick.get(slug);
   // The production controller blends for four ticks (200 ms). Keep the
   // original visibility/articulation assertions, but sample after that blend.
-  return changed!=null&&System.nanoTime()-changed>=250_000_000L;
+  return changed!=null&&observed!=null&&observed-changed>=5;
  }
  private static final long smokeStartedNanos=System.nanoTime();
  private static final java.util.Set<String> loggedProgress=java.util.concurrent.ConcurrentHashMap.newKeySet();
@@ -212,8 +214,9 @@ public final class ClientSmokeTest {
      if(mc.getResourceManager().getResource(model.getTextureResource(entity)).isEmpty())throw new IllegalStateException("Missing rendered texture "+entity.getSpeciesSlug());
      String slug=entity.getSpeciesSlug();renderedSpecies.add(slug);
      String currentClip=entity.getSelectedAnimationForValidation();
+     lastRenderedEntityTick.put(slug,entity.tickCount);
      if(currentClip!=null&&!currentClip.equals(lastRenderedClip.put(slug,currentClip)))
-      clipChangedNanos.put(slug,System.nanoTime());
+      clipChangedTick.put(slug,entity.tickCount);
      if(validationPhase(entity)!=null)reportProgress(slug,"renderização");
      var position=entity.position();var origin=firstRenderedPositions.putIfAbsent(slug,position);
      // Rendering can interpolate one server step over several frames. Measure
