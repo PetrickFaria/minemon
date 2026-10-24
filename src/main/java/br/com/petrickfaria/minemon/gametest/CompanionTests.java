@@ -287,11 +287,13 @@ public final class CompanionTests {
   // not a shore. Keep the source water contained below the surrounding terrain.
   for(int x=8;x<=10;x++)for(int z=4;z<=6;z++){
    h.setBlock(new BlockPos(x,-1,z),net.minecraft.world.level.block.Blocks.STONE);
-   h.setBlock(new BlockPos(x,0,z),net.minecraft.world.level.block.Blocks.WATER);
+   for(int y=0;y<=2;y++)h.setBlock(new BlockPos(x,y,z),net.minecraft.world.level.block.Blocks.WATER);
   }
   MinemonCreature goldeen=h.spawn(ModEntities.SPECIES.get("goldeen").get(),new BlockPos(5,1,5));
-  h.setBlock(new BlockPos(13,-1,10),net.minecraft.world.level.block.Blocks.STONE);
-  h.setBlock(new BlockPos(13,0,10),net.minecraft.world.level.block.Blocks.WATER);
+  for(int x=12;x<=14;x++)for(int z=9;z<=11;z++){
+   h.setBlock(new BlockPos(x,-1,z),net.minecraft.world.level.block.Blocks.STONE);
+   for(int y=0;y<=2;y++)h.setBlock(new BlockPos(x,y,z),net.minecraft.world.level.block.Blocks.WATER);
+  }
   MinemonCreature adjacent=h.spawn(ModEntities.SPECIES.get("goldeen").get(),new BlockPos(12,1,10));
   // NoAI does not disable physical pushing. Keep the dry-survival specimen
   // away from the two roaming water seekers, with a real dry enclosure;

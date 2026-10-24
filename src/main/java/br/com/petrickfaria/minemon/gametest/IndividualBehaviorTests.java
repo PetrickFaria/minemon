@@ -43,22 +43,22 @@ public final class IndividualBehaviorTests {
   h.runAfterDelay(5,()->await(h,condition,next,remaining-5,error));
  }
  @GameTest(template="test_arena",timeoutTicks=700)
- public static void allThreeAltitudeStagesUseRealFlightAndResumeAfterSleep(GameTestHelper h){
+ public static void flyerAlternatesTwoAltitudeBandsAndPausesForSleep(GameTestHelper h){
   arena(h,false);var bird=spawn(h,"pidgey",5,5,5);
   restore(bird,"LAND",5999,0);
-  await(h,()->bird.naturalCycle().stage()==1&&band(bird,6,8),()->{
-   restore(bird,"LAND",1799,1);
-   await(h,()->bird.naturalCycle().stage()==2&&band(bird,9,10),()->{
-    restore(bird,"LAND",1199,2);
-    await(h,()->bird.naturalCycle().stage()==0&&band(bird,3,5),()->{
+  await(h,()->bird.naturalCycle().phase()==AIR&&band(bird,1,3),()->{
+   restore(bird,"AIR",5999,0);
+   await(h,()->bird.naturalCycle().stage()==1&&band(bird,4,9),()->{
+    restore(bird,"AIR",2999,1);
+    await(h,()->bird.naturalCycle().stage()==0&&band(bird,1,3),()->{
      int ticks=bird.naturalCycle().ticks();bird.setSleeping(true);
      h.runAfterDelay(20,()->{
       check(h,bird.naturalCycle().ticks()==ticks,"Sleep must pause the exact altitude clock");
       bird.setSleeping(false);h.succeed();
      });
-    },200,"Flight must return smoothly to the first band"+state(bird));
-   },200,"Flight must reach the 9..10 band"+state(bird));
-  },200,"Flight must reach the 6..8 band"+state(bird));
+    },200,"Flight must return smoothly to the 1..3 band"+state(bird));
+   },200,"Flight must reach the 4..9 band"+state(bird));
+  },200,"Flight must enter its first 1..3 band"+state(bird));
  }
  private static boolean band(MinemonCreature m,double low,double high){double a=m.getY()-m.naturalSurface();return a>=low&&a<=high;}
  @GameTest(template="test_arena",timeoutTicks=700)
@@ -72,7 +72,7 @@ public final class IndividualBehaviorTests {
   }
   await(h,()->first.naturalCycle().phase()==AIR&&second.naturalCycle().phase()==AIR,()->{
    for(var mob:java.util.List.of(first,second)){
-    check(h,!mob.isOnGround()&&mob.isFlyingSpecies(),"Takeoff must physically occur"+state(mob));restore(mob,"AIR",1199,0);
+    check(h,!mob.isOnGround()&&mob.isFlyingSpecies(),"Takeoff must physically occur"+state(mob));restore(mob,"AIR",5999,1);
    }
    await(h,()->first.naturalCycle().phase()==LAND&&second.naturalCycle().phase()==LAND,()->{
     for(var mob:java.util.List.of(first,second))check(h,mob.isOnGround()&&!mob.isFlyingSpecies()&&!mob.isNoGravity(),"Real dry landing must restore land control"+state(mob));
@@ -84,21 +84,21 @@ public final class IndividualBehaviorTests {
  @GameTest(template="test_arena",timeoutTicks=1200)
  public static void visitorDivesSurfacesExitsAndHonorsLandCooldown(GameTestHelper h){
   arena(h,true);var turtle=spawn(h,"squirtle",2,1,7);
+  // Start directly at the seek phase to keep this test focused on real
+  // navigation; the full 10-minute land interval is covered by unit tests.
+  restore(turtle,"SEEK_WATER",0,0);
   await(h,()->turtle.naturalCycle().phase()==SUBMERGED&&underwater(turtle),()->{
-   restore(turtle,"SUBMERGED",599,0);
-   await(h,()->turtle.naturalCycle().phase()==SURFACE&&atSurface(turtle),()->{
-    restore(turtle,"SURFACE",599,0);
-    await(h,()->turtle.naturalCycle().phase()==COOLDOWN&&!turtle.isInWater(),()->{
-     check(h,turtle.isOnGround(),"Cooldown begins only after effective return to land");
-     h.runAfterDelay(100,()->{
-      check(h,turtle.naturalCycle().phase()==COOLDOWN&&!turtle.isInWater(),"Visitor must not immediately reenter water"+state(turtle));h.succeed();
-     });
-    },400,"Visitor must find a reachable real shore and exit"+state(turtle));
-   },300,"Visitor must physically reach the water surface"+state(turtle));
+   restore(turtle,"SUBMERGED",11999,0);
+   await(h,()->turtle.naturalCycle().phase()==COOLDOWN&&!turtle.isInWater(),()->{
+    check(h,turtle.isOnGround(),"Cooldown begins only after effective return to land");
+    h.runAfterDelay(100,()->{
+     check(h,turtle.naturalCycle().phase()==COOLDOWN&&!turtle.isInWater(),"Visitor must not immediately reenter water"+state(turtle));h.succeed();
+    });
+   },400,"Visitor must exit real water and return to land after its water interval"+state(turtle));
   },350,"Visitor must find, enter and submerge in reachable water"+state(turtle));
  }
  private static boolean underwater(MinemonCreature m){return m.level.getFluidState(new BlockPos(m.getX(),m.getY()+m.getBbHeight()+.1D,m.getZ())).is(net.minecraft.tags.FluidTags.WATER);}
- private static boolean atSurface(MinemonCreature m){return m instanceof MinemonAquaticCreature a&&Math.abs(m.getY()-(a.waterSurface()-Math.min(.8D,m.getBbHeight()*.3D)))<.3D;}
+ private static boolean atSurface(MinemonCreature m){return m instanceof MinemonAquaticCreature a&&Math.abs(m.getY()-(a.waterSurface()-WaterMovementGoal.preferredSurfaceDepth(m)))<.3D;}
  @GameTest(template="test_arena",timeoutTicks=320)
  public static void permanentSwimmersMoveUnderwaterAndSurfaceSpeciesFloat(GameTestHelper h){
   arena(h,true);var fish=spawn(h,"magikarp",4,-2,3);fish.setDeltaMovement(-0.12D,0,-0.12D);var lapras=spawn(h,"lapras",8,0,9);var gyarados=spawn(h,"gyarados",11,0,5);

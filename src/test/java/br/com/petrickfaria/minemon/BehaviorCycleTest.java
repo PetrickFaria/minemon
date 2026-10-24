@@ -32,7 +32,7 @@ public class BehaviorCycleTest {
   repeat(c,200,observe(true,false,false,false,false,false,false,false));assertEquals(0,c.ticks());
   var fly=observe(true,false,true,false,false,false,false,false);c.tick(fly);assertEquals(AIR,c.phase());
   repeat(c,5999,fly);assertEquals(AIR,c.phase());c.tick(fly);assertEquals(1,c.stage());assertEquals(4,c.minimumAltitude(),0);
-  repeat(c,2999,fly);assertEquals(AIR,c.phase());c.tick(fly);assertEquals(LANDING,c.phase());
+  repeat(c,5999,fly);assertEquals(AIR,c.phase());c.tick(fly);assertEquals(LANDING,c.phase());
   repeat(c,200,fly);assertEquals(LANDING,c.phase());c.tick(walk);assertEquals(LAND,c.phase());
  }
  @Test public void ordinaryGroundIdleCountsButPriorityPausesDoNot(){
