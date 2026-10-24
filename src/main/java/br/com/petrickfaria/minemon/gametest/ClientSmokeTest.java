@@ -43,6 +43,14 @@ public final class ClientSmokeTest {
  private static int direction=1;
  private static String renderedPhaseSpecies;
  private static int renderedPhase=-1,renderedPhaseFrames;
+ private static final java.util.Map<String,String> lastRenderedClip=new java.util.HashMap<>();
+ private static final java.util.Map<String,Long> clipChangedNanos=new java.util.HashMap<>();
+ private static boolean clipHasSettled(String slug) {
+  Long changed=clipChangedNanos.get(slug);
+  // The production controller blends for four ticks (200 ms). Keep the
+  // original visibility/articulation assertions, but sample after that blend.
+  return changed!=null&&System.nanoTime()-changed>=250_000_000L;
+ }
  private static final long smokeStartedNanos=System.nanoTime();
  private static final java.util.Set<String> loggedProgress=java.util.concurrent.ConcurrentHashMap.newKeySet();
  private static volatile int completedSpeciesWindows;
@@ -203,6 +211,9 @@ public final class ClientSmokeTest {
     MinemonRenderer.validationObserver=(entity,model)->{
      if(mc.getResourceManager().getResource(model.getTextureResource(entity)).isEmpty())throw new IllegalStateException("Missing rendered texture "+entity.getSpeciesSlug());
      String slug=entity.getSpeciesSlug();renderedSpecies.add(slug);
+     String currentClip=entity.getSelectedAnimationForValidation();
+     if(currentClip!=null&&!currentClip.equals(lastRenderedClip.put(slug,currentClip)))
+      clipChangedNanos.put(slug,System.nanoTime());
      if(validationPhase(entity)!=null)reportProgress(slug,"renderização");
      var position=entity.position();var origin=firstRenderedPositions.putIfAbsent(slug,position);
      // Rendering can interpolate one server step over several frames. Measure
@@ -271,7 +282,7 @@ public final class ClientSmokeTest {
         var folded=model.getAnimationProcessor().getBone("wings_folded");
         var open=model.getAnimationProcessor().getBone("wings_open");
         if(folded==null||open==null||Math.abs(folded.getScaleX())>0.001F||Math.abs(open.getScaleX()-1.0F)>0.001F)
-         throw new IllegalStateException("Zubat poser visibility failed: folded wings must be hidden and open wings visible");
+         throw new IllegalStateException("Zubat poser visibility failed: folded wings must be hidden and open wings visible; phase="+phase+" clip="+entity.getSelectedAnimationForValidation()+" scales="+(folded==null?"missing":folded.getScaleX())+"/"+(open==null?"missing":open.getScaleX()));
        }
        if((slug.equals("pidgeotto")||slug.equals("pidgeot"))&&isSettledClipSample(phase)) {
         var closed=model.getAnimationProcessor().getBone("wings_closed");
@@ -333,7 +344,7 @@ public final class ClientSmokeTest {
     String active=species.get((worldTicks-SPECIES_START_TICK)/SPECIES_TEST_WINDOW);
     int appliedPhase=(worldTicks-SPECIES_START_TICK)%SPECIES_TEST_WINDOW;
     if(ARTICULATION_VALIDATION_SPECIES.contains(active)
-       && (!active.equals(renderedPhaseSpecies)||renderedPhase!=appliedPhase||renderedPhaseFrames<2))return;
+       && (!active.equals(renderedPhaseSpecies)||renderedPhase!=appliedPhase||renderedPhaseFrames<2||!clipHasSettled(active)))return;
    }
    worldTicks++;
    if(worldTicks>=SPECIES_START_TICK&&worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW) {
@@ -494,6 +505,7 @@ public final class ClientSmokeTest {
    return 0.0D;
   }
   private static boolean isSettledClipSample(int phase) {
+   if(!clipHasSettled(renderedPhaseSpecies))return false;
    // Ignore samples at phase boundaries; the model renderer can run before
    // GeckoLib has evaluated this tick's controller predicate.
    return (phase>=3&&phase<8) || (phase>=12&&phase<16) || (phase>=18&&phase<24)
