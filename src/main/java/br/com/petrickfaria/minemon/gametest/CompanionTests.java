@@ -283,14 +283,14 @@ public final class CompanionTests {
  @GameTest(template="test_arena",timeoutTicks=1300)
  public static void aquaticSpeciesSeekWaterAndSurviveWithoutIt(GameTestHelper h) {
   floor(h);
-  // A recessed, reachable pond: water above the floor forms a flowing wall,
-  // not a shore. Keep the source water contained below the surrounding terrain.
-  for(int x=8;x<=10;x++)for(int z=4;z<=6;z++){
+  // A broad, deep basin keeps navigable shore approaches and a full-body
+  // 3x3x3 swimming volume for the real amphibious pathfinder.
+  for(int x=4;x<=13;x++)for(int z=3;z<=13;z++){
    h.setBlock(new BlockPos(x,-1,z),net.minecraft.world.level.block.Blocks.STONE);
-   for(int y=0;y<=2;y++)h.setBlock(new BlockPos(x,y,z),net.minecraft.world.level.block.Blocks.WATER);
+   for(int y=0;y<=4;y++)h.setBlock(new BlockPos(x,y,z),net.minecraft.world.level.block.Blocks.WATER);
   }
-  MinemonCreature goldeen=h.spawn(ModEntities.SPECIES.get("goldeen").get(),new BlockPos(5,1,5));
-  BlockPos pond=h.absolutePos(new BlockPos(9,1,5));
+  MinemonCreature goldeen=h.spawn(ModEntities.SPECIES.get("goldeen").get(),new BlockPos(2,1,7));
+  BlockPos pond=h.absolutePos(new BlockPos(9,2,8));
   var directPath=goldeen.getNavigation().createPath(pond,0);
   com.mojang.logging.LogUtils.getLogger().info("MINEMON AQUATIC SEEK FIXTURE target="+pond
       +" targetWater="+h.getLevel().getFluidState(pond).is(net.minecraft.tags.FluidTags.WATER)
@@ -298,11 +298,7 @@ public final class CompanionTests {
           p->h.getLevel().getFluidState(p).is(net.minecraft.tags.FluidTags.WATER))
       +" directPath="+(directPath==null?"null":directPath.canReach()+" nodes="+directPath.getNodeCount())
       +" state="+goldeen.position()+" nav="+goldeen.getNavigation().getClass().getSimpleName());
-  for(int x=12;x<=14;x++)for(int z=9;z<=11;z++){
-   h.setBlock(new BlockPos(x,-1,z),net.minecraft.world.level.block.Blocks.STONE);
-   for(int y=0;y<=2;y++)h.setBlock(new BlockPos(x,y,z),net.minecraft.world.level.block.Blocks.WATER);
-  }
-  MinemonCreature adjacent=h.spawn(ModEntities.SPECIES.get("goldeen").get(),new BlockPos(12,1,10));
+  MinemonCreature adjacent=h.spawn(ModEntities.SPECIES.get("goldeen").get(),new BlockPos(14,1,10));
   // NoAI does not disable physical pushing. Keep the dry-survival specimen
   // away from the two roaming water seekers, with a real dry enclosure;
   // otherwise incidental pushes can invalidate the dry-land precondition.
@@ -313,9 +309,9 @@ public final class CompanionTests {
   dryHorsea.setNoAi(true);
   float health=dryHorsea.getHealth();
   check(h,dryHorsea.canBreatheUnderwater(),"Aquatic species must not drown when temporarily submerged");
-  double initial=goldeen.distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(h.absolutePos(new BlockPos(9,0,5))));
+  double initial=goldeen.distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(pond));
   h.runAfterDelay(260,()->{
-   double current=goldeen.distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(h.absolutePos(new BlockPos(9,0,5))));
+   double current=goldeen.distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(pond));
    check(h,goldeen.isInWater(),"Aquatic species must actually enter reachable water; initial distance="+initial+" current="+current
        +" position="+goldeen.position()+" velocity="+goldeen.getDeltaMovement()+" navigation="+goldeen.getNavigation().getTargetPos()
        +" active="+goldeen.naturalBehaviorActive());
