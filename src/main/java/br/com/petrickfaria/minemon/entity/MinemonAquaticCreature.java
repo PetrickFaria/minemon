@@ -14,6 +14,15 @@ import net.minecraft.world.level.Level;
 public final class MinemonAquaticCreature extends MinemonCreature {
     public MinemonAquaticCreature(EntityType<? extends TamableAnimal> type, Level level) {
         super(type, level);
+        this.lookControl = new net.minecraft.world.entity.ai.control.LookControl(this) {
+            @Override protected boolean resetXRotOnTick() {
+                // LookControl ticks after MoveControl. Its land default resets
+                // pitch to zero every tick, preventing smooth swimming from
+                // accumulating the inclination needed to ascend or descend.
+                return !MinemonAquaticCreature.this.isInWater()
+                        || MinemonAquaticCreature.this.getNavigation().isDone();
+            }
+        };
         this.moveControl = new SmoothSwimmingMoveControl(this, 85, 10, 0.1F, 0.5F, false) {
             private final MoveControl land = new MoveControl(MinemonAquaticCreature.this);
 
