@@ -290,6 +290,14 @@ public final class CompanionTests {
    for(int y=0;y<=2;y++)h.setBlock(new BlockPos(x,y,z),net.minecraft.world.level.block.Blocks.WATER);
   }
   MinemonCreature goldeen=h.spawn(ModEntities.SPECIES.get("goldeen").get(),new BlockPos(5,1,5));
+  BlockPos pond=h.absolutePos(new BlockPos(9,1,5));
+  var directPath=goldeen.getNavigation().createPath(pond,0);
+  com.mojang.logging.LogUtils.getLogger().info("MINEMON AQUATIC SEEK FIXTURE target="+pond
+      +" targetWater="+h.getLevel().getFluidState(pond).is(net.minecraft.tags.FluidTags.WATER)
+      +" 3x3x3="+br.com.petrickfaria.minemon.entity.WaterMovementGoal.isNavigableWaterRegion(pond,
+          p->h.getLevel().getFluidState(p).is(net.minecraft.tags.FluidTags.WATER))
+      +" directPath="+(directPath==null?"null":directPath.canReach()+" nodes="+directPath.getNodeCount())
+      +" state="+goldeen.position()+" nav="+goldeen.getNavigation().getClass().getSimpleName());
   for(int x=12;x<=14;x++)for(int z=9;z<=11;z++){
    h.setBlock(new BlockPos(x,-1,z),net.minecraft.world.level.block.Blocks.STONE);
    for(int y=0;y<=2;y++)h.setBlock(new BlockPos(x,y,z),net.minecraft.world.level.block.Blocks.WATER);
@@ -308,7 +316,9 @@ public final class CompanionTests {
   double initial=goldeen.distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(h.absolutePos(new BlockPos(9,0,5))));
   h.runAfterDelay(260,()->{
    double current=goldeen.distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(h.absolutePos(new BlockPos(9,0,5))));
-   check(h,goldeen.isInWater(),"Aquatic species must actually enter reachable water; initial distance="+initial+" current="+current);
+   check(h,goldeen.isInWater(),"Aquatic species must actually enter reachable water; initial distance="+initial+" current="+current
+       +" position="+goldeen.position()+" velocity="+goldeen.getDeltaMovement()+" navigation="+goldeen.getNavigation().getTargetPos()
+       +" active="+goldeen.naturalBehaviorActive());
    check(h,adjacent.isInWater(),"Aquatic species must also enter an accessible water block immediately beside it");
   });
   h.runAfterDelay(1200,()->{

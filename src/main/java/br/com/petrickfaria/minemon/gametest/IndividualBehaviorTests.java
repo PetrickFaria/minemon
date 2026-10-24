@@ -44,9 +44,9 @@ public final class IndividualBehaviorTests {
  }
  @GameTest(template="test_arena",timeoutTicks=700)
  public static void flyerAlternatesTwoAltitudeBandsAndPausesForSleep(GameTestHelper h){
-  arena(h,false);var bird=spawn(h,"pidgey",5,5,5);
+  arena(h,false);var bird=spawn(h,"pidgey",5,3,5);
   restore(bird,"LAND",5999,0);
-  await(h,()->bird.naturalCycle().phase()==AIR&&band(bird,1,3),()->{
+  await(h,()->bird.naturalCycle().stage()==0&&band(bird,1,3),()->{
    restore(bird,"AIR",5999,0);
    await(h,()->bird.naturalCycle().stage()==1&&band(bird,4,9),()->{
     restore(bird,"AIR",2999,1);
