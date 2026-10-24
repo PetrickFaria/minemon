@@ -251,6 +251,9 @@ public final class CompanionTests {
    h.setBlock(new BlockPos(x,0,z),net.minecraft.world.level.block.Blocks.WATER);
   }
   MinemonCreature goldeen=h.spawn(ModEntities.SPECIES.get("goldeen").get(),new BlockPos(5,1,5));
+  h.setBlock(new BlockPos(13,-1,10),net.minecraft.world.level.block.Blocks.STONE);
+  h.setBlock(new BlockPos(13,0,10),net.minecraft.world.level.block.Blocks.WATER);
+  MinemonCreature adjacent=h.spawn(ModEntities.SPECIES.get("goldeen").get(),new BlockPos(12,1,10));
   MinemonCreature dryHorsea=h.spawn(ModEntities.SPECIES.get("horsea").get(),new BlockPos(12,1,12));
   dryHorsea.setNoAi(true);
   float health=dryHorsea.getHealth();
@@ -259,6 +262,7 @@ public final class CompanionTests {
   h.runAfterDelay(260,()->{
    double current=goldeen.distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(h.absolutePos(new BlockPos(9,0,5))));
    check(h,goldeen.isInWater(),"Aquatic species must actually enter reachable water; initial distance="+initial+" current="+current);
+   check(h,adjacent.isInWater(),"Aquatic species must also enter an accessible water block immediately beside it");
   });
   h.runAfterDelay(1200,()->{
    check(h,!dryHorsea.isInWater()&&dryHorsea.isAlive()&&dryHorsea.getHealth()==health,"Aquatic species must retain full health after 1200 ticks on dry land");

@@ -210,7 +210,7 @@ public final class NaturalMovementGoals {
                     if (!this.mob.level.hasChunkAt(candidate)
                             || !this.mob.level.getFluidState(candidate).is(FluidTags.WATER)) continue;
                     double distance = candidate.distSqr(origin);
-                    if (distance >= 4.0D) nearbyWater.add(candidate.immutable());
+                    if (!this.mob.isInWater() || distance >= 4.0D) nearbyWater.add(candidate.immutable());
                 }
             }
             nearbyWater.sort(java.util.Comparator.comparingDouble(candidate -> candidate.distSqr(origin)));
@@ -229,7 +229,7 @@ public final class NaturalMovementGoals {
                     if (!this.mob.level.hasChunkAt(candidate)
                             || !this.mob.level.getFluidState(candidate).is(FluidTags.WATER)) continue;
                     double distance = candidate.distSqr(origin);
-                    if ((this.mob.isInWater() && distance < 20.0D) || distance < 4.0D || distance >= bestDistance) continue;
+                    if ((this.mob.isInWater() && distance < 20.0D) || distance >= bestDistance) continue;
                     Path path = this.mob.getNavigation().createPath(candidate, 0);
                     if (path != null && path.canReach()) { best = candidate.immutable(); bestDistance = distance; }
                     break;
