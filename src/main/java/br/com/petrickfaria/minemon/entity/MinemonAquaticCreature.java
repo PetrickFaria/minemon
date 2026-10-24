@@ -41,6 +41,14 @@ public final class MinemonAquaticCreature extends MinemonCreature {
         };
     }
 
+    @Override public void travel(net.minecraft.world.phys.Vec3 input){
+        // LivingEntity otherwise subtracts 0.005 vertical velocity every water
+        // tick. Neutral buoyancy lets the swimming controller reach higher
+        // nodes; ordinary land gravity is restored immediately on shore.
+        if(!this.level.isClientSide)this.setNoGravity(this.isInWater());
+        super.travel(input);
+    }
+
     private BlockPosCache waterCache;
     private record BlockPosCache(net.minecraft.core.BlockPos column,int tick,double top){}
     public double waterSurface(){

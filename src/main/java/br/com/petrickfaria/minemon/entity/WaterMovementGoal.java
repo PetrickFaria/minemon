@@ -50,7 +50,13 @@ public final class WaterMovementGoal extends Goal {
   if(needsExit()&&!mob.isInWater()&&mob.isOnGround())mob.getNavigation().stop();
   // Check the next half-block early, before a wall becomes a repeated destination.
   if(mob.isInWater()&&!needsExit()){
-   Vec3 toward=Vec3.atCenterOf(destination).subtract(mob.position()).normalize().scale(0.5D);
+   var path=mob.getNavigation().getPath();
+   Vec3 waypoint=Vec3.atCenterOf(destination);
+   if(path!=null&&!path.isDone()){
+    var node=path.getNode(path.getNextNodeIndex());
+    waypoint=new Vec3(node.x+0.5D,node.y,node.z+0.5D);
+   }
+   Vec3 toward=waypoint.subtract(mob.position()).normalize().scale(0.5D);
    if(!mob.level.noCollision(mob,mob.getBoundingBox().move(toward))){
     stalled=60;mob.getNavigation().stop();
    }

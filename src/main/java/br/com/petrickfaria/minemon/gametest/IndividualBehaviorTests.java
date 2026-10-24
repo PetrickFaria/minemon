@@ -101,7 +101,7 @@ public final class IndividualBehaviorTests {
  private static boolean atSurface(MinemonCreature m){return m instanceof MinemonAquaticCreature a&&Math.abs(m.getY()-(a.waterSurface()-Math.min(.8D,m.getBbHeight()*.3D)))<.3D;}
  @GameTest(template="test_arena",timeoutTicks=320)
  public static void permanentSwimmersMoveUnderwaterAndSurfaceSpeciesFloat(GameTestHelper h){
-  arena(h,true);var fish=spawn(h,"magikarp",6,-2,6);var lapras=spawn(h,"lapras",8,0,9);var gyarados=spawn(h,"gyarados",11,0,5);
+  arena(h,true);var fish=spawn(h,"magikarp",4,-2,3);fish.setDeltaMovement(-0.12D,0,-0.12D);var lapras=spawn(h,"lapras",8,0,9);var gyarados=spawn(h,"gyarados",11,0,5);
   Vec3 start=fish.position();double[] farthest={0};
   sample(h,fish,start,farthest,20);
   h.runAfterDelay(240,()->{
@@ -112,6 +112,19 @@ public final class IndividualBehaviorTests {
  }
  private static void sample(GameTestHelper h,MinemonCreature m,Vec3 start,double[] farthest,int n){
   farthest[0]=Math.max(farthest[0],m.position().distanceToSqr(start));if(n>0)h.runAfterDelay(10,()->sample(h,m,start,farthest,n-1));
+ }
+ @GameTest(template="test_arena",timeoutTicks=300)
+ public static void aquaticControllerActuallyAscendsFromDeepWater(GameTestHelper h){
+  arena(h,true);var fish=spawn(h,"goldeen",7,-3,7);
+  fish.goalSelector.removeAllGoals();fish.targetSelector.removeAllGoals();
+  await(h,fish::isInWater,()->{
+   double start=fish.getY();
+   check(h,fish.getNavigation().moveTo(fish.getX(),start+2.0D,fish.getZ(),1.0D),"Deep water must have a reachable higher node"+state(fish));
+   h.runAfterDelay(200,()->{
+    check(h,fish.isInWater()&&fish.getY()>start+1.0D,"Swimming controller must actually ascend, not continually sink"+state(fish));
+    h.succeed();
+   });
+  },40,"Ascent fixture must first enter its real water volume");
  }
  @GameTest(template="test_arena",timeoutTicks=60)
  public static void seakingScaleAndNaturalCycleStatePersist(GameTestHelper h){
