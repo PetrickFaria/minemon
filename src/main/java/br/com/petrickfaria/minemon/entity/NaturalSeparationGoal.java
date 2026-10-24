@@ -30,7 +30,8 @@ final class NaturalSeparationGoal extends Goal {
   for(int i=0;i<8;i++){
    double angle=Math.PI*2.0D*i/8.0D;
    Vec3 dir=i==0?away:new Vec3(away.x*Math.cos(angle)-away.z*Math.sin(angle),0,away.x*Math.sin(angle)+away.z*Math.cos(angle));
-   BlockPos p=BlockPos.containing(mob.getX()+dir.x*4.5D,mob.getY(),mob.getZ()+dir.z*4.5D);
+   BlockPos p=new BlockPos(net.minecraft.util.Mth.floor(mob.getX()+dir.x*4.5D),
+       net.minecraft.util.Mth.floor(mob.getY()),net.minecraft.util.Mth.floor(mob.getZ()+dir.z*4.5D));
    var path=mob.getNavigation().createPath(p,0);
    if(path!=null&&path.canReach()){destination=p;return true;}
   }
