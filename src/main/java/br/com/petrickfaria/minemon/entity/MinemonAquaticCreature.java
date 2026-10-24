@@ -87,6 +87,14 @@ public final class MinemonAquaticCreature extends MinemonCreature {
                 return MinemonAquaticCreature.this.isInWater()
                         ? MinemonAquaticCreature.this.position() : super.getTempMobPos();
             }
+
+            @Override protected double getGroundY(net.minecraft.world.phys.Vec3 waypoint) {
+                // Land navigation projects nodes onto the block below. Water
+                // has no collision floor: that projection lowers an ascending
+                // node onto the current Y and prevents any vertical progress.
+                return MinemonAquaticCreature.this.isInWater()
+                        ? waypoint.y : super.getGroundY(waypoint);
+            }
         };
     }
 }
