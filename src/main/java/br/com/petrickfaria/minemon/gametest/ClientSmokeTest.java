@@ -125,10 +125,6 @@ public final class ClientSmokeTest {
       states.put("walk",CompatibleLocomotion.gaitJoints(slug));
       states.put("run",CompatibleLocomotion.gaitJoints(slug));
      }
-     if(slug.equals("spearow")){
-      states.put("walk",java.util.List.of("wing_open_left","wing_open_right"));
-      states.put("run",java.util.List.of("wing_open_left","wing_open_right"));
-     }
      result.put(slug,java.util.Map.copyOf(states));
     }
     return java.util.Map.copyOf(result);

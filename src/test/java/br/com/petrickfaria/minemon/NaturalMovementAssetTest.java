@@ -60,5 +60,11 @@ public final class NaturalMovementAssetTest {
   assertFalse("Fearow does not get a synthetic air_fly mapping",fearowClips.containsKey("air_fly"));
   var spearow=animations("spearow");
   assertFalse("Spearow has no generated air cycle",spearow.has("animation.spearow.minemon_fly"));
+  assertEquals("Spearow uses its retained source poser walk", "animation.spearow.minemon_poser_walk",SpeciesDefinitions.get("spearow").walk());
+  try(var reader=Files.newBufferedReader(RESOURCES.resolve("data/minemon_gen1/animation_validation_profiles.json"))) {
+   var profile=JsonParser.parseReader(reader).getAsJsonObject().getAsJsonObject("spearow");
+   assertEquals("leg_left",profile.getAsJsonArray("walk").get(0).getAsString());
+   assertEquals("leg_right",profile.getAsJsonArray("walk").get(1).getAsString());
+  }
  }
 }
