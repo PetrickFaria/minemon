@@ -303,6 +303,10 @@ public final class ClientSmokeTest {
        // Clip selection is sampled only after a phase has settled. The first render
        // frame at a boundary can still expose the previous controller value.
        if(isSettledClipSample(phase)) {
+        if(SpeciesBehaviorProfiles.isAquatic(slug)&&!entity.isInWater())
+         throw new IllegalStateException("Aquatic smoke fixture lost immersion for "+slug+" phase="+phase
+             +" position="+entity.position()+" bounds="+entity.getBoundingBox()
+             +" clip="+entity.getSelectedAnimationForValidation());
         articulationClips.computeIfAbsent(slug,k->new java.util.HashMap<>())
          .computeIfAbsent(state,k->new java.util.HashSet<>()).add(entity.getSelectedAnimationForValidation());
         articulationSampleCounts.computeIfAbsent(slug,k->new java.util.HashMap<>()).merge(state,1,Integer::sum);
@@ -455,8 +459,12 @@ public final class ClientSmokeTest {
     boolean aquatic=SpeciesBehaviorProfiles.isAquatic(slug);
     // Still, contained water is required for an actual zero-input idle:
     // exposed sources above the platform push large entities like Gyarados.
-    for(int x=-9;x<=9;x++)for(int z=2;z<=6;z++){
-     boolean pool=aquatic&&x>=-8&&x<=8&&z>=3&&z<=5;
+    // Centered at z=4, Lapras extends to z=2.8 (width 2.4). The old
+    // z=3..5 pool intersected its hitbox with the solid rim at z=2,
+    // allowing collision step-up to select ground_idle during final rest.
+    // Leave clearance for the complete roster, not just the entity center.
+    for(int x=-9;x<=9;x++)for(int z=1;z<=7;z++){
+     boolean pool=aquatic&&x>=-8&&x<=8&&z>=2&&z<=6;
      level.setBlockAndUpdate(new BlockPos(x,98,z),Blocks.STONE.defaultBlockState());
      for(int y=99;y<=100;y++)level.setBlockAndUpdate(new BlockPos(x,y,z),(pool?Blocks.WATER:Blocks.STONE).defaultBlockState());
      level.setBlockAndUpdate(new BlockPos(x,101,z),Blocks.AIR.defaultBlockState());
