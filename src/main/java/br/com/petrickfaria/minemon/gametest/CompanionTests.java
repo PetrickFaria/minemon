@@ -207,20 +207,24 @@ public final class CompanionTests {
  @GameTest(template="test_arena",timeoutTicks=1300)
  public static void aquaticSpeciesSeekWaterAndSurviveWithoutIt(GameTestHelper h) {
   floor(h);
-  for(int x=8;x<=10;x++)for(int z=4;z<=6;z++)for(int y=1;y<=2;y++)
-   h.setBlock(new BlockPos(x,y,z),net.minecraft.world.level.block.Blocks.WATER);
+  // A recessed, reachable pond: water above the floor forms a flowing wall,
+  // not a shore. Keep the source water contained below the surrounding terrain.
+  for(int x=8;x<=10;x++)for(int z=4;z<=6;z++){
+   h.setBlock(new BlockPos(x,-1,z),net.minecraft.world.level.block.Blocks.STONE);
+   h.setBlock(new BlockPos(x,0,z),net.minecraft.world.level.block.Blocks.WATER);
+  }
   MinemonCreature goldeen=h.spawn(ModEntities.SPECIES.get("goldeen").get(),new BlockPos(5,1,5));
   MinemonCreature dryHorsea=h.spawn(ModEntities.SPECIES.get("horsea").get(),new BlockPos(12,1,12));
   dryHorsea.setNoAi(true);
   float health=dryHorsea.getHealth();
   check(h,dryHorsea.canBreatheUnderwater(),"Aquatic species must not drown when temporarily submerged");
-  double initial=goldeen.distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(new BlockPos(9,1,5)));
+  double initial=goldeen.distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(h.absolutePos(new BlockPos(9,0,5))));
   h.runAfterDelay(260,()->{
-   double current=goldeen.distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(new BlockPos(9,1,5)));
+   double current=goldeen.distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(h.absolutePos(new BlockPos(9,0,5))));
    check(h,goldeen.isInWater(),"Aquatic species must actually enter reachable water; initial distance="+initial+" current="+current);
   });
   h.runAfterDelay(1200,()->{
-   check(h,dryHorsea.isAlive()&&dryHorsea.getHealth()==health,"Aquatic species must retain full health after 1200 ticks on dry land");
+   check(h,!dryHorsea.isInWater()&&dryHorsea.isAlive()&&dryHorsea.getHealth()==health,"Aquatic species must retain full health after 1200 ticks on dry land");
    h.succeed();
   });
  }
