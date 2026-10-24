@@ -499,9 +499,18 @@ public final class ClientSmokeTest {
   private static final String VALIDATION_PHASE_PREFIX="minemon-validation-phase:";
   private static void setValidationPhase(MinemonCreature entity,int phase) {
    if(!Boolean.getBoolean("minemon.clientSmokeTest"))return;
-   entity.setCustomName(net.minecraft.network.chat.Component.literal(VALIDATION_PHASE_PREFIX+phase));
+   String marker=VALIDATION_PHASE_PREFIX+phase;
+   boolean phaseChanged=entity.getCustomName()==null||!marker.equals(entity.getCustomName().getString());
+   entity.setCustomName(net.minecraft.network.chat.Component.literal(marker));
    entity.setCustomNameVisible(false);
    entity.setSpontaneousRunForValidation(phase>=34&&phase<50);
+   if(phaseChanged&&entity.level instanceof net.minecraft.server.level.ServerLevel level) {
+    // Each of the 80 fixture phases still waits for two real rendered samples.
+    // Send the changed phase through the normal network packet immediately,
+    // rather than adding the entity tracker's multi-tick delay to every phase.
+    level.getChunkSource().broadcastAndSend(entity,new net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket(
+        entity.getId(),entity.getEntityData(),true));
+   }
   }
   private static Integer validationPhase(MinemonCreature entity) {
    if(!Boolean.getBoolean("minemon.clientSmokeTest")||entity.getCustomName()==null)return null;
