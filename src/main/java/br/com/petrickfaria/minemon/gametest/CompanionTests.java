@@ -29,6 +29,16 @@ public final class CompanionTests {
  }
  private static void check(GameTestHelper h,boolean condition,String message) { if (!condition) h.fail(message); }
  private static String state(MinemonCreature b, net.minecraft.world.entity.LivingEntity target) { return " bAlive="+b.isAlive()+" bRemoved="+b.isRemoved()+" target="+b.getTarget()+" canAttack="+b.canAttack(target)+" dist="+b.distanceTo(target)+" pos="+b.position()+" targetPos="+target.position()+" alive="+target.isAlive()+" health="+target.getHealth()+" owner="+b.getOwner()+" ownerVictim="+(b.getOwner()==null?null:b.getOwner().getLastHurtMob())+" ownerAttacker="+(b.getOwner()==null?null:b.getOwner().getLastHurtByMob())+" ownerStamp="+(b.getOwner()==null?-1:b.getOwner().getLastHurtByMobTimestamp())+" orderedSit="+b.isOrderedToSit()+" sit="+b.isInSittingPose()+" navDone="+b.getNavigation().isDone(); }
+ private static void traceMovement(GameTestHelper h,String label,MinemonCreature b,int elapsed,int until) {
+  com.mojang.logging.LogUtils.getLogger().info("MINEMON MOVEMENT TRACE "+label+" sample="+elapsed
+      +" entityTick="+b.tickCount+" pos="+b.position()+" velocity="+b.getDeltaMovement()
+      +" alive="+b.isAlive()+" removed="+b.isRemoved()+" noAI="+b.isNoAi()+" noGravity="+b.isNoGravity()
+      +" sleeping="+b.isSleeping()+" grounded="+b.isOnGround()+" water="+b.isInWater()
+      +" speed="+b.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED)
+      +" health="+b.getHealth()+" target="+b.getTarget()+" navDone="+b.getNavigation().isDone()
+      +" navTarget="+b.getNavigation().getTargetPos());
+  if(elapsed<until)h.runAfterDelay(20,()->traceMovement(h,label,b,elapsed+20,until));
+ }
  private static void floor(GameTestHelper h) { for(int x=0;x<16;x++)for(int z=0;z<16;z++){h.setBlock(new BlockPos(x,0,z),net.minecraft.world.level.block.Blocks.STONE);for(int y=1;y<6;y++)h.setBlock(new BlockPos(x,y,z),net.minecraft.world.level.block.Blocks.AIR);} }
  private static MinemonCreature spawn(GameTestHelper h) {
   floor(h);
@@ -48,6 +58,7 @@ public final class CompanionTests {
  @GameTest(template="test_arena",timeoutTicks=300)
  public static void wildRetaliatesAgainstPlayer(GameTestHelper h) {
   MinemonCreature b=spawn(h); ServerPlayer p=player(h);float health=p.getHealth();
+  traceMovement(h,"player-retaliation",b,0,180);
   check(h,b.canAttackType(EntityType.PLAYER),"Player entity type must be a valid retaliation target");
   b.setNoAi(true);h.runAfterDelay(80,()->{b.setNoAi(false);b.getNavigation().stop();check(h,b.hurt(DamageSource.playerAttack(p),1),"Hit must be accepted");
   check(h,b.getTarget()==p,"Player aggressor must become target");
@@ -162,6 +173,7 @@ public final class CompanionTests {
  public static void airborneSpeciesStayAboveSurfaceAndLandOnlyToSleep(GameTestHelper h) {
   floor(h);
   MinemonCreature bird=h.spawn(ModEntities.SPECIES.get("pidgey").get(),new BlockPos(5,1,5));
+  traceMovement(h,"natural-flight",bird,0,300);
   h.runAfterDelay(100,()->{
    double altitude=bird.getY()-NaturalMovementGoals.surfaceBelow(h.getLevel(),bird.getX(),bird.getY(),bird.getZ());
    check(h,altitude>=3.0D&&altitude<=15.0D,"Airborne species must maintain 3..15 block surface clearance; got "+altitude);
@@ -212,6 +224,7 @@ public final class CompanionTests {
   }
   MinemonCreature bird=h.spawn(ModEntities.SPECIES.get("pidgey").get(),new BlockPos(5,8,5));
   bird.setSleeping(true);
+  traceMovement(h,"sleep-landing",bird,0,200);
   h.runAfterDelay(200,()->{
    check(h,bird.isOnGround()&&!bird.isInWater(),"Sleeping flyer must follow a path to dry ground");
    check(h,h.getLevel().noCollision(bird,bird.getBoundingBox()),"Landing must not clip the entity into solid terrain");
