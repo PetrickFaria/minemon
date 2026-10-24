@@ -377,11 +377,15 @@ public final class ClientSmokeTest {
     mc.getSingleplayerServer().execute(()->{
      var level=mc.getSingleplayerServer().overworld();var previous=level.getEntity(testEntity);if(previous!=null)previous.discard();
     boolean aquatic=SpeciesBehaviorProfiles.isAquatic(slug);
-    for(int x=-8;x<=8;x++)for(int z=3;z<=5;z++){
-     level.setBlockAndUpdate(new BlockPos(x,100,z),(aquatic?Blocks.WATER:Blocks.STONE).defaultBlockState());
-     level.setBlockAndUpdate(new BlockPos(x,101,z),(aquatic?Blocks.WATER:Blocks.AIR).defaultBlockState());
+    // Still, contained water is required for an actual zero-input idle:
+    // exposed sources above the platform push large entities like Gyarados.
+    for(int x=-9;x<=9;x++)for(int z=2;z<=6;z++){
+     boolean pool=aquatic&&x>=-8&&x<=8&&z>=3&&z<=5;
+     level.setBlockAndUpdate(new BlockPos(x,98,z),Blocks.STONE.defaultBlockState());
+     for(int y=99;y<=100;y++)level.setBlockAndUpdate(new BlockPos(x,y,z),(pool?Blocks.WATER:Blocks.STONE).defaultBlockState());
+     level.setBlockAndUpdate(new BlockPos(x,101,z),Blocks.AIR.defaultBlockState());
     }
-    var next=ModEntities.SPECIES.get(slug).get().create(level);next.moveTo(0,101,4,180,0);next.setNoAi(false);next.goalSelector.removeAllGoals();next.targetSelector.removeAllGoals();setValidationPhase(next,0);level.addFreshEntity(next);testEntity=next.getUUID();
+    var next=ModEntities.SPECIES.get(slug).get().create(level);next.moveTo(0,aquatic?100.5D:101.0D,4,180,0);next.setNoAi(false);next.goalSelector.removeAllGoals();next.targetSelector.removeAllGoals();setValidationPhase(next,0);level.addFreshEntity(next);testEntity=next.getUUID();
     });
    }
    if(worldTicks>=SPECIES_START_TICK && worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW) {
