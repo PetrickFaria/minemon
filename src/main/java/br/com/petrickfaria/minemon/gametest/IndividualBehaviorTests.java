@@ -105,7 +105,14 @@ public final class IndividualBehaviorTests {
   Vec3 start=fish.position();double[] farthest={0};
   sample(h,fish,start,farthest,20);
   h.runAfterDelay(240,()->{
-   check(h,fish.isInWater()&&underwater(fish)&&farthest[0]>.5D,"Permanent swimmer must actually swim underwater, including turns"+state(fish));
+   BlockPos head=new BlockPos(fish.getX(),fish.getY()+fish.getBbHeight()+.1D,fish.getZ());
+   check(h,fish.isInWater(),"Permanent swimmer must stay in water"+state(fish));
+   check(h,underwater(fish),"Permanent swimmer must keep its full hitbox submerged; headBlock="+head
+       +" headFluid="+h.getLevel().getFluidState(head)+" bbHeight="+fish.getBbHeight()
+       +" waterSurface="+(fish instanceof MinemonAquaticCreature aquatic?aquatic.waterSurface():Double.NaN)
+       +" velocity="+fish.getDeltaMovement()+state(fish));
+   check(h,farthest[0]>.5D,"Permanent swimmer must travel at least 0.5 blocks during the observation window; maxDistanceSquared="+farthest[0]
+       +" start="+start+" current="+fish.position()+" target="+fish.getNavigation().getTargetPos()+" velocity="+fish.getDeltaMovement());
    for(var m:java.util.List.of(lapras,gyarados))check(h,m.isInWater()&&atSurface(m),"Surface species must keep their model-sized surface position"+state(m));
    h.succeed();
   });
