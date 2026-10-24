@@ -230,7 +230,7 @@ def prepare_tail_flame(root,d):
  if slug not in ('charmander','charmeleon','charizard'):return
  model=root/'assets/minemon_gen1'/d['model'].removeprefix('assets/minemon/')
  texture=root/'assets/minemon_gen1'/d['texture'].removeprefix('assets/minemon/')
- geo=json.loads(model.read_text());texture_data=texture.read_bytes();w,h,rows=decode_png_rgba(texture_data)
+ geo=json.loads(model.read_text());texture_data=texture.read_bytes();w,h,_=decode_png_rgba(texture_data)
  bones=geo['minecraft:geometry'][0]['bones']
  if d.get('strip_bedrock_locators'):
   for bone in bones:bone.pop('locators',None)
@@ -240,7 +240,7 @@ def prepare_tail_flame(root,d):
  if len(source_cubes)!=2:raise ValueError(slug+' source flame did not contain its two native crossing planes')
  source_flame=root/'assets/minemon_gen1'/d['flame_texture'].removeprefix('assets/minemon/')
  sw,sh,flame_rows=decode_png_rgba(source_flame.read_bytes())
- pad=2;new_w=w+64;cursor=w+pad;y=2;runtime_cubes=[]
+ mask_rows=[bytearray(w*4) for _ in range(h)];runtime_cubes=[];cursor_y=0
  # Each zero-width Bedrock plane has an independent flame sprite and, in some
  # species, its own pivot/rotation. Preserve both native UV regions and poses.
  for source_cube in source_cubes:
@@ -252,29 +252,46 @@ def prepare_tail_flame(root,d):
   source_y=v+fw
   if u<0 or source_y<0 or u+fw>sw or source_y+fh>sh:raise ValueError(slug+' source flame UV lies outside its flame sheet')
   sprite=[bytes(flame_rows[source_y+yy][u*4:(u+fw)*4]) for yy in range(fh)]
-  uv_x=cursor;uv_y=y-1+fw
+  # Keep the original texture atlas and dimensions untouched. The separate,
+  # same-size emissive mask contains these pixels at a private UV footprint.
+  uv_x,uv_y=0,cursor_y
   # For a thin X-by-Y-by-Z box the visible side faces are (u,v+z) and
   # (u+x+z,v+z). Fill both with this plane's own original flame pixels.
   for sprite_x in (uv_x,uv_x+1+fw):
    for yy in range(fh):
-    row=rows[uv_y+yy]
-    if len(row)<new_w*4:row.extend(b'\0'*(new_w*4-len(row)))
+    row=mask_rows[uv_y+fw+yy]
     row[sprite_x*4:(sprite_x+fw)*4]=sprite[yy]
-  cube={'origin':[-0.5,origin[1],origin[2]],'size':[1,fh,fw],'uv':[uv_x,y-1]}
+  cube={'origin':[-0.5,origin[1],origin[2]],'size':[1,fh,fw],'uv':[uv_x,uv_y]}
   for field in ('pivot','rotation'):
    if field in source_cube:cube[field]=source_cube[field]
   runtime_cubes.append(cube)
-  cursor+=2*fw+4
- for row in rows:
-  if len(row)<new_w*4:row.extend(b'\0'*(new_w*4-len(row)))
- description=geo['minecraft:geometry'][0]['description'];description['texture_width']=new_w
+  cursor_y+=fh+fw+1
  # Replace the native zero-width planes with finite meshes while retaining
  # each source plane's pivot, rotation, dimensions and independent texture UVs.
  pivot=host.get('pivot',[0,0,0]);parent=host['name'];host['cubes']=[]
  bones.append({'name':'tail_flame','parent':parent,'pivot':pivot,'cubes':runtime_cubes})
  model.write_text(json.dumps(geo,ensure_ascii=False,indent=2)+'\n')
- texture.write_bytes(encode_png_rgba(new_w,h,rows))
+ mask=root/'assets/minemon_gen1/textures/emissive'/f'{slug}_tail_flame.png'
+ mask.parent.mkdir(parents=True,exist_ok=True)
+ mask.write_bytes(encode_png_rgba(w,h,mask_rows))
+ # This is only a staging copy; keep the canonical source atlas untouched.
  source_flame.unlink()
+
+def prepare_moltres_emissive_mask(root,d):
+ if d.get('slug')!='moltres':return
+ source=root/'assets/minemon_gen1'/d['texture'].removeprefix('assets/minemon/')
+ w,h,pixels=decode_png_rgba(source.read_bytes())
+ # Fire pixels only: retain Moltres's native RGB and alpha, discard all
+ # plumage/body pixels from the emissive atlas. The renderer further limits
+ # this mask to the wing and native fire bone branches.
+ for row in pixels:
+  for i in range(0,len(row),4):
+   r,g,b,a=row[i:i+4]
+   flame=(a>0 and r>=180 and g>=55 and g<=r*0.82 and b<=105 and r-b>=85)
+   if not flame:row[i+3]=0
+ mask=root/'assets/minemon_gen1/textures/emissive/moltres_fire.png'
+ mask.parent.mkdir(parents=True,exist_ok=True)
+ mask.write_bytes(encode_png_rgba(w,h,pixels))
 for d in definitions.values():
  if d.get('generated_static_animation'):
   p=root/'assets/minemon_gen1'/d['animation'].removeprefix('assets/minemon/')
@@ -309,6 +326,7 @@ for p in (root/'assets/minemon_gen1/animations').rglob('*.animation.json'):
    build_runtime_clips(data,geometry,definition)
    compatible_locomotion(data,geometry,definition)
   prepare_tail_flame(root,definition)
+  prepare_moltres_emissive_mask(root,definition)
  # GeckoLib 3.1.40 dereferences this field while parsing every clip, including
  # expression-only looping clips. Keep the source untouched and add a runtime fallback.
  for animation in data.get('animations',{}).values():
