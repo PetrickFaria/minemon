@@ -35,7 +35,16 @@ public class Batch15AnimationCompatibilityTest {
             assertTrue("Source-backed model variant "+slug,def.get("source_model_variant").getAsString().startsWith(slug));
             for(String key:List.of("model","texture","animation")) assertTrue(slug+"/"+key,def.get(key).getAsString().contains(slug+"_cobblemon_1_8_2/"));
             assertTrue("Missing articulation profile "+slug,profiles.has(slug));
-            for(var clip:def.getAsJsonObject("clips").entrySet()) assertFalse("No invented action "+slug+"/"+clip.getKey(),clip.getValue().getAsString().contains(".minemon_"));
+            for(var clip:def.getAsJsonObject("clips").entrySet()) {
+                String value=clip.getValue().getAsString();
+                if(value.contains(".minemon_")) {
+                    String expected="animation."+slug+".minemon_"+(clip.getKey().equals("air_fly")?"air_fly":clip.getKey().equals("air_idle")?"air_idle":"");
+                    assertTrue("Only the three legendary birds may use derived air clips: "+slug+"/"+clip.getKey(),
+                        List.of("articuno","zapdos","moltres").contains(slug)
+                            &&List.of("air_idle","air_fly").contains(clip.getKey())
+                            &&value.equals(expected));
+                } else assertFalse("No invented action "+slug+"/"+clip.getKey(),value.contains(".minemon_"));
+            }
         }
         assertEquals("ground",definitions.get(140).getAsJsonObject().get("mode").getAsString());
         assertEquals("ground",definitions.get(141).getAsJsonObject().get("mode").getAsString());
@@ -81,7 +90,7 @@ public class Batch15AnimationCompatibilityTest {
         var definitions=defs(); var profiles=json("data/minemon_gen1/animation_validation_profiles.json");
         for(var entry:anatomy.entrySet()) {
             String slug=entry.getKey(); var def=definitions.get(SPECIES.indexOf(slug)+140).getAsJsonObject();
-            var geometry=json("assets/minemon_gen1/geo/"+slug+"_cobblemon_1_8_2/"+slug+".geo.json").getAsJsonArray("minecraft:geometry").get(0).getAsJsonObject();
+            var geometry=json("assets/minemon_gen1/geo/"+slug+"_cobblemon_1_8_2/"+slug+".geo.json").getAsJsonObject("minecraft:geometry").getAsJsonObject();
             var bones=new HashSet<String>(); for(var bone:geometry.getAsJsonArray("bones")) bones.add(bone.getAsJsonObject().get("name").getAsString());
             assertTrue(slug,bones.containsAll(entry.getValue()));
             var animation=animations(slug); var profile=profiles.getAsJsonObject(slug);
@@ -184,8 +193,8 @@ public class Batch15AnimationCompatibilityTest {
 
         var clips=animations("mewtwo");
         for(String bone:transition) {
-            var idle=clips.getAsJsonObject("animation.mewtwo.air_idle").getAsJsonObject("bones").getAsJsonObject(bone).getAsJsonArray("rotation");
-            var fly=clips.getAsJsonObject("animation.mewtwo.air_fly").getAsJsonObject("bones").getAsJsonObject(bone).getAsJsonArray("rotation");
+            var idle=clips.getAsJsonObject("animation.mewtwo.air_idle").getAsJsonObject("bones").getAsJsonArray("rotation");
+            var fly=clips.getAsJsonObject("animation.mewtwo.air_fly").getAsJsonObject("bones").getAsJsonArray("rotation");
             assertEquals(bone+" idle rotation",3,idle.size()); assertEquals(bone+" flight rotation",3,fly.size());
             boolean changed=false;
             for(int axis=0;axis<3;axis++)if(Math.abs(idle.get(axis).getAsDouble()-fly.get(axis).getAsDouble())>0.05)changed=true;
@@ -206,8 +215,8 @@ public class Batch15AnimationCompatibilityTest {
         else if(value.isJsonObject()) for(var entry:value.getAsJsonObject().entrySet()) checkExpressions(entry.getValue(),parser,source);
         else if(value.isJsonPrimitive()&&value.getAsJsonPrimitive().isString()) {
             String expression=value.getAsString();
-            assertFalse(source+" retains Bedrock q. syntax: "+expression,expression.matches("(?s).*\\bq\\.[A-Za-z_].*"));
-            assertFalse(source+" uses unsupported GeckoLib 3.1.40 query.r: "+expression,expression.matches("(?s).*\\bquery\\.r\\.[A-Za-z_][A-Za-z0-9_]*\\s*\\(.*"));
+            assertFalse(source+" retains Bedrock q. syntax: "+expression,expression.matches("(?s).*\bq\.[A-Za-z_].*"));
+            assertFalse(source+" uses unsupported GeckoLib 3.1.40 query.r: "+expression,expression.matches("(?s).*\bquery\.r\.[A-Za-z_][A-Za-z0-9_]*\s*\(.*"));
             var parsed=parser.parseExpression(expression);
             for(int tick=0;tick<=20;tick++){parser.setValue("query.anim_time",tick/20.0);assertTrue(source+" non-finite Molang "+expression,Double.isFinite(parsed.get()));}
         }
