@@ -48,9 +48,9 @@ public final class NightAndSwimmingTests {
   arena(h);var level=h.getLevel();
   for(int x=2;x<=15;x++)for(int z=3;z<=10;z++)for(int y=1;y<=9;y++)h.setBlock(new BlockPos(x,y,z),Blocks.WATER);
   level.setDayTime(18000);
-  var gyarados=spawn(h,"gyarados",4,3,6);var magikarp=spawn(h,"magikarp",8,4,6);var dratini=spawn(h,"dratini",12,6,6);var shellder=spawn(h,"shellder",5,8,9);
-  await(h,()->gyarados.isSleeping()&&magikarp.isSleeping()&&dratini.isSleeping()&&shellder.isSleeping(),()->{
-   check(h,gyarados.isInWater()&&magikarp.isInWater()&&dratini.isInWater()&&shellder.isInWater(),"Aquatic and visitor sleepers must stay wet");
+  var gyarados=spawn(h,"gyarados",4,3,6);var magikarp=spawn(h,"magikarp",8,4,6);var dratini=spawn(h,"dratini",12,6,6);var shellder=spawn(h,"shellder",5,8,9);var vaporeon=spawn(h,"vaporeon",14,7,6);
+  await(h,()->gyarados.isSleeping()&&magikarp.isSleeping()&&dratini.isSleeping()&&shellder.isSleeping()&&vaporeon.isSleeping(),()->{
+   check(h,gyarados.isInWater()&&magikarp.isInWater()&&dratini.isInWater()&&shellder.isInWater()&&vaporeon.isInWater(),"Aquatic and visitor sleepers must stay wet");
    double gyaradosY=WaterMovementGoal.waterRestY(gyarados),fishY=WaterMovementGoal.waterRestY(magikarp),visitorY=WaterMovementGoal.waterRestY(dratini);
    double shellderY=WaterMovementGoal.waterRestY(shellder),originY=h.absolutePos(BlockPos.ZERO).getY();
    check(h,Math.abs(gyarados.getY()-gyaradosY)<.2D,"Gyarados must preserve its preferred water surface while asleep");
@@ -65,7 +65,7 @@ public final class NightAndSwimmingTests {
    await(h,()->attacker.getHealth()<health,()->{
     attacker.discard();await(h,dratini::isSleeping,()->{
      level.setDayTime(1000);
-     await(h,()->!gyarados.isSleeping()&&!magikarp.isSleeping()&&!dratini.isSleeping()&&!shellder.isSleeping(),()->{
+      await(h,()->!gyarados.isSleeping()&&!magikarp.isSleeping()&&!dratini.isSleeping()&&!shellder.isSleeping()&&!vaporeon.isSleeping(),()->{
       h.succeed();
      },40,"Aquatic sleepers must wake at dawn");
     },220,"A water visitor must return to sleep after combat while it is still night; sleeping="+dratini.isSleeping()+" target="+dratini.getTarget()+" y="+dratini.getY());
@@ -142,6 +142,34 @@ public final class NightAndSwimmingTests {
     });
    },350,"Night must settle ground/mixed creatures on land and air-only creatures in a one-block hover");
   });
+ }
+ @GameTest(template="test_arena",batch="night_eevee_line",timeoutTicks=2400)
+ public static void eeveeLineSleepsWakesRetaliatesReturnsAndWakesAtDawn(GameTestHelper h){
+  arena(h);var level=h.getLevel();level.setDayTime(18000);
+  var sleepers=new ArrayList<MinemonCreature>();
+  int[][] positions={{4,3},{10,3},{16,3},{22,3}};
+  var slugs=List.of("eevee","vaporeon","jolteon","flareon");
+  for(int i=0;i<slugs.size();i++)sleepers.add(spawn(h,slugs.get(i),positions[i][0],1,positions[i][1]));
+  await(h,()->sleepers.stream().allMatch(m->m.isSleeping()&&m.isOnGround()),()->{
+   runEeveeLineCombat(h,sleepers,0,()->{
+    level.setDayTime(1000);
+    await(h,()->sleepers.stream().noneMatch(MinemonCreature::isSleeping),h::succeed,40,
+        "Eevee and its evolutions must resume their normal behavior at dawn");
+   });
+  },500,"Eevee, Vaporeon on land, Jolteon, and Flareon must settle into ground sleep");
+ }
+ private static void runEeveeLineCombat(GameTestHelper h,List<MinemonCreature> sleepers,int index,Runnable done){
+  if(index>=sleepers.size()){done.run();return;}
+  var mob=sleepers.get(index);var origin=h.absolutePos(BlockPos.ZERO);
+  int x=(int)Math.floor(mob.getX()-origin.getX()),z=(int)Math.floor(mob.getZ()-origin.getZ());
+  var attacker=h.spawn(EntityType.COW,new BlockPos(x+1,1,z));attacker.setNoAi(true);float health=attacker.getHealth();
+  check(h,mob.hurt(DamageSource.mobAttack(attacker),1)&&!mob.isSleeping()&&mob.getTarget()==attacker,
+      mob.getSpeciesSlug()+" must wake and retain its attacker");
+  await(h,()->attacker.getHealth()<health,()->{
+   attacker.discard();
+   await(h,mob::isSleeping,()->runEeveeLineCombat(h,sleepers,index+1,done),240,
+       mob.getSpeciesSlug()+" must return to sleep after combat while it is still night");
+  },180,mob.getSpeciesSlug()+" must retaliate with the existing combat AI");
  }
  @GameTest(template="test_arena",batch="water_speed",timeoutTicks=240)
  public static void nonAquaticCreatureEscapesToReachableShore(GameTestHelper h){

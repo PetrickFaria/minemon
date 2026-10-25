@@ -177,6 +177,9 @@ def night_sleep_clip(data,geo,d):
  def closed(value):
   if isinstance(value,dict):
    if 'vector' in value:return copy.deepcopy(value['vector'])
+   # The Eevee line's native blink keyframe stores the closed pose in `pre`
+   # and the reopened pose in `post`. Preserve the pre-key pose for sleep.
+   if slug in ('eevee','vaporeon','jolteon','flareon') and 'pre' in value:return closed(value['pre'])
    if 'post' in value:return closed(value['post'])
    if 'pre' in value:return closed(value['pre'])
    keys=sorted((float(k),k) for k in value if re.fullmatch(r'[0-9.]+',k))
@@ -206,9 +209,47 @@ def night_sleep_clip(data,geo,d):
   # These rigs have separate eyes but no eyelid/blink track. A held squint
   # affects only that eye assembly, retaining its native colors and UVs.
   channels.setdefault('eyes',{})['scale']=[1,0.10,1]
+ # These four rigs have no native sleep/rest clip. Their genuine ground_idle
+ # and blink clips are the source pose; fold only existing body/limb joints.
+ # Position offsets are in model pixels, so the low posture stays within the
+ # existing ground collision and does not change entity dimensions.
+ def set_pose(bone,channel,value):
+  if bone in {b['name'] for g in geo.get('minecraft:geometry',[]) for b in g.get('bones',[])}:
+   channels.setdefault(bone,{})[channel]=copy.deepcopy(value)
+ if slug in ('eevee','vaporeon','jolteon','flareon'):
+  set_pose('body','position',[0,-1.1,0])
+  set_pose('body','rotation',[12,0,0])
+  set_pose('torso2','rotation',[5,0,0]);set_pose('torso3','rotation',[-4,0,0])
+  set_pose('neck','rotation',[8,0,0]);set_pose('head_angle','rotation',[5,0,0])
+  front='frontleg_' if slug=='vaporeon' else 'front_leg_'
+  back='backleg_' if slug=='jolteon' else 'back_leg_'
+  for side in ('left','right'):
+   set_pose(front+side,'rotation',[38,0,0])
+   set_pose(('elbow_' if slug=='eevee' else 'elbow_')+side,'rotation',[-62,0,0])
+   set_pose(back+side,'rotation',[48,0,0])
+   set_pose(('knee_' if slug=='eevee' else 'knee_')+side,'rotation',[-70,0,0])
+  # Let Eevee's segmented tail and the evolved tails rest instead of keeping
+  # their idle sway; Jolteon's spines and Flareon's fur remain untouched.
+  for bone in ('tail','tail1','tail2','tail3','tail4','tail5','tail6'):
+   set_pose(bone,'rotation',[8,0,0])
  # A fallback uses the retained idle pose without generic limb rotations.
  # No source geometry or eye texture is changed.
  animations['animation.'+slug+'.minemon_night_sleep']=clip
+ if slug=='vaporeon':
+  # Vaporeon remains at the AI-selected safe water depth. Keep a flatter,
+  # buoyant body and loose tail for water rest; the land clip stays curled.
+  water=copy.deepcopy(clip);water_bones=water.setdefault('bones',{})
+  for bone,channel,value in (
+   ('body','position',[0,-0.2,0]),('body','rotation',[2,0,0]),
+   ('torso2','rotation',[1,0,0]),('torso3','rotation',[0,0,0]),
+   ('neck','rotation',[4,0,0]),('head_angle','rotation',[3,0,0]),
+   ('frontleg_left','rotation',[18,0,0]),('frontleg_right','rotation',[18,0,0]),
+   ('back_leg_left','rotation',[22,0,0]),('back_leg_right','rotation',[22,0,0]),
+   ('tail','rotation',[3,0,0]),('tail2','rotation',[4,0,0]),('tail3','rotation',[5,0,0]),
+   ('tail4','rotation',[6,0,0]),('tail5','rotation',[6,0,0]),('tail6','rotation',[6,0,0])):
+   water_bones.setdefault(bone,{})[channel]=value
+  animations['animation.vaporeon.minemon_night_sleep_water']=water
+  animations['animation.vaporeon.minemon_night_sleep_land']=copy.deepcopy(clip)
 
 def build_runtime_clips(data,geo,d):
  animations=data.setdefault('animations',{});clips=d.get('clips',{})

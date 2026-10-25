@@ -482,7 +482,9 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
             clip=attack;loop=false;
             if(this.playedAttackSequence!=this.attackSequence){controller.markNeedsReload();this.playedAttackSequence=this.attackSequence;}
         } else if (this.isSleeping()) {
-            clip = SpeciesAssetIndex.clip(slug, "night_sleep", "sleep");
+            String restKey=slug.equals("vaporeon")
+                    ? (this.isInWaterOrBubble()?"night_sleep_water":"night_sleep_land") : "night_sleep";
+            clip = SpeciesAssetIndex.clip(slug, restKey, "night_sleep");
         } else if (this.isOrderedToSit()) {
             clip = SpeciesAssetIndex.clip(slug, "sit", "sit");
         } else if (this.isAquaticSpecies() && this.isInWater()) {

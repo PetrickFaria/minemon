@@ -54,6 +54,32 @@ public class NightSleepAssetTest {
    }
   }
  }
+ @Test public void eeveeLineHasGroundSleepAndVaporeonHasSeparateWaterRestPose() throws Exception {
+  for(String slug:java.util.List.of("eevee","jolteon","flareon","vaporeon")){
+   var d=SpeciesDefinitions.get(slug);var source=animations(d);
+   var sleep=source.getAsJsonObject(d.clips().get("night_sleep"));
+   assertNotNull(slug+" generated night sleep",sleep);
+   assertTrue(slug+" sleep loops",sleep.get("loop").getAsBoolean());
+   assertEquals(slug,4.0,sleep.get("animation_length").getAsDouble(),.0001);
+   var bones=sleep.getAsJsonObject("bones");
+   assertTrue(slug+" lowers the body",bones.getAsJsonObject("body").getAsJsonArray("position").get(1).getAsDouble()<0);
+   String blinkName=d.clips().get("blink");var blink=source.getAsJsonObject(blinkName).getAsJsonObject("bones");
+   for(String eyeBone:blink.keySet()){
+    assertTrue(slug+" holds closed native eye bone "+eyeBone,bones.has(eyeBone));
+    var blinkPosition=blink.getAsJsonObject(eyeBone).getAsJsonObject("position").getAsJsonArray("0.0");
+    assertEquals(slug+" keeps its closed blink offset",asNumbers(blinkPosition),asNumbers(bones.getAsJsonObject(eyeBone).getAsJsonArray("position")));
+   }
+  }
+  var vaporeon=SpeciesDefinitions.get("vaporeon");
+  assertNotNull(vaporeon.clips().get("night_sleep_land"));assertNotNull(vaporeon.clips().get("night_sleep_water"));
+  var animations=animations(vaporeon);
+  var land=animations.getAsJsonObject(vaporeon.clips().get("night_sleep_land")).getAsJsonObject("bones");
+  var water=animations.getAsJsonObject(vaporeon.clips().get("night_sleep_water")).getAsJsonObject("bones");
+  assertEquals(-1.1,land.getAsJsonObject("body").getAsJsonArray("position").get(1).getAsDouble(),.0001);
+  assertEquals(-.2,water.getAsJsonObject("body").getAsJsonArray("position").get(1).getAsDouble(),.0001);
+  assertEquals("animation.vaporeon.minemon_night_sleep_land",SpeciesAssetIndex.clip("vaporeon","night_sleep_land","night_sleep"));
+  assertEquals("animation.vaporeon.minemon_night_sleep_water",SpeciesAssetIndex.clip("vaporeon","night_sleep_water","night_sleep"));
+ }
  @Test public void spearowAndFearowFlightClipsUseModelWingsWithoutGroundGaits() throws Exception {
   for(String slug:java.util.List.of("spearow","fearow")){
    var d=SpeciesDefinitions.get(slug);var source=animations(d);

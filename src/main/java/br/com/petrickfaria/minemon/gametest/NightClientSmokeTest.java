@@ -15,7 +15,7 @@ import java.util.*;
 
 /** Additional real-client scenario: production night AI, rendered closed eyes, dawn. */
 final class NightClientSmokeTest {
- private static final List<String> SPECIES=List.of("bulbasaur","victreebel","venusaur","snorlax","charizard","scyther","dragonite","pidgey","pidgeotto","pidgeot","fearow","gastly","haunter","gengar","koffing","weezing","butterfree","beedrill","venomoth","parasect","kakuna","tangela","poliwag","growlithe","magikarp","gyarados","lapras","dratini","omanyte");
+ private static final List<String> SPECIES=List.of("bulbasaur","victreebel","venusaur","snorlax","charizard","scyther","dragonite","pidgey","pidgeotto","pidgeot","fearow","gastly","haunter","gengar","koffing","weezing","butterfree","beedrill","venomoth","parasect","kakuna","tangela","poliwag","growlithe","magikarp","gyarados","lapras","dratini","omanyte","eevee","jolteon","flareon","vaporeon_land","vaporeon");
  private static boolean opened,setup,spawned,waking;
  private static int ticks,index,samples,sleepTick,depthSettleTicks,depthStableTicks,restSettleTicks,restStableTicks;
  private static volatile UUID entity;
@@ -34,7 +34,11 @@ final class NightClientSmokeTest {
     }
     MinemonRenderer.validationObserver=(mob,model)->{
      if(entity==null||!mob.getUUID().equals(entity)||!mob.isSleeping())return;
-     if(!Objects.equals(mob.getSelectedAnimationForValidation(),SpeciesDefinitions.get(mob.getSpeciesSlug()).clips().get("night_sleep")))return;
+     var definition=SpeciesDefinitions.get(mob.getSpeciesSlug());
+     String sleepKey=mob.getSpeciesSlug().equals("vaporeon")
+             ? (mob.isInWaterOrBubble()?"night_sleep_water":"night_sleep_land") : "night_sleep";
+     String selectedClip=definition.clips().getOrDefault(sleepKey,definition.clips().get("night_sleep"));
+     if(!Objects.equals(mob.getSelectedAnimationForValidation(),selectedClip))return;
      if(sleepTick==0){sleepTick=mob.tickCount;return;}
      if(mob.tickCount-sleepTick<12)return;
      // Read the generated pose, whose eye tracks hold the species' native blink closure.
@@ -43,7 +47,7 @@ final class NightClientSmokeTest {
       var animations=com.google.gson.JsonParser.parseReader(new java.io.InputStreamReader(stream)).getAsJsonObject().getAsJsonObject("animations");
       String blink=d.clips().get("blink");
       {
-       var sleepBones=animations.getAsJsonObject(d.clips().get("night_sleep")).getAsJsonObject("bones");
+       var sleepBones=animations.getAsJsonObject(selectedClip).getAsJsonObject("bones");
        java.util.Set<String> eyeNames=blink!=null&&animations.has(blink)?animations.getAsJsonObject(blink).getAsJsonObject("bones").keySet():sleepBones.keySet().stream().filter(n->n.contains("eye")||n.contains("pupil")).collect(java.util.stream.Collectors.toSet());
        if(eyeNames.isEmpty())eyeNames=sleepBones.keySet().stream().filter(n->n.contains("eye")||n.contains("pupil")).collect(java.util.stream.Collectors.toSet());
        for(String name:eyeNames){
@@ -83,8 +87,9 @@ final class NightClientSmokeTest {
     spawned=true;ticks=0;samples=0;sleepTick=0;depthSettleTicks=0;depthStableTicks=0;restSettleTicks=0;restStableTicks=0;waking=false;eyes.clear();
     mc.getSingleplayerServer().execute(()->{
      var level=mc.getSingleplayerServer().overworld();if(entity!=null){var old=level.getEntity(entity);if(old!=null)old.discard();}
-     var mob=ModEntities.SPECIES.get(SPECIES.get(index)).get().create(level);
-     boolean aquatic=SpeciesBehaviorProfiles.waterCapable(mob.getSpeciesSlug());
+     String scenario=SPECIES.get(index);String slug=scenario.equals("vaporeon_land")?"vaporeon":scenario;
+     var mob=ModEntities.SPECIES.get(slug).get().create(level);
+     boolean aquatic=SpeciesBehaviorProfiles.waterCapable(mob.getSpeciesSlug())&&!scenario.equals("vaporeon_land");
      boolean air=SpeciesBehaviorProfiles.canFly(mob.getSpeciesSlug());
      if(aquatic)for(int x=-6;x<=6;x++)for(int z=0;z<=10;z++)for(int y=101;y<=110;y++)
       level.setBlockAndUpdate(new BlockPos(x,y,z),Blocks.WATER.defaultBlockState());

@@ -15,6 +15,10 @@ public final class SpeciesDefinitions {
     String slug=str(o,"slug");
     CompatibleLocomotion.apply(slug,clips);
     clips.put("night_sleep","animation."+slug+".minemon_night_sleep");
+    if(slug.equals("vaporeon")){
+     clips.put("night_sleep_land","animation.vaporeon.minemon_night_sleep_land");
+     clips.put("night_sleep_water","animation.vaporeon.minemon_night_sleep_water");
+    }
     // Jynx/Magmar/Victreebel factors were derived from the selected geo mesh:
     // sum cube volume and vertical extent, balanced geometrically against the
     // approved Electabuzz/Rhydon render bounds. The source manifest stays raw.
