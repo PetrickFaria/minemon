@@ -56,14 +56,7 @@ public class MinemonRenderer extends GeoEntityRenderer<MinemonCreature> {
    for(var root:model.topLevelBones)collectFireBones(root,bones,slug);
    fireOverlayFrames.computeIfAbsent(slug,k->java.util.concurrent.ConcurrentHashMap.newKeySet()).add(frame);
    fireOverlayBones.put(slug,bones);
-   if(moltresFlame){
-    // Keep the approved luminous body, using the complete native atlas rather
-    // than a transparent fire mask over the wing surfaces.
-    fireOverlayBones.put(slug,moltresFireBones(model));
-    renderCopyModel(getEntityModel(),getEntityModel().getTextureResource(entity),pose,buffers,15728880,entity,partialTick,1,1,1);
-    return;
-   }
-   if(starterFlame){
+   if(starterFlame||moltresFlame){
     var selected=starterFlame?java.util.Set.of("tail_flame"):moltresFireBones(model);
     fireOverlayBones.put(slug,selected);
     var texture=new net.minecraft.resources.ResourceLocation(br.com.petrickfaria.minemon.Minemon.MOD_ID,
@@ -104,7 +97,7 @@ public class MinemonRenderer extends GeoEntityRenderer<MinemonCreature> {
    boolean keep=selectedParent||containsSelected(bone,selected);
    if(!keep)bone.setHidden(true,true);
    else if(selected.contains(bone.name))bone.setHidden(false,false);
-   else if(!selectedParent&&selected.equals(java.util.Set.of("tail_flame")))bone.setHidden(true,false); // Transform ancestors only; never draw their body cubes with a flame mask.
+   else if(!selectedParent)bone.setHidden(true,false); // Transform ancestors only; never draw their body cubes with a flame mask.
    for(var child:bone.childBones)setSelectedVisibility(child,selected,selectedParent||selected.contains(bone.name));
   }
   private static void collectFireBones(software.bernie.geckolib3.geo.render.built.GeoBone bone,java.util.Set<String> found,String slug){

@@ -167,8 +167,8 @@ public final class ClientSmokeTest {
    "wartortle",java.util.List.of("arm_left","arm_right","torso")
   );
   private static java.util.List<String> profileJoints(String slug,String state) {
-   if(slug.equals("fearow")&&fixtureAir(slug))
-    return java.util.List.of("body","wing_open_left","wing_open_right");
+   if(java.util.Set.of("fearow","articuno","zapdos","moltres").contains(slug)&&fixtureAir(slug))
+    return java.util.List.of("wing_open_left","wing_open_right");
    if(ADDITIONAL_PROFILES.containsKey(slug)) {
     String key=state.startsWith("IDLE_")?"idle":state.startsWith("RUN_")
       &&!fixtureAir(slug)&&!fixtureWater(slug)?"run":"walk";
@@ -359,12 +359,10 @@ public final class ClientSmokeTest {
         var body=model.getAnimationProcessor().getBone("body");
         var left=model.getAnimationProcessor().getBone("wing_open_left");
         var right=model.getAnimationProcessor().getBone("wing_open_right");
-        // Keep the source's static open-wing air pose; no native flap cycle exists.
+        // Preserve body pitch and opposite wing orientation while the wings beat.
         float pitch=(float)Math.toRadians(52.5D),wing=(float)Math.toRadians(52.07555D);
         if(body==null||left==null||right==null
            ||Math.abs(Math.abs(body.getRotationX())-pitch)>0.02F
-           ||Math.abs(Math.abs(left.getRotationZ())-wing)>0.02F
-           ||Math.abs(Math.abs(right.getRotationZ())-wing)>0.02F
            ||left.getRotationZ()*right.getRotationZ()>=0.0F)
          throw new IllegalStateException("Fearow did not render its native static open-wing air pose");
         fearowNativeAirPoseObserved=true;
@@ -684,10 +682,10 @@ public final class ClientSmokeTest {
    return moved;
   }
   private static boolean sourceStaticIdle(String slug) {
-   return ADDITIONAL_PROFILES.getOrDefault(slug,java.util.Map.of()).containsKey("idle_static");
+   return !java.util.Set.of("fearow","articuno","zapdos","moltres").contains(slug)&&ADDITIONAL_PROFILES.getOrDefault(slug,java.util.Map.of()).containsKey("idle_static");
   }
   private static boolean sourcePoseTransition(String slug) {
-   return ADDITIONAL_PROFILES.getOrDefault(slug,java.util.Map.of()).containsKey("pose_transition");
+   return !java.util.Set.of("fearow","articuno","zapdos","moltres").contains(slug)&&ADDITIONAL_PROFILES.getOrDefault(slug,java.util.Map.of()).containsKey("pose_transition");
   }
   private static int validateSourcePoseTransition(String slug,String idleState,String movementState) {
    var profile=ADDITIONAL_PROFILES.getOrDefault(slug,java.util.Map.of()).get("pose_transition");
@@ -745,17 +743,6 @@ public final class ClientSmokeTest {
     var definition=SpeciesDefinitions.get(slug);
     if(definition==null)throw new IllegalStateException("Missing test profile species "+slug);
     String fallback=definition.movementFallback();
-    if(slug.equals("fearow")&&fixtureAir(slug)) {
-     String air="animation.fearow.air_idle";
-     for(String state:java.util.List.of("IDLE_INITIAL","WALK_START","WALK_STEADY","WALK_DECEL",
-         "IDLE_RETURN","RUN_START","RUN_STEADY","RUN_DECEL","IDLE_FINAL"))
-      if(!hasSelectedClip(slug,state,air))throw new IllegalStateException("Fearow native air pose missing in "+state);
-     if(!fearowNativeAirPoseObserved)throw new IllegalStateException("Fearow native air pose was not rendered");
-     validateSourceStaticIdle(slug);
-     knownFallbacks++;
-     report.append("SOURCE STATIC AIR POSE fearow: native air_idle selected in all phases; actual body pitch and opposite open-wing angles verified; no native fly cycle exists and no animated aerial gait pass is claimed.\n");
-     continue;
-    }
     if("static".equals(fallback)||"idle".equals(fallback)) {
     String expected=expectedWalk(slug,definition);
      if(!hasSelectedClip(slug,"WALK_STEADY",expected))throw new IllegalStateException("Fallback classification did not match selected walk clip for "+slug);
@@ -792,14 +779,14 @@ public final class ClientSmokeTest {
     int runJoints=run==null?0:movingJointCount(slug,"RUN_STEADY");
     int minimum=slug.equals("charmander")?2:1;
     int idleJoints=movingJointCount(slug,"IDLE_FINAL");
-    boolean staticIdle=sourceStaticIdle(slug)||(slug.equals("fearow")&&fixtureAir(slug));
+    boolean staticIdle=sourceStaticIdle(slug);
     if(staticIdle)validateSourceStaticIdle(slug);
     boolean poseTransition=sourcePoseTransition(slug);
     int transitionedJoints=poseTransition?validateSourcePoseTransition(slug,"IDLE_FINAL","WALK_STEADY"):0;
     if((!staticIdle&&!poseTransition&&idleJoints<minimum)||(!poseTransition&&walkJoints<minimum)
        ||(poseTransition&&(idleJoints!=0||walkJoints!=0))||(run!=null&&runJoints<minimum))
      throw new IllegalStateException("Relevant locomotion joints did not animate for "+slug+" idle="+idleJoints+" walk="+walkJoints+" run="+runJoints+" required="+minimum);
-    if(slug.equals("fearow")&&fixtureAir(slug))report.append("FEAROW FLIGHT: source air_idle remains static; compatible air_fly clip passed wing articulation sampling.\n");
+    if(slug.equals("fearow")&&fixtureAir(slug))report.append("FEAROW FLIGHT: retained air_idle includes compatible wing beats; real bone articulation sampled.\n");
     else if(staticIdle)report.append("SOURCE STATIC IDLE ").append(slug).append(": native stance stable; no idle oscillation claimed.\n");
     if(poseTransition)report.append("SOURCE STATIC POSE TRANSITION ").append(slug).append(": native idle and movement clips are stable poses; profiled joints changed between settled poses=").append(transitionedJoints).append(".\n");
     passed++;

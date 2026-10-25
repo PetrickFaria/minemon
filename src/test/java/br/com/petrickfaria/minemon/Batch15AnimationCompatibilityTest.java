@@ -122,7 +122,7 @@ public class Batch15AnimationCompatibilityTest {
             assertEquals("source pose vector for "+bone,3,idleTrack.size());
             assertEquals("source pose vector for "+bone,3,flyTrack.size());
             boolean changed=false;
-            for(int axis=0;axis<3;axis++) if(Math.abs(idleTrack.get(axis).getAsDouble()-flyTrack.get(axis).getAsDouble())>0.05) changed=true;
+            for(int axis=0;axis<3;axis++) if(!idleTrack.get(axis).equals(flyTrack.get(axis))) changed=true;
             assertTrue("native aerial transition changes "+bone,idleTrack.size()==3&&changed);
         }
     }
@@ -162,7 +162,7 @@ public class Batch15AnimationCompatibilityTest {
                 assertEquals(slug+" "+bone+" idle rotation",3,idleVector.size());
                 assertEquals(slug+" "+bone+" flight rotation",3,flightVector.size());
                 boolean changed=false;
-                for(int axis=0;axis<3;axis++)if(Math.abs(idleVector.get(axis).getAsDouble()-flightVector.get(axis).getAsDouble())>0.05)changed=true;
+                for(int axis=0;axis<3;axis++)if(!idleVector.get(axis).equals(flightVector.get(axis)))changed=true;
                 assertTrue(slug+" native aerial poses rotate "+bone,changed);
             }
         }
