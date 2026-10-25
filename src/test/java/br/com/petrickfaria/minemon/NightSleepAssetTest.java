@@ -12,6 +12,10 @@ public class NightSleepAssetTest {
    var animations=JsonParser.parseString(Files.readString(file)).getAsJsonObject().getAsJsonObject("animations");
    var sleep=animations.getAsJsonObject(d.clips().get("night_sleep"));
    assertNotNull(d.slug(),sleep);
+   if(d.slug().equals("growlithe")){
+    assertEquals(.1,sleep.getAsJsonObject("bones").getAsJsonObject("eyelid_left").getAsJsonArray("position").get(0).getAsDouble(),.0001);
+    assertEquals(-.1,sleep.getAsJsonObject("bones").getAsJsonObject("eyelid_right").getAsJsonArray("position").get(0).getAsDouble(),.0001);
+   }
    if(d.slug().equals("haunter"))for(String side:java.util.List.of("left","right")){
     assertEquals(-.15,sleep.getAsJsonObject("bones").getAsJsonObject("closed_eyelid_"+side).getAsJsonArray("position").get(2).getAsDouble(),.0001);
     assertEquals(.2,sleep.getAsJsonObject("bones").getAsJsonObject("pupil_"+side).getAsJsonArray("position").get(2).getAsDouble(),.0001);

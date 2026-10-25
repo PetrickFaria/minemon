@@ -74,7 +74,9 @@ public class MinemonRenderer extends GeoEntityRenderer<MinemonCreature> {
    fireOverlayBones.put(slug,bones);
    if(moltresFlame){
     fireOverlayBones.put(slug,java.util.Set.of("FULL_MODEL"));
-    renderCopyModel(getEntityModel(),getEntityModel().getTextureResource(entity),pose,buffers,15728880,entity,partialTick,1,1,1);
+    boolean previousPass=owner.fireOverlayPass;owner.fireOverlayPass=true;
+    try{renderCopyModel(getEntityModel(),getEntityModel().getTextureResource(entity),pose,buffers,15728880,entity,partialTick,1,1,1);}
+    finally{owner.fireOverlayPass=previousPass;}
     return;
    }
    if(starterFlame){

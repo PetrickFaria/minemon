@@ -135,6 +135,10 @@ def night_sleep_clip(data,geo,d):
   for channel,value in tracks.items():
    if channel in ('position','rotation','scale'):
     channels.setdefault(bone,{})[channel]=closed(value)
+ if slug=='growlithe':
+  # Its retained model reverses the source blink's eyelid naming order.
+  channels.setdefault('eyelid_left',{})['position']=[0.1,0,-0.1]
+  channels.setdefault('eyelid_right',{})['position']=[-0.1,0,-0.1]
  if slug=='haunter':
   # The retained Haunter rig uses different names than its stripped source
   # blink channels. Reuse its actual closed-lid meshes, not absent bones.
