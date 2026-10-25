@@ -122,7 +122,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     }
     public boolean isFlyingSpecies() { return SpeciesBehaviorProfiles.isAirborne(this.getSpeciesSlug())
             &&!(this.isNightResting()&&SpeciesBehaviorProfiles.landsForNightRest(this.getSpeciesSlug()))
-            ||this.entityData.get(NATURAL_FLIGHT); }
+            ||this.entityData.get(NATURAL_FLIGHT)&&!this.wantsNaturalLanding(); }
     public boolean isAquaticSpecies() { return SpeciesBehaviorProfiles.waterCapable(this.getSpeciesSlug()); }
     public boolean isSpontaneouslyRunning() { return this.entityData.get(SPONTANEOUS_RUN); }
     public void setSpontaneousRunForValidation(boolean running) {
