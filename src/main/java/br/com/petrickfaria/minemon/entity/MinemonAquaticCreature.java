@@ -14,9 +14,6 @@ import net.minecraft.world.level.Level;
 public final class MinemonAquaticCreature extends MinemonCreature {
     public MinemonAquaticCreature(EntityType<? extends TamableAnimal> type, Level level) {
         super(type, level);
-        // Amphibious search expands land and water neighbors. The vanilla
-        // node budget exhausted midway through the verified 100-block route.
-        this.getNavigation().setMaxVisitedNodesMultiplier(8.0F);
         this.lookControl = new net.minecraft.world.entity.ai.control.LookControl(this) {
             @Override protected boolean resetXRotOnTick() {
                 // LookControl ticks after MoveControl. Its land default resets
@@ -89,6 +86,19 @@ public final class MinemonAquaticCreature extends MinemonCreature {
         // FlyingPathNavigation. Retain that contract while using amphibious
         // nodes, as the stock amphibious navigation does for water/shore paths.
         return new GroundPathNavigation(this, level) {
+            @Override public net.minecraft.world.level.pathfinder.Path createPath(net.minecraft.core.BlockPos destination,int reach){
+                // The native path-length limit can reject a valid distant
+                // amphibious route even inside the geometric search radius.
+                // Only distant water searches use the larger bounded budget;
+                // ordinary land, swim, follow and combat paths stay unchanged.
+                if(destination.distSqr(this.mob.blockPosition())>32.0D*32.0D
+                        &&level.getFluidState(destination).is(net.minecraft.tags.FluidTags.WATER)){
+                    this.setMaxVisitedNodesMultiplier(8.0F);
+                    try{return super.createPath(destination,reach,256);}
+                    finally{this.resetMaxVisitedNodesMultiplier();}
+                }
+                return super.createPath(destination,reach);
+            }
             @Override protected PathFinder createPathFinder(int maxVisitedNodes) {
                 this.nodeEvaluator = new AmphibiousNodeEvaluator(false);
                 this.nodeEvaluator.setCanPassDoors(true);
