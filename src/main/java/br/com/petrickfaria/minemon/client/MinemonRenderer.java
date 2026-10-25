@@ -7,6 +7,9 @@ public class MinemonRenderer extends GeoEntityRenderer<MinemonCreature> {
  private final MinemonModel minemonModel;
  private String activeFireSpecies;
  private boolean fireOverlayPass;
+ private String activeBone;
+ private static final java.util.Map<String,java.util.Set<String>> drawnFireBones=new java.util.concurrent.ConcurrentHashMap<>();
+ public static java.util.Map<String,java.util.Set<String>> drawnFireBoneSamples(){return java.util.Map.copyOf(drawnFireBones);}
  private static final java.util.Map<String,java.util.Set<Integer>> fireOverlayFrames=new java.util.concurrent.ConcurrentHashMap<>();
  private static final java.util.Map<String,java.util.Set<String>> fireOverlayBones=new java.util.concurrent.ConcurrentHashMap<>();
  public static java.util.function.Consumer<MinemonCreature> validationInput;
@@ -36,7 +39,20 @@ public class MinemonRenderer extends GeoEntityRenderer<MinemonCreature> {
       int light,int overlay,float red,float green,float blue,float alpha) {
   if(!fireOverlayPass&&java.util.Set.of("charmander","charmeleon","charizard").contains(activeFireSpecies)
       &&bone.name.equals("tail_flame"))return;
-  super.renderRecursively(bone,pose,buffer,light,overlay,red,green,blue,alpha);
+  String previousBone=activeBone;activeBone=bone.name;
+  try{super.renderRecursively(bone,pose,buffer,light,overlay,red,green,blue,alpha);}
+  finally{activeBone=previousBone;}
+ }
+
+ @Override public void renderCube(software.bernie.geckolib3.geo.render.built.GeoCube cube,
+      com.mojang.blaze3d.vertex.PoseStack pose,com.mojang.blaze3d.vertex.VertexConsumer buffer,
+      int light,int overlay,float red,float green,float blue,float alpha){
+  if(fireOverlayPass&&Boolean.getBoolean("minemon.clientSmokeTest")){
+   if(light!=15728880)throw new IllegalStateException("Fire cube lost full-bright light: "+activeFireSpecies);
+   if(java.util.Arrays.stream(cube.quads).anyMatch(java.util.Objects::nonNull))
+    drawnFireBones.computeIfAbsent(activeFireSpecies,k->java.util.concurrent.ConcurrentHashMap.newKeySet()).add(activeBone);
+  }
+  super.renderCube(cube,pose,buffer,light,overlay,red,green,blue,alpha);
  }
 
  /** Full-bright overlays use transparent flame masks on fire-bearing bones only. */

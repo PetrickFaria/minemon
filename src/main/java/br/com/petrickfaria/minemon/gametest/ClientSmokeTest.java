@@ -554,11 +554,18 @@ public final class ClientSmokeTest {
       throw new IllegalStateException("Selective fire overlay lost the "+slug+" tail or mane bone: "+bones);
     }
     if(!selectedFireHorses.isEmpty())Files.writeString(Path.of("client-validation.txt"),"PASS PONYTA/RAPIDASH FIRE OVERLAYS: source 10 fps atlas frames rendered only on mane, tail and fire bones: "+selectedFireHorses+".\n",StandardOpenOption.APPEND);
+    for(String slug:selectedFireHorses){
+     var drawn=MinemonRenderer.drawnFireBoneSamples().getOrDefault(slug,java.util.Set.of());
+     if(!drawn.contains("tail")||drawn.stream().noneMatch(n->n.startsWith("fire_mane")||n.endsWith("_fire")))throw new IllegalStateException("No actual full-bright tail/mane cubes rendered: "+slug+" "+drawn);
+    }
     var selectedEmissive=java.util.List.of("charmander","charmeleon","charizard","moltres").stream().filter(species::contains).toList();
     for(String slug:selectedEmissive) {
      var samples=MinemonRenderer.fireOverlayFrameSamples().getOrDefault(slug,java.util.Set.of());
      var bones=MinemonRenderer.fireOverlayBoneSamples().getOrDefault(slug,java.util.Set.of());
      if(!samples.contains(0)||bones.isEmpty())throw new IllegalStateException("Full-bright flame atlas did not render on fire rig for "+slug+": frames="+samples+" bones="+bones);
+     var drawn=MinemonRenderer.drawnFireBoneSamples().getOrDefault(slug,java.util.Set.of());
+     if(drawn.isEmpty())throw new IllegalStateException("No actual full-bright cubes rendered: "+slug);
+     if(!slug.equals("moltres")&&!drawn.equals(java.util.Set.of("tail_flame")))throw new IllegalStateException("Starter overlay actually rendered a body/belly cube: "+slug+" "+drawn);
      if(slug.equals("moltres")) {
       if(!bones.equals(java.util.Set.of("FULL_MODEL")))
        throw new IllegalStateException("Moltres full-bright pass must retain the approved complete body: "+bones);

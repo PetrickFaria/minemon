@@ -86,6 +86,7 @@ public final class NightAndSwimmingTests {
   var mob=spawn(h,"bulbasaur",7,3,10);
   h.runAfterDelay(5,()->{
    check(h,mob.isInWater(),"Escape fixture must begin immersed");
+   for(int tick=20;tick<=180;tick+=20){final int sample=tick;h.runAfterDelay(tick,()->com.mojang.logging.LogUtils.getLogger().info("ESCAPE TRACE tick={} pos={} velocity={} water={} nav={} done={} control={} wanted={}",sample,mob.position(),mob.getDeltaMovement(),mob.isInWater(),mob.getNavigation().getTargetPos(),mob.getNavigation().isDone(),mob.getMoveControl().getClass(),mob.getMoveControl().hasWanted()));}
    await(h,()->!mob.isInWater()&&mob.isOnGround(),()->{
     check(h,h.getLevel().noCollision(mob,mob.getBoundingBox()),"Escape must respect solid shore collisions");h.succeed();
    },200,"Non-aquatic creature must physically leave the pool for its reachable shore");
@@ -110,7 +111,7 @@ public final class NightAndSwimmingTests {
      if(e instanceof MinemonCreature m){
       var target=new BlockPos(m.getX(),m.getY(),m.getZ()+10);
       m.getNavigation().moveTo(target.getX()+.5,target.getY(),target.getZ()+.5,.85);
-      m.getMoveControl().tick();
+      m.getNavigation().tick();m.getMoveControl().tick();
       m.travel(new net.minecraft.world.phys.Vec3(m.xxa*.98,m.yya*.98,m.zza*.98));
      }else e.travel(new net.minecraft.world.phys.Vec3(0,0,.98));
      if(tick==39)start=e.getZ();
