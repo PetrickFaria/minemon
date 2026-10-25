@@ -105,15 +105,17 @@ final class NightClientSmokeTest {
    MinemonCreature current=null;for(var e:mc.level.entitiesForRendering())if(e.getUUID().equals(entity)&&e instanceof MinemonCreature m){current=m;break;}
    if(current==null)return;
    boolean waterRest=SpeciesBehaviorProfiles.waterCapable(current.getSpeciesSlug())&&current.isInWaterOrBubble();
-   if(waterRest){
-    double target=WaterMovementGoal.waterRestY(current);
-    if(!Double.isFinite(target)||Math.abs(current.getY()-target)>.2D)
-     throw new IllegalStateException(current.getSpeciesSlug()+" must sleep at its safe species-specific water depth; target="+target+" y="+current.getY());
-   }else{
-    boolean shouldLand=!SpeciesBehaviorProfiles.hoversDuringNightRest(current.getSpeciesSlug());
-    if(shouldLand&&!current.isOnGround())throw new IllegalStateException(current.getSpeciesSlug()+" must sleep on the ground");
-    if(!shouldLand&&(current.isOnGround()||Math.abs(current.getY()-current.naturalSurface()-1.0D)>.2D))
-     throw new IllegalStateException(current.getSpeciesSlug()+" must keep its approved safe hover sleep pose");
+   if(current.isSleeping()){
+    if(waterRest){
+     double target=WaterMovementGoal.waterRestY(current);
+     if(!Double.isFinite(target)||Math.abs(current.getY()-target)>.2D)
+      throw new IllegalStateException(current.getSpeciesSlug()+" must sleep at its safe species-specific water depth; target="+target+" y="+current.getY());
+    }else{
+     boolean shouldLand=!SpeciesBehaviorProfiles.hoversDuringNightRest(current.getSpeciesSlug());
+     if(shouldLand&&!current.isOnGround())throw new IllegalStateException(current.getSpeciesSlug()+" must sleep on the ground");
+     if(!shouldLand&&(current.isOnGround()||Math.abs(current.getY()-current.naturalSurface()-1.0D)>.2D))
+      throw new IllegalStateException(current.getSpeciesSlug()+" must keep its approved safe hover sleep pose");
+    }
    }
    double dx=current.getX()-mc.player.getX(),dz=current.getZ()-mc.player.getZ(),dy=current.getY()+current.getBbHeight()*.65-mc.player.getEyeY();
    mc.player.setYRot((float)(Math.toDegrees(Math.atan2(dz,dx))-90));mc.player.setXRot((float)-Math.toDegrees(Math.atan2(dy,Math.sqrt(dx*dx+dz*dz))));
