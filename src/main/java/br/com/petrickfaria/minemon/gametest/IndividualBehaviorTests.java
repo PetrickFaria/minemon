@@ -173,6 +173,10 @@ public final class IndividualBehaviorTests {
  public static void aquaticSeekerPhysicallyReachesWaterBeyondNinetyBlocks(GameTestHelper h){
   // A separate batch and elevated corridor keep the long route independent
   // of neighboring behavior arenas and their water fixtures.
+  for(int x=0;x<=112;x+=16){
+   var chunk=new net.minecraft.world.level.ChunkPos(h.absolutePos(new BlockPos(x,18,2)));
+   h.getLevel().setChunkForced(chunk.x,chunk.z,true);
+  }
   for(int x=0;x<=105;x++)for(int z=0;z<=4;z++){
    h.setBlock(new BlockPos(x,18,z),Blocks.STONE);
    for(int y=19;y<=23;y++)h.setBlock(new BlockPos(x,y,z),Blocks.AIR);
@@ -184,6 +188,11 @@ public final class IndividualBehaviorTests {
   var fish=h.spawn(ModEntities.SPECIES.get("goldeen").get(),new BlockPos(2,19,2));
   Vec3 start=fish.position();
   h.runAfterDelay(20,()->{
+   for(int x=2;x<100;x++){
+    var floor=h.absolutePos(new BlockPos(x,18,2));
+    check(h,h.getLevel().getBlockState(floor).is(Blocks.STONE),"Long-range fixture lost corridor floor at "+floor);
+    check(h,h.getLevel().getBlockState(floor.above()).isAir(),"Long-range fixture has an unexpected obstacle at "+floor.above());
+   }
    var target=h.absolutePos(new BlockPos(101,17,2));
    var path=fish.getNavigation().createPath(target,0);
    com.mojang.logging.LogUtils.getLogger().info("LONG WATER PATH target="+target+" loaded="+h.getLevel().hasChunkAt(target)
