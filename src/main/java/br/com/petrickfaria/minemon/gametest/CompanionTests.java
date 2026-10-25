@@ -13,7 +13,6 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.Cow;
 import net.minecraft.world.level.GameType;
-import net.minecraft.world.level.GameRules;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.gametest.GameTestHolder;
@@ -221,11 +220,10 @@ public final class CompanionTests {
   h.runAfterDelay(5,()->checkAirborneAttack(h,bird,cow,health,elapsed+5));
  }
 
- @GameTest(template="test_arena",timeoutTicks=260)
+ @GameTest(template="test_arena",batch="night_landing",timeoutTicks=260)
  public static void sleepingFlyerFindsDryLandingInsteadOfDroppingIntoWater(GameTestHelper h) {
   floor(h);
   h.getLevel().setDayTime(18000);
-  h.getLevel().getGameRules().getRule(GameRules.RULE_DAYLIGHT).set(false,h.getLevel().getServer());
   for(int x=4;x<=6;x++)for(int z=4;z<=6;z++){
    h.setBlock(new BlockPos(x,-1,z),net.minecraft.world.level.block.Blocks.STONE);
    h.setBlock(new BlockPos(x,0,z),net.minecraft.world.level.block.Blocks.WATER);
@@ -236,7 +234,6 @@ public final class CompanionTests {
   h.runAfterDelay(200,()->{
    boolean landed=bird.isSleeping()&&bird.isOnGround()&&!bird.isInWater();
    boolean clear=h.getLevel().noCollision(bird,bird.getBoundingBox());
-   h.getLevel().getGameRules().getRule(GameRules.RULE_DAYLIGHT).set(true,h.getLevel().getServer());
    h.getLevel().setDayTime(1000);
    check(h,landed,"Night-resting mixed flyer must follow a path to dry ground");
    check(h,clear,"Landing must not clip the entity into solid terrain");

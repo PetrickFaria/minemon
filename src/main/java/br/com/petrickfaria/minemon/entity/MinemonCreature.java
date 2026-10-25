@@ -349,7 +349,13 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     private void tickNightRest(){
         if(this.wakeGraceTicks>0)this.wakeGraceTicks--;
         LivingEntity target=this.getTarget();
-        if(target!=null&&(!target.isAlive()||target.isRemoved())){this.setTarget(null);target=null;}
+        if(target!=null&&(!target.isAlive()||target.isRemoved())){
+            this.setTarget(null);
+            // HurtByTargetGoal can otherwise reacquire the discarded attacker
+            // from LivingEntity's remembered damage source on its next tick.
+            if(this.getLastHurtByMob()==target)this.setLastHurtByMob(null);
+            target=null;
+        }
         boolean night=this.level.dimensionType().hasSkyLight()&&this.level.isNight();
         boolean waterRest=SpeciesBehaviorProfiles.waterCapable(this.getSpeciesSlug())&&this.isInWaterOrBubble();
         boolean restingEnvironment=waterRest||!SpeciesBehaviorProfiles.isAquatic(this.getSpeciesSlug())&&!this.isInWaterOrBubble();
