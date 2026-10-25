@@ -1,4 +1,5 @@
 package br.com.petrickfaria.minemon;
+import br.com.petrickfaria.minemon.entity.SpeciesDefinitions;
 import com.google.gson.JsonParser;
 import java.nio.file.*;
 import org.junit.Test;
