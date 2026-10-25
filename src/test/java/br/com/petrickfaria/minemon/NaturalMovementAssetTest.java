@@ -54,13 +54,18 @@ public final class NaturalMovementAssetTest {
   }
   var fearow=animations("fearow");
   assertTrue("Fearow keeps its native air pose",fearow.has("animation.fearow.air_idle"));
-  for(String bone:List.of("wing_open_left","wing_open_right"))assertDynamicBone(fearow,"animation.fearow.air_idle",bone);
-  assertFalse("Fearow has no invented air cycle",fearow.has("animation.fearow.minemon_fly"));
+  for(String bone:List.of("wing_open_left","wing_open_right"))assertDynamicBone(fearow,"animation.fearow.minemon_air_idle",bone);
+  assertTrue("Fearow has the model-specific flight adaptation",fearow.has("animation.fearow.minemon_air_fly"));
+  assertFalse("Fearow has no generic generated air cycle",fearow.has("animation.fearow.minemon_fly"));
   var fearowClips=new java.util.HashMap<>(SpeciesDefinitions.get("fearow").clips());
   CompatibleLocomotion.apply("fearow",fearowClips);
-  assertFalse("Fearow does not get a synthetic air_fly mapping",fearowClips.containsKey("air_fly"));
+  assertEquals("animation.fearow.minemon_air_fly",fearowClips.get("air_fly"));
   var spearow=animations("spearow");
-  assertFalse("Spearow has no generated air cycle",spearow.has("animation.spearow.minemon_fly"));
+  for(String clip:List.of("animation.spearow.minemon_air_idle","animation.spearow.minemon_air_fly"))
+   for(String side:List.of("left","right"))for(String segment:List.of("","2","3"))
+    assertDynamicBone(spearow,clip,"wing_open_"+side+segment);
+  assertFalse("Spearow has no generic generated air cycle",spearow.has("animation.spearow.minemon_fly"));
+  assertEquals("animation.spearow.minemon_air_fly",SpeciesDefinitions.get("spearow").clips().get("air_fly"));
   assertEquals("Spearow uses its retained source poser walk", "animation.spearow.minemon_poser_walk",SpeciesDefinitions.get("spearow").walk());
   try(var reader=Files.newBufferedReader(RESOURCES.resolve("data/minemon_gen1/animation_validation_profiles.json"))) {
    var profile=JsonParser.parseReader(reader).getAsJsonObject().getAsJsonObject("spearow");

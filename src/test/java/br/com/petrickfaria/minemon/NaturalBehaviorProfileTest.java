@@ -18,7 +18,8 @@ public final class NaturalBehaviorProfileTest {
         assertTrue(SpeciesBehaviorProfiles.isAirborne("gastly"));
         assertTrue(SpeciesBehaviorProfiles.canFly("charizard"));
         assertFalse(SpeciesBehaviorProfiles.isAirborne("charizard"));
-        assertTrue(SpeciesBehaviorProfiles.isAirborne("mew"));
+        assertTrue(SpeciesBehaviorProfiles.canFly("mew"));
+        assertFalse(SpeciesBehaviorProfiles.isAirborne("mew"));
         assertFalse(SpeciesBehaviorProfiles.isAirborne("gyarados"));
         assertTrue(SpeciesBehaviorProfiles.isAquatic("gyarados"));
         assertTrue(SpeciesBehaviorProfiles.isAquatic("magikarp"));
