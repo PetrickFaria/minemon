@@ -173,7 +173,7 @@ public final class CompanionTests {
  @GameTest(template="test_arena",timeoutTicks=420)
  public static void airborneSpeciesStayAboveSurfaceAndLandOnlyToSleep(GameTestHelper h) {
   floor(h);
-  MinemonCreature bird=h.spawn(ModEntities.SPECIES.get("pidgey").get(),new BlockPos(5,1,5));
+  MinemonCreature bird=h.spawn(ModEntities.SPECIES.get("spearow").get(),new BlockPos(5,1,5));
   traceMovement(h,"natural-flight",bird,0,300);
   h.runAfterDelay(100,()->{
    double altitude=bird.getY()-NaturalMovementGoals.surfaceBelow(h.getLevel(),bird.getX(),bird.getY(),bird.getZ());
@@ -201,7 +201,7 @@ public final class CompanionTests {
  @GameTest(template="test_arena",timeoutTicks=420)
  public static void airborneCombatHitsGroundTargetsWithoutLanding(GameTestHelper h) {
   floor(h);
-  MinemonCreature bird=h.spawn(ModEntities.SPECIES.get("pidgey").get(),new BlockPos(5,5,5));
+  MinemonCreature bird=h.spawn(ModEntities.SPECIES.get("spearow").get(),new BlockPos(5,5,5));
   Cow cow=h.spawn(EntityType.COW,new BlockPos(7,1,5));cow.setNoAi(true);
   float health=cow.getHealth();
   // Start already airborne and provoke before an unrelated random patrol
@@ -223,16 +223,17 @@ public final class CompanionTests {
  @GameTest(template="test_arena",timeoutTicks=260)
  public static void sleepingFlyerFindsDryLandingInsteadOfDroppingIntoWater(GameTestHelper h) {
   floor(h);
+  h.getLevel().setDayTime(18000);
+  h.getLevel().getGameRules().getRule(GameRules.RULE_DAYLIGHT).set(false,h.getLevel().getServer());
   for(int x=4;x<=6;x++)for(int z=4;z<=6;z++){
    h.setBlock(new BlockPos(x,-1,z),net.minecraft.world.level.block.Blocks.STONE);
    h.setBlock(new BlockPos(x,0,z),net.minecraft.world.level.block.Blocks.WATER);
   }
-  MinemonCreature bird=h.spawn(ModEntities.SPECIES.get("charizard").get(),new BlockPos(5,8,5));
+  MinemonCreature bird=h.spawn(ModEntities.SPECIES.get("pidgey").get(),new BlockPos(5,8,5));
   CompoundTag flight=new CompoundTag();bird.addAdditionalSaveData(flight);flight.putString("NaturalBehaviorPhase","AIR");bird.readAdditionalSaveData(flight);
-  bird.setSleeping(true);
   traceMovement(h,"sleep-landing",bird,0,200);
   h.runAfterDelay(200,()->{
-   check(h,bird.isOnGround()&&!bird.isInWater(),"Sleeping flyer must follow a path to dry ground");
+   check(h,bird.isSleeping()&&bird.isOnGround()&&!bird.isInWater(),"Night-resting mixed flyer must follow a path to dry ground");
    check(h,h.getLevel().noCollision(bird,bird.getBoundingBox()),"Landing must not clip the entity into solid terrain");
    h.succeed();
   });
@@ -352,7 +353,7 @@ public final class CompanionTests {
    h.setBlock(new BlockPos(x,y,z),net.minecraft.world.level.block.Blocks.WATER);
   BlockPos pos=h.absolutePos(new BlockPos(6,water?2:1,6));
   p.moveTo(pos.getX()+.5D,pos.getY(),pos.getZ()+.5D,0,0);p.setNoGravity(true);
-  var mob=h.spawn(ModEntities.SPECIES.get(water?"goldeen":"pidgey").get(),new BlockPos(8,3,6));
+  var mob=h.spawn(ModEntities.SPECIES.get(water?"goldeen":"spearow").get(),new BlockPos(8,3,6));
   h.runAfterDelay(20,()->{
    check(h,mob.getTarget()==null,"Unprovoked Pokemon must remain neutral toward the player");
    check(h,water?mob.isInWater():mob.isFlyingSpecies()&&!mob.isOnGround(),"Provocation must occur in the actual movement medium");

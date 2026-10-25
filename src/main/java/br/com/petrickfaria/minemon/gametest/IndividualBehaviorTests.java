@@ -44,9 +44,9 @@ public final class IndividualBehaviorTests {
  }
  @GameTest(template="test_arena",timeoutTicks=700)
  public static void flyerAlternatesTwoAltitudeBandsAndPausesForSleep(GameTestHelper h){
-  arena(h,false);var bird=spawn(h,"pidgey",5,3,5);
-  // Continuous fliers stay airborne; observe the real patrol band rather than
-  // forcing a grounded state that this species must never enter.
+  arena(h,false);var bird=spawn(h,"spearow",5,3,5);
+  // Spearow has no compatible native ground gait, so it remains in its
+  // source-backed continuous flight profile and alternates both altitude bands.
   restore(bird,"AIR",0,0);
   await(h,()->bird.naturalCycle().stage()==0&&band(bird,1,3),()->{
    restore(bird,"AIR",11999,0);

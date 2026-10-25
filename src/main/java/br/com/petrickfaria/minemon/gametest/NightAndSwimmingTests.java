@@ -52,7 +52,7 @@ public final class NightAndSwimmingTests {
      await(h,()->!gyarados.isSleeping()&&!magikarp.isSleeping()&&!dratini.isSleeping(),()->{
       level.getGameRules().getRule(GameRules.RULE_DAYLIGHT).set(true,level.getServer());h.succeed();
      },40,"Aquatic sleepers must wake at dawn");
-    },220,"A water visitor must return to sleep after combat while it is still night");
+    },220,"A water visitor must return to sleep after combat while it is still night; sleeping="+dratini.isSleeping()+" target="+dratini.getTarget()+" y="+dratini.getY());
    },180,"The woken water visitor must physically retaliate in water");
   },500,"Permanent swimmers must rest in water and water visitors must settle at the bottom");
  }
@@ -62,7 +62,8 @@ public final class NightAndSwimmingTests {
   for(int x=2;x<=27;x++)for(int z=2;z<=21;z++){
    int floor=(x>=13&&z>=9&&z<=15)?2:0;
    for(int y=1;y<=10;y++)h.setBlock(new BlockPos(x,y,z),Blocks.WATER);
-   if(floor==2){h.setBlock(new BlockPos(x,1,z),Blocks.STONE);h.setBlock(new BlockPos(x,2,z),Blocks.STONE);}
+   if(floor==0)h.setBlock(new BlockPos(x,0,z),Blocks.STONE);
+   else {h.setBlock(new BlockPos(x,1,z),Blocks.STONE);h.setBlock(new BlockPos(x,2,z),Blocks.STONE);}
   }
   var shellder=spawn(h,"shellder",7,8,10);var krabby=spawn(h,"krabby",22,8,10);
   await(h,()->shellder.isInWater()&&krabby.isInWater()&&shellder.getY()<4.0D&&krabby.getY()<4.0D,()->{
