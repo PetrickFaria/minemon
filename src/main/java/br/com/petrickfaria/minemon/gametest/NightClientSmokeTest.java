@@ -15,7 +15,7 @@ import java.util.*;
 
 /** Additional real-client scenario: production night AI, rendered closed eyes, dawn. */
 final class NightClientSmokeTest {
- private static final List<String> SPECIES=List.of("bulbasaur","victreebel","venusaur","snorlax","charizard","scyther","dragonite","pidgey","pidgeotto","fearow","gastly","haunter","koffing","weezing");
+ private static final List<String> SPECIES=List.of("bulbasaur","victreebel","venusaur","snorlax","charizard","scyther","dragonite","pidgey","pidgeotto","fearow","gastly","haunter","koffing","weezing","butterfree","beedrill","parasect","kakuna","tangela","poliwag");
  private static boolean opened,setup,spawned,waking;
  private static int ticks,index,samples,sleepTick;
  private static volatile UUID entity;

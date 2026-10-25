@@ -528,7 +528,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     public boolean wantsNaturalLanding(){return !SpeciesBehaviorProfiles.isAirborne(this.getSpeciesSlug())&&(this.isSleeping()||this.isNightResting()) || this.entityData.get(NATURAL_LANDING); }
     public int getSmokeParticleCountForValidation(){return this.smokeParticles;}
     public boolean naturalBehaviorActive(){
-        return this.naturalStartDelay==0&&!this.isNightResting()&&!this.isSleeping()&&!this.isOrderedToSit()&&!this.isPassenger()&&!this.isNoAi()
+        return this.naturalStartDelay==0&&(!this.isInWater()||this.isAquaticSpecies())&&!this.isNightResting()&&!this.isSleeping()&&!this.isOrderedToSit()&&!this.isPassenger()&&!this.isNoAi()
             &&!this.isDeadOrDying()&&this.getTarget()==null&&this.attackAnimationTicks<=0
             &&(this.getOwner()==null||this.distanceToSqr(this.getOwner())<100.0D)
             &&this.goalSelector.getAvailableGoals().stream().noneMatch(goal->goal.isRunning()

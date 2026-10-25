@@ -114,11 +114,14 @@ def night_sleep_clip(data,geo,d):
  airborne=slug in ('butterfree','beedrill','pidgey','pidgeotto','pidgeot','spearow','fearow','zubat','golbat','venomoth','magnemite','magneton','gastly','haunter','gengar','koffing','weezing','aerodactyl','articuno','zapdos','moltres','mewtwo','mew')
  source=clips.get('air_sleep') if airborne else None
  source=source or clips.get('sleep')
+ if source and source.endswith('.minemon_sleep'):source=None
+ if slug=='poliwag':source='animation.poliwag.sleep_placeholder'
  if source not in animations:source=clips.get('air_idle') if airborne else clips.get('ground_idle')
  source=source or d['idle']
  clip=copy.deepcopy(animations.get(source,{}));clip.update(loop=True,animation_length=4.0)
  channels=clip.setdefault('bones',{})
  blink=animations.get(clips.get('blink'),{}).get('bones',{})
+ if slug=='poliwag':blink=animations.get('animation.poliwag.blink_placeholder',{}).get('bones',{})
  # Blink clips hold the source closed pose before their final reopening key.
  def closed(value):
   if isinstance(value,dict):
@@ -132,6 +135,15 @@ def night_sleep_clip(data,geo,d):
   for channel,value in tracks.items():
    if channel in ('position','rotation','scale'):
     channels.setdefault(bone,{})[channel]=closed(value)
+ if slug=='fearow':
+  for side in ('left','right'):
+   channels.setdefault('eyelid_'+side,{})['position']=[0,0,-0.15]
+   channels.setdefault('pupil_'+side,{})['position']=[0,0,0.15]
+ if slug=='tangela':channels.setdefault('eyelids',{})['position']=[0,0,-0.2]
+ if slug in ('butterfree','beedrill','parasect','kakuna'):
+  # These rigs have separate eyes but no eyelid/blink track. A held squint
+  # affects only that eye assembly, retaining its native colors and UVs.
+  channels.setdefault('eyes',{})['scale']=[1,0.10,1]
  # A fallback uses the retained idle pose without generic limb rotations.
  # No source geometry or eye texture is changed.
  animations['animation.'+slug+'.minemon_night_sleep']=clip

@@ -21,8 +21,8 @@ final class WaterEscapeGoal extends Goal {
   out.sort(Comparator.comparingDouble(p->p.distSqr(BlockPos.ZERO)));return List.copyOf(out);
  }
  WaterEscapeGoal(MinemonCreature mob){this.mob=mob;setFlags(EnumSet.of(Flag.MOVE,Flag.JUMP));}
- @Override public boolean canUse(){
-  if(mob.isAquaticSpecies()||!mob.isInWater()||mob.isNoAi()||mob.isPassenger())return false;
+ @Override public boolean canUse(){return !mob.isAquaticSpecies()&&mob.isInWater()&&!mob.isNoAi()&&!mob.isPassenger();}
+ private boolean findShore(){
   if(retry-->0)return false;
   blocked.entrySet().removeIf(e->e.getValue()<mob.tickCount);
   mob.setPathfindingMalus(net.minecraft.world.level.pathfinder.BlockPathTypes.WATER,0);
@@ -39,17 +39,28 @@ final class WaterEscapeGoal extends Goal {
    blocked.put(feet,mob.tickCount+200);
    if(tried>=2)break;
   }
-  retry=4;return false;
+  path=null;retry=4;return false;
  }
- @Override public boolean canContinueToUse(){return mob.isInWater()&&path!=null&&!mob.getNavigation().isDone()&&stalled<30;}
- @Override public void start(){mob.setSleeping(false);mob.getNavigation().moveTo(path,1.0D);previous=mob.position();stalled=0;}
+ @Override public boolean canContinueToUse(){return canUse();}
+ @Override public void start(){mob.setSleeping(false);previous=mob.position();stalled=0;cursor=0;retry=0;path=null;}
  @Override public void tick(){
+  if(path==null||mob.getNavigation().isDone()||stalled>=30){
+   if(destination!=null&&(stalled>=30||path!=null&&mob.getNavigation().isDone()))blocked.put(destination,mob.tickCount+200);
+   mob.getNavigation().stop();path=null;stalled=0;
+   if(findShore())mob.getNavigation().moveTo(path,1.0D);
+  }
+  if(path==null){
+   // No reachable shore yet: rise gently while the bounded search continues.
+   double top=WaterMovementGoal.surfaceAt(mob,mob.blockPosition());
+   if(Double.isFinite(top)&&mob.getY()+mob.getBbHeight()*.5<top)
+    mob.setDeltaMovement(mob.getDeltaMovement().x*.8,Math.max(mob.getDeltaMovement().y,.04),mob.getDeltaMovement().z*.8);
+  }
   if(previous!=null&&mob.position().distanceToSqr(previous)<0.0001D)stalled++;else stalled=0;
   previous=mob.position();
   if(mob.horizontalCollision)mob.setJumping(true);
  }
  @Override public void stop(){
-  if(destination!=null&&stalled>=30)blocked.put(destination,mob.tickCount+200);
+  if(destination!=null&&(stalled>=30||path!=null&&mob.getNavigation().isDone()))blocked.put(destination,mob.tickCount+200);
   mob.getNavigation().stop();mob.setJumping(false);path=null;retry=4;cursor=0;
   mob.setPathfindingMalus(net.minecraft.world.level.pathfinder.BlockPathTypes.WATER,8);
  }
