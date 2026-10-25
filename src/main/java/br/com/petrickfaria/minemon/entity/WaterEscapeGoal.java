@@ -21,7 +21,7 @@ final class WaterEscapeGoal extends Goal {
   out.sort(Comparator.comparingDouble(p->p.distSqr(BlockPos.ZERO)));return List.copyOf(out);
  }
  WaterEscapeGoal(MinemonCreature mob){this.mob=mob;setFlags(EnumSet.of(Flag.MOVE,Flag.JUMP));}
- @Override public boolean canUse(){return !mob.isAquaticSpecies()&&mob.isInWater()&&!mob.isNoAi()&&!mob.isPassenger();}
+ @Override public boolean canUse(){return !mob.isAquaticSpecies()&&mob.isInWater()&&!mob.wantsNaturalLanding()&&!mob.isNoAi()&&!mob.isPassenger();}
  private boolean findShore(){
   if(retry-->0)return false;
   blocked.entrySet().removeIf(e->e.getValue()<mob.tickCount);
