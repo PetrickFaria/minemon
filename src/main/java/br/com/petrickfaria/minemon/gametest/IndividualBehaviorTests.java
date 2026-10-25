@@ -169,6 +169,27 @@ public final class IndividualBehaviorTests {
    +" navDone="+fish.getNavigation().isDone()+" path="+(path==null?"null":path.getNextNodeIndex()+"/"+path.getNodeCount()+" end="+path.getEndNode()));
   if(elapsed<180)h.runAfterDelay(20,()->traceAscent(h,fish,elapsed+20));
  }
+ @GameTest(template="test_arena",batch="long_range_water",timeoutTicks=1600)
+ public static void aquaticSeekerPhysicallyReachesWaterBeyondNinetyBlocks(GameTestHelper h){
+  // A separate batch and elevated corridor keep the long route independent
+  // of neighboring behavior arenas and their water fixtures.
+  for(int x=0;x<=105;x++)for(int z=0;z<=4;z++){
+   h.setBlock(new BlockPos(x,18,z),Blocks.STONE);
+   for(int y=19;y<=23;y++)h.setBlock(new BlockPos(x,y,z),Blocks.AIR);
+  }
+  for(int x=100;x<=104;x++)for(int z=0;z<=4;z++){
+   h.setBlock(new BlockPos(x,15,z),Blocks.STONE);
+   for(int y=16;y<=18;y++)h.setBlock(new BlockPos(x,y,z),Blocks.WATER);
+  }
+  var fish=h.spawn(ModEntities.SPECIES.get("goldeen").get(),new BlockPos(2,19,2));
+  Vec3 start=fish.position();
+  check(h,fish.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.FOLLOW_RANGE)>=100,
+      "Navigation must support the full advertised water-search radius");
+  await(h,()->fish.isInWater()&&fish.position().distanceToSqr(start)>8100,()->{
+   check(h,fish.getX()>=h.absolutePos(new BlockPos(100,0,0)).getX(),"Water seeker must physically reach the distant pond"+state(fish));
+   h.succeed();
+  },1500,"Water search and real navigation must reach a valid pond beyond ninety blocks"+state(fish));
+ }
  @GameTest(template="test_arena",timeoutTicks=60)
  public static void seakingScaleAndNaturalCycleStatePersist(GameTestHelper h){
   arena(h,false);var fish=spawn(h,"seaking",5,1,5);
