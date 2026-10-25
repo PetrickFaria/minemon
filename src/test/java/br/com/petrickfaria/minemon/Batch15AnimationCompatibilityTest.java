@@ -215,8 +215,8 @@ public class Batch15AnimationCompatibilityTest {
         else if(value.isJsonObject()) for(var entry:value.getAsJsonObject().entrySet()) checkExpressions(entry.getValue(),parser,source);
         else if(value.isJsonPrimitive()&&value.getAsJsonPrimitive().isString()) {
             String expression=value.getAsString();
-            assertFalse(source+" retains Bedrock q. syntax: "+expression,expression.matches("(?s).*\bq\.[A-Za-z_].*"));
-            assertFalse(source+" uses unsupported GeckoLib 3.1.40 query.r: "+expression,expression.matches("(?s).*\bquery\.r\.[A-Za-z_][A-Za-z0-9_]*\s*\(.*"));
+            assertFalse(source+" retains Bedrock q. syntax: "+expression,expression.matches("(?s).*\\bq\\.[A-Za-z_].*"));
+            assertFalse(source+" uses unsupported GeckoLib 3.1.40 query.r: "+expression,expression.matches("(?s).*\\bquery\\.r\\.[A-Za-z_][A-Za-z0-9_]*\\s*\\(.*"));
             var parsed=parser.parseExpression(expression);
             for(int tick=0;tick<=20;tick++){parser.setValue("query.anim_time",tick/20.0);assertTrue(source+" non-finite Molang "+expression,Double.isFinite(parsed.get()));}
         }
