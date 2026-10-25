@@ -90,7 +90,7 @@ public class Batch15AnimationCompatibilityTest {
         var definitions=defs(); var profiles=json("data/minemon_gen1/animation_validation_profiles.json");
         for(var entry:anatomy.entrySet()) {
             String slug=entry.getKey(); var def=definitions.get(SPECIES.indexOf(slug)+140).getAsJsonObject();
-            var geometry=json("assets/minemon_gen1/geo/"+slug+"_cobblemon_1_8_2/"+slug+".geo.json").getAsJsonObject("minecraft:geometry").getAsJsonObject();
+            var geometry=json("assets/minemon_gen1/geo/"+slug+"_cobblemon_1_8_2/"+slug+".geo.json").getAsJsonArray("minecraft:geometry").get(0).getAsJsonObject();
             var bones=new HashSet<String>(); for(var bone:geometry.getAsJsonArray("bones")) bones.add(bone.getAsJsonObject().get("name").getAsString());
             assertTrue(slug,bones.containsAll(entry.getValue()));
             var animation=animations(slug); var profile=profiles.getAsJsonObject(slug);
