@@ -68,7 +68,7 @@ public final class MinemonAquaticCreature extends MinemonCreature {
     }
     @Override public void tick(){
         super.tick();
-        if(this.level.isClientSide||!this.isInWater()||!this.naturalBehaviorActive())return;
+        if(this.level.isClientSide||!this.isInWater()||(!this.naturalBehaviorActive()&&!this.isSleeping()))return;
         double top=this.waterSurface();
         if(!Double.isFinite(top))return;
         if(this.isSleeping()){
