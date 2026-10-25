@@ -22,6 +22,27 @@ public final class NightAndSwimmingTests {
   if(ticks<=0){h.getLevel().setDayTime(1000);h.fail(why);return;}
   h.runAfterDelay(5,()->await(h,condition,next,ticks-5,why));
  }
+ private static void awaitBottom(GameTestHelper h,MinemonCreature shellder,MinemonCreature krabby,
+     double originY,int remaining,int elapsed,Runnable next){
+  if(shellder.isInWater()&&krabby.isInWater()
+      &&shellder.getY()-originY<4.0D&&krabby.getY()-originY<4.0D){next.run();return;}
+  if(elapsed%100==0)com.mojang.logging.LogUtils.getLogger().info("BOTTOM NAV TRACE elapsed="+elapsed
+      +" shellderLocalY="+(shellder.getY()-originY)+" shellderPos="+shellder.position()
+      +" shellderWet="+shellder.isInWater()+" shellderNav="+shellder.getNavigation().getTargetPos()
+      +" shellderGoal="+shellder.goalSelector.getAvailableGoals().stream().filter(g->g.getGoal() instanceof WaterMovementGoal).map(g->g.isRunning()).findFirst().orElse(false)
+      +" krabbyLocalY="+(krabby.getY()-originY)+" krabbyPos="+krabby.position()
+      +" krabbyWet="+krabby.isInWater()+" krabbyNav="+krabby.getNavigation().getTargetPos()
+      +" krabbyGoal="+krabby.goalSelector.getAvailableGoals().stream().filter(g->g.getGoal() instanceof WaterMovementGoal).map(g->g.isRunning()).findFirst().orElse(false));
+  if(remaining<=0){
+   h.getLevel().setDayTime(1000);
+   h.fail("Shellder and Krabby must choose reachable water near the floor; elapsed="+elapsed
+       +" originY="+originY+" shellderLocalY="+(shellder.getY()-originY)+" shellderPos="+shellder.position()
+       +" shellderNav="+shellder.getNavigation().getTargetPos()+" krabbyLocalY="+(krabby.getY()-originY)
+       +" krabbyPos="+krabby.position()+" krabbyNav="+krabby.getNavigation().getTargetPos());
+   return;
+  }
+  h.runAfterDelay(5,()->awaitBottom(h,shellder,krabby,originY,remaining-5,elapsed+5,next));
+ }
  private static void arena(GameTestHelper h){
   for(int x=0;x<32;x++)for(int z=0;z<24;z++){
    h.setBlock(new BlockPos(x,0,z),Blocks.STONE);
@@ -66,14 +87,13 @@ public final class NightAndSwimmingTests {
   }
   var shellder=spawn(h,"shellder",7,8,10);var krabby=spawn(h,"krabby",22,8,10);
   double originY=h.absolutePos(BlockPos.ZERO).getY();
-  await(h,()->shellder.isInWater()&&krabby.isInWater()
-      &&shellder.getY()-originY<4.0D&&krabby.getY()-originY<4.0D,()->{
+  awaitBottom(h,shellder,krabby,originY,650,0,()->{
    check(h,h.getLevel().noCollision(shellder,shellder.getBoundingBox()),"Shellder must avoid the solid bottom while seeking it");
    check(h,h.getLevel().noCollision(krabby,krabby.getBoundingBox()),"Krabby must avoid the solid bottom while seeking it");
    double shellderLocalY=shellder.getY()-originY,krabbyLocalY=krabby.getY()-originY;
    check(h,shellderLocalY>=1.0D&&krabbyLocalY>=3.0D,"Bottom-preferring swimmers must stay above the lake bed; shellderLocalY="+shellderLocalY+" krabbyLocalY="+krabbyLocalY);
    h.succeed();
-  },650,"Shellder and Krabby must choose reachable water near the floor");
+  });
  }
  @GameTest(template="test_arena",batch="night_mixed",timeoutTicks=1000)
  public static void realNightLandingHoverWakeRetaliationReturnAndDawn(GameTestHelper h){
