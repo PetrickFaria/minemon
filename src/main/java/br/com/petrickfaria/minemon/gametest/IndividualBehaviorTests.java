@@ -210,7 +210,13 @@ public final class IndividualBehaviorTests {
  }
  private static void traceLongRoute(GameTestHelper h,MinemonCreature fish,int ticks){
   h.runAfterDelay(ticks,()->{
-   com.mojang.logging.LogUtils.getLogger().info("LONG WATER PROGRESS elapsed="+ticks+state(fish));
+   var path=fish.getNavigation().getPath();
+   var control=fish.getMoveControl();
+   com.mojang.logging.LogUtils.getLogger().info("LONG WATER PROGRESS elapsed="+ticks+state(fish)
+       +" velocity="+fish.getDeltaMovement()+" input="+fish.yya+","+fish.zza+" speed="+fish.getSpeed()
+       +" navDone="+fish.getNavigation().isDone()+" wanted="+control.getWantedX()+","+control.getWantedY()+","+control.getWantedZ()
+       +" path="+(path==null?"null":path.getNextNodeIndex()+"/"+path.getNodeCount()+" next="+(path.isDone()?"done":path.getNextNode()))
+       +" goals="+fish.goalSelector.getAvailableGoals().stream().filter(g->g.isRunning()).map(g->g.getGoal().getClass().getSimpleName()).toList());
   });
  }
  @GameTest(template="test_arena",timeoutTicks=60)
