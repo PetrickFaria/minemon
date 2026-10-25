@@ -15,7 +15,8 @@ public final class NaturalBehaviorProfileTest {
     }
 
     @Test public void airborneAndAquaticGroupsAreExplicitAndDoNotUseTypeLabels() {
-        assertTrue(SpeciesBehaviorProfiles.isAirborne("gastly"));
+        assertTrue(SpeciesBehaviorProfiles.canFly("gastly"));
+        assertFalse(SpeciesBehaviorProfiles.isAirborne("gastly"));
         assertTrue(SpeciesBehaviorProfiles.canFly("charizard"));
         assertFalse(SpeciesBehaviorProfiles.isAirborne("charizard"));
         assertTrue(SpeciesBehaviorProfiles.canFly("mew"));
