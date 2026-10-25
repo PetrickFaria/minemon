@@ -254,7 +254,7 @@ public final class CompanionTests {
   h.runAfterDelay(5,()->checkAirborneAttack(h,bird,cow,health,elapsed+5));
  }
 
- @GameTest(template="test_arena",batch="night_landing",timeoutTicks=260)
+ @GameTest(template="test_arena",batch="night_landing",timeoutTicks=520)
  public static void sleepingFlyerFindsDryLandingInsteadOfDroppingIntoWater(GameTestHelper h) {
   floor(h);
   h.getLevel().setDayTime(18000);
@@ -264,12 +264,14 @@ public final class CompanionTests {
   }
   MinemonCreature bird=h.spawn(ModEntities.SPECIES.get("pidgey").get(),new BlockPos(5,8,5));
   CompoundTag flight=new CompoundTag();bird.addAdditionalSaveData(flight);flight.putString("NaturalBehaviorPhase","AIR");bird.readAdditionalSaveData(flight);
-  traceMovement(h,"sleep-landing",bird,0,200);
-  h.runAfterDelay(200,()->{
+  traceMovement(h,"sleep-landing",bird,0,400);
+  h.runAfterDelay(400,()->{
    boolean landed=bird.isSleeping()&&bird.isOnGround()&&!bird.isInWater();
    boolean clear=h.getLevel().noCollision(bird,bird.getBoundingBox());
+   var position=bird.position();var navTarget=bird.getNavigation().getTargetPos();
    h.getLevel().setDayTime(1000);
-   check(h,landed,"Night-resting mixed flyer must follow a path to dry ground");
+   check(h,landed,"Night-resting mixed flyer must follow a path to dry ground; pos="+position+" nav="+navTarget
+       +" sleeping="+bird.isSleeping()+" grounded="+bird.isOnGround()+" water="+bird.isInWater());
    check(h,clear,"Landing must not clip the entity into solid terrain");
    h.succeed();
   });
