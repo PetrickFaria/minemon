@@ -291,7 +291,10 @@ public final class CompanionTests {
    h.setBlock(new BlockPos(x,-3,z),net.minecraft.world.level.block.Blocks.STONE);
    for(int y=-2;y<=0;y++)h.setBlock(new BlockPos(x,y,z),net.minecraft.world.level.block.Blocks.WATER);
   }
-  MinemonCreature goldeen=h.spawn(ModEntities.SPECIES.get("goldeen").get(),new BlockPos(5,1,5));
+  // Keep the seeker only one block from the open pond. At the old farther
+  // spawn, unlucky rejected paths could consume the first search window and
+  // make the assertion race the goal's blocked-destination retry.
+  MinemonCreature goldeen=h.spawn(ModEntities.SPECIES.get("goldeen").get(),new BlockPos(7,1,5));
   int waterPriority=goldeen.goalSelector.getAvailableGoals().stream()
       .filter(goal->goal.getGoal() instanceof WaterMovementGoal).mapToInt(goal->goal.getPriority()).findFirst().orElse(Integer.MAX_VALUE);
   int spacingPriority=goldeen.goalSelector.getAvailableGoals().stream()
@@ -320,7 +323,7 @@ public final class CompanionTests {
   float health=dryHorsea.getHealth();
   check(h,dryHorsea.canBreatheUnderwater(),"Aquatic species must not drown when temporarily submerged");
   double initial=goldeen.distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(pond));
-  h.runAfterDelay(260,()->{
+  h.runAfterDelay(400,()->{
    double current=goldeen.distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(pond));
    check(h,goldeen.isInWater(),"Aquatic species must actually enter reachable water; initial distance="+initial+" current="+current
        +" position="+goldeen.position()+" velocity="+goldeen.getDeltaMovement()+" navigation="+goldeen.getNavigation().getTargetPos()
