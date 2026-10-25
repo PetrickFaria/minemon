@@ -48,13 +48,16 @@ public final class NightAndSwimmingTests {
   arena(h);var level=h.getLevel();
   for(int x=2;x<=15;x++)for(int z=3;z<=10;z++)for(int y=1;y<=9;y++)h.setBlock(new BlockPos(x,y,z),Blocks.WATER);
   level.setDayTime(18000);
-  var gyarados=spawn(h,"gyarados",4,3,6);var magikarp=spawn(h,"magikarp",8,4,6);var dratini=spawn(h,"dratini",12,6,6);
-  await(h,()->gyarados.isSleeping()&&magikarp.isSleeping()&&dratini.isSleeping(),()->{
-   check(h,gyarados.isInWater()&&magikarp.isInWater()&&dratini.isInWater(),"Aquatic and visitor sleepers must stay wet");
+  var gyarados=spawn(h,"gyarados",4,3,6);var magikarp=spawn(h,"magikarp",8,4,6);var dratini=spawn(h,"dratini",12,6,6);var shellder=spawn(h,"shellder",5,8,9);
+  await(h,()->gyarados.isSleeping()&&magikarp.isSleeping()&&dratini.isSleeping()&&shellder.isSleeping(),()->{
+   check(h,gyarados.isInWater()&&magikarp.isInWater()&&dratini.isInWater()&&shellder.isInWater(),"Aquatic and visitor sleepers must stay wet");
    double gyaradosY=WaterMovementGoal.waterRestY(gyarados),fishY=WaterMovementGoal.waterRestY(magikarp),visitorY=WaterMovementGoal.waterRestY(dratini);
+   double shellderY=WaterMovementGoal.waterRestY(shellder),originY=h.absolutePos(BlockPos.ZERO).getY();
    check(h,Math.abs(gyarados.getY()-gyaradosY)<.2D,"Gyarados must preserve its preferred water surface while asleep");
    check(h,Math.abs(magikarp.getY()-fishY)<.2D,"Permanent submerged species must float at a safe, fully wet depth");
-   check(h,Math.abs(dratini.getY()-visitorY)<.2D&&dratini.getY()<3.0D,"A water visitor caught in water at night must settle at the bottom");
+   check(h,Math.abs(dratini.getY()-visitorY)<.2D&&dratini.getY()-originY<2.5D,"A water visitor caught in water at night must settle at the bottom");
+   check(h,Math.abs(shellder.getY()-shellderY)<.2D&&shellder.getY()-originY>=1.0D&&shellder.getY()-originY<2.5D,
+       "A bottom-preferring aquatic sleeper must rest just above the lake floor");
    var attacker=h.spawn(EntityType.COW,new BlockPos(13,2,6));attacker.setNoAi(true);
    float health=attacker.getHealth();
    check(h,dratini.hurt(DamageSource.mobAttack(attacker),1)&&!dratini.isSleeping()&&dratini.getTarget()==attacker,
@@ -62,7 +65,7 @@ public final class NightAndSwimmingTests {
    await(h,()->attacker.getHealth()<health,()->{
     attacker.discard();await(h,dratini::isSleeping,()->{
      level.setDayTime(1000);
-     await(h,()->!gyarados.isSleeping()&&!magikarp.isSleeping()&&!dratini.isSleeping(),()->{
+     await(h,()->!gyarados.isSleeping()&&!magikarp.isSleeping()&&!dratini.isSleeping()&&!shellder.isSleeping(),()->{
       h.succeed();
      },40,"Aquatic sleepers must wake at dawn");
     },220,"A water visitor must return to sleep after combat while it is still night; sleeping="+dratini.isSleeping()+" target="+dratini.getTarget()+" y="+dratini.getY());
