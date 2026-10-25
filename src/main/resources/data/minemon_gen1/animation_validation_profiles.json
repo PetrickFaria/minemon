@@ -71,15 +71,16 @@
   },
   "pidgey": {
     "idle": [
-      "tail2"
+      "wing_open_left",
+      "wing_open_right"
     ],
     "walk": [
-      "leg_left",
-      "leg_right"
+      "wing_open_left",
+      "wing_open_right"
     ],
     "run": [
-      "leg_left",
-      "leg_right"
+      "wing_open_left",
+      "wing_open_right"
     ]
   },
   "pidgeotto": {
