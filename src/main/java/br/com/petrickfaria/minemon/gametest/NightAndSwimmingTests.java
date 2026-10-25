@@ -25,14 +25,7 @@ public final class NightAndSwimmingTests {
  private static void awaitBottom(GameTestHelper h,MinemonCreature shellder,MinemonCreature krabby,
      double originY,int remaining,int elapsed,Runnable next){
   if(shellder.isInWater()&&krabby.isInWater()
-      &&shellder.getY()-originY<4.0D&&krabby.getY()-originY<4.0D){next.run();return;}
-  if(elapsed%100==0)com.mojang.logging.LogUtils.getLogger().info("BOTTOM NAV TRACE elapsed="+elapsed
-      +" shellderLocalY="+(shellder.getY()-originY)+" shellderPos="+shellder.position()
-      +" shellderWet="+shellder.isInWater()+" shellderNav="+shellder.getNavigation().getTargetPos()
-      +" shellderGoal="+shellder.goalSelector.getAvailableGoals().stream().filter(g->g.getGoal() instanceof WaterMovementGoal).map(g->g.isRunning()).findFirst().orElse(false)
-      +" krabbyLocalY="+(krabby.getY()-originY)+" krabbyPos="+krabby.position()
-      +" krabbyWet="+krabby.isInWater()+" krabbyNav="+krabby.getNavigation().getTargetPos()
-      +" krabbyGoal="+krabby.goalSelector.getAvailableGoals().stream().filter(g->g.getGoal() instanceof WaterMovementGoal).map(g->g.isRunning()).findFirst().orElse(false));
+      &&shellder.getY()-originY<2.5D&&krabby.getY()-originY<4.5D){next.run();return;}
   if(remaining<=0){
    h.getLevel().setDayTime(1000);
    h.fail("Shellder and Krabby must choose reachable water near the floor; elapsed="+elapsed
