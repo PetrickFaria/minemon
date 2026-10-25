@@ -71,6 +71,19 @@ public final class MinemonAquaticCreature extends MinemonCreature {
         if(this.level.isClientSide||!this.isInWater()||!this.naturalBehaviorActive())return;
         double top=this.waterSurface();
         if(!Double.isFinite(top))return;
+        if(this.isSleeping()){
+            // Night rest has its own species-specific depth. In particular,
+            // visitors that entered the water during their land cooldown are
+            // marked EXIT_WATER (a surface phase), but must remain asleep at
+            // the safe bottom until dawn rather than being pulled upward.
+            double restY=WaterMovementGoal.waterRestY(this);
+            if(Double.isFinite(restY)){
+                var velocity=this.getDeltaMovement();
+                double vy=net.minecraft.util.Mth.clamp(velocity.y*0.5D+(restY-this.getY())*0.05D,-0.09D,0.09D);
+                this.setDeltaMovement(velocity.x*0.5D,vy,velocity.z*0.5D);
+            }
+            return;
+        }
         boolean surface=this.isNaturalSurface();
         double target=surface?top-WaterMovementGoal.preferredSurfaceDepth(this):top-this.getBbHeight()-0.3D;
         // Surface and submerged correction share the swimming controller; do not
