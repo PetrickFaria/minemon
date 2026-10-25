@@ -256,7 +256,7 @@ public final class CompanionTests {
   h.runAfterDelay(5,()->checkAirborneAttack(h,bird,cow,health,elapsed+5));
  }
 
- @GameTest(template="test_arena",batch="night_landing",timeoutTicks=520)
+ @GameTest(template="test_arena",batch="night_pond_landing",timeoutTicks=520)
  public static void sleepingFlyerFindsDryLandingInsteadOfDroppingIntoWater(GameTestHelper h) {
   floor(h);
   h.getLevel().setDayTime(18000);
