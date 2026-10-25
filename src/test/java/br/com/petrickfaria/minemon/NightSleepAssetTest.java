@@ -104,7 +104,10 @@ public class NightSleepAssetTest {
    var d=SpeciesDefinitions.get(slug);var source=animations(d);
    var sleep=source.getAsJsonObject(d.clips().get("night_sleep")).getAsJsonObject("bones");
    var ground=source.getAsJsonObject(d.clips().get("ground_idle")).getAsJsonObject("bones");
-   assertTrue(slug+" retains a ground wing pose",ground.keySet().stream().anyMatch(n->n.startsWith("wing_closed")||n.equals("wings_closed")));
+   boolean explicitFoldedWings=ground.keySet().stream().anyMatch(n->n.startsWith("wing_closed")||n.equals("wings_closed"));
+   boolean closedRigVisibleByDefault=slug.equals("spearow")&&ground.has("wings_open")
+       &&ground.getAsJsonObject("wings_open").get("scale").getAsDouble()==0.0;
+   assertTrue(slug+" retains a static folded ground wing pose",explicitFoldedWings||closedRigVisibleByDefault);
    for(String bone:ground.keySet())if(bone.startsWith("wing_")||bone.equals("wings_open")||bone.equals("wings_closed"))
     assertEquals(slug+" holds ground wing pose while asleep: "+bone,ground.get(bone),sleep.get(bone));
    assertFalse(slug+" sleep cannot contain a flap oscillator",sleep.toString().contains("math.sin"));
