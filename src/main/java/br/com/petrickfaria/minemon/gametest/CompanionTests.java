@@ -258,11 +258,13 @@ public final class CompanionTests {
  public static void sleepingFlyerFindsDryLandingInsteadOfDroppingIntoWater(GameTestHelper h) {
   floor(h);
   h.getLevel().setDayTime(18000);
-  for(int x=4;x<=6;x++)for(int z=4;z<=6;z++){
+  // Center the pond so the dry shoreline is reachable on every side of this
+  // 16x16 arena, without a neighboring GameTest floor affecting path search.
+  for(int x=7;x<=9;x++)for(int z=7;z<=9;z++){
    h.setBlock(new BlockPos(x,-1,z),net.minecraft.world.level.block.Blocks.STONE);
    h.setBlock(new BlockPos(x,0,z),net.minecraft.world.level.block.Blocks.WATER);
   }
-  MinemonCreature bird=h.spawn(ModEntities.SPECIES.get("pidgey").get(),new BlockPos(5,8,5));
+  MinemonCreature bird=h.spawn(ModEntities.SPECIES.get("pidgey").get(),new BlockPos(8,8,8));
   CompoundTag flight=new CompoundTag();bird.addAdditionalSaveData(flight);flight.putString("NaturalBehaviorPhase","AIR");bird.readAdditionalSaveData(flight);
   traceMovement(h,"sleep-landing",bird,0,400);
   h.runAfterDelay(400,()->{
