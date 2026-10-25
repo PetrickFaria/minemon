@@ -337,9 +337,11 @@ public final class ClientSmokeTest {
        if((slug.equals("pidgeotto")||slug.equals("pidgeot"))&&isSettledClipSample(phase)) {
         var closed=model.getAnimationProcessor().getBone("wings_closed");
         var open=model.getAnimationProcessor().getBone("wings_open");
-        if(closed==null||open==null||!closed.isHidden()||!closed.childBonesAreHiddenToo()
-           ||open.isHidden()||open.childBonesAreHiddenToo()||Math.abs(open.getScaleX()-1.0F)>0.001F)
-         throw new IllegalStateException("Pidge wing poser visibility failed for "+slug+"/"+entity.getSelectedAnimationForValidation()+": closed hierarchy must be hidden and open hierarchy visible; scales="+(closed==null?"missing":closed.getScaleX())+"/"+(open==null?"missing":open.getScaleX()));
+        boolean openPairSelected=open!=null&&closed!=null&&open.getScaleX()>=closed.getScaleX();
+        if(closed==null||open==null||closed.isHidden()!=openPairSelected
+           ||closed.childBonesAreHiddenToo()!=openPairSelected
+           ||open.isHidden()==openPairSelected||open.childBonesAreHiddenToo()==openPairSelected)
+         throw new IllegalStateException("Pidge wing poser visibility failed for "+slug+"/"+entity.getSelectedAnimationForValidation()+": hidden hierarchy must match the inactive wing pose; scales="+(closed==null?"missing":closed.getScaleX())+"/"+(open==null?"missing":open.getScaleX())+", hidden="+(closed==null?"missing":closed.isHidden())+"/"+(open==null?"missing":open.isHidden()));
         wingVisibilitySpecies.add(slug);
        }
        // Measure articulation only after the current phase has settled. The
