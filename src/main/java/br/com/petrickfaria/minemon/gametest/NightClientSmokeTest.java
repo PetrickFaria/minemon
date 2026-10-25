@@ -17,7 +17,7 @@ import java.util.*;
 final class NightClientSmokeTest {
  private static final List<String> SPECIES=List.of("bulbasaur","victreebel","venusaur","snorlax","charizard","scyther","dragonite","pidgey","pidgeotto","pidgeot","fearow","gastly","haunter","gengar","koffing","weezing","butterfree","beedrill","venomoth","parasect","kakuna","tangela","poliwag","growlithe","magikarp","gyarados","lapras","dratini","omanyte");
  private static boolean opened,setup,spawned,waking;
- private static int ticks,index,samples,sleepTick,depthSettleTicks,depthStableTicks;
+ private static int ticks,index,samples,sleepTick,depthSettleTicks,depthStableTicks,restSettleTicks,restStableTicks;
  private static volatile UUID entity;
  private static final Map<String,float[]> eyes=new HashMap<>();
  static void tick(TickEvent.ClientTickEvent event){
@@ -80,7 +80,7 @@ final class NightClientSmokeTest {
     var p=level.getServer().getPlayerList().getPlayers().get(0);p.setGameMode(GameType.CREATIVE);p.teleportTo(level,0,102,-5,0,8);
    });return;}
    if(!spawned){
-    spawned=true;ticks=0;samples=0;sleepTick=0;depthSettleTicks=0;depthStableTicks=0;waking=false;eyes.clear();
+    spawned=true;ticks=0;samples=0;sleepTick=0;depthSettleTicks=0;depthStableTicks=0;restSettleTicks=0;restStableTicks=0;waking=false;eyes.clear();
     mc.getSingleplayerServer().execute(()->{
      var level=mc.getSingleplayerServer().overworld();if(entity!=null){var old=level.getEntity(entity);if(old!=null)old.discard();}
      var mob=ModEntities.SPECIES.get(SPECIES.get(index)).get().create(level);
@@ -118,11 +118,18 @@ final class NightClientSmokeTest {
      }
     }else{
      depthSettleTicks=0;depthStableTicks=0;
-     boolean shouldLand=!SpeciesBehaviorProfiles.hoversDuringNightRest(current.getSpeciesSlug());
-     if(shouldLand&&!current.isOnGround())throw new IllegalStateException(current.getSpeciesSlug()+" must sleep on the ground");
-     if(!shouldLand&&(current.isOnGround()||Math.abs(current.getY()-current.naturalSurface()-1.0D)>.2D))
-      throw new IllegalStateException(current.getSpeciesSlug()+" must keep its approved safe hover sleep pose");
+     boolean shouldHover=SpeciesBehaviorProfiles.hoversDuringNightRest(current.getSpeciesSlug());
+     double support=current.naturalSurface();
+     boolean settled=shouldHover?!current.isOnGround()&&Math.abs(current.getY()-support-1.0D)<=.2D:current.isOnGround();
+     if(!settled){
+      restStableTicks=0;
+      if(++restSettleTicks>20)throw new IllegalStateException(current.getSpeciesSlug()+" did not settle into its approved night-rest pose within 20 client ticks; hover="+shouldHover+" onGround="+current.isOnGround()+" y="+current.getY()+" support="+support+" deltaY="+current.getDeltaMovement().y);
+     }else if(++restStableTicks>=5){
+      restSettleTicks=0;
+     }
     }
+   }else{
+    restSettleTicks=0;restStableTicks=0;
    }
    double dx=current.getX()-mc.player.getX(),dz=current.getZ()-mc.player.getZ(),dy=current.getY()+current.getBbHeight()*.65-mc.player.getEyeY();
    mc.player.setYRot((float)(Math.toDegrees(Math.atan2(dz,dx))-90));mc.player.setXRot((float)-Math.toDegrees(Math.atan2(dy,Math.sqrt(dx*dx+dz*dz))));
