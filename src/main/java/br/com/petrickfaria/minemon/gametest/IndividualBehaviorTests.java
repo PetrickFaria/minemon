@@ -199,6 +199,9 @@ public final class IndividualBehaviorTests {
        +" region="+WaterMovementGoal.isNavigableWaterRegion(target,p->h.getLevel().getFluidState(p).is(net.minecraft.tags.FluidTags.WATER))
        +" range="+fish.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.FOLLOW_RANGE)
        +" path="+(path==null?"null":path.canReach()+" nodes="+path.getNodeCount()+" end="+path.getEndNode())+state(fish));
+   fish.getNavigation().stop();
+   var expanded=fish.getNavigation().createPath(target,0,256);
+   com.mojang.logging.LogUtils.getLogger().info("LONG WATER EXPANDED PATH "+(expanded==null?"null":expanded.canReach()+" nodes="+expanded.getNodeCount()+" end="+expanded.getEndNode()));
   });
   check(h,fish.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.FOLLOW_RANGE)>=100,
       "Navigation must support the full advertised water-search radius");
