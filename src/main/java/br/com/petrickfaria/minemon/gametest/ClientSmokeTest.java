@@ -277,7 +277,7 @@ public final class ClientSmokeTest {
        if(validationPhase>=41&&validationPhase<47)steadyRunFirstTick.putIfAbsent(slug,entity.tickCount);
       }
      }
-     if(validationPhase!=null && java.util.Set.of("abra","kadabra","alakazam","bellsprout","geodude","golem","slowpoke","slowbro","mewtwo","mew").contains(slug)) {
+     if(validationPhase!=null && java.util.Set.of("spearow","fearow","abra","kadabra","alakazam","bellsprout","geodude","golem","slowpoke","slowbro","mewtwo","mew").contains(slug)) {
       var lookHead=model.getAnimationProcessor().getBone("head");
       if(lookHead==null)throw new IllegalStateException("Source q.look head adapter has no GeckoLib head bone for "+slug);
       float[] range=sourceLookRanges.computeIfAbsent(slug,k->{var v=new float[4];java.util.Arrays.fill(v,0,2,Float.MAX_VALUE);java.util.Arrays.fill(v,2,4,-Float.MAX_VALUE);return v;});
@@ -367,14 +367,16 @@ public final class ClientSmokeTest {
         var right=model.getAnimationProcessor().getBone("wing_open_right");
         // The adapted pose lifts the head, straightens both legs and keeps
         // opposite wing orientation while the native rig's wing chains beat.
-        float pitch=(float)Math.toRadians(22.0D),headPitch=(float)Math.toRadians(5.0D),legSplay=(float)Math.toRadians(5.0D);
+        float pitch=(float)Math.toRadians(22.0D),legSplay=(float)Math.toRadians(5.0D);
+        float lookPitch=head==null?Float.NaN:head.getRotationX();
         if(body==null||head==null||leftLeg==null||rightLeg==null||left==null||right==null
            ||Math.abs(Math.abs(body.getRotationX())-pitch)>0.02F
-           ||Math.abs(Math.abs(head.getRotationX())-headPitch)>0.02F
+           ||!Float.isFinite(lookPitch)||lookPitch<(float)Math.toRadians(-35.0D)-0.02F
+           ||lookPitch>(float)Math.toRadians(15.0D)+0.02F
            ||Math.abs(Math.abs(leftLeg.getRotationZ())-legSplay)>0.02F
            ||Math.abs(Math.abs(rightLeg.getRotationZ())-legSplay)>0.02F
            ||left.getRotationZ()*right.getRotationZ()>=0.0F)
-         throw new IllegalStateException("Fearow adapted air pose must lift the head, align the feet and flap both wings");
+         throw new IllegalStateException("Fearow adapted air pose must keep the body/feet aligned, opposite wings beating, and the q.look head within its supported pitch range; head="+lookPitch);
         fearowNativeAirPoseObserved=true;
        }
       if(java.util.Set.of("charmander","charmeleon","charizard").contains(slug)) {
@@ -533,7 +535,7 @@ public final class ClientSmokeTest {
      if(smokeParticles<10)throw new IllegalStateException("Gastly's native idle/walk smoke emitter did not create client particles: "+smokeParticles);
      Files.writeString(Path.of("client-validation.txt"),"PASS GASTLY SMOKE: Cobblemon ghostly_smoke definition loaded and "+smokeParticles+" client particle instances were created during the full render smoke. Manual appearance review remains separate.\\n",StandardOpenOption.APPEND);
     }
-    for(String slug:java.util.List.of("abra","kadabra","alakazam","bellsprout","geodude","golem","slowpoke","slowbro","mewtwo","mew")) {
+    for(String slug:java.util.List.of("spearow","fearow","abra","kadabra","alakazam","bellsprout","geodude","golem","slowpoke","slowbro","mewtwo","mew")) {
      if(!species.contains(slug))continue;
      float[] look=sourceLookRanges.get(slug);
      if(look==null||look[2]-look[0]<0.05F||look[3]-look[1]<0.05F)
@@ -548,7 +550,7 @@ public final class ClientSmokeTest {
      float[] pitch=sourcePitchRanges.get(slug);
      if(pitch==null||pitch[1]-pitch[0]<0.05F)throw new IllegalStateException("Source q.pitch_tilt adaptation did not move "+slug+"'s body: "+java.util.Arrays.toString(pitch));
     }
-    var selectedLook=java.util.List.of("abra","kadabra","alakazam","bellsprout","geodude","golem","slowpoke","slowbro","mewtwo","mew").stream().filter(species::contains).toList();
+    var selectedLook=java.util.List.of("spearow","fearow","abra","kadabra","alakazam","bellsprout","geodude","golem","slowpoke","slowbro","mewtwo","mew").stream().filter(species::contains).toList();
     if(!selectedLook.isEmpty())Files.writeString(Path.of("client-validation.txt"),"PASS SOURCE LOOK: selected head bones respond to source poser look input: "+selectedLook+"\n",StandardOpenOption.APPEND);
     for(String slug:java.util.List.of("mewtwo","mew"))if(species.contains(slug))Files.writeString(Path.of("client-validation.txt"),"PASS SOURCE PITCH: "+slug+" source q.pitch_tilt input moves the body bone: "+java.util.Arrays.toString(sourcePitchRanges.get(slug))+"\n",StandardOpenOption.APPEND);
     var selectedStarters=java.util.List.of("charmander","charmeleon","charizard").stream().filter(species::contains).toList();
