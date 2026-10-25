@@ -63,25 +63,44 @@ public final class IndividualBehaviorTests {
   },200,"Continuous flyer must patrol at 1..3 blocks above terrain"+state(bird));
  }
  private static boolean band(MinemonCreature m,double low,double high){double a=m.getY()-m.naturalSurface();return a>=low&&a<=high;}
- @GameTest(template="test_arena",timeoutTicks=700)
- public static void charizardAndScytherSwitchNavigationAndLandWithoutTeleport(GameTestHelper h){
-  arena(h,false);var first=spawn(h,"charizard",3,1,5);var second=spawn(h,"scyther",10,1,10);
-  await(h,()->first.isOnGround()&&second.isOnGround(),()->{
-  for(var mob:java.util.List.of(first,second)){
-   check(h,!mob.isFlyingSpecies(),"Mixed species must begin on land"+state(mob));
-   restore(mob,"LAND",11999,0);
-   check(h,mob.getNavigation().moveTo(mob.getX()+2,mob.getY(),mob.getZ(),0.8D),"Grounded mixed species must accept the real walk route"+state(mob));
-  }
-  await(h,()->first.naturalCycle().phase()==AIR&&second.naturalCycle().phase()==AIR,()->{
-   for(var mob:java.util.List.of(first,second)){
-    check(h,!mob.isOnGround()&&mob.isFlyingSpecies(),"Takeoff must physically occur"+state(mob));restore(mob,"AIR",5999,1);
+ @GameTest(template="test_arena",timeoutTicks=1000)
+ public static void allMixedFliersTakeOffChangeAltitudeAndLandWithoutTeleport(GameTestHelper h){
+  arena(h,false);
+  var mobs=java.util.List.of(spawn(h,"charizard",3,1,5),spawn(h,"scyther",10,1,10),spawn(h,"dragonite",8,1,4));
+  await(h,()->mobs.stream().allMatch(MinemonCreature::isOnGround),()->{
+   for(var mob:mobs){
+    check(h,!mob.isFlyingSpecies(),"Mixed species must begin on land"+state(mob));
+    restore(mob,"LAND",11999,0);
    }
-   await(h,()->first.naturalCycle().phase()==LAND&&second.naturalCycle().phase()==LAND,()->{
-    for(var mob:java.util.List.of(first,second))check(h,mob.isOnGround()&&!mob.isFlyingSpecies()&&!mob.isNoGravity(),"Real dry landing must restore land control"+state(mob));
-    h.succeed();
-   },400,"Mixed species must complete safe landing");
-  },250,"Both mixed species must enter their real flight phase");
+   await(h,()->mobs.stream().allMatch(m->m.naturalCycle().phase()==AIR&&band(m,1,3)),()->{
+    for(var mob:mobs){
+     check(h,!mob.isOnGround()&&mob.isFlyingSpecies(),"Takeoff must physically occur"+state(mob));
+     restore(mob,"AIR",5999,0);
+    }
+    await(h,()->mobs.stream().allMatch(m->m.naturalCycle().stage()==1&&band(m,4,9)),()->{
+     for(var mob:mobs)restore(mob,"AIR",5999,1);
+     await(h,()->mobs.stream().allMatch(m->m.naturalCycle().phase()==LAND),()->{
+      for(var mob:mobs)check(h,mob.isOnGround()&&!mob.isFlyingSpecies()&&!mob.isNoGravity(),"Real dry landing must restore land control"+state(mob));
+      h.succeed();
+     },400,"All three mixed species must complete safe landing");
+    },250,"All three mixed species must physically reach the high flight band");
+   },250,"All three mixed species must physically enter the low flight band");
   },30,"Mixed species must first settle on their physical ground support");
+ }
+ @GameTest(template="test_arena",timeoutTicks=250)
+ public static void closeNeighborsActuallySeparateAndThenStop(GameTestHelper h){
+  arena(h,false);var mob=spawn(h,"bulbasaur",6,1,6);var neighbor=spawn(h,"bulbasaur",7,1,6);
+  neighbor.setNoAi(true);
+  var separation=mob.goalSelector.getAvailableGoals().stream().map(g->g.getGoal())
+      .filter(g->g.getClass().getSimpleName().equals("NaturalSeparationGoal")).findFirst().orElseThrow();
+  mob.goalSelector.removeAllGoals();mob.goalSelector.addGoal(0,separation);
+  h.runAfterDelay(160,()->{
+   check(h,mob.distanceToSqr(neighbor)>=7.84D,"Close neighbors must physically reach approximately three blocks of separation"+state(mob));
+   Vec3 settled=mob.position();
+   h.runAfterDelay(60,()->{
+    check(h,mob.position().distanceToSqr(settled)<0.25D,"Spacing must settle rather than oscillate indefinitely"+state(mob));h.succeed();
+   });
+  });
  }
  @GameTest(template="test_arena",timeoutTicks=1200)
  public static void visitorDivesSurfacesExitsAndHonorsLandCooldown(GameTestHelper h){

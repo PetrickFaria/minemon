@@ -284,11 +284,11 @@ public final class CompanionTests {
  @GameTest(template="test_arena",timeoutTicks=1300)
  public static void aquaticSpeciesSeekWaterAndSurviveWithoutIt(GameTestHelper h) {
   floor(h);
-  // A small accessible pond exercises permanent swimmers independently of
-  // the 3x3x3 volume requirement used only by aquatic visitors.
-  for(int x=8;x<=10;x++)for(int z=4;z<=6;z++){
-   h.setBlock(new BlockPos(x,-1,z),net.minecraft.world.level.block.Blocks.STONE);
-   h.setBlock(new BlockPos(x,0,z),net.minecraft.world.level.block.Blocks.WATER);
+  // All aquatic profiles require a real 3x3x3 volume; retain a separate
+  // one-block puddle to ensure it cannot satisfy that requirement.
+  for(int x=8;x<=12;x++)for(int z=3;z<=9;z++){
+   h.setBlock(new BlockPos(x,-3,z),net.minecraft.world.level.block.Blocks.STONE);
+   for(int y=-2;y<=0;y++)h.setBlock(new BlockPos(x,y,z),net.minecraft.world.level.block.Blocks.WATER);
   }
   MinemonCreature goldeen=h.spawn(ModEntities.SPECIES.get("goldeen").get(),new BlockPos(5,1,5));
   int waterPriority=goldeen.goalSelector.getAvailableGoals().stream()
@@ -297,7 +297,7 @@ public final class CompanionTests {
       .filter(goal->goal.getGoal().getClass().getSimpleName().equals("NaturalSeparationGoal"))
       .mapToInt(goal->goal.getPriority()).findFirst().orElse(Integer.MIN_VALUE);
   check(h,waterPriority<spacingPriority,"Species-specific water navigation must take priority over optional spacing: water="+waterPriority+" spacing="+spacingPriority);
-  BlockPos pond=h.absolutePos(new BlockPos(9,0,5));
+  BlockPos pond=h.absolutePos(new BlockPos(10,-1,6));
   var directPath=goldeen.getNavigation().createPath(pond,0);
   com.mojang.logging.LogUtils.getLogger().info("MINEMON AQUATIC SEEK FIXTURE target="+pond
       +" targetWater="+h.getLevel().getFluidState(pond).is(net.minecraft.tags.FluidTags.WATER)
@@ -307,7 +307,7 @@ public final class CompanionTests {
       +" state="+goldeen.position()+" nav="+goldeen.getNavigation().getClass().getSimpleName());
   h.setBlock(new BlockPos(13,-1,10),net.minecraft.world.level.block.Blocks.STONE);
   h.setBlock(new BlockPos(13,0,10),net.minecraft.world.level.block.Blocks.WATER);
-  MinemonCreature adjacent=h.spawn(ModEntities.SPECIES.get("goldeen").get(),new BlockPos(12,1,10));
+  MinemonCreature adjacent=h.spawn(ModEntities.SPECIES.get("goldeen").get(),new BlockPos(6,1,7));
   // NoAI does not disable physical pushing. Keep the dry-survival specimen
   // away from the two roaming water seekers, with a real dry enclosure;
   // otherwise incidental pushes can invalidate the dry-land precondition.
@@ -324,7 +324,7 @@ public final class CompanionTests {
    check(h,goldeen.isInWater(),"Aquatic species must actually enter reachable water; initial distance="+initial+" current="+current
        +" position="+goldeen.position()+" velocity="+goldeen.getDeltaMovement()+" navigation="+goldeen.getNavigation().getTargetPos()
        +" active="+goldeen.naturalBehaviorActive());
-   check(h,adjacent.isInWater(),"Aquatic species must also enter an accessible water block immediately beside it");
+   check(h,adjacent.isInWater(),"Second aquatic seeker must reject the small puddle and enter valid water");
   });
   h.runAfterDelay(1200,()->{
    check(h,!dryHorsea.isInWater()&&dryHorsea.isAlive()&&dryHorsea.getHealth()==health,"Aquatic species must retain full health after 1200 ticks on dry land; position="+dryHorsea.position()
