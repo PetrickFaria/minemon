@@ -104,7 +104,7 @@ public class MinemonRenderer extends GeoEntityRenderer<MinemonCreature> {
    boolean keep=selectedParent||containsSelected(bone,selected);
    if(!keep)bone.setHidden(true,true);
    else if(selected.contains(bone.name))bone.setHidden(false,false);
-   else if(!selectedParent)bone.setHidden(true,false); // Transform ancestors only; never draw their body cubes with a flame mask.
+   else if(!selectedParent&&selected.equals(java.util.Set.of("tail_flame")))bone.setHidden(true,false); // Transform ancestors only; never draw their body cubes with a flame mask.
    for(var child:bone.childBones)setSelectedVisibility(child,selected,selectedParent||selected.contains(bone.name));
   }
   private static void collectFireBones(software.bernie.geckolib3.geo.render.built.GeoBone bone,java.util.Set<String> found,String slug){
