@@ -83,6 +83,20 @@ def compatible_locomotion(data,geo,d):
    body=channels.setdefault('body',{})
    body['position']=[0,sinus(0,0.12 if kind=='walk' else 0.2,freq*2),0]
    put(kind,clip)
+ if slug in ('articuno','zapdos','moltres','fearow'):
+  # Retained air clips contain poses only: the source poser's procedural
+  # wing beat is absent in GeckoLib. Add it to the copied air tracks only.
+  for kind in ('air_fly','air_idle'):
+   clip=animations.get('animation.'+slug+'.'+kind)
+   if not clip:continue
+   names={b['name'] for g in geo['minecraft:geometry'] for b in g['bones']}
+   for side,sign in (('left',1),('right',-1)):
+    joint='wing_open_'+side
+    if joint not in names:raise ValueError(slug+' missing wing joint '+joint)
+    ch=clip.setdefault('bones',{}).setdefault(joint,{})
+    rotation=list(ch.get('rotation',[0,0,0]))
+    rotation[2]=sinus(rotation[2],sign*32,1.4)
+    ch['rotation']=rotation
  if slug=='vaporeon':
   clip=source('ground_idle');clip.update(loop=True,animation_length=1.0)
   channels=clip['bones']

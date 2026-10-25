@@ -23,15 +23,15 @@ public class BehaviorCycleTest {
  @Test public void altitudeCountsOnlyActualTimeInsideEachBand(){
   var c=new BehaviorCycle(ALTITUDE_CYCLE);var flight=observe(true,false,true,false,false,false,false,false);
   repeat(c,6000,observe(true,false,false,false,false,false,false,false));assertEquals(0,c.ticks());
-  repeat(c,5999,flight);assertEquals(0,c.stage());c.tick(flight);assertEquals(1,c.stage());assertEquals(8,c.minimumAltitude(),0);
-  assertEquals(15,c.maximumAltitude(),0);repeat(c,3000,flight);assertEquals(0,c.stage());assertEquals(0,c.ticks());
+  repeat(c,11999,flight);assertEquals(0,c.stage());c.tick(flight);assertEquals(1,c.stage());assertEquals(4,c.minimumAltitude(),0);
+  assertEquals(9,c.maximumAltitude(),0);repeat(c,6000,flight);assertEquals(0,c.stage());assertEquals(0,c.ticks());
  }
  @Test public void twentyMinuteGroundLowFlightHighFlightLandingCycle(){
   var c=new BehaviorCycle(GROUND_FLIGHT);var walk=observe(true,true,false,false,false,false,true,false);
-  repeat(c,5999,walk);assertEquals(LAND,c.phase());c.tick(walk);assertEquals(TAKEOFF,c.phase());
+  repeat(c,11999,walk);assertEquals(LAND,c.phase());c.tick(walk);assertEquals(TAKEOFF,c.phase());
   repeat(c,200,observe(true,false,false,false,false,false,false,false));assertEquals(0,c.ticks());
   var fly=observe(true,false,true,false,false,false,false,false);c.tick(fly);assertEquals(AIR,c.phase());
-  repeat(c,5999,fly);assertEquals(AIR,c.phase());c.tick(fly);assertEquals(1,c.stage());assertEquals(8,c.minimumAltitude(),0);
+  repeat(c,5999,fly);assertEquals(AIR,c.phase());c.tick(fly);assertEquals(1,c.stage());assertEquals(4,c.minimumAltitude(),0);
   repeat(c,5999,fly);assertEquals(AIR,c.phase());c.tick(fly);assertEquals(LANDING,c.phase());
   repeat(c,200,fly);assertEquals(LANDING,c.phase());c.tick(walk);assertEquals(LAND,c.phase());
  }
@@ -54,6 +54,15 @@ public class BehaviorCycleTest {
   var flight=observe(true,false,true,false,false,false,false,false);repeat(a,100,flight);
   repeat(a,9000,observe(false,true,true,true,true,true,true,true));assertEquals(100,a.ticks());assertEquals(0,b.ticks());
   var restored=new BehaviorCycle(ALTITUDE_CYCLE);restored.restore(a.phase().name(),a.ticks(),a.stage());assertEquals(100,restored.ticks());
+ }
+ @Test public void freeDepthChoicesPreserveTotalAquaticDurationAndPersist(){
+  var c=new BehaviorCycle(WATER_VISITOR);
+  c.restore("SUBMERGED",4000,0);c.chooseWaterDepth(true);
+  assertEquals(SURFACE,c.phase());assertEquals(4000,c.ticks());
+  c.chooseWaterDepth(false);assertEquals(SUBMERGED,c.phase());assertEquals(4000,c.ticks());
+  var restored=new BehaviorCycle(WATER_VISITOR);restored.restore(c.phase().name(),c.ticks(),0);
+  repeat(restored,8000,observe(true,false,false,true,true,false,false,true));
+  assertEquals(EXIT_WATER,restored.phase());
  }
  @Test public void shallowWaterUsesSurfaceSwimmingInsteadOfForcedSubmersion(){
   var c=new BehaviorCycle(WATER_VISITOR);var dry=observe(true,true,false,false,false,false,true,false);repeat(c,12000,dry);

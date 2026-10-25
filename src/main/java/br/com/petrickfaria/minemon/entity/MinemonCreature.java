@@ -99,7 +99,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     }
 
     public static AttributeSupplier.Builder createAttributes(SpeciesDefinitions.Definition d) {
-        return createAttributes().add(Attributes.MAX_HEALTH,d.health()).add(Attributes.ATTACK_DAMAGE,d.attack()).add(Attributes.MOVEMENT_SPEED,d.speed()).add(Attributes.FLYING_SPEED,0.4D);
+        return createAttributes().add(Attributes.FOLLOW_RANGE,SpeciesBehaviorProfiles.waterCapable(d.slug())?128.0D:24.0D).add(Attributes.MAX_HEALTH,d.health()).add(Attributes.ATTACK_DAMAGE,d.attack()).add(Attributes.MOVEMENT_SPEED,d.speed()).add(Attributes.FLYING_SPEED,0.4D);
     }
     public boolean isFlyingSpecies() { return SpeciesBehaviorProfiles.isAirborne(this.getSpeciesSlug()) || this.entityData.get(NATURAL_FLIGHT); }
     public boolean isAquaticSpecies() { return SpeciesBehaviorProfiles.waterCapable(this.getSpeciesSlug()); }
@@ -464,6 +464,11 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
 
     public BehaviorCycle naturalCycle(){return this.naturalCycle;}
     public boolean isNaturalSurface(){return this.entityData.get(NATURAL_SURFACE);}
+    public void chooseNaturalWaterDepth(boolean surface){
+        if(SpeciesBehaviorProfiles.isVisitor(this.getSpeciesSlug()))
+            this.naturalCycle.chooseWaterDepth(surface);
+        this.syncNaturalState();
+    }
     public boolean wantsNaturalLanding(){return this.isSleeping() || this.entityData.get(NATURAL_LANDING);}
     public int getSmokeParticleCountForValidation(){return this.smokeParticles;}
     public boolean naturalBehaviorActive(){

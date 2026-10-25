@@ -40,7 +40,7 @@ final class NaturalSeparationGoal extends Goal {
 
  @Override public boolean canContinueToUse(){
   return destination!=null&&mob.naturalBehaviorActive()&&!mob.getNavigation().isDone()
-      &&neighbor!=null&&mob.distanceToSqr(neighbor)>=preferredDistance(neighbor)*preferredDistance(neighbor)*1.12D
+      &&neighbor!=null&&mob.distanceToSqr(neighbor)<preferredDistance(neighbor)*preferredDistance(neighbor)*1.12D
       &&stuckTicks<30;
  }
 

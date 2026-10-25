@@ -13,6 +13,7 @@ public final class WaterMovementGoal extends Goal {
  private final MinemonCreature mob;
  private int scanIndex,scanYIndex,delay,stalled;
  private Vec3 lastPosition;
+ private boolean scanDepth;
  private BlockPos destination;
  private final Map<BlockPos,Integer> blocked=new HashMap<>();
  private static final List<BlockPos> OFFSETS=offsets();
@@ -33,7 +34,11 @@ public final class WaterMovementGoal extends Goal {
    if(needsExit()||SpeciesBehaviorProfiles.isVisitor(mob.getSpeciesSlug())&&mob.naturalCycle().phase()==BehaviorCycle.Phase.COOLDOWN)return false;
    destination=scan(false);
   }else if(needsExit())destination=scan(true);
-  else destination=swimDestination();
+  else {
+   if(SpeciesBehaviorProfiles.isVisitor(mob.getSpeciesSlug()))
+    mob.chooseNaturalWaterDepth(!canDive(mob,mob.blockPosition())||mob.getRandom().nextInt(3)==0);
+   destination=swimDestination();
+  }
   return destination!=null;
  }
  @Override public boolean canContinueToUse(){
@@ -74,9 +79,22 @@ public final class WaterMovementGoal extends Goal {
   // a blocked deep node cannot restart the same column indefinitely.
   for(int n=0;n<2048;n++){
    BlockPos offset=OFFSETS.get(scanIndex%OFFSETS.size());
-   int dy=scanYIndex==0?0:((scanYIndex+1)/2)*(scanYIndex%2==1?-1:1);
-   if(++scanYIndex>50){scanYIndex=0;scanIndex=(scanIndex+1)%OFFSETS.size();}
-   BlockPos p=origin.offset(offset.getX(),dy,offset.getZ());
+   BlockPos p;
+   if(!scanDepth){
+    BlockPos column=origin.offset(offset.getX(),0,offset.getZ());
+    if(++scanIndex>=OFFSETS.size()){scanIndex=0;scanDepth=true;}
+    if(!mob.level.hasChunkAt(column))continue;
+    int top=mob.level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,column.getX(),column.getZ());
+    // Prioritize open water/shore columns over the exhaustive underground pass.
+    p=new BlockPos(column.getX(),dry?top:top-2,column.getZ());
+   }else{
+    int dy=scanYIndex==0?0:((scanYIndex+1)/2)*(scanYIndex%2==1?-1:1);
+    if(++scanYIndex>SEARCH_RADIUS*2){
+     scanYIndex=0;
+     if(++scanIndex>=OFFSETS.size()){scanIndex=0;scanDepth=false;}
+    }
+    p=origin.offset(offset.getX(),dy,offset.getZ());
+   }
    if(!withinSearchRadius(origin,p)||!mob.level.hasChunkAt(p)||blocked.containsKey(p))continue;
    if(dry?!safeDry(mob,p):!waterFits(mob,p,SpeciesBehaviorProfiles.profile(mob.getSpeciesSlug())!=SpeciesBehaviorProfiles.Profile.SURFACE)
        ||requiresNavigableVolume(mob.getSpeciesSlug())&&!waterRegion(mob,p))continue;
@@ -142,13 +160,16 @@ public final class WaterMovementGoal extends Goal {
   return mob.getSpeciesSlug().equals("gyarados")?1.5D+mob.getBbHeight()*0.5D:Math.min(0.8D,mob.getBbHeight()*0.3D);
  }
  public static boolean withinSearchRadius(BlockPos origin,BlockPos candidate){return origin.distSqr(candidate)<=SEARCH_RADIUS*SEARCH_RADIUS;}
- public static boolean requiresNavigableVolume(String speciesSlug){return SpeciesBehaviorProfiles.isVisitor(speciesSlug);}
+ public static boolean requiresNavigableVolume(String speciesSlug){return SpeciesBehaviorProfiles.waterCapable(speciesSlug);}
  public static boolean isNavigableWaterRegion(BlockPos center,java.util.function.Predicate<BlockPos> water){
   for(int x=-1;x<=1;x++)for(int y=-1;y<=1;y++)for(int z=-1;z<=1;z++)if(!water.test(center.offset(x,y,z)))return false;
   return true;
  }
  private static boolean waterRegion(MinemonCreature mob,BlockPos center){
-  return isNavigableWaterRegion(center,cell->mob.level.hasChunkAt(cell)
+  double top=surfaceAt(mob,center);
+  if(!Double.isFinite(top))return false;
+  BlockPos volume=new BlockPos(center.getX(),Math.min(center.getY(),(int)Math.ceil(top)-2),center.getZ());
+  return isNavigableWaterRegion(volume,cell->mob.level.hasChunkAt(cell)
       &&mob.level.getFluidState(cell).is(FluidTags.WATER)
       &&mob.level.getBlockState(cell).getCollisionShape(mob.level,cell).isEmpty());
  }

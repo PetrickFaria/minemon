@@ -37,7 +37,7 @@ public final class NaturalMovementAssetTest {
   }
  }
 
- @Test public void sourceFlightPosesStayStaticAndNoWingCycleIsSynthesized() throws Exception {
+ @Test public void retainedFlightClipsReceiveProceduralWingBeats() throws Exception {
   for(String slug:List.of("articuno","zapdos","moltres")) {
    var animations=animations(slug);
    assertTrue(slug+" keeps its source flight clip",animations.has("animation."+slug+".air_fly"));
@@ -46,14 +46,15 @@ public final class NaturalMovementAssetTest {
    for(String bone:List.of("wing_open_left","wing_open_right")) {
     var track=animations.getAsJsonObject("animation."+slug+".air_fly").getAsJsonObject("bones").getAsJsonObject(bone).get("rotation");
     assertNotNull(slug+" native pose for "+bone,track);
-    assertTrue(slug+" source pose remains a static vector for "+bone,track.isJsonArray()&&track.getAsJsonArray().size()==3);
+    assertTrue(slug+" wing must move over time for "+bone,track.toString().contains("math.sin"));
    }
    var clips=new java.util.HashMap<>(SpeciesDefinitions.get(slug).clips());
    String nativeFlight=clips.get("air_fly");CompatibleLocomotion.apply(slug,clips);
    assertEquals(slug+" still selects native air_fly",nativeFlight,clips.get("air_fly"));
   }
   var fearow=animations("fearow");
-  assertTrue("Fearow keeps its native static air pose",fearow.has("animation.fearow.air_idle"));
+  assertTrue("Fearow keeps its native air pose",fearow.has("animation.fearow.air_idle"));
+  for(String bone:List.of("wing_open_left","wing_open_right"))assertDynamicBone(fearow,"animation.fearow.air_idle",bone);
   assertFalse("Fearow has no invented air cycle",fearow.has("animation.fearow.minemon_fly"));
   var fearowClips=new java.util.HashMap<>(SpeciesDefinitions.get("fearow").clips());
   CompatibleLocomotion.apply("fearow",fearowClips);

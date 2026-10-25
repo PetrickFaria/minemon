@@ -14,10 +14,10 @@ public final class WaterSearchTest {
   assertFalse(WaterMovementGoal.withinSearchRadius(origin,new BlockPos(101,0,0)));
  }
 
- @Test public void threeByThreeByThreeVolumeIsRequiredForVisitorsOnly(){
+ @Test public void threeByThreeByThreeVolumeIsRequiredForEveryAquaticProfile(){
   assertTrue(WaterMovementGoal.requiresNavigableVolume("squirtle"));
-  assertFalse(WaterMovementGoal.requiresNavigableVolume("goldeen"));
-  assertFalse(WaterMovementGoal.requiresNavigableVolume("gyarados"));
+  assertTrue(WaterMovementGoal.requiresNavigableVolume("goldeen"));
+  assertTrue(WaterMovementGoal.requiresNavigableVolume("gyarados"));
  }
 
  @Test public void targetRequiresACompleteContiguousThreeByThreeByThreeWaterVolume(){
