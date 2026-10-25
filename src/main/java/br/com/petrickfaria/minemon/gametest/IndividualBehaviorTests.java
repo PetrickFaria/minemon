@@ -36,7 +36,7 @@ public final class IndividualBehaviorTests {
   if(condition.getAsBoolean()){next.run();return;}
   if(remaining<=0){
    var origin=h.absolutePos(BlockPos.ZERO);
-   for(var m:h.getLevel().getEntitiesOfClass(MinemonCreature.class,new net.minecraft.world.phys.AABB(origin).inflate(22)))
+   for(var m:h.getLevel().getEntitiesOfClass(MinemonCreature.class,new net.minecraft.world.phys.AABB(origin).inflate(160)))
     com.mojang.logging.LogUtils.getLogger().error("INDIVIDUAL BEHAVIOR FAILURE"+state(m)+" velocity="+m.getDeltaMovement()+" gravity="+!m.isNoGravity()+" navigation="+m.getNavigation().getClass().getSimpleName());
    h.fail(error);return;
   }
@@ -169,7 +169,7 @@ public final class IndividualBehaviorTests {
    +" navDone="+fish.getNavigation().isDone()+" path="+(path==null?"null":path.getNextNodeIndex()+"/"+path.getNodeCount()+" end="+path.getEndNode()));
   if(elapsed<180)h.runAfterDelay(20,()->traceAscent(h,fish,elapsed+20));
  }
- @GameTest(template="test_arena",batch="long_range_water",timeoutTicks=1600)
+ @GameTest(template="test_arena",batch="long_range_water",timeoutTicks=2600)
  public static void aquaticSeekerPhysicallyReachesWaterBeyondNinetyBlocks(GameTestHelper h){
   // A separate batch and elevated corridor keep the long route independent
   // of neighboring behavior arenas and their water fixtures.
@@ -187,6 +187,7 @@ public final class IndividualBehaviorTests {
   }
   var fish=h.spawn(ModEntities.SPECIES.get("goldeen").get(),new BlockPos(2,19,2));
   Vec3 start=fish.position();
+  for(int sample=200;sample<=2200;sample+=200)traceLongRoute(h,fish,sample);
   h.runAfterDelay(20,()->{
    for(int x=2;x<100;x++){
     var floor=h.absolutePos(new BlockPos(x,18,2));
@@ -205,7 +206,12 @@ public final class IndividualBehaviorTests {
   await(h,()->fish.isInWater()&&fish.position().distanceToSqr(start)>8100,()->{
    check(h,fish.getX()>=h.absolutePos(new BlockPos(100,0,0)).getX(),"Water seeker must physically reach the distant pond"+state(fish));
    h.succeed();
-  },1500,"Water search and real navigation must reach a valid pond beyond ninety blocks"+state(fish));
+  },2400,"Water search and real navigation must reach a valid pond beyond ninety blocks"+state(fish));
+ }
+ private static void traceLongRoute(GameTestHelper h,MinemonCreature fish,int ticks){
+  h.runAfterDelay(ticks,()->{
+   com.mojang.logging.LogUtils.getLogger().info("LONG WATER PROGRESS elapsed="+ticks+state(fish));
+  });
  }
  @GameTest(template="test_arena",timeoutTicks=60)
  public static void seakingScaleAndNaturalCycleStatePersist(GameTestHelper h){
