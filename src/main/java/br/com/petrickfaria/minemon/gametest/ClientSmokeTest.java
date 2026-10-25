@@ -167,6 +167,8 @@ public final class ClientSmokeTest {
    "wartortle",java.util.List.of("arm_left","arm_right","torso")
   );
   private static java.util.List<String> profileJoints(String slug,String state) {
+   if(slug.equals("pidgey")&&fixtureAir(slug))
+    return java.util.List.of("wing_open_left","wing_open_right");
    if(java.util.Set.of("spearow","fearow","articuno","zapdos","moltres").contains(slug)&&fixtureAir(slug))
     return java.util.List.of("wing_open_left","wing_open_right");
    if(ADDITIONAL_PROFILES.containsKey(slug)) {
