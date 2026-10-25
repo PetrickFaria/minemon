@@ -50,6 +50,9 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     private static final EntityDataAccessor<Boolean> NATURAL_FLIGHT = SynchedEntityData.defineId(MinemonCreature.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> NATURAL_SURFACE = SynchedEntityData.defineId(MinemonCreature.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> NATURAL_LANDING = SynchedEntityData.defineId(MinemonCreature.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> NIGHT_REST = SynchedEntityData.defineId(MinemonCreature.class, EntityDataSerializers.BOOLEAN);
+    private int wakeGraceTicks;
+    private boolean nightRoutine;
     private BehaviorCycle naturalCycle;
     private int naturalStartDelay;
     private int smokeParticles;
@@ -82,7 +85,17 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         super(type, level);
         this.naturalCycle = new BehaviorCycle(SpeciesBehaviorProfiles.profile(this.getSpeciesSlug()));
         this.naturalStartDelay=this.getRandom().nextInt(30);
+        if(!this.isAquaticSpecies()&&!SpeciesBehaviorProfiles.canFly(this.getSpeciesSlug()))this.moveControl=new WaterAwareMoveControl(this);
         this.blinkCooldownTicks = 80 + this.getRandom().nextInt(120);
+    }
+
+    @Override protected net.minecraft.world.entity.ai.navigation.PathNavigation createNavigation(Level level){
+        return new EscapeNavigation(this,level);
+    }
+    @Override public void travel(net.minecraft.world.phys.Vec3 input){
+        if(!this.level.isClientSide&&!this.isAquaticSpecies())
+            this.setNoGravity(this.isInWater()||this.isFlyingSpecies()&&!this.wantsNaturalLanding());
+        super.travel(input);
     }
 
     public String getSpeciesSlug() {
@@ -117,7 +130,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         this.entityData.set(SLEEPING, sleeping);
         if (sleeping) {
             this.getNavigation().stop(); this.setTarget(null); this.stopSpontaneousRun();
-            if (this instanceof MinemonFlyingCreature) this.setNoGravity(false);
+            if (this instanceof MinemonFlyingCreature) this.setNoGravity(SpeciesBehaviorProfiles.isAirborne(this.getSpeciesSlug()));
         } else if (this instanceof MinemonFlyingCreature) {
             this.setNoGravity(true);
         }
@@ -125,6 +138,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
 
     @Override protected void defineSynchedData() {
         super.defineSynchedData();
+        this.entityData.define(NIGHT_REST, false);
         this.entityData.define(NATURAL_LANDING, false);
         this.entityData.define(NATURAL_FLIGHT, false);
         this.entityData.define(NATURAL_SURFACE, SpeciesBehaviorProfiles.profile(this.getSpeciesSlug())==SpeciesBehaviorProfiles.Profile.SURFACE);
@@ -135,6 +149,8 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     @Override public void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
         tag.putBoolean("MinemonSleeping", this.isSleeping());
+        tag.putBoolean("NightRoutine",this.nightRoutine);
+        tag.putInt("WakeGraceTicks",this.wakeGraceTicks);
         tag.putInt("NaturalBehaviorStartDelay",this.naturalStartDelay);
         tag.putString("NaturalBehaviorPhase",this.naturalCycle.phase().name());
         tag.putInt("NaturalBehaviorTicks",this.naturalCycle.ticks());
@@ -144,6 +160,8 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     @Override public void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
         this.setSleeping(tag.getBoolean("MinemonSleeping"));
+        this.nightRoutine=tag.getBoolean("NightRoutine");
+        this.wakeGraceTicks=tag.getInt("WakeGraceTicks");
         if(tag.contains("NaturalBehaviorStartDelay"))this.naturalStartDelay=Math.max(0,Math.min(29,tag.getInt("NaturalBehaviorStartDelay")));
         this.naturalCycle.restore(tag.getString("NaturalBehaviorPhase"),tag.getInt("NaturalBehaviorTicks"),tag.getInt("NaturalAltitudeStage"));
         this.syncNaturalState();
@@ -156,7 +174,8 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
 
     @Override
     protected void registerGoals() {
-        if (!this.isAquaticSpecies()) this.goalSelector.addGoal(0, new FloatGoal(this));
+        if (!this.isAquaticSpecies()) this.goalSelector.addGoal(0, new WaterEscapeGoal(this));
+        this.goalSelector.addGoal(0,new NightRestGoal(this));
         this.goalSelector.addGoal(1, new SitWhenOrderedToGoal(this));
         this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.2D, true));
         this.goalSelector.addGoal(3, new FollowOwnerGoal(this, 1.0D, 10.0F, 2.0F, this.isFlyingSpecies()));
@@ -248,6 +267,9 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     @Override
     public boolean hurt(DamageSource source, float amount) {
         boolean hurt = super.hurt(source, amount);
+        if(hurt&&!this.level.isClientSide){
+            this.setSleeping(false);this.entityData.set(NIGHT_REST,false);this.wakeGraceTicks=100;this.syncNaturalState();
+        }
         if (hurt && !this.level.isClientSide && source.getEntity() instanceof LivingEntity attacker
                 && this.canAttack(attacker)) {
             this.setTarget(attacker);
@@ -261,11 +283,8 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
 
     @Override
     public void tick() {
+        if(!this.level.isClientSide&&!(Boolean.getBoolean("minemon.clientSmokeTest")&&this.getTags().contains("minemon-locomotion-fixture")))this.tickNightRest();
         super.tick();
-        if (this.isSleeping()) {
-            if (!this.isFlyingSpecies()) this.getNavigation().stop();
-            this.setTarget(null);
-        }
         if (!this.level.isClientSide) this.tickNaturalCycle();
         if (this.level.isClientSide) {
             if ((this.getSpeciesSlug().equals("koffing")||this.getSpeciesSlug().equals("weezing"))
@@ -310,6 +329,39 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
             if (!this.level.isClientSide) this.tickSpontaneousRun();
             this.tickWildAggression();
         }
+    }
+
+    private void tickNightRest(){
+        if(this.wakeGraceTicks>0)this.wakeGraceTicks--;
+        boolean night=this.level.dimensionType().hasSkyLight()&&this.level.isNight();
+        boolean eligible=!SpeciesBehaviorProfiles.isAquatic(this.getSpeciesSlug())&&!this.isNoAi()
+            &&!this.isPassenger()&&!this.isDeadOrDying()&&!this.isInWaterOrBubble()
+            &&this.getTarget()==null&&this.wakeGraceTicks==0;
+        if(night&&eligible){
+            if(!this.nightRoutine){this.nightRoutine=true;this.getNavigation().stop();this.stopSpontaneousRun();}
+            this.entityData.set(NIGHT_REST,true);
+            boolean hover=SpeciesBehaviorProfiles.isAirborne(this.getSpeciesSlug());
+            boolean settled=hover?Math.abs(this.getY()-this.naturalSurface()-1.0D)<0.18D
+                :this.isOnGround()&&WaterMovementGoal.safeDry(this,this.blockPosition());
+            if(settled&&!this.isSleeping())this.setSleeping(true);
+        }else{
+            this.entityData.set(NIGHT_REST,false);
+            if(this.nightRoutine){this.nightRoutine=false;this.setSleeping(false);this.getNavigation().stop();}
+        }
+        this.syncNaturalState();
+    }
+
+    @Override public void moveRelative(float acceleration,net.minecraft.world.phys.Vec3 input){
+        // Vanilla water travel uses 0.02 acceleration and 0.8 horizontal drag.
+        // SmoothSwimmingMoveControl supplies an attribute-scaled input (<1),
+        // which previously multiplied this down a second time. Match the
+        // player's full forward input (including LivingEntity's 0.98 damping).
+        if(this.isInWater()&&!this.level.isClientSide&&!this.isSleeping()
+                &&this.getMoveControl().hasWanted()&&input.lengthSqr()>1.0E-8){
+            input=input.normalize().scale(0.98D);
+            if(!this.isAquaticSpecies())acceleration*=1.25F;
+        }
+        super.moveRelative(acceleration,input);
     }
 
     private void tickWildAggression() {
@@ -389,8 +441,8 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         } else if (this.attackAnimationTicks>0 && attack!=null) {
             clip=attack;loop=false;
             if(this.playedAttackSequence!=this.attackSequence){controller.markNeedsReload();this.playedAttackSequence=this.attackSequence;}
-        } else if (this.isSleeping() && (!this.isFlyingSpecies() || this.isOnGround())) {
-            clip = SpeciesAssetIndex.clip(slug, "sleep", "sleep");
+        } else if (this.isSleeping()) {
+            clip = SpeciesAssetIndex.clip(slug, "night_sleep", "sleep");
         } else if (this.isOrderedToSit()) {
             clip = SpeciesAssetIndex.clip(slug, "sit", "sit");
         } else if (this.isAquaticSpecies() && this.isInWater()) {
@@ -469,10 +521,11 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
             this.naturalCycle.chooseWaterDepth(surface);
         this.syncNaturalState();
     }
-    public boolean wantsNaturalLanding(){return this.isSleeping() || this.entityData.get(NATURAL_LANDING);}
+    public boolean isNightResting(){return this.entityData.get(NIGHT_REST);}
+    public boolean wantsNaturalLanding(){return !SpeciesBehaviorProfiles.isAirborne(this.getSpeciesSlug())&&(this.isSleeping()||this.isNightResting()) || this.entityData.get(NATURAL_LANDING); }
     public int getSmokeParticleCountForValidation(){return this.smokeParticles;}
     public boolean naturalBehaviorActive(){
-        return this.naturalStartDelay==0&&!this.isSleeping()&&!this.isOrderedToSit()&&!this.isPassenger()&&!this.isNoAi()
+        return this.naturalStartDelay==0&&!this.isNightResting()&&!this.isSleeping()&&!this.isOrderedToSit()&&!this.isPassenger()&&!this.isNoAi()
             &&!this.isDeadOrDying()&&this.getTarget()==null&&this.attackAnimationTicks<=0
             &&(this.getOwner()==null||this.distanceToSqr(this.getOwner())<100.0D)
             &&this.goalSelector.getAvailableGoals().stream().noneMatch(goal->goal.isRunning()
@@ -488,12 +541,13 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     }
     private void syncNaturalState(){
         this.entityData.set(NATURAL_LANDING,this.naturalCycle.landing());
-        this.entityData.set(NATURAL_FLIGHT,SpeciesBehaviorProfiles.profile(this.getSpeciesSlug())==SpeciesBehaviorProfiles.Profile.GROUND_FLIGHT&&this.naturalCycle.flying());
+        this.entityData.set(NATURAL_FLIGHT,SpeciesBehaviorProfiles.profile(this.getSpeciesSlug())==SpeciesBehaviorProfiles.Profile.GROUND_FLIGHT&&this.naturalCycle.flying()
+            &&!(this.isNightResting()&&this.isOnGround()));
         this.entityData.set(NATURAL_SURFACE,SpeciesBehaviorProfiles.profile(this.getSpeciesSlug())==SpeciesBehaviorProfiles.Profile.SURFACE
             ||SpeciesBehaviorProfiles.isVisitor(this.getSpeciesSlug())&&(this.naturalCycle.phase()==BehaviorCycle.Phase.SURFACE||this.naturalCycle.phase()==BehaviorCycle.Phase.EXIT_WATER));
     }
     private void tickNaturalCycle(){
-        if(this.naturalStartDelay>0&&!this.isSleeping()&&!this.isOrderedToSit()&&!this.isPassenger()&&!this.isNoAi()
+        if(this.naturalStartDelay>0&&!this.isNightResting()&&!this.isSleeping()&&!this.isOrderedToSit()&&!this.isPassenger()&&!this.isNoAi()
                 &&!this.isDeadOrDying()&&this.getTarget()==null)this.naturalStartDelay--;
         boolean wet=this.isInWater();
         boolean flying=this.isFlyingSpecies();

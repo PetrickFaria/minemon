@@ -107,6 +107,35 @@ def compatible_locomotion(data,geo,d):
    ch=channels.setdefault(joint,{});rot=list(ch.get('rotation',[0,0,0]));rot[0]=sinus(25,14,1.0,0 if i%2==0 else 180);ch['rotation']=rot
   put('swim',clip)
 
+def night_sleep_clip(data,geo,d):
+ """Keep each source sleeping pose and hold its own closed-eye blink pose."""
+ import copy
+ clips=d.get('clips',{});animations=data['animations'];slug=d['slug']
+ airborne=slug in ('butterfree','beedrill','pidgey','pidgeotto','pidgeot','spearow','fearow','zubat','golbat','venomoth','magnemite','magneton','gastly','haunter','gengar','koffing','weezing','aerodactyl','articuno','zapdos','moltres','mewtwo','mew')
+ source=clips.get('air_sleep') if airborne else None
+ source=source or clips.get('sleep')
+ if source not in animations:source=clips.get('air_idle') if airborne else clips.get('ground_idle')
+ source=source or d['idle']
+ clip=copy.deepcopy(animations.get(source,{}));clip.update(loop=True,animation_length=4.0)
+ channels=clip.setdefault('bones',{})
+ blink=animations.get(clips.get('blink'),{}).get('bones',{})
+ # Blink clips hold the source closed pose before their final reopening key.
+ def closed(value):
+  if isinstance(value,dict):
+   if 'vector' in value:return copy.deepcopy(value['vector'])
+   if 'post' in value:return closed(value['post'])
+   if 'pre' in value:return closed(value['pre'])
+   keys=sorted((float(k),k) for k in value if re.fullmatch(r'[0-9.]+',k))
+   if keys:return closed(value[keys[max(0,len(keys)-2)][1]])
+  return copy.deepcopy(value)
+ for bone,tracks in blink.items():
+  for channel,value in tracks.items():
+   if channel in ('position','rotation','scale'):
+    channels.setdefault(bone,{})[channel]=closed(value)
+ # A fallback uses the retained idle pose without generic limb rotations.
+ # No source geometry or eye texture is changed.
+ animations['animation.'+slug+'.minemon_night_sleep']=clip
+
 def build_runtime_clips(data,geo,d):
  animations=data.setdefault('animations',{});clips=d.get('clips',{})
  walk_name=d.get('walk')
@@ -339,6 +368,7 @@ for p in (root/'assets/minemon_gen1/animations').rglob('*.animation.json'):
    geometry=json.loads(model.read_text())
    build_runtime_clips(data,geometry,definition)
    compatible_locomotion(data,geometry,definition)
+   night_sleep_clip(data,geometry,definition)
   prepare_tail_flame(root,definition)
   prepare_moltres_emissive_mask(root,definition)
  # GeckoLib 3.1.40 dereferences this field while parsing every clip, including

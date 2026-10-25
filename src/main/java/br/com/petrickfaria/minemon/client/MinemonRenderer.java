@@ -56,7 +56,12 @@ public class MinemonRenderer extends GeoEntityRenderer<MinemonCreature> {
    for(var root:model.topLevelBones)collectFireBones(root,bones,slug);
    fireOverlayFrames.computeIfAbsent(slug,k->java.util.concurrent.ConcurrentHashMap.newKeySet()).add(frame);
    fireOverlayBones.put(slug,bones);
-   if(starterFlame||moltresFlame){
+   if(moltresFlame){
+    fireOverlayBones.put(slug,java.util.Set.of("FULL_MODEL"));
+    renderCopyModel(getEntityModel(),getEntityModel().getTextureResource(entity),pose,buffers,15728880,entity,partialTick,1,1,1);
+    return;
+   }
+   if(starterFlame){
     var selected=starterFlame?java.util.Set.of("tail_flame"):moltresFireBones(model);
     fireOverlayBones.put(slug,selected);
     var texture=new net.minecraft.resources.ResourceLocation(br.com.petrickfaria.minemon.Minemon.MOD_ID,
@@ -81,11 +86,11 @@ public class MinemonRenderer extends GeoEntityRenderer<MinemonCreature> {
    try{
     for(var root:model.topLevelBones)setSelectedVisibility(root,selected,false);
     renderCopyModel(getEntityModel(),texture,pose,buffers,15728880,entity,partialTick,1,1,1);
-   }finally{owner.fireOverlayPass=previousPass;original.forEach((bone,visibility)->bone.setHidden(visibility[0],visibility[1]));}
+   }finally{owner.fireOverlayPass=previousPass;original.forEach((bone,visibility)->{bone.setHidden(visibility[0],visibility[1]);bone.setCubesHidden(visibility[2]);});}
   }
   private static void saveVisibility(software.bernie.geckolib3.geo.render.built.GeoBone bone,
        java.util.IdentityHashMap<software.bernie.geckolib3.geo.render.built.GeoBone,boolean[]> original){
-   original.put(bone,new boolean[]{bone.isHidden(),bone.childBonesAreHiddenToo()});for(var child:bone.childBones)saveVisibility(child,original);
+   original.put(bone,new boolean[]{bone.isHidden(),bone.childBonesAreHiddenToo(),bone.cubesAreHidden()});for(var child:bone.childBones)saveVisibility(child,original);
   }
   private static boolean containsSelected(software.bernie.geckolib3.geo.render.built.GeoBone bone,java.util.Set<String> selected){
    if(selected.contains(bone.name))return true;
@@ -97,7 +102,7 @@ public class MinemonRenderer extends GeoEntityRenderer<MinemonCreature> {
    boolean keep=selectedParent||containsSelected(bone,selected);
    if(!keep)bone.setHidden(true,true);
    else if(selected.contains(bone.name))bone.setHidden(false,false);
-   else if(!selectedParent)bone.setHidden(true,false); // Transform ancestors only; never draw their body cubes with a flame mask.
+   else if(!selectedParent){bone.setHidden(false,false);bone.setCubesHidden(true);} // Transform ancestors only; never draw their body cubes with a flame mask.
    for(var child:bone.childBones)setSelectedVisibility(child,selected,selectedParent||selected.contains(bone.name));
   }
   private static void collectFireBones(software.bernie.geckolib3.geo.render.built.GeoBone bone,java.util.Set<String> found,String slug){

@@ -13,16 +13,16 @@ public final class MinemonFlyingCreature extends MinemonCreature {
  private final net.minecraft.world.entity.ai.control.MoveControl groundControl;
  public MinemonFlyingCreature(EntityType<? extends TamableAnimal> type,Level level){
   super(type,level);this.airNavigation=this.navigation;
-  this.groundNavigation=new net.minecraft.world.entity.ai.navigation.GroundPathNavigation(this,level);
+  this.groundNavigation=new EscapeNavigation(this,level);
   this.airControl=new FlyingMoveControl(this,20,true);
-  this.groundControl=new net.minecraft.world.entity.ai.control.MoveControl(this);
+  this.groundControl=new WaterAwareMoveControl(this);
   this.updateLocomotion();
  }
  private void updateLocomotion(){
-  boolean flying=this.isFlyingSpecies();PathNavigation desired=flying?this.airNavigation:this.groundNavigation;
+  boolean flying=this.isFlyingSpecies()&&!this.isInWater();PathNavigation desired=flying?this.airNavigation:this.groundNavigation;
   if(this.navigation!=desired){this.navigation.stop();this.navigation=desired;}
   this.moveControl=flying?this.airControl:this.groundControl;
-  if(!this.level.isClientSide||!this.wantsNaturalLanding())this.setNoGravity(flying);
+  if(!this.level.isClientSide||!this.wantsNaturalLanding())this.setNoGravity(flying||this.isInWater());
  }
  @Override protected PathNavigation createNavigation(Level level){FlyingPathNavigation n=new FlyingPathNavigation(this,level);n.setCanOpenDoors(false);n.setCanFloat(true);n.setCanPassDoors(true);return n;}
  @Override public void travel(net.minecraft.world.phys.Vec3 input){

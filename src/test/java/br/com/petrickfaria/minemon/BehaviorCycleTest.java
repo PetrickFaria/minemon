@@ -102,11 +102,16 @@ public class BehaviorCycleTest {
   assertEquals(1.0,SpeciesDefinitions.get("dewgong").scale(),.0001);
   assertEquals(.965,SpeciesDefinitions.get("jynx").scale(),.0001);
   assertEquals(1.47,SpeciesDefinitions.get("magmar").scale(),.0001);
-  assertEquals(1.46,SpeciesDefinitions.get("victreebel").scale(),.0001);
+  assertEquals(1.241,SpeciesDefinitions.get("victreebel").scale(),.0001);
   assertEquals(1.05,SpeciesDefinitions.get("jynx").width(),.0001);
   assertEquals(2.25,SpeciesDefinitions.get("magmar").height(),.0001);
-  assertEquals(1.70,SpeciesDefinitions.get("victreebel").height(),.0001);
+  assertEquals(1.445,SpeciesDefinitions.get("victreebel").height(),.0001);
   assertEquals(1.05,SpeciesDefinitions.get("kangaskhan").scale(),.0001);
-  assertEquals(1.50,SpeciesDefinitions.get("snorlax").scale(),.0001);
+  assertEquals(1.35,SpeciesDefinitions.get("snorlax").scale(),.0001);
+  assertEquals(1.5,SpeciesDefinitions.get("venusaur").scale(),.0001);
+  assertEquals(1.125,SpeciesDefinitions.get("venusaur").width(),.0001);
+  assertEquals(1.05,SpeciesDefinitions.get("venusaur").height(),.0001);
+  assertEquals(.81,SpeciesDefinitions.get("snorlax").width(),.0001);
+  assertEquals(1.1475,SpeciesDefinitions.get("snorlax").height(),.0001);
  }
 }

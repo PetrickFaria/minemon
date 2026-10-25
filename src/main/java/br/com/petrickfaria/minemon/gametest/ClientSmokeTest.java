@@ -483,7 +483,7 @@ public final class ClientSmokeTest {
      var saved=new net.minecraft.nbt.CompoundTag();next.addAdditionalSaveData(saved);saved.putString("NaturalBehaviorPhase","AIR");next.readAdditionalSaveData(saved);
     }
     double waterY=fixtureSurface(slug)?101.0D-WaterMovementGoal.preferredSurfaceDepth(next):101.0D-next.getBbHeight()-0.35D;
-    next.moveTo(0,aquatic?waterY:101.0D,4,180,0);next.setNoAi(false);next.goalSelector.removeAllGoals();next.targetSelector.removeAllGoals();setValidationPhase(next,0);level.addFreshEntity(next);testEntity=next.getUUID();
+    next.moveTo(0,aquatic?waterY:101.0D,4,180,0);next.addTag("minemon-locomotion-fixture");next.setNoAi(false);next.goalSelector.removeAllGoals();next.targetSelector.removeAllGoals();setValidationPhase(next,0);level.addFreshEntity(next);testEntity=next.getUUID();
     });
    }
    if(worldTicks>=SPECIES_START_TICK && worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW)
@@ -559,14 +559,14 @@ public final class ClientSmokeTest {
      var bones=MinemonRenderer.fireOverlayBoneSamples().getOrDefault(slug,java.util.Set.of());
      if(!samples.contains(0)||bones.isEmpty())throw new IllegalStateException("Full-bright flame atlas did not render on fire rig for "+slug+": frames="+samples+" bones="+bones);
      if(slug.equals("moltres")) {
-      if(!bones.containsAll(java.util.Set.of("wing_open_left","wing_open_right"))||bones.contains("chest")||bones.contains("torso"))
-       throw new IllegalStateException("Moltres full-bright pass escaped the wing/fire branches: "+bones);
+      if(!bones.equals(java.util.Set.of("FULL_MODEL")))
+       throw new IllegalStateException("Moltres full-bright pass must retain the approved complete body: "+bones);
      } else if(!bones.equals(java.util.Set.of("tail_flame")))
       throw new IllegalStateException(slug+" full-bright pass must render the isolated tail_flame bone only: "+bones);
      var mask=new net.minecraft.resources.ResourceLocation(Minemon.MOD_ID,"textures/emissive/"+(slug.equals("moltres")?"moltres_fire":slug+"_tail_flame")+".png");
      if(mc.getResourceManager().getResource(mask).isEmpty())throw new IllegalStateException("Missing selective emissive mask "+mask);
     }
-    if(!selectedEmissive.isEmpty())Files.writeString(Path.of("client-validation.txt"),"PASS EMISSIVE FIRE: isolated masks loaded; starter tail_flame bones and Moltres wing/fire branches rendered selectively: "+selectedEmissive+".\n",StandardOpenOption.APPEND);
+    if(!selectedEmissive.isEmpty())Files.writeString(Path.of("client-validation.txt"),"PASS EMISSIVE FIRE: isolated masks loaded; starter tail_flame bones rendered selectively and Moltres complete body rendered full-bright: "+selectedEmissive+".\n",StandardOpenOption.APPEND);
     Files.writeString(Path.of("client-validation.txt"),"PASS ROSTER: every selected species rendered with its texture in a world: "+renderedSpecies+"\n",StandardOpenOption.APPEND);
     completedSpeciesWindows=species.size();
     lastApprovedCheck="all selected species completed render/movement sampling";

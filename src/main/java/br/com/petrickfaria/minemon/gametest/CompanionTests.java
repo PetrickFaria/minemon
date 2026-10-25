@@ -179,10 +179,10 @@ public final class CompanionTests {
    double altitude=bird.getY()-NaturalMovementGoals.surfaceBelow(h.getLevel(),bird.getX(),bird.getY(),bird.getZ());
    check(h,altitude>=1.0D&&altitude<=9.0D,"Airborne species must maintain the active 1..3 or 4..9 block altitude band; got "+altitude);
    bird.setSleeping(true);
-   check(h,!bird.isNoGravity(),"Sleeping airborne species must enable gravity to land");
+   check(h,bird.isNoGravity(),"Air-only sleeping species must retain hover gravity control");
    h.runAfterDelay(100,()->{
     double surface=NaturalMovementGoals.surfaceBelow(h.getLevel(),bird.getX(),bird.getY(),bird.getZ());
-    check(h,Math.abs(bird.getY()-surface)<=1.1D,"Sleeping airborne species must land on a nearby surface");
+    check(h,Math.abs(bird.getY()-surface-1.0D)<0.2D&&!bird.isOnGround(),"Air-only sleeping species must hover one block above support");
     bird.setSleeping(false);
     check(h,bird.isNoGravity(),"Awake airborne species must resume flight");
     awaitAwakeFlightBand(h,bird,180,0);
@@ -227,7 +227,8 @@ public final class CompanionTests {
    h.setBlock(new BlockPos(x,-1,z),net.minecraft.world.level.block.Blocks.STONE);
    h.setBlock(new BlockPos(x,0,z),net.minecraft.world.level.block.Blocks.WATER);
   }
-  MinemonCreature bird=h.spawn(ModEntities.SPECIES.get("pidgey").get(),new BlockPos(5,8,5));
+  MinemonCreature bird=h.spawn(ModEntities.SPECIES.get("charizard").get(),new BlockPos(5,8,5));
+  CompoundTag flight=new CompoundTag();bird.addAdditionalSaveData(flight);flight.putString("NaturalBehaviorPhase","AIR");bird.readAdditionalSaveData(flight);
   bird.setSleeping(true);
   traceMovement(h,"sleep-landing",bird,0,200);
   h.runAfterDelay(200,()->{

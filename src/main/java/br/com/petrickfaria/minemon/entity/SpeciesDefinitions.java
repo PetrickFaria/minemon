@@ -14,16 +14,19 @@ public final class SpeciesDefinitions {
     JsonObject o=element.getAsJsonObject();Map<String,String> clips=new HashMap<>();o.getAsJsonObject("clips").entrySet().forEach(e->clips.put(e.getKey(),e.getValue().getAsString()));
     String slug=str(o,"slug");
     CompatibleLocomotion.apply(slug,clips);
+    clips.put("night_sleep","animation."+slug+".minemon_night_sleep");
     // Jynx/Magmar/Victreebel factors were derived from the selected geo mesh:
     // sum cube volume and vertical extent, balanced geometrically against the
     // approved Electabuzz/Rhydon render bounds. The source manifest stays raw.
     float factor=switch(slug){
      case "seaking" -> 0.75F;
      case "dewgong" -> 0.50F;
-     case "kangaskhan","snorlax" -> 0.75F;
+     case "kangaskhan" -> 0.75F;
+     case "snorlax" -> 0.75F*0.90F;
+     case "venusaur" -> 0.75F;
      case "jynx" -> 0.965F/o.get("scale").getAsFloat();
      case "magmar" -> 1.47F/o.get("scale").getAsFloat();
-     case "victreebel" -> 1.46F/o.get("scale").getAsFloat();
+     case "victreebel" -> (1.46F*0.85F)/o.get("scale").getAsFloat();
      default -> 1.0F;
     };
     var profile=SpeciesBehaviorProfiles.profile(slug);
@@ -34,7 +37,7 @@ public final class SpeciesDefinitions {
     String fallback=CompatibleLocomotion.groundGait(slug)?null:o.has("movement_fallback")&&!o.get("movement_fallback").isJsonNull()?o.get("movement_fallback").getAsString():null;
     float width=o.get("width").getAsFloat()*factor,height=o.get("height").getAsFloat()*factor;
     if(slug.equals("jynx")||slug.equals("magmar")){width=1.05F;height=2.25F;}
-    else if(slug.equals("victreebel")){width=1.10F;height=1.70F;}
+    else if(slug.equals("victreebel")){width=1.10F*0.85F;height=1.70F*0.85F;}
     Definition d=new Definition(o.get("nationalPokedexNumber").getAsInt(),str(o,"slug"),str(o,"model"),str(o,"texture"),str(o,"animation"),str(o,"mode"),o.get("scale").getAsFloat()*factor,width,height,o.get("health").getAsDouble(),o.get("attack").getAsDouble(),o.get("speed").getAsDouble(),o.get("eggBase").getAsInt(),o.get("eggSpots").getAsInt(),idle,walk,fallback,o.has("attackTicks")?o.get("attackTicks").getAsInt():0,Collections.unmodifiableMap(clips));
     if(result.put(d.slug(),d)!=null)throw new IllegalStateException("Duplicate species "+d.slug());
    }

@@ -26,6 +26,7 @@ public class MinemonModel extends AnimatedGeoModel<MinemonCreature> {
     public void setLivingAnimations(MinemonCreature entity, Integer uniqueID, software.bernie.geckolib3.core.event.predicate.AnimationEvent event) {
         super.setLivingAnimations(entity, uniqueID, event);
         applyPidgeWingVisibility(entity);
+        if(entity.isSleeping())return;
         String slug=entity.getSpeciesSlug();
         boolean headLook=slug.equals("spearow")||slug.equals("fearow")||slug.equals("abra")
             ||slug.equals("kadabra")||slug.equals("alakazam")||slug.equals("bellsprout")
