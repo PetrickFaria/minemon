@@ -167,9 +167,10 @@ public final class ClientSmokeTest {
    "wartortle",java.util.List.of("arm_left","arm_right","torso")
   );
   private static java.util.List<String> profileJoints(String slug,String state) {
-   if(slug.equals("pidgey")) {
+   if(java.util.Set.of("pidgey","pidgeotto","pidgeot").contains(slug)) {
     if(fixtureAir(slug))return java.util.List.of("wing_open_left","wing_open_right");
-    return state.startsWith("IDLE_")?java.util.List.of("tail2"):java.util.List.of("leg_left","leg_right");
+    String idleJoint=switch(slug){case "pidgey"->"tail2";case "pidgeotto"->"tail";default->"hair5";};
+    return state.startsWith("IDLE_")?java.util.List.of(idleJoint):java.util.List.of("leg_left","leg_right");
    }
    if(java.util.Set.of("spearow","fearow","articuno","zapdos","moltres").contains(slug)&&fixtureAir(slug))
     return java.util.List.of("wing_open_left","wing_open_right");
