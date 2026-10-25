@@ -111,7 +111,9 @@ public final class NightAndSwimmingTests {
    tag.putString("NaturalBehaviorPhase","AIR");tag.putInt("NaturalBehaviorTicks",1234);m.readAdditionalSaveData(tag);mixed.add(m);
   }
   x=3;
-  for(String slug:List.of("spearow","fearow","koffing","weezing","magnemite","magneton","haunter","articuno","zapdos","moltres")){
+  // The five requested birds now land for sleep and have a dedicated grounded
+  // night-rest GameTest; this batch covers flyers whose approved rest is hovering.
+  for(String slug:List.of("koffing","weezing","magnemite","magneton","haunter")){
    int airX=3+(air.size()%5)*6,airZ=4+(air.size()/5)*5;air.add(spawn(h,slug,airX,7,airZ));
   }
   h.runAfterDelay(5,()->{
