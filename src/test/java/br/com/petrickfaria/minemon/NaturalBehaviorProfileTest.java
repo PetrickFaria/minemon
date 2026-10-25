@@ -26,6 +26,11 @@ public final class NaturalBehaviorProfileTest {
         assertTrue(SpeciesBehaviorProfiles.isAquatic("magikarp"));
         assertFalse(SpeciesBehaviorProfiles.isAquatic("squirtle"));
         assertFalse(SpeciesBehaviorProfiles.isAquatic("psyduck"));
+        for(String slug:java.util.List.of("spearow","fearow","articuno","zapdos","moltres")) {
+            assertTrue(slug+" remains an airborne species",SpeciesBehaviorProfiles.isAirborne(slug));
+            assertTrue(slug+" must land before night sleep",SpeciesBehaviorProfiles.landsForNightRest(slug));
+            assertFalse(slug+" must not hover while asleep",SpeciesBehaviorProfiles.hoversDuringNightRest(slug));
+        }
         assertEquals(151, SpeciesDefinitions.ALL.size());
     }
 

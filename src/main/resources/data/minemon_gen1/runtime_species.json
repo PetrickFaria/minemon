@@ -10363,8 +10363,8 @@
     "attack": 7.083333333333333,
     "speed": 0.285,
     "clips": {
-      "air_fly": "animation.articuno.air_fly",
-      "air_idle": "animation.articuno.air_idle",
+      "air_fly": "animation.articuno.minemon_air_fly",
+      "air_idle": "animation.articuno.minemon_air_idle",
       "blink": "animation.articuno.blink",
       "ground_idle": "animation.articuno.ground_idle",
       "hold_item": "animation.articuno.hold_item",
@@ -10425,8 +10425,8 @@
     "attack": 7.5,
     "speed": 0.3,
     "clips": {
-      "air_fly": "animation.zapdos.air_fly",
-      "air_idle": "animation.zapdos.air_idle",
+      "air_fly": "animation.zapdos.minemon_air_fly",
+      "air_idle": "animation.zapdos.minemon_air_idle",
       "blink": "animation.zapdos.blink",
       "ground_idle": "animation.zapdos.ground_idle",
       "hold_item": "animation.zapdos.hold_item",
@@ -10487,8 +10487,8 @@
     "attack": 8.333333333333334,
     "speed": 0.29,
     "clips": {
-      "air_fly": "animation.moltres.air_fly",
-      "air_idle": "animation.moltres.air_idle",
+      "air_fly": "animation.moltres.minemon_air_fly",
+      "air_idle": "animation.moltres.minemon_air_idle",
       "blink": "animation.moltres.blink",
       "ground_idle": "animation.moltres.ground_idle",
       "hold_item": "animation.moltres.hold_item",

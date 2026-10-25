@@ -133,7 +133,10 @@ for i,d in enumerate(defs[140:150]):
  assert not d.get('movement_fallback'),(slug,'unexpected artificial fallback')
  if d.get('source_static_idle'):
   assert profiles[slug].get('idle_static')==profiles[slug]['idle'],(slug,'source static idle profile is not exact')
- assert all('.minemon_' not in c for c in d.get('clips',{}).values()),(slug,'synthetic optional action selected')
+ adapted_bird_clips={'air_idle':'animation.'+slug+'.minemon_air_idle','air_fly':'animation.'+slug+'.minemon_air_fly'} if slug in ('articuno','zapdos','moltres') else {}
+ for key,clip in d.get('clips',{}).items():
+  if key in adapted_bird_clips:assert clip==adapted_bird_clips[key],(slug,key,'unexpected bird flight adapter')
+  else:assert '.minemon_' not in clip,(slug,'synthetic optional action selected',key,clip)
  for slug in ('articuno','zapdos','moltres','mewtwo'):
   d=defs[140+EXPECTED.index(slug)];a=readj(d['animation'])['animations']
   assert d['mode']=='flying' and d['idle']=='animation.'+slug+'.air_idle' and d['walk']=='animation.'+slug+'.air_fly'

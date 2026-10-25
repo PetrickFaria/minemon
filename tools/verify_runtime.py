@@ -206,6 +206,15 @@ def validate(read,definitions,prepared=False,packed=False):
      raise ValueError('Fearow flight posture must lift its head above the original down-tilted air pose')
     if air.get('leg_left',{}).get('rotation',[0,0,0])[2]!=-5 or air.get('leg_right',{}).get('rotation',[0,0,0])[2]!=5:
      raise ValueError('Fearow flight posture must keep its feet aligned downward')
+  if prepared and d['slug'] in ('articuno','zapdos','moltres'):
+   if d['clips'].get('air_fly')!='animation.'+d['slug']+'.minemon_air_fly' or d['clips'].get('air_idle')!='animation.'+d['slug']+'.minemon_air_idle':
+    raise ValueError('Legendary birds must select the articulated runtime air clips: '+d['slug'])
+   air=a[d['clips']['air_fly']].get('bones',{})
+   for side in ('left','right'):
+    root='wing_open_'+side
+    joints=[name for name in bone_names if name==root or name.startswith(root+'_') or name.startswith(root) and name[len(root):].isdigit()]
+    if root not in joints or any('math.sin' not in json.dumps(air.get(name,{}).get('rotation')) for name in joints):
+     raise ValueError('Every retained wing segment must move in flight: '+d['slug']+' '+side)
   if d['slug'] in SOURCE_FIRE_HASHES:
    fire_bones={b['name'] for part in g['minecraft:geometry'] for b in part['bones'] if b['name'].startswith('fire_mane') or b['name'].endswith('_fire')}
    for state,clip_name in (('idle',d['idle']),('walk',d['walk'])):

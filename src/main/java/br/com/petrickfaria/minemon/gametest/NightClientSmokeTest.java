@@ -15,11 +15,12 @@ import java.util.*;
 
 /** Additional real-client scenario: production night AI, rendered closed eyes, dawn. */
 final class NightClientSmokeTest {
- private static final List<String> SPECIES=List.of("bulbasaur","victreebel","venusaur","snorlax","charizard","scyther","dragonite","pidgey","pidgeotto","pidgeot","fearow","gastly","haunter","gengar","koffing","weezing","butterfree","beedrill","venomoth","parasect","kakuna","tangela","poliwag","growlithe","magikarp","gyarados","lapras","dratini","omanyte","eevee","jolteon","flareon","vaporeon_land","vaporeon");
+ private static final List<String> SPECIES=List.of("bulbasaur","victreebel","venusaur","snorlax","charizard","scyther","dragonite","pidgey","pidgeotto","pidgeot","spearow","fearow","articuno","zapdos","moltres","gastly","haunter","gengar","koffing","weezing","butterfree","beedrill","venomoth","parasect","kakuna","tangela","poliwag","growlithe","magikarp","gyarados","lapras","dratini","omanyte","eevee","jolteon","flareon","vaporeon_land","vaporeon");
  private static boolean opened,setup,spawned,waking;
  private static int ticks,index,samples,sleepTick,depthSettleTicks,depthStableTicks,restSettleTicks,restStableTicks;
  private static volatile UUID entity;
  private static final Map<String,float[]> eyes=new HashMap<>();
+ private static final Map<String,float[]> restingWings=new HashMap<>();
  static void tick(TickEvent.ClientTickEvent event){
   var mc=Minecraft.getInstance();
   try{
@@ -39,8 +40,8 @@ final class NightClientSmokeTest {
              ? (mob.isInWaterOrBubble()?"night_sleep_water":"night_sleep_land") : "night_sleep";
      String selectedClip=definition.clips().getOrDefault(sleepKey,definition.clips().get("night_sleep"));
      if(!Objects.equals(mob.getSelectedAnimationForValidation(),selectedClip))return;
-     if(sleepTick==0){sleepTick=mob.tickCount;return;}
-     if(mob.tickCount-sleepTick<12)return;
+    if(sleepTick==0)sleepTick=mob.tickCount;
+    if(mob.tickCount-sleepTick<12)return;
      // Read the generated pose, whose eye tracks hold the species' native blink closure.
      var d=SpeciesDefinitions.get(mob.getSpeciesSlug());
      try(var stream=NightClientSmokeTest.class.getResourceAsStream("/"+d.animation().replace("assets/minemon/","assets/minemon_gen1/"))){
@@ -48,6 +49,15 @@ final class NightClientSmokeTest {
       String blink=d.clips().get("blink");
       {
        var sleepBones=animations.getAsJsonObject(selectedClip).getAsJsonObject("bones");
+       if(java.util.Set.of("spearow","fearow","articuno","zapdos","moltres").contains(mob.getSpeciesSlug())){
+        for(String name:sleepBones.keySet())if(name.startsWith("wing_")||name.equals("wings_open")||name.equals("wings_closed")){
+         var wing=model.getAnimationProcessor().getBone(name);if(wing==null)continue;
+         float[] rotation={wing.getRotationX(),wing.getRotationY(),wing.getRotationZ()};
+         float[] prior=restingWings.putIfAbsent(name,rotation);
+         if(prior!=null)for(int axis=0;axis<3;axis++)if(Math.abs(prior[axis]-rotation[axis])>0.015F)
+          throw new IllegalStateException(mob.getSpeciesSlug()+" wing moved during grounded sleep: "+name+" axis="+axis+" delta="+Math.abs(prior[axis]-rotation[axis]));
+        }
+       }
        java.util.Set<String> eyeNames=blink!=null&&animations.has(blink)?animations.getAsJsonObject(blink).getAsJsonObject("bones").keySet():sleepBones.keySet().stream().filter(n->n.contains("eye")||n.contains("pupil")).collect(java.util.stream.Collectors.toSet());
        if(eyeNames.isEmpty())eyeNames=sleepBones.keySet().stream().filter(n->n.contains("eye")||n.contains("pupil")).collect(java.util.stream.Collectors.toSet());
        for(String name:eyeNames){
@@ -84,7 +94,7 @@ final class NightClientSmokeTest {
     var p=level.getServer().getPlayerList().getPlayers().get(0);p.setGameMode(GameType.CREATIVE);p.teleportTo(level,0,102,-5,0,8);
    });return;}
    if(!spawned){
-    spawned=true;ticks=0;samples=0;sleepTick=0;depthSettleTicks=0;depthStableTicks=0;restSettleTicks=0;restStableTicks=0;waking=false;eyes.clear();
+    spawned=true;ticks=0;samples=0;sleepTick=0;depthSettleTicks=0;depthStableTicks=0;restSettleTicks=0;restStableTicks=0;waking=false;eyes.clear();restingWings.clear();
     mc.getSingleplayerServer().execute(()->{
      var level=mc.getSingleplayerServer().overworld();if(entity!=null){var old=level.getEntity(entity);if(old!=null)old.discard();}
      String scenario=SPECIES.get(index);String slug=scenario.equals("vaporeon_land")?"vaporeon":scenario;

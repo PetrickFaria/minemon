@@ -173,7 +173,9 @@ public final class CompanionTests {
  @GameTest(template="test_arena",timeoutTicks=420)
  public static void airborneSpeciesStayAboveSurfaceAndLandOnlyToSleep(GameTestHelper h) {
   floor(h);
-  MinemonCreature bird=h.spawn(ModEntities.SPECIES.get("spearow").get(),new BlockPos(5,1,5));
+  // Magnemite is a flyer that intentionally rests in a safe hover; Spearow,
+  // Fearow and the legendary birds are covered by the grounded night-rest test.
+  MinemonCreature bird=h.spawn(ModEntities.SPECIES.get("magnemite").get(),new BlockPos(5,1,5));
   traceMovement(h,"natural-flight",bird,0,300);
   h.runAfterDelay(100,()->{
    double altitude=bird.getY()-NaturalMovementGoals.surfaceBelow(h.getLevel(),bird.getX(),bird.getY(),bird.getZ());
@@ -186,6 +188,30 @@ public final class CompanionTests {
     bird.setSleeping(false);
     check(h,bird.isNoGravity(),"Awake airborne species must resume flight");
     awaitAwakeFlightBand(h,bird,180,0);
+   });
+  });
+ }
+
+ @GameTest(template="test_arena",batch="night_landing",timeoutTicks=300)
+ public static void requestedBirdsLandAndHoldTheirFoldedSleepPose(GameTestHelper h) {
+  floor(h);h.getLevel().setDayTime(18000);
+  var slugs=java.util.List.of("spearow","fearow","articuno","zapdos","moltres");
+  var birds=new java.util.ArrayList<MinemonCreature>();
+  for(int i=0;i<slugs.size();i++){
+   var bird=h.spawn(ModEntities.SPECIES.get(slugs.get(i)).get(),new BlockPos(3+i*2,8,5));
+   bird.setNoGravity(true);
+   bird.setDeltaMovement(0,0,0);
+   birds.add(bird);
+  }
+  h.runAfterDelay(240,()->{
+   for(var bird:birds){
+    check(h,bird.isSleeping()&&bird.isNightResting(),bird.getSpeciesSlug()+" must enter sleep only after its night landing");
+    check(h,bird.isOnGround()&&!bird.isFlyingSpecies()&&!bird.isNoGravity(),bird.getSpeciesSlug()+" must finish sleep grounded with flight gravity disabled");
+   }
+   h.getLevel().setDayTime(1000);
+   h.runAfterDelay(3,()->{
+    for(var bird:birds)check(h,!bird.isSleeping()&&!bird.isNightResting(),bird.getSpeciesSlug()+" must wake at dawn");
+    h.succeed();
    });
   });
  }

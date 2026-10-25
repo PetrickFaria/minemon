@@ -111,12 +111,18 @@ def native_air_pose_adaptations(data,geo,d):
  """Use each retained bird rig's source pose and animate its actual wing joints."""
  import copy
  slug=d['slug'];animations=data['animations']
- if slug not in ('spearow','fearow'):return
- source_name='animation.'+slug+('.air_idle' if slug=='fearow' else '.ground_idle')
- source=animations.get(source_name)
- if not source:raise ValueError(slug+' is missing its inspected source pose '+source_name)
+ supported=('spearow','fearow','articuno','zapdos','moltres')
+ if slug not in supported:return
  names={b['name'] for g in geo.get('minecraft:geometry',[]) for b in g.get('bones',[])}
  for kind,freq,amplitude in (('air_idle',0.9,14),('air_fly',1.4,30)):
+  if slug in ('spearow','fearow'):
+   source_name='animation.'+slug+('.air_idle' if slug=='fearow' else '.ground_idle')
+   source=animations.get(source_name)
+   if not source:raise ValueError(slug+' is missing its inspected source pose '+source_name)
+  else:
+   source_name='animation.'+slug+'.'+kind
+   source=animations.get(source_name)
+   if not source:raise ValueError(slug+' is missing its original flight clip '+source_name)
   clip=copy.deepcopy(source);clip.update(loop=True,animation_length=1.0/freq)
   channels=clip.setdefault('bones',{})
   if slug=='spearow':
@@ -132,7 +138,11 @@ def native_air_pose_adaptations(data,geo,d):
      channels.setdefault(bone,{})['rotation']=[0,0,f'{sign*amplitude*scale}*math.sin(query.anim_time*360*{freq}+{phase})']
    for leg in ('leg_left','leg_right'):
     if leg in names:channels.setdefault(leg,{})['rotation']=[0,0,0]
-  else:
+   # The copied ground_idle source hides Spearow's open wings. A flight clip
+   # must select the real open-wing rig or the wing tracks animate invisibly.
+   if 'wings_open' in names:channels.setdefault('wings_open',{})['scale']=[1,1,1]
+   if 'wings_closed' in names:channels.setdefault('wings_closed',{})['scale']=[0,0,0]
+  elif slug=='fearow':
    # Fearow's only original flying clip points the head down and splays both
    # legs. Retain its air rig and wing keys, then straighten the head chain and
    # lower the feet without changing model geometry.
@@ -148,7 +158,29 @@ def native_air_pose_adaptations(data,geo,d):
     rotation=list(channels.setdefault(root,{}).get('rotation',[0,0,0]))
     base=rotation[2];rotation[2]=f'({base})+{sign*amplitude}*math.sin(query.anim_time*360*{freq})'
     channels[root]['rotation']=rotation
+  elif slug in ('articuno','zapdos','moltres'):
+   # The imported clips contain static poses for their real articulated wing
+   # chains. Preserve every source body/head/leg key and add a staggered beat
+   # to each existing open-wing joint so the whole wing moves, not one hinge.
+   for side,sign in (('left',1),('right',-1)):
+    root='wing_open_'+side
+    joints=sorted((n for n in names if n==root or n.startswith(root+'_') or n.startswith(root) and n[len(root):].isdigit()),
+                  key=lambda n:(0 if n==root else 1,int(re.search(r'\d+$',n).group()) if re.search(r'\d+$',n) else 0,n))
+    if root not in joints:raise ValueError(slug+' missing wing joint '+root)
+    for segment,bone in enumerate(joints):
+     channel=channels.setdefault(bone,{})
+     rotation=list(channel.get('rotation',[0,0,0]))
+     while len(rotation)<3:rotation.append(0)
+     original=rotation[2]
+     scale=1.0 if segment==0 else max(0.22,0.62**segment)
+     phase=segment*28
+     rotation[2]=f'({original})+{sign*amplitude*scale:.3f}*math.sin(query.anim_time*360*{freq}+{phase})'
+     channel['rotation']=rotation
   animations[f'animation.{slug}.minemon_{kind}']=clip
+  if slug in ('articuno','zapdos','moltres'):
+   # The source clips are static Bedrock poses; runtime must select these
+   # articulated GeckoLib adaptations instead of the frozen originals.
+   d.setdefault('clips',{})[kind]=f'animation.{slug}.minemon_{kind}'
 
 def night_sleep_clip(data,geo,d):
  """Keep each source sleeping pose and hold its own closed-eye blink pose."""
@@ -159,6 +191,10 @@ def night_sleep_clip(data,geo,d):
  source=source or clips.get('sleep')
  if source and source.endswith('.minemon_sleep'):source=None
  if slug=='poliwag':source='animation.poliwag.sleep_placeholder'
+ # These five species are grounded for night rest. Their flight idle clips
+ # include wing motion, so sleep must be based on the real folded ground pose.
+ if slug in ('spearow','fearow','articuno','zapdos','moltres'):
+  source=clips.get('ground_idle')
  if source not in animations:source=clips.get('air_idle') if airborne else clips.get('ground_idle')
  source=source or d['idle']
  if slug in ('pidgey','pidgeotto','pidgeot') and clips.get('sleep') in animations:

@@ -99,6 +99,35 @@ public class NightSleepAssetTest {
    }
   }
  }
+ @Test public void fiveRequestedFlyersUseStaticFoldedGroundPosesForNightSleep() throws Exception {
+  for(String slug:java.util.List.of("spearow","fearow","articuno","zapdos","moltres")){
+   var d=SpeciesDefinitions.get(slug);var source=animations(d);
+   var sleep=source.getAsJsonObject(d.clips().get("night_sleep")).getAsJsonObject("bones");
+   var ground=source.getAsJsonObject(d.clips().get("ground_idle")).getAsJsonObject("bones");
+   assertTrue(slug+" retains a ground wing pose",ground.keySet().stream().anyMatch(n->n.startsWith("wing_closed")||n.equals("wings_closed")));
+   for(String bone:ground.keySet())if(bone.startsWith("wing_")||bone.equals("wings_open")||bone.equals("wings_closed"))
+    assertEquals(slug+" holds ground wing pose while asleep: "+bone,ground.get(bone),sleep.get(bone));
+   assertFalse(slug+" sleep cannot contain a flap oscillator",sleep.toString().contains("math.sin"));
+  }
+ }
+ @Test public void legendaryFlightSelectsAnimatedOriginalRigAndSpearowShowsOpenWings() throws Exception {
+  for(String slug:java.util.List.of("articuno","zapdos","moltres")){
+   var d=SpeciesDefinitions.get(slug);var source=animations(d);
+   assertEquals("animation."+slug+".minemon_air_fly",d.clips().get("air_fly"));
+   assertEquals("animation."+slug+".minemon_air_idle",d.clips().get("air_idle"));
+   for(String side:java.util.List.of("left","right")){
+    var clip=source.getAsJsonObject(d.clips().get("air_fly"));
+    var wings=clip.getAsJsonObject("bones");
+    String root="wing_open_"+side;
+    assertTrue(slug+" animates its real wing hinge",wings.getAsJsonObject(root).get("rotation").toString().contains("math.sin"));
+    for(String name:wings.keySet())if(name.startsWith(root+"_")||name.matches(root+"\\d+"))
+     assertTrue(slug+" articulates wing segment "+name,wings.getAsJsonObject(name).get("rotation").toString().contains("math.sin"));
+   }
+  }
+  var spearow=SpeciesDefinitions.get("spearow");var air=animations(spearow).getAsJsonObject(spearow.clips().get("air_fly")).getAsJsonObject("bones");
+  assertEquals(java.util.List.of(1.0,1.0,1.0),asNumbers(air.getAsJsonObject("wings_open").getAsJsonArray("scale")));
+  assertEquals(java.util.List.of(0.0,0.0,0.0),asNumbers(air.getAsJsonObject("wings_closed").getAsJsonArray("scale")));
+ }
  private static java.util.List<Double> asNumbers(com.google.gson.JsonArray values){
   var result=new java.util.ArrayList<Double>();for(var value:values)result.add(value.getAsDouble());return result;
  }

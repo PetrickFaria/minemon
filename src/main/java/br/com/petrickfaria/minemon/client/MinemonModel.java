@@ -40,7 +40,7 @@ public class MinemonModel extends AnimatedGeoModel<MinemonCreature> {
         if(data.isEmpty())return;
         var input=(software.bernie.geckolib3.model.provider.data.EntityModelData)data.get(0);
         if(head!=null) {
-            float basePitch=slug.equals("fearow")?-10.0F:0.0F;
+            float basePitch=slug.equals("fearow")?(entity.isFlyingSpecies()?5.0F:-10.0F):0.0F;
             float minPitch=slug.equals("mew")?-37.0F:(slug.equals("geodude")?-15.0F:-25.0F);
             float maxPitch=slug.equals("mew")?60.0F:(slug.equals("geodude")?15.0F:25.0F);
             float minYaw=slug.equals("mew")?-90.0F:(slug.equals("geodude")?-15.0F:-60.0F);
