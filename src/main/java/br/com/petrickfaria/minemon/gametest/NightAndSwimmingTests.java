@@ -24,6 +24,16 @@ public final class NightAndSwimmingTests {
  }
  private static void awaitBottom(GameTestHelper h,MinemonCreature shellder,MinemonCreature krabby,
      double originY,int remaining,int elapsed,Runnable next){
+  if(elapsed==0||elapsed%100==0){
+   var path=krabby.getNavigation().getPath();var node=path==null||path.isDone()?null:path.getNode(path.getNextNodeIndex());
+   var control=krabby.getMoveControl();
+   com.mojang.logging.LogUtils.getLogger().info("BOTTOM SWIM TRACE elapsed="+elapsed+" phase="+krabby.naturalCycle().phase()
+       +" pos="+krabby.position()+" velocity="+krabby.getDeltaMovement()+" wet="+krabby.isInWater()
+       +" navDone="+krabby.getNavigation().isDone()+" navTarget="+krabby.getNavigation().getTargetPos()
+       +" path="+(path==null?"null":path.getNextNodeIndex()+"/"+path.getNodeCount()+" end="+path.getEndNode())
+       +" next="+node+" wanted="+control.hasWanted()+":"+control.getWantedX()+","+control.getWantedY()+","+control.getWantedZ()
+       +" pitch="+krabby.getXRot()+" speed="+krabby.getSpeed()+" gravity="+!krabby.isNoGravity());
+  }
   if(shellder.isInWater()&&krabby.isInWater()
       &&shellder.getY()-originY<2.5D&&krabby.getY()-originY<4.5D){next.run();return;}
   if(remaining<=0){
