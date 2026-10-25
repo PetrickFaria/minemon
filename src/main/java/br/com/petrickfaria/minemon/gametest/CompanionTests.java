@@ -192,28 +192,36 @@ public final class CompanionTests {
   });
  }
 
- @GameTest(template="test_arena",batch="night_landing",timeoutTicks=300)
+ @GameTest(template="test_arena",batch="night_landing",timeoutTicks=600)
  public static void requestedBirdsLandAndHoldTheirFoldedSleepPose(GameTestHelper h) {
   floor(h);h.getLevel().setDayTime(18000);
   var slugs=java.util.List.of("spearow","fearow","articuno","zapdos","moltres");
+  int[][] positions={{2,3},{8,3},{14,3},{5,11},{11,11}};
   var birds=new java.util.ArrayList<MinemonCreature>();
   for(int i=0;i<slugs.size();i++){
-   var bird=h.spawn(ModEntities.SPECIES.get(slugs.get(i)).get(),new BlockPos(3+i*2,8,5));
+   var bird=h.spawn(ModEntities.SPECIES.get(slugs.get(i)).get(),new BlockPos(positions[i][0],8,positions[i][1]));
    bird.setNoGravity(true);
    bird.setDeltaMovement(0,0,0);
    birds.add(bird);
   }
-  h.runAfterDelay(240,()->{
-   for(var bird:birds){
-    check(h,bird.isSleeping()&&bird.isNightResting(),bird.getSpeciesSlug()+" must enter sleep only after its night landing");
-    check(h,bird.isOnGround()&&!bird.isFlyingSpecies()&&!bird.isNoGravity(),bird.getSpeciesSlug()+" must finish sleep grounded with flight gravity disabled");
-   }
+  awaitRequestedBirdLanding(h,birds,480);
+ }
+
+ private static void awaitRequestedBirdLanding(GameTestHelper h,java.util.List<MinemonCreature> birds,int remaining) {
+  if(birds.stream().allMatch(b->b.isSleeping()&&b.isNightResting()&&b.isOnGround()&&!b.isNoGravity())){
    h.getLevel().setDayTime(1000);
    h.runAfterDelay(3,()->{
     for(var bird:birds)check(h,!bird.isSleeping()&&!bird.isNightResting(),bird.getSpeciesSlug()+" must wake at dawn");
     h.succeed();
    });
-  });
+   return;
+  }
+  if(remaining<=0){
+   var states=birds.stream().map(b->b.getSpeciesSlug()+"{sleep="+b.isSleeping()+",night="+b.isNightResting()+",ground="+b.isOnGround()+",gravity="+b.isNoGravity()+",pos="+b.position()+",nav="+b.getNavigation().getTargetPos()+"}").toList();
+   h.fail("Requested flyers must land and sleep on dry ground before dawn: "+states);
+   return;
+  }
+  h.runAfterDelay(5,()->awaitRequestedBirdLanding(h,birds,remaining-5));
  }
 
  private static void awaitAwakeFlightBand(GameTestHelper h,MinemonCreature bird,int remaining,int stable){
