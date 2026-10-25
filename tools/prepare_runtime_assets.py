@@ -135,6 +135,13 @@ def night_sleep_clip(data,geo,d):
   for channel,value in tracks.items():
    if channel in ('position','rotation','scale'):
     channels.setdefault(bone,{})[channel]=closed(value)
+ if slug=='haunter':
+  # The retained Haunter rig uses different names than its stripped source
+  # blink channels. Reuse its actual closed-lid meshes, not absent bones.
+  for side in ('left','right'):
+   channels.setdefault('closed_eyelid_'+side,{})['position']=[0,0,-0.15]
+   for part in ('half_eye_','full_eye_','pupil_'):
+    channels.setdefault(part+side,{})['position']=[0,0,0.2]
  if slug=='fearow':
   for side in ('left','right'):
    channels.setdefault('eyelid_'+side,{})['position']=[0,0,-0.15]

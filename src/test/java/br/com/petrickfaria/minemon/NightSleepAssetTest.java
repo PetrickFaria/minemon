@@ -11,7 +11,11 @@ public class NightSleepAssetTest {
    var file=root.resolve(d.animation().replace("assets/minemon/","assets/minemon_gen1/"));
    var animations=JsonParser.parseString(Files.readString(file)).getAsJsonObject().getAsJsonObject("animations");
    var sleep=animations.getAsJsonObject(d.clips().get("night_sleep"));
-   assertNotNull(d.slug(),sleep);assertTrue(d.slug(),sleep.get("loop").getAsBoolean());
+   assertNotNull(d.slug(),sleep);
+   if(d.slug().equals("haunter"))for(String side:java.util.List.of("left","right")){
+    assertEquals(-.15,sleep.getAsJsonObject("bones").getAsJsonObject("closed_eyelid_"+side).getAsJsonArray("position").get(2).getAsDouble(),.0001);
+    assertEquals(.2,sleep.getAsJsonObject("bones").getAsJsonObject("pupil_"+side).getAsJsonArray("position").get(2).getAsDouble(),.0001);
+   }assertTrue(d.slug(),sleep.get("loop").getAsBoolean());
    assertFalse(d.slug(),sleep.toString().matches("(?s).*\\b(?:q|query)\\.r\\..*"));
    String blinkName=d.clips().get("blink");
    if(blinkName!=null&&animations.has(blinkName)){

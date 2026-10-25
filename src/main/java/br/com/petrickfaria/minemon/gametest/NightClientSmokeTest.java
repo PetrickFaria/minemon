@@ -45,6 +45,7 @@ final class NightClientSmokeTest {
       {
        var sleepBones=animations.getAsJsonObject(d.clips().get("night_sleep")).getAsJsonObject("bones");
        java.util.Set<String> eyeNames=blink!=null&&animations.has(blink)?animations.getAsJsonObject(blink).getAsJsonObject("bones").keySet():sleepBones.keySet().stream().filter(n->n.contains("eye")||n.contains("pupil")).collect(java.util.stream.Collectors.toSet());
+       if(eyeNames.isEmpty())eyeNames=sleepBones.keySet().stream().filter(n->n.contains("eye")||n.contains("pupil")).collect(java.util.stream.Collectors.toSet());
        for(String name:eyeNames){
         var bone=model.getAnimationProcessor().getBone(name);if(bone==null)continue;
         var tracks=sleepBones.getAsJsonObject(name);
