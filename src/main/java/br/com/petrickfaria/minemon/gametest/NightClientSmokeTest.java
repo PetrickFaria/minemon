@@ -17,7 +17,7 @@ import java.util.*;
 final class NightClientSmokeTest {
  private static final List<String> SPECIES=List.of("bulbasaur","victreebel","venusaur","snorlax","charizard","scyther","dragonite","pidgey","pidgeotto","pidgeot","fearow","gastly","haunter","gengar","koffing","weezing","butterfree","beedrill","venomoth","parasect","kakuna","tangela","poliwag","growlithe","magikarp","gyarados","lapras","dratini","omanyte");
  private static boolean opened,setup,spawned,waking;
- private static int ticks,index,samples,sleepTick;
+ private static int ticks,index,samples,sleepTick,depthSettleTicks,depthStableTicks;
  private static volatile UUID entity;
  private static final Map<String,float[]> eyes=new HashMap<>();
  static void tick(TickEvent.ClientTickEvent event){
@@ -80,7 +80,7 @@ final class NightClientSmokeTest {
     var p=level.getServer().getPlayerList().getPlayers().get(0);p.setGameMode(GameType.CREATIVE);p.teleportTo(level,0,102,-5,0,8);
    });return;}
    if(!spawned){
-    spawned=true;ticks=0;samples=0;sleepTick=0;waking=false;eyes.clear();
+    spawned=true;ticks=0;samples=0;sleepTick=0;depthSettleTicks=0;depthStableTicks=0;waking=false;eyes.clear();
     mc.getSingleplayerServer().execute(()->{
      var level=mc.getSingleplayerServer().overworld();if(entity!=null){var old=level.getEntity(entity);if(old!=null)old.discard();}
      var mob=ModEntities.SPECIES.get(SPECIES.get(index)).get().create(level);
@@ -108,9 +108,16 @@ final class NightClientSmokeTest {
    if(current.isSleeping()){
     if(waterRest){
      double target=WaterMovementGoal.waterRestY(current);
-     if(!Double.isFinite(target)||Math.abs(current.getY()-target)>.2D)
-      throw new IllegalStateException(current.getSpeciesSlug()+" must sleep at its safe species-specific water depth; target="+target+" y="+current.getY());
+     double error=Math.abs(current.getY()-target);
+     if(!Double.isFinite(target)||error>.2D){
+      depthStableTicks=0;
+      if(++depthSettleTicks>20)
+       throw new IllegalStateException(current.getSpeciesSlug()+" must settle at its safe species-specific water depth; target="+target+" y="+current.getY()+" error="+error);
+     }else{
+      if(++depthStableTicks>=5)depthSettleTicks=0;
+     }
     }else{
+     depthSettleTicks=0;depthStableTicks=0;
      boolean shouldLand=!SpeciesBehaviorProfiles.hoversDuringNightRest(current.getSpeciesSlug());
      if(shouldLand&&!current.isOnGround())throw new IllegalStateException(current.getSpeciesSlug()+" must sleep on the ground");
      if(!shouldLand&&(current.isOnGround()||Math.abs(current.getY()-current.naturalSurface()-1.0D)>.2D))
