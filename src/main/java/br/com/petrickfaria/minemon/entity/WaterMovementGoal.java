@@ -14,6 +14,7 @@ public final class WaterMovementGoal extends Goal {
  private int scanIndex,scanYIndex,delay,stalled;
  private Vec3 lastPosition;
  private boolean scanDepth;
+ private Boolean lastDryScan;
  private BlockPos destination;
  private final Map<BlockPos,Integer> blocked=new HashMap<>();
  private static final List<BlockPos> OFFSETS=offsets();
@@ -74,6 +75,11 @@ public final class WaterMovementGoal extends Goal {
   mob.getNavigation().stop();destination=null;delay=15+mob.getRandom().nextInt(25);
  }
  private BlockPos scan(boolean dry){
+  // Shore exit starts near the swimmer, independent of how far the prior
+  // water search progressed. Do not reuse distant-water scan cursors on land.
+  if(lastDryScan==null||lastDryScan!=dry){
+   lastDryScan=dry;scanIndex=0;scanYIndex=0;scanDepth=false;
+  }
   BlockPos origin=mob.blockPosition();int paths=0;
   // Bounded batches cover the full three-dimensional radius, including
   // water farther above/below than a shore step. Both cursors survive retries;
