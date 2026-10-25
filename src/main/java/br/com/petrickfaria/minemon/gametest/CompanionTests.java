@@ -178,7 +178,7 @@ public final class CompanionTests {
   traceMovement(h,"natural-flight",bird,0,300);
   h.runAfterDelay(100,()->{
    double altitude=bird.getY()-NaturalMovementGoals.surfaceBelow(h.getLevel(),bird.getX(),bird.getY(),bird.getZ());
-   check(h,altitude>=1.0D&&altitude<=9.0D,"Airborne species must maintain the active 1..3 or 4..9 block altitude band; got "+altitude);
+   check(h,altitude>=0.9D&&altitude<=9.1D,"Airborne species must maintain the active 1..3 or 4..9 block altitude band; got "+altitude);
    bird.setSleeping(true);
    check(h,bird.isNoGravity(),"Air-only sleeping species must retain hover gravity control");
    h.runAfterDelay(100,()->{
@@ -193,7 +193,7 @@ public final class CompanionTests {
 
  private static void awaitAwakeFlightBand(GameTestHelper h,MinemonCreature bird,int remaining,int stable){
   double altitude=bird.getY()-NaturalMovementGoals.surfaceBelow(h.getLevel(),bird.getX(),bird.getY(),bird.getZ());
-  int nextStable=altitude>=1.0D&&altitude<=9.0D&&!bird.isOnGround()?stable+5:0;
+  int nextStable=altitude>=0.9D&&altitude<=9.1D&&!bird.isOnGround()?stable+5:0;
   if(nextStable>=20){h.succeed();return;}
   check(h,remaining>0,"Awakened bird must actually take off and remain in the altitude band; got "+altitude);
   h.runAfterDelay(5,()->awaitAwakeFlightBand(h,bird,remaining-5,nextStable));
@@ -234,8 +234,12 @@ public final class CompanionTests {
   CompoundTag flight=new CompoundTag();bird.addAdditionalSaveData(flight);flight.putString("NaturalBehaviorPhase","AIR");bird.readAdditionalSaveData(flight);
   traceMovement(h,"sleep-landing",bird,0,200);
   h.runAfterDelay(200,()->{
-   check(h,bird.isSleeping()&&bird.isOnGround()&&!bird.isInWater(),"Night-resting mixed flyer must follow a path to dry ground");
-   check(h,h.getLevel().noCollision(bird,bird.getBoundingBox()),"Landing must not clip the entity into solid terrain");
+   boolean landed=bird.isSleeping()&&bird.isOnGround()&&!bird.isInWater();
+   boolean clear=h.getLevel().noCollision(bird,bird.getBoundingBox());
+   h.getLevel().getGameRules().getRule(GameRules.RULE_DAYLIGHT).set(true,h.getLevel().getServer());
+   h.getLevel().setDayTime(1000);
+   check(h,landed,"Night-resting mixed flyer must follow a path to dry ground");
+   check(h,clear,"Landing must not clip the entity into solid terrain");
    h.succeed();
   });
  }

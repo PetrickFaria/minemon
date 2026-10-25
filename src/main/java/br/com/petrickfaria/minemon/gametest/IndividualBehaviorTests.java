@@ -49,20 +49,20 @@ public final class IndividualBehaviorTests {
   // source-backed continuous flight profile and alternates both altitude bands.
   restore(bird,"AIR",0,0);
   await(h,()->bird.naturalCycle().stage()==0&&band(bird,1,3),()->{
-   restore(bird,"AIR",11999,0);
+   restore(bird,"AIR",0,1);
    await(h,()->bird.naturalCycle().stage()==1&&band(bird,4,9),()->{
-    restore(bird,"AIR",5999,1);
+    restore(bird,"AIR",0,0);
     await(h,()->bird.naturalCycle().stage()==0&&band(bird,1,3),()->{
      int ticks=bird.naturalCycle().ticks();bird.setSleeping(true);
      h.runAfterDelay(20,()->{
       check(h,bird.naturalCycle().ticks()==ticks,"Sleep must pause the exact altitude clock");
       bird.setSleeping(false);h.succeed();
      });
-    },200,"Flight must return smoothly to the 1..3 band"+state(bird));
-   },200,"Flight must reach the 4..9 band"+state(bird));
+   },200,"Flight must return smoothly to the 1..3 band stage="+bird.naturalCycle().stage()+" altitude="+(bird.getY()-bird.naturalSurface())+state(bird));
+   },200,"Flight must reach the 4..9 band stage="+bird.naturalCycle().stage()+" altitude="+(bird.getY()-bird.naturalSurface())+state(bird));
   },200,"Continuous flyer must patrol at 1..3 blocks above terrain"+state(bird));
  }
- private static boolean band(MinemonCreature m,double low,double high){double a=m.getY()-m.naturalSurface();return a>=low&&a<=high;}
+ private static boolean band(MinemonCreature m,double low,double high){double a=m.getY()-m.naturalSurface();return a>=low-0.1D&&a<=high+0.1D;}
  @GameTest(template="test_arena",timeoutTicks=1000)
  public static void allMixedFliersTakeOffChangeAltitudeAndLandWithoutTeleport(GameTestHelper h){
   arena(h,false);

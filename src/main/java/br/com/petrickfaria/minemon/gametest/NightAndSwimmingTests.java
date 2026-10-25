@@ -69,7 +69,7 @@ public final class NightAndSwimmingTests {
   await(h,()->shellder.isInWater()&&krabby.isInWater()&&shellder.getY()<4.0D&&krabby.getY()<4.0D,()->{
    check(h,h.getLevel().noCollision(shellder,shellder.getBoundingBox()),"Shellder must avoid the solid bottom while seeking it");
    check(h,h.getLevel().noCollision(krabby,krabby.getBoundingBox()),"Krabby must avoid the solid bottom while seeking it");
-   check(h,shellder.getY()>=1&&krabby.getY()>=1,"Bottom-preferring swimmers must stay above the lake bed");
+   check(h,shellder.getY()>=1&&krabby.getY()>=1,"Bottom-preferring swimmers must stay above the lake bed; shellderY="+shellder.getY()+" krabbyY="+krabby.getY());
    h.succeed();
   },650,"Shellder and Krabby must choose reachable water near the floor");
  }

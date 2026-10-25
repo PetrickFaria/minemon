@@ -348,12 +348,14 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
 
     private void tickNightRest(){
         if(this.wakeGraceTicks>0)this.wakeGraceTicks--;
+        LivingEntity target=this.getTarget();
+        if(target!=null&&(!target.isAlive()||target.isRemoved())){this.setTarget(null);target=null;}
         boolean night=this.level.dimensionType().hasSkyLight()&&this.level.isNight();
         boolean waterRest=SpeciesBehaviorProfiles.waterCapable(this.getSpeciesSlug())&&this.isInWaterOrBubble();
         boolean restingEnvironment=waterRest||!SpeciesBehaviorProfiles.isAquatic(this.getSpeciesSlug())&&!this.isInWaterOrBubble();
         boolean eligible=restingEnvironment&&!this.isNoAi()
             &&!this.isPassenger()&&!this.isDeadOrDying()
-            &&this.getTarget()==null&&this.wakeGraceTicks==0;
+            &&target==null&&this.wakeGraceTicks==0;
         if(night&&eligible){
             if(!this.nightRoutine){this.nightRoutine=true;this.getNavigation().stop();this.stopSpontaneousRun();}
             this.entityData.set(NIGHT_REST,true);
