@@ -1,4 +1,117 @@
-YªçŠx-®éÜj×¢ëiºÚ+Š§j[h‘éÜ¢éíãO|N‹Z–‹­¦ëeŠw¬ÔŒ„½ÕÍÈ½‰¥¸½•¹ØÁåÑ¡½¸Ì(ˆˆ‰Y•É¥™ä½‰‰±•µ½¸€Ä¸à¸È	…Ñ €ÄÔ…¹•á…ĞÁÉ•Í•ÉÙ…Ñ¥½¸½˜…ÁÁÉ½Ù•€ŒÀÀÇŠLŒÄĞÀ¸ˆˆˆ)¥µÁ½ÉĞ…ÉÁ…ÉÍ”°©Í½¸°µ…Ñ °ÍÑÉÕĞ°ÍÕ‰ÁÉ½•ÍÌ°é¥Á™¥±”)™É½´Á…Ñ¡±¥ˆ¥µÁ½ÉĞA…Ñ )™É½´Ù•É¥™å}…ÁÁÉ½Ù•‘}…ÍÍ•Ñ}‘•±Ñ„¥µÁ½ÉĞ¥Í}…ÁÁÉ½Ù•‘}ÁÉ¥½É}…ÍÍ•Ñ}‘•±Ñ„()I==PõA…Ñ ¡}}™¥±•}|¤¹É•Í½±Ù” ¤¹Á…É•¹ÑÍlÅt)	MôœÜÙ™ˆÌÀÜÑŒØÕŒØÉ‘•„ÙˆäÑŒÈäÅ‘”äÀäÈÔĞäÑ”äÔœ)HõI==P¼ÍÉŒ½µ…¥¸½É•Í½ÕÉ•Ìœ)5@ô‘…Ñ„½µ¥¹•µ½¹}•¸Ä½ÉÕ¹Ñ¥µ•}ÍÁ•¥•Ì¹©Í½¸œ)Y@ô‘…Ñ„½µ¥¹•µ½¹}•¸Ä½…¹¥µ…Ñ¥½¹}Ù…±¥‘…Ñ¥½¹}ÁÉ½™¥±•Ì¹©Í½¸œ)aAQõl­…‰ÕÑ½ÁÌœ°…•É½‘…Ñå°œ°Í¹½É±…àœ°…ÉÑ¥Õ¹¼œ°é…Á‘½Ìœ°µ½±ÑÉ•Ìœ°‘É…Ñ¥¹¤œ°‘É…½¹…¥Èœ°‘É…½¹¥Ñ”œ°µ•İÑİ¼t)IU9Lõì…•É½‘…Ñå°œ°‘É…Ñ¥¹¤œ°‘É…½¹…¥Èô)1e%9õì…ÉÑ¥Õ¹¼œ°é…Á‘½Ìœ°µ½±ÑÉ•Ìœ°µ•İÑİ¼ô)9Q=5dõì(€­…‰ÕÑ½ÁÌœél±•™Ñ}…É´œ°É¥¡Ñ}…É´œ°±•™Ñ}±…Üœ°É¥¡Ñ}±…Üœ°±•™Ñ}ÕÁÁ•É}±•œœ°É¥¡Ñ}ÕÁÁ•É}±•œœ°Ñ…¥°œ°™¥¹}ÕÁÁ•É}±•™Ğœ°™¥¹}ÕÁÁ•É}É¥¡Ğt°(€…•É½‘…Ñå°œélİ¥¹}É½Õ¹‘}±•™Ğœ°İ¥¹}É½Õ¹‘}É¥¡Ğœ°İ¥¹}…¥É}±•™Ğœ°İ¥¹}…¥É}É¥¡Ğœ°Ñ…¥±|Äœ°Ñ…¥±}Ñ¥Àœ°±•™Ñ}ÕÁÁ•É}±•œœ°É¥¡Ñ}ÕÁÁ•É}±•œt°(€Í¹½É±…àœél‰•±±äœ°‰•±±äÈœ°…Éµ}±•™Ğœ°…Éµ}É¥¡Ğœ°±•}±•™Ğœ°±•}É¥¡Ğt°(€…ÉÑ¥Õ¹¼œélİ¥¹}½Á•¹}±•™Ğœ°İ¥¹}½Á•¹}±•™ĞÌœ°İ¥¹}½Á•¹}É¥¡Ğœ°İ¥¹}½Á•¹}É¥¡ĞÌœ°Ñ…¥°Äàœ°Ñ…¥±}‰…Í”t°(€é…Á‘½Ìœélİ¥¹}½Á•¹}±•™Ğœ°İ¥¹}½Á•¹}±•™Ñ}…¹Ñ¤œ°İ¥¹}½Á•¹}É¥¡Ğœ°İ¥¹}½Á•¹}É¥¡Ñ}…¹Ñ¤œ°Ñ…¥±}Ñ½Àt°(€µ½±ÑÉ•Ìœélİ¥¹}½Á•¹}±•™Ğœ°İ¥¹}½Á•¹}É¥¡Ğœ°¡•…‘}™¥É”Èœ°¡•…‘}™¥É”Ìœ°Ñ…¥±}™¥É•}ÁÕ™˜Èœ°Ñ…¥±}™¥É•}ÁÕ™˜Ôt°(€‘É…Ñ¥¹¤œélÍ•µ•¹ĞÄœ°Í•µ•¹ĞĞœ°Í•µ•¹ĞÜœ°Í•µ•¹Ğàœ°¡•…t°(€‘É…½¹…¥ÈœélÍ•µ•¹ĞÄœ°Í•µ•¹ĞØœ°Í•µ•¹ĞÄÄœ°•µ}Ñ…¥°Äœ°•µ}Ñ…¥°Èœ°¡•…‘}É½Ñ…Ñ¥½¸t°(€‘É…½¹¥Ñ”œél…Éµ}±•™Ğœ°…Éµ}É¥¡Ğœ°±•}±•™Ğœ°±•}É¥¡Ğœ°İ¥¹}±•™Ğœ°İ¥¹}É¥¡Ğœ°Ñ…¥°Ôt°(€µ•İÑİ¼œél…Éµ}±•™Ğœ°…Éµ}É¥¡Ğœ°±•}±•™Ğœ°±•}É¥¡Ğœ°Ñ…¥°œ°Ñ…¥°äœ°¡•…uô)…Àõ…ÉÁ…ÉÍ”¹ÉÕµ•¹ÑA…ÉÍ•È ¤í…À¹…‘‘}…ÉÕµ•¹Ğ ©…Èœ±¹…ÉÌôœüœ¤í…ÉÌõ…À¹Á…ÉÍ•}…ÉÌ ¤)‘•˜É•…‘¨¡Á…Ñ ¤éÉ•ÑÕÉ¸©Í½¸¹±½…‘Ì ¡H½Á…Ñ ¤¹É•…‘}‰åÑ•Ì ¤¤)‘•˜‰…Í”¡Á…Ñ ¤éÉ•ÑÕÉ¸ÍÕ‰ÁÉ½•ÍÌ¹¡•­}½ÕÑÁÕĞ¡l¥Ğœ°Í¡½Üœ±	M¬œèœ­Á…Ñ¡t±İõI==P¤)‘•˜Á…­•¡Á…Ñ ¤éÉ•ÑÕÉ¸Á…Ñ ¹É•Á±…” …ÍÍ•ÑÌ½µ¥¹•µ½¸¼œ°…ÍÍ•ÑÌ½µ¥¹•µ½¹}•¸Ä¼œ°Ä¤)‘•™ÌõÉ•…‘¨¡5@¤íÁÉ½™¥±•ÌõÉ•…‘¨¡Y@¤)½±‘}‘•™Ìõ©Í½¸¹±½…‘Ì¡‰…Í” ÍÉŒ½µ…¥¸½É•Í½ÕÉ•Ì¼œ­5@¤¤í½±‘}ÁÉ½™¥±•Ìõ©Í½¸¹±½…‘Ì¡‰…Í” ÍÉŒ½µ…¥¸½É•Í½ÕÉ•Ì¼œ­Y@¤¤)…ÍÍ•ÉĞ±•¸¡‘•™Ì¤ôôÄÔÄ…¹m‘l¹…Ñ¥½¹…±A½­•‘•á9Õµ‰•Èt™½È¥¸‘•™Ítôõ±¥ÍĞ¡É…¹” Ä°ÄÔÈ¤¤)…ÍÍ•ÉĞm‘lÍ±Õœt™½È¥¸‘•™ÍlÄĞÀèÄÔÁutôõaAQ)ÁÉ¥½É}‘•™Ìõ©Í½¸¹±½…‘Ì¡©Í½¸¹‘ÕµÁÌ¡‘•™ÍlèÄĞÁt¤¤)™½ÈÍ±Õœ¥¸€ ¡…Éµ•±•½¸œ°¡…É¥é…Éœ¤è(‘•™¥¹¥Ñ¥½¸õ¹•áĞ¡™½È¥¸ÁÉ¥½É}‘•™Ì¥˜‘lÍ±ÕœtôõÍ±Õœ¤(‘•™¥¹¥Ñ¥½¹l±¥ÁÌt¹Á½À Ñ…¥±}™±…µ”œ±9½¹”¤(‘•™¥¹¥Ñ¥½¹lÑ…¥±}™±…µ•}…¹¥µ…Ñ¥½¸tõ…±Í”)¡…É¥é…Éõ¹•áĞ¡™½È¥¸ÁÉ¥½É}‘•™Ì¥˜‘lÍ±Õœtôô¡…É¥é…Éœ¤)¡…É¥é…É‘l±¥ÁÌt¹Á½À …¥É}¥‘±”œ±9½¹”¤)¡…É¥é…É‘l±¥ÁÌt¹Á½À …¥É}™±äœ±9½¹”¤)™½ÈÍ±Õœ¥¸€ ÍÅÕ¥ÉÑ±”œ°İ…ÉÑ½ÉÑ±”œ¤è(‘•™¥¹¥Ñ¥½¸õ¹•áĞ¡™½È¥¸ÁÉ¥½É}‘•™Ì¥˜‘lÍ±ÕœtôõÍ±Õœ¤(…ÍÍ•ÉĞ‘•™¥¹¥Ñ¥½¹l±¥ÁÌt¹Á½À É½Õ¹‘}ÉÕ¸œ±9½¹”¤ôõ˜…¹¥µ…Ñ¥½¸¹íÍ±Õô¹É½Õ¹‘}ÉÕ¸œ°=¹±äÑ¡”•á¥ÍÑ¥¹œ¹…Ñ¥Ù”ÑÕÉÑ±”ÉÕ¸µ…ä‰”¹•İ±äÍ•±•Ñ•œ(ŒQ¡•Í”•á…ĞÍ…±”¡…¹•Ì…É”Ñ¡”½¹±ä…ÕÑ¡½É¥é•ÁÉ¥½ÈµÍÁ•¥•Ì‘•™¥¹¥Ñ¥½¸‘•±Ñ…Ì¸)™½ÈÍ±Õœ°•áÁ•Ñ•‘}Í…±”¥¸ì(€…ÍÑ±äœèìÍ…±”œèÀ¸àÔ°İ¥‘Ñ œèÀ¸È°¡•¥¡ĞœèÀ¸Éô°(€•±•Ñ…‰ÕéèœèìÍ…±”œèÄ¸ÌÔ°İ¥‘Ñ œèÄ¸ÀÔ°¡•¥¡ĞœèÈ¸ÈÕô°)ô¹¥Ñ•µÌ ¤è(‘•™¥¹¥Ñ¥½¸õ¹•áĞ ¡™½È¥¸ÁÉ¥½É}‘•™Ì¥˜‘lÍ±ÕœtôõÍ±Õœ¤±9½¹”¤(¥˜‘•™¥¹¥Ñ¥½¸¥Ì¹½Ğ9½¹”è(€‰…Í•±¥¹”õ½±‘}‘•™Ím‘•™¥¹¥Ñ¥½¹l¹…Ñ¥½¹…±A½­•‘•á9Õµ‰•Èt´Åt(€™½È­•ä±Ù…±Õ”¥¸•áÁ•Ñ•‘}Í…±”¹¥Ñ•µÌ ¤è(€€…ÍÍ•ÉĞ‘•™¥¹¥Ñ¥½¹m­•åtôõÙ…±Õ”°¡Í±Õœ±­•ä°Õ¹•áÁ•Ñ•…ÕÑ¡½É¥é•Í…±”œ±‘•™¥¹¥Ñ¥½¹m­•åt¤(€€‘•™¥¹¥Ñ¥½¹m­•åtõ‰…Í•±¥¹•m­•åt)™½ÈÍ±Õœ¥¸€ ÍÁ•…É½Üœ°™•…É½Üœ¤è(‘•™¥¹¥Ñ¥½¸õ¹•áĞ¡™½È¥¸ÁÉ¥½É}‘•™Ì¥˜‘lÍ±ÕœtôõÍ±Õœ¤(½±‘}‘•™¥¹¥Ñ¥½¸õ¹•áĞ¡™½È¥¸½±‘}‘•™Ì¥˜‘lÍ±ÕœtôõÍ±Õœ¤(¥˜Í±ÕœôôÍÁ•…É½Üœè(€…ÍÍ•ÉĞ‘•™¥¹¥Ñ¥½¹l±¥ÁÌt¹Á½À …¥É}¥‘±”œ±9½¹”¤ôô…¹¥µ…Ñ¥½¸¹ÍÁ•…É½Ü¹µ¥¹•µ½¹}…¥É}¥‘±”œ(€…ÍÍ•ÉĞ‘•™¥¹¥Ñ¥½¹l±¥ÁÌt¹Á½À …¥É}™±äœ±9½¹”¤ôô…¹¥µ…Ñ¥½¸¹ÍÁ•…É½Ü¹µ¥¹•µ½¹}…¥É}™±äœ(•±Í”è(€…ÍÍ•ÉĞ‘•™¥¹¥Ñ¥½¹l±¥ÁÌt¹Á½À …¥É}™±äœ±9½¹”¤ôô…¹¥µ…Ñ¥½¸¹™•…É½Ü¹µ¥¹•µ½¹}…¥É}™±äœ(€…ÍÍ•ÉĞ‘•™¥¹¥Ñ¥½¹l±¥ÁÌul…¥É}¥‘±”tôô…¹¥µ…Ñ¥½¸¹™•…É½Ü¹µ¥¹•µ½¹}…¥É}¥‘±”œ(€‘•™¥¹¥Ñ¥½¹l±¥ÁÌul…¥É}¥‘±”tõ½±‘}‘•™¥¹¥Ñ¥½¹l±¥ÁÌul…¥É}¥‘±”t)…ÍÍ•ÉĞÁÉ¥½É}‘•™Ìôõ½±‘}‘•™ÍlèÄĞÁt°¸…ÁÁÉ½Ù•ÁÉ¥½È‘•™¥¹¥Ñ¥½¸¡…¹•‰•å½¹Ñ¡”•áÁ±¥¥Ğ™¥É”µÍÑ…ÉÑ•È™±…µ”…‘…ÁÑ…Ñ¥½¸œ)…ÍÍ•ÉĞ±•¸¡‘•™Ì¤ôôÄÔÄ…¹‘•™ÍlÄÔÁulÍ±Õœtôôµ•Üœ°¥¹…°A½¯¥‘•à•¹ÑÉäµÕÍĞÉ•µ…¥¸5•Üœ)…ÍÍ•ÉĞÍ•Ğ¡ÁÉ½™¥±•Ì¤ôõÍ•Ğ¡½±‘}ÁÉ½™¥±•Ì¥ñÍ•Ğ¡aAQ¥ñìµ•Üô°U¹•áÁ•Ñ•½Èµ¥ÍÍ¥¹œ…ÉÑ¥Õ±…Ñ¥½¸ÁÉ½™¥±”œ)™½ÈÍ±Õœ±ÁÉ½™¥±”¥¸½±‘}ÁÉ½™¥±•Ì¹¥Ñ•µÌ ¤è(•áÁ•Ñ•‘}ÁÉ½™¥±”õ‘¥Ğ¡ÁÉ½™¥±”¤(¥˜Í±ÕœôôÉ…Á¥‘…Í œé•áÁ•Ñ•‘}ÁÉ½™¥±•lÉÕ¸t÷]=òÚ$z{-®éÜj×e,axis)
+#!/usr/bin/env python3
+"""Verify Cobblemon 1.8.2 Batch 15 and exact preservation of approved #001â€“#140."""
+import argparse, json, math, struct, subprocess, zipfile
+from pathlib import Path
+from verify_approved_asset_delta import is_approved_prior_asset_delta
+
+ROOT=Path(__file__).resolve().parents[1]
+BASE='76fcb3074cc65c62dea6b94c291de90925494e95'
+R=ROOT/'src/main/resources'
+MP='data/minemon_gen1/runtime_species.json'
+VP='data/minemon_gen1/animation_validation_profiles.json'
+EXPECTED=['kabutops','aerodactyl','snorlax','articuno','zapdos','moltres','dratini','dragonair','dragonite','mewtwo']
+RUNS={'aerodactyl','dratini','dragonair'}
+FLYING={'articuno','zapdos','moltres','mewtwo'}
+ANATOMY={
+ 'kabutops':['left_arm','right_arm','left_claw','right_claw','left_upper_leg','right_upper_leg','tail','fin_upper_left','fin_upper_right'],
+ 'aerodactyl':['wing_ground_left','wing_ground_right','wing_air_left','wing_air_right','tail_1','tail_tip','left_upper_leg','right_upper_leg'],
+ 'snorlax':['belly','belly2','arm_left','arm_right','leg_left','leg_right'],
+ 'articuno':['wing_open_left','wing_open_left3','wing_open_right','wing_open_right3','tail18','tail_base'],
+ 'zapdos':['wing_open_left','wing_open_left_anti','wing_open_right','wing_open_right_anti','tail_top'],
+ 'moltres':['wing_open_left','wing_open_right','head_fire2','head_fire3','tail_fire_puff2','tail_fire_puff5'],
+ 'dratini':['segment1','segment4','segment7','segment8','head'],
+ 'dragonair':['segment1','segment6','segment11','gem_tail1','gem_tail2','head_rotation'],
+ 'dragonite':['arm_left','arm_right','leg_left','leg_right','wing_left','wing_right','tail5'],
+ 'mewtwo':['arm_left','arm_right','leg_left','leg_right','tail','tail9','head']}
+ap=argparse.ArgumentParser();ap.add_argument('jar',nargs='?');args=ap.parse_args()
+def readj(path):return json.loads((R/path).read_bytes())
+def base(path):return subprocess.check_output(['git','show',BASE+':'+path],cwd=ROOT)
+def packed(path):return path.replace('assets/minemon/','assets/minemon_gen1/',1)
+defs=readj(MP);profiles=readj(VP)
+old_defs=json.loads(base('src/main/resources/'+MP));old_profiles=json.loads(base('src/main/resources/'+VP))
+assert len(defs)==151 and [d['nationalPokedexNumber'] for d in defs]==list(range(1,152))
+assert [d['slug'] for d in defs[140:150]]==EXPECTED
+prior_defs=json.loads(json.dumps(defs[:140]))
+for slug in ('charmeleon','charizard'):
+ definition=next(d for d in prior_defs if d['slug']==slug)
+ definition['clips'].pop('tail_flame',None)
+ definition['tail_flame_animation']=False
+charizard=next(d for d in prior_defs if d['slug']=='charizard')
+charizard['clips'].pop('air_idle',None)
+charizard['clips'].pop('air_fly',None)
+for slug in ('squirtle','wartortle'):
+ definition=next(d for d in prior_defs if d['slug']==slug)
+ assert definition['clips'].pop('ground_run',None)==f'animation.{slug}.ground_run','Only the existing native turtle run may be newly selected'
+# These exact scale changes are the only authorized prior-species definition deltas.
+for slug, expected_scale in {
+ 'gastly': {'scale':0.85,'width':0.2,'height':0.2},
+ 'electabuzz': {'scale':1.35,'width':1.05,'height':2.25},
+}.items():
+ definition=next((d for d in prior_defs if d['slug']==slug),None)
+ if definition is not None:
+  baseline=old_defs[definition['nationalPokedexNumber']-1]
+  for key,value in expected_scale.items():
+   assert definition[key]==value,(slug,key,'unexpected authorized scale',definition[key])
+   definition[key]=baseline[key]
+for slug in ('spearow','fearow'):
+ definition=next(d for d in prior_defs if d['slug']==slug)
+ old_definition=next(d for d in old_defs if d['slug']==slug)
+ if slug=='spearow':
+  assert definition['clips'].pop('air_idle',None)=='animation.spearow.minemon_air_idle'
+  assert definition['clips'].pop('air_fly',None)=='animation.spearow.minemon_air_fly'
+ else:
+  assert definition['clips'].pop('air_fly',None)=='animation.fearow.minemon_air_fly'
+  assert definition['clips']['air_idle']=='animation.fearow.minemon_air_idle'
+  definition['clips']['air_idle']=old_definition['clips']['air_idle']
+assert prior_defs==old_defs[:140],'An approved prior definition changed beyond the explicit fire-starter flame adaptation'
+assert len(defs)==151 and defs[150]['slug']=='mew','Final PokÃ©dex entry must remain Mew'
+assert set(profiles)==set(old_profiles)|set(EXPECTED)|{'mew'},'Unexpected or missing articulation profile'
+for slug,profile in old_profiles.items():
+ expected_profile=dict(profile)
+ if slug=='rapidash':expected_profile['run']=[*profile['run'],'fire_mane_head_flame']
+ assert profiles[slug]==expected_profile,'Earlier profile changed: '+slug
+report=json.loads((ROOT/'docs/animation-audit/minemon-gen1-batch15-source-evidence.json').read_text())
+assert report['batch']==15 and report['range']==[141,150]
+assert report['source_sha256']=='cae8ac328b61354fbe415208b8c6ffc12e7155094d0a87082e85e7914fb380c2'
+assert [s['slug'] for s in report['species']]==EXPECTED
+prior_paths=set()
+for d in old_defs[:140]:prior_paths.update([d['model'],d['texture'],d['animation']]+d.get('licenses',[]))
+for path in prior_paths:
+ current=(R/path).read_bytes()
+ assert is_approved_prior_asset_delta(path,current) or current==base('src/main/resources/'+path),'Earlier asset changed: '+path
+allowed={'src/main/resources/'+MP,'src/main/resources/'+VP,'tools/import_cobblemon_182_batch.py','tools/verify_batch15.py',
+ 'src/test/java/br/com/petrickfaria/minemon/Batch15AnimationCompatibilityTest.java',
+ 'src/main/java/br/com/petrickfaria/minemon/client/MinemonModel.java',
+ 'src/main/java/br/com/petrickfaria/minemon/gametest/ClientSmokeTest.java',
+ 'docs/animation-audit/minemon-gen1-batch15-progress.md','docs/animation-audit/minemon-gen1-batch15-source-evidence.json',
+ '.github/workflows/build.yml'}
+for d in defs[140:150]+defs[150:151]:
+ allowed.update('src/main/resources/'+p for p in [d['model'],d['texture'],d['animation']]+d.get('licenses',[]))
+ allowed.add('src/main/resources/assets/minemon/models/item/'+d['slug']+'_spawn_egg.json')
+source_fire_frames={f'src/main/resources/assets/minemon/textures/pokemon/{slug}_cobblemon_1_8_2/fire/normal/{frame}.png' for slug in ('ponyta','rapidash') for frame in range(1,5)}
+allowed.update(source_fire_frames)
+allowed.add('src/main/resources/assets/minemon/textures/pokemon/arbok_cobblemon_1_8_2/arbok.png')
+allowed.update({'src/main/resources/assets/minemon_gen1/particles/gastly_ghostly_smoke.json',*(f'src/main/resources/assets/minemon_gen1/textures/particle/gastly_ghostly_smoke_{i}.png' for i in range(6))})
+changed=subprocess.check_output(['git','diff','--name-only',BASE,'--','src/main/resources'],cwd=ROOT,text=True).splitlines()
+changed+=subprocess.check_output(['git','ls-files','--others','--exclude-standard','--','src/main/resources'],cwd=ROOT,text=True).splitlines()
+assert set(changed)<=allowed,set(changed)-allowed
+for i,d in enumerate(defs[140:150]):
+ slug=d['slug'];assert d['nationalPokedexNumber']==i+141
+ assert d.get('source_cobblemon_version')=='1.8.2'
+ assert d.get('source_model_variant') in {slug+'.geo.json',slug+'_male.geo.json',slug+'_female.geo.json'}
+ assert all('_cobblemon_1_8_2/' in d[k] for k in ('model','texture','animation'))
+ assert d.get('mode')==('flying' if slug in FLYING else 'ground'),(slug,'unexpected active mode',d.get('mode'))
+ geo=readj(d['model'])['minecraft:geometry'];assert geo
+ bones={}
+ for part in geo:
+  for b in part['bones']:
+   assert b['name'] not in bones,(slug,'duplicate bone',b['name']);bones[b['name']]=b
+ for name,b in bones.items():
+  seen={name};parent=b.get('parent')
+  while parent:
+   assert parent in bones and parent not in seen,(slug,'broken parent',name,parent)
+   seen.add(parent);parent=bones[parent].get('parent')
+  for axis in ('pivot','rotation'):assert all(math.isfinite(float(v)) for v in b.get(axis,[])),(slug,name,axis)
   for cube in b.get('cubes',[]):assert all(math.isfinite(float(v)) for v in cube['origin']+cube['size']),(slug,name,'cube')
  assert set(ANATOMY[slug])<=set(bones),(slug,'missing anatomy',set(ANATOMY[slug])-set(bones))
  tex=(R/d['texture']).read_bytes();assert tex.startswith(b'\x89PNG\r\n\x1a\n')
