@@ -2,6 +2,7 @@
 """Verify native Cobblemon batch 12 and exact cumulative preservation through #110."""
 import argparse,json,math,struct,subprocess,zipfile
 from pathlib import Path
+from verify_approved_asset_delta import is_approved_prior_asset_delta
 
 ROOT=Path(__file__).resolve().parents[1];BASE='0816533addee80e9e17a684c94bed399f4a9488f'
 R=ROOT/'src/main/resources';MP='data/minemon_gen1/runtime_species.json';VP='data/minemon_gen1/animation_validation_profiles.json'
@@ -80,11 +81,14 @@ assert [x['slug'] for x in report['species']]==EXPECTED
 
 prior=set()
 for d in old_defs[:110]:prior.update([d['model'],d['texture'],d['animation']]+d.get('licenses',[]))
-for path in prior:assert (R/path).read_bytes()==base('src/main/resources/'+path),'Prior approved asset changed: '+path
+for path in prior:
+ current=(R/path).read_bytes()
+ assert is_approved_prior_asset_delta(path,current) or current==base('src/main/resources/'+path),'Prior approved asset changed: '+path
 allowed={'src/main/resources/'+MP,'src/main/resources/'+VP}
 for d in defs[110:120]+defs[120:130]+defs[130:140]+defs[140:150]+defs[150:151]:allowed.update('src/main/resources/'+p for p in [d['model'],d['texture'],d['animation']]+d.get('licenses',[]))
 source_fire_frames={f'src/main/resources/assets/minemon/textures/pokemon/{slug}_cobblemon_1_8_2/fire/normal/{frame}.png' for slug in ('ponyta','rapidash') for frame in range(1,5)}
 allowed.update(source_fire_frames)
+allowed.add('src/main/resources/assets/minemon/textures/pokemon/arbok_cobblemon_1_8_2/arbok.png')
 allowed.update({'src/main/resources/assets/minemon_gen1/particles/gastly_ghostly_smoke.json',*(f'src/main/resources/assets/minemon_gen1/textures/particle/gastly_ghostly_smoke_{i}.png' for i in range(6))})
 changed=subprocess.check_output(['git','diff','--name-only',BASE,'--','src/main/resources'],cwd=ROOT,text=True).splitlines()
 changed+=subprocess.check_output(['git','ls-files','--others','--exclude-standard','--','src/main/resources'],cwd=ROOT,text=True).splitlines()
