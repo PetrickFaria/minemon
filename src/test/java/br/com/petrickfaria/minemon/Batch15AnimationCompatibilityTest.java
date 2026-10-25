@@ -193,8 +193,8 @@ public class Batch15AnimationCompatibilityTest {
 
         var clips=animations("mewtwo");
         for(String bone:transition) {
-            var idle=clips.getAsJsonObject("animation.mewtwo.air_idle").getAsJsonObject("bones").getAsJsonArray("rotation");
-            var fly=clips.getAsJsonObject("animation.mewtwo.air_fly").getAsJsonObject("bones").getAsJsonArray("rotation");
+            var idle=clips.getAsJsonObject("animation.mewtwo.air_idle").getAsJsonObject("bones").getAsJsonObject(bone).getAsJsonArray("rotation");
+            var fly=clips.getAsJsonObject("animation.mewtwo.air_fly").getAsJsonObject("bones").getAsJsonObject(bone).getAsJsonArray("rotation");
             assertEquals(bone+" idle rotation",3,idle.size()); assertEquals(bone+" flight rotation",3,fly.size());
             boolean changed=false;
             for(int axis=0;axis<3;axis++)if(Math.abs(idle.get(axis).getAsDouble()-fly.get(axis).getAsDouble())>0.05)changed=true;
