@@ -90,7 +90,16 @@ public final class NaturalMovementGoals {
                             || !this.mob.level.getBlockState(feet).isAir()
                             || !this.mob.level.noCollision(this.mob, this.mob.getBoundingBox().move(
                                     x - this.mob.getX(), surface - this.mob.getY(), z - this.mob.getZ()))) continue;
-                    Path path = this.mob.getNavigation().createPath(feet, 0);
+                    // Cross a shoreline above its collision lip before descending.
+                    // A diagonal path straight to ground can wedge a wide
+                    // flying hitbox against the bank while its center is wet.
+                    double currentSurface=this.mob.naturalSurface();
+                    BlockPos under=new BlockPos(this.mob.getX(),currentSurface-0.001D,this.mob.getZ());
+                    boolean overFluid=!this.mob.level.getFluidState(under).isEmpty();
+                    BlockPos approach=overFluid?feet.above(2):feet;
+                    if(!this.mob.level.noCollision(this.mob,this.mob.getBoundingBox().move(
+                            x-this.mob.getX(),approach.getY()-this.mob.getY(),z-this.mob.getZ())))continue;
+                    Path path = this.mob.getNavigation().createPath(approach, 0);
                     if (path != null && path.canReach()) return path;
                 }
             }
