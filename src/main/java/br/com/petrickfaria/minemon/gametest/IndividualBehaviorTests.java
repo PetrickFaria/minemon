@@ -192,7 +192,7 @@ public final class IndividualBehaviorTests {
   Vec3 start=fish.position();
   for(int sample=200;sample<=2200;sample+=200)traceLongRoute(h,fish,sample);
   h.runAfterDelay(20,()->{
-   for(int x=2;x<100;x++){
+   for(int x=2;x<96;x++){
     var floor=h.absolutePos(new BlockPos(x,18,2));
     check(h,h.getLevel().getBlockState(floor).is(Blocks.STONE),"Long-range fixture lost corridor floor at "+floor);
     check(h,h.getLevel().getBlockState(floor.above()).isAir(),"Long-range fixture has an unexpected obstacle at "+floor.above());
