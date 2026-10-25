@@ -54,7 +54,10 @@ final class NightClientSmokeTest {
          for(int axis=0;axis<3;axis++){
           if(!expected.get(axis).isJsonPrimitive()||!expected.get(axis).getAsJsonPrimitive().isNumber())continue;
           float value=expected.get(axis).getAsFloat()*(channel.equals("rotation")?(float)Math.PI/180:1);
-          if(Math.abs(Math.abs(actual[axis])-Math.abs(value))>.015F)throw new IllegalStateException(mob.getSpeciesSlug()+" eye closure mismatch "+name+" "+channel+" axis="+axis+" got="+actual[axis]+" expected="+value);
+          var initial=bone.getInitialSnapshot();
+          float[] bind=switch(channel){case "position"->new float[]{initial.positionOffsetX,initial.positionOffsetY,initial.positionOffsetZ};case "rotation"->new float[]{initial.rotationValueX,initial.rotationValueY,initial.rotationValueZ};default->new float[]{initial.scaleValueX,initial.scaleValueY,initial.scaleValueZ};};
+          float rendered=channel.equals("scale")?actual[axis]/bind[axis]:actual[axis]-bind[axis];
+          if(Math.abs(Math.abs(rendered)-Math.abs(value))>.015F)throw new IllegalStateException(mob.getSpeciesSlug()+" eye closure mismatch "+name+" "+channel+" axis="+axis+" got="+actual[axis]+" expected="+value);
          }
          eyes.put(name+channel,actual);
         }
@@ -65,13 +68,14 @@ final class NightClientSmokeTest {
     };
    }
    if(mc.level==null||mc.player==null||mc.getSingleplayerServer()==null||mc.screen!=null)return;
-   if(!setup){setup=true;mc.getSingleplayerServer().execute(()->{
+   if(!setup){setup=true;mc.options.hideGui=true;mc.getSingleplayerServer().execute(()->{
     var level=mc.getSingleplayerServer().overworld();level.getGameRules().getRule(GameRules.RULE_DAYLIGHT).set(false,level.getServer());
     level.getGameRules().getRule(GameRules.RULE_DOMOBSPAWNING).set(false,level.getServer());
     for(int x=-12;x<=12;x++)for(int z=-8;z<=18;z++){
      level.setBlockAndUpdate(new BlockPos(x,100,z),Blocks.STONE.defaultBlockState());
      for(int y=101;y<=116;y++)level.setBlockAndUpdate(new BlockPos(x,y,z),Blocks.AIR.defaultBlockState());
     }
+    for(int x:new int[]{-2,2})for(int z:new int[]{3,7})level.setBlockAndUpdate(new BlockPos(x,100,z),Blocks.SEA_LANTERN.defaultBlockState());
     var p=level.getServer().getPlayerList().getPlayers().get(0);p.setGameMode(GameType.CREATIVE);p.teleportTo(level,0,102,-5,0,8);
    });return;}
    if(!spawned){
@@ -84,6 +88,12 @@ final class NightClientSmokeTest {
       var tag=new net.minecraft.nbt.CompoundTag();mob.addAdditionalSaveData(tag);tag.putString("NaturalBehaviorPhase","AIR");mob.readAdditionalSaveData(tag);
      }
      level.addFreshEntity(mob);entity=mob.getUUID();level.setDayTime(18000);
+     double distance=switch(mob.getSpeciesSlug()){
+      case "venusaur"->7;case "snorlax","charizard","dragonite"->6;case "fearow"->9;
+      case "victreebel","scyther","weezing"->5;case "pidgeotto","haunter","butterfree","beedrill","parasect"->4;
+      case "pidgey","gastly","kakuna"->2.5;default->3;
+     };
+     var player=level.getServer().getPlayerList().getPlayers().get(0);player.teleportTo(level,0,101,5-distance,0,0);
     });return;
    }
    ticks++;if(ticks>450)throw new IllegalStateException("Night client timeout: "+SPECIES.get(index)+" samples="+samples);
