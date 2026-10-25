@@ -1,149 +1,106 @@
-#!/usr/bin/env python3
-"""Verify native Cobblemon batch 13 and exact cumulative preservation through #120."""
-import argparse, json, math, struct, subprocess, zipfile
-from pathlib import Path
+YªçŠx-®éÜj×¢ëiºÚ+Š§j[h‘éÜ¢éíßÍtN‹Z–‹­¦ëeŠw¬ÔŒ„½ÕÍÈ½‰¥¸½•¹ØÁåÑ¡½¸Ì(ˆˆ‰Y•É¥™ä¹…Ñ¥Ù”½‰‰±•µ½¸‰…Ñ €ÄÌ…¹•á…ĞÕµÕ±…Ñ¥Ù”ÁÉ•Í•ÉÙ…Ñ¥½¸Ñ¡É½Õ €ŒÄÈÀ¸ˆˆˆ)¥µÁ½ÉĞ…ÉÁ…ÉÍ”°©Í½¸°µ…Ñ °ÍÑÉÕĞ°ÍÕ‰ÁÉ½•ÍÌ°é¥Á™¥±”)™É½´Á…Ñ¡±¥ˆ¥µÁ½ÉĞA…Ñ )™É½´Ù•É¥™å}…ÁÁÉ½Ù•‘}…ÍÍ•Ñ}‘•±Ñ„¥µÁ½ÉĞ¥Í}…ÁÁÉ½Ù•‘}ÁÉ¥½É}…ÍÍ•Ñ}‘•±Ñ„()I==PõA…Ñ ¡}}™¥±•}|¤¹É•Í½±Ù” ¤¹Á…É•¹ÑÍlÅt)	MôœÌØÑ™…ˆÅ…˜ÄÌÙÉ”ØĞÕ˜Ù„ÜİŒĞÄääÔÜÀÈÌÁ•…‰œ)HõI==P¼ÍÉŒ½µ…¥¸½É•Í½ÕÉ•Ìœ)5@ô‘…Ñ„½µ¥¹•µ½¹}•¸Ä½ÉÕ¹Ñ¥µ•}ÍÁ•¥•Ì¹©Í½¸œ)Y@ô‘…Ñ„½µ¥¹•µ½¹}•¸Ä½…¹¥µ…Ñ¥½¹}Ù…±¥‘…Ñ¥½¹}ÁÉ½™¥±•Ì¹©Í½¸œ)aAQõlÍÑ…Éµ¥”œ°µÉµ¥µ”œ°ÍåÑ¡•Èœ°©å¹àœ°•±•Ñ…‰Õéèœ°µ…µ…Èœ°Á¥¹Í¥Èœ°Ñ…ÕÉ½Ìœ°µ…¥­…ÉÀœ°å…É…‘½Ìt)	Q ÄÔõl­…‰ÕÑ½ÁÌœ°…•É½‘…Ñå°œ°Í¹½É±…àœ°…ÉÑ¥Õ¹¼œ°é…Á‘½Ìœ°µ½±ÑÉ•Ìœ°‘É…Ñ¥¹¤œ°‘É…½¹…¥Èœ°‘É…½¹¥Ñ”œ°µ•İÑİ¼t)	Q ÄØõlµ•Üt)Q%Y}IU9LõìÍÑ…Éµ¥”œ°µÉµ¥µ”œ°Ñ…ÕÉ½Ìô)MQQ%}%1õì©å¹àœ°µ…µ…Èô)9Q=5dõì(€ÍÑ…Éµ¥”œél‰½‘äœ°‰½‘å}‰…¬œ°‰½‘å}±¥µ‰}Ñ½Àœ°‰½‘å}±¥µ‰}±•™Ğœ°‰½‘å}±¥µ‰}É¥¡Ğœ°‰½‘å}±¥µ‰}‰½ÑÑ½µ}±•™Ğœ°‰½‘å}±¥µ‰}‰½ÑÑ½µ}É¥¡Ğt°(€µÉµ¥µ”œél¡•…œ°…Éµ}±•™Ğœ°…Éµ}É¥¡Ğœ°İÉ¥ÍÑ}±•™Ğœ°İÉ¥ÍÑ}É¥¡Ğœ°™½½Ñ}±•™Ğœ°™½½Ñ}É¥¡Ğt°(€ÍåÑ¡•Èœél±•™Ñ}İ¥¹œœ°É¥¡Ñ}İ¥¹œœ°±•™Ñ}ÕÁÁ•É}İ¥¹œœ°É¥¡Ñ}ÕÁÁ•É}İ¥¹œœ°±•™Ñ}ÍåÑ¡”œ°É¥¡Ñ}ÍåÑ¡”t°(€©å¹àœél¡…¥É}™É½¹Ñ}±•™Ğœ°¡…¥É}™É½¹Ñ}É¥¡Ğœ°‘É•ÍÍ}™É½¹Ğœ°¡…¹‘}±•™Ğœ°¡…¹‘}É¥¡Ğt°(€•±•Ñ…‰Õéèœél…Éµ}™ÕÉ}±•™Ğœ°…Éµ}™ÕÉ}É¥¡Ğœ°±•}±•™Ğœ°±•}É¥¡Ğœ°¡…¹‘}±•™Ğœ°¡…¹‘}É¥¡Ğœ°Ñ…¥°t°(€µ…µ…Èœél…Éµ}±•™Ğœ°…Éµ}É¥¡Ğœ°•±‰½İ}™É¥±±}±•™Ğœ°•±‰½İ}™É¥±±}É¥¡Ğœ°Ñ…¥°œ°Ñ…¥°Èœ°Ñ…¥°Ìœ°Ñ…¥°Ğt°(€Á¥¹Í¥Èœél±•}±•™Ğœ°±•}É¥¡Ğœ°Á¥¹•É}±•™Ğœ°Á¥¹•É}É¥¡Ğœ°Á¥¹•É}±•™ĞÈœ°Á¥¹•É}É¥¡ĞÈt°(€Ñ…ÕÉ½Ìœél±•}™É½¹Ñ}±•™Ğœ°±•}™É½¹Ñ}É¥¡Ğœ°±•}‰…­}±•™Ğœ°±•}‰…­}É¥¡Ğœ°Ñ…¥±}±•™Ğœ°Ñ…¥±}µ¥‘‘±”œ°Ñ…¥±}É¥¡Ğt°(€µ…¥­…ÉÀœél™¥¹}±•™Ğœ°™¥¹}É¥¡Ğœ°Ñ…¥°œ°Ñ…¥°Èœ°Ñ…¥°Ìœ°İ¡¥Í­•É}±•™Ğœ°İ¡¥Í­•É}É¥¡Ğt°(€å…É…‘½Ìœél¡•…œ°¹•¬Äœ°¹•¬Èœ°¹•¬Ìœ°¹•¬Ğœ°Í•µ•¹Ğœ°Í•µ•¹ĞÈœ°Í•µ•¹ĞÌœ°Í•µ•¹ĞĞœ°Í•µ•¹ĞÔœ°Í•µ•¹ĞØœ°Í•µ•¹ĞÜœ°Í•µ•¹Ğàœ°Í•µ•¹Ğäœ°Ñ…¥°Äœ°Ñ…¥°Èœ°Ñ…¥°Ìuô()…Àõ…ÉÁ…ÉÍ”¹ÉÕµ•¹ÑA…ÉÍ•È ¤í…À¹…‘‘}…ÉÕµ•¹Ğ ©…Èœ±¹…ÉÌôœüœ¤í…ÉÌõ…À¹Á…ÉÍ•}…ÉÌ ¤)‘•˜É•…‘¨¡Á…Ñ ¤èÉ•ÑÕÉ¸©Í½¸¹±½…‘Ì ¡H½Á…Ñ ¤¹É•…‘}‰åÑ•Ì ¤¤)‘•˜‰…Í”¡Á…Ñ ¤èÉ•ÑÕÉ¸ÍÕ‰ÁÉ½•ÍÌ¹¡•­}½ÕÑÁÕĞ¡l¥Ğœ°Í¡½Üœ±	M¬œèœ­Á…Ñ¡t±İõI==P¤)‘•˜Á…­•¡Á…Ñ ¤èÉ•ÑÕÉ¸Á…Ñ ¹É•Á±…” …ÍÍ•ÑÌ½µ¥¹•µ½¸¼œ°…ÍÍ•ÑÌ½µ¥¹•µ½¹}•¸Ä¼œ°Ä¤()‘•™ÌõÉ•…‘¨¡5@¤ìÁÉ½™¥±•ÌõÉ•…‘¨¡Y@¤)½±‘}‘•™Ìõ©Í½¸¹±½…‘Ì¡‰…Í” ÍÉŒ½µ…¥¸½É•Í½ÕÉ•Ì¼œ­5@¤¤ì½±‘}ÁÉ½™¥±•Ìõ©Í½¸¹±½…‘Ì¡‰…Í” ÍÉŒ½µ…¥¸½É•Í½ÕÉ•Ì¼œ­Y@¤¤)…ÍÍ•ÉĞ±•¸¡‘•™Ì¤ôôÄÔÄ…¹m‘l¹…Ñ¥½¹…±A½­•‘•á9Õµ‰•Èt™½È¥¸‘•™Ítôõ±¥ÍĞ¡É…¹” Ä°ÄÔÈ¤¤)…ÍÍ•ÉĞm‘lÍ±Õœt™½È¥¸‘•™ÍlÄÈÀèÄÌÁutôõaAQ)ÁÉ¥½É}‘•™Ìõ©Í½¸¹±½…‘Ì¡©Í½¸¹‘ÕµÁÌ¡‘•™ÍlèÄÈÁt¤¤)™½ÈÍ±Õœ¥¸€ ¡…Éµ•±•½¸œ°¡…É¥é…Éœ¤è(‘•™¥¹¥Ñ¥½¸õ¹•áĞ¡™½È¥¸ÁÉ¥½É}‘•™Ì¥˜‘lÍ±ÕœtôõÍ±Õœ¤(‘•™¥¹¥Ñ¥½¹l±¥ÁÌt¹Á½À Ñ…¥±}™±…µ”œ±9½¹”¤(‘•™¥¹¥Ñ¥½¹lÑ…¥±}™±…µ•}…¹¥µ…Ñ¥½¸tõ…±Í”)¡…É¥é…Éõ¹•áĞ¡™½È¥¸ÁÉ¥½É}‘•™Ì¥˜‘lÍ±Õœtôô¡…É¥é…Éœ¤)¡…É¥é…É‘l±¥ÁÌt¹Á½À …¥É}¥‘±”œ±9½¹”¤)¡…É¥é…É‘l±¥ÁÌt¹Á½À …¥É}™±äœ±9½¹”¤)™½ÈÍ±Õœ¥¸€ ÍÅÕ¥ÉÑ±”œ°İ…ÉÑ½ÉÑ±”œ¤è(‘•™¥¹¥Ñ¥½¸õ¹•áĞ¡™½È¥¸ÁÉ¥½É}‘•™Ì¥˜‘lÍ±ÕœtôõÍ±Õœ¤(…ÍÍ•ÉĞ‘•™¥¹¥Ñ¥½¹l±¥ÁÌt¹Á½À É½Õ¹‘}ÉÕ¸œ±9½¹”¤ôõ˜…¹¥µ…Ñ¥½¸¹íÍ±Õô¹É½Õ¹‘}ÉÕ¸œ°=¹±äÑ¡”•á¥ÍÑ¥¹œ¹…Ñ¥Ù”ÑÕÉÑ±”ÉÕ¸µ…ä‰”¹•İ±äÍ•±•Ñ•œ(ŒQ¡•Í”•á…ĞÍ…±”¡…¹•Ì…É”Ñ¡”½¹±ä…ÕÑ¡½É¥é•ÁÉ¥½ÈµÍÁ•¥•Ì‘•™¥¹¥Ñ¥½¸‘•±Ñ…Ì¸)™½ÈÍ±Õœ°•áÁ•Ñ•‘}Í…±”¥¸ì(€…ÍÑ±äœèìÍ…±”œèÀ¸àÔ°İ¥‘Ñ œèÀ¸È°¡•¥¡ĞœèÀ¸Éô°(€•±•Ñ…‰ÕéèœèìÍ…±”œèÄ¸ÌÔ°İ¥‘Ñ œèÄ¸ÀÔ°¡•¥¡ĞœèÈ¸ÈÕô°)ô¹¥Ñ•µÌ ¤è(‘•™¥¹¥Ñ¥½¸õ¹•áĞ ¡™½È¥¸ÁÉ¥½É}‘•™Ì¥˜‘lÍ±ÕœtôõÍ±Õœ¤±9½¹”¤(¥˜‘•™¥¹¥Ñ¥½¸¥Ì¹½Ğ9½¹”è(€‰…Í•±¥¹”õ½±‘}‘•™Ím‘•™¥¹¥Ñ¥½¹l¹…Ñ¥½¹…±A½­•‘•á9Õµ‰•Èt´Åt(€™½È­•ä±Ù…±Õ”¥¸•áÁ•Ñ•‘}Í…±”¹¥Ñ•µÌ ¤è(€€…ÍÍ•ÉĞ‘•™¥¹¥Ñ¥½¹m­•åtôõÙ…±Õ”°¡Í±Õœ±­•ä°Õ¹•áÁ•Ñ•…ÕÑ¡½É¥é•Í…±”œ±‘•™¥¹¥Ñ¥½¹m­•åt¤(€€‘•™¥¹¥Ñ¥½¹m­•åtõ‰…Í•±¥¹•m­•åt)™½ÈÍ±Õœ¥¸€ ÍÁ•…É½Üœ°™•…É½Üœ¤è(‘•™¥¹¥Ñ¥½¸õ¹•áĞ¡™½È¥¸ÁÉ¥½É}‘•™Ì¥˜‘lÍ±ÕœtôõÍ±Õœ¤(½±‘}‘•™¥¹¥Ñ¥½¸õ¹•áĞ¡™½È¥¸½±‘}‘•™Ì¥˜‘lÍ±ÕœtôõÍ±Õœ¤(¥˜Í±ÕœôôÍÁ•…É½Üœè(€…ÍÍ•ÉĞ‘•™¥¹¥Ñ¥½¹l±¥ÁÌt¹Á½À …¥É}¥‘±”œ±9½¹”¤ôô…¹¥µ…Ñ¥½¸¹ÍÁ•…É½Ü¹µ¥¹•µ½¹}…¥É}¥‘±”œ(€…ÍÍ•ÉĞ‘•™¥¹¥Ñ¥½¹l±¥ÁÌt¹Á½À …¥É}™±äœ±9½¹”¤ôô…¹¥µ…Ñ¥½¸¹ÍÁ•…É½Ü¹µ¥¹•µ½¹}…¥É}™±äœ(•±Í”è(€…ÍÍ•ÉĞ‘•™¥¹¥Ñ¥½¹l±¥ÁÌt¹Á½À …¥É}™±äœ±9½¹”¤ôô…¹¥µ…Ñ¥½¸¹™•…É½Ü¹µ¥¹•µ½¹}…¥É}™±äœ(€…ÍÍ•ÉĞ‘•™¥¹¥Ñ¥½¹l±¥ÁÌul…¥É}¥‘±”tôô…¹¥µ…Ñ¥½¸¹™•…É½Ü¹µ¥¹•µ½¹}…¥É}¥‘±”œ(€‘•™¥¹¥Ñ¥½¹l±¥ÁÌul…¥É}¥‘±”tõ½±‘}‘•™¥¹¥Ñ¥½¹l±¥ÁÌul…¥É}¥‘±”t)…ÍÍ•ÉĞÁÉ¥½É}‘•™Ìôõ½±‘}‘•™ÍlèÄÈÁt°¸…ÁÁÉ½Ù•ÁÉ¥½È‘•™¥¹¥Ñ¥½¸¡…¹•‰•å½¹Ñ¡”•áÁ±¥¥Ğ™¥É”µÍÑ…ÉÑ•È™±…µ”…‘…ÁÑ…Ñ¥½¸œ)…ÍÍ•ÉĞm‘lÍ±Õœt™½È¥¸‘•™ÍlÄÌÀèÄĞÁutôõl±…ÁÉ…Ìœ°‘¥ÑÑ¼œ°••Ù•”œ°Ù…Á½É•½¸œ°©½±Ñ•½¸œ°™±…É•½¸œ°Á½ËÍt¶‰ËkºwµçXÚXÚ×Ûİ]]
+ÉÙÚ]	Ë	ÛËYš[\ÉË	ËK[İ\œÉË	ËKY^ÛYK\İ[™\™	Ë	ËKIË	ÜÜ˜ËÛXZ[‹Ü™\Ûİ\˜Ù\É×KİÙT“ÓÕ^UYJKœÜ][™\Ê
+B˜\ÜÙ\Ù]
+Ú[™ÙY
+OX[İÙYÙ]
+Ú[™ÙY
+KX[İÙY‚™›ÜˆY[ˆ[[Y\˜]JYœÖÌLŒŒLÌJN‚ˆÛYÏYÉÜÛYÉ×NÈ\ÜÙ\ÉÛ˜][Û˜[ÚÙY^[X™\‰×OOZY
+ÌLŒBˆ\ÜÙ\™Ù]
+	ÜÛİ\˜ÙWØÛØ˜›[[Û—İ™\œÚ[Û‰ÊOOIÌKŒ‰Âˆ\›Z]YJÉÛ\—ÛZ[YK™Ù[ËšœÛÛ‰×HYˆÛYÏOIÛ\›Z[YIÈ[ÙHÜÛYÊÉË™Ù[ËšœÛÛ‰ËÛYÊÉ×ÛX[K™Ù[ËšœÛÛ‰ËÛYÊÉ×Ù™[X[K™Ù[ËšœÛÛ‰×JBˆ\ÜÙ\™Ù]
+	ÜÛİ\˜ÙWÛ[Ù[İ˜\šX[	ÊH[ˆ\›Z]Y
+ÛYË™Ù]
+	ÜÛİ\˜ÙWÛ[Ù[İ˜\šX[	ÊJBˆ\ÜÙ\[
+	×ØÛØ˜›[[Û—ÌWÎÌ‹ÉÈ[ˆÚ×H›ÜˆÈ[ˆ
+	Û[Ù[	Ë	İ^\™IË	Ø[š[X][Û‰ÊJBˆÙ[Ï\™XYŠÉÛ[Ù[	×JVÉÛZ[™XÜ˜Y™Ù[ÛY]I×NØ\ÜÙ\Ù[Âˆ›Û™\Ï^ßBˆ›Üˆ\[ˆÙ[Î‚ˆ›Üˆˆ[ˆ\ÉØ›Û™\É×N‚ˆ\ÜÙ\–ÉÛ˜[YI×H›İ[ˆ›Û™\Ë
+ÛYË	Ù\XØ]H›Û™IË–ÉÛ˜[YI×JNØ›Û™\ÖØ–ÉÛ˜[YI×WOX‚ˆ›Üˆ˜[YKˆ[ˆ›Û™\Ëš][\Ê
+N‚ˆÙY[^Û˜[Y_NÜ\™[X‹™Ù]
+	Ü\™[	ÊBˆÚ[H\™[ˆ\ÜÙ\\™[[ˆ›Û™\È[™\™[›İ[ˆÙY[‹
+ÛYË	Ú[˜[Y\™[ÚZ[‰Ë˜[YK\™[
+NÜÙY[‹˜Y
+\™[
+NÜ\™[X›Û™\ÖÜ\™[K™Ù]
+	Ü\™[	ÊBˆ›Üˆ^\È[ˆ
+	Ü]›İ	Ë	Ü›İ][Û‰ÊNˆ\ÜÙ\[
+X]š\Ùš[š]J›Ø]
+ŠJH›Üˆˆ[ˆ‹™Ù]
+^\Ë×JJK
+ÛYË˜[YK^\ÊBˆ›ÜˆİX™H[ˆ‹™Ù]
+	ØİX™\ÉË×JNˆ\ÜÙ\[
+X]š\Ùš[š]J›Ø]
+ŠJH›Üˆˆ[ˆİX™VÉÛÜšYÚ[‰×JØİX™VÉÜÚ^™I×JK
+ÛYË˜[YK	ØİX™IÊBˆ\ÜÙ\Ù]
+SUÓVVÜÛY×JO\Ù]
+›Û™\ÊK
+ÛYË	ÛZ\ÜÚ[™È[˜]Û^IËÙ]
+SUÓVVÜÛY×JK\Ù]
+›Û™\ÊJBˆ^J‹ÙÉİ^\™I×JKœ™XYØ]\Ê
+NØ\ÜÙ\^œİ\İÚ]
+‰×T‘×——XW‰ÊBˆ\ÜÙ\İXİ[œXÚÊ	Ï’RIË^ÌMŒJOOJÙ[ÖÌVÉÙ\ØÜš\[Û‰×VÉİ^\™WİÚY	×KÙ[ÖÌVÉÙ\ØÜš\[Û‰×VÉİ^\™WÚZYÚ	×JK
+ÛYË	İ^\™H[Y[œÚ[ÛœÉÊBˆ[š[X][ÛœÏ\™XYŠÉØ[š[X][Û‰×JVÉØ[š[X][ÛœÉ×NØ\ÜÙ\[š[X][ÛœÂˆ›Üˆ˜[YKÛ\[ˆ[š[X][ÛœËš][\Ê
+N‚ˆ\ÜÙ\Ù]
+Û\™Ù]
+	Ø›Û™\ÉËßJJK\Ù]
+›Û™\ÊOO\Ù]
+™Ù]
+	Üİš\YØ›Û™\ÉËßJK™Ù]
+˜[YK×JJK
+ÛYË˜[YK	İ[˜XÚÙYZ\ÜÚ[™È›Û™\ÉÊBˆYˆÛ\™Ù]
+	Ø[š[X][Û—Û[™İ	ÊH\È›İ›Û™Nˆ\ÜÙ\Û\ÉØ[š[X][Û—Û[™İ	×OŒˆ[YˆÛ\™Ù]
+	ÛÛÜ	ÊH\ÈYNˆ\ÜÂˆ[YˆÛ\™Ù]
+	ÛÛÜ	ÊOOIÚÛÛÛ—Û\İÙœ˜[YIÎˆ\ÜÙ\Û\™Ù]
+	Ø›Û™\ÉÊK
+ÛYË˜[YK	Ù[\HÛİ\˜ÙHÛÛ\	ÊBˆ[ÙNˆ\ÜÙ\›İÛ\™Ù]
+	Ø›Û™\ÉÊH[™Ù]
+Û\
+O^ÉÜÛİ[™ÙY™™XİÉË	Ü\XÛWÙY™™XİÉË	İ[Y[[™IßK
+ÛYË˜[YK	Ú[˜[Y\˜][Û›\ÜÈÛ\	ÊBˆYˆ˜[YH[ˆ™Ù]
+	ÜÛİ\˜ÙWÙ]™[Ù]šY[˜ÙIËßJN‚ˆ›ÜˆÙ^K˜[YH[ˆÉÜÛİ\˜ÙWÙ]™[Ù]šY[˜ÙI×VÛ˜[YWKš][\Ê
+Nˆ\ÜÙ\Û\ÚÙ^WOO]˜[YK
+ÛYË˜[YKÙ^K	ÜÛİ\˜ÙH]™[Ú[™ÙY	ÊBˆ›Üˆİ]H[ˆ
+	ÚYIË	İØ[ÉÊN‚ˆ\ÜÙ\Üİ]WH[ˆ[š[X][ÛœË
+ÛYË	ÛZ\ÜÚ[™È	ÊÜİ]JBˆ\ÜÙ\Ù]
+›Ùš[\ÖÜÛY×VÜİ]WJO\Ù]
+[š[X][ÛœÖÙÜİ]WWK™Ù]
+	Ø›Û™\ÉËßJJK
+ÛYËİ]K	Ü›Ùš[H›İ[ˆÙ[XİYÛ\	ÊBˆ[Y™Ù]
+	ØÛ\ÉËßJK™Ù]
+	ÙÜ›İ[™Ü[‰ÊBˆ\ÜÙ\›ÛÛ
+[ŠOOJÛYÈ[ˆPÕU‘WÔ•S”ÊK
+ÛYË	Û˜]]™H[ˆÙ[Xİ[ÛˆZ\ÛX]Ú	ÊBˆYˆ[ˆ\ÜÙ\Ù]
+›Ùš[\ÖÜÛY×VÉÜ[‰×JO\Ù]
+[š[X][ÛœÖÜ[—K™Ù]
+	Ø›Û™\ÉËßJJK
+ÛYË	Ü[ˆ›Ùš[H›İ[ˆ˜]]™H[‰ÊBˆ\ÜÙ\[
+	Ë›Z[™[[Û—ÉÈ›İ[ˆÈ›ÜˆÈ[ˆ™Ù]
+	ØÛ\ÉËßJK˜[Y\Ê
+JK
+ÛYË	ÙÙ[™\˜]YXİ[ÛˆXÙZÛ\ˆÙ[XİY	ÊBˆYˆÛYÈ[ˆÕUP×ÒQN‚ˆ\ÜÙ\™Ù]
+	ÜÛİ\˜ÙWÜİ]X×ÚYIÊH\ÈYH[™™Ù]
+	Û[İ™[Y[Ù˜[˜XÚÉÊOOIÚYIÂˆ\ÜÙ\›Ùš[\ÖÜÛY×K™Ù]
+	ÚYWÜİ]XÉÊOO\›Ùš[\ÖÜÛY×VÉÚYI×Bˆ[ÙNˆ\ÜÙ\›İ™Ù]
+	ÜÛİ\˜ÙWÜİ]X×ÚYIÊK
+ÛYË	İ[™^XİYİ]XÈYHÛ\ÜÚYšXØ][Û‰ÊBˆYˆÛYÏOIÛ\›Z[YIÎˆ\ÜÙ\ÉÜÛİ\˜ÙWÛ[Ù[İ˜\šX[	×OOIÛ\—ÛZ[YK™Ù[ËšœÛÛ‰Â™›ÜˆÛYÈ[ˆ
+	Üİ\›ZYIË	ÛXYÚZØ\œ	Ë	ÙŞX\˜YÜÉÊN‚ˆÛ\ÏYYœÖÌLŒ
+ÑVPÕQš[™^
+ÛYÊWVÉØÛ\É×Bˆ\ÜÙ\Û\Ë™Ù]
+	İØ]\—ÚYIÊH[™Û\Ë™Ù]
+	İØ]\—ÜİÚ[IÊK
+ÛYË	Û˜]]™HØ]\ˆÛ\ÈÜİ	ÊBœš[
+	ÔTÔÈUÒLÈÌLŒx $ÈÌLÌˆØ[È[Ù[Ë˜]]™H\Xİ[][Û‹ØÛ\Ë[Û[™È™\Ûİ\˜Ù\È[™^Xİš[Ü‹LLŒ™\Ù\˜][Û‰ÊB‚šYˆ\™ÜËš˜\‚ˆÚ]š\š[K–š\š[J\™ÜËš˜\ŠH\È‚ˆ˜[Y\Ï\Ù]
+‹›˜[Y[\İ
 
-ROOT=Path(__file__).resolve().parents[1]
-BASE='364fab1caf136d2e645f6ca77c4199570230eabd'
-R=ROOT/'src/main/resources'
-MP='data/minemon_gen1/runtime_species.json'
-VP='data/minemon_gen1/animation_validation_profiles.json'
-EXPECTED=['starmie','mrmime','scyther','jynx','electabuzz','magmar','pinsir','tauros','magikarp','gyarados']
-BATCH15=['kabutops','aerodactyl','snorlax','articuno','zapdos','moltres','dratini','dragonair','dragonite','mewtwo']
-BATCH16=['mew']
-ACTIVE_RUNS={'starmie','mrmime','tauros'}
-STATIC_IDLE={'jynx','magmar'}
-ANATOMY={
- 'starmie':['body','body_back','body_limb_top','body_limb_left','body_limb_right','body_limb_bottom_left','body_limb_bottom_right'],
- 'mrmime':['head','arm_left','arm_right','wrist_left','wrist_right','foot_left','foot_right'],
- 'scyther':['left_wing','right_wing','left_upper_wing','right_upper_wing','left_scythe','right_scythe'],
- 'jynx':['hair_front_left','hair_front_right','dress_front','hand_left','hand_right'],
- 'electabuzz':['arm_fur_left','arm_fur_right','leg_left','leg_right','hand_left','hand_right','tail'],
- 'magmar':['arm_left','arm_right','elbow_frill_left','elbow_frill_right','tail','tail2','tail3','tail4'],
- 'pinsir':['leg_left','leg_right','pincer_left','pincer_right','pincer_left2','pincer_right2'],
- 'tauros':['leg_front_left','leg_front_right','leg_back_left','leg_back_right','tail_left','tail_middle','tail_right'],
- 'magikarp':['fin_left','fin_right','tail','tail2','tail3','whisker_left','whisker_right'],
- 'gyarados':['head','neck1','neck2','neck3','neck4','segment','segment2','segment3','segment4','segment5','segment6','segment7','segment8','segment9','tail1','tail2','tail3']}
-
-ap=argparse.ArgumentParser();ap.add_argument('jar',nargs='?');args=ap.parse_args()
-def readj(path): return json.loads((R/path).read_bytes())
-def base(path): return subprocess.check_output(['git','show',BASE+':'+path],cwd=ROOT)
-def packed(path): return path.replace('assets/minemon/','assets/minemon_gen1/',1)
-
-defs=readj(MP); profiles=readj(VP)
-old_defs=json.loads(base('src/main/resources/'+MP)); old_profiles=json.loads(base('src/main/resources/'+VP))
-assert len(defs)==151 and [d['nationalPokedexNumber'] for d in defs]==list(range(1,152))
-assert [d['slug'] for d in defs[120:130]]==EXPECTED
-prior_defs=json.loads(json.dumps(defs[:120]))
-for slug in ('charmeleon','charizard'):
- definition=next(d for d in prior_defs if d['slug']==slug)
- definition['clips'].pop('tail_flame',None)
- definition['tail_flame_animation']=False
-charizard=next(d for d in prior_defs if d['slug']=='charizard')
-charizard['clips'].pop('air_idle',None)
-charizard['clips'].pop('air_fly',None)
-for slug in ('squirtle','wartortle'):
- definition=next(d for d in prior_defs if d['slug']==slug)
- assert definition['clips'].pop('ground_run',None)==f'animation.{slug}.ground_run','Only the existing native turtle run may be newly selected'
-# These exact scale changes are the only authorized prior-species definition deltas.
-for slug, expected_scale in {
- 'gastly': {'scale':0.85,'width':0.2,'height':0.2},
- 'electabuzz': {'scale':1.35,'width':1.05,'height':2.25},
-}.items():
- definition=next((d for d in prior_defs if d['slug']==slug),None)
- if definition is not None:
-  baseline=old_defs[definition['nationalPokedexNumber']-1]
-  for key,value in expected_scale.items():
-   assert definition[key]==value,(slug,key,'unexpected authorized scale',definition[key])
-   definition[key]=baseline[key]
-for slug in ('spearow','fearow'):
- definition=next(d for d in prior_defs if d['slug']==slug)
- old_definition=next(d for d in old_defs if d['slug']==slug)
- if slug=='spearow':
-  assert definition['clips'].pop('air_idle',None)=='animation.spearow.minemon_air_idle'
-  assert definition['clips'].pop('air_fly',None)=='animation.spearow.minemon_air_fly'
- else:
-  assert definition['clips'].pop('air_fly',None)=='animation.fearow.minemon_air_fly'
-  assert definition['clips']['air_idle']=='animation.fearow.minemon_air_idle'
-  definition['clips']['air_idle']=old_definition['clips']['air_idle']
-assert prior_defs==old_defs[:120],'An approved prior definition changed beyond the explicit fire-starter flame adaptation'
-assert [d['slug'] for d in defs[130:140]]==['lapras','ditto','eevee','vaporeon','jolteon','flareon','porygon','omanyte','omastar','kabuto'] and [d['slug'] for d in defs[140:150]]==BATCH15, 'Batch 14 plan or a later definition changed'
-assert profiles.keys()==(old_profiles.keys()|set(EXPECTED)|{'lapras','ditto','eevee','vaporeon','jolteon','flareon','porygon','omanyte','omastar','kabuto','kabutops','aerodactyl','snorlax','articuno','zapdos','moltres','dratini','dragonair','dragonite','mewtwo','mew'}), 'Unexpected/missing articulation profile'
-for slug, prior in old_profiles.items():
- expected_profile=dict(prior)
- if slug=='rapidash':expected_profile['run']=[*prior['run'],'fire_mane_head_flame']
- assert profiles[slug]==expected_profile, 'Earlier profile changed: '+slug
-
-report=json.loads((ROOT/'docs/animation-audit/minemon-gen1-batch13-source-evidence.json').read_text())
-assert report['batch']==13 and report['range']==[121,130]
-assert report['source_sha256']=='cae8ac328b61354fbe415208b8c6ffc12e7155094d0a87082e85e7914fb380c2'
-assert [x['slug'] for x in report['species']]==EXPECTED
-old_resources=set()
-for d in old_defs[:120]: old_resources.update([d['model'],d['texture'],d['animation']]+d.get('licenses',[]))
-for p in old_resources: assert (R/p).read_bytes()==base('src/main/resources/'+p), 'Prior asset changed: '+p
-allowed={'src/main/resources/'+MP,'src/main/resources/'+VP,'tools/import_cobblemon_182_batch.py','tools/verify_batch13.py','src/test/java/br/com/petrickfaria/minemon/Batch13AnimationCompatibilityTest.java','docs/animation-audit/minemon-gen1-batch13-progress.md','docs/animation-audit/minemon-gen1-batch13-source-evidence.json'}
-for d in defs[120:150]+defs[150:151]: allowed.update('src/main/resources/'+p for p in [d['model'],d['texture'],d['animation']]+d.get('licenses',[]))
-source_fire_frames={f'src/main/resources/assets/minemon/textures/pokemon/{slug}_cobblemon_1_8_2/fire/normal/{frame}.png' for slug in ('ponyta','rapidash') for frame in range(1,5)}
-allowed.update(source_fire_frames)
-allowed.update({'src/main/resources/assets/minemon_gen1/particles/gastly_ghostly_smoke.json',*(f'src/main/resources/assets/minemon_gen1/textures/particle/gastly_ghostly_smoke_{i}.png' for i in range(6))})
-changed=subprocess.check_output(['git','diff','--name-only',BASE,'--','src/main/resources'],cwd=ROOT,text=True).splitlines()
-changed+=subprocess.check_output(['git','ls-files','--others','--exclude-standard','--','src/main/resources'],cwd=ROOT,text=True).splitlines()
-assert set(changed)<=allowed, set(changed)-allowed
-
-for idx,d in enumerate(defs[120:130]):
- slug=d['slug']; assert d['nationalPokedexNumber']==idx+121
- assert d.get('source_cobblemon_version')=='1.8.2'
- permitted=(['mr_mime.geo.json'] if slug=='mrmime' else [slug+'.geo.json',slug+'_male.geo.json',slug+'_female.geo.json'])
- assert d.get('source_model_variant') in permitted, (slug,d.get('source_model_variant'))
- assert all('_cobblemon_1_8_2/' in d[k] for k in ('model','texture','animation'))
- geo=readj(d['model'])['minecraft:geometry'];assert geo
- bones={}
- for part in geo:
-  for b in part['bones']:
-   assert b['name'] not in bones,(slug,'duplicate bone',b['name']);bones[b['name']]=b
- for name,b in bones.items():
-  seen={name};parent=b.get('parent')
-  while parent: assert parent in bones and parent not in seen,(slug,'invalid parent chain',name,parent);seen.add(parent);parent=bones[parent].get('parent')
-  for axis in ('pivot','rotation'): assert all(math.isfinite(float(v)) for v in b.get(axis,[])),(slug,name,axis)
-  for cube in b.get('cubes',[]): assert all(math.isfinite(float(v)) for v in cube['origin']+cube['size']),(slug,name,'cube')
- assert set(ANATOMY[slug])<=set(bones),(slug,'missing anatomy',set(ANATOMY[slug])-set(bones))
- tex=(R/d['texture']).read_bytes();assert tex.startswith(b'\x89PNG\r\n\x1a\n')
- assert struct.unpack('>II',tex[16:24])==(geo[0]['description']['texture_width'],geo[0]['description']['texture_height']),(slug,'texture dimensions')
- animations=readj(d['animation'])['animations'];assert animations
- for name,clip in animations.items():
-  assert set(clip.get('bones',{}))-set(bones)==set(d.get('stripped_bones',{}).get(name,[])),(slug,name,'untracked missing bones')
-  if clip.get('animation_length') is not None: assert clip['animation_length']>0
-  elif clip.get('loop') is True: pass
-  elif clip.get('loop')=='hold_on_last_frame': assert clip.get('bones'),(slug,name,'empty source hold clip')
-  else: assert not clip.get('bones') and set(clip)<={'sound_effects','particle_effects','timeline'},(slug,name,'invalid durationless clip')
-  if name in d.get('source_event_evidence',{}):
-   for key,value in d['source_event_evidence'][name].items(): assert clip[key]==value,(slug,name,key,'source event changed')
- for state in ('idle','walk'):
-  assert d[state] in animations,(slug,'missing '+state)
-  assert set(profiles[slug][state])<=set(animations[d[state]].get('bones',{})),(slug,state,'profile not in selected clip')
- run=d.get('clips',{}).get('ground_run')
- assert bool(run)==(slug in ACTIVE_RUNS),(slug,'native run selection mismatch')
- if run: assert set(profiles[slug]['run'])<=set(animations[run].get('bones',{})),(slug,'run profile not in native run')
- assert all('.minemon_' not in c for c in d.get('clips',{}).values()),(slug,'generated action placeholder selected')
- if slug in STATIC_IDLE:
-  assert d.get('source_static_idle') is True and d.get('movement_fallback')=='idle'
-  assert profiles[slug].get('idle_static')==profiles[slug]['idle']
- else: assert not d.get('source_static_idle'),(slug,'unexpected static idle classification')
- if slug=='mrmime': assert d['source_model_variant']=='mr_mime.geo.json'
-for slug in ('starmie','magikarp','gyarados'):
- clips=defs[120+EXPECTED.index(slug)]['clips']
- assert clips.get('water_idle') and clips.get('water_swim'),(slug,'native water clips lost')
-print('PASS BATCH 13 #121â€“#130: Kanto models, native articulation/clips, Molang resources and exact prior-120 preservation')
-
-if args.jar:
- with zipfile.ZipFile(args.jar) as z:
-  names=set(z.namelist()); packed_defs=json.loads(z.read('data/minemon_gen1/runtime_species.json')); dex=json.loads(z.read('data/minemon_gen1/pokedex.json'))
-  assert packed_defs==defs and len(dex)==151 and [d['nationalPokedexNumber'] for d in dex]==list(range(1,152))
-  for d in defs[:130]:
-   for key in ('model','texture','animation'): assert packed(d[key]) in names,(d['slug'],key,packed(d[key]))
-  for d in defs[120:130]:
-   packed_anim=json.loads(z.read(packed(d['animation'])))['animations'];source=readj(d['animation'])['animations']
-   for name,clip in source.items():
-    for key in ('sound_effects','particle_effects','timeline'):
-     if key in clip: assert packed_anim[name][key]==clip[key],(d['slug'],name,key,'JAR event mismatch')
- print('PASS JAR BATCH 13: first 130 updated species, 151 dex entries, and native batch 13 resources')
+JNÈXÚÙYÙYœÏZœÛÛ‹›ØYÊ‹œ™XY
+	Ù]KÛZ[™[[Û—ÙÙ[ŒKÜ[[YWÜÜXÚY\ËšœÛÛ‰ÊJNÈ^ZœÛÛ‹›ØYÊ‹œ™XY
+	Ù]KÛZ[™[[Û—ÙÙ[ŒKÜÚÙY^šœÛÛ‰ÊJBˆ\ÜÙ\XÚÙYÙYœÏOYYœÈ[™[Š^
+OOLMLH[™ÙÉÛ˜][Û˜[ÚÙY^[X™\‰×H›Üˆ[ˆ^OO[\İ
+˜[™ÙJKMLŠJBˆ›Üˆ[ˆYœÖÎŒLÌN‚ˆ›ÜˆÙ^H[ˆ
+	Û[Ù[	Ë	İ^\™IË	Ø[š[X][Û‰ÊNˆ\ÜÙ\XÚÙY
+ÚÙ^WJH[ˆ˜[Y\Ë
+ÉÜÛYÉ×KÙ^KXÚÙY
+ÚÙ^WJJBˆ›Üˆ[ˆYœÖÌLŒŒLÌN‚ˆXÚÙYØ[š[OZœÛÛ‹›ØYÊ‹œ™XY
+XÚÙY
+ÉØ[š[X][Û‰×JJJVÉØ[š[X][ÛœÉ×NÜÛİ\˜ÙO\™XYŠÉØ[š[X][Û‰×JVÉØ[š[X][ÛœÉ×Bˆ›Üˆ˜[YKÛ\[ˆÛİ\˜ÙKš][\Ê
+N‚ˆ›ÜˆÙ^H[ˆ
+	ÜÛİ[™ÙY™™XİÉË	Ü\XÛWÙY™™XİÉË	İ[Y[[™IÊN‚ˆYˆÙ^H[ˆÛ\ˆ\ÜÙ\XÚÙYØ[š[VÛ˜[YWVÚÙ^WOOXÛ\ÚÙ^WK
+ÉÜÛYÉ×K˜[YKÙ^K	ÒTˆ]™[Z\ÛX]Ú	ÊBˆš[
+	ÔTÔÈTˆUÒLÎˆš\œİLÌ\]YÜXÚY\ËMLH^[šY\Ë[™˜]]™H˜]ÚLÈ™\Ûİ\˜Ù\ÉÊB
