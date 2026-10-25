@@ -167,7 +167,7 @@ public final class ClientSmokeTest {
    "wartortle",java.util.List.of("arm_left","arm_right","torso")
   );
   private static java.util.List<String> profileJoints(String slug,String state) {
-   if(java.util.Set.of("fearow","articuno","zapdos","moltres").contains(slug)&&fixtureAir(slug))
+   if(java.util.Set.of("spearow","fearow","articuno","zapdos","moltres").contains(slug)&&fixtureAir(slug))
     return java.util.List.of("wing_open_left","wing_open_right");
    if(ADDITIONAL_PROFILES.containsKey(slug)) {
     String key=state.startsWith("IDLE_")?"idle":state.startsWith("RUN_")
@@ -358,14 +358,21 @@ public final class ClientSmokeTest {
        }
        if(slug.equals("fearow")&&isSettledClipSample(phase)) {
         var body=model.getAnimationProcessor().getBone("body");
+        var head=model.getAnimationProcessor().getBone("head");
+        var leftLeg=model.getAnimationProcessor().getBone("leg_left");
+        var rightLeg=model.getAnimationProcessor().getBone("leg_right");
         var left=model.getAnimationProcessor().getBone("wing_open_left");
         var right=model.getAnimationProcessor().getBone("wing_open_right");
-        // Preserve body pitch and opposite wing orientation while the wings beat.
-        float pitch=(float)Math.toRadians(52.5D),wing=(float)Math.toRadians(52.07555D);
-        if(body==null||left==null||right==null
+        // The adapted pose lifts the head, straightens both legs and keeps
+        // opposite wing orientation while the native rig's wing chains beat.
+        float pitch=(float)Math.toRadians(22.0D),headPitch=(float)Math.toRadians(5.0D),legSplay=(float)Math.toRadians(5.0D);
+        if(body==null||head==null||leftLeg==null||rightLeg==null||left==null||right==null
            ||Math.abs(Math.abs(body.getRotationX())-pitch)>0.02F
+           ||Math.abs(Math.abs(head.getRotationX())-headPitch)>0.02F
+           ||Math.abs(Math.abs(leftLeg.getRotationZ())-legSplay)>0.02F
+           ||Math.abs(Math.abs(rightLeg.getRotationZ())-legSplay)>0.02F
            ||left.getRotationZ()*right.getRotationZ()>=0.0F)
-         throw new IllegalStateException("Fearow did not render its native static open-wing air pose");
+         throw new IllegalStateException("Fearow adapted air pose must lift the head, align the feet and flap both wings");
         fearowNativeAirPoseObserved=true;
        }
       if(java.util.Set.of("charmander","charmeleon","charizard").contains(slug)) {
@@ -794,7 +801,8 @@ public final class ClientSmokeTest {
     if((!staticIdle&&!poseTransition&&idleJoints<minimum)||(!poseTransition&&walkJoints<minimum)
        ||(poseTransition&&(idleJoints!=0||walkJoints!=0))||(run!=null&&runJoints<minimum))
      throw new IllegalStateException("Relevant locomotion joints did not animate for "+slug+" idle="+idleJoints+" walk="+walkJoints+" run="+runJoints+" required="+minimum);
-    if(slug.equals("fearow")&&fixtureAir(slug))report.append("FEAROW FLIGHT: retained air_idle includes compatible wing beats; real bone articulation sampled.\n");
+    if(slug.equals("fearow")&&fixtureAir(slug))report.append("FEAROW FLIGHT: adapted source air pose lifts the head, aligns the feet and renders compatible wing beats.\n");
+    if(slug.equals("spearow")&&fixtureAir(slug))report.append("SPEAROW FLIGHT: model-specific air clips flap all three retained wing joints; ground walk is not selected in air.\n");
     else if(staticIdle)report.append("SOURCE STATIC IDLE ").append(slug).append(": native stance stable; no idle oscillation claimed.\n");
     if(poseTransition)report.append("SOURCE STATIC POSE TRANSITION ").append(slug).append(": native idle and movement clips are stable poses; profiled joints changed between settled poses=").append(transitionedJoints).append(".\n");
     passed++;

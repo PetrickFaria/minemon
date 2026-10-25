@@ -54,6 +54,16 @@ charizard['clips'].pop('air_fly',None)
 for slug in ('squirtle','wartortle'):
  definition=next(d for d in preserved_batch8_defs if d['slug']==slug)
  assert definition['clips'].pop('ground_run',None)==f'animation.{slug}.ground_run','Only the existing native turtle run may be newly selected'
+for slug in ('spearow','fearow'):
+ definition=next(d for d in preserved_batch8_defs if d['slug']==slug)
+ old_definition=next(d for d in old_defs[:70] if d['slug']==slug)
+ if slug=='spearow':
+  assert definition['clips'].pop('air_idle',None)=='animation.spearow.minemon_air_idle'
+  assert definition['clips'].pop('air_fly',None)=='animation.spearow.minemon_air_fly'
+ else:
+  assert definition['clips'].pop('air_fly',None)=='animation.fearow.minemon_air_fly'
+  assert definition['clips']['air_idle']=='animation.fearow.minemon_air_idle'
+  definition['clips']['air_idle']=old_definition['clips']['air_idle']
 assert preserved_batch8_defs==old_defs[:70],'An earlier manifest change exceeded the explicit fire-starter flame adaptation'
 for slug in ('charmeleon','charizard'):
  definition=next(d for d in defs[:70] if d['slug']==slug)

@@ -39,7 +39,8 @@ public final class WaterMovementGoal extends Goal {
   }else if(needsExit())destination=scan(true);
   else {
    if(SpeciesBehaviorProfiles.isVisitor(mob.getSpeciesSlug()))
-    mob.chooseNaturalWaterDepth(!canDive(mob,mob.blockPosition())||mob.getRandom().nextInt(3)==0);
+    mob.chooseNaturalWaterDepth(!canDive(mob,mob.blockPosition())
+        ||!SpeciesBehaviorProfiles.prefersBottom(mob.getSpeciesSlug())&&mob.getRandom().nextInt(3)==0);
    destination=swimDestination();
   }
   return destination!=null;
@@ -116,6 +117,7 @@ public final class WaterMovementGoal extends Goal {
  }
  private BlockPos swimDestination(){
   boolean surface=mob.isNaturalSurface();
+  boolean bottomPreferred=SpeciesBehaviorProfiles.prefersBottom(mob.getSpeciesSlug());
   // Far choices distribute swimmers through large lakes; local and fixed
   // probes prevent small ponds/corners from depending on lucky random draws.
   for(int n=0;n<48;n++){
@@ -128,11 +130,12 @@ public final class WaterMovementGoal extends Goal {
    BlockPos column=new BlockPos(x,mob.getY(),z);
    double top=surfaceAt(mob,column);
    if(!Double.isFinite(top))continue;
-   double y=surface?top-preferredSurfaceDepth(mob)
+   double bottomY=bottomPreferred?preferredBottomY(mob,column,top):Double.NaN;
+   double y=Double.isFinite(bottomY)?bottomY:surface?top-preferredSurfaceDepth(mob)
        :n>=24?top-Math.max(2.0D,mob.getBbHeight()+0.3D)
        :Math.min(top-mob.getBbHeight()-0.3D,mob.getY()+mob.getRandom().nextInt(5)-2);
    BlockPos p=new BlockPos(x,y,z);
-   if(blocked.containsKey(p)||!waterFits(mob,p,!surface)
+   if(blocked.containsKey(p)||!waterFits(mob,p,!surface||bottomPreferred)
        ||requiresNavigableVolume(mob.getSpeciesSlug())&&!waterRegion(mob,p))continue;
    boolean clear=true;
    for(int step=1;step<=4;step++){
@@ -145,6 +148,46 @@ public final class WaterMovementGoal extends Goal {
    blocked.put(p.immutable(),mob.tickCount+200);
   }
   return null;
+ }
+ private static double preferredBottomY(MinemonCreature mob,BlockPos column,double surface){
+  int floorWater=bottomWaterBlock(mob,column,surface);
+  if(!safeWaterFloor(mob,column,floorWater))return Double.NaN;
+  if(surface-floorWater<=mob.getBbHeight()+0.45D)return Double.NaN;
+  double target=floorWater+0.02D;
+  var box=mob.getBoundingBox().move(column.getX()+0.5D-mob.getX(),target-mob.getY(),column.getZ()+0.5D-mob.getZ());
+  if(!mob.level.noCollision(mob,box))return Double.NaN;
+  for(int x=(int)Math.floor(box.minX+0.001D);x<=Math.floor(box.maxX-0.001D);x++)
+   for(int z=(int)Math.floor(box.minZ+0.001D);z<=Math.floor(box.maxZ-0.001D);z++)
+    if(!mob.level.getFluidState(new BlockPos(x,floorWater,z)).is(FluidTags.WATER))return Double.NaN;
+  return target;
+ }
+ static double waterRestY(MinemonCreature mob){
+  double top=surfaceAt(mob,mob.blockPosition());
+  if(!Double.isFinite(top))return Double.NaN;
+  if(SpeciesBehaviorProfiles.isVisitor(mob.getSpeciesSlug())){
+   BlockPos column=mob.blockPosition();int floorWater=bottomWaterBlock(mob,column,top);
+   if(safeWaterFloor(mob,column,floorWater)){
+    double target=floorWater+0.02D;
+    var box=mob.getBoundingBox().move(0,target-mob.getY(),0);
+    if(mob.level.noCollision(mob,box))return target;
+   }
+  }
+  return SpeciesBehaviorProfiles.profile(mob.getSpeciesSlug())==SpeciesBehaviorProfiles.Profile.SURFACE
+      ?top-preferredSurfaceDepth(mob):top-mob.getBbHeight()-0.2D;
+ }
+ private static boolean safeWaterFloor(MinemonCreature mob,BlockPos column,int floorWater){
+  int min=mob.level.getMinBuildHeight();if(floorWater<=min)return false;
+  BlockPos floor=new BlockPos(column.getX(),floorWater-1,column.getZ());
+  var state=mob.level.getBlockState(floor);
+  return !state.getCollisionShape(mob.level,floor).isEmpty()
+      &&!state.is(Blocks.MAGMA_BLOCK)&&!state.is(Blocks.CACTUS)
+      &&!state.is(Blocks.CAMPFIRE)&&!state.is(Blocks.SOUL_CAMPFIRE);
+ }
+ private static int bottomWaterBlock(MinemonCreature mob,BlockPos column,double surface){
+  int y=(int)Math.floor(surface)-1;
+  int lowest=mob.level.getMinBuildHeight();
+  while(y>=lowest&&mob.level.getFluidState(new BlockPos(column.getX(),y,column.getZ())).is(FluidTags.WATER))y--;
+  return y+1;
  }
  static boolean safeDry(MinemonCreature mob,BlockPos feet){
   var floor=mob.level.getBlockState(feet.below());
@@ -182,7 +225,10 @@ public final class WaterMovementGoal extends Goal {
  private static boolean waterRegion(MinemonCreature mob,BlockPos center){
   double top=surfaceAt(mob,center);
   if(!Double.isFinite(top))return false;
-  BlockPos volume=new BlockPos(center.getX(),Math.min(center.getY(),(int)Math.ceil(top)-2),center.getZ());
+  int verticalCenter=SpeciesBehaviorProfiles.prefersBottom(mob.getSpeciesSlug())
+      ?Math.max(center.getY(),bottomWaterBlock(mob,center,top)+1)
+      :Math.min(center.getY(),(int)Math.ceil(top)-2);
+  BlockPos volume=new BlockPos(center.getX(),verticalCenter,center.getZ());
   return isNavigableWaterRegion(volume,cell->mob.level.hasChunkAt(cell)
       &&mob.level.getFluidState(cell).is(FluidTags.WATER)
       &&mob.level.getBlockState(cell).getCollisionShape(mob.level,cell).isEmpty());

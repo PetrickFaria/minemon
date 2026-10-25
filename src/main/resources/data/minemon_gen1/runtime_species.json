@@ -1150,7 +1150,9 @@
       "ground_walk": "animation.spearow.minemon_poser_walk",
       "sit": "animation.spearow.minemon_sit",
       "sleep": "animation.spearow.minemon_sleep",
-      "physical_attack": "animation.spearow.minemon_physical_attack"
+      "physical_attack": "animation.spearow.minemon_physical_attack",
+      "air_idle": "animation.spearow.minemon_air_idle",
+      "air_fly": "animation.spearow.minemon_air_fly"
     },
     "idle": "animation.spearow.ground_idle",
     "walk": "animation.spearow.minemon_poser_walk",
@@ -1206,7 +1208,7 @@
     "attack": 7.5,
     "speed": 0.3,
     "clips": {
-      "air_idle": "animation.fearow.air_idle",
+      "air_idle": "animation.fearow.minemon_air_idle",
       "cry": "animation.fearow.cry",
       "ground_idle": "animation.fearow.ground_idle",
       "happy": "animation.fearow.happy",
@@ -1217,7 +1219,8 @@
       "ground_walk": "animation.fearow.minemon_poser_walk",
       "sit": "animation.fearow.minemon_sit",
       "sleep": "animation.fearow.minemon_sleep",
-      "physical_attack": "animation.fearow.minemon_physical_attack"
+      "physical_attack": "animation.fearow.minemon_physical_attack",
+      "air_fly": "animation.fearow.minemon_air_fly"
     },
     "idle": "animation.fearow.ground_idle",
     "walk": "animation.fearow.minemon_poser_walk",

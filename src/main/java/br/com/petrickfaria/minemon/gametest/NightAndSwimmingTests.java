@@ -31,19 +31,65 @@ public final class NightAndSwimmingTests {
  }
  private static MinemonCreature spawn(GameTestHelper h,String slug,int x,int y,int z){return h.spawn(ModEntities.SPECIES.get(slug).get(),new BlockPos(x,y,z));}
  @GameTest(template="test_arena",batch="night_rest",timeoutTicks=1000)
+ public static void aquaticNightRestKeepsSurfaceAndBottomRoutinesSafe(GameTestHelper h){
+  arena(h);var level=h.getLevel();
+  for(int x=2;x<=15;x++)for(int z=3;z<=10;z++)for(int y=1;y<=9;y++)h.setBlock(new BlockPos(x,y,z),Blocks.WATER);
+  level.setDayTime(18000);level.getGameRules().getRule(GameRules.RULE_DAYLIGHT).set(false,level.getServer());
+  var gyarados=spawn(h,"gyarados",4,3,6);var magikarp=spawn(h,"magikarp",8,4,6);var dratini=spawn(h,"dratini",12,6,6);
+  await(h,()->gyarados.isSleeping()&&magikarp.isSleeping()&&dratini.isSleeping(),()->{
+   check(h,gyarados.isInWater()&&magikarp.isInWater()&&dratini.isInWater(),"Aquatic and visitor sleepers must stay wet");
+   double gyaradosY=WaterMovementGoal.waterRestY(gyarados),fishY=WaterMovementGoal.waterRestY(magikarp),visitorY=WaterMovementGoal.waterRestY(dratini);
+   check(h,Math.abs(gyarados.getY()-gyaradosY)<.2D,"Gyarados must preserve its preferred water surface while asleep");
+   check(h,Math.abs(magikarp.getY()-fishY)<.2D,"Permanent submerged species must float at a safe, fully wet depth");
+   check(h,Math.abs(dratini.getY()-visitorY)<.2D&&dratini.getY()<3.0D,"A water visitor caught in water at night must settle at the bottom");
+   var attacker=h.spawn(EntityType.COW,new BlockPos(13,2,6));attacker.setNoAi(true);
+   float health=attacker.getHealth();
+   check(h,dratini.hurt(DamageSource.mobAttack(attacker),1)&&!dratini.isSleeping()&&dratini.getTarget()==attacker,
+       "An aquatic night sleeper must wake and retain its attacker");
+   await(h,()->attacker.getHealth()<health,()->{
+    attacker.discard();await(h,dratini::isSleeping,()->{
+     level.setDayTime(1000);
+     await(h,()->!gyarados.isSleeping()&&!magikarp.isSleeping()&&!dratini.isSleeping(),()->{
+      level.getGameRules().getRule(GameRules.RULE_DAYLIGHT).set(true,level.getServer());h.succeed();
+     },40,"Aquatic sleepers must wake at dawn");
+    },220,"A water visitor must return to sleep after combat while it is still night");
+   },180,"The woken water visitor must physically retaliate in water");
+  },500,"Permanent swimmers must rest in water and water visitors must settle at the bottom");
+ }
+ @GameTest(template="test_arena",batch="water_bottom",timeoutTicks=900)
+ public static void bottomPreferringSpeciesNavigateCloseToTheChangingLakeFloor(GameTestHelper h){
+  arena(h);
+  for(int x=2;x<=27;x++)for(int z=2;z<=21;z++){
+   int floor=(x>=13&&z>=9&&z<=15)?2:0;
+   for(int y=1;y<=10;y++)h.setBlock(new BlockPos(x,y,z),Blocks.WATER);
+   if(floor==2){h.setBlock(new BlockPos(x,1,z),Blocks.STONE);h.setBlock(new BlockPos(x,2,z),Blocks.STONE);}
+  }
+  var shellder=spawn(h,"shellder",7,8,10);var krabby=spawn(h,"krabby",22,8,10);
+  await(h,()->shellder.isInWater()&&krabby.isInWater()&&shellder.getY()<4.0D&&krabby.getY()<4.0D,()->{
+   check(h,h.getLevel().noCollision(shellder,shellder.getBoundingBox()),"Shellder must avoid the solid bottom while seeking it");
+   check(h,h.getLevel().noCollision(krabby,krabby.getBoundingBox()),"Krabby must avoid the solid bottom while seeking it");
+   check(h,shellder.getY()>=1&&krabby.getY()>=1,"Bottom-preferring swimmers must stay above the lake bed");
+   h.succeed();
+  },650,"Shellder and Krabby must choose reachable water near the floor");
+ }
+ @GameTest(template="test_arena",batch="night_rest",timeoutTicks=1000)
  public static void realNightLandingHoverWakeRetaliationReturnAndDawn(GameTestHelper h){
   arena(h);var level=h.getLevel();level.setDayTime(1000);
   level.getGameRules().getRule(GameRules.RULE_DAYLIGHT).set(false,level.getServer());
   var ground=spawn(h,"bulbasaur",3,1,3);
   var mixed=new ArrayList<MinemonCreature>();var air=new ArrayList<MinemonCreature>();
   int x=5;
-  for(String slug:List.of("charizard","scyther","dragonite")){
-   var m=spawn(h,slug,x,7,8);x+=8;
+  var mixedSpecies=List.of("charizard","scyther","dragonite","pidgey","pidgeotto","pidgeot","zubat","golbat","venomoth","gastly","aerodactyl","mewtwo","mew","butterfree","beedrill","gengar");
+  for(int i=0;i<mixedSpecies.size();i++){
+   String slug=mixedSpecies.get(i);x=3+(i%5)*6;int z=5+(i/5)*5;
+   var m=spawn(h,slug,x,7,z);
    var tag=new CompoundTag();m.addAdditionalSaveData(tag);tag.putInt("NaturalBehaviorStartDelay",0);
    tag.putString("NaturalBehaviorPhase","AIR");tag.putInt("NaturalBehaviorTicks",1234);m.readAdditionalSaveData(tag);mixed.add(m);
   }
   x=3;
-  for(String slug:List.of("pidgey","gastly","koffing","weezing")){air.add(spawn(h,slug,x,7,17));x+=7;}
+  for(String slug:List.of("spearow","fearow","koffing","weezing","magnemite","magneton","haunter","articuno","zapdos","moltres")){
+   int airX=3+(air.size()%5)*6,airZ=4+(air.size()/5)*5;air.add(spawn(h,slug,airX,7,airZ));
+  }
   h.runAfterDelay(5,()->{
    level.setDayTime(18000);
    await(h,()->ground.isSleeping()&&mixed.stream().allMatch(m->m.isSleeping()&&m.isOnGround())

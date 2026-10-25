@@ -56,6 +56,16 @@ for slug, expected_scale in {
   for key,value in expected_scale.items():
    assert definition[key]==value,(slug,key,'unexpected authorized scale',definition[key])
    definition[key]=baseline[key]
+for slug in ('spearow','fearow'):
+ definition=next(d for d in prior_defs if d['slug']==slug)
+ old_definition=next(d for d in old_defs if d['slug']==slug)
+ if slug=='spearow':
+  assert definition['clips'].pop('air_idle',None)=='animation.spearow.minemon_air_idle'
+  assert definition['clips'].pop('air_fly',None)=='animation.spearow.minemon_air_fly'
+ else:
+  assert definition['clips'].pop('air_fly',None)=='animation.fearow.minemon_air_fly'
+  assert definition['clips']['air_idle']=='animation.fearow.minemon_air_idle'
+  definition['clips']['air_idle']=old_definition['clips']['air_idle']
 assert prior_defs==old_defs[:120],'An approved prior definition changed beyond the explicit fire-starter flame adaptation'
 assert [d['slug'] for d in defs[130:140]]==['lapras','ditto','eevee','vaporeon','jolteon','flareon','porygon','omanyte','omastar','kabuto'] and [d['slug'] for d in defs[140:150]]==BATCH15, 'Batch 14 plan or a later definition changed'
 assert profiles.keys()==(old_profiles.keys()|set(EXPECTED)|{'lapras','ditto','eevee','vaporeon','jolteon','flareon','porygon','omanyte','omastar','kabuto','kabutops','aerodactyl','snorlax','articuno','zapdos','moltres','dratini','dragonair','dragonite','mewtwo','mew'}), 'Unexpected/missing articulation profile'

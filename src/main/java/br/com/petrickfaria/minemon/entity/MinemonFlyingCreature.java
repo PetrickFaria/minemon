@@ -50,15 +50,12 @@ public final class MinemonFlyingCreature extends MinemonCreature {
   // navigation and must not override that decision during interpolation.
   if(this.level.isClientSide){this.fallDistance=0;return;}
   double support=this.naturalSurface();
-  net.minecraft.core.BlockPos floor=new net.minecraft.core.BlockPos(this.getX(),support-0.001D,this.getZ());
-  var state=this.level.getBlockState(floor);
-  boolean safe=this.level.getFluidState(floor).isEmpty()
-      && !state.isAir() && !state.is(net.minecraft.world.level.block.Blocks.MAGMA_BLOCK)
-      && !state.is(net.minecraft.world.level.block.Blocks.CACTUS)
-      && !state.is(net.minecraft.world.level.block.Blocks.CAMPFIRE)
-      && !state.is(net.minecraft.world.level.block.Blocks.SOUL_CAMPFIRE);
-  boolean settling=safe && this.getY()-support<=1.25D && this.getNavigation().isDone();
-  this.setNoGravity(!sleeping || !this.isOnGround() && !settling);
+  net.minecraft.core.BlockPos feet=new net.minecraft.core.BlockPos(this.getX(),support,this.getZ());
+  boolean safe=WaterMovementGoal.safeDry(this,feet);
+  // Once a collision-safe landing column is found, gravity performs the
+  // gradual descent. If the column is unsafe, keep hovering while the rest
+  // goal searches for a nearby dry landing instead of dropping blindly.
+  this.setNoGravity(!safe && !this.isOnGround());
   this.fallDistance=0;return;
   }
   this.setNoGravity(true);
@@ -84,5 +81,5 @@ public final class MinemonFlyingCreature extends MinemonCreature {
   }
   this.fallDistance=0;
  }
- @Override public boolean causeFallDamage(float distance,float multiplier,DamageSource source){return this.isFlyingSpecies()?false:super.causeFallDamage(distance,multiplier,source);}
+ @Override public boolean causeFallDamage(float distance,float multiplier,DamageSource source){return this.isFlyingSpecies()||this.wantsNaturalLanding()?false:super.causeFallDamage(distance,multiplier,source);}
 }

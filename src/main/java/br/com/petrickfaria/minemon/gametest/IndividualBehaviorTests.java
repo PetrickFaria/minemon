@@ -227,4 +227,19 @@ public final class IndividualBehaviorTests {
   CompoundTag tag=new CompoundTag();dragon.addAdditionalSaveData(tag);var copy=ModEntities.SPECIES.get("charizard").get().create(h.getLevel());copy.readAdditionalSaveData(tag);
   check(h,copy.naturalCycle().phase()==AIR&&copy.naturalCycle().ticks()==437&&copy.isFlyingSpecies(),"NBT must preserve phase, elapsed ticks and synchronized flight mode");h.succeed();
  }
+ @GameTest(template="test_arena",timeoutTicks=60)
+ public static void requestedLargeSpeciesRenderScalesAndSelectionBoxesMatch(GameTestHelper h){
+  arena(h,false);
+  var victreebel=spawn(h,"victreebel",5,1,5);var venusaur=spawn(h,"venusaur",10,1,5);
+  var snorlax=spawn(h,"snorlax",15,1,5);
+  check(h,Math.abs(victreebel.getBbWidth()-.8415D)<.001D&&Math.abs(victreebel.getBbHeight()-1.3005D)<.001D,
+      "Victreebel's additional 10 percent reduction must also resize its selection box");
+  check(h,Math.abs(venusaur.getBbWidth()-1.0125D)<.001D&&Math.abs(venusaur.getBbHeight()-.945D)<.001D,
+      "Venusaur's additional 10 percent reduction must also resize its selection box");
+  check(h,Math.abs(snorlax.getBbWidth()-.81D)<.001D&&Math.abs(snorlax.getBbHeight()-1.1475D)<.001D,
+      "Snorlax's previously approved proportional selection box must remain intact");
+  check(h,Math.abs(SpeciesDefinitions.get("victreebel").scale()-1.1169D)<.001D
+      &&Math.abs(SpeciesDefinitions.get("venusaur").scale()-1.35D)<.001D,
+      "Only the requested render scales must receive the new 10 percent factor");h.succeed();
+ }
 }

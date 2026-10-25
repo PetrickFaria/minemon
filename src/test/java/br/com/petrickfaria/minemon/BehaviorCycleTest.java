@@ -14,11 +14,19 @@ public class BehaviorCycleTest {
  private void repeat(BehaviorCycle c,int n,BehaviorCycle.Observation o){for(int i=0;i<n;i++)c.tick(o);}
  @Test public void exact151SpeciesAndSixDisjointProfiles(){
   assertEquals(SpeciesDefinitions.ALL.keySet(),SpeciesBehaviorProfiles.all().keySet());
-  int[] counts={91,23,3,23,9,2};int i=0;
+  int[] counts={91,13,13,23,9,2};int i=0;
   for(var p:SpeciesBehaviorProfiles.Profile.values())assertEquals(p.name(),counts[i++],SpeciesBehaviorProfiles.all().values().stream().filter(v->v==p).count());
   assertEquals(GROUND_FLIGHT,SpeciesBehaviorProfiles.profile("dragonite"));
   assertEquals(GROUND,SpeciesBehaviorProfiles.profile("farfetchd"));
+  assertEquals(GROUND_FLIGHT,SpeciesBehaviorProfiles.profile("pidgey"));
+  assertEquals(GROUND_FLIGHT,SpeciesBehaviorProfiles.profile("aerodactyl"));
   assertEquals(ALTITUDE_CYCLE,SpeciesBehaviorProfiles.profile("spearow"));
+  assertEquals(ALTITUDE_CYCLE,SpeciesBehaviorProfiles.profile("fearow"));
+  for(String slug:java.util.List.of("pidgey","pidgeotto","pidgeot","zubat","golbat","venomoth","gastly","aerodactyl","mewtwo","mew")){
+   var d=SpeciesDefinitions.get(slug);
+   assertNotNull(slug+" must use a retained ground gait",d.clips().get("ground_walk"));
+   assertNull(slug+" must not receive an invented fallback gait",d.movementFallback());
+  }
  }
  @Test public void altitudeCountsOnlyActualTimeInsideEachBand(){
   var c=new BehaviorCycle(ALTITUDE_CYCLE);var flight=observe(true,false,true,false,false,false,false,false);
@@ -68,6 +76,13 @@ public class BehaviorCycleTest {
   var c=new BehaviorCycle(WATER_VISITOR);var dry=observe(true,true,false,false,false,false,true,false);repeat(c,12000,dry);
   c.tick(observe(true,false,false,true,false,false,false,false));assertEquals(SURFACE,c.phase());
  }
+ @Test public void eightBottomPreferringSpeciesRemainAquaticAndOtherSwimmersKeepTheirProfiles(){
+  var expected=java.util.Set.of("shellder","staryu","starmie","krabby","kingler","omanyte","omastar","kabuto");
+  assertEquals(expected,SpeciesBehaviorProfiles.all().keySet().stream().filter(SpeciesBehaviorProfiles::prefersBottom).collect(java.util.stream.Collectors.toSet()));
+  for(String slug:expected)assertTrue(slug+" must be water-capable",SpeciesBehaviorProfiles.waterCapable(slug));
+  assertFalse(SpeciesBehaviorProfiles.prefersBottom("gyarados"));
+  assertFalse(SpeciesBehaviorProfiles.prefersBottom("lapras"));
+ }
  @Test public void onlySeakingReceivesExactly25PercentReduction(){
   var s=SpeciesDefinitions.get("seaking");assertEquals(1.35,s.scale(),0.00001);assertEquals(.525,s.width(),0.00001);assertEquals(.45,s.height(),0.00001);
   assertEquals(.6,SpeciesDefinitions.get("goldeen").width(),0.00001);
@@ -95,22 +110,23 @@ public class BehaviorCycleTest {
   }
   for(String s:java.util.List.of("articuno","zapdos","moltres"))
    assertEquals("native air fly remains selected for "+s,"animation."+s+".air_fly",SpeciesDefinitions.get(s).clips().get("air_fly"));
-  assertFalse("Fearow has no source air_fly and receives no invented mapping",SpeciesDefinitions.get("fearow").clips().containsKey("air_fly"));
-  assertFalse("Spearow has no source air_fly and receives no invented mapping",SpeciesDefinitions.get("spearow").clips().containsKey("air_fly"));
+  assertEquals("animation.fearow.minemon_air_fly",SpeciesDefinitions.get("fearow").clips().get("air_fly"));
+  assertEquals("animation.spearow.minemon_air_fly",SpeciesDefinitions.get("spearow").clips().get("air_fly"));
  }
  @Test public void requestedScaleAndHitboxAdjustmentsAreAppliedOnlyAtRuntime(){
   assertEquals(1.0,SpeciesDefinitions.get("dewgong").scale(),.0001);
   assertEquals(.965,SpeciesDefinitions.get("jynx").scale(),.0001);
   assertEquals(1.47,SpeciesDefinitions.get("magmar").scale(),.0001);
-  assertEquals(1.241,SpeciesDefinitions.get("victreebel").scale(),.0001);
+  assertEquals(1.1169,SpeciesDefinitions.get("victreebel").scale(),.0001);
+  assertEquals(.8415,SpeciesDefinitions.get("victreebel").width(),.0001);
   assertEquals(1.05,SpeciesDefinitions.get("jynx").width(),.0001);
   assertEquals(2.25,SpeciesDefinitions.get("magmar").height(),.0001);
-  assertEquals(1.445,SpeciesDefinitions.get("victreebel").height(),.0001);
+  assertEquals(1.3005,SpeciesDefinitions.get("victreebel").height(),.0001);
   assertEquals(1.05,SpeciesDefinitions.get("kangaskhan").scale(),.0001);
   assertEquals(1.35,SpeciesDefinitions.get("snorlax").scale(),.0001);
-  assertEquals(1.5,SpeciesDefinitions.get("venusaur").scale(),.0001);
-  assertEquals(1.125,SpeciesDefinitions.get("venusaur").width(),.0001);
-  assertEquals(1.05,SpeciesDefinitions.get("venusaur").height(),.0001);
+  assertEquals(1.35,SpeciesDefinitions.get("venusaur").scale(),.0001);
+  assertEquals(1.0125,SpeciesDefinitions.get("venusaur").width(),.0001);
+  assertEquals(.945,SpeciesDefinitions.get("venusaur").height(),.0001);
   assertEquals(.81,SpeciesDefinitions.get("snorlax").width(),.0001);
   assertEquals(1.1475,SpeciesDefinitions.get("snorlax").height(),.0001);
  }

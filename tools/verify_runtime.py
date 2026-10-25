@@ -188,12 +188,24 @@ def validate(read,definitions,prepared=False,packed=False):
    if prepared:
     if re.search(r'\bq\.',json.dumps(v)):raise ValueError(name+' unbound q alias')
     if 'animation_length' in v and v['animation_length']<=0:raise ValueError(name+' zero duration')
-  generated=lambda n:any(n.endswith('.minemon_'+suffix) for suffix in ('run','sit','sleep','physical_attack','tail_flame'))
+  generated=lambda n:any(n.endswith('.minemon_'+suffix) for suffix in ('run','sit','sleep','physical_attack','tail_flame','air_idle','air_fly'))
   for name in d['clips'].values():
    if name not in a and (prepared or not generated(name)):raise ValueError('Missing referenced clip '+name)
   attack=next((d['clips'][n] for n in ('physical_attack','physical','attack') if n in d['clips']),None)
   if attack and attack in a and d.get('attackTicks')!=math.ceil(a[attack]['animation_length']*20):raise ValueError('Attack duration mismatch '+d['slug'])
   if d['idle'] not in a or d['walk'] not in a:raise ValueError('Missing state clip '+d['slug'])
+  if prepared and d['slug'] in ('spearow','fearow'):
+   if d['clips'].get('air_fly')!='animation.'+d['slug']+'.minemon_air_fly' or d['clips'].get('air_idle')!='animation.'+d['slug']+'.minemon_air_idle':
+    raise ValueError('Spearow/Fearow must select their model-specific air clips: '+d['slug'])
+   air=a[d['clips']['air_fly']].get('bones',{})
+   wings=['wing_open_'+side+segment for side in ('left','right') for segment in ('','2','3')] if d['slug']=='spearow' else ['wing_open_left','wing_open_right']
+   if any('math.sin' not in json.dumps(air.get(name,{}).get('rotation')) for name in wings):
+    raise ValueError('Flight clip must flap every retained wing segment: '+d['slug'])
+   if d['slug']=='fearow':
+    if air.get('body',{}).get('rotation',[0])[0]!=-22 or air.get('head',{}).get('rotation',[0])[0]!=5:
+     raise ValueError('Fearow flight posture must lift its head above the original down-tilted air pose')
+    if air.get('leg_left',{}).get('rotation',[0,0,0])[2]!=-5 or air.get('leg_right',{}).get('rotation',[0,0,0])[2]!=5:
+     raise ValueError('Fearow flight posture must keep its feet aligned downward')
   if d['slug'] in SOURCE_FIRE_HASHES:
    fire_bones={b['name'] for part in g['minecraft:geometry'] for b in part['bones'] if b['name'].startswith('fire_mane') or b['name'].endswith('_fire')}
    for state,clip_name in (('idle',d['idle']),('walk',d['walk'])):

@@ -15,7 +15,7 @@ import java.util.*;
 
 /** Additional real-client scenario: production night AI, rendered closed eyes, dawn. */
 final class NightClientSmokeTest {
- private static final List<String> SPECIES=List.of("bulbasaur","victreebel","venusaur","snorlax","charizard","scyther","dragonite","pidgey","pidgeotto","fearow","gastly","haunter","koffing","weezing","butterfree","beedrill","parasect","kakuna","tangela","poliwag","growlithe");
+ private static final List<String> SPECIES=List.of("bulbasaur","victreebel","venusaur","snorlax","charizard","scyther","dragonite","pidgey","pidgeotto","pidgeot","fearow","gastly","haunter","gengar","koffing","weezing","butterfree","beedrill","venomoth","parasect","kakuna","tangela","poliwag","growlithe","magikarp","gyarados","lapras","dratini","omanyte");
  private static boolean opened,setup,spawned,waking;
  private static int ticks,index,samples,sleepTick;
  private static volatile UUID entity;
@@ -84,7 +84,11 @@ final class NightClientSmokeTest {
     mc.getSingleplayerServer().execute(()->{
      var level=mc.getSingleplayerServer().overworld();if(entity!=null){var old=level.getEntity(entity);if(old!=null)old.discard();}
      var mob=ModEntities.SPECIES.get(SPECIES.get(index)).get().create(level);
-     boolean air=SpeciesBehaviorProfiles.canFly(mob.getSpeciesSlug());mob.moveTo(0,air?107:101,5,180,0);
+     boolean aquatic=SpeciesBehaviorProfiles.waterCapable(mob.getSpeciesSlug());
+     boolean air=SpeciesBehaviorProfiles.canFly(mob.getSpeciesSlug());
+     if(aquatic)for(int x=-6;x<=6;x++)for(int z=0;z<=10;z++)for(int y=101;y<=110;y++)
+      level.setBlockAndUpdate(new BlockPos(x,y,z),Blocks.WATER.defaultBlockState());
+     mob.moveTo(0,aquatic?104:air?107:101,5,180,0);
      if(SpeciesBehaviorProfiles.profile(mob.getSpeciesSlug())==SpeciesBehaviorProfiles.Profile.GROUND_FLIGHT){
       var tag=new net.minecraft.nbt.CompoundTag();mob.addAdditionalSaveData(tag);tag.putString("NaturalBehaviorPhase","AIR");mob.readAdditionalSaveData(tag);
      }
@@ -92,7 +96,7 @@ final class NightClientSmokeTest {
      double distance=switch(mob.getSpeciesSlug()){
       case "venusaur"->7;case "snorlax","charizard","dragonite"->6;case "fearow"->9;
       case "victreebel","scyther","weezing"->5;case "pidgeotto","haunter","butterfree","beedrill","parasect"->4;
-      case "pidgey","gastly","kakuna"->2.5;default->3;
+      case "pidgey","gastly","kakuna"->2.5;case "gyarados","lapras"->8;default->3;
      };
      var player=level.getServer().getPlayerList().getPlayers().get(0);player.teleportTo(level,0,101,5-distance,0,0);
     });return;
@@ -100,6 +104,17 @@ final class NightClientSmokeTest {
    ticks++;if(ticks>450)throw new IllegalStateException("Night client timeout: "+SPECIES.get(index)+" samples="+samples);
    MinemonCreature current=null;for(var e:mc.level.entitiesForRendering())if(e.getUUID().equals(entity)&&e instanceof MinemonCreature m){current=m;break;}
    if(current==null)return;
+   boolean waterRest=SpeciesBehaviorProfiles.waterCapable(current.getSpeciesSlug())&&current.isInWaterOrBubble();
+   if(waterRest){
+    double target=WaterMovementGoal.waterRestY(current);
+    if(!Double.isFinite(target)||Math.abs(current.getY()-target)>.2D)
+     throw new IllegalStateException(current.getSpeciesSlug()+" must sleep at its safe species-specific water depth; target="+target+" y="+current.getY());
+   }else{
+    boolean shouldLand=!SpeciesBehaviorProfiles.hoversDuringNightRest(current.getSpeciesSlug());
+    if(shouldLand&&!current.isOnGround())throw new IllegalStateException(current.getSpeciesSlug()+" must sleep on the ground");
+    if(!shouldLand&&(current.isOnGround()||Math.abs(current.getY()-current.naturalSurface()-1.0D)>.2D))
+     throw new IllegalStateException(current.getSpeciesSlug()+" must keep its approved safe hover sleep pose");
+   }
    double dx=current.getX()-mc.player.getX(),dz=current.getZ()-mc.player.getZ(),dy=current.getY()+current.getBbHeight()*.65-mc.player.getEyeY();
    mc.player.setYRot((float)(Math.toDegrees(Math.atan2(dz,dx))-90));mc.player.setXRot((float)-Math.toDegrees(Math.atan2(dy,Math.sqrt(dx*dx+dz*dz))));
    if(!waking&&samples>=25){

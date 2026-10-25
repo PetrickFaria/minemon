@@ -6,10 +6,12 @@ import java.util.*;
 public final class SpeciesBehaviorProfiles {
  public enum Profile { GROUND, ALTITUDE_CYCLE, GROUND_FLIGHT, WATER_VISITOR, SUBMERGED, SURFACE }
  private static final Map<String,Profile> PROFILES=new LinkedHashMap<>();
+ private static final Set<String> BOTTOM_PREFERENCE=Set.of("shellder","staryu","starmie","krabby","kingler","omanyte","omastar","kabuto");
+ private static final Set<String> LAND_FOR_NIGHT_REST=Set.of("butterfree","beedrill","gengar");
  static {
   assign(Profile.GROUND, "bulbasaur,ivysaur,venusaur,charmander,charmeleon,caterpie,metapod,weedle,kakuna,rattata,raticate,ekans,arbok,pikachu,raichu,sandshrew,sandslash,nidoranf,nidorina,nidoqueen,nidoranm,nidorino,nidoking,clefairy,clefable,vulpix,ninetales,jigglypuff,wigglytuff,oddish,gloom,vileplume,paras,parasect,venonat,diglett,dugtrio,meowth,persian,mankey,primeape,growlithe,arcanine,abra,kadabra,alakazam,machop,machoke,machamp,bellsprout,weepinbell,victreebel,geodude,graveler,golem,ponyta,rapidash,farfetchd,doduo,dodrio,grimer,muk,onix,drowzee,hypno,voltorb,electrode,exeggcute,exeggutor,cubone,marowak,hitmonlee,hitmonchan,lickitung,rhyhorn,rhydon,chansey,tangela,kangaskhan,mrmime,jynx,electabuzz,magmar,pinsir,tauros,ditto,eevee,jolteon,flareon,porygon,snorlax");
-  assign(Profile.ALTITUDE_CYCLE, "butterfree,beedrill,pidgey,pidgeotto,pidgeot,spearow,fearow,zubat,golbat,venomoth,magnemite,magneton,gastly,haunter,gengar,koffing,weezing,aerodactyl,articuno,zapdos,moltres,mewtwo,mew");
-  assign(Profile.GROUND_FLIGHT, "charizard,scyther,dragonite");
+  assign(Profile.ALTITUDE_CYCLE, "butterfree,beedrill,spearow,fearow,magnemite,magneton,haunter,gengar,koffing,weezing,articuno,zapdos,moltres");
+  assign(Profile.GROUND_FLIGHT, "charizard,scyther,dragonite,pidgey,pidgeotto,pidgeot,zubat,golbat,venomoth,gastly,aerodactyl,mewtwo,mew");
   assign(Profile.WATER_VISITOR, "squirtle,wartortle,blastoise,psyduck,golduck,poliwag,poliwhirl,poliwrath,slowpoke,slowbro,seel,dewgong,krabby,kingler,staryu,starmie,vaporeon,omanyte,omastar,kabuto,kabutops,dratini,dragonair");
   assign(Profile.SUBMERGED, "tentacool,tentacruel,shellder,cloyster,horsea,seadra,goldeen,seaking,magikarp");
   assign(Profile.SURFACE, "gyarados,lapras");
@@ -27,6 +29,9 @@ public final class SpeciesBehaviorProfiles {
  public static boolean isVisitor(String slug){return profile(slug)==Profile.WATER_VISITOR;}
  public static boolean isAquatic(String slug){return profile(slug)==Profile.SUBMERGED||profile(slug)==Profile.SURFACE;}
  public static boolean waterCapable(String slug){return isAquatic(slug)||isVisitor(slug);}
+ public static boolean prefersBottom(String slug){return BOTTOM_PREFERENCE.contains(slug);}
+ public static boolean landsForNightRest(String slug){return LAND_FOR_NIGHT_REST.contains(slug);}
+ public static boolean hoversDuringNightRest(String slug){return isAirborne(slug)&&!landsForNightRest(slug);}
  public static Set<String> airborneSpecies(){return select(true);}
  public static Set<String> aquaticSpecies(){return select(false);}
  private static Set<String> select(boolean air){

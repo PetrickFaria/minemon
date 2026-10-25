@@ -107,6 +107,49 @@ def compatible_locomotion(data,geo,d):
    ch=channels.setdefault(joint,{});rot=list(ch.get('rotation',[0,0,0]));rot[0]=sinus(25,14,1.0,0 if i%2==0 else 180);ch['rotation']=rot
   put('swim',clip)
 
+def native_air_pose_adaptations(data,geo,d):
+ """Use each retained bird rig's source pose and animate its actual wing joints."""
+ import copy
+ slug=d['slug'];animations=data['animations']
+ if slug not in ('spearow','fearow'):return
+ source_name='animation.'+slug+('.air_idle' if slug=='fearow' else '.ground_idle')
+ source=animations.get(source_name)
+ if not source:raise ValueError(slug+' is missing its inspected source pose '+source_name)
+ names={b['name'] for g in geo.get('minecraft:geometry',[]) for b in g.get('bones',[])}
+ for kind,freq,amplitude in (('air_idle',0.9,14),('air_fly',1.4,30)):
+  clip=copy.deepcopy(source);clip.update(loop=True,animation_length=1.0/freq)
+  channels=clip.setdefault('bones',{})
+  if slug=='spearow':
+   # Spearow has no native air clip. Keep the source body pose, hold its legs
+   # still, and flap the model's three real open-wing joints in sequence.
+   for side in ('left','right'):
+    for segment in ('','2','3'):
+     bone='wing_open_'+side+segment
+     if bone not in names:raise ValueError('Spearow missing wing joint '+bone)
+     sign=1 if side=='left' else -1
+     scale=(1.0,0.52,0.28)[('','2','3').index(segment)]
+     phase=(0,35,65)[('','2','3').index(segment)]
+     channels.setdefault(bone,{})['rotation']=[0,0,f'{sign*amplitude*scale}*math.sin(query.anim_time*360*{freq}+{phase})']
+   for leg in ('leg_left','leg_right'):
+    if leg in names:channels.setdefault(leg,{})['rotation']=[0,0,0]
+  else:
+   # Fearow's only original flying clip points the head down and splays both
+   # legs. Retain its air rig and wing keys, then straighten the head chain and
+   # lower the feet without changing model geometry.
+   pose={'body':[-22,0,0],'torso':[5,0,0],'neck':[-5,0,0],
+         'neck_2':[10,0,0],'neck3':[10,0,0],'head':[5,0,0],
+         'leg_left':[-5,0,-5],'leg_right':[-5,0,5]}
+   for bone,rotation in pose.items():
+    if bone in names:channels.setdefault(bone,{})['rotation']=rotation
+  if slug=='fearow':
+   for side,sign in (('left',1),('right',-1)):
+    root='wing_open_'+side
+    if root not in names:raise ValueError(slug+' missing wing joint '+root)
+    rotation=list(channels.setdefault(root,{}).get('rotation',[0,0,0]))
+    base=rotation[2];rotation[2]=f'({base})+{sign*amplitude}*math.sin(query.anim_time*360*{freq})'
+    channels[root]['rotation']=rotation
+  animations[f'animation.{slug}.minemon_{kind}']=clip
+
 def night_sleep_clip(data,geo,d):
  """Keep each source sleeping pose and hold its own closed-eye blink pose."""
  import copy
@@ -118,6 +161,14 @@ def night_sleep_clip(data,geo,d):
  if slug=='poliwag':source='animation.poliwag.sleep_placeholder'
  if source not in animations:source=clips.get('air_idle') if airborne else clips.get('ground_idle')
  source=source or d['idle']
+ if slug in ('pidgey','pidgeotto','pidgeot') and clips.get('sleep') in animations:
+  # The native ground sleep clips select the tucked-wing rig. Their separate
+  # air_sleep clips deliberately keep the wings open for airborne rest.
+  source=clips['sleep']
+ if slug=='gengar' and clips.get('sit') in animations:
+  # Gengar has no native sleep clip; keep the compatible seated pose and
+  # hold its own blink's closed-eye bones while it rests on the ground.
+  source=clips['sit']
  clip=copy.deepcopy(animations.get(source,{}));clip.update(loop=True,animation_length=4.0)
  channels=clip.setdefault('bones',{})
  blink=animations.get(clips.get('blink'),{}).get('bones',{})
@@ -391,6 +442,7 @@ for p in (root/'assets/minemon_gen1/animations').rglob('*.animation.json'):
    geometry=json.loads(model.read_text())
    build_runtime_clips(data,geometry,definition)
    compatible_locomotion(data,geometry,definition)
+   native_air_pose_adaptations(data,geometry,definition)
    night_sleep_clip(data,geometry,definition)
   prepare_tail_flame(root,definition)
   prepare_moltres_emissive_mask(root,definition)

@@ -9,16 +9,21 @@ final class NightRestGoal extends Goal {
  private final MinemonCreature mob;
  NightRestGoal(MinemonCreature mob){this.mob=mob;setFlags(EnumSet.of(Flag.MOVE,Flag.LOOK,Flag.JUMP));}
  @Override public boolean canUse(){return (mob.isSleeping()||mob.isNightResting())
-     &&(SpeciesBehaviorProfiles.isAirborne(mob.getSpeciesSlug())||mob.isOnGround());}
+     &&(SpeciesBehaviorProfiles.isAirborne(mob.getSpeciesSlug())||mob.isOnGround()
+         ||mob.wantsNaturalLanding()
+         ||SpeciesBehaviorProfiles.waterCapable(mob.getSpeciesSlug())&&mob.isInWaterOrBubble());}
  @Override public boolean canContinueToUse(){return canUse()&&mob.getTarget()==null;}
  @Override public void start(){mob.getNavigation().stop();}
  @Override public void tick(){
-  if(!SpeciesBehaviorProfiles.isAirborne(mob.getSpeciesSlug())&&!mob.isSleeping()
+  if(mob.isInWaterOrBubble()&&SpeciesBehaviorProfiles.waterCapable(mob.getSpeciesSlug())){
+   holdWaterRest();return;
+  }
+  if(!SpeciesBehaviorProfiles.hoversDuringNightRest(mob.getSpeciesSlug())&&!mob.isSleeping()
       &&!WaterMovementGoal.safeDry(mob,mob.blockPosition())){
    if(!mob.getNavigation().isDone())return;
    for(int radius=1;radius<=8;radius++)for(int dx=-radius;dx<=radius;dx++)for(int dz=-radius;dz<=radius;dz++){
     if(Math.max(Math.abs(dx),Math.abs(dz))!=radius)continue;
-    var feet=mob.blockPosition().offset(dx,0,dz);
+    var feet=new net.minecraft.core.BlockPos(mob.getX(),mob.naturalSurface(),mob.getZ()).offset(dx,0,dz);
     for(int dy=0;dy>=-2;dy--){
      var p=feet.offset(0,dy,0);if(!WaterMovementGoal.safeDry(mob,p))continue;
      var path=mob.getNavigation().createPath(p,0);
@@ -28,9 +33,18 @@ final class NightRestGoal extends Goal {
    return;
   }
   mob.getNavigation().stop();mob.setJumping(false);mob.setSpeed(0);mob.setXxa(0);mob.setYya(0);mob.setZza(0);
-  boolean hover=SpeciesBehaviorProfiles.isAirborne(mob.getSpeciesSlug());
+  boolean hover=SpeciesBehaviorProfiles.hoversDuringNightRest(mob.getSpeciesSlug());
   double vertical=hover?Mth.clamp((mob.naturalSurface()+1.0D-mob.getY())*0.12D,-0.10D,0.10D):Math.min(0,mob.getDeltaMovement().y);
   mob.setDeltaMovement(0,vertical,0);
   if(hover){mob.setNoGravity(true);mob.fallDistance=0;}
+ }
+ private void holdWaterRest(){
+  mob.getNavigation().stop();mob.setJumping(false);mob.setSpeed(0);mob.setXxa(0);mob.setYya(0);mob.setZza(0);
+  double target=WaterMovementGoal.waterRestY(mob);
+  double vertical=Double.isFinite(target)
+      ?net.minecraft.util.Mth.clamp((target-mob.getY())*0.12D,-0.08D,0.08D):0.0D;
+  if(Math.abs(vertical)>1.0E-5D
+      &&!mob.level.noCollision(mob,mob.getBoundingBox().move(0,vertical,0)))vertical=0.0D;
+  mob.setNoGravity(true);mob.fallDistance=0;mob.setDeltaMovement(0,vertical,0);
  }
 }

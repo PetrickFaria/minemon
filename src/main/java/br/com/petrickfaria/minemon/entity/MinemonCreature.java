@@ -120,7 +120,9 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     public static AttributeSupplier.Builder createAttributes(SpeciesDefinitions.Definition d) {
         return createAttributes().add(Attributes.FOLLOW_RANGE,SpeciesBehaviorProfiles.waterCapable(d.slug())?128.0D:24.0D).add(Attributes.MAX_HEALTH,d.health()).add(Attributes.ATTACK_DAMAGE,d.attack()).add(Attributes.MOVEMENT_SPEED,d.speed()).add(Attributes.FLYING_SPEED,0.4D);
     }
-    public boolean isFlyingSpecies() { return SpeciesBehaviorProfiles.isAirborne(this.getSpeciesSlug()) || this.entityData.get(NATURAL_FLIGHT); }
+    public boolean isFlyingSpecies() { return SpeciesBehaviorProfiles.isAirborne(this.getSpeciesSlug())
+            &&!(this.isNightResting()&&SpeciesBehaviorProfiles.landsForNightRest(this.getSpeciesSlug()))
+            ||this.entityData.get(NATURAL_FLIGHT); }
     public boolean isAquaticSpecies() { return SpeciesBehaviorProfiles.waterCapable(this.getSpeciesSlug()); }
     public boolean isSpontaneouslyRunning() { return this.entityData.get(SPONTANEOUS_RUN); }
     public void setSpontaneousRunForValidation(boolean running) {
@@ -347,14 +349,17 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     private void tickNightRest(){
         if(this.wakeGraceTicks>0)this.wakeGraceTicks--;
         boolean night=this.level.dimensionType().hasSkyLight()&&this.level.isNight();
-        boolean eligible=!SpeciesBehaviorProfiles.isAquatic(this.getSpeciesSlug())&&!this.isNoAi()
-            &&!this.isPassenger()&&!this.isDeadOrDying()&&!this.isInWaterOrBubble()
+        boolean waterRest=SpeciesBehaviorProfiles.waterCapable(this.getSpeciesSlug())&&this.isInWaterOrBubble();
+        boolean restingEnvironment=waterRest||!SpeciesBehaviorProfiles.isAquatic(this.getSpeciesSlug())&&!this.isInWaterOrBubble();
+        boolean eligible=restingEnvironment&&!this.isNoAi()
+            &&!this.isPassenger()&&!this.isDeadOrDying()
             &&this.getTarget()==null&&this.wakeGraceTicks==0;
         if(night&&eligible){
             if(!this.nightRoutine){this.nightRoutine=true;this.getNavigation().stop();this.stopSpontaneousRun();}
             this.entityData.set(NIGHT_REST,true);
-            boolean hover=SpeciesBehaviorProfiles.isAirborne(this.getSpeciesSlug());
-            boolean settled=hover?Math.abs(this.getY()-this.naturalSurface()-1.0D)<0.18D
+            boolean hover=SpeciesBehaviorProfiles.hoversDuringNightRest(this.getSpeciesSlug());
+            boolean settled=waterRest?Math.abs(this.getY()-WaterMovementGoal.waterRestY(this))<0.18D
+                :hover?Math.abs(this.getY()-this.naturalSurface()-1.0D)<0.18D
                 :this.isOnGround()&&WaterMovementGoal.safeDry(this,this.blockPosition());
             if(settled&&!this.isSleeping())this.setSleeping(true);
         }else{
@@ -549,7 +554,9 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         this.syncNaturalState();
     }
     public boolean isNightResting(){return this.entityData.get(NIGHT_REST);}
-    public boolean wantsNaturalLanding(){return !SpeciesBehaviorProfiles.isAirborne(this.getSpeciesSlug())&&(this.isSleeping()||this.isNightResting()) || this.entityData.get(NATURAL_LANDING); }
+    public boolean wantsNaturalLanding(){return (!SpeciesBehaviorProfiles.isAirborne(this.getSpeciesSlug())
+            ||SpeciesBehaviorProfiles.landsForNightRest(this.getSpeciesSlug()))&&(this.isSleeping()||this.isNightResting())
+            ||this.entityData.get(NATURAL_LANDING); }
     public int getSmokeParticleCountForValidation(){return this.smokeParticles;}
     public boolean naturalBehaviorActive(){
         return this.naturalStartDelay==0&&(!this.isInWater()||this.isAquaticSpecies())&&!this.isNightResting()&&!this.isSleeping()&&!this.isOrderedToSit()&&!this.isPassenger()&&!this.isNoAi()
@@ -568,8 +575,8 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     }
     private void syncNaturalState(){
         this.entityData.set(NATURAL_LANDING,this.naturalCycle.landing());
-        this.entityData.set(NATURAL_FLIGHT,SpeciesBehaviorProfiles.profile(this.getSpeciesSlug())==SpeciesBehaviorProfiles.Profile.GROUND_FLIGHT&&this.naturalCycle.flying()
-            &&!(this.isNightResting()&&this.isOnGround()));
+        this.entityData.set(NATURAL_FLIGHT,SpeciesBehaviorProfiles.profile(this.getSpeciesSlug())==SpeciesBehaviorProfiles.Profile.GROUND_FLIGHT
+            &&this.naturalCycle.flying()&&!this.isNightResting());
         this.entityData.set(NATURAL_SURFACE,SpeciesBehaviorProfiles.profile(this.getSpeciesSlug())==SpeciesBehaviorProfiles.Profile.SURFACE
             ||SpeciesBehaviorProfiles.isVisitor(this.getSpeciesSlug())&&(this.naturalCycle.phase()==BehaviorCycle.Phase.SURFACE||this.naturalCycle.phase()==BehaviorCycle.Phase.EXIT_WATER));
     }
