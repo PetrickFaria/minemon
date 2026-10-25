@@ -24,16 +24,6 @@ public final class NightAndSwimmingTests {
  }
  private static void awaitBottom(GameTestHelper h,MinemonCreature shellder,MinemonCreature krabby,
      double originY,int remaining,int elapsed,Runnable next){
-  if(elapsed==0||elapsed%100==0){
-   var path=krabby.getNavigation().getPath();var node=path==null||path.isDone()?null:path.getNode(path.getNextNodeIndex());
-   var control=krabby.getMoveControl();
-   com.mojang.logging.LogUtils.getLogger().info("BOTTOM SWIM TRACE elapsed="+elapsed+" phase="+krabby.naturalCycle().phase()
-       +" pos="+krabby.position()+" velocity="+krabby.getDeltaMovement()+" wet="+krabby.isInWater()
-       +" navDone="+krabby.getNavigation().isDone()+" navTarget="+krabby.getNavigation().getTargetPos()
-       +" path="+(path==null?"null":path.getNextNodeIndex()+"/"+path.getNodeCount()+" end="+path.getEndNode())
-       +" next="+node+" wanted="+control.hasWanted()+":"+control.getWantedX()+","+control.getWantedY()+","+control.getWantedZ()
-       +" pitch="+krabby.getXRot()+" speed="+krabby.getSpeed()+" gravity="+!krabby.isNoGravity());
-  }
   if(shellder.isInWater()&&krabby.isInWater()
       &&shellder.getY()-originY<2.5D&&krabby.getY()-originY<4.5D){next.run();return;}
   if(remaining<=0){
@@ -92,6 +82,12 @@ public final class NightAndSwimmingTests {
    else {h.setBlock(new BlockPos(x,1,z),Blocks.STONE);h.setBlock(new BlockPos(x,2,z),Blocks.STONE);}
   }
   var shellder=spawn(h,"shellder",7,8,10);var krabby=spawn(h,"krabby",22,8,10);
+  // Krabby is also a land/water visitor and starts in its land cooldown.
+  // This probe is specifically for bottom navigation, so place it in its
+  // established submerged phase instead of exercising the separate exit rule.
+  var cycle=new CompoundTag();krabby.addAdditionalSaveData(cycle);
+  cycle.putInt("NaturalBehaviorStartDelay",0);cycle.putString("NaturalBehaviorPhase","SUBMERGED");
+  cycle.putInt("NaturalBehaviorTicks",0);krabby.readAdditionalSaveData(cycle);
   double originY=h.absolutePos(BlockPos.ZERO).getY();
   awaitBottom(h,shellder,krabby,originY,650,0,()->{
    check(h,h.getLevel().noCollision(shellder,shellder.getBoundingBox()),"Shellder must avoid the solid bottom while seeking it");
