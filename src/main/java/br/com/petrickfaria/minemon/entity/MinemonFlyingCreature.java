@@ -9,17 +9,19 @@ import net.minecraft.world.damagesource.DamageSource;
 public final class MinemonFlyingCreature extends MinemonCreature {
  private final PathNavigation airNavigation;
  private final PathNavigation groundNavigation;
+ private final PathNavigation escapeNavigation;
  private final net.minecraft.world.entity.ai.control.MoveControl airControl;
  private final net.minecraft.world.entity.ai.control.MoveControl groundControl;
  public MinemonFlyingCreature(EntityType<? extends TamableAnimal> type,Level level){
   super(type,level);this.airNavigation=this.navigation;
-  this.groundNavigation=new EscapeNavigation(this,level);
+  this.groundNavigation=new net.minecraft.world.entity.ai.navigation.GroundPathNavigation(this,level);
+  this.escapeNavigation=new EscapeNavigation(this,level);
   this.airControl=new FlyingMoveControl(this,20,true);
   this.groundControl=new WaterAwareMoveControl(this);
   this.updateLocomotion();
  }
  private void updateLocomotion(){
-  boolean flying=this.isFlyingSpecies()&&!this.isInWater();PathNavigation desired=flying?this.airNavigation:this.groundNavigation;
+  boolean flying=this.isFlyingSpecies()&&!this.isInWater();PathNavigation desired=this.isInWater()?this.escapeNavigation:flying?this.airNavigation:this.groundNavigation;
   if(this.navigation!=desired){this.navigation.stop();this.navigation=desired;}
   this.moveControl=flying?this.airControl:this.groundControl;
   if(!this.level.isClientSide||!this.wantsNaturalLanding())this.setNoGravity(flying||this.isInWater());

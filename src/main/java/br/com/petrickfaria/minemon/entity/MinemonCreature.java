@@ -51,6 +51,9 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     private static final EntityDataAccessor<Boolean> NATURAL_SURFACE = SynchedEntityData.defineId(MinemonCreature.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> NATURAL_LANDING = SynchedEntityData.defineId(MinemonCreature.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> NIGHT_REST = SynchedEntityData.defineId(MinemonCreature.class, EntityDataSerializers.BOOLEAN);
+    private net.minecraft.world.entity.ai.navigation.PathNavigation dryNavigation;
+    private net.minecraft.world.entity.ai.navigation.PathNavigation escapeNavigation;
+    private int nightCombatTicks,nightUnreachableTicks;
     private int wakeGraceTicks;
     private boolean nightRoutine;
     private BehaviorCycle naturalCycle;
@@ -88,13 +91,13 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         };
         this.naturalCycle = new BehaviorCycle(SpeciesBehaviorProfiles.profile(this.getSpeciesSlug()));
         this.naturalStartDelay=this.getRandom().nextInt(30);
-        if(!this.isAquaticSpecies()&&!SpeciesBehaviorProfiles.canFly(this.getSpeciesSlug()))this.moveControl=new WaterAwareMoveControl(this);
+        if(!this.isAquaticSpecies()&&!SpeciesBehaviorProfiles.canFly(this.getSpeciesSlug())){
+            this.moveControl=new WaterAwareMoveControl(this);
+            this.dryNavigation=this.navigation;this.escapeNavigation=new EscapeNavigation(this,level);
+        }
         this.blinkCooldownTicks = 80 + this.getRandom().nextInt(120);
     }
 
-    @Override protected net.minecraft.world.entity.ai.navigation.PathNavigation createNavigation(Level level){
-        return new EscapeNavigation(this,level);
-    }
     @Override public void travel(net.minecraft.world.phys.Vec3 input){
         if(!this.level.isClientSide&&!this.isAquaticSpecies()&&!SpeciesBehaviorProfiles.canFly(this.getSpeciesSlug()))
             this.setNoGravity(this.isInWater());
@@ -269,6 +272,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
 
     @Override
     public boolean hurt(DamageSource source, float amount) {
+        boolean wokeFromRest=this.isSleeping()||this.isNightResting();
         boolean hurt = super.hurt(source, amount);
         if(hurt&&!this.level.isClientSide){
             this.setSleeping(false);this.entityData.set(NIGHT_REST,false);this.wakeGraceTicks=100;this.syncNaturalState();
@@ -276,6 +280,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         if (hurt && !this.level.isClientSide && source.getEntity() instanceof LivingEntity attacker
                 && this.canAttack(attacker)) {
             this.setTarget(attacker);
+            if(wokeFromRest){this.nightCombatTicks=WILD_AGGRESSION_DURATION_TICKS;this.nightUnreachableTicks=0;}
             if (!this.isTame()) {
                 this.wildAggressionTicks = WILD_AGGRESSION_DURATION_TICKS;
                 this.wildUnreachableTicks = 0;
@@ -286,6 +291,10 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
 
     @Override
     public void tick() {
+        if(this.escapeNavigation!=null){
+            var desired=this.isInWater()?this.escapeNavigation:this.dryNavigation;
+            if(this.navigation!=desired){this.navigation.stop();this.navigation=desired;}
+        }
         if(!this.level.isClientSide&&!(Boolean.getBoolean("minemon.clientSmokeTest")&&this.getTags().contains("minemon-locomotion-fixture")))this.tickNightRest();
         super.tick();
         if (!this.level.isClientSide) this.tickNaturalCycle();
@@ -331,6 +340,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         } else {
             if (!this.level.isClientSide) this.tickSpontaneousRun();
             this.tickWildAggression();
+            this.tickNightCombat();
         }
     }
 
@@ -365,6 +375,20 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
             if(!this.isAquaticSpecies())acceleration*=1.25F;
         }
         super.moveRelative(acceleration,input);
+    }
+
+    private void tickNightCombat(){
+        if(this.nightCombatTicks<=0)return;
+        var target=this.getTarget();
+        if(target!=null&&target.isAlive()&&target.distanceToSqr(this)<=WILD_MAX_CHASE_DISTANCE*WILD_MAX_CHASE_DISTANCE){
+            if(this.getNavigation().isDone()&&target.distanceToSqr(this)>16)this.nightUnreachableTicks++;
+            else this.nightUnreachableTicks=0;
+            if(--this.nightCombatTicks>0&&this.nightUnreachableTicks<WILD_UNREACHABLE_LIMIT_TICKS)return;
+        }
+        this.nightCombatTicks=0;this.nightUnreachableTicks=0;
+        this.setTarget(null);this.getNavigation().stop();
+        // Do not reacquire the same expired personal attacker while returning to rest.
+        this.setLastHurtByMob(null);
     }
 
     private void tickWildAggression() {

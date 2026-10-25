@@ -111,7 +111,9 @@ public final class NightAndSwimmingTests {
      if(e instanceof MinemonCreature m){
       var target=new BlockPos(m.getX(),m.getY(),m.getZ()+10);
       m.getNavigation().moveTo(target.getX()+.5,target.getY(),target.getZ()+.5,.85);
-      m.getNavigation().tick();m.getMoveControl().tick();
+      m.getNavigation().tick();
+      m.getMoveControl().setWantedPosition(m.getX(),m.getY(),m.getZ()+10,.85);
+      m.getMoveControl().tick();
       m.travel(new net.minecraft.world.phys.Vec3(m.xxa*.98,m.yya*.98,m.zza*.98));
      }else e.travel(new net.minecraft.world.phys.Vec3(0,0,.98));
      if(tick==39)start=e.getZ();
