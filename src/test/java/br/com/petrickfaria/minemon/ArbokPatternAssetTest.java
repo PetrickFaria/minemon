@@ -9,12 +9,18 @@ public class ArbokPatternAssetTest {
   var root=Path.of("src/main/resources/assets/minemon");
   var geo=JsonParser.parseString(Files.readString(root.resolve("geo/arbok_cobblemon_1_8_2/arbok.geo.json")))
       .getAsJsonObject().getAsJsonArray("minecraft:geometry").get(0).getAsJsonObject();
-  var hood3=geo.getAsJsonArray("bones").asList().stream()
-      .map(com.google.gson.JsonElement::getAsJsonObject).filter(b->b.get("name").getAsString().equals("hood3")).findFirst().orElseThrow();
-  var panel=hood3.getAsJsonArray("cubes").asList().stream().map(com.google.gson.JsonElement::getAsJsonObject)
-      .filter(c->c.getAsJsonArray("uv").get(0).getAsInt()==0&&c.getAsJsonArray("uv").get(1).getAsInt()==19
-          &&c.getAsJsonArray("size").get(0).getAsInt()==24&&c.getAsJsonArray("size").get(1).getAsInt()==1
-          &&c.getAsJsonArray("size").get(2).getAsInt()==12).findFirst().orElseThrow();
+  com.google.gson.JsonObject hood3=null;
+  for(var bone:geo.getAsJsonArray("bones"))if(bone.getAsJsonObject().get("name").getAsString().equals("hood3")){
+   hood3=bone.getAsJsonObject();break;
+  }
+  assertNotNull("Current Arbok rig contains hood3",hood3);
+  com.google.gson.JsonObject panel=null;
+  for(var cube:hood3.getAsJsonArray("cubes")){
+   var candidate=cube.getAsJsonObject();var uv=candidate.getAsJsonArray("uv");var size=candidate.getAsJsonArray("size");
+   if(uv.get(0).getAsInt()==0&&uv.get(1).getAsInt()==19&&size.get(0).getAsInt()==24
+       &&size.get(1).getAsInt()==1&&size.get(2).getAsInt()==12){panel=candidate;break;}
+  }
+  assertNotNull("Current Arbok hood has the expected front UV slab",panel);
   int faceX=panel.getAsJsonArray("uv").get(0).getAsInt()+panel.getAsJsonArray("size").get(2).getAsInt();
   int faceY=panel.getAsJsonArray("uv").get(1).getAsInt();
   assertEquals(12,faceX);assertEquals(19,faceY);
