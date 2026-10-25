@@ -117,6 +117,11 @@ jobs:
             grep -F 'ARTICULATION PROFILES:' run/client-validation.txt
             cp run/client-validation.txt "run/client-validation-$scenario.txt"
           done
+      - name: Validate production nighttime sleep and closed eyes on the real client
+        run: |
+          python3 tools/prepare_client_world.py
+          timeout --kill-after=30s 900s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeSleep
+          grep -F 'PASS NIGHT CLIENT:' run/client-validation-night.txt
       - name: Verify executable mod JAR contents
         shell: bash
         run: |

@@ -83,6 +83,9 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
 
     public MinemonCreature(EntityType<? extends TamableAnimal> type, Level level) {
         super(type, level);
+        if(!this.isAquaticSpecies())this.lookControl=new net.minecraft.world.entity.ai.control.LookControl(this){
+            @Override protected boolean resetXRotOnTick(){return !MinemonCreature.this.isInWater()||MinemonCreature.this.getNavigation().isDone();}
+        };
         this.naturalCycle = new BehaviorCycle(SpeciesBehaviorProfiles.profile(this.getSpeciesSlug()));
         this.naturalStartDelay=this.getRandom().nextInt(30);
         if(!this.isAquaticSpecies()&&!SpeciesBehaviorProfiles.canFly(this.getSpeciesSlug()))this.moveControl=new WaterAwareMoveControl(this);
@@ -93,8 +96,8 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         return new EscapeNavigation(this,level);
     }
     @Override public void travel(net.minecraft.world.phys.Vec3 input){
-        if(!this.level.isClientSide&&!this.isAquaticSpecies())
-            this.setNoGravity(this.isInWater()||this.isFlyingSpecies()&&!this.wantsNaturalLanding());
+        if(!this.level.isClientSide&&!this.isAquaticSpecies()&&!SpeciesBehaviorProfiles.canFly(this.getSpeciesSlug()))
+            this.setNoGravity(this.isInWater());
         super.travel(input);
     }
 
