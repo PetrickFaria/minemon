@@ -334,6 +334,33 @@ public final class CompanionTests {
   });
  }
 
+ @GameTest(template="test_arena",timeoutTicks=300)
+ public static void airbornePokemonRetaliatesAgainstRealPlayer(GameTestHelper h){
+  playerRetaliationInMedium(h,false);
+ }
+ @GameTest(template="test_arena",timeoutTicks=300)
+ public static void swimmingPokemonRetaliatesAgainstRealPlayer(GameTestHelper h){
+  playerRetaliationInMedium(h,true);
+ }
+ private static void playerRetaliationInMedium(GameTestHelper h,boolean water){
+  ServerPlayer p=player(h);
+  if(water)for(int x=3;x<=12;x++)for(int z=3;z<=12;z++)for(int y=1;y<=5;y++)
+   h.setBlock(new BlockPos(x,y,z),net.minecraft.world.level.block.Blocks.WATER);
+  BlockPos pos=h.absolutePos(new BlockPos(6,water?2:1,6));
+  p.moveTo(pos.getX()+.5D,pos.getY(),pos.getZ()+.5D,0,0);p.setNoGravity(true);
+  var mob=h.spawn(ModEntities.SPECIES.get(water?"goldeen":"pidgey").get(),new BlockPos(8,3,6));
+  h.runAfterDelay(20,()->{
+   check(h,mob.getTarget()==null,"Unprovoked Pokemon must remain neutral toward the player");
+   check(h,water?mob.isInWater():mob.isFlyingSpecies()&&!mob.isOnGround(),"Provocation must occur in the actual movement medium");
+   float health=p.getHealth();mob.hurt(DamageSource.playerAttack(p),1);
+   check(h,mob.getTarget()==p,"Pokemon must identify the player aggressor in its movement medium");
+   h.runAfterDelay(200,()->{
+    check(h,p.getHealth()<health,"Existing melee combat must actually damage the player aggressor: "+state(mob,p));
+    p.discard();h.succeed();
+   });
+  });
+ }
+
  @GameTest(template="test_arena",timeoutTicks=1000)
  public static void nativeGroundRunnerUsesSpontaneousRunOnlyDuringTravel(GameTestHelper h) {
   floor(h);
