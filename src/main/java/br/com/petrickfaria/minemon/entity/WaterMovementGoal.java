@@ -161,7 +161,7 @@ public final class WaterMovementGoal extends Goal {
     if(!mob.level.getFluidState(new BlockPos(x,floorWater,z)).is(FluidTags.WATER))return Double.NaN;
   return target;
  }
- static double waterRestY(MinemonCreature mob){
+ public static double waterRestY(MinemonCreature mob){
   double top=surfaceAt(mob,mob.blockPosition());
   if(!Double.isFinite(top))return Double.NaN;
   if(SpeciesBehaviorProfiles.isVisitor(mob.getSpeciesSlug())){
