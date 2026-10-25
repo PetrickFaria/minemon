@@ -14,6 +14,9 @@ import net.minecraft.world.level.Level;
 public final class MinemonAquaticCreature extends MinemonCreature {
     public MinemonAquaticCreature(EntityType<? extends TamableAnimal> type, Level level) {
         super(type, level);
+        // Amphibious search expands land and water neighbors. The vanilla
+        // node budget exhausted midway through the verified 100-block route.
+        this.getNavigation().setMaxVisitedNodesMultiplier(8.0F);
         this.lookControl = new net.minecraft.world.entity.ai.control.LookControl(this) {
             @Override protected boolean resetXRotOnTick() {
                 // LookControl ticks after MoveControl. Its land default resets

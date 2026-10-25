@@ -17,6 +17,7 @@ public final class WaterMovementGoal extends Goal {
  private BlockPos destination;
  private final Map<BlockPos,Integer> blocked=new HashMap<>();
  private static final List<BlockPos> OFFSETS=offsets();
+ private static final int[][] SWIM_DIRECTIONS={{1,0},{1,1},{0,1},{-1,1},{-1,0},{-1,-1},{0,-1},{1,-1}};
  private static List<BlockPos> offsets(){
   List<BlockPos> out=new ArrayList<>();
   for(int x=-SEARCH_RADIUS;x<=SEARCH_RADIUS;x++)for(int z=-SEARCH_RADIUS;z<=SEARCH_RADIUS;z++)if(x*x+z*z<=SEARCH_RADIUS*SEARCH_RADIUS)out.add(new BlockPos(x,0,z));
@@ -108,14 +109,20 @@ public final class WaterMovementGoal extends Goal {
  }
  private BlockPos swimDestination(){
   boolean surface=mob.isNaturalSurface();
-  for(int n=0;n<12;n++){
-   int dx=mob.getRandom().nextInt(49)-24,dz=mob.getRandom().nextInt(49)-24;
+  // Far choices distribute swimmers through large lakes; local and fixed
+  // probes prevent small ponds/corners from depending on lucky random draws.
+  for(int n=0;n<48;n++){
+   int dx,dz;
+   if(n<12){dx=mob.getRandom().nextInt(49)-24;dz=mob.getRandom().nextInt(49)-24;}
+   else if(n<24){dx=mob.getRandom().nextInt(13)-6;dz=mob.getRandom().nextInt(13)-6;}
+   else {int[] direction=SWIM_DIRECTIONS[(n-24)%8];int distance=2+2*((n-24)/8);dx=direction[0]*distance;dz=direction[1]*distance;}
    if(dx*dx+dz*dz<4)continue;
    int x=mob.blockPosition().getX()+dx,z=mob.blockPosition().getZ()+dz;
    BlockPos column=new BlockPos(x,mob.getY(),z);
    double top=surfaceAt(mob,column);
    if(!Double.isFinite(top))continue;
    double y=surface?top-preferredSurfaceDepth(mob)
+       :n>=24?top-Math.max(2.0D,mob.getBbHeight()+0.3D)
        :Math.min(top-mob.getBbHeight()-0.3D,mob.getY()+mob.getRandom().nextInt(5)-2);
    BlockPos p=new BlockPos(x,y,z);
    if(blocked.containsKey(p)||!waterFits(mob,p,!surface)
