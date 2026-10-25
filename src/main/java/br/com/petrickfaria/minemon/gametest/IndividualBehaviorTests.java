@@ -183,6 +183,14 @@ public final class IndividualBehaviorTests {
   }
   var fish=h.spawn(ModEntities.SPECIES.get("goldeen").get(),new BlockPos(2,19,2));
   Vec3 start=fish.position();
+  h.runAfterDelay(20,()->{
+   var target=h.absolutePos(new BlockPos(101,17,2));
+   var path=fish.getNavigation().createPath(target,0);
+   com.mojang.logging.LogUtils.getLogger().info("LONG WATER PATH target="+target+" loaded="+h.getLevel().hasChunkAt(target)
+       +" region="+WaterMovementGoal.isNavigableWaterRegion(target,p->h.getLevel().getFluidState(p).is(net.minecraft.tags.FluidTags.WATER))
+       +" range="+fish.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.FOLLOW_RANGE)
+       +" path="+(path==null?"null":path.canReach()+" nodes="+path.getNodeCount()+" end="+path.getEndNode())+state(fish));
+  });
   check(h,fish.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.FOLLOW_RANGE)>=100,
       "Navigation must support the full advertised water-search radius");
   await(h,()->fish.isInWater()&&fish.position().distanceToSqr(start)>8100,()->{
