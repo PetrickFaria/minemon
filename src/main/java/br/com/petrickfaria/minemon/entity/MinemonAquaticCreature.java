@@ -99,6 +99,16 @@ public final class MinemonAquaticCreature extends MinemonCreature {
                 }
                 return super.createPath(destination,reach);
             }
+            @Override protected void doStuckDetection(net.minecraft.world.phys.Vec3 position){
+                // 1.19.2 retains timeoutTimer when the next node changes. On
+                // long routes, time spent at earlier nodes eventually cancels
+                // a moving entity's path. Keep the timeout local to its node;
+                // vanilla's distance and blocked-node checks still run.
+                if(this.path!=null&&!this.path.isDone()
+                        &&!this.path.getNextNodePos().equals(this.timeoutCachedNode))
+                    this.timeoutTimer=0L;
+                super.doStuckDetection(position);
+            }
             @Override protected PathFinder createPathFinder(int maxVisitedNodes) {
                 this.nodeEvaluator = new AmphibiousNodeEvaluator(false);
                 this.nodeEvaluator.setCanPassDoors(true);

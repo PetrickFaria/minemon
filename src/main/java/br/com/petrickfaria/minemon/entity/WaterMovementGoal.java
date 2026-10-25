@@ -15,6 +15,7 @@ public final class WaterMovementGoal extends Goal {
  private Vec3 lastPosition;
  private boolean scanDepth;
  private Boolean lastDryScan;
+ private BlockPos scanOrigin;
  private BlockPos destination;
  private final Map<BlockPos,Integer> blocked=new HashMap<>();
  private static final List<BlockPos> OFFSETS=offsets();
@@ -77,10 +78,10 @@ public final class WaterMovementGoal extends Goal {
  private BlockPos scan(boolean dry){
   // Shore exit starts near the swimmer, independent of how far the prior
   // water search progressed. Do not reuse distant-water scan cursors on land.
-  if(lastDryScan==null||lastDryScan!=dry){
-   lastDryScan=dry;scanIndex=0;scanYIndex=0;scanDepth=false;
+  if(lastDryScan==null||lastDryScan!=dry||scanOrigin==null||scanOrigin.distSqr(mob.blockPosition())>256.0D){
+   lastDryScan=dry;scanIndex=0;scanYIndex=0;scanDepth=false;scanOrigin=mob.blockPosition();
   }
-  BlockPos origin=mob.blockPosition();int paths=0;
+  BlockPos origin=scanOrigin;int paths=0;
   // Bounded batches cover the full three-dimensional radius, including
   // water farther above/below than a shore step. Both cursors survive retries;
   // a blocked deep node cannot restart the same column indefinitely.
@@ -102,7 +103,7 @@ public final class WaterMovementGoal extends Goal {
     }
     p=origin.offset(offset.getX(),dy,offset.getZ());
    }
-   if(!withinSearchRadius(origin,p)||!mob.level.hasChunkAt(p)||blocked.containsKey(p))continue;
+   if(!withinSearchRadius(mob.blockPosition(),p)||!mob.level.hasChunkAt(p)||blocked.containsKey(p))continue;
    if(dry?!safeDry(mob,p):!waterFits(mob,p,SpeciesBehaviorProfiles.profile(mob.getSpeciesSlug())!=SpeciesBehaviorProfiles.Profile.SURFACE)
        ||requiresNavigableVolume(mob.getSpeciesSlug())&&!waterRegion(mob,p))continue;
    paths++;
