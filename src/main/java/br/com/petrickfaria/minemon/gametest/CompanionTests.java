@@ -34,7 +34,9 @@ public final class CompanionTests {
   com.mojang.logging.LogUtils.getLogger().info("MINEMON MOVEMENT TRACE "+label+" sample="+elapsed
       +" entityTick="+b.tickCount+" pos="+b.position()+" velocity="+b.getDeltaMovement()
       +" alive="+b.isAlive()+" removed="+b.isRemoved()+" noAI="+b.isNoAi()+" noGravity="+b.isNoGravity()
-      +" sleeping="+b.isSleeping()+" grounded="+b.isOnGround()+" water="+b.isInWater()
+      +" sleeping="+b.isSleeping()+" nightRest="+b.isNightResting()+" wantsLanding="+b.wantsNaturalLanding()
+      +" flying="+b.isFlyingSpecies()+" naturalActive="+b.naturalBehaviorActive()
+      +" grounded="+b.isOnGround()+" water="+b.isInWater()
       +" speed="+b.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED)
       +" health="+b.getHealth()+" target="+b.getTarget()+" navDone="+b.getNavigation().isDone()
       +" navTarget="+b.getNavigation().getTargetPos());
