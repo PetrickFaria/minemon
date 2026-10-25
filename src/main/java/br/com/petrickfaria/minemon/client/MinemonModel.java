@@ -42,7 +42,7 @@ public class MinemonModel extends AnimatedGeoModel<MinemonCreature> {
         if(head!=null) {
             float basePitch=slug.equals("fearow")?(entity.isFlyingSpecies()?5.0F:-10.0F):0.0F;
             float minPitch=slug.equals("mew")?-37.0F:(slug.equals("geodude")?-15.0F:-25.0F);
-            float maxPitch=slug.equals("mew")?60.0F:(slug.equals("geodude")?15.0F:25.0F);
+            float maxPitch=slug.equals("fearow")&&entity.isFlyingSpecies()?10.0F:slug.equals("mew")?60.0F:(slug.equals("geodude")?15.0F:25.0F);
             float minYaw=slug.equals("mew")?-90.0F:(slug.equals("geodude")?-15.0F:-60.0F);
             float maxYaw=slug.equals("mew")?20.0F:(slug.equals("geodude")?15.0F:60.0F);
             head.setRotationX((basePitch+net.minecraft.util.Mth.clamp(input.headPitch,minPitch,maxPitch))*(float)Math.PI/180.0F);
