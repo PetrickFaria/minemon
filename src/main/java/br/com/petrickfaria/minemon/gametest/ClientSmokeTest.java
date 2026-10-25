@@ -491,7 +491,7 @@ public final class ClientSmokeTest {
     applyValidationInput(mc,Math.floorMod(worldTicks-SPECIES_START_TICK,SPECIES_TEST_WINDOW));
    if(worldTicks>=SPECIES_START_TICK+20 && worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW && (worldTicks-(SPECIES_START_TICK+20))%SPECIES_TEST_WINDOW==0)Screenshot.grab(mc.gameDirectory,mc.getMainRenderTarget(),message->{});
    if(worldTicks>=SPECIES_START_TICK && worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW && ((worldTicks-SPECIES_START_TICK)%SPECIES_TEST_WINDOW)==42
-       && java.util.Set.of("charmander","charmeleon","charizard","moltres","ponyta","rapidash").contains(species.get((worldTicks-SPECIES_START_TICK)/SPECIES_TEST_WINDOW)))Screenshot.grab(mc.gameDirectory,mc.getMainRenderTarget(),message->{});
+       && java.util.Set.of("charmander","charmeleon","charizard","moltres","ponyta","rapidash").contains(species.get((worldTicks-SPECIES_START_TICK)/SPECIES_TEST_WINDOW)))Screenshot.grab(mc.gameDirectory,"fire-night-"+species.get((worldTicks-SPECIES_START_TICK)/SPECIES_TEST_WINDOW)+".png",mc.getMainRenderTarget(),message->{});
    if(worldTicks==SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW) {
     if(!combatPassed)throw new IllegalStateException("Survival combat check did not pass");
     if(!renderedSpecies.containsAll(species))throw new IllegalStateException("Some species were not rendered: expected="+species+" actual="+renderedSpecies);

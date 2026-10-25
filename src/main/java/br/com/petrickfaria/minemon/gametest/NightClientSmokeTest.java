@@ -42,10 +42,10 @@ final class NightClientSmokeTest {
      try(var stream=NightClientSmokeTest.class.getResourceAsStream("/"+d.animation().replace("assets/minemon/","assets/minemon_gen1/"))){
       var animations=com.google.gson.JsonParser.parseReader(new java.io.InputStreamReader(stream)).getAsJsonObject().getAsJsonObject("animations");
       String blink=d.clips().get("blink");
-      if(blink!=null&&animations.has(blink)){
-       var blinkBones=animations.getAsJsonObject(blink).getAsJsonObject("bones");
+      {
        var sleepBones=animations.getAsJsonObject(d.clips().get("night_sleep")).getAsJsonObject("bones");
-       for(String name:blinkBones.keySet()){
+       java.util.Set<String> eyeNames=blink!=null&&animations.has(blink)?animations.getAsJsonObject(blink).getAsJsonObject("bones").keySet():sleepBones.keySet().stream().filter(n->n.contains("eye")||n.contains("pupil")).collect(java.util.stream.Collectors.toSet());
+       for(String name:eyeNames){
         var bone=model.getAnimationProcessor().getBone(name);if(bone==null)continue;
         var tracks=sleepBones.getAsJsonObject(name);
         for(String channel:List.of("position","rotation","scale"))if(tracks.has(channel)&&tracks.get(channel).isJsonArray()){
@@ -92,7 +92,7 @@ final class NightClientSmokeTest {
    double dx=current.getX()-mc.player.getX(),dz=current.getZ()-mc.player.getZ(),dy=current.getY()+current.getBbHeight()*.65-mc.player.getEyeY();
    mc.player.setYRot((float)(Math.toDegrees(Math.atan2(dz,dx))-90));mc.player.setXRot((float)-Math.toDegrees(Math.atan2(dy,Math.sqrt(dx*dx+dz*dz))));
    if(!waking&&samples>=25){
-    Screenshot.grab(mc.gameDirectory,mc.getMainRenderTarget(),message->{});
+    Screenshot.grab(mc.gameDirectory,"night-"+SPECIES.get(index)+".png",mc.getMainRenderTarget(),message->{});
     Files.writeString(Path.of("client-validation-night.txt"),"PASS NIGHT RENDER "+SPECIES.get(index)+" sleep clip="+current.getSelectedAnimationForValidation()+" closed-eye tracks="+eyes.keySet()+" samples="+samples+" grounded="+current.isOnGround()+"\n",StandardOpenOption.APPEND);
     waking=true;mc.getSingleplayerServer().execute(()->mc.getSingleplayerServer().overworld().setDayTime(1000));
    }
