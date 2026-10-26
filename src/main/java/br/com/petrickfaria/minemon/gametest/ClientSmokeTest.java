@@ -513,12 +513,12 @@ public final class ClientSmokeTest {
     applyValidationInput(mc,Math.floorMod(worldTicks-SPECIES_START_TICK,SPECIES_TEST_WINDOW));
    if(worldTicks>=SPECIES_START_TICK+20 && worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW && (worldTicks-(SPECIES_START_TICK+20))%SPECIES_TEST_WINDOW==0)Screenshot.grab(mc.gameDirectory,mc.getMainRenderTarget(),message->{});
    if(arbokScreenshotPending){
-    Screenshot.grab(mc.gameDirectory,"arbok-front.png",mc.getMainRenderTarget(),message->{});
+    Screenshot.grab(mc.gameDirectory,"arbok-front-"+locomotionState(renderedPhase)+".png",mc.getMainRenderTarget(),message->{});
     mc.options.hideGui=false;arbokScreenshotPending=false;
    }
    if(worldTicks>=SPECIES_START_TICK && worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW
        &&species.get((worldTicks-SPECIES_START_TICK)/SPECIES_TEST_WINDOW).equals("arbok")
-       &&(worldTicks-SPECIES_START_TICK)%SPECIES_TEST_WINDOW==20){
+       &&java.util.Set.of(5,20,73).contains((worldTicks-SPECIES_START_TICK)%SPECIES_TEST_WINDOW)){
     // One rendered frame later, this produces an unobstructed front view of
     // the cobra hood so the UV remap can be inspected in the client artifact.
     mc.options.hideGui=true;arbokScreenshotPending=true;

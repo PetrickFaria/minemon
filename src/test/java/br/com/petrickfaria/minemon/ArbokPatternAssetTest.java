@@ -31,13 +31,25 @@ public class ArbokPatternAssetTest {
   var texture=javax.imageio.ImageIO.read(root.resolve("textures/pokemon/arbok_cobblemon_1_8_2/arbok.png").toFile());
   assertEquals(128,texture.getWidth());assertEquals(128,texture.getHeight());
   var original=javax.imageio.ImageIO.read(root.resolve("textures/pokemon/arbok/arbok_pattern_classic.png").toFile());
-  var expected=original.getSubimage(95,44,32,20);
+  // Original hood: size 19x0x12, UV (77,52). Its underside starts at
+  // u + depth + width = 108. The old 32x20 crop mixed unrelated atlas faces.
+  var oldGeo=JsonParser.parseString(Files.readString(root.resolve("geo/arbok/arbok.geo.json")))
+      .getAsJsonObject().getAsJsonArray("minecraft:geometry").get(0).getAsJsonObject();
+  com.google.gson.JsonObject sourcePanel=null;
+  for(var bone:oldGeo.getAsJsonArray("bones"))if(bone.getAsJsonObject().get("name").getAsString().equals("hood"))
+   for(var cube:bone.getAsJsonObject().getAsJsonArray("cubes")){
+    var c=cube.getAsJsonObject();var size=c.getAsJsonArray("size");
+    if(size.get(0).getAsInt()==19&&size.get(1).getAsInt()==0&&size.get(2).getAsInt()==12)sourcePanel=c;
+   }
+  assertNotNull("Original hood panel determines the source pattern UV",sourcePanel);
+  var sourceUv=sourcePanel.getAsJsonArray("uv");var sourceSize=sourcePanel.getAsJsonArray("size");
+  int sourceX=sourceUv.get(0).getAsInt()+sourceSize.get(0).getAsInt()+sourceSize.get(2).getAsInt();
+  int sourceY=sourceUv.get(1).getAsInt();
+  assertEquals(108,sourceX);assertEquals(52,sourceY);
+  var expected=original.getSubimage(sourceX,sourceY,19,12);
   int marked=0;
   for(int y=0;y<12;y++)for(int x=0;x<19;x++){
-   // Match the Pillow NEAREST mapping used to prepare the atlas byte-for-byte;
-   // Java2D's nearest-neighbor scaler chooses different edge pixels.
-   int sx=(int)Math.floor((x+0.5)*32.0/19.0),sy=(int)Math.floor((y+0.5)*20.0/12.0);
-   int source=expected.getRGB(sx,sy);
+   int source=expected.getRGB(x,y);
    if((source>>>24)<254)continue;
    marked++;
    int actual=texture.getRGB(38+x,19+y);
