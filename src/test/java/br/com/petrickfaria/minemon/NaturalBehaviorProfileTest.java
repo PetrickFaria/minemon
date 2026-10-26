@@ -17,6 +17,8 @@ public final class NaturalBehaviorProfileTest {
     @Test public void airborneAndAquaticGroupsAreExplicitAndDoNotUseTypeLabels() {
         assertTrue(SpeciesBehaviorProfiles.canFly("gastly"));
         assertTrue(SpeciesBehaviorProfiles.isAirborne("gastly"));
+        assertFalse("Gastly is an air-cycle species that rests in hover",SpeciesBehaviorProfiles.landsForNightRest("gastly"));
+        assertTrue("Gastly must keep its one-block hover at night",SpeciesBehaviorProfiles.hoversDuringNightRest("gastly"));
         for(String slug:java.util.List.of("pidgey","pidgeotto","pidgeot"))
             assertTrue(slug+" runs its continuous daytime altitude cycle",SpeciesBehaviorProfiles.isAirborne(slug));
         assertTrue(SpeciesBehaviorProfiles.canFly("charizard"));

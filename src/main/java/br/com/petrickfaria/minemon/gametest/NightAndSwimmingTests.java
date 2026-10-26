@@ -18,8 +18,11 @@ import java.util.function.BooleanSupplier;
 public final class NightAndSwimmingTests {
  private static void check(GameTestHelper h,boolean ok,String why){if(!ok){h.getLevel().setDayTime(1000);h.fail(why);}}
  private static void await(GameTestHelper h,BooleanSupplier condition,Runnable next,int ticks,String why){
+  await(h,condition,next,ticks,()->why);
+ }
+ private static void await(GameTestHelper h,BooleanSupplier condition,Runnable next,int ticks,java.util.function.Supplier<String> why){
   if(condition.getAsBoolean()){next.run();return;}
-  if(ticks<=0){h.getLevel().setDayTime(1000);h.fail(why);return;}
+  if(ticks<=0){h.getLevel().setDayTime(1000);h.fail(why.get());return;}
   h.runAfterDelay(5,()->await(h,condition,next,ticks-5,why));
  }
  private static void awaitBottom(GameTestHelper h,MinemonCreature shellder,MinemonCreature krabby,
@@ -104,7 +107,7 @@ public final class NightAndSwimmingTests {
   var ground=spawn(h,"bulbasaur",3,1,3);
   var mixed=new ArrayList<MinemonCreature>();var air=new ArrayList<MinemonCreature>();
   int x=5;
-  var mixedSpecies=List.of("charizard","scyther","dragonite","pidgey","pidgeotto","pidgeot","zubat","golbat","venomoth","gastly","aerodactyl","mewtwo","mew","butterfree","beedrill","gengar");
+  var mixedSpecies=List.of("charizard","scyther","dragonite","pidgey","pidgeotto","pidgeot","zubat","golbat","venomoth","aerodactyl","mewtwo","mew","butterfree","beedrill","gengar");
   for(int i=0;i<mixedSpecies.size();i++){
    String slug=mixedSpecies.get(i);x=3+(i%5)*6;int z=5+(i/5)*5;
    var m=spawn(h,slug,x,7,z);
@@ -112,7 +115,7 @@ public final class NightAndSwimmingTests {
    tag.putString("NaturalBehaviorPhase","AIR");tag.putInt("NaturalBehaviorTicks",1234);m.readAdditionalSaveData(tag);mixed.add(m);
   }
   x=3;
-  for(String slug:List.of("spearow","fearow","koffing","weezing","magnemite","magneton","haunter","articuno","zapdos","moltres")){
+  for(String slug:List.of("spearow","fearow","gastly","koffing","weezing","magnemite","magneton","haunter","articuno","zapdos","moltres")){
    int airX=3+(air.size()%5)*6,airZ=4+(air.size()/5)*5;air.add(spawn(h,slug,airX,7,airZ));
   }
   h.runAfterDelay(5,()->{
@@ -141,7 +144,9 @@ public final class NightAndSwimmingTests {
       },180,"After combat, a creature must return to sleep while still night");
      },150,"Woken creature must physically retaliate using melee AI");
     });
-   },350,"Night must settle ground/mixed creatures on land and air-only creatures in a one-block hover");
+   },350,()->"Night must settle ground/mixed creatures on land and air-only creatures in a one-block hover; mixed="
+       +mixed.stream().map(m->m.getSpeciesSlug()+"{sleep="+m.isSleeping()+",ground="+m.isOnGround()+",night="+m.isNightResting()+",pos="+m.position()+",nav="+m.getNavigation().getTargetPos()+"}").toList()
+       +" air="+air.stream().map(m->m.getSpeciesSlug()+"{sleep="+m.isSleeping()+",ground="+m.isOnGround()+",night="+m.isNightResting()+",pos="+m.position()+"}").toList());
   });
  }
  @GameTest(template="test_arena",batch="night_eevee_line",timeoutTicks=2400)
