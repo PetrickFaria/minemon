@@ -371,7 +371,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         }
         if (!this.customSoundDayActive) {
             this.customSoundDayActive = true;
-            this.customSoundTicks = 20 + this.getRandom().nextInt(181);
+            this.customSoundTicks = 20 + this.customSoundRandom.nextInt(181);
             return;
         }
         if (this.customSoundTicks > 0) this.customSoundTicks--;
