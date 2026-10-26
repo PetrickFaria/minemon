@@ -80,7 +80,8 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     private int spontaneousRunTicks;
     private int spontaneousRunCooldown = 50 + this.getRandom().nextInt(100);
     private int spontaneousRunCount;
-    private int customSoundTicks = 1 + this.getRandom().nextInt(6000);
+    private int customSoundTicks;
+    private boolean customSoundDayActive;
     // Client-only diagnostic sample used by the automated locomotion smoke test.
     private String selectedAnimationForValidation;
     private String selectedTailFlameAnimationForValidation;
@@ -165,6 +166,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         tag.putInt("NaturalBehaviorTicks",this.naturalCycle.ticks());
         tag.putInt("NaturalAltitudeStage",this.naturalCycle.stage());
         tag.putInt("MinemonCustomSoundTicks", this.customSoundTicks);
+        tag.putBoolean("MinemonCustomSoundDayActive", this.customSoundDayActive);
     }
 
     @Override public void readAdditionalSaveData(CompoundTag tag) {
@@ -174,7 +176,12 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         this.wakeGraceTicks=tag.getInt("WakeGraceTicks");
         if(tag.contains("NaturalBehaviorStartDelay"))this.naturalStartDelay=Math.max(0,Math.min(29,tag.getInt("NaturalBehaviorStartDelay")));
         this.naturalCycle.restore(tag.getString("NaturalBehaviorPhase"),tag.getInt("NaturalBehaviorTicks"),tag.getInt("NaturalAltitudeStage"));
-        if (tag.contains("MinemonCustomSoundTicks")) this.customSoundTicks = Math.max(1, Math.min(6000, tag.getInt("MinemonCustomSoundTicks")));
+        if (tag.contains("MinemonCustomSoundTicks")) {
+            this.customSoundTicks = Math.max(0, Math.min(6000, tag.getInt("MinemonCustomSoundTicks")));
+            // Saves from before the day-only scheduler had a valid five-minute timer.
+            this.customSoundDayActive = tag.contains("MinemonCustomSoundDayActive")
+                    ? tag.getBoolean("MinemonCustomSoundDayActive") : this.customSoundTicks > 0;
+        }
         this.syncNaturalState();
     }
 
@@ -355,6 +362,16 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     /** Independent, persisted world-time counter. Unloaded chunks do not advance it. */
     private void tickCustomSoundTimer() {
         if (!this.isAlive() || this.isRemoved()) return;
+        if (!this.isCustomSoundDaytime()) {
+            this.customSoundDayActive = false;
+            this.customSoundTicks = 0;
+            return;
+        }
+        if (!this.customSoundDayActive) {
+            this.customSoundDayActive = true;
+            this.customSoundTicks = 20 + this.getRandom().nextInt(181);
+            return;
+        }
         if (this.customSoundTicks > 0) this.customSoundTicks--;
         if (this.customSoundTicks == 0) {
             br.com.petrickfaria.minemon.network.MinemonNetwork.playForTracking(this);
@@ -363,12 +380,23 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     }
 
     public void resetCustomSoundTimerAndPlay() {
+        if (!this.isCustomSoundDaytime()) return;
+        this.customSoundDayActive = true;
         this.customSoundTicks = 6000;
         br.com.petrickfaria.minemon.network.MinemonNetwork.playForTracking(this);
     }
 
+    /** Uses this world's daylight state, never the host computer clock. Dimensions without a day/night cycle stay eligible. */
+    public boolean isCustomSoundDaytime() {
+        return !this.level.dimensionType().hasSkyLight() || !this.level.isNight();
+    }
+
     public int customSoundTicksForValidation() { return this.customSoundTicks; }
-    public void setCustomSoundTicksForValidation(int ticks) { this.customSoundTicks = Math.max(1, Math.min(6000, ticks)); }
+    public void setCustomSoundTicksForValidation(int ticks) {
+        this.customSoundTicks = Math.max(0, Math.min(6000, ticks));
+        this.customSoundDayActive = ticks > 0;
+    }
+    public boolean customSoundDayActiveForValidation() { return this.customSoundDayActive; }
 
     private void tickNightRest(){
         if(this.wakeGraceTicks>0)this.wakeGraceTicks--;

@@ -64,7 +64,7 @@ public final class CustomCreatureAudio {
 
     public static void play(int entityId, UUID uuid) {
         Minecraft minecraft = Minecraft.getInstance();
-        if (minecraft.level == null) return;
+        if (!isDaytime(minecraft)) return;
         var entity = minecraft.level.getEntity(entityId);
         if (!(entity instanceof MinemonCreature creature) || !creature.getUUID().equals(uuid) || !creature.isAlive()) return;
         if (!REQUESTED.add(uuid)) return;
@@ -88,7 +88,8 @@ public final class CustomCreatureAudio {
                 Pcm pcm = decode(file);
                 minecraft.execute(() -> {
                     var current = minecraft.level == null ? null : minecraft.level.getEntity(entityId);
-                    if (!(current instanceof MinemonCreature live) || !live.getUUID().equals(uuid) || !live.isAlive()) {
+                    if (!(current instanceof MinemonCreature live) || !live.getUUID().equals(uuid) || !live.isAlive()
+                            || !isDaytime(minecraft)) {
                         MemoryUtil.memFree(pcm.bytes);
                         RESERVED.decrementAndGet();
                         REQUESTED.remove(uuid);
@@ -118,9 +119,10 @@ public final class CustomCreatureAudio {
     public static void clientTick(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.END || ACTIVE.isEmpty()) return;
         Minecraft minecraft = Minecraft.getInstance();
+        boolean daytime = isDaytime(minecraft);
         for (Playback playback : List.copyOf(ACTIVE)) {
             var entity = minecraft.level == null ? null : minecraft.level.getEntity(playback.entityId);
-            if (!(entity instanceof MinemonCreature creature) || !creature.getUUID().equals(playback.uuid) || !creature.isAlive()) {
+            if (!daytime || !(entity instanceof MinemonCreature creature) || !creature.getUUID().equals(playback.uuid) || !creature.isAlive()) {
                 if (!playback.stopping) {
                     playback.stopping = true;
                     if (!executeAudio(() -> stop(playback))) playback.finished = true;
@@ -137,6 +139,11 @@ public final class CustomCreatureAudio {
                 REQUESTED.remove(playback.uuid);
             }
         }
+    }
+
+    private static boolean isDaytime(Minecraft minecraft) {
+        return minecraft.level != null
+                && (!minecraft.level.dimensionType().hasSkyLight() || !minecraft.level.isNight());
     }
 
     static Pcm decode(Path file) throws Exception {

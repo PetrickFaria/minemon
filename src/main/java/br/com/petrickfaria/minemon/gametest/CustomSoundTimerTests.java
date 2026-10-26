@@ -31,24 +31,52 @@ public final class CustomSoundTimerTests {
         } catch (Exception failure) { helper.fail("folder setup failed: " + failure); }
     }
 
-    @GameTest(template = "test_arena", timeoutTicks = 30)
-    public static void independentTimersContinueDuringSleepAndClickResets(GameTestHelper helper) {
+    @GameTest(template = "test_arena", timeoutTicks = 260)
+    public static void timersAreDayOnlyAndEachDawnGetsIndependentDelay(GameTestHelper helper) {
         for (int x = 0; x < 16; x++) for (int z = 0; z < 16; z++) {
             helper.setBlock(new BlockPos(x, 3, z), Blocks.STONE);
             for (int y = 4; y <= 8; y++) helper.setBlock(new BlockPos(x, y, z), Blocks.AIR);
         }
+        helper.getLevel().setDayTime(1000);
         MinemonCreature first = helper.spawn(ModEntities.BULBASAUR.get(), new BlockPos(5, 4, 5));
-        MinemonCreature second = helper.spawn(ModEntities.SPECIES.get("pikachu").get(), new BlockPos(8, 4, 5));
-        first.setCustomSoundTicksForValidation(1);
-        second.setCustomSoundTicksForValidation(100);
+        MinemonCreature second = helper.spawn(ModEntities.BULBASAUR.get(), new BlockPos(8, 4, 5));
         first.setSleeping(true);
         helper.runAfterDelay(2, () -> {
-            if (first.customSoundTicksForValidation() > 6000 || first.customSoundTicksForValidation() < 5998) helper.fail("first timer should emit and restart while asleep");
-            if (second.customSoundTicksForValidation() > 99 || second.customSoundTicksForValidation() <= 0)
-                helper.fail("second entity timer must advance independently");
+            int firstDelay = first.customSoundTicksForValidation();
+            int secondDelay = second.customSoundTicksForValidation();
+            if (firstDelay < 18 || firstDelay > 200 || secondDelay < 18 || secondDelay > 200)
+                helper.fail("entities loaded during daytime need independent 20..200 tick dawn delays");
+            if (!first.customSoundDayActiveForValidation() || !second.customSoundDayActiveForValidation())
+                helper.fail("daytime entities must have an active scheduler, including sleeping Pokémon");
+
             second.resetCustomSoundTimerAndPlay();
-            if (second.customSoundTicksForValidation() != 6000) helper.fail("click trigger must restart the five minute timer");
-            helper.succeed();
+            if (second.customSoundTicksForValidation() != 6000) helper.fail("daytime click must cancel the dawn delay and restart five minutes");
+            helper.runAfterDelay(201, () -> {
+                if (first.customSoundTicksForValidation() < 5790 || first.customSoundTicksForValidation() > 6000
+                        || second.customSoundTicksForValidation() < 5790 || second.customSoundTicksForValidation() > 6000)
+                    helper.fail("first dawn playback and daytime click must each start a fresh five-minute timer");
+                helper.getLevel().setDayTime(18000);
+                MinemonCreature loadedAtNight = helper.spawn(ModEntities.SPECIES.get("pikachu").get(), new BlockPos(11, 4, 5));
+                helper.runAfterDelay(2, () -> {
+                    if (first.customSoundTicksForValidation() != 0 || second.customSoundTicksForValidation() != 0)
+                        helper.fail("night must suspend and discard both pending timers");
+                    if (loadedAtNight.customSoundTicksForValidation() != 0 || loadedAtNight.customSoundDayActiveForValidation())
+                        helper.fail("entities loaded during night must not schedule custom sounds");
+                    second.resetCustomSoundTimerAndPlay();
+                    if (second.customSoundTicksForValidation() != 0)
+                        helper.fail("nighttime click must not schedule or play custom audio");
+
+                    helper.getLevel().setDayTime(1000);
+                    helper.runAfterDelay(2, () -> {
+                        if (first.customSoundTicksForValidation() < 18 || first.customSoundTicksForValidation() > 200
+                                || second.customSoundTicksForValidation() < 18 || second.customSoundTicksForValidation() > 200
+                                || loadedAtNight.customSoundTicksForValidation() < 18 || loadedAtNight.customSoundTicksForValidation() > 200)
+                            helper.fail("dawn after night must schedule fresh randomized delays");
+                        if (!first.isSleeping()) helper.fail("sound scheduling must not wake a sleeping Pokémon");
+                        helper.succeed();
+                    });
+                });
+            });
         });
     }
 
