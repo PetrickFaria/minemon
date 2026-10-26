@@ -64,7 +64,7 @@ public final class ClientSmokeTest {
   if(!running&&(sourcePoseTransition(slug)||slug.equals("fearow")
       ||definition!=null&&("static".equals(definition.movementFallback())||"idle".equals(definition.movementFallback()))))return true;
   Integer first=(running?steadyRunFirstTick:steadyWalkFirstTick).get(slug),last=lastRenderedEntityTick.get(slug);
-  return first!=null&&last!=null&&last-first>=40;
+  return first!=null&&last!=null&&last-first>=(slug.equals("gengar")?120:40);
  }
  private static boolean finalIdleObserved(String slug) {
   if(sourceStaticIdle(slug)||sourcePoseTransition(slug)||slug.equals("fearow"))return true;
@@ -73,7 +73,7 @@ public final class ClientSmokeTest {
   Integer first=finalIdleFirstTick.get(slug),last=lastRenderedEntityTick.get(slug);
   // Keep every threshold; collect enough real idle time for slow native
   // breathing. Rhyhorn's original idle is a four-second cycle.
-  int required=slug.equals("rhyhorn")?80:40;
+  int required=slug.equals("gengar")?160:slug.equals("rhyhorn")?80:40;
   return first!=null&&last!=null&&last-first>=required;
  }
  private static boolean clipHasSettled(String slug) {
@@ -726,7 +726,9 @@ public final class ClientSmokeTest {
    return !java.util.Set.of("fearow","articuno","zapdos","moltres").contains(slug)&&ADDITIONAL_PROFILES.getOrDefault(slug,java.util.Map.of()).containsKey("idle_static");
   }
   private static boolean sourcePoseTransition(String slug) {
-   return !java.util.Set.of("fearow","articuno","zapdos","moltres").contains(slug)&&ADDITIONAL_PROFILES.getOrDefault(slug,java.util.Map.of()).containsKey("pose_transition");
+   // Gengar now has a generated body/tail oscillation over its retained poses.
+   // Require temporal articulation and observe a complete slow float cycle.
+   return !java.util.Set.of("gengar","fearow","articuno","zapdos","moltres").contains(slug)&&ADDITIONAL_PROFILES.getOrDefault(slug,java.util.Map.of()).containsKey("pose_transition");
   }
   private static int validateSourcePoseTransition(String slug,String idleState,String movementState) {
    var profile=ADDITIONAL_PROFILES.getOrDefault(slug,java.util.Map.of()).get("pose_transition");
