@@ -9,7 +9,7 @@ public final class SpeciesBehaviorProfiles {
  private static final Set<String> BOTTOM_PREFERENCE=Set.of("shellder","staryu","starmie","krabby","kingler","omanyte","omastar","kabuto");
  private static final Set<String> BOTTOM_NIGHT_REST=Set.of("gyarados","cloyster");
  private static final Set<String> LAND_FOR_NIGHT_REST=Set.of("butterfree","beedrill","gengar",
-     "spearow","fearow","articuno","zapdos","moltres");
+     "spearow","fearow","articuno","zapdos","moltres","pidgey","pidgeotto","pidgeot");
  static {
   assign(Profile.GROUND, "bulbasaur,ivysaur,venusaur,charmander,charmeleon,caterpie,metapod,weedle,kakuna,rattata,raticate,ekans,arbok,pikachu,raichu,sandshrew,sandslash,nidoranf,nidorina,nidoqueen,nidoranm,nidorino,nidoking,clefairy,clefable,vulpix,ninetales,jigglypuff,wigglytuff,oddish,gloom,vileplume,paras,parasect,venonat,diglett,dugtrio,meowth,persian,mankey,primeape,growlithe,arcanine,abra,kadabra,alakazam,machop,machoke,machamp,bellsprout,weepinbell,victreebel,geodude,graveler,golem,ponyta,rapidash,farfetchd,doduo,dodrio,grimer,muk,onix,drowzee,hypno,voltorb,electrode,exeggcute,exeggutor,cubone,marowak,hitmonlee,hitmonchan,lickitung,rhyhorn,rhydon,chansey,tangela,kangaskhan,mrmime,jynx,electabuzz,magmar,pinsir,tauros,ditto,eevee,jolteon,flareon,porygon,snorlax");
   assign(Profile.ALTITUDE_CYCLE, "butterfree,beedrill,spearow,fearow,magnemite,magneton,haunter,gengar,koffing,weezing,articuno,zapdos,moltres,pidgey,pidgeotto,pidgeot,gastly");

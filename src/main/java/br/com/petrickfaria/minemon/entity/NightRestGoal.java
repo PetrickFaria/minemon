@@ -8,10 +8,13 @@ import net.minecraft.util.Mth;
 final class NightRestGoal extends Goal {
  private final MinemonCreature mob;
  NightRestGoal(MinemonCreature mob){this.mob=mob;setFlags(EnumSet.of(Flag.MOVE,Flag.LOOK,Flag.JUMP));}
- @Override public boolean canUse(){return (mob.isSleeping()||mob.isNightResting())
-     &&(SpeciesBehaviorProfiles.isAirborne(mob.getSpeciesSlug())||mob.isOnGround()
-         ||mob.wantsNaturalLanding()
-         ||SpeciesBehaviorProfiles.waterCapable(mob.getSpeciesSlug())&&mob.isInWaterOrBubble());}
+ @Override public boolean canUse(){
+  boolean resting=mob.isSleeping()||mob.isNightResting();
+  boolean waterRest=SpeciesBehaviorProfiles.waterCapable(mob.getSpeciesSlug())&&mob.isInWaterOrBubble();
+  // Let SleepLanding own MOVE while a land-resting flyer is still airborne.
+  // A resting airborne species that never lands remains eligible to hover.
+  return resting&&(waterRest||mob.isOnGround()||!mob.wantsNaturalLanding());
+ }
  @Override public boolean canContinueToUse(){return canUse()&&mob.getTarget()==null;}
  @Override public void start(){mob.getNavigation().stop();}
  @Override public void tick(){
