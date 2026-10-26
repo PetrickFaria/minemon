@@ -202,8 +202,17 @@ def validate(read,definitions,prepared=False,packed=False):
    if any('math.sin' not in json.dumps(air.get(name,{}).get('rotation')) for name in wings):
     raise ValueError('Flight clip must flap every retained wing segment: '+d['slug'])
    if d['slug']=='fearow':
-    if air.get('body',{}).get('rotation',[0])[0]!=-22 or air.get('head',{}).get('rotation',[0])[0]!=5:
-     raise ValueError('Fearow flight posture must lift its head above the original down-tilted air pose')
+    if air.get('body',{}).get('rotation',[0])[0]!=-22:
+     raise ValueError('Fearow flight must preserve its approved body posture')
+    # Verify the actual inherited orientation rather than the obsolete local
+    # head angle (5), which discarded the head's -90-degree model bind pose.
+    chain=('body','torso','chest','neck','neck_2','neck3','head')
+    bind={b['name']:b.get('rotation',[0,0,0])[0] for part in g['minecraft:geometry'] for b in part['bones']}
+    def effective_pitch(channels):
+     return -sum(bind.get(name,0)+channels.get(name,{}).get('rotation',[0,0,0])[0] for name in chain)
+    night=a.get('animation.fearow.minemon_night_sleep',{}).get('bones',{})
+    if not night or abs(effective_pitch(air)-7.5)>.0001 or abs(effective_pitch(night)+140.5)>.0001:
+     raise ValueError('Fearow must swap the effective old night/day head orientations, including neck and bind rotations')
     if air.get('leg_left',{}).get('rotation',[0,0,0])[2]!=-5 or air.get('leg_right',{}).get('rotation',[0,0,0])[2]!=5:
      raise ValueError('Fearow flight posture must keep its feet aligned downward')
   if prepared and d['slug'] in ('articuno','zapdos','moltres'):
