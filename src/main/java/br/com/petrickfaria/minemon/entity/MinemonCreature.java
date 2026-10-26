@@ -375,15 +375,20 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         if (this.customSoundTicks > 0) this.customSoundTicks--;
         if (this.customSoundTicks == 0) {
             br.com.petrickfaria.minemon.network.MinemonNetwork.playForTracking(this);
-            this.customSoundTicks = 6000;
+            this.customSoundTicks = this.nextCustomSoundInterval();
         }
     }
 
     public void resetCustomSoundTimerAndPlay() {
         if (!this.isCustomSoundDaytime()) return;
         this.customSoundDayActive = true;
-        this.customSoundTicks = 6000;
+        this.customSoundTicks = this.nextCustomSoundInterval();
         br.com.petrickfaria.minemon.network.MinemonNetwork.playForTracking(this);
+    }
+
+    /** Returns an independent 3–5 minute interval, inclusive, for this entity. */
+    private int nextCustomSoundInterval() {
+        return 3600 + this.getRandom().nextInt(2401);
     }
 
     /** Uses this world's daylight state, never the host computer clock. Dimensions without a day/night cycle stay eligible. */

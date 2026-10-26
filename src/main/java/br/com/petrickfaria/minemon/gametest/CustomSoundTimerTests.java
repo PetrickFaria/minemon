@@ -31,8 +31,8 @@ public final class CustomSoundTimerTests {
         } catch (Exception failure) { helper.fail("folder setup failed: " + failure); }
     }
 
-    @GameTest(template = "test_arena", timeoutTicks = 260)
-    public static void timersAreDayOnlyAndEachDawnGetsIndependentDelay(GameTestHelper helper) {
+    @GameTest(template = "test_arena", timeoutTicks = 30)
+    public static void customSoundIntervalsStayBetweenThreeAndFiveMinutes(GameTestHelper helper) {
         for (int x = 0; x < 16; x++) for (int z = 0; z < 16; z++) {
             helper.setBlock(new BlockPos(x, 3, z), Blocks.STONE);
             for (int y = 4; y <= 8; y++) helper.setBlock(new BlockPos(x, y, z), Blocks.AIR);
@@ -52,35 +52,49 @@ public final class CustomSoundTimerTests {
             first.setSleeping(true);
             first.resetCustomSoundTimerAndPlay();
             if (!first.isSleeping()) helper.fail("custom playback must not wake an already sleeping Pokémon");
-            if (first.customSoundTicksForValidation() != 6000) helper.fail("daytime playback must restart five minutes");
-            second.resetCustomSoundTimerAndPlay();
-            if (second.customSoundTicksForValidation() != 6000) helper.fail("daytime click must cancel the dawn delay and restart five minutes");
-            helper.runAfterDelay(201, () -> {
-                if (first.customSoundTicksForValidation() < 5790 || first.customSoundTicksForValidation() > 6000
-                        || second.customSoundTicksForValidation() < 5790 || second.customSoundTicksForValidation() > 6000)
-                    helper.fail("first dawn playback and daytime click must each start a fresh five-minute timer");
-                helper.getLevel().setDayTime(18000);
-                MinemonCreature loadedAtNight = helper.spawn(ModEntities.SPECIES.get("pikachu").get(), new BlockPos(11, 4, 5));
-                helper.runAfterDelay(2, () -> {
-                    if (first.customSoundTicksForValidation() != 0 || second.customSoundTicksForValidation() != 0)
-                        helper.fail("night must suspend and discard both pending timers");
-                    if (loadedAtNight.customSoundTicksForValidation() != 0 || loadedAtNight.customSoundDayActiveForValidation())
-                        helper.fail("entities loaded during night must not schedule custom sounds");
-                    second.resetCustomSoundTimerAndPlay();
-                    if (second.customSoundTicksForValidation() != 0)
-                        helper.fail("nighttime click must not schedule or play custom audio");
+            if (!withinThreeToFiveMinutes(first.customSoundTicksForValidation()))
+                helper.fail("daytime click must cancel the dawn delay and choose 3600..6000 ticks");
+            second.setCustomSoundTicksForValidation(1);
+            helper.runAfterDelay(2, () -> {
+                if (!withinIntervalAfterTwoTicks(first.customSoundTicksForValidation())
+                        || !withinIntervalAfterTwoTicks(second.customSoundTicksForValidation()))
+                    helper.fail("automatic playback and interaction reset must leave timers in the 3600..6000 tick range");
 
-                    helper.getLevel().setDayTime(1000);
+                second.setCustomSoundTicksForValidation(1);
+                helper.runAfterDelay(2, () -> {
+                    if (!withinIntervalAfterTwoTicks(second.customSoundTicksForValidation()))
+                        helper.fail("a new 3..5 minute interval must be selected after every automatic playback");
+                    helper.getLevel().setDayTime(18000);
+                    MinemonCreature loadedAtNight = helper.spawn(ModEntities.SPECIES.get("pikachu").get(), new BlockPos(11, 4, 5));
                     helper.runAfterDelay(2, () -> {
-                        if (first.customSoundTicksForValidation() < 18 || first.customSoundTicksForValidation() > 200
-                                || second.customSoundTicksForValidation() < 18 || second.customSoundTicksForValidation() > 200
-                                || loadedAtNight.customSoundTicksForValidation() < 18 || loadedAtNight.customSoundTicksForValidation() > 200)
-                            helper.fail("dawn after night must schedule fresh randomized delays");
-                        helper.succeed();
+                        if (first.customSoundTicksForValidation() != 0 || second.customSoundTicksForValidation() != 0)
+                            helper.fail("night must suspend and discard both pending timers");
+                        if (loadedAtNight.customSoundTicksForValidation() != 0 || loadedAtNight.customSoundDayActiveForValidation())
+                            helper.fail("entities loaded during night must not schedule custom sounds");
+                        second.resetCustomSoundTimerAndPlay();
+                        if (second.customSoundTicksForValidation() != 0)
+                            helper.fail("nighttime click must not schedule or play custom audio");
+
+                        helper.getLevel().setDayTime(1000);
+                        helper.runAfterDelay(2, () -> {
+                            if (first.customSoundTicksForValidation() < 18 || first.customSoundTicksForValidation() > 200
+                                    || second.customSoundTicksForValidation() < 18 || second.customSoundTicksForValidation() > 200
+                                    || loadedAtNight.customSoundTicksForValidation() < 18 || loadedAtNight.customSoundTicksForValidation() > 200)
+                                helper.fail("dawn after night must schedule fresh randomized delays");
+                            helper.succeed();
+                        });
                     });
                 });
             });
         });
+    }
+
+    private static boolean withinThreeToFiveMinutes(int ticks) {
+        return ticks >= 3600 && ticks <= 6000;
+    }
+
+    private static boolean withinIntervalAfterTwoTicks(int ticks) {
+        return ticks >= 3598 && ticks <= 6000;
     }
 
     private CustomSoundTimerTests() {}
