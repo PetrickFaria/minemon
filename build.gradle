@@ -102,6 +102,9 @@ dependencies {
     library(group: 'javazoom', name: 'jlayer', version: '1.0.1') {
         jarJar.pin(it, '1.0.1')
     }
+    jarJar(group: 'javazoom', name: 'jlayer', version: '1.0.1') {
+        jarJar.pin(it, '1.0.1')
+    }
     def osName = System.getProperty('os.name').toLowerCase(Locale.ROOT)
     def osArch = System.getProperty('os.arch').toLowerCase(Locale.ROOT)
     def lwjglNatives = osName.contains('win') ? 'natives-windows'
