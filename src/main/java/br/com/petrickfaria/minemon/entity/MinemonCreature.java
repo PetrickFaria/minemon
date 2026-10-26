@@ -30,6 +30,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.RandomSource;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -82,6 +83,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     private int spontaneousRunCount;
     private int customSoundTicks;
     private boolean customSoundDayActive;
+    private final RandomSource customSoundRandom = RandomSource.create();
     // Client-only diagnostic sample used by the automated locomotion smoke test.
     private String selectedAnimationForValidation;
     private String selectedTailFlameAnimationForValidation;
@@ -388,7 +390,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
 
     /** Returns an independent 3–5 minute interval, inclusive, for this entity. */
     private int nextCustomSoundInterval() {
-        return 3600 + this.getRandom().nextInt(2401);
+        return 3600 + this.customSoundRandom.nextInt(2401);
     }
 
     /** Uses this world's daylight state, never the host computer clock. Dimensions without a day/night cycle stay eligible. */
