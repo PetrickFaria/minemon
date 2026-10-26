@@ -35,7 +35,6 @@ import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Executor;
@@ -58,7 +57,7 @@ public final class CustomCreatureAudio {
     }, new ThreadPoolExecutor.AbortPolicy());
     private static final AtomicInteger RESERVED = new AtomicInteger();
     private static final List<Playback> ACTIVE = new ArrayList<>();
-    private static final Set<UUID> REQUESTED = java.util.concurrent.ConcurrentHashMap.newKeySet();
+    private static final java.util.concurrent.ConcurrentHashMap<UUID, java.util.concurrent.atomic.AtomicBoolean> REQUESTED = new java.util.concurrent.ConcurrentHashMap<>();
     private static volatile Executor audioExecutor;
     private static volatile UUID lastStartedEntity;
 
@@ -67,19 +66,19 @@ public final class CustomCreatureAudio {
         if (!isDaytime(minecraft)) return;
         var entity = minecraft.level.getEntity(entityId);
         if (!(entity instanceof MinemonCreature creature) || !creature.getUUID().equals(uuid) || !creature.isAlive()) return;
-        if (!REQUESTED.add(uuid)) return;
+        var cancelled = new java.util.concurrent.atomic.AtomicBoolean(false);
+        if (REQUESTED.putIfAbsent(uuid, cancelled) != null) return;
         if (RESERVED.incrementAndGet() > MAX_ACTIVE) {
             RESERVED.decrementAndGet();
-            REQUESTED.remove(uuid);
+            REQUESTED.remove(uuid, cancelled);
             return;
         }
         Path file;
         try {
             file = CustomSoundFolders.findAudio(creature.getSpeciesSlug());
-            if (file == null) { RESERVED.decrementAndGet(); REQUESTED.remove(uuid); return; }
+            if (file == null) { releaseRequest(uuid, cancelled); return; }
         } catch (Exception exception) {
-            RESERVED.decrementAndGet();
-            REQUESTED.remove(uuid);
+            releaseRequest(uuid, cancelled);
             LOGGER.warn("Could not inspect custom audio for {}", creature.getSpeciesSlug(), exception);
             return;
         }
@@ -89,13 +88,12 @@ public final class CustomCreatureAudio {
                 minecraft.execute(() -> {
                     var current = minecraft.level == null ? null : minecraft.level.getEntity(entityId);
                     if (!(current instanceof MinemonCreature live) || !live.getUUID().equals(uuid) || !live.isAlive()
-                            || !isDaytime(minecraft)) {
+                            || cancelled.get() || !isDaytime(minecraft)) {
                         MemoryUtil.memFree(pcm.bytes);
-                        RESERVED.decrementAndGet();
-                        REQUESTED.remove(uuid);
+                        releaseRequest(uuid, cancelled);
                         return;
                     }
-                    Playback playback = new Playback(entityId, uuid, pcm, live.getX(), live.getY() + live.getBbHeight() * 0.5, live.getZ());
+                    Playback playback = new Playback(entityId, uuid, cancelled, pcm, live.getX(), live.getY() + live.getBbHeight() * 0.5, live.getZ());
                     ACTIVE.add(playback);
                     if (!executeAudio(() -> start(playback))) {
                         MemoryUtil.memFree(pcm.bytes);
@@ -103,13 +101,11 @@ public final class CustomCreatureAudio {
                     }
                 });
             } catch (Exception exception) {
-                RESERVED.decrementAndGet();
-                REQUESTED.remove(uuid);
+                releaseRequest(uuid, cancelled);
                 LOGGER.warn("Rejected custom audio file {}: {}", file, exception.getMessage());
             }
         }); } catch (java.util.concurrent.RejectedExecutionException full) {
-            RESERVED.decrementAndGet();
-            REQUESTED.remove(uuid);
+            releaseRequest(uuid, cancelled);
         }
     }
 
@@ -117,12 +113,20 @@ public final class CustomCreatureAudio {
 
     @SubscribeEvent
     public static void clientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || ACTIVE.isEmpty()) return;
+        if (event.phase != TickEvent.Phase.END) return;
         Minecraft minecraft = Minecraft.getInstance();
         boolean daytime = isDaytime(minecraft);
+        if (!daytime) {
+            REQUESTED.forEach((uuid, cancelled) -> {
+                cancelled.set(true);
+                REQUESTED.remove(uuid, cancelled);
+            });
+        }
+        if (ACTIVE.isEmpty()) return;
         for (Playback playback : List.copyOf(ACTIVE)) {
             var entity = minecraft.level == null ? null : minecraft.level.getEntity(playback.entityId);
             if (!daytime || !(entity instanceof MinemonCreature creature) || !creature.getUUID().equals(playback.uuid) || !creature.isAlive()) {
+                playback.cancelled.set(true);
                 if (!playback.stopping) {
                     playback.stopping = true;
                     if (!executeAudio(() -> stop(playback))) playback.finished = true;
@@ -136,9 +140,14 @@ public final class CustomCreatureAudio {
             if (playback.finished) {
                 ACTIVE.remove(playback);
                 RESERVED.decrementAndGet();
-                REQUESTED.remove(playback.uuid);
+                REQUESTED.remove(playback.uuid, playback.cancelled);
             }
         }
+    }
+
+    private static void releaseRequest(UUID uuid, java.util.concurrent.atomic.AtomicBoolean cancelled) {
+        REQUESTED.remove(uuid, cancelled);
+        RESERVED.decrementAndGet();
     }
 
     private static boolean isDaytime(Minecraft minecraft) {
@@ -268,6 +277,7 @@ public final class CustomCreatureAudio {
 
     private static void start(Playback playback) {
         try {
+            if (playback.cancelled.get()) { playback.finished = true; return; }
             int buffer = AL10.alGenBuffers();
             int source = AL10.alGenSources();
             playback.buffer = buffer; playback.source = source;
@@ -331,10 +341,10 @@ public final class CustomCreatureAudio {
 
     record Pcm(ByteBuffer bytes, int sampleRate, int channels) {}
     private static final class Playback {
-        final int entityId; final UUID uuid; final Pcm pcm; final double x, y, z;
+        final int entityId; final UUID uuid; final java.util.concurrent.atomic.AtomicBoolean cancelled; final Pcm pcm; final double x, y, z;
         volatile int source, buffer;
         volatile boolean finished, stopping;
-        Playback(int entityId, UUID uuid, Pcm pcm, double x, double y, double z) { this.entityId = entityId; this.uuid = uuid; this.pcm = pcm; this.x=x; this.y=y; this.z=z; }
+        Playback(int entityId, UUID uuid, java.util.concurrent.atomic.AtomicBoolean cancelled, Pcm pcm, double x, double y, double z) { this.entityId = entityId; this.uuid = uuid; this.cancelled = cancelled; this.pcm = pcm; this.x=x; this.y=y; this.z=z; }
     }
 
     private CustomCreatureAudio() {}
