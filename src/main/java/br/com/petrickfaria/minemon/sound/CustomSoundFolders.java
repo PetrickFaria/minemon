@@ -63,19 +63,19 @@ public final class CustomSoundFolders {
     }
 
     public static Path selectAudio(Path root, Path directory) throws IOException {
-        root = root.normalize();
-        directory = directory.normalize();
-        if (Files.isSymbolicLink(root) || Files.isSymbolicLink(directory) || !directory.startsWith(root)
-                || !Files.isDirectory(root, java.nio.file.LinkOption.NOFOLLOW_LINKS)
-                || !Files.isDirectory(directory, java.nio.file.LinkOption.NOFOLLOW_LINKS)) return null;
+        Path normalizedRoot = root.normalize();
+        Path normalizedDirectory = directory.normalize();
+        if (Files.isSymbolicLink(normalizedRoot) || Files.isSymbolicLink(normalizedDirectory) || !normalizedDirectory.startsWith(normalizedRoot)
+                || !Files.isDirectory(normalizedRoot, java.nio.file.LinkOption.NOFOLLOW_LINKS)
+                || !Files.isDirectory(normalizedDirectory, java.nio.file.LinkOption.NOFOLLOW_LINKS)) return null;
         for (String extension : new String[]{".ogg", ".mp3"}) {
-            try (Stream<Path> paths = Files.list(directory)) {
-                Path selected = paths.filter(path -> path.getParent().equals(directory))
+            try (Stream<Path> paths = Files.list(normalizedDirectory)) {
+                Path selected = paths.filter(path -> path.getParent().equals(normalizedDirectory))
                         .filter(path -> Files.isRegularFile(path, java.nio.file.LinkOption.NOFOLLOW_LINKS))
                         .filter(path -> path.getFileName().toString().toLowerCase(Locale.ROOT).endsWith(extension))
                         .sorted(Comparator.comparing(path -> path.getFileName().toString().toLowerCase(Locale.ROOT)))
                         .findFirst().orElse(null);
-                if (selected != null && selected.normalize().startsWith(directory)) return selected;
+                if (selected != null && selected.normalize().startsWith(normalizedDirectory)) return selected;
             }
         }
         return null;
