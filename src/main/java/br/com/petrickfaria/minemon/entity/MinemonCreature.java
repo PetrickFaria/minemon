@@ -89,7 +89,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         if(!this.isAquaticSpecies())this.lookControl=new net.minecraft.world.entity.ai.control.LookControl(this){
             @Override protected boolean resetXRotOnTick(){return !MinemonCreature.this.isInWater()||MinemonCreature.this.getNavigation().isDone();}
         };
-        this.naturalCycle = new BehaviorCycle(SpeciesBehaviorProfiles.profile(this.getSpeciesSlug()));
+        this.naturalCycle = new BehaviorCycle(SpeciesBehaviorProfiles.profile(this.getSpeciesSlug()),this.getSpeciesSlug());
         this.naturalStartDelay=this.getRandom().nextInt(30);
         if(!this.isAquaticSpecies()&&!SpeciesBehaviorProfiles.canFly(this.getSpeciesSlug())){
             this.moveControl=new WaterAwareMoveControl(this);
@@ -313,7 +313,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
                     this.smokeParticles++;
                 }
             }
-            if (this.getSpeciesSlug().equals("gastly") && !this.isSleeping() && !this.isOrderedToSit()
+            if (this.getSpeciesSlug().equals("gastly") && !this.isOrderedToSit()
                     && !this.isDeadOrDying() && this.attackAnimationTicks <= 0) {
                 // Cobblemon ground_idle/ground_walk each emit ghostly_smoke
                 // twice at locator `gas`, with two 10 particles/s emitters.

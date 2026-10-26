@@ -48,12 +48,13 @@ public final class NightAndSwimmingTests {
   arena(h);var level=h.getLevel();
   for(int x=2;x<=15;x++)for(int z=3;z<=10;z++)for(int y=1;y<=9;y++)h.setBlock(new BlockPos(x,y,z),Blocks.WATER);
   level.setDayTime(18000);
-  var gyarados=spawn(h,"gyarados",4,3,6);var magikarp=spawn(h,"magikarp",8,4,6);var dratini=spawn(h,"dratini",12,6,6);var shellder=spawn(h,"shellder",5,8,9);var vaporeon=spawn(h,"vaporeon",14,7,6);
-  await(h,()->gyarados.isSleeping()&&magikarp.isSleeping()&&dratini.isSleeping()&&shellder.isSleeping()&&vaporeon.isSleeping(),()->{
-   check(h,gyarados.isInWater()&&magikarp.isInWater()&&dratini.isInWater()&&shellder.isInWater()&&vaporeon.isInWater(),"Aquatic and visitor sleepers must stay wet");
-   double gyaradosY=WaterMovementGoal.waterRestY(gyarados),fishY=WaterMovementGoal.waterRestY(magikarp),visitorY=WaterMovementGoal.waterRestY(dratini);
+  var gyarados=spawn(h,"gyarados",4,3,6);var magikarp=spawn(h,"magikarp",8,4,6);var dratini=spawn(h,"dratini",12,6,6);var shellder=spawn(h,"shellder",5,8,9);var vaporeon=spawn(h,"vaporeon",14,7,6);var cloyster=spawn(h,"cloyster",10,7,9);
+  await(h,()->gyarados.isSleeping()&&magikarp.isSleeping()&&dratini.isSleeping()&&shellder.isSleeping()&&vaporeon.isSleeping()&&cloyster.isSleeping(),()->{
+   check(h,gyarados.isInWater()&&magikarp.isInWater()&&dratini.isInWater()&&shellder.isInWater()&&vaporeon.isInWater()&&cloyster.isInWater(),"Aquatic and visitor sleepers must stay wet");
+   double gyaradosY=WaterMovementGoal.waterRestY(gyarados),fishY=WaterMovementGoal.waterRestY(magikarp),visitorY=WaterMovementGoal.waterRestY(dratini),cloysterY=WaterMovementGoal.waterRestY(cloyster);
    double shellderY=WaterMovementGoal.waterRestY(shellder),originY=h.absolutePos(BlockPos.ZERO).getY();
-   check(h,Math.abs(gyarados.getY()-gyaradosY)<.2D,"Gyarados must preserve its preferred water surface while asleep");
+   check(h,Math.abs(gyarados.getY()-gyaradosY)<.2D&&gyarados.getY()-originY<2.5D,"Gyarados must rest at the safe water bottom at night");
+   check(h,Math.abs(cloyster.getY()-cloysterY)<.2D&&cloyster.getY()-originY<2.5D,"Cloyster must rest at the safe water bottom at night");
    check(h,Math.abs(magikarp.getY()-fishY)<.2D,"Permanent submerged species must float at a safe, fully wet depth");
    check(h,Math.abs(dratini.getY()-visitorY)<.2D&&dratini.getY()-originY<2.5D,"A water visitor caught in water at night must settle at the bottom");
    check(h,Math.abs(shellder.getY()-shellderY)<.2D&&shellder.getY()-originY>=1.0D&&shellder.getY()-originY<2.5D,
@@ -65,7 +66,7 @@ public final class NightAndSwimmingTests {
    await(h,()->attacker.getHealth()<health,()->{
     attacker.discard();await(h,dratini::isSleeping,()->{
      level.setDayTime(1000);
-      await(h,()->!gyarados.isSleeping()&&!magikarp.isSleeping()&&!dratini.isSleeping()&&!shellder.isSleeping()&&!vaporeon.isSleeping(),()->{
+      await(h,()->!gyarados.isSleeping()&&!magikarp.isSleeping()&&!dratini.isSleeping()&&!shellder.isSleeping()&&!vaporeon.isSleeping()&&!cloyster.isSleeping(),()->{
       h.succeed();
      },40,"Aquatic sleepers must wake at dawn");
     },220,"A water visitor must return to sleep after combat while it is still night; sleeping="+dratini.isSleeping()+" target="+dratini.getTarget()+" y="+dratini.getY());
@@ -111,9 +112,7 @@ public final class NightAndSwimmingTests {
    tag.putString("NaturalBehaviorPhase","AIR");tag.putInt("NaturalBehaviorTicks",1234);m.readAdditionalSaveData(tag);mixed.add(m);
   }
   x=3;
-  // The five requested birds now land for sleep and have a dedicated grounded
-  // night-rest GameTest; this batch covers flyers whose approved rest is hovering.
-  for(String slug:List.of("koffing","weezing","magnemite","magneton","haunter")){
+  for(String slug:List.of("spearow","fearow","koffing","weezing","magnemite","magneton","haunter","articuno","zapdos","moltres")){
    int airX=3+(air.size()%5)*6,airZ=4+(air.size()/5)*5;air.add(spawn(h,slug,airX,7,airZ));
   }
   h.runAfterDelay(5,()->{

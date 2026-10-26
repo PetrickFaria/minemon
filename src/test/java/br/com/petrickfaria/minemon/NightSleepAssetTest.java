@@ -40,9 +40,11 @@ public class NightSleepAssetTest {
  @Test public void gengarNightRestUsesASeatedPoseAndPidgeLineSleepsWithFoldedWings() throws Exception {
   var gengar=animations(SpeciesDefinitions.get("gengar"));
   var sleep=gengar.getAsJsonObject(SpeciesDefinitions.get("gengar").clips().get("night_sleep")).getAsJsonObject("bones");
-  assertEquals(-1.0,sleep.getAsJsonObject("body").getAsJsonArray("position").get(1).getAsDouble(),.0001);
-  assertEquals(24.0,sleep.getAsJsonObject("leg_left").getAsJsonArray("rotation").get(0).getAsDouble(),.0001);
-  assertEquals(24.0,sleep.getAsJsonObject("leg_right").getAsJsonArray("rotation").get(0).getAsDouble(),.0001);
+  assertEquals(-1.2,sleep.getAsJsonObject("body").getAsJsonArray("position").get(1).getAsDouble(),.0001);
+  for(String side:java.util.List.of("left","right")){
+   assertEquals(58.0,sleep.getAsJsonObject("leg_"+side).getAsJsonArray("rotation").get(0).getAsDouble(),.0001);
+   assertEquals(-72.0,sleep.getAsJsonObject("leg_"+side+"2").getAsJsonArray("rotation").get(0).getAsDouble(),.0001);
+  }
   for(String slug:java.util.List.of("pidgey","pidgeotto","pidgeot")){
    var d=SpeciesDefinitions.get(slug);var source=animations(d);
    var sleepBones=source.getAsJsonObject(d.clips().get("night_sleep")).getAsJsonObject("bones");
@@ -53,6 +55,34 @@ public class NightSleepAssetTest {
     assertEquals(java.util.List.of(1.0,1.0,1.0),asNumbers(sleepBones.getAsJsonObject("wings_closed").getAsJsonArray("scale")));
    }
   }
+ }
+ @Test public void haunterFearowSleepAndSpearowWingbeatKeepTheirRequestedPoses() throws Exception {
+  var haunter=animations(SpeciesDefinitions.get("haunter"));
+  var haunterSleep=haunter.getAsJsonObject(SpeciesDefinitions.get("haunter").clips().get("night_sleep")).getAsJsonObject("bones");
+  assertTrue(haunterSleep.getAsJsonObject("body").getAsJsonArray("rotation").get(2).getAsString().contains("math.sin"));
+  for(String side:java.util.List.of("left","right")){
+   assertEquals(-55.0,haunterSleep.getAsJsonObject("hand_"+side+"1").getAsJsonArray("rotation").get(0).getAsDouble(),.0001);
+   assertEquals(-25.0,haunterSleep.getAsJsonObject("hand_"+side+"2").getAsJsonArray("rotation").get(0).getAsDouble(),.0001);
+   for(String finger:java.util.List.of("thumb1","middle","ring"))
+    assertEquals(-18.0,haunterSleep.getAsJsonObject("finger_"+side+"_"+finger).getAsJsonArray("rotation").get(0).getAsDouble(),.0001);
+  }
+  var fearow=animations(SpeciesDefinitions.get("fearow"));
+  var fearowSleep=fearow.getAsJsonObject(SpeciesDefinitions.get("fearow").clips().get("night_sleep")).getAsJsonObject("bones");
+  assertEquals(-15.0,fearowSleep.getAsJsonObject("head").getAsJsonArray("rotation").get(0).getAsDouble(),.0001);
+  for(String side:java.util.List.of("left","right"))
+   assertEquals("Fearow folds its wings into the grounded idle pose",
+       animations(SpeciesDefinitions.get("fearow")).getAsJsonObject(SpeciesDefinitions.get("fearow").clips().get("ground_idle")).getAsJsonObject("bones").get("wing_open_"+side),
+       fearowSleep.get("wing_open_"+side));
+  var spearow=animations(SpeciesDefinitions.get("spearow"));
+  var spearowFly=spearow.getAsJsonObject(SpeciesDefinitions.get("spearow").clips().get("air_fly"));
+  assertEquals(.75,spearowFly.get("animation_length").getAsDouble(),.0001);
+  var pidgeotto=animations(SpeciesDefinitions.get("pidgeotto"));
+  var pidgeottoFly=pidgeotto.getAsJsonObject("animation.pidgeotto.air_fly");
+  var pidgeottoWing=pidgeottoFly.getAsJsonObject("bones").getAsJsonObject("wing_open_left").getAsJsonObject("rotation");
+  assertEquals(1.5,pidgeottoFly.get("animation_length").getAsDouble(),.0001);
+  assertEquals("Pidgeotto repeats its complete wing pose at 0.75 seconds",
+      asNumbers(pidgeottoWing.getAsJsonArray("0.0")),asNumbers(pidgeottoWing.getAsJsonArray("0.75")));
+  assertEquals(asNumbers(pidgeottoWing.getAsJsonArray("0.0")),asNumbers(pidgeottoWing.getAsJsonArray("1.5")));
  }
  @Test public void eeveeLineHasGroundSleepAndVaporeonHasSeparateWaterRestPose() throws Exception {
   for(String slug:java.util.List.of("eevee","jolteon","flareon","vaporeon")){

@@ -16,13 +16,18 @@ public final class NaturalBehaviorProfileTest {
 
     @Test public void airborneAndAquaticGroupsAreExplicitAndDoNotUseTypeLabels() {
         assertTrue(SpeciesBehaviorProfiles.canFly("gastly"));
-        assertFalse(SpeciesBehaviorProfiles.isAirborne("gastly"));
+        assertTrue(SpeciesBehaviorProfiles.isAirborne("gastly"));
+        for(String slug:java.util.List.of("pidgey","pidgeotto","pidgeot"))
+            assertTrue(slug+" runs its continuous daytime altitude cycle",SpeciesBehaviorProfiles.isAirborne(slug));
         assertTrue(SpeciesBehaviorProfiles.canFly("charizard"));
         assertFalse(SpeciesBehaviorProfiles.isAirborne("charizard"));
         assertTrue(SpeciesBehaviorProfiles.canFly("mew"));
         assertFalse(SpeciesBehaviorProfiles.isAirborne("mew"));
         assertFalse(SpeciesBehaviorProfiles.isAirborne("gyarados"));
         assertTrue(SpeciesBehaviorProfiles.isAquatic("gyarados"));
+        assertTrue(SpeciesBehaviorProfiles.restsAtWaterBottom("gyarados"));
+        assertTrue(SpeciesBehaviorProfiles.restsAtWaterBottom("cloyster"));
+        assertFalse("Gyarados keeps its daytime surface profile",SpeciesBehaviorProfiles.prefersBottom("gyarados"));
         assertTrue(SpeciesBehaviorProfiles.isAquatic("magikarp"));
         assertFalse(SpeciesBehaviorProfiles.isAquatic("squirtle"));
         assertFalse(SpeciesBehaviorProfiles.isAquatic("psyduck"));

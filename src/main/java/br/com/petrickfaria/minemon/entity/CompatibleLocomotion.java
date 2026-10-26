@@ -10,6 +10,10 @@ public final class CompatibleLocomotion {
  public static void apply(String slug,Map<String,String> clips){
   if(groundGait(slug))clips.putIfAbsent("ground_walk",clip(slug,"walk"));
   if(quadruped(slug)||slug.equals("meowth")||slug.equals("persian"))clips.putIfAbsent("ground_run",clip(slug,"run"));
+  if(slug.equals("haunter")){
+   clips.put("air_idle",clip(slug,"air_idle"));
+   clips.put("air_fly",clip(slug,"air_fly"));
+  }
   if(slug.equals("vaporeon")){
    clips.putIfAbsent("water_swim",clip(slug,"swim"));
    clips.putIfAbsent("water_idle",clips.get("ground_idle"));

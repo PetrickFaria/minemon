@@ -2,7 +2,7 @@
 import hashlib
 
 ARBOK_TEXTURE_PATH = "assets/minemon/textures/pokemon/arbok_cobblemon_1_8_2/arbok.png"
-ARBOK_TEXTURE_SHA256 = "77ee51f52a5e7f361b217c2f3df6554e94b062942fe993e925dc9777bf65ea0f"
+ARBOK_TEXTURE_SHA256 = "d6f4c86838c0f0d9d169d692fceaf3cc8040295a921b1257b480605023ba50a2"
 
 
 def is_approved_prior_asset_delta(path, content):

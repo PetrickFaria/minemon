@@ -78,6 +78,15 @@ public final class MinemonFlyingCreature extends MinemonCreature {
     this.setDeltaMovement(this.getDeltaMovement().x,
         net.minecraft.util.Mth.clamp(this.getDeltaMovement().y+correction,-0.12D,0.12D),this.getDeltaMovement().z);
    }
+   if(!combat&&this.naturalBehaviorActive()
+       &&(this.getSpeciesSlug().equals("haunter")||this.getSpeciesSlug().equals("gengar"))
+       &&altitude>=this.naturalCycle().minimumAltitude()&&altitude<=this.naturalCycle().maximumAltitude()){
+    double center=surface+(this.naturalCycle().minimumAltitude()+this.naturalCycle().maximumAltitude())*0.5D;
+    double target=center+Math.sin(this.tickCount*0.025D)*0.20D;
+    double bob=net.minecraft.util.Mth.clamp((target-this.getY())*0.035D-this.getDeltaMovement().y*0.20D,-0.025D,0.025D);
+    this.setDeltaMovement(this.getDeltaMovement().x,
+        net.minecraft.util.Mth.clamp(this.getDeltaMovement().y+bob,-0.04D,0.04D),this.getDeltaMovement().z);
+   }
   }
   this.fallDistance=0;
  }

@@ -28,6 +28,7 @@ public final class ClientSmokeTest {
  private static boolean fixtureSurface(String slug){return SpeciesBehaviorProfiles.profile(slug)==SpeciesBehaviorProfiles.Profile.SURFACE;}
  private static final java.util.Map<String,Integer> smokeParticleSamples=new java.util.HashMap<>();
  private static boolean opened,setup;
+ private static boolean arbokScreenshotPending;
  private static int worldTicks,titleTicks,frames;
  private static volatile UUID testEntity;
  private static volatile int initialEntityId;
@@ -511,10 +512,17 @@ public final class ClientSmokeTest {
    if(worldTicks>=SPECIES_START_TICK && worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW)
     applyValidationInput(mc,Math.floorMod(worldTicks-SPECIES_START_TICK,SPECIES_TEST_WINDOW));
    if(worldTicks>=SPECIES_START_TICK+20 && worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW && (worldTicks-(SPECIES_START_TICK+20))%SPECIES_TEST_WINDOW==0)Screenshot.grab(mc.gameDirectory,mc.getMainRenderTarget(),message->{});
+   if(arbokScreenshotPending){
+    Screenshot.grab(mc.gameDirectory,"arbok-front.png",mc.getMainRenderTarget(),message->{});
+    mc.options.hideGui=false;arbokScreenshotPending=false;
+   }
    if(worldTicks>=SPECIES_START_TICK && worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW
        &&species.get((worldTicks-SPECIES_START_TICK)/SPECIES_TEST_WINDOW).equals("arbok")
-       &&(worldTicks-SPECIES_START_TICK)%SPECIES_TEST_WINDOW==20)
-    Screenshot.grab(mc.gameDirectory,"arbok-front.png",mc.getMainRenderTarget(),message->{});
+       &&(worldTicks-SPECIES_START_TICK)%SPECIES_TEST_WINDOW==20){
+    // One rendered frame later, this produces an unobstructed front view of
+    // the cobra hood so the UV remap can be inspected in the client artifact.
+    mc.options.hideGui=true;arbokScreenshotPending=true;
+   }
    if(worldTicks>=SPECIES_START_TICK && worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW && ((worldTicks-SPECIES_START_TICK)%SPECIES_TEST_WINDOW)==42
        && java.util.Set.of("charmander","charmeleon","charizard","moltres","ponyta","rapidash").contains(species.get((worldTicks-SPECIES_START_TICK)/SPECIES_TEST_WINDOW)))Screenshot.grab(mc.gameDirectory,"fire-night-"+species.get((worldTicks-SPECIES_START_TICK)/SPECIES_TEST_WINDOW)+".png",mc.getMainRenderTarget(),message->{});
    if(worldTicks==SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW) {

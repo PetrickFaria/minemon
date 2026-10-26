@@ -14,11 +14,11 @@ public class BehaviorCycleTest {
  private void repeat(BehaviorCycle c,int n,BehaviorCycle.Observation o){for(int i=0;i<n;i++)c.tick(o);}
  @Test public void exact151SpeciesAndSixDisjointProfiles(){
   assertEquals(SpeciesDefinitions.ALL.keySet(),SpeciesBehaviorProfiles.all().keySet());
-  int[] counts={91,13,13,23,9,2};int i=0;
+  int[] counts={91,17,9,23,9,2};int i=0;
   for(var p:SpeciesBehaviorProfiles.Profile.values())assertEquals(p.name(),counts[i++],SpeciesBehaviorProfiles.all().values().stream().filter(v->v==p).count());
   assertEquals(GROUND_FLIGHT,SpeciesBehaviorProfiles.profile("dragonite"));
   assertEquals(GROUND,SpeciesBehaviorProfiles.profile("farfetchd"));
-  assertEquals(GROUND_FLIGHT,SpeciesBehaviorProfiles.profile("pidgey"));
+  assertEquals(ALTITUDE_CYCLE,SpeciesBehaviorProfiles.profile("pidgey"));
   assertEquals(GROUND_FLIGHT,SpeciesBehaviorProfiles.profile("aerodactyl"));
   assertEquals(ALTITUDE_CYCLE,SpeciesBehaviorProfiles.profile("spearow"));
   assertEquals(ALTITUDE_CYCLE,SpeciesBehaviorProfiles.profile("fearow"));
@@ -33,6 +33,25 @@ public class BehaviorCycleTest {
   repeat(c,6000,observe(true,false,false,false,false,false,false,false));assertEquals(0,c.ticks());
   repeat(c,11999,flight);assertEquals(0,c.stage());c.tick(flight);assertEquals(1,c.stage());assertEquals(4,c.minimumAltitude(),0);
   assertEquals(9,c.maximumAltitude(),0);repeat(c,6000,flight);assertEquals(0,c.stage());assertEquals(0,c.ticks());
+ }
+ @Test public void pidgeyLineRunsFiveMinutesLowThenThreeMinutesHighAboveTerrain(){
+  var band=observe(true,false,true,false,false,false,false,false);
+  for(String slug:java.util.List.of("pidgey","pidgeotto","pidgeot")){
+   var c=new BehaviorCycle(ALTITUDE_CYCLE,slug);
+   assertEquals(1,c.minimumAltitude(),0);assertEquals(5,c.maximumAltitude(),0);
+   repeat(c,5999,band);assertEquals(0,c.stage());c.tick(band);
+   assertEquals(6,c.minimumAltitude(),0);assertEquals(10,c.maximumAltitude(),0);
+   repeat(c,3599,band);assertEquals(1,c.stage());c.tick(band);
+   assertEquals(0,c.stage());assertEquals(0,c.ticks());
+  }
+ }
+ @Test public void gastlyFloatsFiveMinutesLowThenThreeMinutesHighAndPausesWhenInactive(){
+  var c=new BehaviorCycle(ALTITUDE_CYCLE,"gastly");var band=observe(true,false,true,false,false,false,false,false);
+  assertEquals(1,c.minimumAltitude(),0);assertEquals(3,c.maximumAltitude(),0);
+  repeat(c,5999,band);assertEquals(0,c.stage());c.tick(band);
+  assertEquals(4,c.minimumAltitude(),0);assertEquals(6,c.maximumAltitude(),0);
+  repeat(c,100,observe(false,false,true,false,false,false,false,false));assertEquals(0,c.ticks());
+  repeat(c,3599,band);c.tick(band);assertEquals(0,c.stage());assertEquals(0,c.ticks());
  }
  @Test public void twentyMinuteGroundLowFlightHighFlightLandingCycle(){
   var c=new BehaviorCycle(GROUND_FLIGHT);var walk=observe(true,true,false,false,false,false,true,false);
@@ -82,6 +101,9 @@ public class BehaviorCycleTest {
   for(String slug:expected)assertTrue(slug+" must be water-capable",SpeciesBehaviorProfiles.waterCapable(slug));
   assertFalse(SpeciesBehaviorProfiles.prefersBottom("gyarados"));
   assertFalse(SpeciesBehaviorProfiles.prefersBottom("lapras"));
+  assertTrue(SpeciesBehaviorProfiles.restsAtWaterBottom("gyarados"));
+  assertTrue(SpeciesBehaviorProfiles.restsAtWaterBottom("cloyster"));
+  assertFalse(SpeciesBehaviorProfiles.restsAtWaterBottom("lapras"));
  }
  @Test public void onlySeakingReceivesExactly25PercentReduction(){
   var s=SpeciesDefinitions.get("seaking");assertEquals(1.35,s.scale(),0.00001);assertEquals(.525,s.width(),0.00001);assertEquals(.45,s.height(),0.00001);
@@ -109,7 +131,7 @@ public class BehaviorCycleTest {
    assertEquals(CompatibleLocomotion.clip(s,"run"),d.clips().get("ground_run"));
   }
   for(String s:java.util.List.of("articuno","zapdos","moltres"))
-   assertEquals("articulated runtime flight adaptation is selected for "+s,"animation."+s+".minemon_air_fly",SpeciesDefinitions.get(s).clips().get("air_fly"));
+   assertEquals("native air fly remains selected for "+s,"animation."+s+".air_fly",SpeciesDefinitions.get(s).clips().get("air_fly"));
   assertEquals("animation.fearow.minemon_air_fly",SpeciesDefinitions.get("fearow").clips().get("air_fly"));
   assertEquals("animation.spearow.minemon_air_fly",SpeciesDefinitions.get("spearow").clips().get("air_fly"));
  }

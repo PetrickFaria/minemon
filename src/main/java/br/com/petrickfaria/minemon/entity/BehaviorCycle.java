@@ -8,21 +8,34 @@ public final class BehaviorCycle {
  public record Observation(boolean active,boolean ground,boolean flightBand,boolean wet,
                            boolean submerged,boolean surface,boolean dryGround,boolean canDive) {}
  private final Profile profile;
+ private final String speciesSlug;
  private Phase phase;
  private int ticks,stage;
- public BehaviorCycle(Profile p){profile=p;phase=p==Profile.WATER_VISITOR?Phase.COOLDOWN:Phase.LAND;}
+ public BehaviorCycle(Profile p){this(p,null);}
+ public BehaviorCycle(Profile p,String slug){profile=p;speciesSlug=slug;phase=p==Profile.WATER_VISITOR?Phase.COOLDOWN:Phase.LAND;}
  public Phase phase(){return phase;}
  public int ticks(){return ticks;}
  public int stage(){return stage;}
- public double minimumAltitude(){return profile==Profile.ALTITUDE_CYCLE||profile==Profile.GROUND_FLIGHT?new double[]{1,4}[Math.min(stage,1)]:3;}
- public double maximumAltitude(){return profile==Profile.ALTITUDE_CYCLE||profile==Profile.GROUND_FLIGHT?new double[]{3,9}[Math.min(stage,1)]:15;}
+ public double minimumAltitude(){
+  if("pidgey".equals(speciesSlug)||"pidgeotto".equals(speciesSlug)||"pidgeot".equals(speciesSlug))return stage==0?1:6;
+  if("gastly".equals(speciesSlug))return stage==0?1:4;
+  return profile==Profile.ALTITUDE_CYCLE||profile==Profile.GROUND_FLIGHT?new double[]{1,4}[Math.min(stage,1)]:3;
+ }
+ public double maximumAltitude(){
+  if("pidgey".equals(speciesSlug)||"pidgeotto".equals(speciesSlug)||"pidgeot".equals(speciesSlug))return stage==0?5:10;
+  if("gastly".equals(speciesSlug))return stage==0?3:6;
+  return profile==Profile.ALTITUDE_CYCLE||profile==Profile.GROUND_FLIGHT?new double[]{3,9}[Math.min(stage,1)]:15;
+ }
+ private int stageDuration(){return shortAltitudeCycle()?stage==0?6000:3600:stage==0?12000:6000;}
+ private boolean shortAltitudeCycle(){return "pidgey".equals(speciesSlug)||"pidgeotto".equals(speciesSlug)
+     ||"pidgeot".equals(speciesSlug)||"gastly".equals(speciesSlug);}
  public boolean flying(){return profile==Profile.ALTITUDE_CYCLE||profile==Profile.GROUND_FLIGHT&&phase!=Phase.LAND;}
  public boolean landing(){return profile==Profile.GROUND_FLIGHT&&phase==Phase.LANDING;}
  private void enter(Phase next){phase=next;ticks=0;}
  public void tick(Observation o){
   if(!o.active())return;
   if(profile==Profile.ALTITUDE_CYCLE){
-   if(o.flightBand()&&++ticks>=(stage==0?12000:6000)){stage=1-stage;ticks=0;}
+   if(o.flightBand()&&++ticks>=stageDuration()){stage=1-stage;ticks=0;}
   }else if(profile==Profile.GROUND_FLIGHT){
    switch(phase){
     case LAND -> {if(o.ground()&&++ticks>=12000)enter(Phase.TAKEOFF);}
@@ -52,7 +65,7 @@ public final class BehaviorCycle {
  public void restore(String state,int elapsed,int altitudeStage){
   try{phase=Phase.valueOf(state);}catch(IllegalArgumentException e){phase=profile==Profile.WATER_VISITOR?Phase.COOLDOWN:Phase.LAND;}
   stage=Math.max(0,Math.min(profile==Profile.ALTITUDE_CYCLE||profile==Profile.GROUND_FLIGHT?1:0,altitudeStage));
-  int limit=profile==Profile.ALTITUDE_CYCLE?(stage==0?12000:6000)
+  int limit=profile==Profile.ALTITUDE_CYCLE?stageDuration()
       :phase==Phase.SUBMERGED||phase==Phase.SURFACE?12000:phase==Phase.AIR?6000:12000;
   ticks=Math.max(0,Math.min(limit-1,elapsed));
   if(profile==Profile.GROUND_FLIGHT&&phase!=Phase.LAND&&phase!=Phase.TAKEOFF&&phase!=Phase.AIR&&phase!=Phase.LANDING)enter(Phase.LAND);

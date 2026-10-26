@@ -67,6 +67,25 @@ public final class NaturalMovementAssetTest {
   assertFalse("Spearow has no generic generated air cycle",spearow.has("animation.spearow.minemon_fly"));
   assertEquals("animation.spearow.minemon_air_fly",SpeciesDefinitions.get("spearow").clips().get("air_fly"));
   assertEquals("Spearow uses its retained source poser walk", "animation.spearow.minemon_poser_walk",SpeciesDefinitions.get("spearow").walk());
+  var haunter=animations("haunter");
+  for(String clip:List.of("animation.haunter.minemon_air_idle","animation.haunter.minemon_air_fly")){
+   assertDynamicBone(haunter,clip,"body");
+   assertDynamicBone(haunter,clip,"hand_left1");
+   assertDynamicBone(haunter,clip,"tail1");
+   assertTrue("Haunter flight keeps a small vertical float",haunter.getAsJsonObject(clip).getAsJsonObject("bones")
+       .getAsJsonObject("body").getAsJsonArray("position").toString().contains("math.sin"));
+  }
+  var haunterClips=new java.util.HashMap<>(SpeciesDefinitions.get("haunter").clips());
+  CompatibleLocomotion.apply("haunter",haunterClips);
+  assertEquals("animation.haunter.minemon_air_idle",haunterClips.get("air_idle"));
+  assertEquals("animation.haunter.minemon_air_fly",haunterClips.get("air_fly"));
+  var gengar=animations("gengar");
+  for(String clip:List.of("animation.gengar.air_idle","animation.gengar.air_fly")){
+   assertDynamicBone(gengar,clip,"body");
+   assertDynamicBone(gengar,clip,"tail");
+   assertTrue("Gengar keeps a gentle floating body motion",gengar.getAsJsonObject(clip).getAsJsonObject("bones")
+       .getAsJsonObject("body").getAsJsonArray("position").toString().contains("math.sin"));
+  }
   try(var reader=Files.newBufferedReader(RESOURCES.resolve("data/minemon_gen1/animation_validation_profiles.json"))) {
    var profile=JsonParser.parseReader(reader).getAsJsonObject().getAsJsonObject("spearow");
    assertEquals("leg_left",profile.getAsJsonArray("walk").get(0).getAsString());

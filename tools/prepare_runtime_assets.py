@@ -83,6 +83,55 @@ def compatible_locomotion(data,geo,d):
    body=channels.setdefault('body',{})
    body['position']=[0,sinus(0,0.12 if kind=='walk' else 0.2,freq*2),0]
    put(kind,clip)
+ if slug=='haunter':
+  # The retained Haunter poser has no flight clips and falls back to a static
+  # idle while its flying navigator moves. Derive two small, additive gaits
+  # from that source pose and animate only bones present in its rig.
+  names={b['name'] for g in geo['minecraft:geometry'] for b in g['bones']}
+  base=source('ground_idle')
+  for kind,bob,roll,freq in (('air_idle',0.16,1.6,0.14),('air_fly',0.24,2.4,0.18)):
+   clip=copy.deepcopy(base);clip.update(loop=True,animation_length=1.0/freq)
+   channels=clip.setdefault('bones',{})
+   body=channels.setdefault('body',{})
+   pos=list(body.get('position',[0,0,0]));
+   while len(pos)<3:pos.append(0)
+   pos[1]=sinus(pos[1],bob,freq);body['position']=pos
+   rot=list(body.get('rotation',[0,0,0]));
+   while len(rot)<3:rot.append(0)
+   rot[2]=sinus(rot[2],roll,freq,35);body['rotation']=rot
+   for side,sign in (('left',1),('right',-1)):
+    for segment,scale in ((1,1.0),(2,0.55)):
+     bone=f'hand_{side}{segment}'
+     if bone not in names:continue
+     ch=channels.setdefault(bone,{})
+     r=list(ch.get('rotation',[0,0,0]));
+     while len(r)<3:r.append(0)
+     r[2]=sinus(r[2],sign*2.2*scale,freq,segment*25);ch['rotation']=r
+   for tail,scale in (('tail1',1.0),('tail2',0.65),('tail3',0.4)):
+    if tail in names:
+     ch=channels.setdefault(tail,{});r=list(ch.get('rotation',[0,0,0]));
+     while len(r)<3:r.append(0)
+     r[1]=sinus(r[1],2.5*scale,freq,35);ch['rotation']=r
+   put(kind,clip)
+ if slug=='gengar':
+  # Keep Gengar's retained air clips, adding only a gentle floating body/tail
+  # rhythm so its existing leg/arm gait does not appear to stop and start.
+  names={b['name'] for g in geo['minecraft:geometry'] for b in g['bones']}
+  for kind,bob,roll,freq in (('air_idle',0.14,1.2,0.14),('air_fly',0.20,1.8,0.18)):
+   clip=animations.get('animation.gengar.'+kind)
+   if not clip:continue
+   channels=clip.setdefault('bones',{});body=channels.setdefault('body',{})
+   pos=list(body.get('position',[0,0,0]));
+   while len(pos)<3:pos.append(0)
+   pos[1]=sinus(pos[1],bob,freq);body['position']=pos
+   rot=list(body.get('rotation',[0,0,0]));
+   while len(rot)<3:rot.append(0)
+   rot[2]=sinus(rot[2],roll,freq,35);body['rotation']=rot
+   for tail,scale in (('tail',1.0),('tail2',0.65)):
+    if tail in names:
+     ch=channels.setdefault(tail,{});r=list(ch.get('rotation',[0,0,0]));
+     while len(r)<3:r.append(0)
+     r[1]=sinus(r[1],3*scale,freq,55);ch['rotation']=r
  if slug in ('articuno','zapdos','moltres','fearow'):
   # Retained air clips contain poses only: the source poser's procedural
   # wing beat is absent in GeckoLib. Add it to the copied air tracks only.
@@ -115,6 +164,10 @@ def native_air_pose_adaptations(data,geo,d):
  if slug not in supported:return
  names={b['name'] for g in geo.get('minecraft:geometry',[]) for b in g.get('bones',[])}
  for kind,freq,amplitude in (('air_idle',0.9,14),('air_fly',1.4,30)):
+  if slug=='spearow' and kind=='air_fly':
+   # Pidgeotto's active 1.5-second air_fly repeats the same wing pose at
+   # 0.0, 0.75 and 1.5 seconds. Match that 0.75-second beat exactly.
+   freq=4.0/3.0
   if slug in ('spearow','fearow'):
    source_name='animation.'+slug+('.air_idle' if slug=='fearow' else '.ground_idle')
    source=animations.get(source_name)
@@ -268,6 +321,32 @@ def night_sleep_clip(data,geo,d):
   # their idle sway; Jolteon's spines and Flareon's fur remain untouched.
   for bone in ('tail','tail1','tail2','tail3','tail4','tail5','tail6'):
    set_pose(bone,'rotation',[8,0,0])
+ if slug=='gengar':
+  # Sit on the floor with the two articulated leg segments folded forward.
+  # This uses the retained joints only; no mesh or hitbox changes are needed.
+  set_pose('body','position',[0,-1.2,0]);set_pose('body','rotation',[8,0,0])
+  for side in ('left','right'):
+   set_pose('leg_'+side,'rotation',[58,0,0])
+   set_pose('leg_'+side+'2','rotation',[-72,0,0])
+ if slug=='haunter':
+  # Haunter remains in place at night. Lower both existing hand chains and
+  # add only a subtle torso sway so the rest pose is alive without travelling.
+  set_pose('body','rotation',[0,0,'1.5*math.sin(query.anim_time*360*0.12)'])
+  for side,sign in (('left',1),('right',-1)):
+   set_pose('hand_'+side+'1','rotation',[-55,0,f'{sign}*1.2*math.sin(query.anim_time*360*0.12)'])
+   set_pose('hand_'+side+'2','rotation',[-25,0,f'{sign}*0.8*math.sin(query.anim_time*360*0.12+20)'])
+   for finger in ('thumb','middle','ring'):
+    first='finger_'+side+'_'+finger+('1' if finger=='thumb' else '')
+    set_pose(first,'rotation',[-18,0,0])
+    for segment in (2,3):
+     bone='finger_'+side+'_'+finger+str(segment)
+     if bone in channels or bone in {b['name'] for g in geo['minecraft:geometry'] for b in g['bones']}:
+      set_pose(bone,'rotation',[-12 if segment==2 else -8,0,0])
+ if slug=='fearow':
+  # Sleep is grounded and must lower the head after the flight-only look pose.
+  set_pose('head','rotation',[-15,0,0])
+  for bone in ('neck','neck2','neck_2','neck3'):
+   set_pose(bone,'rotation',[0,0,0])
  # A fallback uses the retained idle pose without generic limb rotations.
  # No source geometry or eye texture is changed.
  animations['animation.'+slug+'.minemon_night_sleep']=clip

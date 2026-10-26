@@ -114,14 +114,16 @@ public final class NaturalMovementGoals {
 
         AirPatrol(MinemonCreature mob) {
             this.mob = mob;
-            this.cooldown = 20 + mob.getRandom().nextInt(40);
+            this.cooldown = fluidFloater()?0:20 + mob.getRandom().nextInt(40);
             this.setFlags(EnumSet.of(Goal.Flag.MOVE));
         }
+
+        private boolean fluidFloater(){return this.mob.getSpeciesSlug().equals("haunter")||this.mob.getSpeciesSlug().equals("gengar");}
 
         @Override public boolean canUse() {
             if (this.cooldown > 0) { this.cooldown--; return false; }
             if (!eligible() || this.mob.getTarget() != null || !this.mob.getNavigation().isDone()
-                    || this.mob.getRandom().nextInt(4) != 0) return false;
+                    || !fluidFloater()&&this.mob.getRandom().nextInt(4) != 0) return false;
             if (chooseDestination()) return true;
             this.cooldown = 40;
             return false;
@@ -138,7 +140,7 @@ public final class NaturalMovementGoals {
 
         @Override public void stop() {
             this.destination = null;
-            this.cooldown = 70 + this.mob.getRandom().nextInt(150);
+            this.cooldown = fluidFloater()?1+this.mob.getRandom().nextInt(5):70 + this.mob.getRandom().nextInt(150);
         }
 
         private boolean eligible() {
@@ -149,8 +151,16 @@ public final class NaturalMovementGoals {
             int x0 = this.mob.blockPosition().getX();
             int z0 = this.mob.blockPosition().getZ();
             for (int attempt = 0; attempt < 12; attempt++) {
-                int x = x0 + this.mob.getRandom().nextInt(25) - 12;
-                int z = z0 + this.mob.getRandom().nextInt(25) - 12;
+                int x,z;
+                if(fluidFloater()){
+                    double yaw=Math.toRadians(this.mob.getYRot()+this.mob.getRandom().nextInt(61)-30);
+                    int distance=8+this.mob.getRandom().nextInt(9);
+                    x=x0+(int)Math.round(-Math.sin(yaw)*distance);
+                    z=z0+(int)Math.round(Math.cos(yaw)*distance);
+                }else{
+                    x=x0+this.mob.getRandom().nextInt(25)-12;
+                    z=z0+this.mob.getRandom().nextInt(25)-12;
+                }
                 if (!this.mob.level.hasChunkAt(new BlockPos(x, this.mob.blockPosition().getY(), z))) continue;
                 int surfaceY = this.mob.level.getHeight(
                         net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
