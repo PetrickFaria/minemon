@@ -9,6 +9,12 @@ group = 'br.com.petrickfaria.minemon'
 version = mod_version
 base { archivesName = 'Minemon-1.19.2' }
 
+configurations {
+    library
+    implementation.extendsFrom library
+}
+jarJar.enable()
+
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 def runtimeSpecies = (findProperty('runtime_species') ?: 'bulbasaur')
@@ -30,7 +36,9 @@ processResources {
         def destinationRoot = destinationDir
         def assetPrefix = 'assets/minemon/'
         def sourceFireFrames = ['ponyta','rapidash'].collectMany { slug -> (1..4).collect { frame -> "assets/minemon/textures/pokemon/${slug}_cobblemon_1_8_2/fire/normal/${frame}.png" } }
-        def runtimePaths = runtimeDefinitions.collectMany { d -> [d.model,d.texture] + ((d.generated_static_animation && !new File(sourceRoot,d.animation).isFile()) ? [] : [d.animation]) + d.sounds + d.licenses + (d.flame_texture ? [d.flame_texture] : []) }.unique() + sourceFireFrames
+        // Pokémon recordings remain in the source archive for provenance, but are never
+        // copied into the distributable JAR. User-provided files live under config/minemon.
+        def runtimePaths = runtimeDefinitions.collectMany { d -> [d.model,d.texture] + ((d.generated_static_animation && !new File(sourceRoot,d.animation).isFile()) ? [] : [d.animation]) + d.licenses + (d.flame_texture ? [d.flame_texture] : []) }.unique() + sourceFireFrames
         runtimePaths = runtimePaths.unique()
         runtimeDefinitions.each { d -> runtimePaths << "assets/minemon/models/item/${d.slug}_spawn_egg.json" }
         runtimePaths.unique().each { path ->
@@ -61,6 +69,9 @@ minecraft {
             jvmArgs '-Xmx2G'
             forceExit false
             property 'forge.logging.console.level', 'info'
+            lazyToken('minecraft_classpath') {
+                configurations.library.copyRecursive().resolve().collect { it.absolutePath }.join(File.pathSeparator)
+            }
             mods { minemon_gen1 { source sourceSets.main } }
         }
         client {
@@ -70,6 +81,7 @@ minecraft {
             property 'minemon.clientSmokeSleep', project.hasProperty('clientSmokeSleep').toString()
             property 'minemon.clientSmokeAir', project.hasProperty('clientSmokeAir').toString()
             property 'minemon.clientSmokeWater', project.hasProperty('clientSmokeWater').toString()
+            property 'minemon.clientSmokeAudio', project.hasProperty('clientSmokeAudio').toString()
             property 'minemon.clientSmokeSpecies', (findProperty('clientSmokeSpecies') ?: '').toString()
         }
         server { args '--nogui' }
@@ -87,6 +99,16 @@ dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
     testImplementation 'junit:junit:4.13.2'
     implementation fg.deobf('software.bernie.geckolib:geckolib-forge-1.19:3.1.40')
+    library(group: 'javazoom', name: 'jlayer', version: '1.0.1') {
+        jarJar.pin(it, '1.0.1')
+    }
+    def osName = System.getProperty('os.name').toLowerCase(Locale.ROOT)
+    def osArch = System.getProperty('os.arch').toLowerCase(Locale.ROOT)
+    def lwjglNatives = osName.contains('win') ? 'natives-windows'
+            : osName.contains('mac') ? (osArch.contains('aarch64') ? 'natives-macos-arm64' : 'natives-macos')
+            : (osArch.contains('aarch64') ? 'natives-linux-arm64' : 'natives-linux')
+    testRuntimeOnly "org.lwjgl:lwjgl:3.3.1:${lwjglNatives}"
+    testRuntimeOnly "org.lwjgl:lwjgl-stb:3.3.1:${lwjglNatives}"
 }
 
 jar {

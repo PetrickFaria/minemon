@@ -47,7 +47,7 @@ jobs:
       - name: Ensure Gradle Wrapper is executable
         run: chmod +x gradlew
       - name: Run focused species selection and active Molang tests
-        run: ./gradlew --no-daemon test --tests 'br.com.petrickfaria.minemon.gametest.SmokeSpeciesSelectionTest' --tests 'br.com.petrickfaria.minemon.gametest.ActiveAnimationMolangPreflightTest' --tests 'br.com.petrickfaria.minemon.Batch10AnimationCompatibilityTest' --tests 'br.com.petrickfaria.minemon.Batch11AnimationCompatibilityTest' --tests 'br.com.petrickfaria.minemon.Batch12AnimationCompatibilityTest' --tests 'br.com.petrickfaria.minemon.Batch13AnimationCompatibilityTest' --tests 'br.com.petrickfaria.minemon.Batch14AnimationCompatibilityTest' --tests 'br.com.petrickfaria.minemon.Batch15AnimationCompatibilityTest' --tests 'br.com.petrickfaria.minemon.NightSleepAssetTest' --tests 'br.com.petrickfaria.minemon.NaturalMovementAssetTest'
+        run: ./gradlew --no-daemon test --tests 'br.com.petrickfaria.minemon.gametest.SmokeSpeciesSelectionTest' --tests 'br.com.petrickfaria.minemon.gametest.ActiveAnimationMolangPreflightTest' --tests 'br.com.petrickfaria.minemon.Batch10AnimationCompatibilityTest' --tests 'br.com.petrickfaria.minemon.Batch11AnimationCompatibilityTest' --tests 'br.com.petrickfaria.minemon.Batch12AnimationCompatibilityTest' --tests 'br.com.petrickfaria.minemon.Batch13AnimationCompatibilityTest' --tests 'br.com.petrickfaria.minemon.Batch14AnimationCompatibilityTest' --tests 'br.com.petrickfaria.minemon.Batch15AnimationCompatibilityTest' --tests 'br.com.petrickfaria.minemon.NightSleepAssetTest' --tests 'br.com.petrickfaria.minemon.NaturalMovementAssetTest' --tests 'br.com.petrickfaria.minemon.entity.CustomSoundSpeciesFoldersTest' --tests 'br.com.petrickfaria.minemon.client.CustomCreatureAudioTest'
       - name: Report ForgeGradle and build/run tests
         id: compile
         run: ./gradlew --no-daemon buildEnvironment clean test build
@@ -91,8 +91,10 @@ jobs:
         if: ${{ success() && steps.compile.outcome == 'success' }}
         run: |
           python3 tools/prepare_client_world.py
+          mkdir -p run/config/minemon/sounds/001_Bulbasaur
+          cp src/test/resources/audio/synthetic.ogg run/config/minemon/sounds/001_Bulbasaur/ci-synthetic.ogg
           set +e
-          timeout --kill-after=30s 5400s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest
+          timeout --kill-after=30s 5400s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeAudio
           smoke_status=$?
           set -e
           if [ "$smoke_status" -ne 0 ]; then
@@ -107,6 +109,7 @@ jobs:
           fi
           grep -F 'PASS WORLD' run/client-validation.txt
           grep -F 'PASS COMBAT' run/client-validation.txt
+          grep -F 'PASS CUSTOM AUDIO' run/client-validation.txt
           grep -F 'PASS LOCOMOTION' run/client-validation.txt
           grep -F 'PASS ROSTER' run/client-validation.txt
           grep -F 'PASS CHARMANDER TAIL FLAME' run/client-validation.txt
@@ -175,7 +178,7 @@ jobs:
       - name: Upload Minemon JAR
         uses: actions/upload-artifact@v4
         with:
-          name: Minemon-1.19.2-2.0.0-gen1
+          name: Minemon-1.19.2-2.1.0-gen1
           path: build/libs/Minemon-1.19.2-*.jar
           if-no-files-found: error
           retention-days: 14

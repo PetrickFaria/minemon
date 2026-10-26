@@ -1,4 +1,4 @@
-import json,struct,sys,zipfile,re,math,hashlib,zlib
+import json,struct,sys,zipfile,re,math,hashlib,zlib,io
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1];R=ROOT/'src/main/resources'
 SOURCE_PREFIX='assets/minemon/';RUNTIME_PREFIX='assets/minemon_gen1/'
@@ -298,7 +298,7 @@ if __name__=='__main__':
    validate_emissive_masks(z.read,defs)
    entries=json.loads(z.read(dex));assert len(entries)==151 and [e['nationalPokedexNumber'] for e in entries]==list(range(1,152))
    active={d['slug'] for d in defs};assert active=={e['slug'] for e in entries if e['registered']}
-   allowed={runtime_path(p) for d in defs for p in [d['model'],d['texture'],d['animation']]+d['sounds']+d['licenses']}
+   allowed={runtime_path(p) for d in defs for p in [d['model'],d['texture'],d['animation']]+d['licenses']}
    allowed.update(runtime_path(f'assets/minemon/textures/pokemon/{slug}_cobblemon_1_8_2/fire/normal/{i}.png') for slug in SOURCE_FIRE_HASHES for i in range(1,5))
    allowed.update(f'assets/minemon_gen1/textures/emissive/{slug}_tail_flame.png' for slug in ('charmander','charmeleon','charizard'))
    allowed.add('assets/minemon_gen1/textures/emissive/moltres_fire.png')
@@ -306,9 +306,22 @@ if __name__=='__main__':
    roots=roots+('assets/minemon_gen1/textures/emissive/',)
    unexpected=[n for n in z.namelist() if not n.endswith('/') and n.startswith(roots) and n not in allowed]
    if unexpected:raise ValueError('Unexpected assets '+str(unexpected))
+   audio=[n for n in z.namelist() if n.lower().endswith(('.ogg','.mp3'))]
+   if audio:raise ValueError('Custom audio update must not ship recordings: '+str(audio[:8]))
    for d in defs:
     egg=json.loads(z.read(f"assets/minemon_gen1/models/item/{d['slug']}_spawn_egg.json"));assert egg['parent']=='minecraft:item/template_spawn_egg'
-   for p in ['pack.mcmeta','META-INF/mods.toml','META-INF/ASSET_LICENSES.md','br/com/petrickfaria/minemon/Minemon.class','br/com/petrickfaria/minemon/registry/ModParticles.class','br/com/petrickfaria/minemon/client/GastlySmokeParticle.class',GASTLY_PARTICLE,*GASTLY_PARTICLE_TEXTURES,'assets/minemon_gen1/textures/emissive/charmander_tail_flame.png','assets/minemon_gen1/textures/emissive/charmeleon_tail_flame.png','assets/minemon_gen1/textures/emissive/charizard_tail_flame.png','assets/minemon_gen1/textures/emissive/moltres_fire.png',manifest,dex]:assert p in z.namelist(),p
+   for p in ['pack.mcmeta','META-INF/mods.toml','META-INF/ASSET_LICENSES.md','META-INF/LICENSE-JLAYER-LGPL-2.1.txt','META-INF/jarjar/metadata.json','br/com/petrickfaria/minemon/Minemon.class','br/com/petrickfaria/minemon/registry/ModParticles.class','br/com/petrickfaria/minemon/client/GastlySmokeParticle.class',GASTLY_PARTICLE,*GASTLY_PARTICLE_TEXTURES,'assets/minemon_gen1/textures/emissive/charmander_tail_flame.png','assets/minemon_gen1/textures/emissive/charmeleon_tail_flame.png','assets/minemon_gen1/textures/emissive/charizard_tail_flame.png','assets/minemon_gen1/textures/emissive/moltres_fire.png',manifest,dex]:assert p in z.namelist(),p
+   dependency_paths=[n for n in z.namelist() if n.startswith('META-INF/jarjar/') and n.endswith('.jar')]
+   if not dependency_paths:raise ValueError('JLayer MP3 decoder is not embedded with Jar-in-Jar')
+   jlayer_found=False
+   for dependency in dependency_paths:
+    with zipfile.ZipFile(io.BytesIO(z.read(dependency))) as embedded:
+     embedded_names=embedded.namelist()
+     if 'javazoom/jl/decoder/Decoder.class' in embedded_names:jlayer_found=True
+     if any(name.lower().endswith(('.ogg','.mp3')) for name in embedded_names):
+      raise ValueError('Embedded dependency unexpectedly contains audio files: '+dependency)
+   if not jlayer_found:
+    raise ValueError('Embedded dependency does not contain the JLayer MP3 decoder')
    print('PASS JAR registrations/resources:',len(defs),'eggs; only selected assets packaged')
    meta=z.read('META-INF/mods.toml').decode();assert 'modId="minemon_gen1"' in meta and 'displayName="Minemon (1ª Geração)"' in meta
    print('PASS Minemon (1ª Geração) metadata and minemon_gen1 ID')

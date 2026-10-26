@@ -4,6 +4,8 @@ import br.com.petrickfaria.minemon.config.MinemonConfig;
 import br.com.petrickfaria.minemon.registry.ModEntities;
 import br.com.petrickfaria.minemon.registry.ModItems;
 import br.com.petrickfaria.minemon.registry.ModParticles;
+import br.com.petrickfaria.minemon.sound.CustomSoundFolders;
+import br.com.petrickfaria.minemon.network.MinemonNetwork;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
@@ -24,5 +26,7 @@ public final class Minemon {
         ModItems.ITEMS.register(bus);
         ModParticles.PARTICLE_TYPES.register(bus);
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, MinemonConfig.SPEC);
+        MinemonNetwork.register();
+        CustomSoundFolders.createAll();
     }
 }

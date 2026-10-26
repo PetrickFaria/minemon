@@ -80,6 +80,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     private int spontaneousRunTicks;
     private int spontaneousRunCooldown = 50 + this.getRandom().nextInt(100);
     private int spontaneousRunCount;
+    private int customSoundTicks = 1 + this.getRandom().nextInt(6000);
     // Client-only diagnostic sample used by the automated locomotion smoke test.
     private String selectedAnimationForValidation;
     private String selectedTailFlameAnimationForValidation;
@@ -163,6 +164,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         tag.putString("NaturalBehaviorPhase",this.naturalCycle.phase().name());
         tag.putInt("NaturalBehaviorTicks",this.naturalCycle.ticks());
         tag.putInt("NaturalAltitudeStage",this.naturalCycle.stage());
+        tag.putInt("MinemonCustomSoundTicks", this.customSoundTicks);
     }
 
     @Override public void readAdditionalSaveData(CompoundTag tag) {
@@ -172,6 +174,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         this.wakeGraceTicks=tag.getInt("WakeGraceTicks");
         if(tag.contains("NaturalBehaviorStartDelay"))this.naturalStartDelay=Math.max(0,Math.min(29,tag.getInt("NaturalBehaviorStartDelay")));
         this.naturalCycle.restore(tag.getString("NaturalBehaviorPhase"),tag.getInt("NaturalBehaviorTicks"),tag.getInt("NaturalAltitudeStage"));
+        if (tag.contains("MinemonCustomSoundTicks")) this.customSoundTicks = Math.max(1, Math.min(6000, tag.getInt("MinemonCustomSoundTicks")));
         this.syncNaturalState();
     }
 
@@ -299,7 +302,10 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         }
         if(!this.level.isClientSide&&!(Boolean.getBoolean("minemon.clientSmokeTest")&&this.getTags().contains("minemon-locomotion-fixture")))this.tickNightRest();
         super.tick();
-        if (!this.level.isClientSide) this.tickNaturalCycle();
+        if (!this.level.isClientSide) {
+            this.tickNaturalCycle();
+            this.tickCustomSoundTimer();
+        }
         if (this.level.isClientSide) {
             if ((this.getSpeciesSlug().equals("koffing")||this.getSpeciesSlug().equals("weezing"))
                     && !this.isDeadOrDying() && this.tickCount%5==Math.floorMod(this.getId(),5)) {
@@ -345,6 +351,24 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
             this.tickNightCombat();
         }
     }
+
+    /** Independent, persisted world-time counter. Unloaded chunks do not advance it. */
+    private void tickCustomSoundTimer() {
+        if (!this.isAlive() || this.isRemoved()) return;
+        if (this.customSoundTicks > 0) this.customSoundTicks--;
+        if (this.customSoundTicks == 0) {
+            br.com.petrickfaria.minemon.network.MinemonNetwork.playForTracking(this);
+            this.customSoundTicks = 6000;
+        }
+    }
+
+    public void resetCustomSoundTimerAndPlay() {
+        this.customSoundTicks = 6000;
+        br.com.petrickfaria.minemon.network.MinemonNetwork.playForTracking(this);
+    }
+
+    public int customSoundTicksForValidation() { return this.customSoundTicks; }
+    public void setCustomSoundTicksForValidation(int ticks) { this.customSoundTicks = Math.max(1, Math.min(6000, ticks)); }
 
     private void tickNightRest(){
         if(this.wakeGraceTicks>0)this.wakeGraceTicks--;

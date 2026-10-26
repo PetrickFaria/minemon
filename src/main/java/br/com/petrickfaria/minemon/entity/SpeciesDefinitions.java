@@ -4,7 +4,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 public final class SpeciesDefinitions {
- public record Definition(int nationalPokedexNumber,String slug,String model,String texture,String animation,String mode,float scale,float width,float height,double health,double attack,double speed,int eggBase,int eggSpots,String idle,String walk,String movementFallback,int attackTicks,Map<String,String> clips) {}
+ public record Definition(int nationalPokedexNumber,String slug,String name,String model,String texture,String animation,String mode,float scale,float width,float height,double health,double attack,double speed,int eggBase,int eggSpots,String idle,String walk,String movementFallback,int attackTicks,Map<String,String> clips) {}
  public static final Map<String,Definition> ALL=load();
  private static Map<String,Definition> load() {
   Map<String,Definition> result=new LinkedHashMap<>();
@@ -42,7 +42,7 @@ public final class SpeciesDefinitions {
     float width=o.get("width").getAsFloat()*factor,height=o.get("height").getAsFloat()*factor;
     if(slug.equals("jynx")||slug.equals("magmar")){width=1.05F;height=2.25F;}
     else if(slug.equals("victreebel")){width=1.10F*0.85F*0.90F;height=1.70F*0.85F*0.90F;}
-    Definition d=new Definition(o.get("nationalPokedexNumber").getAsInt(),str(o,"slug"),str(o,"model"),str(o,"texture"),str(o,"animation"),str(o,"mode"),o.get("scale").getAsFloat()*factor,width,height,o.get("health").getAsDouble(),o.get("attack").getAsDouble(),o.get("speed").getAsDouble(),o.get("eggBase").getAsInt(),o.get("eggSpots").getAsInt(),idle,walk,fallback,o.has("attackTicks")?o.get("attackTicks").getAsInt():0,Collections.unmodifiableMap(clips));
+    Definition d=new Definition(o.get("nationalPokedexNumber").getAsInt(),str(o,"slug"),str(o,"name"),str(o,"model"),str(o,"texture"),str(o,"animation"),str(o,"mode"),o.get("scale").getAsFloat()*factor,width,height,o.get("health").getAsDouble(),o.get("attack").getAsDouble(),o.get("speed").getAsDouble(),o.get("eggBase").getAsInt(),o.get("eggSpots").getAsInt(),idle,walk,fallback,o.has("attackTicks")?o.get("attackTicks").getAsInt():0,Collections.unmodifiableMap(clips));
     if(result.put(d.slug(),d)!=null)throw new IllegalStateException("Duplicate species "+d.slug());
    }
   }catch(Exception e){throw new IllegalStateException("Could not load runtime species",e);}

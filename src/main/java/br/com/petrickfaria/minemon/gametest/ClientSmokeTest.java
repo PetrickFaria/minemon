@@ -1,876 +1,1 @@
-package br.com.petrickfaria.minemon.gametest;
-import br.com.petrickfaria.minemon.Minemon;
-import br.com.petrickfaria.minemon.client.MinemonRenderer;
-import br.com.petrickfaria.minemon.entity.*;
-import br.com.petrickfaria.minemon.registry.ModEntities;
-import br.com.petrickfaria.minemon.registry.ModItems;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.Screenshot;
-import net.minecraft.client.gui.screens.TitleScreen;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.GameType;
-import net.minecraft.world.level.GameRules;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import software.bernie.geckolib3.resource.GeckoLibCache;
-import java.nio.file.*;
-import java.util.UUID;
-@Mod.EventBusSubscriber(modid=Minemon.MOD_ID,value=Dist.CLIENT)
-public final class ClientSmokeTest {
- private static boolean fixtureAir(String slug){return SpeciesBehaviorProfiles.isAirborne(slug)
-     ||Boolean.getBoolean("minemon.clientSmokeAir")&&SpeciesBehaviorProfiles.canFly(slug);}
- private static boolean fixtureWater(String slug){return SpeciesBehaviorProfiles.isAquatic(slug)
-     ||Boolean.getBoolean("minemon.clientSmokeWater")&&SpeciesBehaviorProfiles.waterCapable(slug);}
- private static boolean fixtureSurface(String slug){return SpeciesBehaviorProfiles.profile(slug)==SpeciesBehaviorProfiles.Profile.SURFACE;}
- private static final java.util.Map<String,Integer> smokeParticleSamples=new java.util.HashMap<>();
- private static boolean opened,setup;
- private static boolean arbokScreenshotPending;
- private static final java.util.Set<String> flightFrames=new java.util.HashSet<>();
- private static int worldTicks,titleTicks,frames;
- private static volatile UUID testEntity;
- private static volatile int initialEntityId;
- private static float minLeg=Float.MAX_VALUE,maxLeg=-Float.MAX_VALUE,minBody=Float.MAX_VALUE,maxBody=-Float.MAX_VALUE;
- private static volatile boolean combatPassed;
- private static volatile int combatHits;
- private static final java.util.Map<String,java.util.List<String>> modelBones=new java.util.HashMap<>();
- private static final java.util.Map<String,float[]> motionRanges=new java.util.HashMap<>();
- private static final java.util.Map<String,float[]> fireStarterArmRanges=new java.util.HashMap<>();
- private static boolean fearowNativeAirPoseObserved;
- private static final java.util.Map<String,float[]> sourceLookRanges=new java.util.HashMap<>();
- private static final java.util.Map<String,float[]> sourcePitchRanges=new java.util.HashMap<>();
- private static final java.util.Set<String> walkedSpecies=new java.util.HashSet<>();
- private static final java.util.Set<String> wingVisibilitySpecies=new java.util.HashSet<>();
- private static final java.util.Map<String,net.minecraft.world.phys.Vec3> firstRenderedPositions=new java.util.HashMap<>();
- @SubscribeEvent public static void actualDamage(net.minecraftforge.event.entity.living.LivingDamageEvent event) {
-  if(Boolean.getBoolean("minemon.clientSmokeTest") && event.getAmount()>0 && event.getEntity() instanceof net.minecraft.server.level.ServerPlayer
-     && event.getSource().getEntity() instanceof MinemonCreature b && b.getUUID().equals(testEntity))combatHits++;
- }
- private static int direction=1;
- private static String renderedPhaseSpecies;
- private static int renderedPhase=-1,renderedPhaseFrames;
- private static final java.util.Map<String,String> lastRenderedClip=new java.util.HashMap<>();
- private static final java.util.Map<String,Integer> clipChangedTick=new java.util.HashMap<>();
- private static final java.util.Map<String,Integer> lastRenderedEntityTick=new java.util.HashMap<>();
- private static final java.util.Map<String,Integer> finalIdleFirstTick=new java.util.HashMap<>();
- private static final java.util.Map<String,Integer> steadyWalkFirstTick=new java.util.HashMap<>();
- private static final java.util.Map<String,Integer> steadyRunFirstTick=new java.util.HashMap<>();
- private static boolean steadyMotionObserved(String slug,boolean running) {
-  if(running&&(fixtureAir(slug)||fixtureWater(slug)
-      ||SpeciesAssetIndex.clip(slug,"ground_run","run")==null))return true;
-  var definition=SpeciesDefinitions.get(slug);
-  if(!running&&(sourcePoseTransition(slug)||slug.equals("fearow")
-      ||definition!=null&&("static".equals(definition.movementFallback())||"idle".equals(definition.movementFallback()))))return true;
-  Integer first=(running?steadyRunFirstTick:steadyWalkFirstTick).get(slug),last=lastRenderedEntityTick.get(slug);
-  return first!=null&&last!=null&&last-first>=(slug.equals("gengar")?120:40);
- }
- private static boolean finalIdleObserved(String slug) {
-  if(sourceStaticIdle(slug)||sourcePoseTransition(slug)||slug.equals("fearow"))return true;
-  var definition=SpeciesDefinitions.get(slug);
-  if(definition!=null&&"static".equals(definition.movementFallback()))return true;
-  Integer first=finalIdleFirstTick.get(slug),last=lastRenderedEntityTick.get(slug);
-  // Keep every threshold; collect enough real idle time for slow native
-  // breathing. Rhyhorn's original idle is a four-second cycle.
-  int required=slug.equals("gengar")?160:slug.equals("rhyhorn")?80:40;
-  return first!=null&&last!=null&&last-first>=required;
- }
- private static boolean clipHasSettled(String slug) {
-  Integer changed=clipChangedTick.get(slug);
-  Integer observed=lastRenderedEntityTick.get(slug);
-  // The production controller blends for four ticks (200 ms). Keep the
-  // original visibility/articulation assertions, but sample after that blend.
-  return changed!=null&&observed!=null&&observed-changed>=5;
- }
- private static final long smokeStartedNanos=System.nanoTime();
- private static final java.util.Set<String> loggedProgress=java.util.concurrent.ConcurrentHashMap.newKeySet();
- private static volatile int completedSpeciesWindows;
- private static volatile String lastApprovedCheck="Minecraft client initialized";
- private static void reportProgress(String slug,String phase) {
-  if(!loggedProgress.add(slug+":"+phase))return;
-  var definition=SpeciesDefinitions.get(slug);
-  int dex=definition==null?0:definition.nationalPokedexNumber();
-  int index=species.indexOf(slug)+1;
-  double elapsed=(System.nanoTime()-smokeStartedNanos)/60_000_000_000.0D;
-  System.out.printf(java.util.Locale.ROOT,"[CLIENT SMOKE] %d/%d ‚Äî #%03d %s ‚Äî %s ‚Äî conclu√≠das=%d/%d ‚Äî dura√ß√£o=%.1f min ‚Äî √∫ltima=%s%n",
-    index,species.size(),dex,slug,phase,completedSpeciesWindows,species.size(),elapsed,lastApprovedCheck);
-  System.out.flush();
- }
- private static final int SPECIES_TEST_WINDOW=80;
- private static final int BULBASAUR_VALIDATION_TICK=430;
- private static final int COMBAT_VALIDATION_TICK=BULBASAUR_VALIDATION_TICK+100;
- private static final int SPECIES_START_TICK=COMBAT_VALIDATION_TICK+10;
- private static final java.util.Set<String> renderedSpecies=java.util.concurrent.ConcurrentHashMap.newKeySet();
- private static final java.util.List<String> species=SmokeSpeciesSelection.select(
-   SpeciesDefinitions.ALL.values(),System.getProperty("minemon.clientSmokeSpecies"));
-  // Profiles use exact joints from each selected model skeleton, not one global bone-name list.
-  // The active ten-species development batch receives detailed gait validation;
-  // the general render, texture, movement and roster smoke continues to cover all 151.
-  private static final java.util.Map<String,java.util.Map<String,java.util.List<String>>> ADDITIONAL_PROFILES=loadAdditionalProfiles();
-  private static java.util.Map<String,java.util.Map<String,java.util.List<String>>> loadAdditionalProfiles() {
-   try(var stream=ClientSmokeTest.class.getResourceAsStream("/data/minemon_gen1/animation_validation_profiles.json")) {
-    if(stream==null)throw new IllegalStateException("Missing batch articulation profiles");
-    var json=com.google.gson.JsonParser.parseReader(new java.io.InputStreamReader(stream)).getAsJsonObject();
-    var result=new java.util.HashMap<String,java.util.Map<String,java.util.List<String>>>();
-    for(var species:json.entrySet()) {
-     var states=new java.util.HashMap<String,java.util.List<String>>();
-     for(var state:species.getValue().getAsJsonObject().entrySet()) {
-      var joints=new java.util.ArrayList<String>();
-      for(var joint:state.getValue().getAsJsonArray())joints.add(joint.getAsString());
-      if(joints.isEmpty())throw new IllegalStateException("Empty articulation profile "+species.getKey()+"/"+state.getKey());
-      states.put(state.getKey(),java.util.List.copyOf(joints));
-     }
-     String slug=species.getKey();
-     if(CompatibleLocomotion.groundGait(slug)&&!fixtureAir(slug)&&!fixtureWater(slug)){
-      states.put("walk",CompatibleLocomotion.gaitJoints(slug));
-      states.put("run",CompatibleLocomotion.gaitJoints(slug));
-     }
-     result.put(slug,java.util.Map.copyOf(states));
-    }
-    return java.util.Map.copyOf(result);
-   }catch(java.io.IOException e){throw new ExceptionInInitializerError(e);}
-  }
-  private static java.util.Set<String> validationSpecies() {
-   var result=new java.util.HashSet<>(java.util.Set.of("bulbasaur","ivysaur","venusaur","charmander","charmeleon","charizard","squirtle","wartortle","blastoise","caterpie"));
-   result.addAll(ADDITIONAL_PROFILES.keySet());return java.util.Set.copyOf(result);
-  }
-  private static java.util.Map<String,java.util.List<String>> addProfiles(java.util.Map<String,java.util.List<String>> original) {
-   var result=new java.util.HashMap<>(original);
-   ADDITIONAL_PROFILES.forEach((slug,states)->result.put(slug,states.get("walk")));
-   return java.util.Map.copyOf(result);
-  }
-  private static final java.util.Set<String> ARTICULATION_VALIDATION_SPECIES=validationSpecies();
-  private static final java.util.Map<String,java.util.List<String>> ARTICULATION_PROFILES=addProfiles(java.util.Map.ofEntries(
-   java.util.Map.entry("bulbasaur",java.util.List.of("leg_front_right","leg_front_left","leg_back_right","leg_back_left")),
-   java.util.Map.entry("ivysaur",java.util.List.of("leg_front_right","leg_front_left","leg_back_right","leg_back_left")),
-   java.util.Map.entry("venusaur",java.util.List.of("leg_front_left","leg_front_right","leg_left","leg_right")),
-   java.util.Map.entry("charmander",java.util.List.of("leg_left","leg_right")),
-   java.util.Map.entry("charmeleon",java.util.List.of("leg_left","leg_right")),
-   java.util.Map.entry("charizard",java.util.List.of("leg_left","leg_right")),
-   java.util.Map.entry("squirtle",java.util.List.of("leg_left","leg_right")),
-   java.util.Map.entry("wartortle",java.util.List.of("leg_left","leg_right")),
-   java.util.Map.entry("blastoise",java.util.List.of("leg_left","leg_right")),
-   java.util.Map.entry("pikachu",java.util.List.of("leg_right","leg_left")),
-   java.util.Map.entry("caterpie",java.util.List.of("body_segment","body_segment2")),
-   java.util.Map.entry("hitmonlee",java.util.List.of("leg_left","leg_right")),
-   java.util.Map.entry("onix",java.util.List.of("segment1","segment7","segment14")),
-   java.util.Map.entry("psyduck",java.util.List.of("foot_left","foot_right")),
-   java.util.Map.entry("jolteon",java.util.List.of("leg_front_right","leg_front_left","leg_back_right","leg_back_left")),
-   java.util.Map.entry("nidorina",java.util.List.of("left_leg","right_leg")),
-   java.util.Map.entry("meowth",java.util.List.of("leg_left","leg_right"))
-  ));
-  // These source idle clips intentionally keep their gait legs static. Inspect
-  // their animated idle joints without weakening the leg checks for walk/run.
-  private static final java.util.Map<String,java.util.List<String>> IDLE_PROFILES=java.util.Map.of(
-   "bulbasaur",java.util.List.of("torso","head"),
-   "squirtle",java.util.List.of("arm_left","arm_right","torso"),
-   "wartortle",java.util.List.of("arm_left","arm_right","torso")
-  );
-  private static java.util.List<String> profileJoints(String slug,String state) {
-   if(java.util.Set.of("pidgey","pidgeotto","pidgeot").contains(slug)) {
-    if(fixtureAir(slug))return java.util.List.of("wing_open_left","wing_open_right");
-    String idleJoint=switch(slug){case "pidgey"->"tail2";case "pidgeotto"->"tail";default->"hair5";};
-    return state.startsWith("IDLE_")?java.util.List.of(idleJoint):java.util.List.of("leg_left","leg_right");
-   }
-   if(java.util.Set.of("spearow","fearow","articuno","zapdos","moltres").contains(slug)&&fixtureAir(slug))
-    return java.util.List.of("wing_open_left","wing_open_right");
-   if(ADDITIONAL_PROFILES.containsKey(slug)) {
-    String key=state.startsWith("IDLE_")?"idle":state.startsWith("RUN_")
-      &&!fixtureAir(slug)&&!fixtureWater(slug)?"run":"walk";
-    var joints=ADDITIONAL_PROFILES.get(slug).get(key);
-    if(joints!=null)return joints;
-    // Some native posers map the smoke's faster-motion phase to their fly clip
-    // and have no ground_run articulation profile. Do not invent one; the
-    // final profile validator separately requires movement only when a native
-    // run clip is declared.
-    if(key.equals("run")&&SpeciesAssetIndex.clip(slug,"ground_run","run")==null)return java.util.List.of();
-    throw new IllegalStateException("Missing articulation profile "+slug+"/"+key);
-   }
-   // Native turtle runs retract their limbs and spin the shell/body.
-   if(java.util.Set.of("squirtle","wartortle","blastoise").contains(slug) && state.startsWith("RUN_"))return java.util.List.of("body","body2");
-   return state.startsWith("IDLE_") && IDLE_PROFILES.containsKey(slug)
-    ? IDLE_PROFILES.get(slug) : ARTICULATION_PROFILES.getOrDefault(slug,java.util.List.of());
-  }
-  private static final java.util.Map<String,java.util.Map<String,float[]>> articulationRanges=new java.util.HashMap<>();
-  private static final java.util.Map<String,java.util.Map<String,java.util.Set<String>>> articulationClips=new java.util.HashMap<>();
-  private static final java.util.Map<String,java.util.Map<String,Integer>> articulationSampleCounts=new java.util.HashMap<>();
-  private static final java.util.Map<String,java.util.Map<String,java.util.Set<String>>> articulationInputs=new java.util.HashMap<>();
-  private static final java.util.Map<String,java.util.Map<String,float[]>> tailFlameRanges=new java.util.HashMap<>();
-  private static final java.util.Map<String,java.util.Set<String>> tailFlameClips=new java.util.HashMap<>();
- @SubscribeEvent public static void tick(TickEvent.ClientTickEvent event) {
-  if(!Boolean.getBoolean("minemon.clientSmokeTest")||event.phase!=TickEvent.Phase.END)return;
-  if(Boolean.getBoolean("minemon.clientSmokeSleep")){NightClientSmokeTest.tick(event);return;}
-  if(Boolean.getBoolean("minemon.clientSmokePatrol")){HaunterPatrolClientSmokeTest.tick(event);return;}
-  Minecraft mc=Minecraft.getInstance();
-  try {
-   if(!opened && mc.screen instanceof TitleScreen && titleTicks==0)
-   System.out.println("[CLIENT SMOKE] inicializa√ß√£o ‚Äî TitleScreen alcan√ßada; verificando cache GeckoLib e recursos registrados.");
-  if(!opened && mc.screen instanceof TitleScreen && ++titleTicks==20) {
-    var tabItems=net.minecraft.core.NonNullList.<net.minecraft.world.item.ItemStack>create();
-    ModItems.MINEMON_TAB.fillItemList(tabItems);
-    var eggOrder=new java.util.ArrayList<String>();
-    for(var stack:tabItems){var key=net.minecraftforge.registries.ForgeRegistries.ITEMS.getKey(stack.getItem());if(key!=null&&key.getPath().endsWith("_spawn_egg"))eggOrder.add(key.getPath().substring(0,key.getPath().length()-"_spawn_egg".length()));}
-    var expectedEggOrder=SpeciesDefinitions.ALL.values().stream()
-      .sorted(java.util.Comparator.comparingInt(SpeciesDefinitions.Definition::nationalPokedexNumber))
-      .map(SpeciesDefinitions.Definition::slug).toList();
-    if(!eggOrder.equals(expectedEggOrder))throw new IllegalStateException("Creative spawn eggs are not unique and in National Pok√©dex order: "+eggOrder);
-    for(var d:SpeciesDefinitions.ALL.values()) {
-     var geo=new ResourceLocation(Minemon.MOD_ID,d.model().substring("assets/minemon/".length()));var anim=new ResourceLocation(Minemon.MOD_ID,d.animation().substring("assets/minemon/".length()));
-     try(var stream=ClientSmokeTest.class.getResourceAsStream("/"+d.model().replace("assets/minemon/","assets/minemon_gen1/"))) {
-      var json=com.google.gson.JsonParser.parseReader(new java.io.InputStreamReader(stream)).getAsJsonObject();var names=new java.util.ArrayList<String>();
-      for(var geometry:json.getAsJsonArray("minecraft:geometry"))for(var bone:geometry.getAsJsonObject().getAsJsonArray("bones"))names.add(bone.getAsJsonObject().get("name").getAsString());modelBones.put(d.slug(),names);
-     }
-     if(!GeckoLibCache.getInstance().getGeoModels().containsKey(geo)||!GeckoLibCache.getInstance().getAnimations().containsKey(anim))throw new IllegalStateException("GeckoLib did not parse "+d.slug());
-    }
-    Files.writeString(Path.of("client-validation.txt"),"PASS MENU: Minecraft reached TitleScreen; every registered model/animation parsed by GeckoLib.\nPASS CREATIVE ORDER: all "+SpeciesDefinitions.ALL.size()+" spawn eggs are unique and appear in National Pok√©dex order.\n");
-    opened=true;
-    System.out.println("[CLIENT SMOKE] PASS carregamento ‚Äî cache GeckoLib e "+SpeciesDefinitions.ALL.size()+" esp√©cies verificadas.");
-    System.out.flush();
-    var dataFile=Path.of("saves/minemon-validation/level.dat").toFile();var tag=net.minecraft.nbt.NbtIo.readCompressed(dataFile);tag.getCompound("Data").putBoolean("confirmedExperimentalSettings",true);net.minecraft.nbt.NbtIo.writeCompressed(tag,dataFile);
-    Object flows=Minecraft.class.getMethod("createWorldOpenFlows").invoke(mc);boolean invoked=false;
-    for(var method:flows.getClass().getMethods())if(method.getName().equals("loadLevel")) {
-     if(method.getParameterCount()==2&&method.getParameterTypes()[1]==String.class){method.invoke(flows,mc.screen,"minemon-validation");invoked=true;break;}
-     if(method.getParameterCount()==1&&method.getParameterTypes()[0]==String.class){method.invoke(flows,"minemon-validation");invoked=true;break;}
-    }
-    if(!invoked)throw new IllegalStateException("Could not locate WorldOpenFlows.loadLevel");
-    // Animation selection receives a controlled input, independent of the timing
-    // of velocity packets and client-side friction. World movement is still
-    // driven by real server travel and checked separately for every species.
-    MinemonRenderer.validationInput=entity->{
-     if(entity.getSpeciesSlug().equals("arbok")&&mc.player!=null){
-      double dx=mc.player.getX()-entity.getX(),dz=mc.player.getZ()-entity.getZ();
-      float yaw=(float)(Math.toDegrees(Math.atan2(dz,dx))-90.0D);
-      entity.setYRot(yaw);entity.yBodyRot=yaw;entity.yHeadRot=yaw;
-     }
-     Integer phase=validationPhase(entity);
-     if(phase!=null && ARTICULATION_VALIDATION_SPECIES.contains(entity.getSpeciesSlug())) {
-      entity.setDeltaMovement(animationVelocity(phase),0,0);
-      if(entity.getSpeciesSlug().equals("spearow")||entity.getSpeciesSlug().equals("fearow")) {
-       // Probe the native procedural look input while preserving a static idle
-       // stance; no invented autonomous idle oscillation is claimed.
-       entity.setXRot((float)Math.sin(entity.tickCount*0.17F)*12.0F);
-       entity.yHeadRot=entity.getYRot()+(float)Math.sin(entity.tickCount*0.13F)*25.0F;
-      }
-      if(java.util.Set.of("abra","kadabra","alakazam","bellsprout","geodude","golem","slowpoke","slowbro","mewtwo","mew").contains(entity.getSpeciesSlug())) {
-       // Exercise source q.look('head') / q.look('head_ai') adaptations.
-       entity.setXRot((float)Math.sin(entity.tickCount*0.17F)*12.0F);
-       entity.yHeadRot=entity.getYRot()+(float)Math.sin(entity.tickCount*0.13F)*25.0F;
-      }
-     }
-    };
-    MinemonRenderer.validationObserver=(entity,model)->{
-     if(mc.getResourceManager().getResource(model.getTextureResource(entity)).isEmpty())throw new IllegalStateException("Missing rendered texture "+entity.getSpeciesSlug());
-     String slug=entity.getSpeciesSlug();renderedSpecies.add(slug);
-     String currentClip=entity.getSelectedAnimationForValidation();
-     lastRenderedEntityTick.put(slug,entity.tickCount);
-     if(currentClip!=null&&!currentClip.equals(lastRenderedClip.put(slug,currentClip)))
-      clipChangedTick.put(slug,entity.tickCount);
-     if(validationPhase(entity)!=null)reportProgress(slug,"renderiza√ß√£o");
-     var position=entity.position();var origin=firstRenderedPositions.putIfAbsent(slug,position);
-     // Rendering can interpolate one server step over several frames. Measure
-     // net movement from the first rendered position instead of requiring a
-     // single frame to cross the threshold.
-     if(origin!=null&&origin.distanceToSqr(position)>0.0025D) {
-      walkedSpecies.add(slug);
-     }
-     // Sample every render frame, independently of position updates. Filtering
-     // these samples by displacement can alias animation keyframes when the
-     // client batches several server ticks into a single render frame.
-     Integer validationPhase=validationPhase(entity);
-     if(validationPhase!=null && ARTICULATION_VALIDATION_SPECIES.contains(slug)) {
-      if(!slug.equals(renderedPhaseSpecies)||renderedPhase!=validationPhase) {
-       renderedPhaseSpecies=slug;renderedPhase=validationPhase;renderedPhaseFrames=0;
-      }
-      renderedPhaseFrames++;
-      if(clipHasSettled(slug)) {
-       if(validationPhase>=68)finalIdleFirstTick.putIfAbsent(slug,entity.tickCount);
-       if(validationPhase>=18&&validationPhase<24)steadyWalkFirstTick.putIfAbsent(slug,entity.tickCount);
-       if(validationPhase>=41&&validationPhase<47)steadyRunFirstTick.putIfAbsent(slug,entity.tickCount);
-      }
-     }
-     if(validationPhase!=null && java.util.Set.of("spearow","fearow","abra","kadabra","alakazam","bellsprout","geodude","golem","slowpoke","slowbro","mewtwo","mew").contains(slug)) {
-      var lookHead=model.getAnimationProcessor().getBone("head");
-      if(lookHead==null)throw new IllegalStateException("Source q.look head adapter has no GeckoLib head bone for "+slug);
-      float[] range=sourceLookRanges.computeIfAbsent(slug,k->{var v=new float[4];java.util.Arrays.fill(v,0,2,Float.MAX_VALUE);java.util.Arrays.fill(v,2,4,-Float.MAX_VALUE);return v;});
-      float[] values={lookHead.getRotationX(),lookHead.getRotationY()};
-      for(int axis=0;axis<2;axis++){range[axis]=Math.min(range[axis],values[axis]);range[axis+2]=Math.max(range[axis+2],values[axis]);}
-     }
-     if(validationPhase!=null&&(slug.equals("mewtwo")||slug.equals("mew"))) {
-      var body=model.getAnimationProcessor().getBone("body");
-      if(body==null)throw new IllegalStateException("Source q.pitch_tilt adapter has no GeckoLib body bone for "+slug);
-      float[] range=sourcePitchRanges.computeIfAbsent(slug,k->{var v=new float[2];v[0]=Float.MAX_VALUE;v[1]=-Float.MAX_VALUE;return v;});
-      range[0]=Math.min(range[0],body.getRotationX());range[1]=Math.max(range[1],body.getRotationX());
-     }
-     if(validationPhase!=null) {
-      if(slug.equals("koffing")||slug.equals("weezing"))smokeParticleSamples.merge(slug,entity.getSmokeParticleCountForValidation(),Math::max);
-      if(slug.equals("charmander")||slug.equals("charmeleon")||slug.equals("charizard")) {
-       var left=model.getAnimationProcessor().getBone("arm_left");var right=model.getAnimationProcessor().getBone("arm_right");
-       int phase=validationPhase;
-       int mode=phase>=38&&phase<=46?2:(phase>=16&&phase<=23?0:-1);
-       if(mode>=0){
-        var range=fireStarterArmRanges.computeIfAbsent(slug,k->new float[4]);
-        range[mode]=Math.max(range[mode],Math.abs(left.getRotationZ()));
-        range[mode+1]=Math.max(range[mode+1],Math.abs(right.getRotationZ()));
-       }
-      }
-      for(String name:modelBones.get(slug)) {
-       if(name.contains("eye")||name.contains("mouth")||name.contains("jaw"))continue;
-       var bone=model.getAnimationProcessor().getBone(name);if(bone==null)continue;
-       float[] values={bone.getRotationX(),bone.getRotationY(),bone.getRotationZ(),bone.getPositionX(),bone.getPositionY(),bone.getPositionZ()};
-       var range=motionRanges.computeIfAbsent(slug+":"+name,k->{var r=new float[12];java.util.Arrays.fill(r,0,6,Float.MAX_VALUE);java.util.Arrays.fill(r,6,12,-Float.MAX_VALUE);return r;});
-       for(int axis=0;axis<6;axis++){range[axis]=Math.min(range[axis],values[axis]);range[axis+6]=Math.max(range[axis+6],values[axis]);}
-      }
-     }
-      if(validationPhase!=null && ARTICULATION_VALIDATION_SPECIES.contains(slug) && ARTICULATION_PROFILES.containsKey(slug)) {
-       int phase=validationPhase;
-       String state=locomotionState(phase);
-       // Clip selection is sampled only after a phase has settled. The first render
-       // frame at a boundary can still expose the previous controller value.
-       if(isSettledClipSample(phase)) {
-        if(fixtureWater(slug)&&!entity.isInWater())
-         throw new IllegalStateException("Aquatic smoke fixture lost immersion for "+slug+" phase="+phase
-             +" position="+entity.position()+" bounds="+entity.getBoundingBox()
-             +" clip="+entity.getSelectedAnimationForValidation());
-        articulationClips.computeIfAbsent(slug,k->new java.util.HashMap<>())
-         .computeIfAbsent(state,k->new java.util.HashSet<>()).add(entity.getSelectedAnimationForValidation());
-        articulationSampleCounts.computeIfAbsent(slug,k->new java.util.HashMap<>()).merge(state,1,Integer::sum);
-        double velocitySqr=entity.getDeltaMovement().horizontalDistanceSqr();
-        double displacementSqr=(entity.getX()-entity.xo)*(entity.getX()-entity.xo)+(entity.getZ()-entity.zo)*(entity.getZ()-entity.zo);
-        articulationInputs.computeIfAbsent(slug,k->new java.util.HashMap<>())
-         .computeIfAbsent(state,k->new java.util.HashSet<>()).add("phase="+phase+",clip="+entity.getSelectedAnimationForValidation()+",velocitySqr="+velocitySqr+",positionDeltaSqr="+displacementSqr);
-       }
-       if(slug.equals("zubat")&&isSettledClipSample(phase)) {
-        var folded=model.getAnimationProcessor().getBone("wings_folded");
-        var open=model.getAnimationProcessor().getBone("wings_open");
-        if(folded==null||open==null||Math.abs(folded.getScaleX())>0.001F||Math.abs(open.getScaleX()-1.0F)>0.001F)
-         throw new IllegalStateException("Zubat poser visibility failed: folded wings must be hidden and open wings visible; phase="+phase+" clip="+entity.getSelectedAnimationForValidation()+" scales="+(folded==null?"missing":folded.getScaleX())+"/"+(open==null?"missing":open.getScaleX()));
-       }
-       if((slug.equals("pidgeotto")||slug.equals("pidgeot"))&&isSettledClipSample(phase)) {
-        var closed=model.getAnimationProcessor().getBone("wings_closed");
-        var open=model.getAnimationProcessor().getBone("wings_open");
-        boolean openPairSelected=open!=null&&closed!=null&&open.getScaleX()>=closed.getScaleX();
-        if(closed==null||open==null||closed.isHidden()!=openPairSelected
-           ||closed.childBonesAreHiddenToo()!=openPairSelected
-           ||open.isHidden()==openPairSelected||open.childBonesAreHiddenToo()==openPairSelected)
-         throw new IllegalStateException("Pidge wing poser visibility failed for "+slug+"/"+entity.getSelectedAnimationForValidation()+": hidden hierarchy must match the inactive wing pose; scales="+(closed==null?"missing":closed.getScaleX())+"/"+(open==null?"missing":open.getScaleX())+", hidden="+(closed==null?"missing":closed.isHidden())+"/"+(open==null?"missing":open.isHidden()));
-        wingVisibilitySpecies.add(slug);
-       }
-       // Measure articulation only after the current phase has settled. The
-       // selected-clip/input records already use this gate; applying it to pose
-       // ranges prevents transition blend frames from contaminating static-idle
-       // checks (notably Nidoqueen's native fixed ground_idle stance).
-       if(isSettledClipSample(phase)) {
-        var perSpecies=articulationRanges.computeIfAbsent(slug,k->new java.util.HashMap<>());
-        for(String joint:profileJoints(slug,state)) {
-         var bone=model.getAnimationProcessor().getBone(joint);
-         if(bone==null)throw new IllegalStateException("Locomotion profile references missing bone "+slug+":"+joint);
-         float[] values={bone.getRotationX(),bone.getRotationY(),bone.getRotationZ(),bone.getPositionX(),bone.getPositionY(),bone.getPositionZ()};
-         var range=perSpecies.computeIfAbsent(state+":"+joint,k->{var v=new float[12];java.util.Arrays.fill(v,0,6,Float.MAX_VALUE);java.util.Arrays.fill(v,6,12,-Float.MAX_VALUE);return v;});
-         for(int axis=0;axis<6;axis++){range[axis]=Math.min(range[axis],values[axis]);range[axis+6]=Math.max(range[axis+6],values[axis]);}
-        }
-       }
-       if(slug.equals("fearow")&&isSettledClipSample(phase)) {
-        var body=model.getAnimationProcessor().getBone("body");
-        var head=model.getAnimationProcessor().getBone("head");
-        var leftLeg=model.getAnimationProcessor().getBone("leg_left");
-        var rightLeg=model.getAnimationProcessor().getBone("leg_right");
-        var left=model.getAnimationProcessor().getBone("wing_open_left");
-        var right=model.getAnimationProcessor().getBone("wing_open_right");
-        // The adapted pose lifts the head, straightens both legs and keeps
-        // opposite wing orientation while the native rig's wing chains beat.
-        float pitch=(float)Math.toRadians(22.0D),legSplay=(float)Math.toRadians(5.0D);
-        float lookPitch=head==null?Float.NaN:head.getRotationX();
-        if(body==null||head==null||leftLeg==null||rightLeg==null||left==null||right==null
-           ||Math.abs(Math.abs(body.getRotationX())-pitch)>0.02F
-           ||!Float.isFinite(lookPitch)||lookPitch<(float)Math.toRadians(95.0D)-0.02F
-           ||lookPitch>(float)Math.toRadians(115.0D)+0.02F
-           ||Math.abs(Math.abs(leftLeg.getRotationZ())-legSplay)>0.02F
-           ||Math.abs(Math.abs(rightLeg.getRotationZ())-legSplay)>0.02F
-           ||left.getRotationZ()*right.getRotationZ()>=0.0F)
-         throw new IllegalStateException("Fearow adapted air pose must keep the body/feet aligned, opposite wings beating, and the q.look head within its supported pitch range; head="+lookPitch);
-        fearowNativeAirPoseObserved=true;
-       }
-      if(java.util.Set.of("charmander","charmeleon","charizard").contains(slug)) {
-        var flame=model.getAnimationProcessor().getBone("tail_flame");
-        if(flame==null)throw new IllegalStateException(slug+" runtime model is missing tail_flame bone");
-        String mode=(phase<8||phase>=54)?"idle":(phase>=8&&phase<27)?"walk":null;
-        if(mode!=null) {
-         float[] range=tailFlameRanges.computeIfAbsent(slug,k->new java.util.HashMap<>()).computeIfAbsent(mode,k->{var v=new float[6];java.util.Arrays.fill(v,0,3,Float.MAX_VALUE);java.util.Arrays.fill(v,3,6,-Float.MAX_VALUE);return v;});
-         float[] rotations={flame.getRotationX(),flame.getRotationY(),flame.getRotationZ()};
-         for(int axis=0;axis<3;axis++){range[axis]=Math.min(range[axis],rotations[axis]);range[axis+3]=Math.max(range[axis+3],rotations[axis]);}
-        }
-        String flameClip=entity.getSelectedTailFlameAnimationForValidation();if(flameClip!=null)tailFlameClips.computeIfAbsent(slug,k->java.util.concurrent.ConcurrentHashMap.newKeySet()).add(flameClip);
-       }
-      }
-     if(testEntity==null||!entity.getUUID().equals(testEntity)||worldTicks<110||worldTicks>=BULBASAUR_VALIDATION_TICK)return;
-     var leg=model.getAnimationProcessor().getBone("leg_front_right");var body=model.getAnimationProcessor().getBone("body");
-     minLeg=Math.min(minLeg,leg.getRotationX());maxLeg=Math.max(maxLeg,leg.getRotationX());minBody=Math.min(minBody,body.getPositionY());maxBody=Math.max(maxBody,body.getPositionY());frames++;
-    };
-   }
-   if(mc.level==null||mc.player==null||mc.getSingleplayerServer()==null)return;
-   if(!setup) {
-    setup=true;mc.getSingleplayerServer().execute(()->{
-     var level=mc.getSingleplayerServer().overworld();level.setDayTime(1000);level.getGameRules().getRule(GameRules.RULE_DOMOBSPAWNING).set(false,mc.getSingleplayerServer());
-     for(int x=-8;x<=8;x++)for(int z=-5;z<=12;z++)level.setBlockAndUpdate(new BlockPos(x,100,z),Blocks.STONE.defaultBlockState());
-     // The generated validation world can contain terrain or structures above y=100.
-     // Clear a roomy air volume so the render fixture cannot suffocate before sampling.
-     for(int x=-8;x<=8;x++)for(int z=-5;z<=12;z++)for(int y=101;y<=110;y++)
-      level.setBlockAndUpdate(new BlockPos(x,y,z),Blocks.AIR.defaultBlockState());
-     var player=mc.getSingleplayerServer().getPlayerList().getPlayers().get(0);player.setGameMode(GameType.CREATIVE);player.teleportTo(level,0,101,0,0,12);
-     var b=ModEntities.BULBASAUR.get().create(level);b.moveTo(0,101,4,180,0);b.tame(player);b.setOrderedToSit(false);b.setNoAi(true);level.addFreshEntity(b);testEntity=b.getUUID();initialEntityId=b.getId();
-    });
-   }
-   if(mc.screen!=null || (worldTicks==0 && (initialEntityId==0 || mc.level.getEntity(initialEntityId)==null || mc.player.getY()<100)))return;
-   if(worldTicks>=SPECIES_START_TICK&&worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW&&testEntity!=null) {
-    // Keep real airborne/swimming specimens in view during the longer idle
-    // observation; camera movement does not alter their pose or physics.
-    for(var tracked:mc.level.entitiesForRendering())if(tracked.getUUID().equals(testEntity)) {
-     double dx=tracked.getX()-mc.player.getX(),dz=tracked.getZ()-mc.player.getZ();
-     double dy=tracked.getY()+tracked.getBbHeight()*0.5D-mc.player.getEyeY();
-     mc.player.setYRot((float)(Math.toDegrees(Math.atan2(dz,dx))-90.0D));
-     mc.player.setXRot((float)-Math.toDegrees(Math.atan2(dy,Math.sqrt(dx*dx+dz*dz))));
-     break;
-    }
-   }
-   // Do not skip a short input phase when the client batches ticks between
-   // render frames. Keep every original phase and assertion, and require two
-   // rendered observations before advancing the ten-species fixture.
-   if(worldTicks>=SPECIES_START_TICK && worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW) {
-    String active=species.get((worldTicks-SPECIES_START_TICK)/SPECIES_TEST_WINDOW);
-    int appliedPhase=(worldTicks-SPECIES_START_TICK)%SPECIES_TEST_WINDOW;
-    if(ARTICULATION_VALIDATION_SPECIES.contains(active)
-       && (!active.equals(renderedPhaseSpecies)||renderedPhase!=appliedPhase||renderedPhaseFrames<2
-           ||!clipHasSettled(active)||appliedPhase==79&&!finalIdleObserved(active)
-           ||appliedPhase==23&&!steadyMotionObserved(active,false)
-           ||appliedPhase==46&&!steadyMotionObserved(active,true))) {
-     applyValidationInput(mc,appliedPhase);
-     return;
-    }
-   }
-   worldTicks++;
-   if(worldTicks>=SPECIES_START_TICK&&worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW) {
-    int index=(worldTicks-SPECIES_START_TICK)/SPECIES_TEST_WINDOW;
-    int phase=(worldTicks-SPECIES_START_TICK)%SPECIES_TEST_WINDOW;
-    if(phase==0&&index>completedSpeciesWindows) {
-     completedSpeciesWindows=index;
-     String previous=species.get(index-1);
-     lastApprovedCheck=previous+" teve a janela de renderiza√ß√£o e movimento coletada";
-     System.out.printf("[CLIENT SMOKE] %d/%d ‚Äî %s ‚Äî janela conclu√≠da; verifica√ß√µes de renderiza√ß√£o e movimento coletadas.%n",
-       index,species.size(),previous);
-     System.out.flush();
-    }
-    String slug=species.get(index);
-    String stage=phase<8?"repouso inicial":phase<27?"caminhada":phase<34?"repouso ap√≥s caminhada":phase<54?"corrida":"repouso final";
-    reportProgress(slug,"Validando "+stage);
-   }
-   if(worldTicks==70||worldTicks==170)Screenshot.grab(mc.gameDirectory,mc.getMainRenderTarget(),message->{});
-   if(worldTicks>=100&&worldTicks<BULBASAUR_VALIDATION_TICK)mc.getSingleplayerServer().execute(()->{
-    var b=(MinemonCreature)mc.getSingleplayerServer().overworld().getEntity(testEntity);if(b!=null){b.setNoAi(true);b.getNavigation().stop();if(b.getX()>2.5)direction=-1;if(b.getX()< -2.5)direction=1;b.moveTo(b.getX()+direction*0.08,b.getY(),b.getZ(),b.getYRot(),b.getXRot());}
-   });
-   if(worldTicks==BULBASAUR_VALIDATION_TICK){
-    if(frames<10||maxLeg-minLeg<0.1F||maxBody-minBody<0.01F)throw new IllegalStateException("Rendered body animation did not advance: frames="+frames+" leg="+(maxLeg-minLeg)+" body="+(maxBody-minBody));
-    Files.writeString(Path.of("client-validation.txt"),"PASS WORLD: Bulbasaur rendered in a Minecraft world; frames="+frames+" leg rotation range="+(maxLeg-minLeg)+" body position range="+(maxBody-minBody)+"\n",StandardOpenOption.APPEND);
-    mc.getSingleplayerServer().execute(()->{
-     var level=mc.getSingleplayerServer().overworld();var old=level.getEntity(testEntity);if(old!=null)old.discard();
-     var player=mc.getSingleplayerServer().getPlayerList().getPlayers().get(0);player.teleportTo(level,0,101,0,0,12);player.setGameMode(GameType.SURVIVAL);player.setHealth(20);player.getFoodData().setFoodLevel(0);
-     var wild=ModEntities.BULBASAUR.get().create(level);wild.moveTo(0,101,1.5,180,0);level.addFreshEntity(wild);testEntity=wild.getUUID();wild.hurt(net.minecraft.world.damagesource.DamageSource.playerAttack(player),1);
-    });
-   }
-   if(worldTicks==COMBAT_VALIDATION_TICK)mc.getSingleplayerServer().execute(()->{
-    var player=mc.getSingleplayerServer().getPlayerList().getPlayers().get(0);var wild=(MinemonCreature)mc.getSingleplayerServer().overworld().getEntity(testEntity);
-    combatPassed=combatHits>0&&player.getHealth()<20&&player.isAlive();
-    if(!combatPassed)throw new IllegalStateException("Connected Survival player did not receive retaliation damage; health="+player.getHealth()+" target="+wild.getTarget());
-    try{Files.writeString(Path.of("client-validation.txt"),"PASS COMBAT: connected Survival player received melee retaliation; damage events="+combatHits+" health="+player.getHealth()+"\n",StandardOpenOption.APPEND);}catch(java.io.IOException e){throw new RuntimeException(e);}
-    player.setGameMode(GameType.CREATIVE);player.setHealth(20);player.teleportTo(mc.getSingleplayerServer().overworld(),0,101,0,0,12);player.fallDistance=0;
-   });
-   if(worldTicks>=SPECIES_START_TICK && worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW && (worldTicks-SPECIES_START_TICK)%SPECIES_TEST_WINDOW==0) {
-    String slug=species.get((worldTicks-SPECIES_START_TICK)/SPECIES_TEST_WINDOW);
-    reportProgress(slug,"carregamento");
-    mc.getSingleplayerServer().execute(()->{
-     var level=mc.getSingleplayerServer().overworld();var previous=level.getEntity(testEntity);if(previous!=null)previous.discard();
-    boolean aquatic=fixtureWater(slug);
-    // Still, contained water is required for an actual zero-input idle:
-    // exposed sources above the platform push large entities like Gyarados.
-    // Centered at z=4, Lapras extends to z=2.8 (width 2.4). The old
-    // z=3..5 pool intersected its hitbox with the solid rim at z=2,
-    // allowing collision step-up to select ground_idle during final rest.
-    // Leave clearance for the complete roster, not just the entity center.
-    for(int x=-9;x<=9;x++)for(int z=1;z<=7;z++){
-     boolean pool=aquatic&&x>=-8&&x<=8&&z>=2&&z<=6;
-     level.setBlockAndUpdate(new BlockPos(x,96,z),Blocks.STONE.defaultBlockState());
-     for(int y=97;y<=100;y++)level.setBlockAndUpdate(new BlockPos(x,y,z),(pool?Blocks.WATER:Blocks.STONE).defaultBlockState());
-     level.setBlockAndUpdate(new BlockPos(x,101,z),Blocks.AIR.defaultBlockState());
-    }
-    var next=ModEntities.SPECIES.get(slug).get().create(level);
-    if(fixtureAir(slug)&&SpeciesBehaviorProfiles.profile(slug)==SpeciesBehaviorProfiles.Profile.GROUND_FLIGHT){
-     var saved=new net.minecraft.nbt.CompoundTag();next.addAdditionalSaveData(saved);saved.putString("NaturalBehaviorPhase","AIR");next.readAdditionalSaveData(saved);
-    }
-    double waterY=fixtureSurface(slug)?101.0D-WaterMovementGoal.preferredSurfaceDepth(next):101.0D-next.getBbHeight()-0.35D;
-    next.moveTo(0,aquatic?waterY:101.0D,4,180,0);next.addTag("minemon-locomotion-fixture");next.setNoAi(false);next.goalSelector.removeAllGoals();next.targetSelector.removeAllGoals();setValidationPhase(next,0);level.addFreshEntity(next);testEntity=next.getUUID();
-    });
-   }
-   if(worldTicks>=SPECIES_START_TICK && worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW)
-    applyValidationInput(mc,Math.floorMod(worldTicks-SPECIES_START_TICK,SPECIES_TEST_WINDOW));
-   if(worldTicks>=SPECIES_START_TICK+20 && worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW && (worldTicks-(SPECIES_START_TICK+20))%SPECIES_TEST_WINDOW==0)Screenshot.grab(mc.gameDirectory,mc.getMainRenderTarget(),message->{});
-   if(worldTicks>=SPECIES_START_TICK&&worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW){
-    String active=species.get((worldTicks-SPECIES_START_TICK)/SPECIES_TEST_WINDOW);
-    int phase=(worldTicks-SPECIES_START_TICK)%SPECIES_TEST_WINDOW;
-    if(fixtureAir(active)&&java.util.Set.of("spearow","pidgey","fearow","haunter","gengar").contains(active)
-       &&phase>=18&&phase<=23&&flightFrames.add(active+":"+phase))
-     Screenshot.grab(mc.gameDirectory,"flight-"+active+"-"+phase+".png",mc.getMainRenderTarget(),message->{});
-   }
-   if(arbokScreenshotPending){
-    Screenshot.grab(mc.gameDirectory,"arbok-front-"+locomotionState(renderedPhase)+".png",mc.getMainRenderTarget(),message->{});
-    mc.options.hideGui=false;arbokScreenshotPending=false;
-   }
-   if(worldTicks>=SPECIES_START_TICK && worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW
-       &&species.get((worldTicks-SPECIES_START_TICK)/SPECIES_TEST_WINDOW).equals("arbok")
-       &&java.util.Set.of(5,20,73).contains((worldTicks-SPECIES_START_TICK)%SPECIES_TEST_WINDOW)){
-    // One rendered frame later, this produces an unobstructed front view of
-    // the cobra hood so the UV remap can be inspected in the client artifact.
-    mc.options.hideGui=true;arbokScreenshotPending=true;
-   }
-   if(worldTicks>=SPECIES_START_TICK && worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW && ((worldTicks-SPECIES_START_TICK)%SPECIES_TEST_WINDOW)==42
-       && java.util.Set.of("charmander","charmeleon","charizard","moltres","ponyta","rapidash").contains(species.get((worldTicks-SPECIES_START_TICK)/SPECIES_TEST_WINDOW)))Screenshot.grab(mc.gameDirectory,"fire-night-"+species.get((worldTicks-SPECIES_START_TICK)/SPECIES_TEST_WINDOW)+".png",mc.getMainRenderTarget(),message->{});
-   if(worldTicks==SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW) {
-    if(!combatPassed)throw new IllegalStateException("Survival combat check did not pass");
-    if(!renderedSpecies.containsAll(species))throw new IllegalStateException("Some species were not rendered: expected="+species+" actual="+renderedSpecies);
-    for(String slug:species) {
-     boolean bodyMoved=motionRanges.entrySet().stream().filter(e->e.getKey().startsWith(slug+":")).anyMatch(e->{for(int axis=0;axis<6;axis++)if(e.getValue()[axis+6]-e.getValue()[axis]>0.0001)return true;return false;});
-     var definition=SpeciesDefinitions.get(slug);
-     boolean staticFallback=definition!=null&&"static".equals(definition.movementFallback());
-     if(!walkedSpecies.contains(slug)||(!staticFallback&&!bodyMoved))throw new IllegalStateException("No rendered movement for "+slug+"; displacement="+walkedSpecies.contains(slug)+" bodyChanged="+bodyMoved+" staticFallback="+staticFallback);
-    }
-    for(String slug:java.util.List.of("charmander","charmeleon","charizard")) {
-     if(!species.contains(slug))continue;
-     float[] arms=fireStarterArmRanges.get(slug);
-     // Native Charizard air_fly arms are 17.5 +/- 1 degrees;
-     // the adapted ground gait uses 55 degrees. Validate the active source
-     // flight pose without weakening the other starters' ground regression.
-     float minimumArm=slug.equals("charizard")&&fixtureAir(slug)?(float)Math.toRadians(16.0D):0.35F;
-     float maximumArm=slug.equals("charizard")&&fixtureAir(slug)?(float)Math.toRadians(19.0D):Float.MAX_VALUE;
-     boolean walkArms=arms!=null&&arms[0]>=minimumArm&&arms[1]>=minimumArm
-       &&arms[0]<=maximumArm&&arms[1]<=maximumArm;
-     boolean fasterArms=slug.equals("charmander")||(arms!=null&&arms[2]>=minimumArm&&arms[3]>=minimumArm&&arms[2]<=maximumArm&&arms[3]<=maximumArm);
-     if(!walkArms||!fasterArms)
-      throw new IllegalStateException("Fire-starter arms remained near T-pose during validated movement for "+slug+"; arm rotations="+java.util.Arrays.toString(arms));
-    }
-    validateArticulationProfiles();
-    if(species.contains("gastly")) {
-     var particleJson=new ResourceLocation(Minemon.MOD_ID,"particles/gastly_ghostly_smoke.json");
-     if(mc.getResourceManager().getResource(particleJson).isEmpty())
-      throw new IllegalStateException("Missing Gastly Cobblemon smoke particle definition");
-     int smokeParticles=br.com.petrickfaria.minemon.client.GastlySmokeParticle.spawnCountForValidation();
-     if(smokeParticles<10)throw new IllegalStateException("Gastly's native idle/walk smoke emitter did not create client particles: "+smokeParticles);
-     Files.writeString(Path.of("client-validation.txt"),"PASS GASTLY SMOKE: Cobblemon ghostly_smoke definition loaded and "+smokeParticles+" client particle instances were created during the full render smoke. Manual appearance review remains separate.\\n",StandardOpenOption.APPEND);
-    }
-    for(String slug:java.util.List.of("spearow","fearow","abra","kadabra","alakazam","bellsprout","geodude","golem","slowpoke","slowbro","mewtwo","mew")) {
-     if(!species.contains(slug))continue;
-     float[] look=sourceLookRanges.get(slug);
-     if(look==null||look[2]-look[0]<0.05F||look[3]-look[1]<0.05F)
-      throw new IllegalStateException("Source q.look adaptation did not move the head for "+slug+": "+java.util.Arrays.toString(look));
-    }
-    var selectedPidge=java.util.Set.of("pidgeotto","pidgeot").stream().filter(species::contains).collect(java.util.stream.Collectors.toSet());
-    if(!wingVisibilitySpecies.containsAll(selectedPidge))
-     throw new IllegalStateException("Pidge wing visibility was not sampled for selected models "+selectedPidge+": "+wingVisibilitySpecies);
-    Files.writeString(Path.of("client-validation.txt"),"PASS LOCOMOTION: every selected species moved and had changing body bone transforms.\n",StandardOpenOption.APPEND);
-    if(!selectedPidge.isEmpty())Files.writeString(Path.of("client-validation.txt"),"PASS PIDGE WINGS: selected Pidgeotto/Pidgeot rendered the open pair only in settled idle/walk/run poses; closed alternatives stayed hidden.\n",StandardOpenOption.APPEND);
-    for(String slug:java.util.List.of("mewtwo","mew"))if(species.contains(slug)) {
-     float[] pitch=sourcePitchRanges.get(slug);
-     if(pitch==null||pitch[1]-pitch[0]<0.05F)throw new IllegalStateException("Source q.pitch_tilt adaptation did not move "+slug+"'s body: "+java.util.Arrays.toString(pitch));
-    }
-    var selectedLook=java.util.List.of("spearow","fearow","abra","kadabra","alakazam","bellsprout","geodude","golem","slowpoke","slowbro","mewtwo","mew").stream().filter(species::contains).toList();
-    if(!selectedLook.isEmpty())Files.writeString(Path.of("client-validation.txt"),"PASS SOURCE LOOK: selected head bones respond to source poser look input: "+selectedLook+"\n",StandardOpenOption.APPEND);
-    for(String slug:java.util.List.of("mewtwo","mew"))if(species.contains(slug))Files.writeString(Path.of("client-validation.txt"),"PASS SOURCE PITCH: "+slug+" source q.pitch_tilt input moves the body bone: "+java.util.Arrays.toString(sourcePitchRanges.get(slug))+"\n",StandardOpenOption.APPEND);
-    var selectedStarters=java.util.List.of("charmander","charmeleon","charizard").stream().filter(species::contains).toList();
-    if(!selectedStarters.isEmpty())Files.writeString(Path.of("client-validation.txt"),"PASS FIRE-STARTER ARMS: validated walk and faster-movement poses remain lowered: "+selectedStarters+"; Charmander uses no source run clip.\n",StandardOpenOption.APPEND);
-    var selectedFireHorses=java.util.List.of("ponyta","rapidash").stream().filter(species::contains).toList();
-    for(String slug:selectedFireHorses) {
-     var samples=MinemonRenderer.fireOverlayFrameSamples().getOrDefault(slug,java.util.Set.of());
-     var bones=MinemonRenderer.fireOverlayBoneSamples().getOrDefault(slug,java.util.Set.of());
-     if(!samples.containsAll(java.util.Set.of(0,1,2,3))||bones.isEmpty())
-      throw new IllegalStateException("Animated original fire overlay did not render all frames/bones for "+slug+": frames="+samples+" bones="+bones);
-     if(!bones.contains("tail")||bones.stream().noneMatch(name->name.startsWith("fire_mane")||name.endsWith("_fire")))
-      throw new IllegalStateException("Selective fire overlay lost the "+slug+" tail or mane bone: "+bones);
-    }
-    if(!selectedFireHorses.isEmpty())Files.writeString(Path.of("client-validation.txt"),"PASS PONYTA/RAPIDASH FIRE OVERLAYS: source 10 fps atlas frames rendered only on mane, tail and fire bones: "+selectedFireHorses+".\n",StandardOpenOption.APPEND);
-    for(String slug:selectedFireHorses){
-     var drawn=MinemonRenderer.drawnFireBoneSamples().getOrDefault(slug,java.util.Set.of());
-     if(!drawn.contains("tail")||drawn.stream().noneMatch(n->n.startsWith("fire_mane")||n.endsWith("_fire")))throw new IllegalStateException("No actual full-bright tail/mane cubes rendered: "+slug+" "+drawn);
-    }
-    var selectedEmissive=java.util.List.of("charmander","charmeleon","charizard","moltres").stream().filter(species::contains).toList();
-    for(String slug:selectedEmissive) {
-     var samples=MinemonRenderer.fireOverlayFrameSamples().getOrDefault(slug,java.util.Set.of());
-     var bones=MinemonRenderer.fireOverlayBoneSamples().getOrDefault(slug,java.util.Set.of());
-     if(!samples.contains(0)||bones.isEmpty())throw new IllegalStateException("Full-bright flame atlas did not render on fire rig for "+slug+": frames="+samples+" bones="+bones);
-     var drawn=MinemonRenderer.drawnFireBoneSamples().getOrDefault(slug,java.util.Set.of());
-     if(drawn.isEmpty())throw new IllegalStateException("No actual full-bright cubes rendered: "+slug);
-     if(!slug.equals("moltres")&&!drawn.equals(java.util.Set.of("tail_flame")))throw new IllegalStateException("Starter overlay actually rendered a body/belly cube: "+slug+" "+drawn);
-     if(slug.equals("moltres")) {
-      if(!bones.equals(java.util.Set.of("FULL_MODEL")))
-       throw new IllegalStateException("Moltres full-bright pass must retain the approved complete body: "+bones);
-     } else if(!bones.equals(java.util.Set.of("tail_flame")))
-      throw new IllegalStateException(slug+" full-bright pass must render the isolated tail_flame bone only: "+bones);
-     var mask=new net.minecraft.resources.ResourceLocation(Minemon.MOD_ID,"textures/emissive/"+(slug.equals("moltres")?"moltres_fire":slug+"_tail_flame")+".png");
-     if(mc.getResourceManager().getResource(mask).isEmpty())throw new IllegalStateException("Missing selective emissive mask "+mask);
-    }
-    if(!selectedEmissive.isEmpty())Files.writeString(Path.of("client-validation.txt"),"PASS EMISSIVE FIRE: isolated masks loaded; starter tail_flame bones rendered selectively and Moltres complete body rendered full-bright: "+selectedEmissive+".\n",StandardOpenOption.APPEND);
-    Files.writeString(Path.of("client-validation.txt"),"PASS ROSTER: every selected species rendered with its texture in a world: "+renderedSpecies+"\n",StandardOpenOption.APPEND);
-    completedSpeciesWindows=species.size();
-    lastApprovedCheck="all selected species completed render/movement sampling";
-    for(String gas:java.util.List.of("koffing","weezing"))if(species.contains(gas)){
-     int particles=smokeParticleSamples.getOrDefault(gas,0);
-     if(particles<2)throw new IllegalStateException("Real smoke particles were not emitted for "+gas+": "+particles);
-     Files.writeString(Path.of("client-validation.txt"),"PASS GAS SMOKE: "+gas+" real Minecraft smoke particles="+particles+"\n",StandardOpenOption.APPEND);
-    }
-    mc.stop();
-   }
-  }catch(Exception e){throw new IllegalStateException("Minemon client validation failed",e);}
- }
-  private static void applyValidationInput(Minecraft mc,int phase) {
-    mc.getSingleplayerServer().execute(()->{
-    var current=(MinemonCreature)mc.getSingleplayerServer().overworld().getEntity(testEntity);
-     if(current!=null){
-     setValidationPhase(current,phase);
-     if(java.util.Set.of("charmander","charmeleon","charizard","moltres","ponyta","rapidash").contains(current.getSpeciesSlug()))
-      mc.getSingleplayerServer().overworld().setDayTime(phase>=27&&phase<54?18000L:1000L);
-     // Keep the fixture's movement deterministic while still exercising its real travel
-     // and render path. The goals are removed at spawn, so no pathfinding competes with
-     // the controlled velocity used to select the locomotion clips.
-     current.setNoAi(false);current.getNavigation().stop();
-     if(current.getX()>2.5)direction=-1;if(current.getX()<-2.5)direction=1;
-     double animationVelocity=animationVelocity(phase);
-     // Preserve ordinary land gravity: resetting Y to zero on every server
-     // update prevents the negative collision step that maintains onGround,
-     // which correctly disqualifies a production creature from ground runs.
-     double vertical=current.isFlyingSpecies()||current.isAquaticSpecies()&&current.isInWater()?0.0D:current.getDeltaMovement().y;
-     if(animationVelocity>0.0D){
-      current.setDeltaMovement(direction*animationVelocity,vertical,0);
-      current.hasImpulse=true;
-     } else {
-      current.setDeltaMovement(0,vertical,0);
-     }
-    }
-    });
-  }
-  private static double animationVelocity(int phase) {
-   if(phase<8 || phase>=54)return 0.0D;
-   if(phase<16)return (phase-7)*0.00625D;
-   if(phase<24)return 0.05D;
-   if(phase<27)return (27-phase)*0.0166667D;
-   if(phase<34)return 0.0D;
-   if(phase<38)return (phase-33)*0.03D;
-   if(phase<47)return 0.12D;
-   if(phase<49)return 0.16D;
-   if(phase<52)return 0.05D;
-   return 0.0D;
-  }
-  private static boolean isSettledClipSample(int phase) {
-   if(!clipHasSettled(renderedPhaseSpecies))return false;
-   // Ignore samples at phase boundaries; the model renderer can run before
-   // GeckoLib has evaluated this tick's controller predicate.
-   return (phase>=3&&phase<8) || (phase>=12&&phase<16) || (phase>=18&&phase<24)
-     || (phase>=25&&phase<27) || (phase>=29&&phase<34) || (phase>=36&&phase<38)
-     || (phase>=41&&phase<47) || (phase>=47&&phase<49) || (phase>=50&&phase<54) || phase>=68;
-  }
-  private static final String VALIDATION_PHASE_PREFIX="minemon-validation-phase:";
-  private static void setValidationPhase(MinemonCreature entity,int phase) {
-   if(!Boolean.getBoolean("minemon.clientSmokeTest"))return;
-   String marker=VALIDATION_PHASE_PREFIX+phase;
-   boolean phaseChanged=entity.getCustomName()==null||!marker.equals(entity.getCustomName().getString());
-   entity.setCustomName(net.minecraft.network.chat.Component.literal(marker));
-   entity.setCustomNameVisible(false);
-   entity.setSpontaneousRunForValidation(phase>=34&&phase<50);
-   if(phaseChanged&&entity.level instanceof net.minecraft.server.level.ServerLevel level) {
-    // Each of the 80 fixture phases still waits for two real rendered samples.
-    // Send the changed phase through the normal network packet immediately,
-    // rather than adding the entity tracker's multi-tick delay to every phase.
-    level.getChunkSource().broadcastAndSend(entity,new net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket(
-        entity.getId(),entity.getEntityData(),true));
-   }
-  }
-  private static Integer validationPhase(MinemonCreature entity) {
-   if(!Boolean.getBoolean("minemon.clientSmokeTest")||entity.getCustomName()==null)return null;
-   String marker=entity.getCustomName().getString();
-   if(!marker.startsWith(VALIDATION_PHASE_PREFIX))return null;
-   try {int phase=Integer.parseInt(marker.substring(VALIDATION_PHASE_PREFIX.length()));return phase>=0&&phase<SPECIES_TEST_WINDOW?phase:null;}
-   catch(NumberFormatException ignored) {return null;}
-  }
-  private static String locomotionState(int phase) {
-   if(phase<8)return "IDLE_INITIAL";
-   if(phase<16)return "WALK_START";
-   if(phase<24)return "WALK_STEADY";
-   if(phase<27)return "WALK_DECEL";
-   if(phase<34)return "IDLE_RETURN";
-   if(phase<38)return "RUN_START";
-   if(phase<47)return "RUN_STEADY";
-   if(phase<54)return "RUN_DECEL";
-   return "IDLE_FINAL";
-  }
-  private static boolean hasSelectedClip(String slug,String state,String clip) {
-   return clip!=null && articulationClips.getOrDefault(slug,java.util.Map.of()).getOrDefault(state,java.util.Set.of()).contains(clip);
-  }
-  private static boolean hasVelocitySample(String slug,String state,String clip,boolean aboveRunThreshold) {
-   for(String sample:articulationInputs.getOrDefault(slug,java.util.Map.of()).getOrDefault(state,java.util.Set.of())) {
-    if(!sample.contains("clip="+clip+",velocitySqr="))continue;
-    int start=sample.indexOf("velocitySqr=")+12;int end=sample.indexOf(',',start);
-    if(end<0)continue;
-    double speedSqr=Double.parseDouble(sample.substring(start,end));
-    if((speedSqr>0.01D)==aboveRunThreshold)return true;
-   }
-   return false;
-  }
-  private static int movingJointCount(String slug,String state) {
-   int moved=0;
-   for(String joint:profileJoints(slug,state)) {
-    float[] range=articulationRanges.getOrDefault(slug,java.util.Map.of()).get(state+":"+joint);
-    if(range==null)continue;
-    for(int axis=0;axis<6;axis++)if(range[axis+6]-range[axis]>(axis<3?0.02F:0.05F)){moved++;break;}
-   }
-   return moved;
-  }
-  private static boolean sourceStaticIdle(String slug) {
-   return !java.util.Set.of("fearow","articuno","zapdos","moltres").contains(slug)&&ADDITIONAL_PROFILES.getOrDefault(slug,java.util.Map.of()).containsKey("idle_static");
-  }
-  private static boolean sourcePoseTransition(String slug) {
-   // Gengar now has a generated body/tail oscillation over its retained poses.
-   // Require temporal articulation and observe a complete slow float cycle.
-   return !java.util.Set.of("gengar","fearow","articuno","zapdos","moltres").contains(slug)&&ADDITIONAL_PROFILES.getOrDefault(slug,java.util.Map.of()).containsKey("pose_transition");
-  }
-  private static int validateSourcePoseTransition(String slug,String idleState,String movementState) {
-   var profile=ADDITIONAL_PROFILES.getOrDefault(slug,java.util.Map.of()).get("pose_transition");
-   if(profile==null||profile.isEmpty())throw new IllegalStateException("Missing source pose transition profile for "+slug);
-   if(articulationSampleCounts.getOrDefault(slug,java.util.Map.of()).getOrDefault(idleState,0)<2
-      ||articulationSampleCounts.getOrDefault(slug,java.util.Map.of()).getOrDefault(movementState,0)<2)
-    throw new IllegalStateException("Insufficient settled pose samples for "+slug+" states="+idleState+"/"+movementState);
-   int transitioned=0;
-   for(String joint:profile) {
-    float[] idle=articulationRanges.getOrDefault(slug,java.util.Map.of()).get(idleState+":"+joint);
-    float[] movement=articulationRanges.getOrDefault(slug,java.util.Map.of()).get(movementState+":"+joint);
-    if(idle==null||movement==null)throw new IllegalStateException("Missing settled source pose "+slug+":"+joint);
-    for(int axis=0;axis<6;axis++) {
-     float tolerance=axis<3?0.02F:0.05F;
-     if(!Float.isFinite(idle[axis])||!Float.isFinite(idle[axis+6])||idle[axis+6]<idle[axis]
-        ||idle[axis+6]-idle[axis]>tolerance||!Float.isFinite(movement[axis])
-        ||!Float.isFinite(movement[axis+6])||movement[axis+6]<movement[axis]
-        ||movement[axis+6]-movement[axis]>tolerance)
-      throw new IllegalStateException("Native source pose should settle without invented cyclic movement for "+slug+":"+joint);
-     float idlePose=(idle[axis]+idle[axis+6])*0.5F;
-     float movementPose=(movement[axis]+movement[axis+6])*0.5F;
-     if(Math.abs(movementPose-idlePose)>tolerance){transitioned++;break;}
-    }
-   }
-   if(transitioned<1)throw new IllegalStateException("Native movement pose did not articulate any profiled joint for "+slug);
-   return transitioned;
-  }
-  private static void validateSourceStaticIdle(String slug) {
-   if(articulationSampleCounts.getOrDefault(slug,java.util.Map.of()).getOrDefault("IDLE_FINAL",0)<2)
-    throw new IllegalStateException("Insufficient static idle samples for "+slug);
-   for(String joint:profileJoints(slug,"IDLE_FINAL")) {
-    float[] range=articulationRanges.getOrDefault(slug,java.util.Map.of()).get("IDLE_FINAL:"+joint);
-    if(range==null)throw new IllegalStateException("Missing static idle pose "+slug+":"+joint);
-    for(int axis=0;axis<6;axis++)
-     if(!Float.isFinite(range[axis])||!Float.isFinite(range[axis+6])||range[axis+6]<range[axis]
-        ||range[axis+6]-range[axis]>(axis<3?0.02F:0.05F))
-      throw new IllegalStateException("Native static idle pose was not stable for "+slug+":"+joint);
-   }
-  }
-  private static void validateArticulationProfiles() throws java.io.IOException {
-   StringBuilder report=new StringBuilder();
-   int passed=0,knownFallbacks=0;
-   for(String slug:java.util.List.of("charmander","charmeleon","charizard")) {
-    if(!species.contains(slug))continue;
-    var ranges=tailFlameRanges.getOrDefault(slug,java.util.Map.of());var flameIdle=ranges.get("idle");var flameWalk=ranges.get("walk");
-    String expected="animation."+slug+".minemon_tail_flame";
-    boolean animatedFlame=flameIdle!=null&&flameWalk!=null&&tailFlameClips.getOrDefault(slug,java.util.Set.of()).contains(expected);
-    for(int axis=0;axis<3&&animatedFlame;axis++)animatedFlame=flameIdle[axis+3]-flameIdle[axis]>0.01F&&flameWalk[axis+3]-flameWalk[axis]>0.01F;
-    if(!animatedFlame)throw new IllegalStateException(slug+" tail flame did not animate independently during idle and walk; idle="+java.util.Arrays.toString(flameIdle)+" walk="+java.util.Arrays.toString(flameWalk)+" selected="+tailFlameClips.get(slug));
-    Files.writeString(Path.of("client-validation.txt"),"PASS "+slug.toUpperCase(java.util.Locale.ROOT)+" TAIL FLAME: independent clip="+tailFlameClips.get(slug)+" changed in idle range="+java.util.Arrays.toString(flameIdle)+" and walk range="+java.util.Arrays.toString(flameWalk)+".\n",StandardOpenOption.APPEND);
-   }
-   for(var entry:ARTICULATION_PROFILES.entrySet()) {
-    String slug=entry.getKey();
-    if(!ARTICULATION_VALIDATION_SPECIES.contains(slug)||!species.contains(slug))continue;
-    var definition=SpeciesDefinitions.get(slug);
-    if(definition==null)throw new IllegalStateException("Missing test profile species "+slug);
-    String fallback=definition.movementFallback();
-    if("static".equals(fallback)||"idle".equals(fallback)) {
-    String expected=expectedWalk(slug,definition);
-     if(!hasSelectedClip(slug,"WALK_STEADY",expected))throw new IllegalStateException("Fallback classification did not match selected walk clip for "+slug);
-     if(ADDITIONAL_PROFILES.containsKey(slug)) {
-      if(!hasSelectedClip(slug,"IDLE_INITIAL",expectedIdle(slug,definition))||!hasSelectedClip(slug,"IDLE_FINAL",expectedIdle(slug,definition)))
-       throw new IllegalStateException("Source idle fallback did not select the expected clip for "+slug);
-      if(sourceStaticIdle(slug))validateSourceStaticIdle(slug);
-      else if(movingJointCount(slug,"IDLE_FINAL")<1)
-       throw new IllegalStateException("Animated source idle fallback did not animate for "+slug);
-     }
-     knownFallbacks++;
-     report.append("EXPECTED GAP ").append(slug).append(": fallback=").append(fallback)
-       .append("; selected walk=").append(expected).append("; no gait pass claimed.\n");
-     continue;
-    }
-    String walk=expectedWalk(slug,definition);
-    String run=fixtureAir(slug)||fixtureWater(slug)
-      ?null:SpeciesAssetIndex.clip(slug,"ground_run","run");
-    String idle=expectedIdle(slug,definition);
-    if(!hasSelectedClip(slug,"IDLE_INITIAL",idle)||!hasSelectedClip(slug,"IDLE_FINAL",idle)||!hasSelectedClip(slug,"IDLE_RETURN",idle))
-     throw new IllegalStateException("Idle state selection did not return to expected clip for "+slug+" expected="+idle+" observed="+articulationClips.get(slug));
-    if(!hasSelectedClip(slug,"WALK_STEADY",walk)||!hasSelectedClip(slug,"WALK_START",walk)||!hasSelectedClip(slug,"WALK_DECEL",walk))
-     throw new IllegalStateException("Walk state selection failed for "+slug+" expected="+walk+" states="+articulationClips.get(slug)+" samples="+articulationSampleCounts.get(slug)+" measured="+articulationInputs.get(slug));
-    if(run!=null&&!hasSelectedClip(slug,"RUN_STEADY",run))
-     throw new IllegalStateException("Run state selection failed for "+slug+" expected="+run+" states="+articulationClips.get(slug));
-    if(run!=null) {
-     var deceleration=articulationClips.getOrDefault(slug,java.util.Map.of()).getOrDefault("RUN_DECEL",java.util.Set.of());
-     boolean observedLowerSpeed=hasVelocitySample(slug,"RUN_DECEL",walk,false)||hasVelocitySample(slug,"RUN_DECEL",idle,false);
-     if(!deceleration.contains(run)||java.util.Collections.disjoint(deceleration,java.util.Set.of(walk,idle))
-        ||!hasVelocitySample(slug,"RUN_DECEL",run,true)||!observedLowerSpeed)
-      throw new IllegalStateException("Run deceleration did not transition from run to a lower-speed state for "+slug+" run="+run+" walk="+walk+" idle="+idle+" observed="+deceleration+" measured="+articulationInputs.getOrDefault(slug,java.util.Map.of()).get("RUN_DECEL"));
-    }
-    int walkJoints=movingJointCount(slug,"WALK_STEADY");
-    int runJoints=run==null?0:movingJointCount(slug,"RUN_STEADY");
-    int minimum=slug.equals("charmander")?2:1;
-    int idleJoints=movingJointCount(slug,"IDLE_FINAL");
-    boolean staticIdle=sourceStaticIdle(slug);
-    if(staticIdle)validateSourceStaticIdle(slug);
-    boolean poseTransition=sourcePoseTransition(slug);
-    int transitionedJoints=poseTransition?validateSourcePoseTransition(slug,"IDLE_FINAL","WALK_STEADY"):0;
-    if((!staticIdle&&!poseTransition&&idleJoints<minimum)||(!poseTransition&&walkJoints<minimum)
-       ||(poseTransition&&(idleJoints!=0||walkJoints!=0))||(run!=null&&runJoints<minimum))
-     throw new IllegalStateException("Relevant locomotion joints did not animate for "+slug+" idle="+idleJoints+" walk="+walkJoints+" run="+runJoints+" required="+minimum);
-    if(slug.equals("fearow")&&fixtureAir(slug))report.append("FEAROW FLIGHT: adapted source air pose lifts the head, aligns the feet and renders compatible wing beats.\n");
-    if(slug.equals("spearow")&&fixtureAir(slug))report.append("SPEAROW FLIGHT: model-specific air clips flap all three retained wing joints; ground walk is not selected in air.\n");
-    else if(staticIdle)report.append("SOURCE STATIC IDLE ").append(slug).append(": native stance stable; no idle oscillation claimed.\n");
-    if(poseTransition)report.append("SOURCE STATIC POSE TRANSITION ").append(slug).append(": native idle and movement clips are stable poses; profiled joints changed between settled poses=").append(transitionedJoints).append(".\n");
-    passed++;
-    report.append("PASS ").append(slug).append(": idle/walk").append(run==null?" (no source run clip)":"/run").append(" clips selected; profile joints changed idle=")
-      .append(idleJoints).append(" walk=").append(walkJoints).append(" run=").append(runJoints).append("; transition samples=")
-      .append(articulationClips.get(slug)).append("; synchronized inputs=").append(articulationInputs.get(slug)).append(".\n");
-   }
-   var selectedProfiles=ARTICULATION_VALIDATION_SPECIES.stream().filter(species::contains).collect(java.util.stream.Collectors.toSet());
-   Files.writeString(Path.of("client-validation.txt"),"ARTICULATION PROFILES: passed="+passed+" expected fallback gaps="+knownFallbacks+" selected profiles="+selectedProfiles.size()+" detailed scope="+selectedProfiles+"; unselected species were not tested in this targeted run.\n"+report,StandardOpenOption.APPEND);
-  }
-  private static String expectedIdle(String slug,SpeciesDefinitions.Definition definition) {
-   if(fixtureWater(slug)) {
-    String water=fixtureSurface(slug)?firstMappedClip(definition,"surface_water_idle","surfacewater_idle","water_surface_idle","water_idle"):firstMappedClip(definition,"water_idle","water_surface_idle","surface_water_idle","surfacewater_idle");
-    if(water!=null)return water;
-   }
-   String air=fixtureAir(slug)?SpeciesAssetIndex.clip(slug,"air_idle","air_idle"):null;
-   return air==null?definition.idle():air;
-  }
-  private static String expectedWalk(String slug,SpeciesDefinitions.Definition definition) {
-   if(fixtureWater(slug)) {
-    String water=fixtureSurface(slug)?firstMappedClip(definition,"surface_water_swim","surfacewater_swim","water_surface_swim","water_swim"):firstMappedClip(definition,"water_swim","water_surface_swim","surface_water_swim","surfacewater_swim");
-    if(water!=null)return water;
-   }
-   if(!fixtureAir(slug))return definition.walk();
-   String air=SpeciesAssetIndex.clip(slug,"air_fly","air_fly");
-   if(air==null)air=SpeciesAssetIndex.clip(slug,"air_glide","air_glide");
-   if(air==null)air=SpeciesAssetIndex.clip(slug,"air_idle","air_idle");
-   return air==null?definition.walk():air;
-  }
-  private static String firstMappedClip(SpeciesDefinitions.Definition definition,String... keys) {
-   for(String key:keys) {String clip=definition.clips().get(key);if(clip!=null)return clip;}
-   return null;
-  }
-}
+Y™Áäx-ÆÈ‹j◊ù¢Îi∫⁄+äßj[hëÈ‹¢ÈÌ€~8ı:-jZ.∂õ≠ñ)ﬁ≥W6∂vR'"Ê6ˆ“ÁWG&ñ6∂f&ñÊ÷ñÊV÷ˆ‚Êv÷WFW7C∞¶ñ◊˜'B'"Ê6ˆ“ÁWG&ñ6∂f&ñÊ÷ñÊV÷ˆ‚‰÷ñÊV÷ˆ„∞¶ñ◊˜'B'"Ê6ˆ“ÁWG&ñ6∂f&ñÊ÷ñÊV÷ˆ‚Ê6∆ñVÁB‰÷ñÊV÷ˆÂ&VÊFW&W#∞¶ñ◊˜'B'"Ê6ˆ“ÁWG&ñ6∂f&ñÊ÷ñÊV÷ˆ‚ÊVÁFóGí‚£∞¶ñ◊˜'B'"Ê6ˆ“ÁWG&ñ6∂f&ñÊ÷ñÊV÷ˆ‚Á&Vvó7G'í‰÷ˆDVÁFóFñW3∞¶ñ◊˜'B'"Ê6ˆ“ÁWG&ñ6∂f&ñÊ÷ñÊV÷ˆ‚Á&Vvó7G'í‰÷ˆDóFV◊3∞¶ñ◊˜'BÊWBÊ÷ñÊV7&gBÊ6∆ñVÁB‰÷ñÊV7&gC∞¶ñ◊˜'BÊWBÊ÷ñÊV7&gBÊ6∆ñVÁBÂ67&VVÁ6Ü˜C∞¶ñ◊˜'BÊWBÊ÷ñÊV7&gBÊ6∆ñVÁBÊwVíÁ67&VVÁ2ÂFóF∆U67&VV„∞¶ñ◊˜'BÊWBÊ÷ñÊV7&gBÁ&W6˜W&6W2Â&W6˜W&6T∆ˆ6Fñˆ„∞¶ñ◊˜'BÊWBÊ÷ñÊV7&gBÊ6˜&R‰&∆ˆ6µ˜3∞¶ñ◊˜'BÊWBÊ÷ñÊV7&gBÁv˜&∆BÊ∆WfV¬Ê&∆ˆ6≤‰&∆ˆ6∑3∞¶ñ◊˜'BÊWBÊ÷ñÊV7&gBÁv˜&∆BÊ∆WfV¬‰v÷UGóS∞¶ñ◊˜'BÊWBÊ÷ñÊV7&gBÁv˜&∆BÊ∆WfV¬‰v÷U'V∆W3∞¶ñ◊˜'BÊWBÊ÷ñÊV7&gFf˜&vRÊíÊFó7F÷&∂W"‰Fó7C∞¶ñ◊˜'BÊWBÊ÷ñÊV7&gFf˜&vRÊWfVÁBÂFñ6¥WfVÁC∞¶ñ◊˜'BÊWBÊ÷ñÊV7&gFf˜&vRÊWfVÁF'W2ÊíÂ7V'67&ñ&TWfVÁC∞¶ñ◊˜'BÊWBÊ÷ñÊV7&gFf˜&vRÊf÷¬Ê6ˆ÷÷ˆ‚‰÷ˆC∞¶ñ◊˜'B6ˆgGv&RÊ&W&ÊñRÊvV6∂ˆ∆ñ#2Á&W6˜W&6R‰vV6∂Ù∆ñ$66ÜS∞¶ñ◊˜'B¶fÊÊñÚÊfñ∆R‚£∞¶ñ◊˜'B¶fÁWFñ¬ÂUTîC∞§÷ˆB‰WfVÁD'W57V'67&ñ&W"Ü÷ˆFñC‘÷ñÊV÷ˆ‚‰‘ÙEÙîB«f«VS‘Fó7B‰4ƒîTÂBêßV&∆ñ2fñÊ¬6∆726∆ñVÁE6÷ˆ∂UFW7B∞¢&ófFR7FFñ2&ˆˆ∆V‚fóáGW&Tó"Ö7G&ñÊr6«Vró∑&WGW&‚7V6ñW4&VÜfñ˜%&ˆfñ∆W2Êó4ó&&˜&ÊRá6«Vrê¢«ƒ&ˆˆ∆V‚ÊvWD&ˆˆ∆V‚Ç&÷ñÊV÷ˆ‚Ê6∆ñVÁE6÷ˆ∂Tó""íbe7V6ñW4&VÜfñ˜%&ˆfñ∆W2Ê6‰f«íá6«Vrì∑–¢&ófFR7FFñ2&ˆˆ∆V‚fóáGW&UvFW"Ö7G&ñÊr6«Vró∑&WGW&‚7V6ñW4&VÜfñ˜%&ˆfñ∆W2Êó4VFñ2á6«Vrê¢«ƒ&ˆˆ∆V‚ÊvWD&ˆˆ∆V‚Ç&÷ñÊV÷ˆ‚Ê6∆ñVÁE6÷ˆ∂UvFW""íbe7V6ñW4&VÜfñ˜%&ˆfñ∆W2ÁvFW$6&∆Rá6«Vrì∑–¢&ófFR7FFñ2&ˆˆ∆V‚fóáGW&U7W&f6RÖ7G&ñÊr6«Vró∑&WGW&‚7V6ñW4&VÜfñ˜%&ˆfñ∆W2Á&ˆfñ∆Rá6«Vrì”’7V6ñW4&VÜfñ˜%&ˆfñ∆W2Â&ˆfñ∆RÂ5U$d4S∑–¢&ófFR7FFñ2fñÊ¬¶fÁWFñ¬‰÷≈7G&ñÊrƒñÁFVvW#‚6÷ˆ∂U'Fñ6∆U6◊∆W3÷ÊWr¶fÁWFñ¬‰Ü6Ñ÷√‚Çì∞¢&ófFR7FFñ2&ˆˆ∆V‚˜VÊVB«6WGW∞¢&ófFR7FFñ2&ˆˆ∆V‚&&ˆµ67&VVÁ6Ü˜EVÊFñÊs∞¢&ófFR7FFñ2fñÊ¬¶fÁWFñ¬Â6WC≈7G&ñÊs‚f∆ñváDg&÷W3÷ÊWr¶fÁWFñ¬‰Ü6Ö6WC√‚Çì∞¢&ófFR7FFñ2ñÁBv˜&∆EFñ6∑2«FóF∆UFñ6∑2∆g&÷W3∞¢&ófFR7FFñ2fˆ∆Fñ∆RUTîBFW7DVÁFóGì∞¢&ófFR7FFñ2&ˆˆ∆V‚7W7Fˆ‘VFñı6÷ˆ∂U&WVW7FVC∞¢&ófFR7FFñ2fˆ∆Fñ∆RñÁBñÊóFñƒVÁFóGîñC∞¢&ófFR7FFñ2f∆ˆB÷ñ‰∆Vs‘f∆ˆB‰‘Öıd≈TR∆÷Ñ∆Vs“‘f∆ˆB‰‘Öıd≈TR∆÷ñ‰&ˆGì‘f∆ˆB‰‘Öıd≈TR∆÷Ñ&ˆGì“‘f∆ˆB‰‘Öıd≈TS∞¢&ófFR7FFñ2fˆ∆Fñ∆R&ˆˆ∆V‚6ˆ÷&E76VC∞¢&ófFR7FFñ2fˆ∆Fñ∆RñÁB6ˆ÷&DÜóG3∞¢&ófFR7FFñ2fñÊ¬¶fÁWFñ¬‰÷≈7G&ñÊr∆¶fÁWFñ¬‰∆ó7C≈7G&ñÊs„‚÷ˆFVƒ&ˆÊW3÷ÊWr¶fÁWFñ¬‰Ü6Ñ÷√‚Çì∞¢&ófFR7FFñ2fñÊ¬¶fÁWFñ¬‰÷≈7G&ñÊr∆f∆ˆEµ”‚÷˜FñˆÂ&ÊvW3÷ÊWr¶fÁWFñ¬‰Ü6Ñ÷√‚Çì∞¢&ófFR7FFñ2fñÊ¬¶fÁWFñ¬‰÷≈7G&ñÊr∆f∆ˆEµ”‚fó&U7F'FW$&’&ÊvW3÷ÊWr¶fÁWFñ¬‰Ü6Ñ÷√‚Çì∞¢&ófFR7FFñ2&ˆˆ∆V‚fV&˜tÊFófTó%˜6Tˆ'6W'fVC∞¢&ófFR7FFñ2fñÊ¬¶fÁWFñ¬‰÷≈7G&ñÊr∆f∆ˆEµ”‚6˜W&6T∆ˆˆµ&ÊvW3÷ÊWr¶fÁWFñ¬‰Ü6Ñ÷√‚Çì∞¢&ófFR7FFñ2fñÊ¬¶fÁWFñ¬‰÷≈7G&ñÊr∆f∆ˆEµ”‚6˜W&6UóF6Ö&ÊvW3÷ÊWr¶fÁWFñ¬‰Ü6Ñ÷√‚Çì∞¢&ófFR7FFñ2fñÊ¬¶fÁWFñ¬Â6WC≈7G&ñÊs‚v∆∂VE7V6ñW3÷ÊWr¶fÁWFñ¬‰Ü6Ö6WC√‚Çì∞¢&ófFR7FFñ2fñÊ¬¶fÁWFñ¬Â6WC≈7G&ñÊs‚vñÊufó6ñ&ñ∆óGï7V6ñW3÷ÊWr¶fÁWFñ¬‰Ü6Ö6WC√‚Çì∞¢&ófFR7FFñ2fñÊ¬¶fÁWFñ¬‰÷≈7G&ñÊr∆ÊWBÊ÷ñÊV7&gBÁv˜&∆BÁáó2ÂfV33‚fó'7E&VÊFW&VE˜6óFñˆÁ3÷ÊWr¶fÁWFñ¬‰Ü6Ñ÷√‚Çì∞¢7V'67&ñ&TWfVÁBV&∆ñ27FFñ2fˆñB7GVƒF÷vRÜÊWBÊ÷ñÊV7&gFf˜&vRÊWfVÁBÊVÁFóGíÊ∆ófñÊr‰∆ófñÊtF÷vTWfVÁBWfVÁBí∞¢ñbÑ&ˆˆ∆V‚ÊvWD&ˆˆ∆V‚Ç&÷ñÊV÷ˆ‚Ê6∆ñVÁE6÷ˆ∂UFW7B"íbbWfVÁBÊvWD÷˜VÁBÇì„bbWfVÁBÊvWDVÁFóGíÇíñÁ7FÊ6VˆbÊWBÊ÷ñÊV7&gBÁ6W'fW"Ê∆WfV¬Â6W'fW%∆ñW ¢bbWfVÁBÊvWE6˜W&6RÇíÊvWDVÁFóGíÇíñÁ7FÊ6Vˆb÷ñÊV÷ˆ‰7&VGW&R"bb"ÊvWEUTîBÇíÊWV«2áFW7DVÁFóGííñ6ˆ÷&DÜóG2≤≥∞¢–¢&ófFR7FFñ2ñÁBFó&V7Fñˆ„”∞¢&ófFR7FFñ27G&ñÊr&VÊFW&VEÜ6U7V6ñW3∞¢&ófFR7FFñ2ñÁB&VÊFW&VEÜ6S“”«&VÊFW&VEÜ6Tg&÷W3∞¢&ófFR7FFñ2fñÊ¬¶fÁWFñ¬‰÷≈7G&ñÊr≈7G&ñÊs‚∆7E&VÊFW&VD6∆ó÷ÊWr¶fÁWFñ¬‰Ü6Ñ÷√‚Çì∞¢&ófFR7FFñ2fñÊ¬¶fÁWFñ¬‰÷≈7G&ñÊrƒñÁFVvW#‚6∆ó6ÜÊvVEFñ6≥÷ÊWr¶fÁWFñ¬‰Ü6Ñ÷√‚Çì∞¢&ófFR7FFñ2fñÊ¬¶fÁWFñ¬‰÷≈7G&ñÊrƒñÁFVvW#‚∆7E&VÊFW&VDVÁFóGïFñ6≥÷ÊWr¶fÁWFñ¬‰Ü6Ñ÷√‚Çì∞¢&ófFR7FFñ2fñÊ¬¶fÁWFñ¬‰÷≈7G&ñÊrƒñÁFVvW#‚fñÊƒñF∆Tfó'7EFñ6≥÷ÊWr¶fÁWFñ¬‰Ü6Ñ÷√‚Çì∞¢&ófFR7FFñ2fñÊ¬¶fÁWFñ¬‰÷≈7G&ñÊrƒñÁFVvW#‚7FVGïv∆¥fó'7EFñ6≥÷ÊWr¶fÁWFñ¬‰Ü6Ñ÷√‚Çì∞¢&ófFR7FFñ2fñÊ¬¶fÁWFñ¬‰÷≈7G&ñÊrƒñÁFVvW#‚7FVGï'V‰fó'7EFñ6≥÷ÊWr¶fÁWFñ¬‰Ü6Ñ÷√‚Çì∞¢&ófFR7FFñ2&ˆˆ∆V‚7FVGî÷˜Fñˆ‰ˆ'6W'fVBÖ7G&ñÊr6«Vr∆&ˆˆ∆V‚'VÊÊñÊrí∞¢ñbá'VÊÊñÊrbbÜfóáGW&Tó"á6«Vró«∆fóáGW&UvFW"á6«Vrê¢«≈7V6ñW476WDñÊFWÇÊ6∆óá6«Vr¬&w&˜VÊE˜'V‚"¬''V‚"ì”÷ÁV∆¬íó&WGW&‚G'VS∞¢f"FVfñÊóFñˆ„’7V6ñW4FVfñÊóFñˆÁ2ÊvWBá6«Vrì∞¢ñbÇ'VÊÊñÊrbbá6˜W&6U˜6UG&Á6óFñˆ‚á6«Vró««6«VrÊWV«2Ç&fV&˜r"ê¢«∆FVfñÊóFñˆ‚÷ÁV∆¬bbÇ'7FFñ2"ÊWV«2ÜFVfñÊóFñˆ‚Ê÷˜fV÷VÁDf∆∆&6≤Çíó«¬&ñF∆R"ÊWV«2ÜFVfñÊóFñˆ‚Ê÷˜fV÷VÁDf∆∆&6≤Çííííó&WGW&‚G'VS∞¢ñÁFVvW"fó'7C“á'VÊÊñÊs˜7FVGï'V‰fó'7EFñ6≥ß7FVGïv∆¥fó'7EFñ6≤íÊvWBá6«Vrí∆∆7C÷∆7E&VÊFW&VDVÁFóGïFñ6≤ÊvWBá6«Vrì∞¢&WGW&‚fó'7B÷ÁV∆¬bf∆7B÷ÁV∆¬bf∆7B÷fó'7C„“á6«VrÊWV«2Ç&vVÊv""ìÛ#£Cì∞¢–¢&ófFR7FFñ2&ˆˆ∆V‚fñÊƒñF∆Tˆ'6W'fVBÖ7G&ñÊr6«Vrí∞¢ñbá6˜W&6U7FFñ4ñF∆Rá6«Vró««6˜W&6U˜6UG&Á6óFñˆ‚á6«Vró««6«VrÊWV«2Ç&fV&˜r"íó&WGW&‚G'VS∞¢f"FVfñÊóFñˆ„’7V6ñW4FVfñÊóFñˆÁ2ÊvWBá6«Vrì∞¢ñbÜFVfñÊóFñˆ‚÷ÁV∆¬bb'7FFñ2"ÊWV«2ÜFVfñÊóFñˆ‚Ê÷˜fV÷VÁDf∆∆&6≤Çííó&WGW&‚G'VS∞¢ñÁFVvW"fó'7C÷fñÊƒñF∆Tfó'7EFñ6≤ÊvWBá6«Vrí∆∆7C÷∆7E&VÊFW&VDVÁFóGïFñ6≤ÊvWBá6«Vrì∞¢ÚÚ∂VWWfW'íFá&W6Üˆ∆C≤6ˆ∆∆V7BVÊ˜VvÇ&V¬ñF∆RFñ÷Rf˜"6∆˜rÊFófP¢ÚÚ'&VFÜñÊr‚&áñÜ˜&‚w2˜&ñvñÊ¬ñF∆Ró2f˜W"◊6V6ˆÊB7ñ6∆R‡¢ñÁB&WVó&VC◊6«VrÊWV«2Ç&vVÊv""ìÛcß6«VrÊWV«2Ç'&áñÜ˜&‚"ìÛÉ£C∞¢&WGW&‚fó'7B÷ÁV∆¬bf∆7B÷ÁV∆¬bf∆7B÷fó'7C„◊&WVó&VC∞¢–¢&ófFR7FFñ2&ˆˆ∆V‚6∆óÜ56WGF∆VBÖ7G&ñÊr6«Vrí∞¢ñÁFVvW"6ÜÊvVC÷6∆ó6ÜÊvVEFñ6≤ÊvWBá6«Vrì∞¢ñÁFVvW"ˆ'6W'fVC÷∆7E&VÊFW&VDVÁFóGïFñ6≤ÊvWBá6«Vrì∞¢ÚÚFÜR&ˆGV7Fñˆ‚6ˆÁG&ˆ∆∆W"&∆VÊG2f˜"f˜W"Fñ6∑2É#◊2í‚∂VWFÜP¢ÚÚ˜&ñvñÊ¬fó6ñ&ñ∆óGíˆ'Fñ7V∆Fñˆ‚76W'FñˆÁ2¬'WB6◊∆RgFW"FÜB&∆VÊB‡¢&WGW&‚6ÜÊvVB÷ÁV∆¬bfˆ'6W'fVB÷ÁV∆¬bfˆ'6W'fVB÷6ÜÊvVC„”S∞¢–¢&ófFR7FFñ2fñÊ¬∆ˆÊr6÷ˆ∂U7F'FVDÊÊ˜3’7ó7FV“ÊÊÊıFñ÷RÇì∞¢&ófFR7FFñ2fñÊ¬¶fÁWFñ¬Â6WC≈7G&ñÊs‚∆ˆvvVE&ˆw&W73÷¶fÁWFñ¬Ê6ˆÊ7W'&VÁB‰6ˆÊ7W'&VÁDÜ6Ñ÷ÊÊWt∂Wï6WBÇì∞¢&ófFR7FFñ2fˆ∆Fñ∆RñÁB6ˆ◊∆WFVE7V6ñW5vñÊF˜w3∞¢&ófFR7FFñ2fˆ∆Fñ∆R7G&ñÊr∆7D&˜fVD6ÜV6≥“$÷ñÊV7&gB6∆ñVÁBñÊóFñ∆ó¶VB#∞¢&ófFR7FFñ2fˆñB&W˜'E&ˆw&W72Ö7G&ñÊr6«Vr≈7G&ñÊrÜ6Rí∞¢ñbÇ∆ˆvvVE&ˆw&W72ÊFBá6«Vr≤#¢"∑Ü6Ríó&WGW&„∞¢f"FVfñÊóFñˆ„’7V6ñW4FVfñÊóFñˆÁ2ÊvWBá6«Vrì∞¢ñÁBFWÉ÷FVfñÊóFñˆ„”÷ÁV∆√Û¶FVfñÊóFñˆ‚ÊÊFñˆÊ≈ˆ∂VFWÑÁV÷&W"Çì∞¢ñÁBñÊFWÉ◊7V6ñW2ÊñÊFWÑˆbá6«Vrí≥∞¢F˜V&∆RV∆6VC“Ö7ó7FV“ÊÊÊıFñ÷RÇí◊6÷ˆ∂U7F'FVDÊÊ˜2íÛcÛÛÛ„C∞¢7ó7FV“Ê˜WBÁ&ñÁFbÜ¶fÁWFñ¬‰∆ˆ6∆RÂ$ÙıB¬%¥4ƒîTÂB4‘Ù¥U“VBÚVB(	B2S6BW2(	BW2(	B6ˆÊ6«\:÷F3“VBÚVB(	BGW&:|:6Û“R„b÷ñ‚(	B;¶«Fñ÷“W2V‚"¿¢ñÊFWÇ«7V6ñW2Á6ó¶RÇí∆FWÇ«6«Vr«Ü6R∆6ˆ◊∆WFVE7V6ñW5vñÊF˜w2«7V6ñW2Á6ó¶RÇí∆V∆6VB∆∆7D&˜fVD6ÜV6≤ì∞¢7ó7FV“Ê˜WBÊf«W6ÇÇì∞¢–¢&ófFR7FFñ2fñÊ¬ñÁB5T4îU5ıDU5Eıtî‰Dıs”É∞¢&ófFR7FFñ2fñÊ¬ñÁB%Tƒ$4U%ıdƒîDDîÙÂıDî4≥”C3∞¢&ófFR7FFñ2fñÊ¬ñÁB4Ù‘$EıdƒîDDîÙÂıDî4≥‘%Tƒ$4U%ıdƒîDDîÙÂıDî4≤≥∞¢&ófFR7FFñ2fñÊ¬ñÁB5T4îU5ı5D%EıDî4≥‘4Ù‘$EıdƒîDDîÙÂıDî4≤≥∞¢&ófFR7FFñ2fñÊ¬¶fÁWFñ¬Â6WC≈7G&ñÊs‚&VÊFW&VE7V6ñW3÷¶fÁWFñ¬Ê6ˆÊ7W'&VÁB‰6ˆÊ7W'&VÁDÜ6Ñ÷ÊÊWt∂Wï6WBÇì∞¢&ófFR7FFñ2fñÊ¬¶fÁWFñ¬‰∆ó7C≈7G&ñÊs‚7V6ñW3’6÷ˆ∂U7V6ñW56V∆V7Fñˆ‚Á6V∆V7BÄ¢7V6ñW4FVfñÊóFñˆÁ2‰ƒ¬Áf«VW2Çí≈7ó7FV“ÊvWE&˜W'GíÇ&÷ñÊV÷ˆ‚Ê6∆ñVÁE6÷ˆ∂U7V6ñW2"íì∞¢ÚÚ&ˆfñ∆W2W6RWÜ7B¶ˆñÁG2g&ˆ“V6Ç6V∆V7FVB÷ˆFV¬6∂V∆WFˆ‚¬Ê˜BˆÊRv∆ˆ&¬&ˆÊR÷Ê÷R∆ó7B‡¢ÚÚFÜR7FófRFV‚◊7V6ñW2FWfV∆˜÷VÁB&F6Ç&V6VófW2FWFñ∆VBvóBf∆ñFFñˆ„∞¢ÚÚFÜRvVÊW&¬&VÊFW"¬FWáGW&R¬÷˜fV÷VÁBÊB&˜7FW"6÷ˆ∂R6ˆÁFñÁVW2FÚ6˜fW"∆¬S‡¢&ófFR7FFñ2fñÊ¬¶fÁWFñ¬‰÷≈7G&ñÊr∆¶fÁWFñ¬‰÷≈7G&ñÊr∆¶fÁWFñ¬‰∆ó7C≈7G&ñÊs„„‚DDïDîÙ‰≈ı$ÙdîƒU3÷∆ˆDFFóFñˆÊ≈&ˆfñ∆W2Çì∞¢&ófFR7FFñ2¶fÁWFñ¬‰÷≈7G&ñÊr∆¶fÁWFñ¬‰÷≈7G&ñÊr∆¶fÁWFñ¬‰∆ó7C≈7G&ñÊs„„‚∆ˆDFFóFñˆÊ≈&ˆfñ∆W2Çí∞¢G'íáf"7G&V”‘6∆ñVÁE6÷ˆ∂UFW7BÊ6∆72ÊvWE&W6˜W&6T57G&V“Ç"ˆFFˆ÷ñÊV÷ˆÂˆvV„ˆÊñ÷FñˆÂ˜f∆ñFFñˆÂ˜&ˆfñ∆W2Êß6ˆ‚"íí∞¢ñbá7G&V””÷ÁV∆¬óFá&˜rÊWrñ∆∆Vv≈7FFTWÜ6WFñˆ‚Ç$÷ó76ñÊr&F6Ç'Fñ7V∆Fñˆ‚&ˆfñ∆W2"ì∞¢f"ß6ˆ„÷6ˆ“Êvˆˆv∆RÊw6ˆ‚‰ß6ˆÂ'6W"Á'6U&VFW"ÜÊWr¶fÊñÚ‰ñÁWE7G&V’&VFW"á7G&V“ííÊvWD4ß6ˆ‰ˆ&¶V7BÇì∞¢f"&W7V«C÷ÊWr¶fÁWFñ¬‰Ü6Ñ÷≈7G&ñÊr∆¶fÁWFñ¬‰÷≈7G&ñÊr∆¶fÁWFñ¬‰∆ó7C≈7G&ñÊs„„‚Çì∞¢f˜"áf"7V6ñW3¶ß6ˆ‚ÊVÁG'ï6WBÇíí∞¢f"7FFW3÷ÊWr¶fÁWFñ¬‰Ü6Ñ÷≈7G&ñÊr∆¶fÁWFñ¬‰∆ó7C≈7G&ñÊs„‚Çì∞¢f˜"áf"7FFSß7V6ñW2ÊvWEf«VRÇíÊvWD4ß6ˆ‰ˆ&¶V7BÇíÊVÁG'ï6WBÇíí∞¢f"¶ˆñÁG3÷ÊWr¶fÁWFñ¬‰'&î∆ó7C≈7G&ñÊs‚Çì∞¢f˜"áf"¶ˆñÁCß7FFRÊvWEf«VRÇíÊvWD4ß6ˆ‰'&íÇíñ¶ˆñÁG2ÊFBÜ¶ˆñÁBÊvWD57G&ñÊrÇíì∞¢ñbÜ¶ˆñÁG2Êó4V◊GíÇíóFá&˜rÊWrñ∆∆Vv≈7FFTWÜ6WFñˆ‚Ç$V◊Gí'Fñ7V∆Fñˆ‚&ˆfñ∆R"∑7V6ñW2ÊvWD∂WíÇí≤"Ú"∑7FFRÊvWD∂WíÇíì∞¢7FFW2ÁWBá7FFRÊvWD∂WíÇí∆¶fÁWFñ¬‰∆ó7BÊ6˜îˆbÜ¶ˆñÁG2íì∞¢–¢7G&ñÊr6«Vs◊7V6ñW2ÊvWD∂WíÇì∞¢ñbÑ6ˆ◊Fñ&∆T∆ˆ6ˆ÷˜Fñˆ‚Êw&˜VÊDvóBá6«VríbbfóáGW&Tó"á6«VríbbfóáGW&UvFW"á6«Vríó∞¢7FFW2ÁWBÇ'v∆≤"ƒ6ˆ◊Fñ&∆T∆ˆ6ˆ÷˜Fñˆ‚ÊvóD¶ˆñÁG2á6«Vríì∞¢7FFW2ÁWBÇ''V‚"ƒ6ˆ◊Fñ&∆T∆ˆ6ˆ÷˜Fñˆ‚ÊvóD¶ˆñÁG2á6«Vríì∞¢–¢&W7V«BÁWBá6«Vr∆¶fÁWFñ¬‰÷Ê6˜îˆbá7FFW2íì∞¢–¢&WGW&‚¶fÁWFñ¬‰÷Ê6˜îˆbá&W7V«Bì∞¢÷6F6ÇÜ¶fÊñÚ‰îÙWÜ6WFñˆ‚Ró∑Fá&˜rÊWrWÜ6WFñˆ‰ñ‰ñÊóFñ∆ó¶W$W'&˜"ÜRì∑–¢–¢&ófFR7FFñ2¶fÁWFñ¬Â6WC≈7G&ñÊs‚f∆ñFFñˆÂ7V6ñW2Çí∞¢f"&W7V«C÷ÊWr¶fÁWFñ¬‰Ü6Ö6WC√‚Ü¶fÁWFñ¬Â6WBÊˆbÇ&'V∆&6W""¬&ógó6W""¬'fVÁW6W""¬&6Ü&÷ÊFW""¬&6Ü&÷V∆Vˆ‚"¬&6Ü&ó¶&B"¬'7Vó'F∆R"¬'v'F˜'F∆R"¬&&∆7Fˆó6R"¬&6FW'ñR"íì∞¢&W7V«BÊFD∆¬ÑDDïDîÙ‰≈ı$ÙdîƒU2Ê∂Wï6WBÇíì∑&WGW&‚¶fÁWFñ¬Â6WBÊ6˜îˆbá&W7V«Bì∞¢–¢&ófFR7FFñ2¶fÁWFñ¬‰÷≈7G&ñÊr∆¶fÁWFñ¬‰∆ó7C≈7G&ñÊs„‚FE&ˆfñ∆W2Ü¶fÁWFñ¬‰÷≈7G&ñÊr∆¶fÁWFñ¬‰∆ó7C≈7G&ñÊs„‚˜&ñvñÊ¬í∞¢f"&W7V«C÷ÊWr¶fÁWFñ¬‰Ü6Ñ÷√‚Ü˜&ñvñÊ¬ì∞¢DDïDîÙ‰≈ı$ÙdîƒU2Êf˜$V6ÇÇá6«Vr«7FFW2í”Á&W7V«BÁWBá6«Vr«7FFW2ÊvWBÇ'v∆≤"ííì∞¢&WGW&‚¶fÁWFñ¬‰÷Ê6˜îˆbá&W7V«Bì∞¢–¢&ófFR7FFñ2fñÊ¬¶fÁWFñ¬Â6WC≈7G&ñÊs‚%Dî5TƒDîÙÂıdƒîDDîÙÂı5T4îU3◊f∆ñFFñˆÂ7V6ñW2Çì∞¢&ófFR7FFñ2fñÊ¬¶fÁWFñ¬‰÷≈7G&ñÊr∆¶fÁWFñ¬‰∆ó7C≈7G&ñÊs„‚%Dî5TƒDîÙÂı$ÙdîƒU3÷FE&ˆfñ∆W2Ü¶fÁWFñ¬‰÷ÊˆdVÁG&ñW2Ä¢¶fÁWFñ¬‰÷ÊVÁG'íÇ&'V∆&6W""∆¶fÁWFñ¬‰∆ó7BÊˆbÇ&∆Vuˆg&ˆÁE˜&ñváB"¬&∆Vuˆg&ˆÁEˆ∆VgB"¬&∆Vuˆ&6µ˜&ñváB"¬&∆Vuˆ&6µˆ∆VgB"íí¿¢¶fÁWFñ¬‰÷ÊVÁG'íÇ&ógó6W""∆¶fÁWFñ¬‰∆ó7BÊˆbÇ&∆Vuˆg&ˆÁE˜&ñváB"¬&∆Vuˆg&ˆÁEˆ∆VgB"¬&∆Vuˆ&6µ˜&ñváB"¬&∆Vuˆ&6µˆ∆VgB"íí¿¢¶fÁWFñ¬‰÷ÊVÁG'íÇ'fVÁW6W""∆¶fÁWFñ¬‰∆ó7BÊˆbÇ&∆Vuˆg&ˆÁEˆ∆VgB"¬&∆Vuˆg&ˆÁE˜&ñváB"¬&∆Vuˆ∆VgB"¬&∆Vu˜&ñváB"íí¿¢¶fÁWFñ¬‰÷ÊVÁG'íÇ&6Ü&÷ÊFW""∆¶fÁWFñ¬‰∆ó7BÊˆbÇ&∆Vuˆ∆VgB"¬&∆Vu˜&ñváB"íí¿¢¶fÁWFñ¬‰÷ÊVÁG'íÇ&6Ü&÷V∆Vˆ‚"∆¶fÁWFñ¬‰∆ó7BÊˆbÇ&∆Vuˆ∆VgB"¬&∆Vu˜&ñváB"íí¿¢¶fÁWFñ¬‰÷ÊVÁG'íÇ&6Ü&ó¶&B"∆¶fÁWFñ¬‰∆ó7BÊˆbÇ&∆Vuˆ∆VgB"¬&∆Vu˜&ñváB"íí¿¢¶fÁWFñ¬‰÷ÊVÁG'íÇ'7Vó'F∆R"∆¶fÁWFñ¬‰∆ó7BÊˆbÇ&∆Vuˆ∆VgB"¬&∆Vu˜&ñváB"íí¿¢¶fÁWFñ¬‰÷ÊVÁG'íÇ'v'F˜'F∆R"∆¶fÁWFñ¬‰∆ó7BÊˆbÇ&∆Vuˆ∆VgB"¬&∆Vu˜&ñváB"íí¿¢¶fÁWFñ¬‰÷ÊVÁG'íÇ&&∆7Fˆó6R"∆¶fÁWFñ¬‰∆ó7BÊˆbÇ&∆Vuˆ∆VgB"¬&∆Vu˜&ñváB"íí¿¢¶fÁWFñ¬‰÷ÊVÁG'íÇ'ñ∂6áR"∆¶fÁWFñ¬‰∆ó7BÊˆbÇ&∆Vu˜&ñváB"¬&∆Vuˆ∆VgB"íí¿¢¶fÁWFñ¬‰÷ÊVÁG'íÇ&6FW'ñR"∆¶fÁWFñ¬‰∆ó7BÊˆbÇ&&ˆGï˜6Vv÷VÁB"¬&&ˆGï˜6Vv÷VÁC""íí¿¢¶fÁWFñ¬‰÷ÊVÁG'íÇ&ÜóF÷ˆÊ∆VR"∆¶fÁWFñ¬‰∆ó7BÊˆbÇ&∆Vuˆ∆VgB"¬&∆Vu˜&ñváB"íí¿¢¶fÁWFñ¬‰÷ÊVÁG'íÇ&ˆÊóÇ"∆¶fÁWFñ¬‰∆ó7BÊˆbÇ'6Vv÷VÁC"¬'6Vv÷VÁCr"¬'6Vv÷VÁCB"íí¿¢¶fÁWFñ¬‰÷ÊVÁG'íÇ'7ñGV6≤"∆¶fÁWFñ¬‰∆ó7BÊˆbÇ&fˆ˜Eˆ∆VgB"¬&fˆ˜E˜&ñváB"íí¿¢¶fÁWFñ¬‰÷ÊVÁG'íÇ&¶ˆ«FVˆ‚"∆¶fÁWFñ¬‰∆ó7BÊˆbÇ&∆Vuˆg&ˆÁE˜&ñváB"¬&∆Vuˆg&ˆÁEˆ∆VgB"¬&∆Vuˆ&6µ˜&ñváB"¬&∆Vuˆ&6µˆ∆VgB"íí¿¢¶fÁWFñ¬‰÷ÊVÁG'íÇ&ÊñF˜&ñÊ"∆¶fÁWFñ¬‰∆ó7BÊˆbÇ&∆VgEˆ∆Vr"¬'&ñváEˆ∆Vr"íí¿¢¶fÁWFñ¬‰÷ÊVÁG'íÇ&÷V˜wFÇ"∆¶fÁWFñ¬‰∆ó7BÊˆbÇ&∆Vuˆ∆VgB"¬&∆Vu˜&ñváB"íê¢íì∞¢ÚÚFÜW6R6˜W&6RñF∆R6∆ó2ñÁFVÁFñˆÊ∆«í∂VWFÜVó"vóB∆Vw27FFñ2‚ñÁ7V7@¢ÚÚFÜVó"Êñ÷FVBñF∆R¶ˆñÁG2vóFÜ˜WBvV∂VÊñÊrFÜR∆Vr6ÜV6∑2f˜"v∆≤˜'V‚‡¢&ófFR7FFñ2fñÊ¬¶fÁWFñ¬‰÷≈7G&ñÊr∆¶fÁWFñ¬‰∆ó7C≈7G&ñÊs„‚îDƒUı$ÙdîƒU3÷¶fÁWFñ¬‰÷ÊˆbÄ¢&'V∆&6W""∆¶fÁWFñ¬‰∆ó7BÊˆbÇ'F˜'6Ú"¬&ÜVB"í¿¢'7Vó'F∆R"∆¶fÁWFñ¬‰∆ó7BÊˆbÇ&&’ˆ∆VgB"¬&&’˜&ñváB"¬'F˜'6Ú"í¿¢'v'F˜'F∆R"∆¶fÁWFñ¬‰∆ó7BÊˆbÇ&&’ˆ∆VgB"¬&&’˜&ñváB"¬'F˜'6Ú"ê¢ì∞¢&ófFR7FFñ2¶fÁWFñ¬‰∆ó7C≈7G&ñÊs‚&ˆfñ∆T¶ˆñÁG2Ö7G&ñÊr6«Vr≈7G&ñÊr7FFRí∞¢ñbÜ¶fÁWFñ¬Â6WBÊˆbÇ'ñFvWí"¬'ñFvV˜GFÚ"¬'ñFvV˜B"íÊ6ˆÁFñÁ2á6«Vríí∞¢ñbÜfóáGW&Tó"á6«Vríó&WGW&‚¶fÁWFñ¬‰∆ó7BÊˆbÇ'vñÊuˆ˜VÂˆ∆VgB"¬'vñÊuˆ˜VÂ˜&ñváB"ì∞¢7G&ñÊrñF∆T¶ˆñÁC◊7vóF6Çá6«Vró∂66R'ñFvWí"”‚'Fñ√"#∂66R'ñFvV˜GFÚ"”‚'Fñ¬#∂FVfV«B”‚&Üó#R#∑”∞¢&WGW&‚7FFRÁ7F'G5vóFÇÇ$îDƒUÚ"ìˆ¶fÁWFñ¬‰∆ó7BÊˆbÜñF∆T¶ˆñÁBì¶¶fÁWFñ¬‰∆ó7BÊˆbÇ&∆Vuˆ∆VgB"¬&∆Vu˜&ñváB"ì∞¢–¢ñbÜ¶fÁWFñ¬Â6WBÊˆbÇ'7V&˜r"¬&fV&˜r"¬&'Fñ7VÊÚ"¬'¶F˜2"¬&÷ˆ«G&W2"íÊ6ˆÁFñÁ2á6«VríbffóáGW&Tó"á6«Vríê¢&WGW&‚¶fÁWFñ¬‰∆ó7BÊˆbÇ'vñÊuˆ˜VÂˆ∆VgB"¬'vñÊuˆ˜VÂ˜&ñváB"ì∞¢ñbÑDDïDîÙ‰≈ı$ÙdîƒU2Ê6ˆÁFñÁ4∂Wíá6«Vríí∞¢7G&ñÊr∂Wì◊7FFRÁ7F'G5vóFÇÇ$îDƒUÚ"ìÚ&ñF∆R#ß7FFRÁ7F'G5vóFÇÇ%%TÂÚ"ê¢bbfóáGW&Tó"á6«VríbbfóáGW&UvFW"á6«VrìÚ''V‚#¢'v∆≤#∞¢f"¶ˆñÁG3‘DDïDîÙ‰≈ı$ÙdîƒU2ÊvWBá6«VríÊvWBÜ∂Wíì∞¢ñbÜ¶ˆñÁG2÷ÁV∆¬ó&WGW&‚¶ˆñÁG3∞¢ÚÚ6ˆ÷RÊFófR˜6W'2÷FÜR6÷ˆ∂Rw2f7FW"÷÷˜Fñˆ‚Ü6RFÚFÜVó"f«í6∆ó ¢ÚÚÊBÜfRÊÚw&˜VÊE˜'V‚'Fñ7V∆Fñˆ‚&ˆfñ∆R‚FÚÊ˜BñÁfVÁBˆÊS≤FÜP¢ÚÚfñÊ¬&ˆfñ∆Rf∆ñFF˜"6W&FV«í&WVó&W2÷˜fV÷VÁBˆÊ«ívÜV‚ÊFófP¢ÚÚ'V‚6∆óó2FV6∆&VB‡¢ñbÜ∂WíÊWV«2Ç''V‚"íbe7V6ñW476WDñÊFWÇÊ6∆óá6«Vr¬&w&˜VÊE˜'V‚"¬''V‚"ì”÷ÁV∆¬ó&WGW&‚¶fÁWFñ¬‰∆ó7BÊˆbÇì∞¢Fá&˜rÊWrñ∆∆Vv≈7FFTWÜ6WFñˆ‚Ç$÷ó76ñÊr'Fñ7V∆Fñˆ‚&ˆfñ∆R"∑6«Vr≤"Ú"∂∂Wíì∞¢–¢ÚÚÊFófRGW'F∆R'VÁ2&WG&7BFÜVó"∆ñ÷'2ÊB7ñ‚FÜR6ÜV∆¬ˆ&ˆGí‡¢ñbÜ¶fÁWFñ¬Â6WBÊˆbÇ'7Vó'F∆R"¬'v'F˜'F∆R"¬&&∆7Fˆó6R"íÊ6ˆÁFñÁ2á6«Vríbb7FFRÁ7F'G5vóFÇÇ%%TÂÚ"íó&WGW&‚¶fÁWFñ¬‰∆ó7BÊˆbÇ&&ˆGí"¬&&ˆGì""ì∞¢&WGW&‚7FFRÁ7F'G5vóFÇÇ$îDƒUÚ"íbbîDƒUı$ÙdîƒU2Ê6ˆÁFñÁ4∂Wíá6«Vrê¢ÚîDƒUı$ÙdîƒU2ÊvWBá6«Vrí¢%Dî5TƒDîÙÂı$ÙdîƒU2ÊvWD˜$FVfV«Bá6«Vr∆¶fÁWFñ¬‰∆ó7BÊˆbÇíì∞¢–¢&ófFR7FFñ2fñÊ¬¶fÁWFñ¬‰÷≈7G&ñÊr∆¶fÁWFñ¬‰÷≈7G&ñÊr∆f∆ˆEµ”„‚'Fñ7V∆FñˆÂ&ÊvW3÷ÊWr¶fÁWFñ¬‰Ü6Ñ÷√‚Çì∞¢&ófFR7FFñ2fñÊ¬¶fÁWFñ¬‰÷≈7G&ñÊr∆¶fÁWFñ¬‰÷≈7G&ñÊr∆¶fÁWFñ¬Â6WC≈7G&ñÊs„„‚'Fñ7V∆Fñˆ‰6∆ó3÷ÊWr¶fÁWFñ¬‰Ü6Ñ÷√‚Çì∞¢&ófFR7FFñ2fñÊ¬¶fÁWFñ¬‰÷≈7G&ñÊr∆¶fÁWFñ¬‰÷≈7G&ñÊrƒñÁFVvW#„‚'Fñ7V∆FñˆÂ6◊∆T6˜VÁG3÷ÊWr¶fÁWFñ¬‰Ü6Ñ÷√‚Çì∞¢&ófFR7FFñ2fñÊ¬¶fÁWFñ¬‰÷≈7G&ñÊr∆¶fÁWFñ¬‰÷≈7G&ñÊr∆¶fÁWFñ¬Â6WC≈7G&ñÊs„„‚'Fñ7V∆Fñˆ‰ñÁWG3÷ÊWr¶fÁWFñ¬‰Ü6Ñ÷√‚Çì∞¢&ófFR7FFñ2fñÊ¬¶fÁWFñ¬‰÷≈7G&ñÊr∆¶fÁWFñ¬‰÷≈7G&ñÊr∆f∆ˆEµ”„‚Fñƒf∆÷U&ÊvW3÷ÊWr¶fÁWFñ¬‰Ü6Ñ÷√‚Çì∞¢&ófFR7FFñ2fñÊ¬¶fÁWFñ¬‰÷≈7G&ñÊr∆¶fÁWFñ¬Â6WC≈7G&ñÊs„‚Fñƒf∆÷T6∆ó3÷ÊWr¶fÁWFñ¬‰Ü6Ñ÷√‚Çì∞¢7V'67&ñ&TWfVÁBV&∆ñ27FFñ2fˆñBFñ6≤ÖFñ6¥WfVÁB‰6∆ñVÁEFñ6¥WfVÁBWfVÁBí∞¢ñbÇ&ˆˆ∆V‚ÊvWD&ˆˆ∆V‚Ç&÷ñÊV÷ˆ‚Ê6∆ñVÁE6÷ˆ∂UFW7B"ó«∆WfVÁBÁÜ6R’Fñ6¥WfVÁBÂÜ6R‰T‰Bó&WGW&„∞¢ñbÑ&ˆˆ∆V‚ÊvWD&ˆˆ∆V‚Ç&÷ñÊV÷ˆ‚Ê6∆ñVÁE6÷ˆ∂U6∆VW"íó¥ÊñváD6∆ñVÁE6÷ˆ∂UFW7BÁFñ6≤ÜWfVÁBì∑&WGW&„∑–¢ñbÑ&ˆˆ∆V‚ÊvWD&ˆˆ∆V‚Ç&÷ñÊV÷ˆ‚Ê6∆ñVÁE6÷ˆ∂UG&ˆ¬"íó¥ÜVÁFW%G&ˆƒ6∆ñVÁE6÷ˆ∂UFW7BÁFñ6≤ÜWfVÁBì∑&WGW&„∑–¢÷ñÊV7&gB÷3‘÷ñÊV7&gBÊvWDñÁ7FÊ6RÇì∞¢G'í∞¢ñbÇ˜VÊVBbb÷2Á67&VV‚ñÁ7FÊ6VˆbFóF∆U67&VV‚bbFóF∆UFñ6∑3””ê¢7ó7FV“Ê˜WBÁ&ñÁF∆‚Ç%¥4ƒîTÂB4‘Ù¥U“ñÊñ6ñ∆ó¶:|:6Ú(	BFóF∆U67&VV‚∆6Ï:vF≤fW&ñfñ6ÊFÚ66ÜRvV6∂Ù∆ñ"R&V7W'6˜2&Vvó7G&F˜2‚"ì∞¢ñbÇ˜VÊVBbb÷2Á67&VV‚ñÁ7FÊ6VˆbFóF∆U67&VV‚bb≤∑FóF∆UFñ6∑3””#í∞¢f"F$óFV◊3÷ÊWBÊ÷ñÊV7&gBÊ6˜&R‰Êˆ‰ÁV∆ƒ∆ó7B„∆ÊWBÊ÷ñÊV7&gBÁv˜&∆BÊóFV“‰óFV’7F6≥Ê7&VFRÇì∞¢÷ˆDóFV◊2‰‘î‰T‘ÙÂıD"Êfñ∆ƒóFV‘∆ó7BáF$óFV◊2ì∞¢f"Vvt˜&FW#÷ÊWr¶fÁWFñ¬‰'&î∆ó7C≈7G&ñÊs‚Çì∞¢f˜"áf"7F6≥ßF$óFV◊2ó∑f"∂Wì÷ÊWBÊ÷ñÊV7&gFf˜&vRÁ&Vvó7G&ñW2‰f˜&vU&Vvó7G&ñW2‰ïDT’2ÊvWD∂Wíá7F6≤ÊvWDóFV“Çíì∂ñbÜ∂Wí÷ÁV∆¬bf∂WíÊvWEFÇÇíÊVÊG5vóFÇÇ%˜7vÂˆVvr"íñVvt˜&FW"ÊFBÜ∂WíÊvWEFÇÇíÁ7V'7G&ñÊrÉ∆∂WíÊvWEFÇÇíÊ∆VÊwFÇÇí“%˜7vÂˆVvr"Ê∆VÊwFÇÇííì∑–¢f"WáV7FVDVvt˜&FW#’7V6ñW4FVfñÊóFñˆÁ2‰ƒ¬Áf«VW2ÇíÁ7G&V“Çê¢Á6˜'FVBÜ¶fÁWFñ¬‰6ˆ◊&F˜"Ê6ˆ◊&ñÊtñÁBÖ7V6ñW4FVfñÊóFñˆÁ2‰FVfñÊóFñˆ„£¶ÊFñˆÊ≈ˆ∂VFWÑÁV÷&W"íê¢Ê÷Ö7V6ñW4FVfñÊóFñˆÁ2‰FVfñÊóFñˆ„£ß6«VríÁFÙ∆ó7BÇì∞¢ñbÇVvt˜&FW"ÊWV«2ÜWáV7FVDVvt˜&FW"íóFá&˜rÊWrñ∆∆Vv≈7FFTWÜ6WFñˆ‚Ç$7&VFófR7v‚Vvw2&RÊ˜BVÊóVRÊBñ‚ÊFñˆÊ¬ˆº:ñFWÇ˜&FW#¢"∂Vvt˜&FW"ì∞¢f˜"áf"C•7V6ñW4FVfñÊóFñˆÁ2‰ƒ¬Áf«VW2Çíí∞¢f"vVÛ÷ÊWr&W6˜W&6T∆ˆ6Fñˆ‚Ñ÷ñÊV÷ˆ‚‰‘ÙEÙîB∆BÊ÷ˆFV¬ÇíÁ7V'7G&ñÊrÇ&76WG2ˆ÷ñÊV÷ˆ‚Ú"Ê∆VÊwFÇÇííì∑f"Êñ”÷ÊWr&W6˜W&6T∆ˆ6Fñˆ‚Ñ÷ñÊV÷ˆ‚‰‘ÙEÙîB∆BÊÊñ÷Fñˆ‚ÇíÁ7V'7G&ñÊrÇ&76WG2ˆ÷ñÊV÷ˆ‚Ú"Ê∆VÊwFÇÇííì∞¢G'íáf"7G&V”‘6∆ñVÁE6÷ˆ∂UFW7BÊ6∆72ÊvWE&W6˜W&6T57G&V“Ç"Ú"∂BÊ÷ˆFV¬ÇíÁ&W∆6RÇ&76WG2ˆ÷ñÊV÷ˆ‚Ú"¬&76WG2ˆ÷ñÊV÷ˆÂˆvV„Ú"ííí∞¢f"ß6ˆ„÷6ˆ“Êvˆˆv∆RÊw6ˆ‚‰ß6ˆÂ'6W"Á'6U&VFW"ÜÊWr¶fÊñÚ‰ñÁWE7G&V’&VFW"á7G&V“ííÊvWD4ß6ˆ‰ˆ&¶V7BÇì∑f"Ê÷W3÷ÊWr¶fÁWFñ¬‰'&î∆ó7C≈7G&ñÊs‚Çì∞¢f˜"áf"vVˆ÷WG'ì¶ß6ˆ‚ÊvWD4ß6ˆ‰'&íÇ&÷ñÊV7&gC¶vVˆ÷WG'í"íñf˜"áf"&ˆÊS¶vVˆ÷WG'íÊvWD4ß6ˆ‰ˆ&¶V7BÇíÊvWD4ß6ˆ‰'&íÇ&&ˆÊW2"íñÊ÷W2ÊFBÜ&ˆÊRÊvWD4ß6ˆ‰ˆ&¶V7BÇíÊvWBÇ&Ê÷R"íÊvWD57G&ñÊrÇíì∂÷ˆFVƒ&ˆÊW2ÁWBÜBÁ6«VrÇí∆Ê÷W2ì∞¢–¢ñbÇvV6∂Ù∆ñ$66ÜRÊvWDñÁ7FÊ6RÇíÊvWDvVÙ÷ˆFV«2ÇíÊ6ˆÁFñÁ4∂WíÜvVÚó«¬vV6∂Ù∆ñ$66ÜRÊvWDñÁ7FÊ6RÇíÊvWDÊñ÷FñˆÁ2ÇíÊ6ˆÁFñÁ4∂WíÜÊñ“íóFá&˜rÊWrñ∆∆Vv≈7FFTWÜ6WFñˆ‚Ç$vV6∂Ù∆ñ"FñBÊ˜B'6R"∂BÁ6«VrÇíì∞¢–¢fñ∆W2Áw&óFU7G&ñÊrÖFÇÊˆbÇ&6∆ñVÁB◊f∆ñFFñˆ‚ÁGáB"í¬%52‘TÂS¢÷ñÊV7&gB&V6ÜVBFóF∆U67&VV„≤WfW'í&Vvó7FW&VB÷ˆFV¬ˆÊñ÷Fñˆ‚'6VB'ívV6∂Ù∆ñ"Â∆Â525$TDïdRı$DU#¢∆¬"µ7V6ñW4FVfñÊóFñˆÁ2‰ƒ¬Á6ó¶RÇí≤"7v‚Vvw2&RVÊóVRÊBV"ñ‚ÊFñˆÊ¬ˆº:ñFWÇ˜&FW"Â∆‚"ì∞¢˜VÊVC◊G'VS∞¢7ó7FV“Ê˜WBÁ&ñÁF∆‚Ç%¥4ƒîTÂB4‘Ù¥U“526'&Vv÷VÁFÚ(	B66ÜRvV6∂Ù∆ñ"R"µ7V6ñW4FVfñÊóFñˆÁ2‰ƒ¬Á6ó¶RÇí≤"W7:ñ6ñW2fW&ñfñ6F2‚"ì∞¢7ó7FV“Ê˜WBÊf«W6ÇÇì∞¢f"FFfñ∆S’FÇÊˆbÇ'6fW2ˆ÷ñÊV÷ˆ‚◊f∆ñFFñˆ‚ˆ∆WfV¬ÊFB"íÁFÙfñ∆RÇì∑f"Fs÷ÊWBÊ÷ñÊV7&gBÊÊ'B‰Ê'DñÚÁ&VD6ˆ◊&W76VBÜFFfñ∆Rì∑FrÊvWD6ˆ◊˜VÊBÇ$FF"íÁWD&ˆˆ∆V‚Ç&6ˆÊfó&÷VDWáW&ñ÷VÁF≈6WGFñÊw2"«G'VRì∂ÊWBÊ÷ñÊV7&gBÊÊ'B‰Ê'DñÚÁw&óFT6ˆ◊&W76VBáFr∆FFfñ∆Rì∞¢ˆ&¶V7Bf∆˜w3‘÷ñÊV7&gBÊ6∆72ÊvWD÷WFÜˆBÇ&7&VFUv˜&∆D˜V‰f∆˜w2"íÊñÁfˆ∂RÜ÷2ì∂&ˆˆ∆V‚ñÁfˆ∂VC÷f«6S∞¢f˜"áf"÷WFÜˆC¶f∆˜w2ÊvWD6∆72ÇíÊvWD÷WFÜˆG2ÇíññbÜ÷WFÜˆBÊvWDÊ÷RÇíÊWV«2Ç&∆ˆD∆WfV¬"íí∞¢ñbÜ÷WFÜˆBÊvWE&÷WFW$6˜VÁBÇì””"bf÷WFÜˆBÊvWE&÷WFW%GóW2Çï≥””’7G&ñÊrÊ6∆72ó∂÷WFÜˆBÊñÁfˆ∂RÜf∆˜w2∆÷2Á67&VV‚¬&÷ñÊV÷ˆ‚◊f∆ñFFñˆ‚"ì∂ñÁfˆ∂VC◊G'VS∂'&V≥∑–¢ñbÜ÷WFÜˆBÊvWE&÷WFW$6˜VÁBÇì””bf÷WFÜˆBÊvWE&÷WFW%GóW2Çï≥””’7G&ñÊrÊ6∆72ó∂÷WFÜˆBÊñÁfˆ∂RÜf∆˜w2¬&÷ñÊV÷ˆ‚◊f∆ñFFñˆ‚"ì∂ñÁfˆ∂VC◊G'VS∂'&V≥∑–¢–¢ñbÇñÁfˆ∂VBóFá&˜rÊWrñ∆∆Vv≈7FFTWÜ6WFñˆ‚Ç$6˜V∆BÊ˜B∆ˆ6FRv˜&∆D˜V‰f∆˜w2Ê∆ˆD∆WfV¬"ì∞¢ÚÚÊñ÷Fñˆ‚6V∆V7Fñˆ‚&V6VófW26ˆÁG&ˆ∆∆VBñÁWB¬ñÊFWVÊFVÁBˆbFÜRFñ÷ñÊp¢ÚÚˆbfV∆ˆ6óGí6∂WG2ÊB6∆ñVÁB◊6ñFRg&ñ7Fñˆ‚‚v˜&∆B÷˜fV÷VÁBó27Fñ∆¿¢ÚÚG&ófV‚'í&V¬6W'fW"G&fV¬ÊB6ÜV6∂VB6W&FV«íf˜"WfW'í7V6ñW2‡¢÷ñÊV÷ˆÂ&VÊFW&W"Áf∆ñFFñˆ‰ñÁWC÷VÁFóGí”Á∞¢ñbÜVÁFóGíÊvWE7V6ñW56«VrÇíÊWV«2Ç&&&ˆ≤"íbf÷2Á∆ñW"÷ÁV∆¬ó∞¢F˜V&∆RGÉ÷÷2Á∆ñW"ÊvWEÇÇí÷VÁFóGíÊvWEÇÇí∆G£÷÷2Á∆ñW"ÊvWE¢Çí÷VÁFóGíÊvWE¢Çì∞¢f∆ˆBñs“Üf∆ˆBíÑ÷FÇÁFÙFVw&VW2Ñ÷FÇÊF„"ÜG¢∆GÇíí”ì„Bì∞¢VÁFóGíÁ6WEï&˜Báñrì∂VÁFóGíÁî&ˆGï&˜C◊ñs∂VÁFóGíÁîÜVE&˜C◊ñs∞¢–¢ñÁFVvW"Ü6S◊f∆ñFFñˆÂÜ6RÜVÁFóGíì∞¢ñbáÜ6R÷ÁV∆¬bb%Dî5TƒDîÙÂıdƒîDDîÙÂı5T4îU2Ê6ˆÁFñÁ2ÜVÁFóGíÊvWE7V6ñW56«VrÇííí∞¢VÁFóGíÁ6WDFV«F÷˜fV÷VÁBÜÊñ÷FñˆÂfV∆ˆ6óGíáÜ6Rí√√ì∞¢ñbÜVÁFóGíÊvWE7V6ñW56«VrÇíÊWV«2Ç'7V&˜r"ó«∆VÁFóGíÊvWE7V6ñW56«VrÇíÊWV«2Ç&fV&˜r"íí∞¢ÚÚ&ˆ&RFÜRÊFófR&ˆ6VGW&¬∆ˆˆ≤ñÁWBvÜñ∆R&W6W'fñÊr7FFñ2ñF∆P¢ÚÚ7FÊ6S≤ÊÚñÁfVÁFVBWFˆÊˆ÷˜W2ñF∆R˜66ñ∆∆Fñˆ‚ó26∆ñ÷VB‡¢VÁFóGíÁ6WEÖ&˜BÇÜf∆ˆBî÷FÇÁ6ñ‚ÜVÁFóGíÁFñ6¥6˜VÁB£„tbí£"„bì∞¢VÁFóGíÁîÜVE&˜C÷VÁFóGíÊvWEï&˜BÇí≤Üf∆ˆBî÷FÇÁ6ñ‚ÜVÁFóGíÁFñ6¥6˜VÁB£„4bí£#R„c∞¢–¢ñbÜ¶fÁWFñ¬Â6WBÊˆbÇ&'&"¬&∂F'&"¬&∆∂¶“"¬&&V∆«7&˜WB"¬&vVˆGVFR"¬&vˆ∆V“"¬'6∆˜wˆ∂R"¬'6∆˜v'&Ú"¬&÷WwGvÚ"¬&÷Wr"íÊ6ˆÁFñÁ2ÜVÁFóGíÊvWE7V6ñW56«VrÇííí∞¢ÚÚWÜW&6ó6R6˜W&6RÊ∆ˆˆ≤ÇvÜVBríÚÊ∆ˆˆ≤ÇvÜVEˆíríFFFñˆÁ2‡¢VÁFóGíÁ6WEÖ&˜BÇÜf∆ˆBî÷FÇÁ6ñ‚ÜVÁFóGíÁFñ6¥6˜VÁB£„tbí£"„bì∞¢VÁFóGíÁîÜVE&˜C÷VÁFóGíÊvWEï&˜BÇí≤Üf∆ˆBî÷FÇÁ6ñ‚ÜVÁFóGíÁFñ6¥6˜VÁB£„4bí£#R„c∞¢–¢–¢”∞¢÷ñÊV÷ˆÂ&VÊFW&W"Áf∆ñFFñˆ‰ˆ'6W'fW#“ÜVÁFóGí∆÷ˆFV¬í”Á∞¢ñbÜ÷2ÊvWE&W6˜W&6T÷ÊvW"ÇíÊvWE&W6˜W&6RÜ÷ˆFV¬ÊvWEFWáGW&U&W6˜W&6RÜVÁFóGíííÊó4V◊GíÇíóFá&˜rÊWrñ∆∆Vv≈7FFTWÜ6WFñˆ‚Ç$÷ó76ñÊr&VÊFW&VBFWáGW&R"∂VÁFóGíÊvWE7V6ñW56«VrÇíì∞¢7G&ñÊr6«Vs÷VÁFóGíÊvWE7V6ñW56«VrÇì∑&VÊFW&VE7V6ñW2ÊFBá6«Vrì∞¢7G&ñÊr7W'&VÁD6∆ó÷VÁFóGíÊvWE6V∆V7FVDÊñ÷Fñˆ‰f˜%f∆ñFFñˆ‚Çì∞¢∆7E&VÊFW&VDVÁFóGïFñ6≤ÁWBá6«Vr∆VÁFóGíÁFñ6¥6˜VÁBì∞¢ñbÜ7W'&VÁD6∆ó÷ÁV∆¬bb7W'&VÁD6∆óÊWV«2Ü∆7E&VÊFW&VD6∆óÁWBá6«Vr∆7W'&VÁD6∆óííê¢6∆ó6ÜÊvVEFñ6≤ÁWBá6«Vr∆VÁFóGíÁFñ6¥6˜VÁBì∞¢ñbáf∆ñFFñˆÂÜ6RÜVÁFóGíí÷ÁV∆¬ó&W˜'E&ˆw&W72á6«Vr¬'&VÊFW&ó¶:|:6Ú"ì∞¢f"˜6óFñˆ„÷VÁFóGíÁ˜6óFñˆ‚Çì∑f"˜&ñvñ„÷fó'7E&VÊFW&VE˜6óFñˆÁ2ÁWDñd'6VÁBá6«Vr«˜6óFñˆ‚ì∞¢ÚÚ&VÊFW&ñÊr6‚ñÁFW'ˆ∆FRˆÊR6W'fW"7FW˜fW"6WfW&¬g&÷W2‚÷V7W&P¢ÚÚÊWB÷˜fV÷VÁBg&ˆ“FÜRfó'7B&VÊFW&VB˜6óFñˆ‚ñÁ7FVBˆb&WVó&ñÊr¢ÚÚ6ñÊv∆Rg&÷RFÚ7&˜72FÜRFá&W6Üˆ∆B‡¢ñbÜ˜&ñvñ‚÷ÁV∆¬bf˜&ñvñ‚ÊFó7FÊ6UFı7"á˜6óFñˆ‚ì„„#TBí∞¢v∆∂VE7V6ñW2ÊFBá6«Vrì∞¢–¢ÚÚ6◊∆RWfW'í&VÊFW"g&÷R¬ñÊFWVÊFVÁF«íˆb˜6óFñˆ‚WFFW2‚fñ«FW&ñÊp¢ÚÚFÜW6R6◊∆W2'íFó7∆6V÷VÁB6‚∆ñ2Êñ÷Fñˆ‚∂Wñg&÷W2vÜV‚FÜP¢ÚÚ6∆ñVÁB&F6ÜW26WfW&¬6W'fW"Fñ6∑2ñÁFÚ6ñÊv∆R&VÊFW"g&÷R‡¢ñÁFVvW"f∆ñFFñˆÂÜ6S◊f∆ñFFñˆÂÜ6RÜVÁFóGíì∞¢ñbáf∆ñFFñˆÂÜ6R÷ÁV∆¬bb%Dî5TƒDîÙÂıdƒîDDîÙÂı5T4îU2Ê6ˆÁFñÁ2á6«Vríí∞¢ñbÇ6«VrÊWV«2á&VÊFW&VEÜ6U7V6ñW2ó««&VÊFW&VEÜ6R◊f∆ñFFñˆÂÜ6Rí∞¢&VÊFW&VEÜ6U7V6ñW3◊6«Vs∑&VÊFW&VEÜ6S◊f∆ñFFñˆÂÜ6S∑&VÊFW&VEÜ6Tg&÷W3”∞¢–¢&VÊFW&VEÜ6Tg&÷W2≤≥∞¢ñbÜ6∆óÜ56WGF∆VBá6«Vríí∞¢ñbáf∆ñFFñˆÂÜ6S„”cÇñfñÊƒñF∆Tfó'7EFñ6≤ÁWDñd'6VÁBá6«Vr∆VÁFóGíÁFñ6¥6˜VÁBì∞¢ñbáf∆ñFFñˆÂÜ6S„”Çbgf∆ñFFñˆÂÜ6S√#Bó7FVGïv∆¥fó'7EFñ6≤ÁWDñd'6VÁBá6«Vr∆VÁFóGíÁFñ6¥6˜VÁBì∞¢ñbáf∆ñFFñˆÂÜ6S„”Cbgf∆ñFFñˆÂÜ6S√Cró7FVGï'V‰fó'7EFñ6≤ÁWDñd'6VÁBá6«Vr∆VÁFóGíÁFñ6¥6˜VÁBì∞¢–¢–¢ñbáf∆ñFFñˆÂÜ6R÷ÁV∆¬bb¶fÁWFñ¬Â6WBÊˆbÇ'7V&˜r"¬&fV&˜r"¬&'&"¬&∂F'&"¬&∆∂¶“"¬&&V∆«7&˜WB"¬&vVˆGVFR"¬&vˆ∆V“"¬'6∆˜wˆ∂R"¬'6∆˜v'&Ú"¬&÷WwGvÚ"¬&÷Wr"íÊ6ˆÁFñÁ2á6«Vríí∞¢f"∆ˆˆ¥ÜVC÷÷ˆFV¬ÊvWDÊñ÷FñˆÂ&ˆ6W76˜"ÇíÊvWD&ˆÊRÇ&ÜVB"ì∞¢ñbÜ∆ˆˆ¥ÜVC”÷ÁV∆¬óFá&˜rÊWrñ∆∆Vv≈7FFTWÜ6WFñˆ‚Ç%6˜W&6RÊ∆ˆˆ≤ÜVBFFW"Ü2ÊÚvV6∂Ù∆ñ"ÜVB&ˆÊRf˜""∑6«Vrì∞¢f∆ˆEµ“&ÊvS◊6˜W&6T∆ˆˆµ&ÊvW2Ê6ˆ◊WFTñd'6VÁBá6«Vr∆≤”Á∑f"c÷ÊWrf∆ˆE≥E”∂¶fÁWFñ¬‰'&ó2Êfñ∆¬áb√√"ƒf∆ˆB‰‘Öıd≈TRì∂¶fÁWFñ¬‰'&ó2Êfñ∆¬áb√"√B¬‘f∆ˆB‰‘Öıd≈TRì∑&WGW&‚c∑“ì∞¢f∆ˆEµ“f«VW3◊∂∆ˆˆ¥ÜVBÊvWE&˜FFñˆÂÇÇí∆∆ˆˆ¥ÜVBÊvWE&˜FFñˆÂíÇó”∞¢f˜"ÜñÁBÜó3”∂Üó3√#∂Üó2≤≤ó∑&ÊvU∂Üó5”‘÷FÇÊ÷ñ‚á&ÊvU∂Üó5“«f«VW5∂Üó5“ì∑&ÊvU∂Üó2≥%”‘÷FÇÊ÷Çá&ÊvU∂Üó2≥%“«f«VW5∂Üó5“ì∑–¢–¢ñbáf∆ñFFñˆÂÜ6R÷ÁV∆¬bbá6«VrÊWV«2Ç&÷WwGvÚ"ó««6«VrÊWV«2Ç&÷Wr"ííí∞¢f"&ˆGì÷÷ˆFV¬ÊvWDÊñ÷FñˆÂ&ˆ6W76˜"ÇíÊvWD&ˆÊRÇ&&ˆGí"ì∞¢ñbÜ&ˆGì”÷ÁV∆¬óFá&˜rÊWrñ∆∆Vv≈7FFTWÜ6WFñˆ‚Ç%6˜W&6RÁóF6Ö˜Fñ«BFFW"Ü2ÊÚvV6∂Ù∆ñ"&ˆGí&ˆÊRf˜""∑6«Vrì∞¢f∆ˆEµ“&ÊvS◊6˜W&6UóF6Ö&ÊvW2Ê6ˆ◊WFTñd'6VÁBá6«Vr∆≤”Á∑f"c÷ÊWrf∆ˆE≥%”∑e≥”‘f∆ˆB‰‘Öıd≈TS∑e≥”“‘f∆ˆB‰‘Öıd≈TS∑&WGW&‚c∑“ì∞¢&ÊvU≥”‘÷FÇÊ÷ñ‚á&ÊvU≥“∆&ˆGíÊvWE&˜FFñˆÂÇÇíì∑&ÊvU≥”‘÷FÇÊ÷Çá&ÊvU≥“∆&ˆGíÊvWE&˜FFñˆÂÇÇíì∞¢–¢ñbáf∆ñFFñˆÂÜ6R÷ÁV∆¬í∞¢ñbá6«VrÊWV«2Ç&∂ˆffñÊr"ó««6«VrÊWV«2Ç'vVW¶ñÊr"íó6÷ˆ∂U'Fñ6∆U6◊∆W2Ê÷W&vRá6«Vr∆VÁFóGíÊvWE6÷ˆ∂U'Fñ6∆T6˜VÁDf˜%f∆ñFFñˆ‚Çíƒ÷FÉ£¶÷Çì∞¢ñbá6«VrÊWV«2Ç&6Ü&÷ÊFW""ó««6«VrÊWV«2Ç&6Ü&÷V∆Vˆ‚"ó««6«VrÊWV«2Ç&6Ü&ó¶&B"íí∞¢f"∆VgC÷÷ˆFV¬ÊvWDÊñ÷FñˆÂ&ˆ6W76˜"ÇíÊvWD&ˆÊRÇ&&’ˆ∆VgB"ì∑f"&ñváC÷÷ˆFV¬ÊvWDÊñ÷FñˆÂ&ˆ6W76˜"ÇíÊvWD&ˆÊRÇ&&’˜&ñváB"ì∞¢ñÁBÜ6S◊f∆ñFFñˆÂÜ6S∞¢ñÁB÷ˆFS◊Ü6S„”3ÇbgÜ6S√”CcÛ#¢áÜ6S„”bbgÜ6S√”#3Û¢”ì∞¢ñbÜ÷ˆFS„”ó∞¢f"&ÊvS÷fó&U7F'FW$&’&ÊvW2Ê6ˆ◊WFTñd'6VÁBá6«Vr∆≤”ÊÊWrf∆ˆE≥E“ì∞¢&ÊvU∂÷ˆFU”‘÷FÇÊ÷Çá&ÊvU∂÷ˆFU“ƒ÷FÇÊ'2Ü∆VgBÊvWE&˜FFñˆÂ¢Çííì∞¢&ÊvU∂÷ˆFR≥”‘÷FÇÊ÷Çá&ÊvU∂÷ˆFR≥“ƒ÷FÇÊ'2á&ñváBÊvWE&˜FFñˆÂ¢Çííì∞¢–¢–¢f˜"Ö7G&ñÊrÊ÷S¶÷ˆFVƒ&ˆÊW2ÊvWBá6«Vríí∞¢ñbÜÊ÷RÊ6ˆÁFñÁ2Ç&WñR"ó«∆Ê÷RÊ6ˆÁFñÁ2Ç&÷˜WFÇ"ó«∆Ê÷RÊ6ˆÁFñÁ2Ç&¶r"íñ6ˆÁFñÁVS∞¢f"&ˆÊS÷÷ˆFV¬ÊvWDÊñ÷FñˆÂ&ˆ6W76˜"ÇíÊvWD&ˆÊRÜÊ÷Rì∂ñbÜ&ˆÊS”÷ÁV∆¬ñ6ˆÁFñÁVS∞¢f∆ˆEµ“f«VW3◊∂&ˆÊRÊvWE&˜FFñˆÂÇÇí∆&ˆÊRÊvWE&˜FFñˆÂíÇí∆&ˆÊRÊvWE&˜FFñˆÂ¢Çí∆&ˆÊRÊvWE˜6óFñˆÂÇÇí∆&ˆÊRÊvWE˜6óFñˆÂíÇí∆&ˆÊRÊvWE˜6óFñˆÂ¢Çó”∞¢f"&ÊvS÷÷˜FñˆÂ&ÊvW2Ê6ˆ◊WFTñd'6VÁBá6«Vr≤#¢"∂Ê÷R∆≤”Á∑f"#÷ÊWrf∆ˆE≥%”∂¶fÁWFñ¬‰'&ó2Êfñ∆¬á"√√bƒf∆ˆB‰‘Öıd≈TRì∂¶fÁWFñ¬‰'&ó2Êfñ∆¬á"√b√"¬‘f∆ˆB‰‘Öıd≈TRì∑&WGW&‚#∑“ì∞¢f˜"ÜñÁBÜó3”∂Üó3√c∂Üó2≤≤ó∑&ÊvU∂Üó5”‘÷FÇÊ÷ñ‚á&ÊvU∂Üó5“«f«VW5∂Üó5“ì∑&ÊvU∂Üó2≥e”‘÷FÇÊ÷Çá&ÊvU∂Üó2≥e“«f«VW5∂Üó5“ì∑–¢–¢–¢ñbáf∆ñFFñˆÂÜ6R÷ÁV∆¬bb%Dî5TƒDîÙÂıdƒîDDîÙÂı5T4îU2Ê6ˆÁFñÁ2á6«Vríbb%Dî5TƒDîÙÂı$ÙdîƒU2Ê6ˆÁFñÁ4∂Wíá6«Vríí∞¢ñÁBÜ6S◊f∆ñFFñˆÂÜ6S∞¢7G&ñÊr7FFS÷∆ˆ6ˆ÷˜FñˆÂ7FFRáÜ6Rì∞¢ÚÚ6∆ó6V∆V7Fñˆ‚ó26◊∆VBˆÊ«ígFW"Ü6RÜ26WGF∆VB‚FÜRfó'7B&VÊFW ¢ÚÚg&÷RB&˜VÊF'í6‚7Fñ∆¬Wá˜6RFÜR&Wfñ˜W26ˆÁG&ˆ∆∆W"f«VR‡¢ñbÜó56WGF∆VD6∆ó6◊∆RáÜ6Ríí∞¢ñbÜfóáGW&UvFW"á6«VríbbVÁFóGíÊó4ñÂvFW"Çíê¢Fá&˜rÊWrñ∆∆Vv≈7FFTWÜ6WFñˆ‚Ç$VFñ26÷ˆ∂RfóáGW&R∆˜7Bñ÷÷W'6ñˆ‚f˜""∑6«Vr≤"Ü6S“"∑Ü6P¢≤"˜6óFñˆ„“"∂VÁFóGíÁ˜6óFñˆ‚Çí≤"&˜VÊG3“"∂VÁFóGíÊvWD&˜VÊFñÊt&˜ÇÇê¢≤"6∆ó“"∂VÁFóGíÊvWE6V∆V7FVDÊñ÷Fñˆ‰f˜%f∆ñFFñˆ‚Çíì∞¢'Fñ7V∆Fñˆ‰6∆ó2Ê6ˆ◊WFTñd'6VÁBá6«Vr∆≤”ÊÊWr¶fÁWFñ¬‰Ü6Ñ÷√‚Çíê¢Ê6ˆ◊WFTñd'6VÁBá7FFR∆≤”ÊÊWr¶fÁWFñ¬‰Ü6Ö6WC√‚ÇííÊFBÜVÁFóGíÊvWE6V∆V7FVDÊñ÷Fñˆ‰f˜%f∆ñFFñˆ‚Çíì∞¢'Fñ7V∆FñˆÂ6◊∆T6˜VÁG2Ê6ˆ◊WFTñd'6VÁBá6«Vr∆≤”ÊÊWr¶fÁWFñ¬‰Ü6Ñ÷√‚ÇííÊ÷W&vRá7FFR√ƒñÁFVvW#£ß7V“ì∞¢F˜V&∆RfV∆ˆ6óGï7#÷VÁFóGíÊvWDFV«F÷˜fV÷VÁBÇíÊÜ˜&ó¶ˆÁFƒFó7FÊ6U7"Çì∞¢F˜V&∆RFó7∆6V÷VÁE7#“ÜVÁFóGíÊvWEÇÇí÷VÁFóGíÁÜÚí¢ÜVÁFóGíÊvWEÇÇí÷VÁFóGíÁÜÚí≤ÜVÁFóGíÊvWE¢Çí÷VÁFóGíÁ¶Úí¢ÜVÁFóGíÊvWE¢Çí÷VÁFóGíÁ¶Úì∞¢'Fñ7V∆Fñˆ‰ñÁWG2Ê6ˆ◊WFTñd'6VÁBá6«Vr∆≤”ÊÊWr¶fÁWFñ¬‰Ü6Ñ÷√‚Çíê¢Ê6ˆ◊WFTñd'6VÁBá7FFR∆≤”ÊÊWr¶fÁWFñ¬‰Ü6Ö6WC√‚ÇííÊFBÇ'Ü6S“"∑Ü6R≤"∆6∆ó“"∂VÁFóGíÊvWE6V∆V7FVDÊñ÷Fñˆ‰f˜%f∆ñFFñˆ‚Çí≤"«fV∆ˆ6óGï7#“"∑fV∆ˆ6óGï7"≤"«˜6óFñˆ‰FV«F7#“"∂Fó7∆6V÷VÁE7"ì∞¢–¢ñbá6«VrÊWV«2Ç'ßV&B"íbfó56WGF∆VD6∆ó6◊∆RáÜ6Ríí∞¢f"fˆ∆FVC÷÷ˆFV¬ÊvWDÊñ÷FñˆÂ&ˆ6W76˜"ÇíÊvWD&ˆÊRÇ'vñÊw5ˆfˆ∆FVB"ì∞¢f"˜V„÷÷ˆFV¬ÊvWDÊñ÷FñˆÂ&ˆ6W76˜"ÇíÊvWD&ˆÊRÇ'vñÊw5ˆ˜V‚"ì∞¢ñbÜfˆ∆FVC”÷ÁV∆««∆˜V„”÷ÁV∆««ƒ÷FÇÊ'2Üfˆ∆FVBÊvWE66∆UÇÇíì„„g«ƒ÷FÇÊ'2Ü˜V‚ÊvWE66∆UÇÇí”„bì„„bê¢Fá&˜rÊWrñ∆∆Vv≈7FFTWÜ6WFñˆ‚Ç%ßV&B˜6W"fó6ñ&ñ∆óGífñ∆VC¢fˆ∆FVBvñÊw2◊W7B&RÜñFFV‚ÊB˜V‚vñÊw2fó6ñ&∆S≤Ü6S“"∑Ü6R≤"6∆ó“"∂VÁFóGíÊvWE6V∆V7FVDÊñ÷Fñˆ‰f˜%f∆ñFFñˆ‚Çí≤"66∆W3“"≤Üfˆ∆FVC”÷ÁV∆√Ú&÷ó76ñÊr#¶fˆ∆FVBÊvWE66∆UÇÇíí≤"Ú"≤Ü˜V„”÷ÁV∆√Ú&÷ó76ñÊr#¶˜V‚ÊvWE66∆UÇÇííì∞¢–¢ñbÇá6«VrÊWV«2Ç'ñFvV˜GFÚ"ó««6«VrÊWV«2Ç'ñFvV˜B"ííbfó56WGF∆VD6∆ó6◊∆RáÜ6Ríí∞¢f"6∆˜6VC÷÷ˆFV¬ÊvWDÊñ÷FñˆÂ&ˆ6W76˜"ÇíÊvWD&ˆÊRÇ'vñÊw5ˆ6∆˜6VB"ì∞¢f"˜V„÷÷ˆFV¬ÊvWDÊñ÷FñˆÂ&ˆ6W76˜"ÇíÊvWD&ˆÊRÇ'vñÊw5ˆ˜V‚"ì∞¢&ˆˆ∆V‚˜VÂó%6V∆V7FVC÷˜V‚÷ÁV∆¬bf6∆˜6VB÷ÁV∆¬bf˜V‚ÊvWE66∆UÇÇì„÷6∆˜6VBÊvWE66∆UÇÇì∞¢ñbÜ6∆˜6VC”÷ÁV∆««∆˜V„”÷ÁV∆««∆6∆˜6VBÊó4ÜñFFV‚Çí÷˜VÂó%6V∆V7FV@¢«∆6∆˜6VBÊ6Üñ∆D&ˆÊW4&TÜñFFVÂFˆÚÇí÷˜VÂó%6V∆V7FV@¢«∆˜V‚Êó4ÜñFFV‚Çì”÷˜VÂó%6V∆V7FVG«∆˜V‚Ê6Üñ∆D&ˆÊW4&TÜñFFVÂFˆÚÇì”÷˜VÂó%6V∆V7FVBê¢Fá&˜rÊWrñ∆∆Vv≈7FFTWÜ6WFñˆ‚Ç%ñFvRvñÊr˜6W"fó6ñ&ñ∆óGífñ∆VBf˜""∑6«Vr≤"Ú"∂VÁFóGíÊvWE6V∆V7FVDÊñ÷Fñˆ‰f˜%f∆ñFFñˆ‚Çí≤#¢ÜñFFV‚ÜñW&&6áí◊W7B÷F6ÇFÜRñÊ7FófRvñÊr˜6S≤66∆W3“"≤Ü6∆˜6VC”÷ÁV∆√Ú&÷ó76ñÊr#¶6∆˜6VBÊvWE66∆UÇÇíí≤"Ú"≤Ü˜V„”÷ÁV∆√Ú&÷ó76ñÊr#¶˜V‚ÊvWE66∆UÇÇíí≤"¬ÜñFFV„“"≤Ü6∆˜6VC”÷ÁV∆√Ú&÷ó76ñÊr#¶6∆˜6VBÊó4ÜñFFV‚Çíí≤"Ú"≤Ü˜V„”÷ÁV∆√Ú&÷ó76ñÊr#¶˜V‚Êó4ÜñFFV‚Çííì∞¢vñÊufó6ñ&ñ∆óGï7V6ñW2ÊFBá6«Vrì∞¢–¢ÚÚ÷V7W&R'Fñ7V∆Fñˆ‚ˆÊ«ígFW"FÜR7W'&VÁBÜ6RÜ26WGF∆VB‚FÜP¢ÚÚ6V∆V7FVB÷6∆óˆñÁWB&V6˜&G2«&VGíW6RFÜó2vFS≤«ññÊróBFÚ˜6P¢ÚÚ&ÊvW2&WfVÁG2G&Á6óFñˆ‚&∆VÊBg&÷W2g&ˆ“6ˆÁF÷ñÊFñÊr7FFñ2÷ñF∆P¢ÚÚ6ÜV6∑2ÜÊ˜F&«íÊñF˜VVV‚w2ÊFófRfóÜVBw&˜VÊEˆñF∆R7FÊ6Rí‡¢ñbÜó56WGF∆VD6∆ó6◊∆RáÜ6Ríí∞¢f"W%7V6ñW3÷'Fñ7V∆FñˆÂ&ÊvW2Ê6ˆ◊WFTñd'6VÁBá6«Vr∆≤”ÊÊWr¶fÁWFñ¬‰Ü6Ñ÷√‚Çíì∞¢f˜"Ö7G&ñÊr¶ˆñÁCß&ˆfñ∆T¶ˆñÁG2á6«Vr«7FFRíí∞¢f"&ˆÊS÷÷ˆFV¬ÊvWDÊñ÷FñˆÂ&ˆ6W76˜"ÇíÊvWD&ˆÊRÜ¶ˆñÁBì∞¢ñbÜ&ˆÊS”÷ÁV∆¬óFá&˜rÊWrñ∆∆Vv≈7FFTWÜ6WFñˆ‚Ç$∆ˆ6ˆ÷˜Fñˆ‚&ˆfñ∆R&VfW&VÊ6W2÷ó76ñÊr&ˆÊR"∑6«Vr≤#¢"∂¶ˆñÁBì∞¢f∆ˆEµ“f«VW3◊∂&ˆÊRÊvWE&˜FFñˆÂÇÇí∆&ˆÊRÊvWE&˜FFñˆÂíÇí∆&ˆÊRÊvWE&˜FFñˆÂ¢Çí∆&ˆÊRÊvWE˜6óFñˆÂÇÇí∆&ˆÊRÊvWE˜6óFñˆÂíÇí∆&ˆÊRÊvWE˜6óFñˆÂ¢Çó”∞¢f"&ÊvS◊W%7V6ñW2Ê6ˆ◊WFTñd'6VÁBá7FFR≤#¢"∂¶ˆñÁB∆≤”Á∑f"c÷ÊWrf∆ˆE≥%”∂¶fÁWFñ¬‰'&ó2Êfñ∆¬áb√√bƒf∆ˆB‰‘Öıd≈TRì∂¶fÁWFñ¬‰'&ó2Êfñ∆¬áb√b√"¬‘f∆ˆB‰‘Öıd≈TRì∑&WGW&‚c∑“ì∞¢f˜"ÜñÁBÜó3”∂Üó3√c∂Üó2≤≤ó∑&ÊvU∂Üó5”‘÷FÇÊ÷ñ‚á&ÊvU∂Üó5“«f«VW5∂Üó5“ì∑&ÊvU∂Üó2≥e”‘÷FÇÊ÷Çá&ÊvU∂Üó2≥e“«f«VW5∂Üó5“ì∑–¢–¢–¢ñbá6«VrÊWV«2Ç&fV&˜r"íbfó56WGF∆VD6∆ó6◊∆RáÜ6Ríí∞¢f"&ˆGì÷÷ˆFV¬ÊvWDÊñ÷FñˆÂ&ˆ6W76˜"ÇíÊvWD&ˆÊRÇ&&ˆGí"ì∞¢f"ÜVC÷÷ˆFV¬ÊvWDÊñ÷FñˆÂ&ˆ6W76˜"ÇíÊvWD&ˆÊRÇ&ÜVB"ì∞¢f"∆VgD∆Vs÷÷ˆFV¬ÊvWDÊñ÷FñˆÂ&ˆ6W76˜"ÇíÊvWD&ˆÊRÇ&∆Vuˆ∆VgB"ì∞¢f"&ñváD∆Vs÷÷ˆFV¬ÊvWDÊñ÷FñˆÂ&ˆ6W76˜"ÇíÊvWD&ˆÊRÇ&∆Vu˜&ñváB"ì∞¢f"∆VgC÷÷ˆFV¬ÊvWDÊñ÷FñˆÂ&ˆ6W76˜"ÇíÊvWD&ˆÊRÇ'vñÊuˆ˜VÂˆ∆VgB"ì∞¢f"&ñváC÷÷ˆFV¬ÊvWDÊñ÷FñˆÂ&ˆ6W76˜"ÇíÊvWD&ˆÊRÇ'vñÊuˆ˜VÂ˜&ñváB"ì∞¢ÚÚFÜRFFVB˜6R∆ñgG2FÜRÜVB¬7G&ñváFVÁ2&˜FÇ∆Vw2ÊB∂VW0¢ÚÚ˜˜6óFRvñÊr˜&ñVÁFFñˆ‚vÜñ∆RFÜRÊFófR&ñrw2vñÊr6ÜñÁ2&VB‡¢f∆ˆBóF6É“Üf∆ˆBî÷FÇÁFı&FñÁ2É#"„Bí∆∆Vu7∆ì“Üf∆ˆBî÷FÇÁFı&FñÁ2ÉR„Bì∞¢f∆ˆB∆ˆˆµóF6É÷ÜVC”÷ÁV∆√Ùf∆ˆB‰Ê„¶ÜVBÊvWE&˜FFñˆÂÇÇì∞¢ñbÜ&ˆGì”÷ÁV∆««∆ÜVC”÷ÁV∆««∆∆VgD∆Vs”÷ÁV∆«««&ñváD∆Vs”÷ÁV∆««∆∆VgC”÷ÁV∆«««&ñváC”÷ÁV∆¿¢«ƒ÷FÇÊ'2Ñ÷FÇÊ'2Ü&ˆGíÊvWE&˜FFñˆÂÇÇíí◊óF6Çì„„$`¢«¬f∆ˆBÊó4fñÊóFRÜ∆ˆˆµóF6Çó«∆∆ˆˆµóF6É¬Üf∆ˆBî÷FÇÁFı&FñÁ2ÉìR„Bí”„$`¢«∆∆ˆˆµóF6É‚Üf∆ˆBî÷FÇÁFı&FñÁ2ÉR„Bí≥„$`¢«ƒ÷¯„€hëÈÏ∂ªßq´^u±Ωç≠πëU¡ëÖ—î°πï‹Å	±Ωç≠AΩÃ°‡∞ƒ¿ƒ±Ë§±	±Ωç≠Ãπ%HπëïôÖ’±—	±Ωç≠M—Ö—î†§§Ï(ÄÄÄÅÙ(ÄÄÄÅŸÖ»Åπï·–ı5Ωëπ—•—•ïÃπMA%Lπùï–°Õ±’ú§πùï–†§πç…ïÖ—î°±ïŸï∞§Ï(ÄÄÄÅ•ò°ô•·—’…ï•»°Õ±’ú§òôM¡ïç•ïÕ	ï°ÖŸ•Ω…A…Ωô•±ïÃπ¡…Ωô•±î°Õ±’ú§ÙıM¡ïç•ïÕ	ï°ÖŸ•Ω…A…Ωô•±ïÃπA…Ωô•±îπI=U9}1%!P•Ï(ÄÄÄÄÅŸÖ»ÅÕÖŸïêıπï‹Åπï–πµ•πïç…Öô–ππâ–πΩµ¡Ω’πëQÖú†§Ìπï·–πÖëëëë•—•ΩπÖ±MÖŸïÖ—Ñ°ÕÖŸïê§ÌÕÖŸïêπ¡’—M—…•πú†â9Ö—’…Ö±	ï°ÖŸ•Ω…A°ÖÕîà∞â%Hà§Ìπï·–π…ïÖëëë•—•ΩπÖ±MÖŸïÖ—Ñ°ÕÖŸïê§Ï(ÄÄÄÅÙ(ÄÄÄÅëΩ’â±îÅ›Ö—ï…dıô•·—’…ïM’…ôÖçî°Õ±’ú§¸ƒ¿ƒ∏¡µ]Ö—ï…5ΩŸïµïπ—ΩÖ∞π¡…ïôï……ïëM’…ôÖçïï¡—†°πï·–§Ëƒ¿ƒ∏¡µπï·–πùï—	â!ï•ù°–†§¥¿∏Ã’Ï(ÄÄÄÅπï·–πµΩŸïQº†¿±Ö≈’Ö—•å˝›Ö—ï…dËƒ¿ƒ∏¡∞–∞ƒ‡¿∞¿§Ìπï·–πÖëëQÖú†âµ•πïµΩ∏µ±ΩçΩµΩ—•Ω∏µô•·—’…îà§Ìπï·–πÕï—9Ω§°ôÖ±Õî§Ìπï·–πùΩÖ±Mï±ïç—Ω»π…ïµΩŸï±±ΩÖ±Ã†§Ìπï·–π—Ö…ùï—Mï±ïç—Ω»π…ïµΩŸï±±ΩÖ±Ã†§ÌÕï—YÖ±•ëÖ—•ΩπA°ÖÕî°πï·–∞¿§Ì±ïŸï∞πÖëë…ïÕ°π—•—‰°πï·–§Ì—ïÕ—π—•—‰ıπï·–πùï—UU%†§Ï(ÄÄÄÅÙ§Ï(ÄÄÅÙ(ÄÄÅ•ò°›Ω…±ëQ•ç≠Ã¯ıMA%M}MQIQ}Q%,ÄòòÅ›Ω…±ëQ•ç≠ÃÒMA%M}MQIQ}Q%,≠Õ¡ïç•ïÃπÕ•Èî†§©MA%M}QMQ}]%9=\§(ÄÄÄÅÖ¡¡±ÂYÖ±•ëÖ—•Ωπ%π¡’–°µå±5Ö—†πô±ΩΩ…5Ωê°›Ω…±ëQ•ç≠ÃµMA%M}MQIQ}Q%,±MA%M}QMQ}]%9=\§§Ï(ÄÄÅ•ò°›Ω…±ëQ•ç≠Ã¯ıMA%M}MQIQ}Q%,¨»¿ÄòòÅ›Ω…±ëQ•ç≠ÃÒMA%M}MQIQ}Q%,≠Õ¡ïç•ïÃπÕ•Èî†§©MA%M}QMQ}]%9=\ÄòòÄ°›Ω…±ëQ•ç≠Ã¥°MA%M}MQIQ}Q%,¨»¿§§ïMA%M}QMQ}]%9=\ÙÙ¿•Mç…ïïπÕ°Ω–πù…Öà°µåπùÖµï•…ïç—Ω…‰±µåπùï—5Ö•πIïπëï…QÖ…ùï–†§±µïÕÕÖùî¥˘ÌÙ§Ï(ÄÄÅ•ò°›Ω…±ëQ•ç≠Ã¯ıMA%M}MQIQ}Q%,òô›Ω…±ëQ•ç≠ÃÒMA%M}MQIQ}Q%,≠Õ¡ïç•ïÃπÕ•Èî†§©MA%M}QMQ}]%9=\•Ï(ÄÄÄÅM—…•πúÅÖç—•ŸîıÕ¡ïç•ïÃπùï–†°›Ω…±ëQ•ç≠ÃµMA%M}MQIQ}Q%,§ΩMA%M}QMQ}]%9=\§Ï(ÄÄÄÅ•π–Å¡°ÖÕîÙ°›Ω…±ëQ•ç≠ÃµMA%M}MQIQ}Q%,§ïMA%M}QMQ}]%9=\Ï(ÄÄÄÅ•ò°ô•·—’…ï•»°Öç—•Ÿî§òô©ÖŸÑπ’—•∞πMï–πΩò†âÕ¡ïÖ…Ω‹à∞â¡•ëùï‰à∞âôïÖ…Ω‹à∞â°Ö’π—ï»à∞âùïπùÖ»à§πçΩπ—Ö•πÃ°Öç—•Ÿî§(ÄÄÄÄÄÄÄòô¡°ÖÕî¯Ùƒ‡òô¡°ÖÕîÙ»Ãòôô±•ù°—…ÖµïÃπÖëê°Öç—•Ÿî¨àËà≠¡°ÖÕî§§(ÄÄÄÄÅMç…ïïπÕ°Ω–πù…Öà°µåπùÖµï•…ïç—Ω…‰∞âô±•ù°–¥à≠Öç—•Ÿî¨à¥à≠¡°ÖÕî¨àπ¡πúà±µåπùï—5Ö•πIïπëï…QÖ…ùï–†§±µïÕÕÖùî¥˘ÌÙ§Ï(ÄÄÅÙ(ÄÄÅ•ò°Ö…âΩ≠Mç…ïïπÕ°Ω—Aïπë•πú•Ï(ÄÄÄÅMç…ïïπÕ°Ω–πù…Öà°µåπùÖµï•…ïç—Ω…‰∞âÖ…âΩ¨µô…Ωπ–¥à≠±ΩçΩµΩ—•ΩπM—Ö—î°…ïπëï…ïëA°ÖÕî§¨àπ¡πúà±µåπùï—5Ö•πIïπëï…QÖ…ùï–†§±µïÕÕÖùî¥˘ÌÙ§Ï(ÄÄÄÅµåπΩ¡—•ΩπÃπ°•ëï’§ıôÖ±ÕîÌÖ…âΩ≠Mç…ïïπÕ°Ω—Aïπë•πúıôÖ±ÕîÏ(ÄÄÅÙ(ÄÄÅ•ò°›Ω…±ëQ•ç≠Ã¯ıMA%M}MQIQ}Q%,ÄòòÅ›Ω…±ëQ•ç≠ÃÒMA%M}MQIQ}Q%,≠Õ¡ïç•ïÃπÕ•Èî†§©MA%M}QMQ}]%9=\(ÄÄÄÄÄÄÄòôÕ¡ïç•ïÃπùï–†°›Ω…±ëQ•ç≠ÃµMA%M}MQIQ}Q%,§ΩMA%M}QMQ}]%9=\§πï≈’Ö±Ã†âÖ…âΩ¨à§(ÄÄÄÄÄÄÄòô©ÖŸÑπ’—•∞πMï–πΩò†‘∞»¿∞‹Ã§πçΩπ—Ö•πÃ†°›Ω…±ëQ•ç≠ÃµMA%M}MQIQ}Q%,§ïMA%M}QMQ}]%9=\§•Ï(ÄÄÄÄººÅ=πîÅ…ïπëï…ïêÅô…ÖµîÅ±Ö—ï»∞Å—°•ÃÅ¡…Ωë’çïÃÅÖ∏Å’πΩâÕ—…’ç—ïêÅô…Ωπ–ÅŸ•ï‹ÅΩò(ÄÄÄÄººÅ—°îÅçΩâ…ÑÅ°ΩΩêÅÕºÅ—°îÅUXÅ…ïµÖ¿ÅçÖ∏ÅâîÅ•πÕ¡ïç—ïêÅ•∏Å—°îÅç±•ïπ–ÅÖ…—•ôÖç–∏(ÄÄÄÅµåπΩ¡—•ΩπÃπ°•ëï’§ı—…’îÌÖ…âΩ≠Mç…ïïπÕ°Ω—Aïπë•πúı—…’îÏ(ÄÄÅÙ(ÄÄÅ•ò°›Ω…±ëQ•ç≠Ã¯ıMA%M}MQIQ}Q%,ÄòòÅ›Ω…±ëQ•ç≠ÃÒMA%M}MQIQ}Q%,≠Õ¡ïç•ïÃπÕ•Èî†§©MA%M}QMQ}]%9=\ÄòòÄ†°›Ω…±ëQ•ç≠ÃµMA%M}MQIQ}Q%,§ïMA%M}QMQ}]%9=\§ÙÙ–»(ÄÄÄÄÄÄÄòòÅ©ÖŸÑπ’—•∞πMï–πΩò†âç°Ö…µÖπëï»à∞âç°Ö…µï±ïΩ∏à∞âç°Ö…•ÈÖ…êà∞âµΩ±—…ïÃà∞â¡ΩπÂ—Ñà∞â…Ö¡•ëÖÕ†à§πçΩπ—Ö•πÃ°Õ¡ïç•ïÃπùï–†°›Ω…±ëQ•ç≠ÃµMA%M}MQIQ}Q%,§ΩMA%M}QMQ}]%9=\§§•Mç…ïïπÕ°Ω–πù…Öà°µåπùÖµï•…ïç—Ω…‰∞âô•…îµπ•ù°–¥à≠Õ¡ïç•ïÃπùï–†°›Ω…±ëQ•ç≠ÃµMA%M}MQIQ}Q%,§ΩMA%M}QMQ}]%9=\§¨àπ¡πúà±µåπùï—5Ö•πIïπëï…QÖ…ùï–†§±µïÕÕÖùî¥˘ÌÙ§Ï(ÄÄÅ•ò°›Ω…±ëQ•ç≠ÃÙıMA%M}MQIQ}Q%,≠Õ¡ïç•ïÃπÕ•Èî†§©MA%M}QMQ}]%9=\§ÅÏ(ÄÄÄÅ•ò†ÖçΩµâÖ—AÖÕÕïê•—°…Ω‹Åπï‹Å%±±ïùÖ±M—Ö—ï·çï¡—•Ω∏†âM’…Ÿ•ŸÖ∞ÅçΩµâÖ–Åç°ïç¨Åë•êÅπΩ–Å¡ÖÕÃà§Ï(ÄÄÄÅ•ò†Ö…ïπëï…ïëM¡ïç•ïÃπçΩπ—Ö•πÕ±∞°Õ¡ïç•ïÃ§•—°…Ω‹Åπï‹Å%±±ïùÖ±M—Ö—ï·çï¡—•Ω∏†âMΩµîÅÕ¡ïç•ïÃÅ›ï…îÅπΩ–Å…ïπëï…ïêËÅï·¡ïç—ïêÙà≠Õ¡ïç•ïÃ¨àÅÖç—’Ö∞Ùà≠…ïπëï…ïëM¡ïç•ïÃ§Ï(ÄÄÄÅôΩ»°M—…•πúÅÕ±’úÈÕ¡ïç•ïÃ§ÅÏ(ÄÄÄÄÅâΩΩ±ïÖ∏ÅâΩëÂ5ΩŸïêıµΩ—•ΩπIÖπùïÃπïπ—…ÂMï–†§πÕ—…ïÖ¥†§πô•±—ï»°î¥˘îπùï—-ï‰†§πÕ—Ö…—Õ]•—†°Õ±’ú¨àËà§§πÖπÂ5Ö—ç†°î¥˘ÌôΩ»°•π–ÅÖ·•ÃÙ¿ÌÖ·•ÃÿÌÖ·•Ã¨¨••ò°îπùï—YÖ±’î†•mÖ·•Ã¨Ÿtµîπùï—YÖ±’î†•mÖ·•Õt¯¿∏¿¿¿ƒ•…ï—’…∏Å—…’îÌ…ï—’…∏ÅôÖ±ÕîÌÙ§Ï(ÄÄÄÄÅŸÖ»Åëïô•π•—•Ω∏ıM¡ïç•ïÕïô•π•—•ΩπÃπùï–°Õ±’ú§Ï(ÄÄÄÄÅâΩΩ±ïÖ∏ÅÕ—Ö—•çÖ±±âÖç¨ıëïô•π•—•Ω∏Ñıπ’±∞òòâÕ—Ö—•åàπï≈’Ö±Ã°ëïô•π•—•Ω∏πµΩŸïµïπ—Ö±±âÖç¨†§§Ï(ÄÄÄÄÅ•ò†Ö›Ö±≠ïëM¡ïç•ïÃπçΩπ—Ö•πÃ°Õ±’ú•Ò†ÖÕ—Ö—•çÖ±±âÖç¨òòÖâΩëÂ5ΩŸïê§•—°…Ω‹Åπï‹Å%±±ïùÖ±M—Ö—ï·çï¡—•Ω∏†â9ºÅ…ïπëï…ïêÅµΩŸïµïπ–ÅôΩ»Äà≠Õ±’ú¨àÏÅë•Õ¡±Öçïµïπ–Ùà≠›Ö±≠ïëM¡ïç•ïÃπçΩπ—Ö•πÃ°Õ±’ú§¨àÅâΩëÂ°ÖπùïêÙà≠âΩëÂ5ΩŸïê¨àÅÕ—Ö—•çÖ±±âÖç¨Ùà≠Õ—Ö—•çÖ±±âÖç¨§Ï(ÄÄÄÅÙ(ÄÄÄÅôΩ»°M—…•πúÅÕ±’úÈ©ÖŸÑπ’—•∞π1•Õ–πΩò†âç°Ö…µÖπëï»à∞âç°Ö…µï±ïΩ∏à∞âç°Ö…•ÈÖ…êà§§ÅÏ(ÄÄÄÄÅ•ò†ÖÕ¡ïç•ïÃπçΩπ—Ö•πÃ°Õ±’ú§•çΩπ—•π’îÏ(ÄÄÄÄÅô±ΩÖ—mtÅÖ…µÃıô•…ïM—Ö…—ï……µIÖπùïÃπùï–°Õ±’ú§Ï(ÄÄÄÄÄººÅ9Ö—•ŸîÅ°Ö…•ÈÖ…êÅÖ•…}ô±‰ÅÖ…µÃÅÖ…îÄƒ‹∏‘Ä¨º¥ÄƒÅëïù…ïïÃÏ(ÄÄÄÄÄººÅ—°îÅÖëÖ¡—ïêÅù…Ω’πêÅùÖ•–Å’ÕïÃÄ‘‘Åëïù…ïïÃ∏ÅYÖ±•ëÖ—îÅ—°îÅÖç—•ŸîÅÕΩ’…çî(ÄÄÄÄÄººÅô±•ù°–Å¡ΩÕîÅ›•—°Ω’–Å›ïÖ≠ïπ•πúÅ—°îÅΩ—°ï»ÅÕ—Ö…—ï…ÃúÅù…Ω’πêÅ…ïù…ïÕÕ•Ω∏∏(ÄÄÄÄÅô±ΩÖ–Åµ•π•µ’µ…¥ıÕ±’úπï≈’Ö±Ã†âç°Ö…•ÈÖ…êà§òôô•·—’…ï•»°Õ±’ú§¸°ô±ΩÖ–•5Ö—†π—ΩIÖë•ÖπÃ†ƒÿ∏¡§Ë¿∏Ã’Ï(ÄÄÄÄÅô±ΩÖ–ÅµÖ·•µ’µ…¥ıÕ±’úπï≈’Ö±Ã†âç°Ö…•ÈÖ…êà§òôô•·—’…ï•»°Õ±’ú§¸°ô±ΩÖ–•5Ö—†π—ΩIÖë•ÖπÃ†ƒ‰∏¡§È±ΩÖ–π5a}Y1UÏ(ÄÄÄÄÅâΩΩ±ïÖ∏Å›Ö±≠…µÃıÖ…µÃÑıπ’±∞òôÖ…µÕl¡t¯ıµ•π•µ’µ…¥òôÖ…µÕl≈t¯ıµ•π•µ’µ…¥(ÄÄÄÄÄÄÄòôÖ…µÕl¡tıµÖ·•µ’µ…¥òôÖ…µÕl≈tıµÖ·•µ’µ…¥Ï(ÄÄÄÄÅâΩΩ±ïÖ∏ÅôÖÕ—ï……µÃıÕ±’úπï≈’Ö±Ã†âç°Ö…µÖπëï»à•Ò°Ö…µÃÑıπ’±∞òôÖ…µÕl…t¯ıµ•π•µ’µ…¥òôÖ…µÕlÕt¯ıµ•π•µ’µ…¥òôÖ…µÕl…tıµÖ·•µ’µ…¥òôÖ…µÕlÕtıµÖ·•µ’µ…¥§Ï(ÄÄÄÄÅ•ò†Ö›Ö±≠…µÕÒÖôÖÕ—ï……µÃ§(ÄÄÄÄÄÅ—°…Ω‹Åπï‹Å%±±ïùÖ±M—Ö—ï·çï¡—•Ω∏†â•…îµÕ—Ö…—ï»ÅÖ…µÃÅ…ïµÖ•πïêÅπïÖ»ÅPµ¡ΩÕîÅë’…•πúÅŸÖ±•ëÖ—ïêÅµΩŸïµïπ–ÅôΩ»Äà≠Õ±’ú¨àÏÅÖ…¥Å…Ω—Ö—•ΩπÃÙà≠©ÖŸÑπ’—•∞π……ÖÂÃπ—ΩM—…•πú°Ö…µÃ§§Ï(ÄÄÄÅÙ(ÄÄÄÅŸÖ±•ëÖ—ï…—•ç’±Ö—•ΩπA…Ωô•±ïÃ†§Ï(ÄÄÄÅ•ò°Õ¡ïç•ïÃπçΩπ—Ö•πÃ†âùÖÕ—±‰à§§ÅÏ(ÄÄÄÄÅŸÖ»Å¡Ö…—•ç±ï)ÕΩ∏ıπï‹ÅIïÕΩ’…çï1ΩçÖ—•Ω∏°5•πïµΩ∏π5=}%∞â¡Ö…—•ç±ïÃΩùÖÕ—±Â}ù°ΩÕ—±Â}ÕµΩ≠îπ©ÕΩ∏à§Ï(ÄÄÄÄÅ•ò°µåπùï—IïÕΩ’…çï5ÖπÖùï»†§πùï—IïÕΩ’…çî°¡Ö…—•ç±ï)ÕΩ∏§π•Õµ¡—‰†§§(ÄÄÄÄÄÅ—°…Ω‹Åπï‹Å%±±ïùÖ±M—Ö—ï·çï¡—•Ω∏†â5•ÕÕ•πúÅÖÕ—±‰ÅΩââ±ïµΩ∏ÅÕµΩ≠îÅ¡Ö…—•ç±îÅëïô•π•—•Ω∏à§Ï(ÄÄÄÄÅ•π–ÅÕµΩ≠ïAÖ…—•ç±ïÃıâ»πçΩ¥π¡ï—…•ç≠ôÖ…•Ñπµ•πïµΩ∏πç±•ïπ–πÖÕ—±ÂMµΩ≠ïAÖ…—•ç±îπÕ¡Ö›πΩ’π—Ω…YÖ±•ëÖ—•Ω∏†§Ï(ÄÄÄÄÅ•ò°ÕµΩ≠ïAÖ…—•ç±ïÃƒ¿•—°…Ω‹Åπï‹Å%±±ïùÖ±M—Ö—ï·çï¡—•Ω∏†âÖÕ—±‰ùÃÅπÖ—•ŸîÅ•ë±îΩ›Ö±¨ÅÕµΩ≠îÅïµ•——ï»Åë•êÅπΩ–Åç…ïÖ—îÅç±•ïπ–Å¡Ö…—•ç±ïÃËÄà≠ÕµΩ≠ïAÖ…—•ç±ïÃ§Ï(ÄÄÄÄÅ•±ïÃπ›…•—ïM—…•πú°AÖ—†πΩò†âç±•ïπ–µŸÖ±•ëÖ—•Ω∏π—·–à§∞âAMLÅMQ1dÅM5=-ËÅΩââ±ïµΩ∏Åù°ΩÕ—±Â}ÕµΩ≠îÅëïô•π•—•Ω∏Å±ΩÖëïêÅÖπêÄà≠ÕµΩ≠ïAÖ…—•ç±ïÃ¨àÅç±•ïπ–Å¡Ö…—•ç±îÅ•πÕ—ÖπçïÃÅ›ï…îÅç…ïÖ—ïêÅë’…•πúÅ—°îÅô’±∞Å…ïπëï»ÅÕµΩ≠î∏Å5Öπ’Ö∞ÅÖ¡¡ïÖ…ÖπçîÅ…ïŸ•ï‹Å…ïµÖ•πÃÅÕï¡Ö…Ö—îπqq∏à±M—ÖπëÖ…ë=¡ïπ=¡—•Ω∏πAA9§Ï(ÄÄÄÅÙ(ÄÄÄÅôΩ»°M—…•πúÅÕ±’úÈ©ÖŸÑπ’—•∞π1•Õ–πΩò†âÕ¡ïÖ…Ω‹à∞âôïÖ…Ω‹à∞âÖâ…Ñà∞â≠ÖëÖâ…Ñà∞âÖ±Ö≠ÖÈÖ¥à∞ââï±±Õ¡…Ω’–à∞âùïΩë’ëîà∞âùΩ±ï¥à∞âÕ±Ω›¡Ω≠îà∞âÕ±Ω›â…ºà∞âµï›—›ºà∞âµï‹à§§ÅÏ(ÄÄÄÄÅ•ò†ÖÕ¡ïç•ïÃπçΩπ—Ö•πÃ°Õ±’ú§•çΩπ—•π’îÏ(ÄÄÄÄÅô±ΩÖ—mtÅ±ΩΩ¨ıÕΩ’…çï1ΩΩ≠IÖπùïÃπùï–°Õ±’ú§Ï(ÄÄÄÄÅ•ò°±ΩΩ¨Ùıπ’±±ÒÒ±ΩΩ≠l…tµ±ΩΩ≠l¡t¿∏¿’ÒÒ±ΩΩ≠lÕtµ±ΩΩ≠l≈t¿∏¿’§(ÄÄÄÄÄÅ—°…Ω‹Åπï‹Å%±±ïùÖ±M—Ö—ï·çï¡—•Ω∏†âMΩ’…çîÅƒπ±ΩΩ¨ÅÖëÖ¡—Ö—•Ω∏Åë•êÅπΩ–ÅµΩŸîÅ—°îÅ°ïÖêÅôΩ»Äà≠Õ±’ú¨àËÄà≠©ÖŸÑπ’—•∞π……ÖÂÃπ—ΩM—…•πú°±ΩΩ¨§§Ï(ÄÄÄÅÙ(ÄÄÄÅŸÖ»ÅÕï±ïç—ïëA•ëùîı©ÖŸÑπ’—•∞πMï–πΩò†â¡•ëùïΩ——ºà∞â¡•ëùïΩ–à§πÕ—…ïÖ¥†§πô•±—ï»°Õ¡ïç•ïÃËÈçΩπ—Ö•πÃ§πçΩ±±ïç–°©ÖŸÑπ’—•∞πÕ—…ïÖ¥πΩ±±ïç—Ω…Ãπ—ΩMï–†§§Ï(ÄÄÄÅ•ò†Ö›•πùY•Õ•â•±•—ÂM¡ïç•ïÃπçΩπ—Ö•πÕ±∞°Õï±ïç—ïëA•ëùî§§(ÄÄÄÄÅ—°…Ω‹Åπï‹Å%±±ïùÖ±M—Ö—ï·çï¡—•Ω∏†âA•ëùîÅ›•πúÅŸ•Õ•â•±•—‰Å›ÖÃÅπΩ–ÅÕÖµ¡±ïêÅôΩ»ÅÕï±ïç—ïêÅµΩëï±ÃÄà≠Õï±ïç—ïëA•ëùî¨àËÄà≠›•πùY•Õ•â•±•—ÂM¡ïç•ïÃ§Ï(ÄÄÄÅ•±ïÃπ›…•—ïM—…•πú°AÖ—†πΩò†âç±•ïπ–µŸÖ±•ëÖ—•Ω∏π—·–à§∞âAMLÅ1==5=Q%=8ËÅïŸï…‰ÅÕï±ïç—ïêÅÕ¡ïç•ïÃÅµΩŸïêÅÖπêÅ°ÖêÅç°Öπù•πúÅâΩë‰ÅâΩπîÅ—…ÖπÕôΩ…µÃπq∏à±M—ÖπëÖ…ë=¡ïπ=¡—•Ω∏πAA9§Ï(ÄÄÄÅ•ò†ÖÕï±ïç—ïëA•ëùîπ•Õµ¡—‰†§••±ïÃπ›…•—ïM—…•πú°AÖ—†πΩò†âç±•ïπ–µŸÖ±•ëÖ—•Ω∏π—·–à§∞âAMLÅA%Å]%9LËÅÕï±ïç—ïêÅA•ëùïΩ——ºΩA•ëùïΩ–Å…ïπëï…ïêÅ—°îÅΩ¡ï∏Å¡Ö•»ÅΩπ±‰Å•∏ÅÕï——±ïêÅ•ë±îΩ›Ö±¨Ω…’∏Å¡ΩÕïÃÏÅç±ΩÕïêÅÖ±—ï…πÖ—•ŸïÃÅÕ—ÖÂïêÅ°•ëëï∏πq∏à±M—ÖπëÖ…ë=¡ïπ=¡—•Ω∏πAA9§Ï(ÄÄÄÅôΩ»°M—…•πúÅÕ±’úÈ©ÖŸÑπ’—•∞π1•Õ–πΩò†âµï›—›ºà∞âµï‹à§••ò°Õ¡ïç•ïÃπçΩπ—Ö•πÃ°Õ±’ú§§ÅÏ(ÄÄÄÄÅô±ΩÖ—mtÅ¡•—ç†ıÕΩ’…çïA•—ç°IÖπùïÃπùï–°Õ±’ú§Ï(ÄÄÄÄÅ•ò°¡•—ç†Ùıπ’±±ÒÒ¡•—ç°l≈tµ¡•—ç°l¡t¿∏¿’•—°…Ω‹Åπï‹Å%±±ïùÖ±M—Ö—ï·çï¡—•Ω∏†âMΩ’…çîÅƒπ¡•—ç°}—•±–ÅÖëÖ¡—Ö—•Ω∏Åë•êÅπΩ–ÅµΩŸîÄà≠Õ±’ú¨àùÃÅâΩë‰ËÄà≠©ÖŸÑπ’—•∞π……ÖÂÃπ—ΩM—…•πú°¡•—ç†§§Ï(ÄÄÄÅÙ(ÄÄÄÅŸÖ»ÅÕï±ïç—ïë1ΩΩ¨ı©ÖŸÑπ’—•∞π1•Õ–πΩò†âÕ¡ïÖ…Ω‹à∞âôïÖ…Ω‹à∞âÖâ…Ñà∞â≠ÖëÖâ…Ñà∞âÖ±Ö≠ÖÈÖ¥à∞ââï±±Õ¡…Ω’–à∞âùïΩë’ëîà∞âùΩ±ï¥à∞âÕ±Ω›¡Ω≠îà∞âÕ±Ω›â…ºà∞âµï›—›ºà∞âµï‹à§πÕ—…ïÖ¥†§πô•±—ï»°Õ¡ïç•ïÃËÈçΩπ—Ö•πÃ§π—Ω1•Õ–†§Ï(ÄÄÄÅ•ò†ÖÕï±ïç—ïë1ΩΩ¨π•Õµ¡—‰†§••±ïÃπ›…•—ïM—…•πú°AÖ—†πΩò†âç±•ïπ–µŸÖ±•ëÖ—•Ω∏π—·–à§∞âAMLÅM=UIÅ1==,ËÅÕï±ïç—ïêÅ°ïÖêÅâΩπïÃÅ…ïÕ¡ΩπêÅ—ºÅÕΩ’…çîÅ¡ΩÕï»Å±ΩΩ¨Å•π¡’–ËÄà≠Õï±ïç—ïë1ΩΩ¨¨âq∏à±M—ÖπëÖ…ë=¡ïπ=¡—•Ω∏πAA9§Ï(ÄÄÄÅôΩ»°M—…•πúÅÕ±’úÈ©ÖŸÑπ’—•∞π1•Õ–πΩò†âµï›—›ºà∞âµï‹à§••ò°Õ¡ïç•ïÃπçΩπ—Ö•πÃ°Õ±’ú§••±ïÃπ›…•—ïM—…•πú°AÖ—†πΩò†âç±•ïπ–µŸÖ±•ëÖ—•Ω∏π—·–à§∞âAMLÅM=UIÅA%Q ËÄà≠Õ±’ú¨àÅÕΩ’…çîÅƒπ¡•—ç°}—•±–Å•π¡’–ÅµΩŸïÃÅ—°îÅâΩë‰ÅâΩπîËÄà≠©ÖŸÑπ’—•∞π……ÖÂÃπ—ΩM—…•πú°ÕΩ’…çïA•—ç°IÖπùïÃπùï–°Õ±’ú§§¨âq∏à±M—ÖπëÖ…ë=¡ïπ=¡—•Ω∏πAA9§Ï(ÄÄÄÅŸÖ»ÅÕï±ïç—ïëM—Ö…—ï…Ãı©ÖŸÑπ’—•∞π1•Õ–πΩò†âç°Ö…µÖπëï»à∞âç°Ö…µï±ïΩ∏à∞âç°Ö…•ÈÖ…êà§πÕ—…ïÖ¥†§πô•±—ï»°Õ¡ïç•ïÃËÈçΩπ—Ö•πÃ§π—Ω1•Õ–†§Ï(ÄÄÄÅ•ò†ÖÕï±ïç—ïëM—Ö…—ï…Ãπ•Õµ¡—‰†§••±ïÃπ›…•—ïM—…•πú°AÖ—†πΩò†âç±•ïπ–µŸÖ±•ëÖ—•Ω∏π—·–à§∞âAMLÅ%IµMQIQHÅI5LËÅŸÖ±•ëÖ—ïêÅ›Ö±¨ÅÖπêÅôÖÕ—ï»µµΩŸïµïπ–Å¡ΩÕïÃÅ…ïµÖ•∏Å±Ω›ï…ïêËÄà≠Õï±ïç—ïëM—Ö…—ï…Ã¨àÏÅ°Ö…µÖπëï»Å’ÕïÃÅπºÅÕΩ’…çîÅ…’∏Åç±•¿πq∏à±M—ÖπëÖ…ë=¡ïπ=¡—•Ω∏πAA9§Ï(ÄÄÄÅŸÖ»ÅÕï±ïç—ïë•…ï!Ω…ÕïÃı©ÖŸÑπ’—•∞π1•Õ–πΩò†â¡ΩπÂ—Ñà∞â…Ö¡•ëÖÕ†à§πÕ—…ïÖ¥†§πô•±—ï»°Õ¡ïç•ïÃËÈçΩπ—Ö•πÃ§π—Ω1•Õ–†§Ï(ÄÄÄÅôΩ»°M—…•πúÅÕ±’úÈÕï±ïç—ïë•…ï!Ω…ÕïÃ§ÅÏ(ÄÄÄÄÅŸÖ»ÅÕÖµ¡±ïÃı5•πïµΩπIïπëï…ï»πô•…ï=Ÿï…±ÖÂ…ÖµïMÖµ¡±ïÃ†§πùï—=…ïôÖ’±–°Õ±’ú±©ÖŸÑπ’—•∞πMï–πΩò†§§Ï(ÄÄÄÄÅŸÖ»ÅâΩπïÃı5•πïµΩπIïπëï…ï»πô•…ï=Ÿï…±ÖÂ	ΩπïMÖµ¡±ïÃ†§πùï—=…ïôÖ’±–°Õ±’ú±©ÖŸÑπ’—•∞πMï–πΩò†§§Ï(ÄÄÄÄÅ•ò†ÖÕÖµ¡±ïÃπçΩπ—Ö•πÕ±∞°©ÖŸÑπ’—•∞πMï–πΩò†¿∞ƒ∞»∞Ã§•ÒÒâΩπïÃπ•Õµ¡—‰†§§(ÄÄÄÄÄÅ—°…Ω‹Åπï‹Å%±±ïùÖ±M—Ö—ï·çï¡—•Ω∏†âπ•µÖ—ïêÅΩ…•ù•πÖ∞Åô•…îÅΩŸï…±Ö‰Åë•êÅπΩ–Å…ïπëï»ÅÖ±∞Åô…ÖµïÃΩâΩπïÃÅôΩ»Äà≠Õ±’ú¨àËÅô…ÖµïÃÙà≠ÕÖµ¡±ïÃ¨àÅâΩπïÃÙà≠âΩπïÃ§Ï(ÄÄÄÄÅ•ò†ÖâΩπïÃπçΩπ—Ö•πÃ†â—Ö•∞à•ÒÒâΩπïÃπÕ—…ïÖ¥†§ππΩπï5Ö—ç†°πÖµî¥˘πÖµîπÕ—Ö…—Õ]•—††âô•…ï}µÖπîà•ÒÒπÖµîπïπëÕ]•—††â}ô•…îà§§§(ÄÄÄÄÄÅ—°…Ω‹Åπï‹Å%±±ïùÖ±M—Ö—ï·çï¡—•Ω∏†âMï±ïç—•ŸîÅô•…îÅΩŸï…±Ö‰Å±ΩÕ–Å—°îÄà≠Õ±’ú¨àÅ—Ö•∞ÅΩ»ÅµÖπîÅâΩπîËÄà≠âΩπïÃ§Ï(ÄÄÄÅÙ(ÄÄÄÅ•ò†ÖÕï±ïç—ïë•…ï!Ω…ÕïÃπ•Õµ¡—‰†§••±ïÃπ›…•—ïM—…•πú°AÖ—†πΩò†âç±•ïπ–µŸÖ±•ëÖ—•Ω∏π—·–à§∞âAMLÅA=9eQΩIA%M Å%IÅ=YI1eLËÅÕΩ’…çîÄƒ¿Åô¡ÃÅÖ—±ÖÃÅô…ÖµïÃÅ…ïπëï…ïêÅΩπ±‰ÅΩ∏ÅµÖπî∞Å—Ö•∞ÅÖπêÅô•…îÅâΩπïÃËÄà≠Õï±ïç—ïë•…ï!Ω…ÕïÃ¨àπq∏à±M—ÖπëÖ…ë=¡ïπ=¡—•Ω∏πAA9§Ï(ÄÄÄÅôΩ»°M—…•πúÅÕ±’úÈÕï±ïç—ïë•…ï!Ω…ÕïÃ•Ï(ÄÄÄÄÅŸÖ»Åë…Ö›∏ı5•πïµΩπIïπëï…ï»πë…Ö›π•…ï	ΩπïMÖµ¡±ïÃ†§πùï—=…ïôÖ’±–°Õ±’ú±©ÖŸÑπ’—•∞πMï–πΩò†§§Ï(ÄÄÄÄÅ•ò†Öë…Ö›∏πçΩπ—Ö•πÃ†â—Ö•∞à•ÒÒë…Ö›∏πÕ—…ïÖ¥†§ππΩπï5Ö—ç†°∏¥˘∏πÕ—Ö…—Õ]•—††âô•…ï}µÖπîà•ÒÒ∏πïπëÕ]•—††â}ô•…îà§§•—°…Ω‹Åπï‹Å%±±ïùÖ±M—Ö—ï·çï¡—•Ω∏†â9ºÅÖç—’Ö∞Åô’±∞µâ…•ù°–Å—Ö•∞ΩµÖπîÅç’âïÃÅ…ïπëï…ïêËÄà≠Õ±’ú¨àÄà≠ë…Ö›∏§Ï(ÄÄÄÅÙ(ÄÄÄÅŸÖ»ÅÕï±ïç—ïëµ•ÕÕ•Ÿîı©ÖŸÑπ’—•∞π1•Õ–πΩò†âç°Ö…µÖπëï»à∞âç°Ö…µï±ïΩ∏à∞âç°Ö…•ÈÖ…êà∞âµΩ±—…ïÃà§πÕ—…ïÖ¥†§πô•±—ï»°Õ¡ïç•ïÃËÈçΩπ—Ö•πÃ§π—Ω1•Õ–†§Ï(ÄÄÄÅôΩ»°M—…•πúÅÕ±’úÈÕï±ïç—ïëµ•ÕÕ•Ÿî§ÅÏ(ÄÄÄÄÅŸÖ»ÅÕÖµ¡±ïÃı5•πïµΩπIïπëï…ï»πô•…ï=Ÿï…±ÖÂ…ÖµïMÖµ¡±ïÃ†§πùï—=…ïôÖ’±–°Õ±’ú±©ÖŸÑπ’—•∞πMï–πΩò†§§Ï(ÄÄÄÄÅŸÖ»ÅâΩπïÃı5•πïµΩπIïπëï…ï»πô•…ï=Ÿï…±ÖÂ	ΩπïMÖµ¡±ïÃ†§πùï—=…ïôÖ’±–°Õ±’ú±©ÖŸÑπ’—•∞πMï–πΩò†§§Ï(ÄÄÄÄÅ•ò†ÖÕÖµ¡±ïÃπçΩπ—Ö•πÃ†¿•ÒÒâΩπïÃπ•Õµ¡—‰†§•—°…Ω‹Åπï‹Å%±±ïùÖ±M—Ö—ï·çï¡—•Ω∏†â’±∞µâ…•ù°–Åô±ÖµîÅÖ—±ÖÃÅë•êÅπΩ–Å…ïπëï»ÅΩ∏Åô•…îÅ…•úÅôΩ»Äà≠Õ±’ú¨àËÅô…ÖµïÃÙà≠ÕÖµ¡±ïÃ¨àÅâΩπïÃÙà≠âΩπïÃ§Ï(ÄÄÄÄÅŸÖ»Åë…Ö›∏ı5•πïµΩπIïπëï…ï»πë…Ö›π•…ï	ΩπïMÖµ¡±ïÃ†§πùï—=…ïôÖ’±–°Õ±’ú±©ÖŸÑπ’—•∞πMï–πΩò†§§Ï(ÄÄÄÄÅ•ò°ë…Ö›∏π•Õµ¡—‰†§•—°…Ω‹Åπï‹Å%±±ïùÖ±M—Ö—ï·çï¡—•Ω∏†â9ºÅÖç—’Ö∞Åô’±∞µâ…•ù°–Åç’âïÃÅ…ïπëï…ïêËÄà≠Õ±’ú§Ï(ÄÄÄÄÅ•ò†ÖÕ±’úπï≈’Ö±Ã†âµΩ±—…ïÃà§òòÖë…Ö›∏πï≈’Ö±Ã°©ÖŸÑπ’—•∞πMï–πΩò†â—Ö•±}ô±Öµîà§§•—°…Ω‹Åπï‹Å%±±ïùÖ±M—Ö—ï·çï¡—•Ω∏†âM—Ö…—ï»ÅΩŸï…±Ö‰ÅÖç—’Ö±±‰Å…ïπëï…ïêÅÑÅâΩë‰Ωâï±±‰Åç’âîËÄà≠Õ±’ú¨àÄà≠ë…Ö›∏§Ï(ÄÄÄÄÅ•ò°Õ±’úπï≈’Ö±Ã†âµΩ±—…ïÃà§§ÅÏ(ÄÄÄÄÄÅ•ò†ÖâΩπïÃπï≈’Ö±Ã°©ÖŸÑπ’—•∞πMï–πΩò†âU11}5=0à§§§(ÄÄÄÄÄÄÅ—°…Ω‹Åπï‹Å%±±ïùÖ±M—Ö—ï·çï¡—•Ω∏†â5Ω±—…ïÃÅô’±∞µâ…•ù°–Å¡ÖÕÃÅµ’Õ–Å…ï—Ö•∏Å—°îÅÖ¡¡…ΩŸïêÅçΩµ¡±ï—îÅâΩë‰ËÄà≠âΩπïÃ§Ï(ÄÄÄÄÅÙÅï±ÕîÅ•ò†ÖâΩπïÃπï≈’Ö±Ã°©ÖŸÑπ’—•∞πMï–πΩò†â—Ö•±}ô±Öµîà§§§(ÄÄÄÄÄÅ—°…Ω‹Åπï‹Å%±±ïùÖ±M—Ö—ï·çï¡—•Ω∏°Õ±’ú¨àÅô’±∞µâ…•ù°–Å¡ÖÕÃÅµ’Õ–Å…ïπëï»Å—°îÅ•ÕΩ±Ö—ïêÅ—Ö•±}ô±ÖµîÅâΩπîÅΩπ±‰ËÄà≠âΩπïÃ§Ï(ÄÄÄÄÅŸÖ»ÅµÖÕ¨ıπï‹Åπï–πµ•πïç…Öô–π…ïÕΩ’…çïÃπIïÕΩ’…çï1ΩçÖ—•Ω∏°5•πïµΩ∏π5=}%∞â—ï·—’…ïÃΩïµ•ÕÕ•Ÿîºà¨°Õ±’úπï≈’Ö±Ã†âµΩ±—…ïÃà§¸âµΩ±—…ïÕ}ô•…îàÈÕ±’ú¨â}—Ö•±}ô±Öµîà§¨àπ¡πúà§Ï(ÄÄÄÄÅ•ò°µåπùï—IïÕΩ’…çï5ÖπÖùï»†§πùï—IïÕΩ’…çî°µÖÕ¨§π•Õµ¡—‰†§•—°…Ω‹Åπï‹Å%±±ïùÖ±M—Ö—ï·çï¡—•Ω∏†â5•ÕÕ•πúÅÕï±ïç—•ŸîÅïµ•ÕÕ•ŸîÅµÖÕ¨Äà≠µÖÕ¨§Ï(ÄÄÄÅÙ(ÄÄÄÅ•ò†ÖÕï±ïç—ïëµ•ÕÕ•Ÿîπ•Õµ¡—‰†§••±ïÃπ›…•—ïM—…•πú°AÖ—†πΩò†âç±•ïπ–µŸÖ±•ëÖ—•Ω∏π—·–à§∞âAMLÅ5%MM%YÅ%IËÅ•ÕΩ±Ö—ïêÅµÖÕ≠ÃÅ±ΩÖëïêÏÅÕ—Ö…—ï»Å—Ö•±}ô±ÖµîÅâΩπïÃÅ…ïπëï…ïêÅÕï±ïç—•Ÿï±‰ÅÖπêÅ5Ω±—…ïÃÅçΩµ¡±ï—îÅâΩë‰Å…ïπëï…ïêÅô’±∞µâ…•ù°–ËÄà≠Õï±ïç—ïëµ•ÕÕ•Ÿî¨àπq∏à±M—ÖπëÖ…ë=¡ïπ=¡—•Ω∏πAA9§Ï(ÄÄÄÅ•±ïÃπ›…•—ïM—…•πú°AÖ—†πΩò†âç±•ïπ–µŸÖ±•ëÖ—•Ω∏π—·–à§∞âAMLÅI=MQHËÅïŸï…‰ÅÕï±ïç—ïêÅÕ¡ïç•ïÃÅ…ïπëï…ïêÅ›•—†Å•—ÃÅ—ï·—’…îÅ•∏ÅÑÅ›Ω…±êËÄà≠…ïπëï…ïëM¡ïç•ïÃ¨âq∏à±M—ÖπëÖ…ë=¡ïπ=¡—•Ω∏πAA9§Ï(ÄÄÄÅçΩµ¡±ï—ïëM¡ïç•ïÕ]•πëΩ›ÃıÕ¡ïç•ïÃπÕ•Èî†§Ï(ÄÄÄÅ±ÖÕ—¡¡…ΩŸïë°ïç¨ÙâÖ±∞ÅÕï±ïç—ïêÅÕ¡ïç•ïÃÅçΩµ¡±ï—ïêÅ…ïπëï»ΩµΩŸïµïπ–ÅÕÖµ¡±•πúàÏ(ÄÄÄÅôΩ»°M—…•πúÅùÖÃÈ©ÖŸÑπ’—•∞π1•Õ–πΩò†â≠Ωôô•πúà∞â›ïïÈ•πúà§••ò°Õ¡ïç•ïÃπçΩπ—Ö•πÃ°ùÖÃ§•Ï(ÄÄÄÄÅ•π–Å¡Ö…—•ç±ïÃıÕµΩ≠ïAÖ…—•ç±ïMÖµ¡±ïÃπùï—=…ïôÖ’±–°ùÖÃ∞¿§Ï(ÄÄÄÄÅ•ò°¡Ö…—•ç±ïÃ»•—°…Ω‹Åπï‹Å%±±ïùÖ±M—Ö—ï·çï¡—•Ω∏†âIïÖ∞ÅÕµΩ≠îÅ¡Ö…—•ç±ïÃÅ›ï…îÅπΩ–Åïµ•——ïêÅôΩ»Äà≠ùÖÃ¨àËÄà≠¡Ö…—•ç±ïÃ§Ï(ÄÄÄÄÅ•±ïÃπ›…•—ïM—…•πú°AÖ—†πΩò†âç±•ïπ–µŸÖ±•ëÖ—•Ω∏π—·–à§∞âAMLÅLÅM5=-ËÄà≠ùÖÃ¨àÅ…ïÖ∞Å5•πïç…Öô–ÅÕµΩ≠îÅ¡Ö…—•ç±ïÃÙà≠¡Ö…—•ç±ïÃ¨âq∏à±M—ÖπëÖ…ë=¡ïπ=¡—•Ω∏πAA9§Ï(ÄÄÄÅÙ(ÄÄÄÅµåπÕ—Ω¿†§Ï(ÄÄÅÙ(ÄÅıçÖ—ç†°·çï¡—•Ω∏Åî•Ì—°…Ω‹Åπï‹Å%±±ïùÖ±M—Ö—ï·çï¡—•Ω∏†â5•πïµΩ∏Åç±•ïπ–ÅŸÖ±•ëÖ—•Ω∏ÅôÖ•±ïêà±î§ÌÙ(ÅÙ(ÄÅ¡…•ŸÖ—îÅÕ—Ö—•åÅŸΩ•êÅÖ¡¡±ÂYÖ±•ëÖ—•Ωπ%π¡’–°5•πïç…Öô–Åµå±•π–Å¡°ÖÕî§ÅÏ(ÄÄÄÅµåπùï—M•πù±ï¡±ÖÂï…Mï…Ÿï»†§πï·ïç’—î††§¥˘Ï(ÄÄÄÅŸÖ»Åç’……ïπ–Ù°5•πïµΩπ…ïÖ—’…î•µåπùï—M•πù±ï¡±ÖÂï…Mï…Ÿï»†§πΩŸï…›Ω…±ê†§πùï—π—•—‰°—ïÕ—π—•—‰§Ï(ÄÄÄÄÅ•ò°ç’……ïπ–Ñıπ’±∞•Ï(ÄÄÄÄÅÕï—YÖ±•ëÖ—•ΩπA°ÖÕî°ç’……ïπ–±¡°ÖÕî§Ï(ÄÄÄÄÅ•ò°©ÖŸÑπ’—•∞πMï–πΩò†âç°Ö…µÖπëï»à∞âç°Ö…µï±ïΩ∏à∞âç°Ö…•ÈÖ…êà∞âµΩ±—…ïÃà∞â¡ΩπÂ—Ñà∞â…Ö¡•ëÖÕ†à§πçΩπ—Ö•πÃ°ç’……ïπ–πùï—M¡ïç•ïÕM±’ú†§§§(ÄÄÄÄÄÅµåπùï—M•πù±ï¡±ÖÂï…Mï…Ÿï»†§πΩŸï…›Ω…±ê†§πÕï—ÖÂQ•µî°¡°ÖÕî¯Ù»‹òô¡°ÖÕî‘–¸ƒ‡¿¿¡0Ëƒ¿¿¡0§Ï(ÄÄÄÄÄººÅ-ïï¿Å—°îÅô•·—’…îùÃÅµΩŸïµïπ–Åëï—ï…µ•π•Õ—•åÅ›°•±îÅÕ—•±∞Åï·ï…ç•Õ•πúÅ•—ÃÅ…ïÖ∞Å—…ÖŸï∞(ÄÄÄÄÄººÅÖπêÅ…ïπëï»Å¡Ö—†∏ÅQ°îÅùΩÖ±ÃÅÖ…îÅ…ïµΩŸïêÅÖ–ÅÕ¡Ö›∏∞ÅÕºÅπºÅ¡Ö—°ô•πë•πúÅçΩµ¡ï—ïÃÅ›•—†(ÄÄÄÄÄººÅ—°îÅçΩπ—…Ω±±ïêÅŸï±Ωç•—‰Å’ÕïêÅ—ºÅÕï±ïç–Å—°îÅ±ΩçΩµΩ—•Ω∏Åç±•¡Ã∏(ÄÄÄÄÅç’……ïπ–πÕï—9Ω§°ôÖ±Õî§Ìç’……ïπ–πùï—9ÖŸ•ùÖ—•Ω∏†§πÕ—Ω¿†§Ï(ÄÄÄÄÅ•ò°ç’……ïπ–πùï—`†§¯»∏‘•ë•…ïç—•Ω∏Ù¥ƒÌ•ò°ç’……ïπ–πùï—`†§¥»∏‘•ë•…ïç—•Ω∏ÙƒÏ(ÄÄÄÄÅëΩ’â±îÅÖπ•µÖ—•ΩπYï±Ωç•—‰ıÖπ•µÖ—•ΩπYï±Ωç•—‰°¡°ÖÕî§Ï(ÄÄÄÄÄººÅA…ïÕï…ŸîÅΩ…ë•πÖ…‰Å±ÖπêÅù…ÖŸ•—‰ËÅ…ïÕï——•πúÅdÅ—ºÅÈï…ºÅΩ∏ÅïŸï…‰ÅÕï…Ÿï»(ÄÄÄÄÄººÅ’¡ëÖ—îÅ¡…ïŸïπ—ÃÅ—°îÅπïùÖ—•ŸîÅçΩ±±•Õ•Ω∏ÅÕ—ï¿Å—°Ö–ÅµÖ•π—Ö•πÃÅΩπ…Ω’πê∞(ÄÄÄÄÄººÅ›°•ç†ÅçΩ……ïç—±‰Åë•Õ≈’Ö±•ô•ïÃÅÑÅ¡…Ωë’ç—•Ω∏Åç…ïÖ—’…îÅô…Ω¥Åù…Ω’πêÅ…’πÃ∏(ÄÄÄÄÅëΩ’â±îÅŸï…—•çÖ∞ıç’……ïπ–π•Õ±Â•πùM¡ïç•ïÃ†•ÒÒç’……ïπ–π•Õ≈’Ö—•çM¡ïç•ïÃ†§òôç’……ïπ–π•Õ%π]Ö—ï»†§¸¿∏¡Èç’……ïπ–πùï—ï±—Ö5ΩŸïµïπ–†§π‰Ï(ÄÄÄÄÅ•ò°Öπ•µÖ—•ΩπYï±Ωç•—‰¯¿∏¡•Ï(ÄÄÄÄÄÅç’……ïπ–πÕï—ï±—Ö5ΩŸïµïπ–°ë•…ïç—•Ω∏©Öπ•µÖ—•ΩπYï±Ωç•—‰±Ÿï…—•çÖ∞∞¿§Ï(ÄÄÄÄÄÅç’……ïπ–π°ÖÕ%µ¡’±Õîı—…’îÏ(ÄÄÄÄÅÙÅï±ÕîÅÏ(ÄÄÄÄÄÅç’……ïπ–πÕï—ï±—Ö5ΩŸïµïπ–†¿±Ÿï…—•çÖ∞∞¿§Ï(ÄÄÄÄÅÙ(ÄÄÄÅÙ(ÄÄÄÅÙ§Ï(ÄÅÙ(ÄÅ¡…•ŸÖ—îÅÕ—Ö—•åÅëΩ’â±îÅÖπ•µÖ—•ΩπYï±Ωç•—‰°•π–Å¡°ÖÕî§ÅÏ(ÄÄÅ•ò°¡°ÖÕî‡ÅÒÅ¡°ÖÕî¯Ù‘–•…ï—’…∏Ä¿∏¡Ï(ÄÄÅ•ò°¡°ÖÕîƒÿ•…ï—’…∏Ä°¡°ÖÕî¥‹§®¿∏¿¿ÿ»’Ï(ÄÄÅ•ò°¡°ÖÕî»–•…ï—’…∏Ä¿∏¿’Ï(ÄÄÅ•ò°¡°ÖÕî»‹•…ï—’…∏Ä†»‹µ¡°ÖÕî§®¿∏¿ƒÿÿÿÿ›Ï(ÄÄÅ•ò°¡°ÖÕîÃ–•…ï—’…∏Ä¿∏¡Ï(ÄÄÅ•ò°¡°ÖÕîÃ‡•…ï—’…∏Ä°¡°ÖÕî¥ÃÃ§®¿∏¿ÕÏ(ÄÄÅ•ò°¡°ÖÕî–‹•…ï—’…∏Ä¿∏ƒ…Ï(ÄÄÅ•ò°¡°ÖÕî–‰•…ï—’…∏Ä¿∏ƒŸÏ(ÄÄÅ•ò°¡°ÖÕî‘»•…ï—’…∏Ä¿∏¿’Ï(ÄÄÅ…ï—’…∏Ä¿∏¡Ï(ÄÅÙ(ÄÅ¡…•ŸÖ—îÅÕ—Ö—•åÅâΩΩ±ïÖ∏Å•ÕMï——±ïë±•¡MÖµ¡±î°•π–Å¡°ÖÕî§ÅÏ(ÄÄÅ•ò†Öç±•¡!ÖÕMï——±ïê°…ïπëï…ïëA°ÖÕïM¡ïç•ïÃ§•…ï—’…∏ÅôÖ±ÕîÏ(ÄÄÄººÅ%ùπΩ…îÅÕÖµ¡±ïÃÅÖ–Å¡°ÖÕîÅâΩ’πëÖ…•ïÃÏÅ—°îÅµΩëï∞Å…ïπëï…ï»ÅçÖ∏Å…’∏ÅâïôΩ…î(ÄÄÄººÅïç≠Ω1•àÅ°ÖÃÅïŸÖ±’Ö—ïêÅ—°•ÃÅ—•ç¨ùÃÅçΩπ—…Ω±±ï»Å¡…ïë•çÖ—î∏(ÄÄÅ…ï—’…∏Ä°¡°ÖÕî¯ÙÃòô¡°ÖÕî‡§ÅÒÄ°¡°ÖÕî¯Ùƒ»òô¡°ÖÕîƒÿ§ÅÒÄ°¡°ÖÕî¯Ùƒ‡òô¡°ÖÕî»–§(ÄÄÄÄÅÒÄ°¡°ÖÕî¯Ù»‘òô¡°ÖÕî»‹§ÅÒÄ°¡°ÖÕî¯Ù»‰òô¡°ÖÕîÃ–§ÅÒÄ°¡°ÖÕî¯ÙÃÿòô¡°ÖÕîÃ‡§(ÄÄÄÄÅÒÄ°¡°ÖÕî¯Ù–ƒòô¡°ÖÕî–‹§ÅÒÄ°¡°ÖÕî¯Ù–‹òô¡°ÖÕî–‰§ÅÒÄ°¡°ÖÕî¯Ù‘¿òô¡°ÖÕî‘–§ÅÒÅ¡°ÖÕî¯Ùÿ‡Ï(ÄÅÙ(ÄÅ¡…•ŸÖ—îÅÕ—Ö—•åÅô•πÖ∞ÅM—…•πúÅY1%Q%=9}A!M}AI%`Ùâµ•πïµΩ∏µŸÖ±•ëÖ—•Ω∏µ¡°ÖÕîËàÏ(ÄÅ¡…•ŸÖ—îÅÕ—Ö—•åÅŸΩ•êÅÕï—YÖ±•ëÖ—•ΩπA°ÖÕî°5•πïµΩπ…ïÖ—’…îÅïπ—•—‰±•π–Å¡°ÖÕî§ÅÏ(ÄÄÅ•ò†Ö	ΩΩ±ïÖ∏πùï—	ΩΩ±ïÖ∏†âµ•πïµΩ∏πç±•ïπ—MµΩ≠ïQïÕ–à§•…ï—’…∏Ï(ÄÄÅM—…•πúÅµÖ…≠ï»ıY1%Q%=9}A!M}AI%`≠¡°ÖÕîÏ(ÄÄÅâΩΩ±ïÖ∏Å¡°ÖÕï°Öπùïêıïπ—•—‰πùï—’Õ—Ωµ9Öµî†§Ùıπ’±±ÒÖµÖ…≠ï»πï≈’Ö±Ã°ïπ—•—‰πùï—’Õ—Ωµ9Öµî†§πùï—M—…•πú†§§Ï(ÄÄÅïπ—•—‰πÕï—’Õ—Ωµ9Öµî°πï–πµ•πïç…Öô–ππï—›Ω…¨πç°Ö–πΩµ¡Ωπïπ–π±•—ï…Ö∞°µÖ…≠ï»§§Ï(ÄÄÅïπ—•—‰πÕï—’Õ—Ωµ9ÖµïY•Õ•â±î°ôÖ±Õî§Ï(ÄÄÅïπ—•—‰πÕï—M¡Ωπ—ÖπïΩ’ÕI’πΩ…YÖ±•ëÖ—•Ω∏°¡°ÖÕî¯ÙÃ–òô¡°ÖÕî‘¿§Ï(ÄÄÅ•ò°¡°ÖÕï°Öπùïêòôïπ—•—‰π±ïŸï∞Å•πÕ—ÖπçïΩòÅπï–πµ•πïç…Öô–πÕï…Ÿï»π±ïŸï∞πMï…Ÿï…1ïŸï∞Å±ïŸï∞§ÅÏ(ÄÄÄÄººÅÖç†ÅΩòÅ—°îÄ‡¿Åô•·—’…îÅ¡°ÖÕïÃÅÕ—•±∞Å›Ö•—ÃÅôΩ»Å—›ºÅ…ïÖ∞Å…ïπëï…ïêÅÕÖµ¡±ïÃ∏(ÄÄÄÄººÅMïπêÅ—°îÅç°ÖπùïêÅ¡°ÖÕîÅ—°…Ω’ù†Å—°îÅπΩ…µÖ∞Åπï—›Ω…¨Å¡Öç≠ï–Å•µµïë•Ö—ï±‰∞(ÄÄÄÄººÅ…Ö—°ï»Å—°Ö∏ÅÖëë•πúÅ—°îÅïπ—•—‰Å—…Öç≠ï»ùÃÅµ’±—§µ—•ç¨Åëï±Ö‰Å—ºÅïŸï…‰Å¡°ÖÕî∏(ÄÄÄÅ±ïŸï∞πùï—°’π≠MΩ’…çî†§πâ…ΩÖëçÖÕ—πëMïπê°ïπ—•—‰±πï‹Åπï–πµ•πïç…Öô–ππï—›Ω…¨π¡…Ω—ΩçΩ∞πùÖµîπ±•ïπ—âΩ’πëMï—π—•—ÂÖ—ÖAÖç≠ï–†(ÄÄÄÄÄÄÄÅïπ—•—‰πùï—%ê†§±ïπ—•—‰πùï—π—•—ÂÖ—Ñ†§±—…’î§§Ï(ÄÄÅÙ(ÄÅÙ(ÄÅ¡…•ŸÖ—îÅÕ—Ö—•åÅ%π—ïùï»ÅŸÖ±•ëÖ—•ΩπA°ÖÕî°5•πïµΩπ…ïÖ—’…îÅïπ—•—‰§ÅÏ(ÄÄÅ•ò†Ö	ΩΩ±ïÖ∏πùï—	ΩΩ±ïÖ∏†âµ•πïµΩ∏πç±•ïπ—MµΩ≠ïQïÕ–à•ÒÒïπ—•—‰πùï—’Õ—Ωµ9Öµî†§Ùıπ’±∞•…ï—’…∏Åπ’±∞Ï(ÄÄÅM—…•πúÅµÖ…≠ï»ıïπ—•—‰πùï—’Õ—Ωµ9Öµî†§πùï—M—…•πú†§Ï(ÄÄÅ•ò†ÖµÖ…≠ï»πÕ—Ö…—Õ]•—†°Y1%Q%=9}A!M}AI%`§•…ï—’…∏Åπ’±∞Ï(ÄÄÅ—…‰ÅÌ•π–Å¡°ÖÕîı%π—ïùï»π¡Ö…Õï%π–°µÖ…≠ï»πÕ’âÕ—…•πú°Y1%Q%=9}A!M}AI%`π±ïπù—††§§§Ì…ï—’…∏Å¡°ÖÕî¯Ù¿òô¡°ÖÕîÒMA%M}QMQ}]%9=\˝¡°ÖÕîÈπ’±∞ÌÙ(ÄÄÅçÖ—ç†°9’µâï…Ω…µÖ—·çï¡—•Ω∏Å•ùπΩ…ïê§ÅÌ…ï—’…∏Åπ’±∞ÌÙ(ÄÅÙ(ÄÅ¡…•ŸÖ—îÅÕ—Ö—•åÅM—…•πúÅ±ΩçΩµΩ—•ΩπM—Ö—î°•π–Å¡°ÖÕî§ÅÏ(ÄÄÅ•ò°¡°ÖÕî‡•…ï—’…∏Äâ%1}%9%Q%0àÏ(ÄÄÅ•ò°¡°ÖÕîƒÿ•…ï—’…∏Äâ]1-}MQIPàÏ(ÄÄÅ•ò°¡°ÖÕî»–•…ï—’…∏Äâ]1-}MQdàÏ(ÄÄÅ•ò°¡°ÖÕî»‹•…ï—’…∏Äâ]1-}0àÏ(ÄÄÅ•ò°¡°ÖÕîÃ–•…ï—’…∏Äâ%1}IQUI8àÏ(ÄÄÅ•ò°¡°ÖÕîÃ‡•…ï—’…∏ÄâIU9}MQIPàÏ(ÄÄÅ•ò°¡°ÖÕî–‹•…ï—’…∏ÄâIU9}MQdàÏ(ÄÄÅ•ò°¡°ÖÕî‘–•…ï—’…∏ÄâIU9}0àÏ(ÄÄÅ…ï—’…∏Äâ%1}%90àÏ(ÄÅÙ(ÄÅ¡…•ŸÖ—îÅÕ—Ö—•åÅâΩΩ±ïÖ∏Å°ÖÕMï±ïç—ïë±•¿°M—…•πúÅÕ±’ú±M—…•πúÅÕ—Ö—î±M—…•πúÅç±•¿§ÅÏ(ÄÄÅ…ï—’…∏Åç±•¿Ñıπ’±∞ÄòòÅÖ…—•ç’±Ö—•Ωπ±•¡Ãπùï—=…ïôÖ’±–°Õ±’ú±©ÖŸÑπ’—•∞π5Ö¿πΩò†§§πùï—=…ïôÖ’±–°Õ—Ö—î±©ÖŸÑπ’—•∞πMï–πΩò†§§πçΩπ—Ö•πÃ°ç±•¿§Ï(ÄÅÙ(ÄÅ¡…•ŸÖ—îÅÕ—Ö—•åÅâΩΩ±ïÖ∏Å°ÖÕYï±Ωç•—ÂMÖµ¡±î°M—…•πúÅÕ±’ú±M—…•πúÅÕ—Ö—î±M—…•πúÅç±•¿±âΩΩ±ïÖ∏ÅÖâΩŸïI’πQ°…ïÕ°Ω±ê§ÅÏ(ÄÄÅôΩ»°M—…•πúÅÕÖµ¡±îÈÖ…—•ç’±Ö—•Ωπ%π¡’—Ãπùï—=…ïôÖ’±–°Õ±’ú±©ÖŸÑπ’—•∞π5Ö¿πΩò†§§πùï—=…ïôÖ’±–°Õ—Ö—î±©ÖŸÑπ’—•∞πMï–πΩò†§§§ÅÏ(ÄÄÄÅ•ò†ÖÕÖµ¡±îπçΩπ—Ö•πÃ†âç±•¿Ùà≠ç±•¿¨à±Ÿï±Ωç•—ÂM≈»Ùà§•çΩπ—•π’îÏ(ÄÄÄÅ•π–ÅÕ—Ö…–ıÕÖµ¡±îπ•πëï·=ò†âŸï±Ωç•—ÂM≈»Ùà§¨ƒ»Ì•π–ÅïπêıÕÖµ¡±îπ•πëï·=ò†ú∞ú±Õ—Ö…–§Ï(ÄÄÄÅ•ò°ïπê¿•çΩπ—•π’îÏ(ÄÄÄÅëΩ’â±îÅÕ¡ïïëM≈»ıΩ’â±îπ¡Ö…ÕïΩ’â±î°ÕÖµ¡±îπÕ’âÕ—…•πú°Õ—Ö…–±ïπê§§Ï(ÄÄÄÅ•ò†°Õ¡ïïëM≈»¯¿∏¿≈§ÙıÖâΩŸïI’πQ°…ïÕ°Ω±ê•…ï—’…∏Å—…’îÏ(ÄÄÅÙ(ÄÄÅ…ï—’…∏ÅôÖ±ÕîÏ(ÄÅÙ(ÄÅ¡…•ŸÖ—îÅÕ—Ö—•åÅ•π–ÅµΩŸ•πù)Ω•π—Ω’π–°M—…•πúÅÕ±’ú±M—…•πúÅÕ—Ö—î§ÅÏ(ÄÄÅ•π–ÅµΩŸïêÙ¿Ï(ÄÄÅôΩ»°M—…•πúÅ©Ω•π–È¡…Ωô•±ï)Ω•π—Ã°Õ±’ú±Õ—Ö—î§§ÅÏ(ÄÄÄÅô±ΩÖ—mtÅ…ÖπùîıÖ…—•ç’±Ö—•ΩπIÖπùïÃπùï—=…ïôÖ’±–°Õ±’ú±©ÖŸÑπ’—•∞π5Ö¿πΩò†§§πùï–°Õ—Ö—î¨àËà≠©Ω•π–§Ï(ÄÄÄÅ•ò°…ÖπùîÙıπ’±∞•çΩπ—•π’îÏ(ÄÄÄÅôΩ»°•π–ÅÖ·•ÃÙ¿ÌÖ·•ÃÿÌÖ·•Ã¨¨••ò°…ÖπùïmÖ·•Ã¨Ÿtµ…ÖπùïmÖ·•Õt¯°Ö·•ÃÃ¸¿∏¿…Ë¿∏¿’§•ÌµΩŸïê¨¨Ìâ…ïÖ¨ÌÙ(ÄÄÅÙ(ÄÄÅ…ï—’…∏ÅµΩŸïêÏ(ÄÅÙ(ÄÅ¡…•ŸÖ—îÅÕ—Ö—•åÅâΩΩ±ïÖ∏ÅÕΩ’…çïM—Ö—•ç%ë±î°M—…•πúÅÕ±’ú§ÅÏ(ÄÄÅ…ï—’…∏ÄÖ©ÖŸÑπ’—•∞πMï–πΩò†âôïÖ…Ω‹à∞âÖ…—•ç’πºà∞âÈÖ¡ëΩÃà∞âµΩ±—…ïÃà§πçΩπ—Ö•πÃ°Õ±’ú§òô%Q%=91}AI=%1Lπùï—=…ïôÖ’±–°Õ±’ú±©ÖŸÑπ’—•∞π5Ö¿πΩò†§§πçΩπ—Ö•πÕ-ï‰†â•ë±ï}Õ—Ö—•åà§Ï(ÄÅÙ(ÄÅ¡…•ŸÖ—îÅÕ—Ö—•åÅâΩΩ±ïÖ∏ÅÕΩ’…çïAΩÕïQ…ÖπÕ•—•Ω∏°M—…•πúÅÕ±’ú§ÅÏ(ÄÄÄººÅïπùÖ»ÅπΩ‹Å°ÖÃÅÑÅùïπï…Ö—ïêÅâΩë‰Ω—Ö•∞ÅΩÕç•±±Ö—•Ω∏ÅΩŸï»Å•—ÃÅ…ï—Ö•πïêÅ¡ΩÕïÃ∏(ÄÄÄººÅIï≈’•…îÅ—ïµ¡Ω…Ö∞ÅÖ…—•ç’±Ö—•Ω∏ÅÖπêÅΩâÕï…ŸîÅÑÅçΩµ¡±ï—îÅÕ±Ω‹Åô±ΩÖ–ÅçÂç±î∏(ÄÄÅ…ï—’…∏ÄÖ©ÖŸÑπ’—•∞πMï–πΩò†âùïπùÖ»à∞âôïÖ…Ω‹à∞âÖ…—•ç’πºà∞âÈÖ¡ëΩÃà∞âµΩ±—…ïÃà§πçΩπ—Ö•πÃ°Õ±’ú§òô%Q%=91}AI=%1Lπùï—=…ïôÖ’±–°Õ±’ú±©ÖŸÑπ’—•∞π5Ö¿πΩò†§§πçΩπ—Ö•πÕ-ï‰†â¡ΩÕï}—…ÖπÕ•—•Ω∏à§Ï(ÄÅÙ(ÄÅ¡…•ŸÖ—îÅÕ—Ö—•åÅ•π–ÅŸÖ±•ëÖ—ïMΩ’…çïAΩÕïQ…ÖπÕ•—•Ω∏°M—…•πúÅÕ±’ú±M—…•πúÅ•ë±ïM—Ö—î±M—…•πúÅµΩŸïµïπ—M—Ö—î§ÅÏ(ÄÄÅŸÖ»Å¡…Ωô•±îı%Q%=91}AI=%1Lπùï—=…ïôÖ’±–°Õ±’ú±©ÖŸÑπ’—•∞π5Ö¿πΩò†§§πùï–†â¡ΩÕï}—…ÖπÕ•—•Ω∏à§Ï(ÄÄÅ•ò°¡…Ωô•±îÙıπ’±±ÒÒ¡…Ωô•±îπ•Õµ¡—‰†§•—°…Ω‹Åπï‹Å%±±ïùÖ±M—Ö—ï·çï¡—•Ω∏†â5•ÕÕ•πúÅÕΩ’…çîÅ¡ΩÕîÅ—…ÖπÕ•—•Ω∏Å¡…Ωô•±îÅôΩ»Äà≠Õ±’ú§Ï(ÄÄÅ•ò°Ö…—•ç’±Ö—•ΩπMÖµ¡±ïΩ’π—Ãπùï—=…ïôÖ’±–°Õ±’ú±©ÖŸÑπ’—•∞π5Ö¿πΩò†§§πùï—=…ïôÖ’±–°•ë±ïM—Ö—î∞¿§»(ÄÄÄÄÄÅÒÒÖ…—•ç’±Ö—•ΩπMÖµ¡±ïΩ’π—Ãπùï—=…ïôÖ’±–°Õ±’ú±©ÖŸÑπ’—•∞π5Ö¿πΩò†§§πùï—=…ïôÖ’±–°µΩŸïµïπ—M—Ö—î∞¿§»§(ÄÄÄÅ—°…Ω‹Åπï‹Å%±±ïùÖ±M—Ö—ï·çï¡—•Ω∏†â%πÕ’ôô•ç•ïπ–ÅÕï——±ïêÅ¡ΩÕîÅÕÖµ¡±ïÃÅôΩ»Äà≠Õ±’ú¨àÅÕ—Ö—ïÃÙà≠•ë±ïM—Ö—î¨àºà≠µΩŸïµïπ—M—Ö—î§Ï(ÄÄÅ•π–Å—…ÖπÕ•—•ΩπïêÙ¿Ï(ÄÄÅôΩ»°M—…•πúÅ©Ω•π–È¡…Ωô•±î§ÅÏ(ÄÄÄÅô±ΩÖ—mtÅ•ë±îıÖ…—•ç’±Ö—•ΩπIÖπùïÃπùï—=…ïôÖ’±–°Õ±’ú±©ÖŸÑπ’—•∞π5Ö¿πΩò†§§πùï–°•ë±ïM—Ö—î¨àËà≠©Ω•π–§Ï(ÄÄÄÅô±ΩÖ—mtÅµΩŸïµïπ–ıÖ…—•ç’±Ö—•ΩπIÖπùïÃπùï—=…ïôÖ’±–°Õ±’ú±©ÖŸÑπ’—•∞π5Ö¿πΩò†§§πùï–°µΩŸïµïπ—M—Ö—î¨àËà≠©Ω•π–§Ï(ÄÄÄÅ•ò°•ë±îÙıπ’±±ÒÒµΩŸïµïπ–Ùıπ’±∞•—°…Ω‹Åπï‹Å%±±ïùÖ±M—Ö—ï·çï¡—•Ω∏†â5•ÕÕ•πúÅÕï——±ïêÅÕΩ’…çîÅ¡ΩÕîÄà≠Õ±’ú¨àËà≠©Ω•π–§Ï(ÄÄÄÅôΩ»°•π–ÅÖ·•ÃÙ¿ÌÖ·•ÃÿÌÖ·•Ã¨¨§ÅÏ(ÄÄÄÄÅô±ΩÖ–Å—Ω±ï…ÖπçîıÖ·•ÃÃ¸¿∏¿…Ë¿∏¿’Ï(ÄÄÄÄÅ•ò†Ö±ΩÖ–π•Õ•π•—î°•ë±ïmÖ·•Õt•ÒÖ±ΩÖ–π•Õ•π•—î°•ë±ïmÖ·•Ã¨Ÿt•ÒÒ•ë±ïmÖ·•Ã¨ŸtÒ•ë±ïmÖ·•Õt(ÄÄÄÄÄÄÄÅÒÒ•ë±ïmÖ·•Ã¨Ÿtµ•ë±ïmÖ·•Õt˘—Ω±ï…ÖπçïÒÖ±ΩÖ–π•Õ•π•—î°µΩŸïµïπ—mÖ·•Õt§(ÄÄÄÄÄÄÄÅÒÖ±ΩÖ–π•Õ•π•—î°µΩŸïµïπ—mÖ·•Ã¨Ÿt•ÒÒµΩŸïµïπ—mÖ·•Ã¨ŸtÒµΩŸïµïπ—mÖ·•Õt(ÄÄÄÄÄÄÄÅÒÒµΩŸïµïπ—mÖ·•Ã¨ŸtµµΩŸïµïπ—mÖ·•Õt˘—Ω±ï…Öπçî§(ÄÄÄÄÄÅ—°…Ω‹Åπï‹Å%±±ïùÖ±M—Ö—ï·çï¡—•Ω∏†â9Ö—•ŸîÅÕΩ’…çîÅ¡ΩÕîÅÕ°Ω’±êÅÕï——±îÅ›•—°Ω’–Å•πŸïπ—ïêÅçÂç±•åÅµΩŸïµïπ–ÅôΩ»Äà≠Õ±’ú¨àËà≠©Ω•π–§Ï(ÄÄÄÄÅô±ΩÖ–Å•ë±ïAΩÕîÙ°•ë±ïmÖ·•Õt≠•ë±ïmÖ·•Ã¨Ÿt§®¿∏’Ï(ÄÄÄÄÅô±ΩÖ–ÅµΩŸïµïπ—AΩÕîÙ°µΩŸïµïπ—mÖ·•Õt≠µΩŸïµïπ—mÖ·•Ã¨Ÿt§®¿∏’Ï(ÄÄÄÄÅ•ò°5Ö—†πÖâÃ°µΩŸïµïπ—AΩÕîµ•ë±ïAΩÕî§˘—Ω±ï…Öπçî•Ì—…ÖπÕ•—•Ωπïê¨¨Ìâ…ïÖ¨ÌÙ(ÄÄÄÅÙ(ÄÄÅÙ(ÄÄÅ•ò°—…ÖπÕ•—•Ωπïêƒ•—°…Ω‹Åπï‹Å%±±ïùÖ±M—Ö—ï·çï¡—•Ω∏†â9Ö—•ŸîÅµΩŸïµïπ–Å¡ΩÕîÅë•êÅπΩ–ÅÖ…—•ç’±Ö—îÅÖπ‰Å¡…Ωô•±ïêÅ©Ω•π–ÅôΩ»Äà≠Õ±’ú§Ï(ÄÄÅ…ï—’…∏Å—…ÖπÕ•—•ΩπïêÏ(ÄÅÙ(ÄÅ¡…•ŸÖ—îÅÕ—Ö—•åÅŸΩ•êÅŸÖ±•ëÖ—ïMΩ’…çïM—Ö—•ç%ë±î°M—…•πúÅÕ±’ú§ÅÏ(ÄÄÅ•ò°Ö…—•ç’±Ö—•ΩπMÖµ¡±ïΩ’π—Ãπùï—=…ïôÖ’±–°Õ±’ú±©ÖŸÑπ’—•∞π5Ö¿πΩò†§§πùï—=…ïôÖ’±–†â%1}%90à∞¿§»§(ÄÄÄÅ—°…Ω‹Åπï‹Å%±±ïùÖ±M—Ö—ï·çï¡—•Ω∏†â%πÕ’ôô•ç•ïπ–ÅÕ—Ö—•åÅ•ë±îÅÕÖµ¡±ïÃÅôΩ»Äà≠Õ±’ú§Ï(ÄÄÅôΩ»°M—…•πúÅ©Ω•π–È¡…Ωô•±ï)Ω•π—Ã°Õ±’ú∞â%1}%90à§§ÅÏ(ÄÄÄÅô±ΩÖ—mtÅ…ÖπùîıÖ…—•ç’±Ö—•ΩπIÖπùïÃπùï—=…ïôÖ’±–°Õ±’ú±©ÖŸÑπ’—•∞π5Ö¿πΩò†§§πùï–†â%1}%90Ëà≠©Ω•π–§Ï(ÄÄÄÅ•ò°…ÖπùîÙıπ’±∞•—°…Ω‹Åπï‹Å%±±ïùÖ±M—Ö—ï·çï¡—•Ω∏†â5•ÕÕ•πúÅÕ—Ö—•åÅ•ë±îÅ¡ΩÕîÄà≠Õ±’ú¨àËà≠©Ω•π–§Ï(ÄÄÄÅôΩ»°•π–ÅÖ·•ÃÙ¿ÌÖ·•ÃÿÌÖ·•Ã¨¨§(ÄÄÄÄÅ•ò†Ö±ΩÖ–π•Õ•π•—î°…ÖπùïmÖ·•Õt•ÒÖ±ΩÖ–π•Õ•π•—î°…ÖπùïmÖ·•Ã¨Ÿt•ÒÒ…ÖπùïmÖ·•Ã¨ŸtÒ…ÖπùïmÖ·•Õt(ÄÄÄÄÄÄÄÅÒÒ…ÖπùïmÖ·•Ã¨Ÿtµ…ÖπùïmÖ·•Õt¯°Ö·•ÃÃ¸¿∏¿…Ë¿∏¿’§§(ÄÄÄÄÄÅ—°…Ω‹Åπï‹Å%±±ïùÖ±M—Ö—ï·çï¡—•Ω∏†â9Ö—•ŸîÅÕ—Ö—•åÅ•ë±îÅ¡ΩÕîÅ›ÖÃÅπΩ–ÅÕ—Öâ±îÅôΩ»Äà≠Õ±’ú¨àËà≠©Ω•π–§Ï(ÄÄÅÙ(ÄÅÙ(ÄÅ¡…•ŸÖ—îÅÕ—Ö—•åÅŸΩ•êÅŸÖ±•ëÖ—ï…—•ç’±Ö—•ΩπA…Ωô•±ïÃ†§Å—°…Ω›ÃÅ©ÖŸÑπ•ºπ%=·çï¡—•Ω∏ÅÏ(ÄÄÅM—…•πù	’•±ëï»Å…ï¡Ω…–ıπï‹ÅM—…•πù	’•±ëï»†§Ï(ÄÄÅ•π–Å¡ÖÕÕïêÙ¿±≠πΩ›πÖ±±âÖç≠ÃÙ¿Ï(ÄÄÅôΩ»°M—…•πúÅÕ±’úÈ©ÖŸÑπ’—•∞π1•Õ–πΩò†âç°Ö…µÖπëï»à∞âç°Ö…µï±ïΩ∏à∞âç°Ö…•ÈÖ…êà§§ÅÏ(ÄÄÄÅ•ò†ÖÕ¡ïç•ïÃπçΩπ—Ö•πÃ°Õ±’ú§•çΩπ—•π’îÏ(ÄÄÄÅŸÖ»Å…ÖπùïÃı—Ö•±±ÖµïIÖπùïÃπùï—=…ïôÖ’±–°Õ±’ú±©ÖŸÑπ’—•∞π5Ö¿πΩò†§§ÌŸÖ»Åô±Öµï%ë±îı…ÖπùïÃπùï–†â•ë±îà§ÌŸÖ»Åô±Öµï]Ö±¨ı…ÖπùïÃπùï–†â›Ö±¨à§Ï(ÄÄÄÅM—…•πúÅï·¡ïç—ïêÙâÖπ•µÖ—•Ω∏∏à≠Õ±’ú¨àπµ•πïµΩπ}—Ö•±}ô±ÖµîàÏ(ÄÄÄÅâΩΩ±ïÖ∏ÅÖπ•µÖ—ïë±Öµîıô±Öµï%ë±îÑıπ’±∞òôô±Öµï]Ö±¨Ñıπ’±∞òô—Ö•±±Öµï±•¡Ãπùï—=…ïôÖ’±–°Õ±’ú±©ÖŸÑπ’—•∞πMï–πΩò†§§πçΩπ—Ö•πÃ°ï·¡ïç—ïê§Ï(ÄÄÄÅôΩ»°•π–ÅÖ·•ÃÙ¿ÌÖ·•ÃÃòôÖπ•µÖ—ïë±ÖµîÌÖ·•Ã¨¨•Öπ•µÖ—ïë±Öµîıô±Öµï%ë±ïmÖ·•Ã¨Õtµô±Öµï%ë±ïmÖ·•Õt¯¿∏¿≈òôô±Öµï]Ö±≠mÖ·•Ã¨Õtµô±Öµï]Ö±≠mÖ·•Õt¯¿∏¿≈Ï(ÄÄÄÅ•ò†ÖÖπ•µÖ—ïë±Öµî•—°…Ω‹Åπï‹Å%±±ïùÖ±M—Ö—ï·çï¡—•Ω∏°Õ±’ú¨àÅ—Ö•∞Åô±ÖµîÅë•êÅπΩ–ÅÖπ•µÖ—îÅ•πëï¡ïπëïπ—±‰Åë’…•πúÅ•ë±îÅÖπêÅ›Ö±¨ÏÅ•ë±îÙà≠©ÖŸÑπ’—•∞π……ÖÂÃπ—ΩM—…•πú°ô±Öµï%ë±î§¨àÅ›Ö±¨Ùà≠©ÖŸÑπ’—•∞π……ÖÂÃπ—ΩM—…•πú°ô±Öµï]Ö±¨§¨àÅÕï±ïç—ïêÙà≠—Ö•±±Öµï±•¡Ãπùï–°Õ±’ú§§Ï(ÄÄÄÅ•±ïÃπ›…•—ïM—…•πú°AÖ—†πΩò†âç±•ïπ–µŸÖ±•ëÖ—•Ω∏π—·–à§∞âAMLÄà≠Õ±’úπ—ΩU¡¡ï…ÖÕî°©ÖŸÑπ’—•∞π1ΩçÖ±îπI==P§¨àÅQ%0Å15ËÅ•πëï¡ïπëïπ–Åç±•¿Ùà≠—Ö•±±Öµï±•¡Ãπùï–°Õ±’ú§¨àÅç°ÖπùïêÅ•∏Å•ë±îÅ…ÖπùîÙà≠©ÖŸÑπ’—•∞π……ÖÂÃπ—ΩM—…•πú°ô±Öµï%ë±î§¨àÅÖπêÅ›Ö±¨Å…ÖπùîÙà≠©ÖŸÑπ’—•∞π……ÖÂÃπ—ΩM—…•πú°ô±Öµï]Ö±¨§¨àπq∏à±M—ÖπëÖ…ë=¡ïπ=¡—•Ω∏πAA9§Ï(ÄÄÅÙ(ÄÄÅôΩ»°ŸÖ»Åïπ—…‰ÈIQ%U1Q%=9}AI=%1Lπïπ—…ÂMï–†§§ÅÏ(ÄÄÄÅM—…•πúÅÕ±’úıïπ—…‰πùï—-ï‰†§Ï(ÄÄÄÅ•ò†ÖIQ%U1Q%=9}Y1%Q%=9}MA%LπçΩπ—Ö•πÃ°Õ±’ú•ÒÖÕ¡ïç•ïÃπçΩπ—Ö•πÃ°Õ±’ú§•çΩπ—•π’îÏ(ÄÄÄÅŸÖ»Åëïô•π•—•Ω∏ıM¡ïç•ïÕïô•π•—•ΩπÃπùï–°Õ±’ú§Ï(ÄÄÄÅ•ò°ëïô•π•—•Ω∏Ùıπ’±∞•—°…Ω‹Åπï‹Å%±±ïùÖ±M—Ö—ï·çï¡—•Ω∏†â5•ÕÕ•πúÅ—ïÕ–Å¡…Ωô•±îÅÕ¡ïç•ïÃÄà≠Õ±’ú§Ï(ÄÄÄÅM—…•πúÅôÖ±±âÖç¨ıëïô•π•—•Ω∏πµΩŸïµïπ—Ö±±âÖç¨†§Ï(ÄÄÄÅ•ò†âÕ—Ö—•åàπï≈’Ö±Ã°ôÖ±±âÖç¨•Òâ•ë±îàπï≈’Ö±Ã°ôÖ±±âÖç¨§§ÅÏ(ÄÄÄÅM—…•πúÅï·¡ïç—ïêıï·¡ïç—ïë]Ö±¨°Õ±’ú±ëïô•π•—•Ω∏§Ï(ÄÄÄÄÅ•ò†Ö°ÖÕMï±ïç—ïë±•¿°Õ±’ú∞â]1-}MQdà±ï·¡ïç—ïê§•—°…Ω‹Åπï‹Å%±±ïùÖ±M—Ö—ï·çï¡—•Ω∏†âÖ±±âÖç¨Åç±ÖÕÕ•ô•çÖ—•Ω∏Åë•êÅπΩ–ÅµÖ—ç†ÅÕï±ïç—ïêÅ›Ö±¨Åç±•¿ÅôΩ»Äà≠Õ±’ú§Ï(ÄÄÄÄÅ•ò°%Q%=91}AI=%1LπçΩπ—Ö•πÕ-ï‰°Õ±’ú§§ÅÏ(ÄÄÄÄÄÅ•ò†Ö°ÖÕMï±ïç—ïë±•¿°Õ±’ú∞â%1}%9%Q%0à±ï·¡ïç—ïë%ë±î°Õ±’ú±ëïô•π•—•Ω∏§•ÒÖ°ÖÕMï±ïç—ïë±•¿°Õ±’ú∞â%1}%90à±ï·¡ïç—ïë%ë±î°Õ±’ú±ëïô•π•—•Ω∏§§§(ÄÄÄÄÄÄÅ—°…Ω‹Åπï‹Å%±±ïùÖ±M—Ö—ï·çï¡—•Ω∏†âMΩ’…çîÅ•ë±îÅôÖ±±âÖç¨Åë•êÅπΩ–ÅÕï±ïç–Å—°îÅï·¡ïç—ïêÅç±•¿ÅôΩ»Äà≠Õ±’ú§Ï(ÄÄÄÄÄÅ•ò°ÕΩ’…çïM—Ö—•ç%ë±î°Õ±’ú§•ŸÖ±•ëÖ—ïMΩ’…çïM—Ö—•ç%ë±î°Õ±’ú§Ï(ÄÄÄÄÄÅï±ÕîÅ•ò°µΩŸ•πù)Ω•π—Ω’π–°Õ±’ú∞â%1}%90à§ƒ§(ÄÄÄÄÄÄÅ—°…Ω‹Åπï‹Å%±±ïùÖ±M—Ö—ï·çï¡—•Ω∏†âπ•µÖ—ïêÅÕΩ’…çîÅ•ë±îÅôÖ±±âÖç¨Åë•êÅπΩ–ÅÖπ•µÖ—îÅôΩ»Äà≠Õ±’ú§Ï(ÄÄÄÄÅÙ(ÄÄÄÄÅ≠πΩ›πÖ±±âÖç≠Ã¨¨Ï(ÄÄÄÄÅ…ï¡Ω…–πÖ¡¡ïπê†âaAQÅ@Äà§πÖ¡¡ïπê°Õ±’ú§πÖ¡¡ïπê†àËÅôÖ±±âÖç¨Ùà§πÖ¡¡ïπê°ôÖ±±âÖç¨§(ÄÄÄÄÄÄÄπÖ¡¡ïπê†àÏÅÕï±ïç—ïêÅ›Ö±¨Ùà§πÖ¡¡ïπê°ï·¡ïç—ïê§πÖ¡¡ïπê†àÏÅπºÅùÖ•–Å¡ÖÕÃÅç±Ö•µïêπq∏à§Ï(ÄÄÄÄÅçΩπ—•π’îÏ(ÄÄÄÅÙ(ÄÄÄÅM—…•πúÅ›Ö±¨ıï·¡ïç—ïë]Ö±¨°Õ±’ú±ëïô•π•—•Ω∏§Ï(ÄÄÄÅM—…•πúÅ…’∏ıô•·—’…ï•»°Õ±’ú•ÒÒô•·—’…ï]Ö—ï»°Õ±’ú§(ÄÄÄÄÄÄ˝π’±∞ÈM¡ïç•ïÕÕÕï—%πëï‡πç±•¿°Õ±’ú∞âù…Ω’πë}…’∏à∞â…’∏à§Ï(ÄÄÄÅM—…•πúÅ•ë±îıï·¡ïç—ïë%ë±î°Õ±’ú±ëïô•π•—•Ω∏§Ï(ÄÄÄÅ•ò†Ö°ÖÕMï±ïç—ïë±•¿°Õ±’ú∞â%1}%9%Q%0à±•ë±î•ÒÖ°ÖÕMï±ïç—ïë±•¿°Õ±’ú∞â%1}%90à±•ë±î•ÒÖ°ÖÕMï±ïç—ïë±•¿°Õ±’ú∞â%1}IQUI8à±•ë±î§§(ÄÄÄÄÅ—°…Ω‹Åπï‹Å%±±ïùÖ±M—Ö—ï·çï¡—•Ω∏†â%ë±îÅÕ—Ö—îÅÕï±ïç—•Ω∏Åë•êÅπΩ–Å…ï—’…∏Å—ºÅï·¡ïç—ïêÅç±•¿ÅôΩ»Äà≠Õ±’ú¨àÅï·¡ïç—ïêÙà≠•ë±î¨àÅΩâÕï…ŸïêÙà≠Ö…—•ç’±Ö—•Ωπ±•¡Ãπùï–°Õ±’ú§§Ï(ÄÄÄÅ•ò†Ö°ÖÕMï±ïç—ïë±•¿°Õ±’ú∞â]1-}MQdà±›Ö±¨•ÒÖ°ÖÕMï±ïç—ïë±•¿°Õ±’ú∞â]1-}MQIPà±›Ö±¨•ÒÖ°ÖÕMï±ïç—ïë±•¿°Õ±’ú∞â]1-}0à±›Ö±¨§§(ÄÄÄÄÅ—°…Ω‹Åπï‹Å%±±ïùÖ±M—Ö—ï·çï¡—•Ω∏†â]Ö±¨ÅÕ—Ö—îÅÕï±ïç—•Ω∏ÅôÖ•±ïêÅôΩ»Äà≠Õ±’ú¨àÅï·¡ïç—ïêÙà≠›Ö±¨¨àÅÕ—Ö—ïÃÙà≠Ö…—•ç’±Ö—•Ωπ±•¡Ãπùï–°Õ±’ú§¨àÅÕÖµ¡±ïÃÙà≠Ö…—•ç’±Ö—•ΩπMÖµ¡±ïΩ’π—Ãπùï–°Õ±’ú§¨àÅµïÖÕ’…ïêÙà≠Ö…—•ç’±Ö—•Ωπ%π¡’—Ãπùï–°Õ±’ú§§Ï(ÄÄÄÅ•ò°…’∏Ñıπ’±∞òòÖ°ÖÕMï±ïç—ïë±•¿°Õ±’ú∞âIU9}MQdà±…’∏§§(ÄÄÄÄÅ—°…Ω‹Åπï‹Å%±±ïùÖ±M—Ö—ï·çï¡—•Ω∏†âI’∏ÅÕ—Ö—îÅÕï±ïç—•Ω∏ÅôÖ•±ïêÅôΩ»Äà≠Õ±’ú¨àÅï·¡ïç—ïêÙà≠…’∏¨àÅÕ—Ö—ïÃÙà≠Ö…—•ç’±Ö—•Ωπ±•¡Ãπùï–°Õ±’ú§§Ï(ÄÄÄÅ•ò°…’∏Ñıπ’±∞§ÅÏ(ÄÄÄÄÅŸÖ»Åëïçï±ï…Ö—•Ω∏ıÖ…—•ç’±Ö—•Ωπ±•¡Ãπùï—=…ïôÖ’±–°Õ±’ú±©ÖŸÑπ’—•∞π5Ö¿πΩò†§§πùï—=…ïôÖ’±–†âIU9}0à±©ÖŸÑπ’—•∞πMï–πΩò†§§Ï(ÄÄÄÄÅâΩΩ±ïÖ∏ÅΩâÕï…Ÿïë1Ω›ï…M¡ïïêı°ÖÕYï±Ωç•—ÂMÖµ¡±î°Õ±’ú∞âIU9}0à±›Ö±¨±ôÖ±Õî•ÒÒ°ÖÕYï±Ωç•—ÂMÖµ¡±î°Õ±’ú∞âIU9}0à±•ë±î±ôÖ±Õî§Ï(ÄÄÄÄÅ•ò†Öëïçï±ï…Ö—•Ω∏πçΩπ—Ö•πÃ°…’∏•ÒÒ©ÖŸÑπ’—•∞πΩ±±ïç—•ΩπÃπë•Õ©Ω•π–°ëïçï±ï…Ö—•Ω∏±©ÖŸÑπ’—•∞πMï–πΩò°›Ö±¨±•ë±î§§(ÄÄÄÄÄÄÄÅÒÖ°ÖÕYï±Ωç•—ÂMÖµ¡±î°Õ±’ú∞âIU9}0à±…’∏±—…’î•ÒÖΩâÕï…Ÿïë1Ω›ï…M¡ïïê§(ÄÄÄÄÄÅ—°…Ω‹Åπï‹Å%±±ïùÖ±M—Ö—ï·çï¡—•Ω∏†âI’∏Åëïçï±ï…Ö—•Ω∏Åë•êÅπΩ–Å—…ÖπÕ•—•Ω∏Åô…Ω¥Å…’∏Å—ºÅÑÅ±Ω›ï»µÕ¡ïïêÅÕ—Ö—îÅôΩ»Äà≠Õ±’ú¨àÅ…’∏Ùà≠…’∏¨àÅ›Ö±¨Ùà≠›Ö±¨¨àÅ•ë±îÙà≠•ë±î¨àÅΩâÕï…ŸïêÙà≠ëïçï±ï…Ö—•Ω∏¨àÅµïÖÕ’…ïêÙà≠Ö…—•ç’±Ö—•Ωπ%π¡’—Ãπùï—=…ïôÖ’±–°Õ±’ú±©ÖŸÑπ’—•∞π5Ö¿πΩò†§§πùï–†âIU9}0à§§Ï(ÄÄÄÅÙ(ÄÄÄÅ•π–Å›Ö±≠)Ω•π—ÃıµΩŸ•πù)Ω•π—Ω’π–°Õ±’ú∞â]1-}MQdà§Ï(ÄÄÄÅ•π–Å…’π)Ω•π—Ãı…’∏Ùıπ’±∞¸¿ÈµΩŸ•πù)Ω•π—Ω’π–°Õ±’ú∞âIU9}MQdà§Ï(ÄÄÄÅ•π–Åµ•π•µ’¥ıÕ±’úπï≈’Ö±Ã†âç°Ö…µÖπëï»à§¸»ËƒÏ(ÄÄÄÅ•π–Å•ë±ï)Ω•π—ÃıµΩŸ•πù)Ω•π—Ω’π–°Õ±’ú∞â%1}%90à§Ï(ÄÄÄÅâΩΩ±ïÖ∏ÅÕ—Ö—•ç%ë±îıÕΩ’…çïM—Ö—•ç%ë±î°Õ±’ú§Ï(ÄÄÄÅ•ò°Õ—Ö—•ç%ë±î•ŸÖ±•ëÖ—ïMΩ’…çïM—Ö—•ç%ë±î°Õ±’ú§Ï(ÄÄÄÅâΩΩ±ïÖ∏Å¡ΩÕïQ…ÖπÕ•—•Ω∏ıÕΩ’…çïAΩÕïQ…ÖπÕ•—•Ω∏°Õ±’ú§Ï(ÄÄÄÅ•π–Å—…ÖπÕ•—•Ωπïë)Ω•π—Ãı¡ΩÕïQ…ÖπÕ•—•Ω∏˝ŸÖ±•ëÖ—ïMΩ’…çïAΩÕïQ…ÖπÕ•—•Ω∏°Õ±’ú∞â%1}%90à∞â]1-}MQdà§Ë¿Ï(ÄÄÄÅ•ò††ÖÕ—Ö—•ç%ë±îòòÖ¡ΩÕïQ…ÖπÕ•—•Ω∏òô•ë±ï)Ω•π—ÃÒµ•π•µ’¥•Ò†Ö¡ΩÕïQ…ÖπÕ•—•Ω∏òô›Ö±≠)Ω•π—ÃÒµ•π•µ’¥§(ÄÄÄÄÄÄÅÒ°¡ΩÕïQ…ÖπÕ•—•Ω∏òò°•ë±ï)Ω•π—ÃÑÙ¡ÒÒ›Ö±≠)Ω•π—ÃÑÙ¿§•Ò°…’∏Ñıπ’±∞òô…’π)Ω•π—ÃÒµ•π•µ’¥§§(ÄÄÄÄÅ—°…Ω‹Åπï‹Å%±±ïùÖ±M—Ö—ï·çï¡—•Ω∏†âIï±ïŸÖπ–Å±ΩçΩµΩ—•Ω∏Å©Ω•π—ÃÅë•êÅπΩ–ÅÖπ•µÖ—îÅôΩ»Äà≠Õ±’ú¨àÅ•ë±îÙà≠•ë±ï)Ω•π—Ã¨àÅ›Ö±¨Ùà≠›Ö±≠)Ω•π—Ã¨àÅ…’∏Ùà≠…’π)Ω•π—Ã¨àÅ…ï≈’•…ïêÙà≠µ•π•µ’¥§Ï(ÄÄÄÅ•ò°Õ±’úπï≈’Ö±Ã†âôïÖ…Ω‹à§òôô•·—’…ï•»°Õ±’ú§•…ï¡Ω…–πÖ¡¡ïπê†âI=\Å1%!PËÅÖëÖ¡—ïêÅÕΩ’…çîÅÖ•»Å¡ΩÕîÅ±•ô—ÃÅ—°îÅ°ïÖê∞ÅÖ±•ùπÃÅ—°îÅôïï–ÅÖπêÅ…ïπëï…ÃÅçΩµ¡Ö—•â±îÅ›•πúÅâïÖ—Ãπq∏à§Ï(ÄÄÄÅ•ò°Õ±’úπï≈’Ö±Ã†âÕ¡ïÖ…Ω‹à§òôô•·—’…ï•»°Õ±’ú§•…ï¡Ω…–πÖ¡¡ïπê†âMAI=\Å1%!PËÅµΩëï∞µÕ¡ïç•ô•åÅÖ•»Åç±•¡ÃÅô±Ö¿ÅÖ±∞Å—°…ïîÅ…ï—Ö•πïêÅ›•πúÅ©Ω•π—ÃÏÅù…Ω’πêÅ›Ö±¨Å•ÃÅπΩ–ÅÕï±ïç—ïêÅ•∏ÅÖ•»πq∏à§Ï(ÄÄÄÅï±ÕîÅ•ò°Õ—Ö—•ç%ë±î•…ï¡Ω…–πÖ¡¡ïπê†âM=UIÅMQQ%Å%1Äà§πÖ¡¡ïπê°Õ±’ú§πÖ¡¡ïπê†àËÅπÖ—•ŸîÅÕ—ÖπçîÅÕ—Öâ±îÏÅπºÅ•ë±îÅΩÕç•±±Ö—•Ω∏Åç±Ö•µïêπq∏à§Ï(ÄÄÄÅ•ò°¡ΩÕïQ…ÖπÕ•—•Ω∏•…ï¡Ω…–πÖ¡¡ïπê†âM=UIÅMQQ%ÅA=MÅQI9M%Q%=8Äà§πÖ¡¡ïπê°Õ±’ú§πÖ¡¡ïπê†àËÅπÖ—•ŸîÅ•ë±îÅÖπêÅµΩŸïµïπ–Åç±•¡ÃÅÖ…îÅÕ—Öâ±îÅ¡ΩÕïÃÏÅ¡…Ωô•±ïêÅ©Ω•π—ÃÅç°ÖπùïêÅâï—›ïï∏ÅÕï——±ïêÅ¡ΩÕïÃÙà§πÖ¡¡ïπê°—…ÖπÕ•—•Ωπïë)Ω•π—Ã§πÖ¡¡ïπê†àπq∏à§Ï(ÄÄÄÅ¡ÖÕÕïê¨¨Ï(ÄÄÄÅ…ï¡Ω…–πÖ¡¡ïπê†âAMLÄà§πÖ¡¡ïπê°Õ±’ú§πÖ¡¡ïπê†àËÅ•ë±îΩ›Ö±¨à§πÖ¡¡ïπê°…’∏Ùıπ’±∞¸àÄ°πºÅÕΩ’…çîÅ…’∏Åç±•¿§àËàΩ…’∏à§πÖ¡¡ïπê†àÅç±•¡ÃÅÕï±ïç—ïêÏÅ¡…Ωô•±îÅ©Ω•π—ÃÅç°ÖπùïêÅ•ë±îÙà§(ÄÄÄÄÄÄπÖ¡¡ïπê°•ë±ï)Ω•π—Ã§πÖ¡¡ïπê†àÅ›Ö±¨Ùà§πÖ¡¡ïπê°›Ö±≠)Ω•π—Ã§πÖ¡¡ïπê†àÅ…’∏Ùà§πÖ¡¡ïπê°…’π)Ω•π—Ã§πÖ¡¡ïπê†àÏÅ—…ÖπÕ•—•Ω∏ÅÕÖµ¡±ïÃÙà§(ÄÄÄÄÄÄπÖ¡¡ïπê°Ö…—•ç’±Ö—•Ωπ±•¡Ãπùï–°Õ±’ú§§πÖ¡¡ïπê†àÏÅÕÂπç°…Ωπ•ÈïêÅ•π¡’—ÃÙà§πÖ¡¡ïπê°Ö…—•ç’±Ö—•Ωπ%π¡’—Ãπùï–°Õ±’ú§§πÖ¡¡ïπê†àπq∏à§Ï(ÄÄÅÙ(ÄÄÅŸÖ»ÅÕï±ïç—ïëA…Ωô•±ïÃıIQ%U1Q%=9}Y1%Q%=9}MA%LπÕ—…ïÖ¥†§πô•±—ï»°Õ¡ïç•ïÃËÈçΩπ—Ö•πÃ§πçΩ±±ïç–°©ÖŸÑπ’—•∞πÕ—…ïÖ¥πΩ±±ïç—Ω…Ãπ—ΩMï–†§§Ï(ÄÄÅ•±ïÃπ›…•—ïM—…•πú°AÖ—†πΩò†âç±•ïπ–µŸÖ±•ëÖ—•Ω∏π—·–à§∞âIQ%U1Q%=8ÅAI=%1LËÅ¡ÖÕÕïêÙà≠¡ÖÕÕïê¨àÅï·¡ïç—ïêÅôÖ±±âÖç¨ÅùÖ¡ÃÙà≠≠πΩ›πÖ±±âÖç≠Ã¨àÅÕï±ïç—ïêÅ¡…Ωô•±ïÃÙà≠Õï±ïç—ïëA…Ωô•±ïÃπÕ•Èî†§¨àÅëï—Ö•±ïêÅÕçΩ¡îÙà≠Õï±ïç—ïëA…Ωô•±ïÃ¨àÏÅ’πÕï±ïç—ïêÅÕ¡ïç•ïÃÅ›ï…îÅπΩ–Å—ïÕ—ïêÅ•∏Å—°•ÃÅ—Ö…ùï—ïêÅ…’∏πq∏à≠…ï¡Ω…–±M—ÖπëÖ…ë=¡ïπ=¡—•Ω∏πAA9§Ï(ÄÅÙ(ÄÅ¡…•ŸÖ—îÅÕ—Ö—•åÅM—…•πúÅï·¡ïç—ïë%ë±î°M—…•πúÅÕ±’ú±M¡ïç•ïÕïô•π•—•ΩπÃπïô•π•—•Ω∏Åëïô•π•—•Ω∏§ÅÏ(ÄÄÅ•ò°ô•·—’…ï]Ö—ï»°Õ±’ú§§ÅÏ(ÄÄÄÅM—…•πúÅ›Ö—ï»ıô•·—’…ïM’…ôÖçî°Õ±’ú§˝ô•…Õ—5Ö¡¡ïë±•¿°ëïô•π•—•Ω∏∞âÕ’…ôÖçï}›Ö—ï…}•ë±îà∞âÕ’…ôÖçï›Ö—ï…}•ë±îà∞â›Ö—ï…}Õ’…ôÖçï}•ë±îà∞â›Ö—ï…}•ë±îà§Èô•…Õ—5Ö¡¡ïë±•¿°ëïô•π•—•Ω∏∞â›Ö—ï…}•ë±îà∞â›Ö—ï…}Õ’…ôÖçï}•ë±îà∞âÕ’…ôÖçï}›Ö—ï…}•ë±îà∞âÕ’…ôÖçï›Ö—ï…}•ë±îà§Ï(ÄÄÄÅ•ò°›Ö—ï»Ñıπ’±∞•…ï—’…∏Å›Ö—ï»Ï(ÄÄÅÙ(ÄÄÅM—…•πúÅÖ•»ıô•·—’…ï•»°Õ±’ú§˝M¡ïç•ïÕÕÕï—%πëï‡πç±•¿°Õ±’ú∞âÖ•…}•ë±îà∞âÖ•…}•ë±îà§Èπ’±∞Ï(ÄÄÅ…ï—’…∏ÅÖ•»Ùıπ’±∞˝ëïô•π•—•Ω∏π•ë±î†§ÈÖ•»Ï(ÄÅÙ(ÄÅ¡…•ŸÖ—îÅÕ—Ö—•åÅM—…•πúÅï·¡ïç—ïë]Ö±¨°M—…•πúÅÕ±’ú±M¡ïç•ïÕïô•π•—•ΩπÃπïô•π•—•Ω∏Åëïô•π•—•Ω∏§ÅÏ(ÄÄÅ•ò°ô•·—’…ï]Ö—ï»°Õ±’ú§§ÅÏ(ÄÄÄÅM—…•πúÅ›Ö—ï»ıô•·—’…ïM’…ôÖçî°Õ±’ú§˝ô•…Õ—5Ö¡¡ïë±•¿°ëïô•π•—•Ω∏∞âÕ’…ôÖçï}›Ö—ï…}Õ›•¥à∞âÕ’…ôÖçï›Ö—ï…}Õ›•¥à∞â›Ö—ï…}Õ’…ôÖçï}Õ›•¥à∞â›Ö—ï…}Õ›•¥à§Èô•…Õ—5Ö¡¡ïë±•¿°ëïô•π•—•Ω∏∞â›Ö—ï…}Õ›•¥à∞â›Ö—ï…}Õ’…ôÖçï}Õ›•¥à∞âÕ’…ôÖçï}›Ö—ï…}Õ›•¥à∞âÕ’…ôÖçï›Ö—ï…}Õ›•¥à§Ï(ÄÄÄÅ•ò°›Ö—ï»Ñıπ’±∞•…ï—’…∏Å›Ö—ï»Ï(ÄÄÅÙ(ÄÄÅ•ò†Öô•·—’…ï•»°Õ±’ú§•…ï—’…∏Åëïô•π•—•Ω∏π›Ö±¨†§Ï(ÄÄÅM—…•πúÅÖ•»ıM¡ïç•ïÕÕÕï—%πëï‡πç±•¿°Õ±’ú∞âÖ•…}ô±‰à∞âÖ•…}ô±‰à§Ï(ÄÄÅ•ò°Ö•»Ùıπ’±∞•Ö•»ıM¡ïç•ïÕÕÕï—%πëï‡πç±•¿°Õ±’ú∞âÖ•…}ù±•ëîà∞âÖ•…}ù±•ëîà§Ï(ÄÄÅ•ò°Ö•»Ùıπ’±∞•Ö•»ıM¡ïç•ïÕÕÕï—%πëï‡πç±•¿°Õ±’ú∞âÖ•…}•ë±îà∞âÖ•…}•ë±îà§Ï(ÄÄÅ…ï—’…∏ÅÖ•»Ùıπ’±∞˝ëïô•π•—•Ω∏π›Ö±¨†§ÈÖ•»Ï(ÄÅÙ(ÄÅ¡…•ŸÖ—îÅÕ—Ö—•åÅM—…•πúÅô•…Õ—5Ö¡¡ïë±•¿°M¡ïç•ïÕïô•π•—•ΩπÃπïô•π•—•Ω∏Åëïô•π•—•Ω∏±M—…•πú∏∏∏Å≠ïÂÃ§ÅÏ(ÄÄÅôΩ»°M—…•πúÅ≠ï‰È≠ïÂÃ§ÅÌM—…•πúÅç±•¿ıëïô•π•—•Ω∏πç±•¡Ã†§πùï–°≠ï‰§Ì•ò°ç±•¿Ñıπ’±∞•…ï—’…∏Åç±•¿ÌÙ(ÄÄÅ…ï—’…∏Åπ’±∞Ï(ÄÅÙ)Ù
