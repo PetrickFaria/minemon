@@ -139,6 +139,15 @@ jar.finalizedBy('reobfJar')
 // Include it in assemble so build outputs the JLayer-bearing production JAR.
 tasks.named('jarJar') {
     finalizedBy('reobfJarJar')
+    exclude 'br/com/petrickfaria/minemon/gametest/**'
+    exclude 'data/minemon_gen1/structures/test_arena.nbt'
+    from('ASSET_LICENSES.md') {
+        into 'META-INF'
+    }
+    from('licenses/JLAYER-LGPL-2.1.txt') {
+        into 'META-INF'
+        rename { 'LICENSE-JLAYER-LGPL-2.1.txt' }
+    }
 }
 tasks.named('assemble') {
     dependsOn tasks.named('jarJar')
