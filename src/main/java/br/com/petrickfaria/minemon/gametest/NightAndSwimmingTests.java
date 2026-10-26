@@ -107,7 +107,8 @@ public final class NightAndSwimmingTests {
   var ground=spawn(h,"bulbasaur",3,1,3);
   var mixed=new ArrayList<MinemonCreature>();var air=new ArrayList<MinemonCreature>();
   int x=5;
-  var mixedSpecies=List.of("charizard","scyther","dragonite","pidgey","pidgeotto","pidgeot","zubat","golbat","venomoth","aerodactyl","mewtwo","mew","butterfree","beedrill","gengar");
+  // Land-resting flyers include ground/air cycle species and species with an approved night landing pose.
+  var mixedSpecies=List.of("charizard","scyther","dragonite","pidgey","pidgeotto","pidgeot","zubat","golbat","venomoth","aerodactyl","mewtwo","mew","butterfree","beedrill","gengar","spearow","fearow","articuno","zapdos","moltres");
   for(int i=0;i<mixedSpecies.size();i++){
    String slug=mixedSpecies.get(i);x=3+(i%5)*6;int z=5+(i/5)*5;
    var m=spawn(h,slug,x,7,z);
@@ -115,7 +116,8 @@ public final class NightAndSwimmingTests {
    tag.putString("NaturalBehaviorPhase","AIR");tag.putInt("NaturalBehaviorTicks",1234);m.readAdditionalSaveData(tag);mixed.add(m);
   }
   x=3;
-  for(String slug:List.of("spearow","fearow","gastly","koffing","weezing","magnemite","magneton","haunter","articuno","zapdos","moltres")){
+  // These airborne species keep their one-block hover while asleep.
+  for(String slug:List.of("gastly","koffing","weezing","magnemite","magneton","haunter")){
    int airX=3+(air.size()%5)*6,airZ=4+(air.size()/5)*5;air.add(spawn(h,slug,airX,7,airZ));
   }
   h.runAfterDelay(5,()->{
