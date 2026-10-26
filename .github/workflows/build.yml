@@ -141,7 +141,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          jar_file="$(find build/libs -maxdepth 1 -type f -name 'Minemon-1.19.2-*.jar' ! -name '*sources*' -print -quit)"
+          jar_file="$(find build/libs -maxdepth 1 -type f -name 'Minemon-1.19.2-*-all.jar' -print -quit)"
           test -n "$jar_file"
           jar tf "$jar_file" | grep -Fx 'META-INF/ASSET_LICENSES.md'
           jar tf "$jar_file" | grep -Fx 'pack.mcmeta'
@@ -179,7 +179,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Minemon-1.19.2-2.1.0-gen1
-          path: build/libs/Minemon-1.19.2-*.jar
+          path: build/libs/Minemon-1.19.2-*-all.jar
           if-no-files-found: error
           retention-days: 14
       - name: Collect diagnostics
