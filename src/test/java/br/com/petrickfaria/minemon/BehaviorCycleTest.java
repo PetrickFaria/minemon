@@ -131,7 +131,8 @@ public class BehaviorCycleTest {
    assertEquals(CompatibleLocomotion.clip(s,"run"),d.clips().get("ground_run"));
   }
   for(String s:java.util.List.of("articuno","zapdos","moltres"))
-   assertEquals("native air fly remains selected for "+s,"animation."+s+".air_fly",SpeciesDefinitions.get(s).clips().get("air_fly"));
+   assertEquals("model-specific native air fly adapter remains selected for "+s,
+       "animation."+s+".minemon_air_fly",SpeciesDefinitions.get(s).clips().get("air_fly"));
   assertEquals("animation.fearow.minemon_air_fly",SpeciesDefinitions.get("fearow").clips().get("air_fly"));
   assertEquals("animation.spearow.minemon_air_fly",SpeciesDefinitions.get("spearow").clips().get("air_fly"));
  }

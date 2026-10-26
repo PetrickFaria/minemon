@@ -32,12 +32,12 @@ public class ArbokPatternAssetTest {
   assertEquals(128,texture.getWidth());assertEquals(128,texture.getHeight());
   var original=javax.imageio.ImageIO.read(root.resolve("textures/pokemon/arbok/arbok_pattern_classic.png").toFile());
   var expected=original.getSubimage(95,44,32,20);
-  var resized=new java.awt.image.BufferedImage(19,12,java.awt.image.BufferedImage.TYPE_INT_ARGB);
-  var graphics=resized.createGraphics();graphics.setRenderingHint(java.awt.RenderingHints.KEY_INTERPOLATION,
-      java.awt.RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);graphics.drawImage(expected,0,0,19,12,null);graphics.dispose();
   int marked=0;
   for(int y=0;y<12;y++)for(int x=0;x<19;x++){
-   int source=resized.getRGB(x,y);
+   // Match the Pillow NEAREST mapping used to prepare the atlas byte-for-byte;
+   // Java2D's nearest-neighbor scaler chooses different edge pixels.
+   int sx=(int)Math.floor((x+0.5)*32.0/19.0),sy=(int)Math.floor((y+0.5)*20.0/12.0);
+   int source=expected.getRGB(sx,sy);
    if((source>>>24)<254)continue;
    marked++;
    int actual=texture.getRGB(38+x,19+y);
