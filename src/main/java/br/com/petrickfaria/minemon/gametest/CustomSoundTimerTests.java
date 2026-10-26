@@ -48,6 +48,7 @@ public final class CustomSoundTimerTests {
                 helper.fail("entities loaded during daytime need independent 20..200 tick dawn delays");
             if (!first.customSoundDayActiveForValidation() || !second.customSoundDayActiveForValidation())
                 helper.fail("daytime entities must have an active scheduler, including sleeping Pokémon");
+            if (!first.isSleeping()) helper.fail("daytime audio scheduling must not wake a sleeping Pokémon");
 
             second.resetCustomSoundTimerAndPlay();
             if (second.customSoundTicksForValidation() != 6000) helper.fail("daytime click must cancel the dawn delay and restart five minutes");
@@ -72,7 +73,6 @@ public final class CustomSoundTimerTests {
                                 || second.customSoundTicksForValidation() < 18 || second.customSoundTicksForValidation() > 200
                                 || loadedAtNight.customSoundTicksForValidation() < 18 || loadedAtNight.customSoundTicksForValidation() > 200)
                             helper.fail("dawn after night must schedule fresh randomized delays");
-                        if (!first.isSleeping()) helper.fail("sound scheduling must not wake a sleeping Pokémon");
                         helper.succeed();
                     });
                 });
