@@ -137,7 +137,9 @@ jar {
 jar.finalizedBy('reobfJar')
 // ForgeGradle produces the executable Jar-in-Jar artifact as a separate task.
 // Include it in assemble so build outputs the JLayer-bearing production JAR.
-jarJar.finalizedBy('reobfJarJar')
+tasks.named('jarJar') {
+    finalizedBy('reobfJarJar')
+}
 tasks.named('assemble') {
     dependsOn tasks.named('jarJar')
 }
