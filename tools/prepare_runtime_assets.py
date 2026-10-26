@@ -42,6 +42,23 @@ def add_pose_animation(data, geo, d, name, kind):
     channels.setdefault(n,{})['rotation']={'0.0':{'vector':[0,0,0]},'0.15':{'vector':[angle,0,0]},'0.32':{'vector':[-angle*0.45,0,0]},'0.6':{'vector':[0,0,0]}}
  animations[name]=animation
 
+
+def gastly_body_sway(channels,kind,scale):
+ """Native Gastly oscillation, centered on the target species' existing pose."""
+ import copy
+ source=root/'assets/minemon_gen1/animations/gastly_cobblemon_1_8_2/gastly.animation.json'
+ native=json.loads(source.read_text())['animations']['animation.gastly.'+('ground_idle' if kind=='air_idle' else 'ground_walk')]['bones']['body']
+ body=channels.setdefault('body',{})
+ original_position=copy.deepcopy(body.get('position',[0,0,0]))
+ original_rotation=copy.deepcopy(body.get('rotation',[0,0,0]))
+ for channel,base in (('position',original_position),('rotation',original_rotation)):
+  vector=native[channel];values=[]
+  for axis in range(3):
+   expr=re.sub(r'\bq\.', 'query.',str(vector[axis]))
+   center=5 if (channel=='position' and axis==1 or channel=='rotation' and axis==0) else 0
+   values.append(f'({base[axis]})+{scale}*(({expr})-{center})')
+  body[channel]=values
+
 def compatible_locomotion(data,geo,d):
  """Skeleton-specific new gaits. Every original animation remains byte-equivalent after normal adaptation."""
  import copy
@@ -92,13 +109,8 @@ def compatible_locomotion(data,geo,d):
   for kind,bob,roll,freq in (('air_idle',0.16,1.6,0.14),('air_fly',0.24,2.4,0.18)):
    clip=copy.deepcopy(base);clip.update(loop=True,animation_length=1.0/freq)
    channels=clip.setdefault('bones',{})
-   body=channels.setdefault('body',{})
-   pos=list(body.get('position',[0,0,0]));
-   while len(pos)<3:pos.append(0)
-   pos[1]=sinus(pos[1],bob,freq);body['position']=pos
-   rot=list(body.get('rotation',[0,0,0]));
-   while len(rot)<3:rot.append(0)
-   rot[2]=sinus(rot[2],roll,freq,35);body['rotation']=rot
+   gastly_body_sway(channels,kind,0.70)
+   clip['animation_length']=4.0 if kind=='air_idle' else 8.0
    for side,sign in (('left',1),('right',-1)):
     for segment,scale in ((1,1.0),(2,0.55)):
      bone=f'hand_{side}{segment}'
@@ -120,13 +132,9 @@ def compatible_locomotion(data,geo,d):
   for kind,bob,roll,freq in (('air_idle',0.14,1.2,0.14),('air_fly',0.20,1.8,0.18)):
    clip=animations.get('animation.gengar.'+kind)
    if not clip:continue
-   channels=clip.setdefault('bones',{});body=channels.setdefault('body',{})
-   pos=list(body.get('position',[0,0,0]));
-   while len(pos)<3:pos.append(0)
-   pos[1]=sinus(pos[1],bob,freq);body['position']=pos
-   rot=list(body.get('rotation',[0,0,0]));
-   while len(rot)<3:rot.append(0)
-   rot[2]=sinus(rot[2],roll,freq,35);body['rotation']=rot
+   channels=clip.setdefault('bones',{})
+   gastly_body_sway(channels,kind,0.60)
+   clip['animation_length']=4.0 if kind=='air_idle' else 8.0
    for tail,scale in (('tail',1.0),('tail2',0.65)):
     if tail in names:
      ch=channels.setdefault(tail,{});r=list(ch.get('rotation',[0,0,0]));
@@ -164,10 +172,6 @@ def native_air_pose_adaptations(data,geo,d):
  if slug not in supported:return
  names={b['name'] for g in geo.get('minecraft:geometry',[]) for b in g.get('bones',[])}
  for kind,freq,amplitude in (('air_idle',0.9,14),('air_fly',1.4,30)):
-  if slug=='spearow' and kind=='air_fly':
-   # Pidgeotto's active 1.5-second air_fly repeats the same wing pose at
-   # 0.0, 0.75 and 1.5 seconds. Match that 0.75-second beat exactly.
-   freq=4.0/3.0
   if slug in ('spearow','fearow'):
    source_name='animation.'+slug+('.air_idle' if slug=='fearow' else '.ground_idle')
    source=animations.get(source_name)
@@ -179,28 +183,35 @@ def native_air_pose_adaptations(data,geo,d):
   clip=copy.deepcopy(source);clip.update(loop=True,animation_length=1.0/freq)
   channels=clip.setdefault('bones',{})
   if slug=='spearow':
-   # Spearow has no native air clip. Keep the source body pose, hold its legs
-   # still, and flap the model's three real open-wing joints in sequence.
-   for side in ('left','right'):
-    for segment in ('','2','3'):
-     bone='wing_open_'+side+segment
-     if bone not in names:raise ValueError('Spearow missing wing joint '+bone)
-     sign=1 if side=='left' else -1
-     scale=(1.0,0.52,0.28)[('','2','3').index(segment)]
-     phase=(0,35,65)[('','2','3').index(segment)]
-     channels.setdefault(bone,{})['rotation']=[0,0,f'{sign*amplitude*scale}*math.sin(query.anim_time*360*{freq}+{phase})']
+   # Pidgey's actual active tracks: 540 degrees/s = 1.5 wingbeats/s.
+   # Both rigs have matching body/torso and three-segment open-wing chains.
+   # Copy their timing, amplitude and phase; retain Spearow's own geometry,
+   # bind rotations, neck/head anatomy, ground clips and folded night rig.
+   pidgey_path=globals()['root']/'assets/minemon_gen1/animations/pidgey_cobblemon_1_8_2/pidgey.animation.json'
+   reference=json.loads(pidgey_path.read_text())['animations']['animation.pidgey.'+kind]
+   def normalize_reference(v):
+    if isinstance(v,str):return re.sub(r'\bq\.', 'query.',v)
+    if isinstance(v,list):return [normalize_reference(x) for x in v]
+    if isinstance(v,dict):return {k:normalize_reference(x) for k,x in v.items()}
+    return v
+   reference=normalize_reference(reference)
+   clip['animation_length']=reference['animation_length']
+   for bone in ('body','torso','wing_open_left','wing_open_left2','wing_open_left3',
+                'wing_open_right','wing_open_right2','wing_open_right3'):
+    if bone not in names:raise ValueError('Spearow missing mapped Pidgey joint '+bone)
+    channels[bone]=copy.deepcopy(reference['bones'][bone])
+   # Its torso bind pitch differs by five degrees from Pidgey's.
+   channels['torso']['rotation'][0]='5+('+str(channels['torso']['rotation'][0])+')'
    for leg in ('leg_left','leg_right'):
     if leg in names:channels.setdefault(leg,{})['rotation']=[0,0,0]
-   # The copied ground_idle source hides Spearow's open wings. A flight clip
-   # must select the real open-wing rig or the wing tracks animate invisibly.
    if 'wings_open' in names:channels.setdefault('wings_open',{})['scale']=[1,1,1]
    if 'wings_closed' in names:channels.setdefault('wings_closed',{})['scale']=[0,0,0]
   elif slug=='fearow':
    # Fearow's only original flying clip points the head down and splays both
    # legs. Retain its air rig and wing keys, then straighten the head chain and
    # lower the feet without changing model geometry.
-   pose={'body':[-22,0,0],'torso':[5,0,0],'neck':[-5,0,0],
-         'neck_2':[10,0,0],'neck3':[10,0,0],'head':[5,0,0],
+   pose={'body':[-22,0,0],'torso':[5,0,0],'neck':[-33,0,0],
+         'neck_2':[0,0,0],'neck3':[0,0,0],'head':[-15,0,0],
          'leg_left':[-5,0,-5],'leg_right':[-5,0,5]}
    for bone,rotation in pose.items():
     if bone in names:channels.setdefault(bone,{})['rotation']=rotation
@@ -329,24 +340,29 @@ def night_sleep_clip(data,geo,d):
    set_pose('leg_'+side,'rotation',[58,0,0])
    set_pose('leg_'+side+'2','rotation',[-72,0,0])
  if slug=='haunter':
-  # Haunter remains in place at night. Lower both existing hand chains and
-  # add only a subtle torso sway so the rest pose is alive without travelling.
-  set_pose('body','rotation',[0,0,'1.5*math.sin(query.anim_time*360*0.12)'])
+  # Native fingers remain byte-equivalent to ground_idle. Positive X turns
+  # their forward (-Z) direction downward in GeckoLib's inverted X basis.
+  clip['animation_length']=8.0
+  set_pose('body','rotation',[0,0,'1.5*math.sin(query.anim_time*360*0.125)'])
+  natural=animations[clips['ground_idle']]['bones']
   for side,sign in (('left',1),('right',-1)):
-   set_pose('hand_'+side+'1','rotation',[-55,0,f'{sign}*1.2*math.sin(query.anim_time*360*0.12)'])
-   set_pose('hand_'+side+'2','rotation',[-25,0,f'{sign}*0.8*math.sin(query.anim_time*360*0.12+20)'])
-   for finger in ('thumb','middle','ring'):
-    first='finger_'+side+'_'+finger+('1' if finger=='thumb' else '')
-    set_pose(first,'rotation',[-18,0,0])
-    for segment in (2,3):
-     bone='finger_'+side+'_'+finger+str(segment)
-     if bone in channels or bone in {b['name'] for g in geo['minecraft:geometry'] for b in g['bones']}:
-      set_pose(bone,'rotation',[-12 if segment==2 else -8,0,0])
+   hand='hand_'+side+'1';rotation=copy.deepcopy(natural[hand]['rotation'])
+   rotation[0]=90
+   rotation[2]=str(rotation[2])+f'+{sign}*1.2*math.sin(query.anim_time*360*0.125)'
+   set_pose(hand,'rotation',rotation)
  if slug=='fearow':
-  # Sleep is grounded and must lower the head after the flight-only look pose.
-  set_pose('head','rotation',[-15,0,0])
-  for bone in ('neck','neck2','neck_2','neck3'):
-   set_pose(bone,'rotation',[0,0,0])
+  # Swap the effective old daytime head/neck chain into sleep. The parent
+  # chest pitch is 33 degrees different, so compensate at the first neck.
+  # GeckoLib negates source X and adds each model's bind rotation.
+  set_pose('neck','rotation',[28,0,0])
+  set_pose('neck_2','rotation',[10,0,0])
+  set_pose('neck3','rotation',[10,0,0])
+  set_pose('head','rotation',[85,0,0])
+ if slug=='gengar':
+  # The short blink covers only the upper lid. Select the retained full
+  # closed-eye meshes, positioned just in front of the open eye surface.
+  for side in ('left','right'):
+   set_pose('closed_eyelid_'+side,'position',[0,0,-0.2])
  # A fallback uses the retained idle pose without generic limb rotations.
  # No source geometry or eye texture is changed.
  animations['animation.'+slug+'.minemon_night_sleep']=clip

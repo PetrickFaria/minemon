@@ -111,11 +111,15 @@ public final class NaturalMovementGoals {
         private final MinemonCreature mob;
         private BlockPos destination;
         private int cooldown;
+        private Path selectedPath;
+        private net.minecraft.world.phys.Vec3 progressPosition;
+        private int lastProgressTick;
 
         AirPatrol(MinemonCreature mob) {
             this.mob = mob;
             this.cooldown = fluidFloater()?0:20 + mob.getRandom().nextInt(40);
-            this.setFlags(EnumSet.of(Goal.Flag.MOVE));
+            this.setFlags(this.mob.getSpeciesSlug().equals("haunter")
+                    ? EnumSet.of(Goal.Flag.MOVE,Goal.Flag.LOOK) : EnumSet.of(Goal.Flag.MOVE));
         }
 
         private boolean fluidFloater(){return this.mob.getSpeciesSlug().equals("haunter")||this.mob.getSpeciesSlug().equals("gengar");}
@@ -134,11 +138,29 @@ public final class NaturalMovementGoals {
         }
 
         @Override public void start() {
-            if (this.destination != null) this.mob.getNavigation().moveTo(
+            this.progressPosition=this.mob.position();this.lastProgressTick=this.mob.tickCount;
+            if(this.mob.getSpeciesSlug().equals("haunter"))this.mob.getNavigation().moveTo(this.selectedPath,0.82D);
+            else if (this.destination != null) this.mob.getNavigation().moveTo(
                     this.destination.getX() + 0.5D, this.destination.getY(), this.destination.getZ() + 0.5D, 0.82D);
         }
 
+        @Override public void tick() {
+            if(!this.mob.getSpeciesSlug().equals("haunter"))return;
+            if(this.progressPosition==null||this.mob.position().distanceToSqr(this.progressPosition)>.0625D){
+                this.progressPosition=this.mob.position();this.lastProgressTick=this.mob.tickCount;
+            }else if(this.mob.tickCount-this.lastProgressTick>=80){
+                this.mob.getNavigation().stop();return;
+            }
+            var path=this.mob.getNavigation().getPath();
+            if(path!=null&&!path.isDone()){
+                var next=path.getNextEntityPos(this.mob);
+                this.mob.getLookControl().setLookAt(next.x,next.y+this.mob.getEyeHeight(),next.z,10.0F,10.0F);
+            }
+        }
+
         @Override public void stop() {
+            if(this.mob.getSpeciesSlug().equals("haunter"))this.mob.getNavigation().stop();
+            this.selectedPath=null;
             this.destination = null;
             this.cooldown = fluidFloater()?1+this.mob.getRandom().nextInt(5):70 + this.mob.getRandom().nextInt(150);
         }
@@ -153,7 +175,9 @@ public final class NaturalMovementGoals {
             for (int attempt = 0; attempt < 12; attempt++) {
                 int x,z;
                 if(fluidFloater()){
-                    double yaw=Math.toRadians(this.mob.getYRot()+this.mob.getRandom().nextInt(61)-30);
+                    double offset=this.mob.getSpeciesSlug().equals("haunter")&&attempt>=6
+                            ?this.mob.getRandom().nextInt(360)-180:this.mob.getRandom().nextInt(61)-30;
+                    double yaw=Math.toRadians(this.mob.getYRot()+offset);
                     int distance=8+this.mob.getRandom().nextInt(9);
                     x=x0+(int)Math.round(-Math.sin(yaw)*distance);
                     z=z0+(int)Math.round(Math.cos(yaw)*distance);
@@ -172,7 +196,7 @@ public final class NaturalMovementGoals {
                         || !this.mob.level.noCollision(this.mob, this.mob.getBoundingBox().move(
                                 x + 0.5D - this.mob.getX(), y - this.mob.getY(), z + 0.5D - this.mob.getZ()))) continue;
                 Path path = this.mob.getNavigation().createPath(candidate, 0);
-                if (path != null && path.canReach()) { this.destination = candidate; return true; }
+                if (path != null && path.canReach()) { this.destination = candidate; this.selectedPath=path; return true; }
             }
             return false;
         }

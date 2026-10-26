@@ -16,7 +16,7 @@ import java.util.*;
 /** Additional real-client scenario: production night AI, rendered closed eyes, dawn. */
 final class NightClientSmokeTest {
  private static final List<String> SPECIES=List.of("bulbasaur","victreebel","venusaur","snorlax","charizard","scyther","dragonite","pidgey","pidgeotto","pidgeot","spearow","fearow","articuno","zapdos","moltres","gastly","haunter","gengar","koffing","weezing","butterfree","beedrill","venomoth","parasect","kakuna","tangela","poliwag","growlithe","magikarp","gyarados","lapras","dratini","omanyte","eevee","jolteon","flareon","vaporeon_land","vaporeon");
- private static boolean opened,setup,spawned,waking;
+ private static boolean opened,setup,spawned,waking,gengarWakeEyesObserved;
  private static int ticks,index,samples,sleepTick,depthSettleTicks,depthStableTicks,restSettleTicks,restStableTicks;
  private static volatile UUID entity;
  private static final Map<String,float[]> eyes=new HashMap<>();
@@ -33,8 +33,26 @@ final class NightClientSmokeTest {
      if(method.getParameterCount()==2&&method.getParameterTypes()[1]==String.class){method.invoke(flows,mc.screen,"minemon-validation");break;}
      if(method.getParameterCount()==1&&method.getParameterTypes()[0]==String.class){method.invoke(flows,"minemon-validation");break;}
     }
+    MinemonRenderer.validationInput=mob->{
+     if(mob.isSleeping()&&Set.of("gengar","haunter","fearow").contains(mob.getSpeciesSlug())){
+      mob.setYRot(180);mob.yRotO=180;mob.yBodyRot=180;mob.yBodyRotO=180;mob.yHeadRot=180;mob.yHeadRotO=180;
+     }
+    };
     MinemonRenderer.validationObserver=(mob,model)->{
-     if(entity==null||!mob.getUUID().equals(entity)||!mob.isSleeping())return;
+     if(entity==null||!mob.getUUID().equals(entity))return;
+     if(mob.getSpeciesSlug().equals("gengar")){
+      for(String side:List.of("left","right")){
+       var eye=model.getAnimationProcessor().getBone("eye_"+side);
+       var lid=model.getAnimationProcessor().getBone("closed_eyelid_"+side);
+       var pupil=model.getAnimationProcessor().getBone("pupil_"+side);
+       if(eye==null||lid==null||pupil==null)throw new IllegalStateException("Gengar full native eye rig missing");
+       if(eye.isHidden()!=mob.isSleeping()||eye.childBonesAreHiddenToo()
+          ||lid.isHidden()==mob.isSleeping()||pupil.isHidden()!=mob.isSleeping())
+        throw new IllegalStateException("Gengar must visibly select both full closed lids only during sleep");
+      }
+      if(waking&&!mob.isSleeping())gengarWakeEyesObserved=true;
+     }
+     if(!mob.isSleeping())return;
      var definition=SpeciesDefinitions.get(mob.getSpeciesSlug());
      String sleepKey=mob.getSpeciesSlug().equals("vaporeon")
              ? (mob.isInWaterOrBubble()?"night_sleep_water":"night_sleep_land") : "night_sleep";
@@ -94,7 +112,7 @@ final class NightClientSmokeTest {
     var p=level.getServer().getPlayerList().getPlayers().get(0);p.setGameMode(GameType.CREATIVE);p.teleportTo(level,0,102,-5,0,8);
    });return;}
    if(!spawned){
-    spawned=true;ticks=0;samples=0;sleepTick=0;depthSettleTicks=0;depthStableTicks=0;restSettleTicks=0;restStableTicks=0;waking=false;eyes.clear();restingWings.clear();
+    spawned=true;gengarWakeEyesObserved=false;ticks=0;samples=0;sleepTick=0;depthSettleTicks=0;depthStableTicks=0;restSettleTicks=0;restStableTicks=0;waking=false;eyes.clear();restingWings.clear();
     mc.getSingleplayerServer().execute(()->{
      var level=mc.getSingleplayerServer().overworld();if(entity!=null){var old=level.getEntity(entity);if(old!=null)old.discard();}
      String scenario=SPECIES.get(index);String slug=scenario.equals("vaporeon_land")?"vaporeon":scenario;
@@ -113,7 +131,7 @@ final class NightClientSmokeTest {
       case "victreebel","scyther","weezing"->5;case "pidgeotto","haunter","butterfree","beedrill","parasect"->4;
       case "pidgey","gastly","kakuna"->2.5;case "gyarados","lapras"->8;default->3;
      };
-     var player=level.getServer().getPlayerList().getPlayers().get(0);player.teleportTo(level,0,101,5-distance,0,0);
+     var player=level.getServer().getPlayerList().getPlayers().get(0);player.teleportTo(level,slug.equals("fearow")?distance:0,101,slug.equals("fearow")?5:5-distance,0,0);
     });return;
    }
    ticks++;if(ticks>450)throw new IllegalStateException("Night client timeout: "+SPECIES.get(index)+" samples="+samples);
@@ -154,6 +172,7 @@ final class NightClientSmokeTest {
     waking=true;mc.getSingleplayerServer().execute(()->mc.getSingleplayerServer().overworld().setDayTime(1000));
    }
    if(waking&&!current.isSleeping()){
+    if(current.getSpeciesSlug().equals("gengar")&&!gengarWakeEyesObserved)return;
     if(++index>=SPECIES.size()){
      Files.writeString(Path.of("client-validation-night.txt"),"PASS NIGHT CLIENT: all "+SPECIES.size()+" species slept using production night AI, rendered held native closed-eye poses and woke at dawn.\n",StandardOpenOption.APPEND);
      mc.stop();return;

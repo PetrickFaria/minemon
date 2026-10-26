@@ -26,6 +26,7 @@ public class MinemonModel extends AnimatedGeoModel<MinemonCreature> {
     public void setLivingAnimations(MinemonCreature entity, Integer uniqueID, software.bernie.geckolib3.core.event.predicate.AnimationEvent event) {
         super.setLivingAnimations(entity, uniqueID, event);
         applyPidgeWingVisibility(entity);
+        applyGengarEyeVisibility(entity);
         if(entity.isSleeping())return;
         String slug=entity.getSpeciesSlug();
         boolean headLook=slug.equals("spearow")||slug.equals("fearow")||slug.equals("abra")
@@ -45,12 +46,30 @@ public class MinemonModel extends AnimatedGeoModel<MinemonCreature> {
             float maxPitch=slug.equals("fearow")&&entity.isFlyingSpecies()?10.0F:slug.equals("mew")?60.0F:(slug.equals("geodude")?15.0F:25.0F);
             float minYaw=slug.equals("mew")?-90.0F:(slug.equals("geodude")?-15.0F:-60.0F);
             float maxYaw=slug.equals("mew")?20.0F:(slug.equals("geodude")?15.0F:60.0F);
-            head.setRotationX((basePitch+net.minecraft.util.Mth.clamp(input.headPitch,minPitch,maxPitch))*(float)Math.PI/180.0F);
+            if(slug.equals("fearow"))
+                head.setRotationX(head.getRotationX()+net.minecraft.util.Mth.clamp(input.headPitch,-10.0F,10.0F)*(float)Math.PI/180.0F);
+            else head.setRotationX((basePitch+net.minecraft.util.Mth.clamp(input.headPitch,minPitch,maxPitch))*(float)Math.PI/180.0F);
             head.setRotationY(net.minecraft.util.Mth.clamp(input.netHeadYaw,minYaw,maxYaw)*(float)Math.PI/180.0F);
         }
         if(bodyPitch) {
             var body=getAnimationProcessor().getBone("body");
             if(body!=null)body.setRotationX(body.getRotationX()+input.headPitch*(float)Math.PI/180.0F);
+        }
+    }
+
+    private void applyGengarEyeVisibility(MinemonCreature entity) {
+        if(!entity.getSpeciesSlug().equals("gengar"))return;
+        boolean sleeping=entity.isSleeping();
+        for(String side:java.util.List.of("left","right")) {
+            var eye=getAnimationProcessor().getBone("eye_"+side);
+            // Hide only the open-eye cube; its closed-lid descendant must render.
+            if(eye!=null)eye.setHidden(sleeping,false);
+            for(String name:java.util.List.of("pupil_","eyelid_","half_eyelid_","sad_eyelid_","happy_eyelid_")) {
+                var bone=getAnimationProcessor().getBone(name+side);
+                if(bone!=null)bone.setHidden(sleeping,sleeping);
+            }
+            var closed=getAnimationProcessor().getBone("closed_eyelid_"+side);
+            if(closed!=null)closed.setHidden(!sleeping,!sleeping);
         }
     }
 

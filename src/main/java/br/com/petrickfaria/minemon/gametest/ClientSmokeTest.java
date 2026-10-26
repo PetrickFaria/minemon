@@ -29,6 +29,7 @@ public final class ClientSmokeTest {
  private static final java.util.Map<String,Integer> smokeParticleSamples=new java.util.HashMap<>();
  private static boolean opened,setup;
  private static boolean arbokScreenshotPending;
+ private static final java.util.Set<String> flightFrames=new java.util.HashSet<>();
  private static int worldTicks,titleTicks,frames;
  private static volatile UUID testEntity;
  private static volatile int initialEntityId;
@@ -201,6 +202,7 @@ public final class ClientSmokeTest {
  @SubscribeEvent public static void tick(TickEvent.ClientTickEvent event) {
   if(!Boolean.getBoolean("minemon.clientSmokeTest")||event.phase!=TickEvent.Phase.END)return;
   if(Boolean.getBoolean("minemon.clientSmokeSleep")){NightClientSmokeTest.tick(event);return;}
+  if(Boolean.getBoolean("minemon.clientSmokePatrol")){HaunterPatrolClientSmokeTest.tick(event);return;}
   Minecraft mc=Minecraft.getInstance();
   try {
    if(!opened && mc.screen instanceof TitleScreen && titleTicks==0)
@@ -382,8 +384,8 @@ public final class ClientSmokeTest {
         float lookPitch=head==null?Float.NaN:head.getRotationX();
         if(body==null||head==null||leftLeg==null||rightLeg==null||left==null||right==null
            ||Math.abs(Math.abs(body.getRotationX())-pitch)>0.02F
-           ||!Float.isFinite(lookPitch)||lookPitch<(float)Math.toRadians(-35.0D)-0.02F
-           ||lookPitch>(float)Math.toRadians(15.0D)+0.02F
+           ||!Float.isFinite(lookPitch)||lookPitch<(float)Math.toRadians(95.0D)-0.02F
+           ||lookPitch>(float)Math.toRadians(115.0D)+0.02F
            ||Math.abs(Math.abs(leftLeg.getRotationZ())-legSplay)>0.02F
            ||Math.abs(Math.abs(rightLeg.getRotationZ())-legSplay)>0.02F
            ||left.getRotationZ()*right.getRotationZ()>=0.0F)
@@ -512,6 +514,13 @@ public final class ClientSmokeTest {
    if(worldTicks>=SPECIES_START_TICK && worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW)
     applyValidationInput(mc,Math.floorMod(worldTicks-SPECIES_START_TICK,SPECIES_TEST_WINDOW));
    if(worldTicks>=SPECIES_START_TICK+20 && worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW && (worldTicks-(SPECIES_START_TICK+20))%SPECIES_TEST_WINDOW==0)Screenshot.grab(mc.gameDirectory,mc.getMainRenderTarget(),message->{});
+   if(worldTicks>=SPECIES_START_TICK&&worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW){
+    String active=species.get((worldTicks-SPECIES_START_TICK)/SPECIES_TEST_WINDOW);
+    int phase=(worldTicks-SPECIES_START_TICK)%SPECIES_TEST_WINDOW;
+    if(fixtureAir(active)&&java.util.Set.of("spearow","pidgey","fearow","haunter","gengar").contains(active)
+       &&phase>=18&&phase<=23&&flightFrames.add(active+":"+phase))
+     Screenshot.grab(mc.gameDirectory,"flight-"+active+"-"+phase+".png",mc.getMainRenderTarget(),message->{});
+   }
    if(arbokScreenshotPending){
     Screenshot.grab(mc.gameDirectory,"arbok-front-"+locomotionState(renderedPhase)+".png",mc.getMainRenderTarget(),message->{});
     mc.options.hideGui=false;arbokScreenshotPending=false;

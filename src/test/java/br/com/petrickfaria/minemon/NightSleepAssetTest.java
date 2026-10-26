@@ -61,28 +61,51 @@ public class NightSleepAssetTest {
   var haunterSleep=haunter.getAsJsonObject(SpeciesDefinitions.get("haunter").clips().get("night_sleep")).getAsJsonObject("bones");
   assertTrue(haunterSleep.getAsJsonObject("body").getAsJsonArray("rotation").get(2).getAsString().contains("math.sin"));
   for(String side:java.util.List.of("left","right")){
-   assertEquals(-55.0,haunterSleep.getAsJsonObject("hand_"+side+"1").getAsJsonArray("rotation").get(0).getAsDouble(),.0001);
-   assertEquals(-25.0,haunterSleep.getAsJsonObject("hand_"+side+"2").getAsJsonArray("rotation").get(0).getAsDouble(),.0001);
-   for(String finger:java.util.List.of("thumb1","middle","ring"))
-    assertEquals(-18.0,haunterSleep.getAsJsonObject("finger_"+side+"_"+finger).getAsJsonArray("rotation").get(0).getAsDouble(),.0001);
+   assertEquals(90.0,haunterSleep.getAsJsonObject("hand_"+side+"1").getAsJsonArray("rotation").get(0).getAsDouble(),.0001);
+   var nativeHand=haunter.getAsJsonObject("animation.haunter.ground_idle").getAsJsonObject("bones");
+   assertEquals(nativeHand.get("hand_"+side+"2"),haunterSleep.get("hand_"+side+"2"));
+   for(String name:nativeHand.keySet())if(name.startsWith("finger_"+side+"_"))
+    assertEquals("Sleep preserves the natural spread and curl of every finger",nativeHand.get(name),haunterSleep.get(name));
   }
   var fearow=animations(SpeciesDefinitions.get("fearow"));
   var fearowSleep=fearow.getAsJsonObject(SpeciesDefinitions.get("fearow").clips().get("night_sleep")).getAsJsonObject("bones");
-  assertEquals(-15.0,fearowSleep.getAsJsonObject("head").getAsJsonArray("rotation").get(0).getAsDouble(),.0001);
+  assertEquals(85.0,fearowSleep.getAsJsonObject("head").getAsJsonArray("rotation").get(0).getAsDouble(),.0001);
   for(String side:java.util.List.of("left","right"))
    assertEquals("Fearow folds its wings into the grounded idle pose",
        animations(SpeciesDefinitions.get("fearow")).getAsJsonObject(SpeciesDefinitions.get("fearow").clips().get("ground_idle")).getAsJsonObject("bones").get("wing_open_"+side),
        fearowSleep.get("wing_open_"+side));
   var spearow=animations(SpeciesDefinitions.get("spearow"));
   var spearowFly=spearow.getAsJsonObject(SpeciesDefinitions.get("spearow").clips().get("air_fly"));
-  assertEquals(.75,spearowFly.get("animation_length").getAsDouble(),.0001);
-  var pidgeotto=animations(SpeciesDefinitions.get("pidgeotto"));
-  var pidgeottoFly=pidgeotto.getAsJsonObject("animation.pidgeotto.air_fly");
-  var pidgeottoWing=pidgeottoFly.getAsJsonObject("bones").getAsJsonObject("wing_open_left").getAsJsonObject("rotation");
-  assertEquals(1.5,pidgeottoFly.get("animation_length").getAsDouble(),.0001);
-  assertEquals("Pidgeotto repeats its complete wing pose at 0.75 seconds",
-      asNumbers(pidgeottoWing.getAsJsonArray("0.0")),asNumbers(pidgeottoWing.getAsJsonArray("0.75")));
-  assertEquals(asNumbers(pidgeottoWing.getAsJsonArray("0.0")),asNumbers(pidgeottoWing.getAsJsonArray("1.5")));
+  var pidgey=animations(SpeciesDefinitions.get("pidgey"));
+  var pidgeyFly=pidgey.getAsJsonObject("animation.pidgey.air_fly");
+  assertEquals(pidgeyFly.get("animation_length"),spearowFly.get("animation_length"));
+  for(String bone:java.util.List.of("body","wing_open_left","wing_open_left2","wing_open_left3","wing_open_right","wing_open_right2","wing_open_right3"))
+   assertEquals("Spearow uses Pidgey's actual rhythm and articulated tracks: "+bone,
+       pidgeyFly.getAsJsonObject("bones").get(bone),spearowFly.getAsJsonObject("bones").get(bone));
+ }
+ @Test public void fearowSwapsTheEffectiveWorldHeadAnglesIncludingBindAndParentPitch() throws Exception {
+  var clips=animations(SpeciesDefinitions.get("fearow"));
+  var fly=clips.getAsJsonObject("animation.fearow.minemon_air_fly").getAsJsonObject("bones");
+  var night=clips.getAsJsonObject("animation.fearow.minemon_night_sleep").getAsJsonObject("bones");
+  // Original night: 37.5 parent + (-80 + 0 -55 +105) = 7.5 degrees.
+  // Original flight: 4.5 parent + (-75 -10 -65 +5) = -140.5 degrees.
+  double[] bind={0,-17.5,-10,80,0,55,-90};
+  var chain=java.util.List.of("body","torso","chest","neck","neck_2","neck3","head");
+  double day=0,sleep=0;
+  for(int i=0;i<chain.size();i++){
+   String name=chain.get(i);
+   double f=fly.has(name)&&fly.getAsJsonObject(name).has("rotation")?fly.getAsJsonObject(name).getAsJsonArray("rotation").get(0).getAsDouble():0;
+   double n=night.has(name)&&night.getAsJsonObject(name).has("rotation")?night.getAsJsonObject(name).getAsJsonArray("rotation").get(0).getAsDouble():0;
+   day-=bind[i]+f;sleep-=bind[i]+n;
+  }
+  assertEquals("Old night head orientation becomes the daylight flight pose",7.5,day,.0001);
+  assertEquals("Old daylight head orientation becomes the night pose",-140.5,sleep,.0001);
+ }
+ @Test public void gengarUsesBothNativeFullClosedLidMeshesWithoutReplacingItsTexture() throws Exception {
+  var d=SpeciesDefinitions.get("gengar");var clips=animations(d);
+  var night=clips.getAsJsonObject(d.clips().get("night_sleep")).getAsJsonObject("bones");
+  for(String side:java.util.List.of("left","right"))
+   assertEquals(-.2,night.getAsJsonObject("closed_eyelid_"+side).getAsJsonArray("position").get(2).getAsDouble(),.0001);
  }
  @Test public void eeveeLineHasGroundSleepAndVaporeonHasSeparateWaterRestPose() throws Exception {
   for(String slug:java.util.List.of("eevee","jolteon","flareon","vaporeon")){
@@ -123,7 +146,7 @@ public class NightSleepAssetTest {
     assertTrue(slug+" must animate retained wing joint "+wing,bones.has(wing));
    if(slug.equals("fearow")){
     assertEquals(-22,bones.getAsJsonObject("body").getAsJsonArray("rotation").get(0).getAsInt());
-    assertEquals(5,bones.getAsJsonObject("head").getAsJsonArray("rotation").get(0).getAsInt());
+    assertEquals(-15,bones.getAsJsonObject("head").getAsJsonArray("rotation").get(0).getAsInt());
     assertEquals(-5,bones.getAsJsonObject("leg_left").getAsJsonArray("rotation").get(2).getAsInt());
     assertEquals(5,bones.getAsJsonObject("leg_right").getAsJsonArray("rotation").get(2).getAsInt());
    }
