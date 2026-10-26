@@ -94,7 +94,7 @@ jobs:
           mkdir -p run/config/minemon/sounds/001_Bulbasaur
           cp src/test/resources/audio/synthetic.ogg run/config/minemon/sounds/001_Bulbasaur/ci-synthetic.ogg
           set +e
-          timeout --kill-after=30s 5400s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeAudio
+          ALSOFT_DRIVERS=null timeout --kill-after=30s 5400s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeAudio
           smoke_status=$?
           set -e
           if [ "$smoke_status" -ne 0 ]; then
