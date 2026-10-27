@@ -49,8 +49,8 @@ public final class CustomCreatureAudio {
     private static final long MAX_FILE_BYTES = 8L * 1024 * 1024;
     private static final int MAX_SECONDS = 30;
     private static final int MAX_ACTIVE = 4;
-    private static final double FULL_VOLUME_DISTANCE = 4.0D;
-    private static final double MAX_AUDIBLE_DISTANCE = 32.0D;
+    private static final double FULL_VOLUME_DISTANCE = 1.0D;
+    private static final double ATTENUATION_PER_BLOCK = 0.05D;
     private static final Executor DECODER = new ThreadPoolExecutor(1, 1, 0, TimeUnit.MILLISECONDS,
             new ArrayBlockingQueue<>(16), runnable -> {
         Thread thread = new Thread(runnable, "Minemon-audio-decoder");
@@ -75,37 +75,35 @@ public final class CustomCreatureAudio {
             REQUESTED.remove(uuid, cancelled);
             return;
         }
-        Path file;
-        try {
-            file = CustomSoundFolders.findAudio(creature.getSpeciesSlug());
-            if (file == null) { releaseRequest(uuid, cancelled); return; }
-        } catch (Exception exception) {
-            releaseRequest(uuid, cancelled);
-            LOGGER.warn("Could not inspect custom audio for {}", creature.getSpeciesSlug(), exception);
-            return;
-        }
+        String speciesSlug = creature.getSpeciesSlug();
         try { DECODER.execute(() -> {
             try {
-                Pcm pcm = decode(file);
+                var candidates = CustomSoundFolders.findAudioCandidates(speciesSlug);
+                if (candidates.isEmpty()) { releaseRequest(uuid, cancelled); return; }
+                SelectedPcm selected = decodeRandomValid(candidates, CustomSoundFolders.root(),
+                        java.util.concurrent.ThreadLocalRandom.current());
+                if (selected == null) { releaseRequest(uuid, cancelled); return; }
+                Pcm pcm = toMonoForSpatialPlayback(selected.pcm);
+                final Pcm selectedPcm = pcm;
                 minecraft.execute(() -> {
                     var current = minecraft.level == null ? null : minecraft.level.getEntity(entityId);
                     if (!(current instanceof MinemonCreature live) || !live.getUUID().equals(uuid) || !live.isAlive()
                             || cancelled.get() || !isDaytime(minecraft)) {
-                        MemoryUtil.memFree(pcm.bytes);
+                        MemoryUtil.memFree(selectedPcm.bytes);
                         releaseRequest(uuid, cancelled);
                         return;
                     }
                     double x = live.getX(), y = live.getY() + live.getBbHeight() * 0.5D, z = live.getZ();
-                    Playback playback = new Playback(entityId, uuid, cancelled, pcm, x, y, z, effectiveGain(minecraft, x, y, z));
+                    Playback playback = new Playback(entityId, uuid, cancelled, selectedPcm, x, y, z, effectiveGain(minecraft, x, y, z));
                     ACTIVE.add(playback);
                     if (!executeAudio(() -> start(playback))) {
-                        MemoryUtil.memFree(pcm.bytes);
+                        MemoryUtil.memFree(selectedPcm.bytes);
                         playback.finished = true;
                     }
                 });
             } catch (Exception exception) {
                 releaseRequest(uuid, cancelled);
-                LOGGER.warn("Rejected custom audio file {}: {}", file, exception.getMessage());
+                LOGGER.warn("Could not inspect custom audio for {}: {}", speciesSlug, exception.getMessage());
             }
         }); } catch (java.util.concurrent.RejectedExecutionException full) {
             releaseRequest(uuid, cancelled);
@@ -114,13 +112,11 @@ public final class CustomCreatureAudio {
 
     public static boolean wasStarted(UUID entity) { return entity != null && entity.equals(lastStartedEntity); }
 
-    /** Smooth per-listener fade layered over OpenAL's native positional attenuation. */
+    /** Exact linear attenuation requested for each local listener; OpenAL distance rolloff is disabled. */
     static float spatialAttenuationForDistance(double distance) {
-        if (!Double.isFinite(distance) || distance >= MAX_AUDIBLE_DISTANCE) return 0.0F;
-        if (distance <= FULL_VOLUME_DISTANCE) return 1.0F;
-        double progress = (distance - FULL_VOLUME_DISTANCE) / (MAX_AUDIBLE_DISTANCE - FULL_VOLUME_DISTANCE);
-        double smoothFade = 1.0D - progress * progress * (3.0D - 2.0D * progress);
-        return (float) Math.max(0.0D, Math.min(1.0D, smoothFade));
+        if (!Double.isFinite(distance)) return 0.0F;
+        double attenuation = 1.0D - Math.max(0.0D, distance - FULL_VOLUME_DISTANCE) * ATTENUATION_PER_BLOCK;
+        return (float) Math.max(0.0D, Math.min(1.0D, attenuation));
     }
 
     private static float effectiveGain(Minecraft minecraft, double x, double y, double z) {
@@ -190,6 +186,34 @@ public final class CustomCreatureAudio {
         String lower = file.getFileName().toString().toLowerCase(java.util.Locale.ROOT);
         if (!lower.endsWith(".ogg") && !lower.endsWith(".mp3")) throw new IllegalArgumentException("only .ogg and .mp3 are supported");
         return lower.endsWith(".ogg") ? decodeOgg(file, Math.toIntExact(length)) : decodeMp3(file);
+    }
+
+    /** Stereo PCM is downmixed in memory so OpenAL can spatialize the sound source directionally. */
+    static Pcm toMonoForSpatialPlayback(Pcm pcm) {
+        if (pcm.channels == 1) return pcm;
+        int frames = pcm.bytes.remaining() / (Short.BYTES * pcm.channels);
+        ByteBuffer mono = MemoryUtil.memAlloc(frames * Short.BYTES).order(ByteOrder.LITTLE_ENDIAN);
+        ShortBuffer input = pcm.bytes.order(ByteOrder.LITTLE_ENDIAN).asShortBuffer();
+        ShortBuffer output = mono.asShortBuffer();
+        for (int frame = 0; frame < frames; frame++) {
+            int sum = 0;
+            for (int channel = 0; channel < pcm.channels; channel++) sum += input.get();
+            output.put((short) (sum / pcm.channels));
+        }
+        mono.limit(frames * Short.BYTES).position(0);
+        MemoryUtil.memFree(pcm.bytes);
+        return new Pcm(mono, pcm.sampleRate, 1);
+    }
+
+    static SelectedPcm decodeRandomValid(List<Path> candidates, Path allowedRoot, java.util.Random random) {
+        for (Path candidate : CustomSoundFolders.randomizedCandidateOrder(candidates, random)) {
+            try {
+                return new SelectedPcm(candidate, decode(candidate, allowedRoot));
+            } catch (Exception invalidFile) {
+                LOGGER.warn("Ignoring invalid custom audio file {}: {}", candidate, invalidFile.getMessage());
+            }
+        }
+        return null;
     }
 
     private static Pcm decodeOgg(Path file, int length) throws Exception {
@@ -307,8 +331,7 @@ public final class CustomCreatureAudio {
             AL10.alSourcei(source, AL10.AL_BUFFER, buffer);
             AL10.alSourcei(source, AL10.AL_SOURCE_RELATIVE, AL10.AL_FALSE);
             AL10.alSourcef(source, AL10.AL_REFERENCE_DISTANCE, (float) FULL_VOLUME_DISTANCE);
-            AL10.alSourcef(source, AL10.AL_MAX_DISTANCE, (float) MAX_AUDIBLE_DISTANCE);
-            AL10.alSourcef(source, AL10.AL_ROLLOFF_FACTOR, 1.0f);
+            AL10.alSourcef(source, AL10.AL_ROLLOFF_FACTOR, 0.0f);
             AL10.alSourcef(source, AL10.AL_GAIN, playback.gain);
             AL10.alSource3f(source, AL10.AL_POSITION, (float)playback.x, (float)playback.y, (float)playback.z);
             AL10.alSourcePlay(source);
@@ -361,6 +384,7 @@ public final class CustomCreatureAudio {
     }
 
     record Pcm(ByteBuffer bytes, int sampleRate, int channels) {}
+    record SelectedPcm(Path file, Pcm pcm) {}
     private static final class Playback {
         final int entityId; final UUID uuid; final java.util.concurrent.atomic.AtomicBoolean cancelled; final Pcm pcm; final double x, y, z;
         final float gain;

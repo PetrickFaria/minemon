@@ -9,7 +9,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
+import java.util.Random;
 import java.util.stream.Stream;
 
 /** Creates the per-species user audio folders without touching their contents. */
@@ -55,30 +58,40 @@ public final class CustomSoundFolders {
         return String.format(Locale.ROOT, "%03d_%s", definition.nationalPokedexNumber(), safeName);
     }
 
-    /** OGG has fixed priority. Within a format, use the first filename in lexical order. */
-    public static Path findAudio(String slug) throws IOException {
+    /** Returns every direct, regular OGG/MP3 candidate in the species folder. */
+    public static List<Path> findAudioCandidates(String slug) throws IOException {
         var definition = SpeciesDefinitions.get(slug);
-        if (definition == null) return null;
-        return selectAudio(root(), folder(definition));
+        if (definition == null) return List.of();
+        return listAudioCandidates(root(), folder(definition));
     }
 
-    public static Path selectAudio(Path root, Path directory) throws IOException {
+    public static List<Path> listAudioCandidates(Path root, Path directory) throws IOException {
         Path normalizedRoot = root.normalize();
         Path normalizedDirectory = directory.normalize();
         if (Files.isSymbolicLink(normalizedRoot) || Files.isSymbolicLink(normalizedDirectory) || !normalizedDirectory.startsWith(normalizedRoot)
                 || !Files.isDirectory(normalizedRoot, java.nio.file.LinkOption.NOFOLLOW_LINKS)
-                || !Files.isDirectory(normalizedDirectory, java.nio.file.LinkOption.NOFOLLOW_LINKS)) return null;
-        for (String extension : new String[]{".ogg", ".mp3"}) {
-            try (Stream<Path> paths = Files.list(normalizedDirectory)) {
-                Path selected = paths.filter(path -> path.getParent().equals(normalizedDirectory))
-                        .filter(path -> Files.isRegularFile(path, java.nio.file.LinkOption.NOFOLLOW_LINKS))
-                        .filter(path -> path.getFileName().toString().toLowerCase(Locale.ROOT).endsWith(extension))
-                        .sorted(Comparator.comparing(path -> path.getFileName().toString().toLowerCase(Locale.ROOT)))
-                        .findFirst().orElse(null);
-                if (selected != null && selected.normalize().startsWith(normalizedDirectory)) return selected;
-            }
+                || !Files.isDirectory(normalizedDirectory, java.nio.file.LinkOption.NOFOLLOW_LINKS)) return List.of();
+        try (Stream<Path> paths = Files.list(normalizedDirectory)) {
+            return paths.filter(path -> path.getParent().equals(normalizedDirectory))
+                    .filter(path -> !Files.isSymbolicLink(path))
+                    .filter(path -> Files.isRegularFile(path, java.nio.file.LinkOption.NOFOLLOW_LINKS))
+                    .filter(CustomSoundFolders::isAudioFile)
+                    .filter(path -> path.normalize().startsWith(normalizedDirectory))
+                    .sorted(Comparator.comparing(path -> path.getFileName().toString().toLowerCase(Locale.ROOT)))
+                    .toList();
         }
-        return null;
+    }
+
+    /** Randomizes candidate order; trying candidates in this order selects uniformly among valid files. */
+    public static List<Path> randomizedCandidateOrder(List<Path> candidates, Random random) {
+        var result = new ArrayList<>(candidates);
+        java.util.Collections.shuffle(result, random);
+        return result;
+    }
+
+    private static boolean isAudioFile(Path path) {
+        String name = path.getFileName().toString().toLowerCase(Locale.ROOT);
+        return name.endsWith(".ogg") || name.endsWith(".mp3");
     }
 
     private CustomSoundFolders() {}
