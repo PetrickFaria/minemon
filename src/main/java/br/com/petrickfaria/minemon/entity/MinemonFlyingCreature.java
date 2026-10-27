@@ -110,6 +110,12 @@ public final class MinemonFlyingCreature extends MinemonCreature {
   // gradual descent. If the column is unsafe, keep hovering while the rest
   // goal searches for a nearby dry landing instead of dropping blindly.
   this.setNoGravity(!safe && !this.isOnGround());
+  // Ground navigation can finish while a small fixed-height floater is still
+  // fractionally above its support. Keep the sleep landing state authoritative
+  // and carry it through the final descent instead of letting the move control
+  // hold it at the edge of its altitude band.
+  if(safe&&this.wantsNaturalLanding()&&!this.isOnGround())
+   this.setDeltaMovement(this.getDeltaMovement().x,Math.min(this.getDeltaMovement().y,-0.08D),this.getDeltaMovement().z);
   this.fallDistance=0;return;
   }
   this.setNoGravity(true);
