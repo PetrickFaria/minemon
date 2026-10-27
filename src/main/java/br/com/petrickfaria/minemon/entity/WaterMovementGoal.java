@@ -38,6 +38,9 @@ public final class WaterMovementGoal extends Goal {
    destination=scan(false);
   }else if(needsExit())destination=scan(true);
   else {
+   if(SpeciesBehaviorProfiles.isVisitor(mob.getSpeciesSlug()))
+    mob.chooseNaturalWaterDepth(!canDive(mob,mob.blockPosition())
+        ||!SpeciesBehaviorProfiles.prefersBottom(mob.getSpeciesSlug())&&mob.getRandom().nextInt(3)==0);
    destination=swimDestination();
   }
   return destination!=null;
@@ -102,7 +105,7 @@ public final class WaterMovementGoal extends Goal {
     p=origin.offset(offset.getX(),dy,offset.getZ());
    }
    if(!withinSearchRadius(mob.blockPosition(),p)||!mob.level.hasChunkAt(p)||blocked.containsKey(p))continue;
-   if(dry?!safeDry(mob,p):!waterFits(mob,p,SpeciesBehaviorProfiles.profile(mob.getSpeciesSlug())!=SpeciesBehaviorProfiles.Profile.AQUATIC_SURFACE)
+   if(dry?!safeDry(mob,p):!waterFits(mob,p,SpeciesBehaviorProfiles.profile(mob.getSpeciesSlug())!=SpeciesBehaviorProfiles.Profile.SURFACE)
        ||requiresNavigableVolume(mob.getSpeciesSlug())&&!waterRegion(mob,p))continue;
    paths++;
    var path=mob.getNavigation().createPath(p,0);
@@ -115,7 +118,7 @@ public final class WaterMovementGoal extends Goal {
  private BlockPos swimDestination(){
   boolean surface=mob.isNaturalSurface();
   boolean bottomPreferred=SpeciesBehaviorProfiles.prefersBottom(mob.getSpeciesSlug());
-  if(bottomPreferred&&!surface){
+  if(bottomPreferred){
    BlockPos nearby=nearbyBottomDestination();
    if(nearby!=null)return nearby;
   }
@@ -131,12 +134,12 @@ public final class WaterMovementGoal extends Goal {
    BlockPos column=new BlockPos(x,mob.getY(),z);
    double top=surfaceAt(mob,column);
    if(!Double.isFinite(top))continue;
-   double bottomY=bottomPreferred&&!surface?preferredBottomY(mob,column,top):Double.NaN;
+   double bottomY=bottomPreferred?preferredBottomY(mob,column,top):Double.NaN;
    double y=Double.isFinite(bottomY)?bottomY:surface?top-preferredSurfaceDepth(mob)
        :n>=24?top-Math.max(2.0D,mob.getBbHeight()+0.3D)
        :Math.min(top-mob.getBbHeight()-0.3D,mob.getY()+mob.getRandom().nextInt(5)-2);
    BlockPos p=new BlockPos(x,bottomPreferred&&Double.isFinite(bottomY)?Math.ceil(y):y,z);
-   if(blocked.containsKey(p)||!waterFits(mob,p,!surface)
+   if(blocked.containsKey(p)||!waterFits(mob,p,!surface||bottomPreferred)
        ||requiresNavigableVolume(mob.getSpeciesSlug())&&!waterRegion(mob,p))continue;
    boolean clear=true;
    for(int step=1;step<=4;step++){
@@ -203,11 +206,8 @@ public final class WaterMovementGoal extends Goal {
    double target=preferredBottomY(mob,mob.blockPosition(),top);
    if(Double.isFinite(target))return target;
   }
-  var profile=SpeciesBehaviorProfiles.profile(mob.getSpeciesSlug());
-  if(profile==SpeciesBehaviorProfiles.Profile.AQUATIC_SURFACE
-      ||profile==SpeciesBehaviorProfiles.Profile.AQUATIC_NEAR_SURFACE)return top-preferredSurfaceDepth(mob);
-  if(profile==SpeciesBehaviorProfiles.Profile.AQUATIC_CYCLE)return top-1.0D-mob.getBbHeight()*0.5D;
-  return top-mob.getBbHeight()-0.2D;
+  return SpeciesBehaviorProfiles.profile(mob.getSpeciesSlug())==SpeciesBehaviorProfiles.Profile.SURFACE
+      ?top-preferredSurfaceDepth(mob):top-mob.getBbHeight()-0.2D;
  }
  private static boolean safeWaterFloor(MinemonCreature mob,BlockPos column,int floorWater){
   int min=mob.level.getMinBuildHeight();if(floorWater<=min)return false;

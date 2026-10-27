@@ -37,8 +37,7 @@ final class NightRestGoal extends Goal {
   }
   mob.getNavigation().stop();mob.setJumping(false);mob.setSpeed(0);mob.setXxa(0);mob.setYya(0);mob.setZza(0);
   boolean hover=SpeciesBehaviorProfiles.hoversDuringNightRest(mob.getSpeciesSlug());
-  double restHeight=SpeciesBehaviorProfiles.nightRestHoverHeight(mob.getSpeciesSlug());
-  double vertical=hover?Mth.clamp((mob.naturalSurface()+restHeight-mob.getY())*0.12D,-0.10D,0.10D):Math.min(0,mob.getDeltaMovement().y);
+  double vertical=hover?Mth.clamp((mob.naturalSurface()+1.0D-mob.getY())*0.12D,-0.10D,0.10D):Math.min(0,mob.getDeltaMovement().y);
   mob.setDeltaMovement(0,vertical,0);
   if(hover){mob.setNoGravity(true);mob.fallDistance=0;}
  }
