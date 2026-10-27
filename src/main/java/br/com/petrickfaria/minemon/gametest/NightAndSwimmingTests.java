@@ -173,6 +173,8 @@ public final class NightAndSwimmingTests {
                 .map(m->m.getSpeciesSlug()+"{phase="+m.naturalCycle().phase()+",ticks="+m.naturalCycle().ticks()
                     +",was="+clocks.get(m)+",stage="+m.naturalCycle().stage()+",air="+m.isFlyingSpecies()
                     +",active="+m.naturalBehaviorActive()+",ground="+m.isOnGround()+",alt="+(m.getY()-m.naturalSurface())
+                    +",min="+m.naturalCycle().minimumAltitude()+",landing="+m.wantsNaturalLanding()
+                    +",sleep="+m.isSleeping()+",gravity="+!m.isNoGravity()+",vy="+m.getDeltaMovement().y
                     +",nav="+m.getNavigation().getTargetPos()+"}").toList());
        },30,"All night sleepers must wake at dawn");
       },180,"After combat, a creature must return to sleep while still night");

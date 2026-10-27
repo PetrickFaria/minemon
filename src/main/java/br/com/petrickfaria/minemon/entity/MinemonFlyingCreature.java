@@ -42,7 +42,7 @@ public final class MinemonFlyingCreature extends MinemonCreature {
   // FlyingMoveControl can replace the pre-travel lift with a downward input
   // while an entity is waking from a landed sleep pose. Reassert the active
   // cycle's floor after travel so the entity actually resumes its flight band.
-  if(!this.level.isClientSide&&!this.wantsNaturalLanding()&&this.naturalBehaviorActive()
+  if(!this.level.isClientSide&&this.isFlyingSpecies()&&!this.wantsNaturalLanding()&&this.naturalBehaviorActive()
       &&this.getTarget()==null){
    double minimum=this.naturalCycle().minimumAltitude();
    double altitude=this.getY()-this.naturalSurface();
