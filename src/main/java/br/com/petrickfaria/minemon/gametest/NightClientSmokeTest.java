@@ -142,12 +142,15 @@ final class NightClientSmokeTest {
     });return;
    }
    ticks++;if(ticks>450){
-    var observed=entity==null?null:mc.level.getEntity(entity);
+    var observed=entity==null?null:mc.level.getEntitiesOfClass(MinemonCreature.class,
+        mc.player.getBoundingBox().inflate(128.0D),m->m.getUUID().equals(entity)).stream().findFirst().orElse(null);
+    boolean rendered=false;
+    for(var candidate:mc.level.entitiesForRendering())if(candidate.getUUID().equals(entity)){rendered=true;break;}
     String state=observed instanceof MinemonCreature m
         ? " sleeping="+m.isSleeping()+" nightRest="+m.isNightResting()+" clip="+m.getSelectedAnimationForValidation()
           +" pos="+m.position()+" support="+m.naturalSurface()+" onGround="+m.isOnGround()
           +" noGravity="+m.isNoGravity()+" navDone="+m.getNavigation().isDone()
-          +" rendered="+mc.level.entitiesForRendering().stream().anyMatch(e->e.getUUID().equals(entity))
+          +" rendered="+rendered
         : " entityMissing="+(observed==null);
     throw new IllegalStateException("Night client timeout: "+SPECIES.get(index)+" samples="+samples+" activeSamples="+activeSamples+" midday="+nocturnalMidday+state);
    }
