@@ -21,7 +21,7 @@ public final class ModItems {
  };
  public static final DeferredRegister<Item> ITEMS=DeferredRegister.create(ForgeRegistries.ITEMS,Minemon.MOD_ID);
  public static final Map<String,RegistryObject<Item>> EGGS=register();
- public static final RegistryObject<Item> POKEC=ITEMS.register("pokec",()->new net.minecraft.world.item.BlockItem(ModBlocks.POKEC.get(),new Item.Properties().tab(MINEMON_TAB)));
+ public static final RegistryObject<Item> POKEC=ITEMS.register("pokec",()->new PokecBlockItem(ModBlocks.POKEC.get(),new Item.Properties().tab(MINEMON_TAB)));
  public static final Map<String,RegistryObject<Item>> SOULS=registerSouls();
  public static final RegistryObject<Item> BULBASAUR_SPAWN_EGG=EGGS.get("bulbasaur");
  private static Map<String,RegistryObject<Item>> register(){

@@ -44,7 +44,7 @@ public final class PokecBlock extends Block {
         if(!level.isClientSide&&player instanceof ServerPlayer serverPlayer){
             BlockPos base=state.getValue(HALF)==DoubleBlockHalf.UPPER?pos.below():pos;
             if(level.getBlockState(base).getBlock()==this)NetworkHooks.openScreen(serverPlayer,new net.minecraft.world.MenuProvider(){
-                @Override public Component getDisplayName(){return Component.translatable("container.minemon_gen1.pokec");}
+                @Override public Component getDisplayName(){return Component.literal("Terminal PokéC");}
                 @Override public net.minecraft.world.inventory.AbstractContainerMenu createMenu(int id,net.minecraft.world.entity.player.Inventory inventory,Player p){return new PokecMenu(id,inventory,base);}
             },buf->buf.writeBlockPos(base));
         }

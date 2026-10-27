@@ -20,9 +20,9 @@ public final class PokecEvents {
         event.getDispatcher().register(Commands.literal("pokec").requires(source->source.hasPermission(2))
             .then(Commands.literal("coins").then(Commands.argument("player",EntityArgument.player()).then(Commands.argument("amount",IntegerArgumentType.integer(0)).executes(ctx->{
                 var target=EntityArgument.getPlayer(ctx,"player");int amount=IntegerArgumentType.getInteger(ctx,"amount");PokecPlayerData.setCoins(target,amount);br.com.petrickfaria.minemon.network.MinemonNetwork.refreshPokec(target);
-                ctx.getSource().sendSuccess(Component.translatable("command.minemon_gen1.pokec.coins_set",target.getName(),amount),true);return 1;
+                ctx.getSource().sendSuccess(Component.literal("Saldo de "+target.getName().getString()+" definido para "+amount+" PokéCoins."),true);return 1;
             }))))
-            .then(Commands.literal("reload").executes(ctx->{PokecEconomy.load();for(var p:ctx.getSource().getServer().getPlayerList().getPlayers())br.com.petrickfaria.minemon.network.MinemonNetwork.refreshPokec(p);ctx.getSource().sendSuccess(Component.translatable("command.minemon_gen1.pokec.reload"),true);return 1;})));
+            .then(Commands.literal("reload").executes(ctx->{PokecEconomy.load();for(var p:ctx.getSource().getServer().getPlayerList().getPlayers())br.com.petrickfaria.minemon.network.MinemonNetwork.refreshPokec(p);ctx.getSource().sendSuccess(Component.literal("Configuração da economia PokéC recarregada."),true);return 1;})));
     }
     private PokecEvents(){}
 }

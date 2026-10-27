@@ -35,8 +35,8 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         int x=leftPos,y=topPos;
         GuiComponent.fill(g,x,y,x+imageWidth,y+imageHeight,0xF20B111B);GuiComponent.fill(g,x+3,y+3,x+imageWidth-3,y+imageHeight-3,0xFF172432);
         GuiComponent.fill(g,x+6,y+24,x+imageWidth-6,y+26,0xFF2487C8);
-        font.draw(g,Component.translatable("gui.minemon_gen1.pokec.coins",syncedCoins),x+230,y+8,0x75D8FF);
-        font.draw(g,Component.translatable("gui.minemon_gen1.pokec.free",syncedFreeAvailable?"1":"—"),x+10,y+imageHeight-13,0xFFE39A);
+        font.draw(g,"PokéCoins: "+syncedCoins,x+230,y+8,0x75D8FF);
+        font.draw(g,"Primeira compra: "+(syncedFreeAvailable?"1":"—"),x+10,y+imageHeight-13,0xFFE39A);
         int start=page*PER_PAGE;
         for(int i=0;i<PER_PAGE&&start+i<ordered.size();i++){
             PokecSpecies.Entry species=ordered.get(start+i);int col=i%COLS,row=i/COLS;int bx=x+8+col*CELL_W,by=y+31+row*CELL_H;
@@ -51,7 +51,7 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
             g.pushPose();g.translate(bx+CELL_W/2-1,by+CELL_H-16,0);g.scale(labelScale,labelScale,1);font.drawCenteredString(g,label,0,0,textColor);g.popPose();
             String cost;
             if(unlocked){cost=(syncedFreeAvailable?"FREE ":"")+syncedPrices.getOrDefault(species.slug(),PokecEconomy.get().coins(species.slug()))+" C";}
-            else if(evolution)cost="✕  "+Component.translatable("gui.minemon_gen1.pokec.evolve").getString();
+            else if(evolution)cost="X  EVOLUÇÃO";
             else cost="+ "+syncedDeposits.getOrDefault(species.slug(),0)+"/"+syncedRequirements.getOrDefault(species.slug(),PokecEconomy.get().souls(species.slug()))+" "+species.primaryType().toUpperCase(Locale.ROOT);
             GuiComponent.fill(g,bx+3,by+CELL_H-13,bx+14,by+CELL_H-3,0xFF7FD9FF);GuiComponent.fill(g,bx+4,by+CELL_H-12,bx+13,by+CELL_H-4,0xFF0D1E2B);
             font.drawCenteredString(g,unlocked?"C":evolution?"X":"+",bx+8,by+CELL_H-11,unlocked?0xFFFFD76A:evolution?0xFFFF7E86:0xFF75CFF2);
@@ -59,7 +59,7 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
             g.pushPose();g.translate(bx+16,by+CELL_H-10,0);g.scale(costScale,costScale,1);font.draw(g,cost,0,0,unlocked?0xFFFFD76A:evolution?0xFFFF7E86:0xFF75CFF2);g.popPose();
         }
         GuiComponent.fill(g,x+8,y+imageHeight-23,x+imageWidth-8,y+imageHeight-21,0xFF24465B);
-        font.draw(g,Component.translatable("gui.minemon_gen1.pokec.page",page+1,(ordered.size()+PER_PAGE-1)/PER_PAGE),x+imageWidth/2-15,y+imageHeight-18,0xD8E9F4);
+        font.draw(g,"Página "+(page+1)+"/"+((ordered.size()+PER_PAGE-1)/PER_PAGE),x+imageWidth/2-15,y+imageHeight-18,0xD8E9F4);
         font.draw(g,Component.literal("‹"),x+imageWidth-41,y+imageHeight-20,0xFFFFFFFF);
         font.draw(g,Component.literal("›"),x+imageWidth-20,y+imageHeight-20,0xFFFFFFFF);
     }
