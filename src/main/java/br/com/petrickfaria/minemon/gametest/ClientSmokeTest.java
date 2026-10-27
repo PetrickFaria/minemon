@@ -51,6 +51,43 @@ public final class ClientSmokeTest {
  private static final java.util.Set<String> walkedSpecies=new java.util.HashSet<>();
  private static final java.util.Set<String> wingVisibilitySpecies=new java.util.HashSet<>();
  private static final java.util.Map<String,net.minecraft.world.phys.Vec3> firstRenderedPositions=new java.util.HashMap<>();
+ private static String customAudioSmokeDiagnostics(UUID uuid) {
+  StringBuilder out=new StringBuilder("audioPipeline{");
+  try {
+   var candidates=br.com.petrickfaria.minemon.sound.CustomSoundFolders.findAudioCandidates("bulbasaur");
+   out.append("soundRoot=").append(br.com.petrickfaria.minemon.sound.CustomSoundFolders.root())
+       .append(",candidates=").append(candidates.stream().map(p->{
+        try{return p.getFileName()+"("+Files.size(p)+" bytes)";}catch(Exception e){return p.getFileName()+"("+e.getClass().getSimpleName()+")";}
+       }).toList());
+  } catch(Exception e) { out.append("candidateError=").append(e.getClass().getSimpleName()).append(':').append(e.getMessage()); }
+  try {
+   Class<?> audio=br.com.petrickfaria.minemon.client.CustomCreatureAudio.class;
+   var requested=(java.util.Map<?,?>)privateAudioField(audio,"REQUESTED");
+   var active=(java.util.List<?>)privateAudioField(audio,"ACTIVE");
+   var decoder=(java.util.concurrent.ThreadPoolExecutor)privateAudioField(audio,"DECODER");
+   Object executor=privateAudioField(audio,"audioExecutor");
+   Object started=privateAudioField(audio,"lastStartedEntity");
+   out.append(",requestedForEntity=").append(requested.containsKey(uuid))
+       .append(",reserved=").append(privateAudioField(audio,"RESERVED"))
+       .append(",decoderActive=").append(decoder.getActiveCount())
+       .append(",decoderQueued=").append(decoder.getQueue().size())
+       .append(",audioExecutor=").append(executor==null?"not-resolved":executor.getClass().getName())
+       .append(",lastStartedEntity=").append(started)
+       .append(",activePlayback=").append(active.stream().map(playback->{
+        try{return "uuid="+readPrivateField(playback,"uuid")+",source="+readPrivateField(playback,"source")
+            +",buffer="+readPrivateField(playback,"buffer")+",finished="+readPrivateField(playback,"finished")
+            +",cancelled="+((java.util.concurrent.atomic.AtomicBoolean)readPrivateField(playback,"cancelled")).get();}
+        catch(Exception e){return "unreadable="+e.getClass().getSimpleName()+":"+e.getMessage();}
+       }).toList());
+  } catch(Exception e) { out.append(",reflectionError=").append(e.getClass().getSimpleName()).append(':').append(e.getMessage()); }
+  return out.append('}').toString();
+ }
+ private static Object privateAudioField(Class<?> owner,String name)throws ReflectiveOperationException {
+  var field=owner.getDeclaredField(name);field.setAccessible(true);return field.get(null);
+ }
+ private static Object readPrivateField(Object owner,String name)throws ReflectiveOperationException {
+  var field=owner.getClass().getDeclaredField(name);field.setAccessible(true);return field.get(owner);
+ }
  @SubscribeEvent public static void actualDamage(net.minecraftforge.event.entity.living.LivingDamageEvent event) {
   if(Boolean.getBoolean("minemon.clientSmokeTest") && event.getAmount()>0 && event.getEntity() instanceof net.minecraft.server.level.ServerPlayer
      && event.getSource().getEntity() instanceof MinemonCreature b && b.getUUID().equals(testEntity))combatHits++;
@@ -471,7 +508,7 @@ public final class ClientSmokeTest {
     if(!customAudioSmokeRequested||!br.com.petrickfaria.minemon.client.CustomCreatureAudio.wasStarted(testEntity))
      throw new IllegalStateException("Synthetic local OGG did not start positionally; requested="
          +customAudioSmokeRequested+", requestTick="+customAudioSmokeRequestTick+", clientEntity="
-         +mc.level.getEntity(initialEntityId)+", daytime="+!mc.level.isNight());
+         +mc.level.getEntity(initialEntityId)+", daytime="+!mc.level.isNight()+", "+customAudioSmokeDiagnostics(testEntity));
     Files.writeString(Path.of("client-validation.txt"),"PASS CUSTOM AUDIO: synthetic local OGG decoded and started positionally in the Minecraft client.\n",StandardOpenOption.APPEND);
    }
    if(worldTicks>=SPECIES_START_TICK&&worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW) {
