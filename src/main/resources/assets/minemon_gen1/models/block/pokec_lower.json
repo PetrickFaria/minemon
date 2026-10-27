@@ -1,0 +1,13 @@
+{
+  "textures":{"particle":"minemon_gen1:block/pokec_lower","all":"minemon_gen1:block/pokec_lower"},
+  "elements":[
+    {"from":[1,0,1],"to":[15,16,15],"faces":{"north":{"texture":"#all"},"south":{"texture":"#all"},"east":{"texture":"#all"},"west":{"texture":"#all"},"up":{"texture":"#all"},"down":{"texture":"#all"}}},
+    {"from":[2,1,0],"to":[14,15,1],"faces":{"north":{"texture":"#all"}}},
+    {"from":[2,4,0],"to":[14,12,0.75],"faces":{"north":{"texture":"#all"}}},
+    {"from":[3,4,0],"to":[13,11,0.5],"faces":{"north":{"texture":"#all"}}},
+    {"from":[4,5,0],"to":[12,10,0.25],"faces":{"north":{"texture":"#all"}}},
+    {"from":[1,0,0],"to":[4,3,2],"faces":{"north":{"texture":"#all"},"east":{"texture":"#all"},"west":{"texture":"#all"},"up":{"texture":"#all"}}},
+    {"from":[12,0,0],"to":[15,3,2],"faces":{"north":{"texture":"#all"},"east":{"texture":"#all"},"west":{"texture":"#all"},"up":{"texture":"#all"}}},
+    {"from":[2,13,0],"to":[14,15,1],"faces":{"north":{"texture":"#all"}}}
+  ]
+}

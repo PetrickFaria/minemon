@@ -1,0 +1,1574 @@
+[
+  {
+    "number": 1,
+    "slug": "bulbasaur",
+    "name": "Bulbasaur",
+    "types": [
+      "grass",
+      "poison"
+    ],
+    "rarity": "uncommon",
+    "evolvesFrom": null
+  },
+  {
+    "number": 2,
+    "slug": "ivysaur",
+    "name": "Ivysaur",
+    "types": [
+      "grass",
+      "poison"
+    ],
+    "rarity": "uncommon",
+    "evolvesFrom": "bulbasaur"
+  },
+  {
+    "number": 3,
+    "slug": "venusaur",
+    "name": "Venusaur",
+    "types": [
+      "grass",
+      "poison"
+    ],
+    "rarity": "rare",
+    "evolvesFrom": "ivysaur"
+  },
+  {
+    "number": 4,
+    "slug": "charmander",
+    "name": "Charmander",
+    "types": [
+      "fire"
+    ],
+    "rarity": "uncommon",
+    "evolvesFrom": null
+  },
+  {
+    "number": 5,
+    "slug": "charmeleon",
+    "name": "Charmeleon",
+    "types": [
+      "fire"
+    ],
+    "rarity": "uncommon",
+    "evolvesFrom": "charmander"
+  },
+  {
+    "number": 6,
+    "slug": "charizard",
+    "name": "Charizard",
+    "types": [
+      "fire",
+      "flying"
+    ],
+    "rarity": "rare",
+    "evolvesFrom": "charmeleon"
+  },
+  {
+    "number": 7,
+    "slug": "squirtle",
+    "name": "Squirtle",
+    "types": [
+      "water"
+    ],
+    "rarity": "uncommon",
+    "evolvesFrom": null
+  },
+  {
+    "number": 8,
+    "slug": "wartortle",
+    "name": "Wartortle",
+    "types": [
+      "water"
+    ],
+    "rarity": "uncommon",
+    "evolvesFrom": "squirtle"
+  },
+  {
+    "number": 9,
+    "slug": "blastoise",
+    "name": "Blastoise",
+    "types": [
+      "water"
+    ],
+    "rarity": "very_rare",
+    "evolvesFrom": "wartortle"
+  },
+  {
+    "number": 10,
+    "slug": "caterpie",
+    "name": "Caterpie",
+    "types": [
+      "bug"
+    ],
+    "rarity": "common",
+    "evolvesFrom": null
+  },
+  {
+    "number": 11,
+    "slug": "metapod",
+    "name": "Metapod",
+    "types": [
+      "bug"
+    ],
+    "rarity": "common",
+    "evolvesFrom": "caterpie"
+  },
+  {
+    "number": 12,
+    "slug": "butterfree",
+    "name": "Butterfree",
+    "types": [
+      "bug",
+      "flying"
+    ],
+    "rarity": "uncommon",
+    "evolvesFrom": "metapod"
+  },
+  {
+    "number": 13,
+    "slug": "weedle",
+    "name": "Weedle",
+    "types": [
+      "bug",
+      "poison"
+    ],
+    "rarity": "common",
+    "evolvesFrom": null
+  },
+  {
+    "number": 14,
+    "slug": "kakuna",
+    "name": "Kakuna",
+    "types": [
+      "bug",
+      "poison"
+    ],
+    "rarity": "common",
+    "evolvesFrom": "weedle"
+  },
+  {
+    "number": 15,
+    "slug": "beedrill",
+    "name": "Beedrill",
+    "types": [
+      "bug",
+      "poison"
+    ],
+    "rarity": "very_rare",
+    "evolvesFrom": "kakuna"
+  },
+  {
+    "number": 16,
+    "slug": "pidgey",
+    "name": "Pidgey",
+    "types": [
+      "normal",
+      "flying"
+    ],
+    "rarity": "common",
+    "evolvesFrom": null
+  },
+  {
+    "number": 17,
+    "slug": "pidgeotto",
+    "name": "Pidgeotto",
+    "types": [
+      "normal",
+      "flying"
+    ],
+    "rarity": "uncommon",
+    "evolvesFrom": "pidgey"
+  },
+  {
+    "number": 18,
+    "slug": "pidgeot",
+    "name": "Pidgeot",
+    "types": [
+      "normal",
+      "flying"
+    ],
+    "rarity": "very_rare",
+    "evolvesFrom": "pidgeotto"
+  },
+  {
+    "number": 19,
+    "slug": "rattata",
+    "name": "Rattata",
+    "types": [
+      "normal"
+    ],
+    "rarity": "common",
+    "evolvesFrom": null
+  },
+  {
+    "number": 20,
+    "slug": "raticate",
+    "name": "Raticate",
+    "types": [
+      "normal"
+    ],
+    "rarity": "uncommon",
+    "evolvesFrom": "rattata"
+  },
+  {
+    "number": 21,
+    "slug": "spearow",
+    "name": "Spearow",
+    "types": [
+      "normal",
+      "flying"
+    ],
+    "rarity": "common",
+    "evolvesFrom": null
+  },
+  {
+    "number": 22,
+    "slug": "fearow",
+    "name": "Fearow",
+    "types": [
+      "normal",
+      "flying"
+    ],
+    "rarity": "uncommon",
+    "evolvesFrom": "spearow"
+  },
+  {
+    "number": 23,
+    "slug": "ekans",
+    "name": "Ekans",
+    "types": [
+      "poison"
+    ],
+    "rarity": "common",
+    "evolvesFrom": null
+  },
+  {
+    "number": 24,
+    "slug": "arbok",
+    "name": "Arbok",
+    "types": [
+      "poison"
+    ],
+    "rarity": "uncommon",
+    "evolvesFrom": "ekans"
+  },
+  {
+    "number": 25,
+    "slug": "pikachu",
+    "name": "Pikachu",
+    "types": [
+      "electric"
+    ],
+    "rarity": "uncommon",
+    "evolvesFrom": null
+  },
+  {
+    "number": 26,
+    "slug": "raichu",
+    "name": "Raichu",
+    "types": [
+      "electric"
+    ],
+    "rarity": "rare",
+    "evolvesFrom": "pikachu"
+  },
+  {
+    "number": 27,
+    "slug": "sandshrew",
+    "name": "Sandshrew",
+    "types": [
+      "ground"
+    ],
+    "rarity": "common",
+    "evolvesFrom": null
+  },
+  {
+    "number": 28,
+    "slug": "sandslash",
+    "name": "Sandslash",
+    "types": [
+      "ground"
+    ],
+    "rarity": "uncommon",
+    "evolvesFrom": "sandshrew"
+  },
+  {
+    "number": 29,
+    "slug": "nidoranf",
+    "name": "Nidoran-F",
+    "types": [
+      "poison"
+    ],
+    "rarity": "common",
+    "evolvesFrom": null
+  },
+  {
+    "number": 30,
+    "slug": "nidorina",
+    "name": "Nidorina",
+    "types": [
+      "poison"
+    ],
+    "rarity": "uncommon",
+    "evolvesFrom": "nidoranf"
+  },
+  {
+    "number": 31,
+    "slug": "nidoqueen",
+    "name": "Nidoqueen",
+    "types": [
+      "poison",
+      "ground"
+    ],
+    "rarity": "rare",
+    "evolvesFrom": "nidorina"
+  },
+  {
+    "number": 32,
+    "slug": "nidoranm",
+    "name": "Nidoran-M",
+    "types": [
+      "poison"
+    ],
+    "rarity": "common",
+    "evolvesFrom": null
+  },
+  {
+    "number": 33,
+    "slug": "nidorino",
+    "name": "Nidorino",
+    "types": [
+      "poison"
+    ],
+    "rarity": "uncommon",
+    "evolvesFrom": "nidoranm"
+  },
+  {
+    "number": 34,
+    "slug": "nidoking",
+    "name": "Nidoking",
+    "types": [
+      "poison",
+      "ground"
+    ],
+    "rarity": "rare",
+    "evolvesFrom": "nidorino"
+  },
+  {
+    "number": 35,
+    "slug": "clefairy",
+    "name": "Clefairy",
+    "types": [
+      "normal"
+    ],
+    "rarity": "common",
+    "evolvesFrom": null
+  },
+  {
+    "number": 36,
+    "slug": "clefable",
+    "name": "Clefable",
+    "types": [
+      "normal"
+    ],
+    "rarity": "rare",
+    "evolvesFrom": "clefairy"
+  },
+  {
+    "number": 37,
+    "slug": "vulpix",
+    "name": "Vulpix",
+    "types": [
+      "fire"
+    ],
+    "rarity": "uncommon",
+    "evolvesFrom": null
+  },
+  {
+    "number": 38,
+    "slug": "ninetales",
+    "name": "Ninetales",
+    "types": [
+      "fire"
+    ],
+    "rarity": "rare",
+    "evolvesFrom": "vulpix"
+  },
+  {
+    "number": 39,
+    "slug": "jigglypuff",
+    "name": "Jigglypuff",
+    "types": [
+      "normal"
+    ],
+    "rarity": "common",
+    "evolvesFrom": null
+  },
+  {
+    "number": 40,
+    "slug": "wigglytuff",
+    "name": "Wigglytuff",
+    "types": [
+      "normal"
+    ],
+    "rarity": "rare",
+    "evolvesFrom": "jigglypuff"
+  },
+  {
+    "number": 41,
+    "slug": "zubat",
+    "name": "Zubat",
+    "types": [
+      "poison",
+      "flying"
+    ],
+    "rarity": "common",
+    "evolvesFrom": null
+  },
+  {
+    "number": 42,
+    "slug": "golbat",
+    "name": "Golbat",
+    "types": [
+      "poison",
+      "flying"
+    ],
+    "rarity": "rare",
+    "evolvesFrom": "zubat"
+  },
+  {
+    "number": 43,
+    "slug": "oddish",
+    "name": "Oddish",
+    "types": [
+      "grass",
+      "poison"
+    ],
+    "rarity": "common",
+    "evolvesFrom": null
+  },
+  {
+    "number": 44,
+    "slug": "gloom",
+    "name": "Gloom",
+    "types": [
+      "grass",
+      "poison"
+    ],
+    "rarity": "uncommon",
+    "evolvesFrom": "oddish"
+  },
+  {
+    "number": 45,
+    "slug": "vileplume",
+    "name": "Vileplume",
+    "types": [
+      "grass",
+      "poison"
+    ],
+    "rarity": "rare",
+    "evolvesFrom": "gloom"
+  },
+  {
+    "number": 46,
+    "slug": "paras",
+    "name": "Paras",
+    "types": [
+      "bug",
+      "grass"
+    ],
+    "rarity": "common",
+    "evolvesFrom": null
+  },
+  {
+    "number": 47,
+    "slug": "parasect",
+    "name": "Parasect",
+    "types": [
+      "bug",
+      "grass"
+    ],
+    "rarity": "uncommon",
+    "evolvesFrom": "paras"
+  },
+  {
+    "number": 48,
+    "slug": "venonat",
+    "name": "Venonat",
+    "types": [
+      "bug",
+      "poison"
+    ],
+    "rarity": "common",
+    "evolvesFrom": null
+  },
+  {
+    "number": 49,
+    "slug": "venomoth",
+    "name": "Venomoth",
+    "types": [
+      "bug",
+      "poison"
+    ],
+    "rarity": "uncommon",
+    "evolvesFrom": "venonat"
+  },
+  {
+    "number": 50,
+    "slug": "diglett",
+    "name": "Diglett",
+    "types": [
+      "ground"
+    ],
+    "rarity": "common",
+    "evolvesFrom": null
+  },
+  {
+    "number": 51,
+    "slug": "dugtrio",
+    "name": "Dugtrio",
+    "types": [
+      "ground"
+    ],
+    "rarity": "uncommon",
+    "evolvesFrom": "diglett"
+  },
+  {
+    "number": 52,
+    "slug": "meowth",
+    "name": "Meowth",
+    "types": [
+      "normal"
+    ],
+    "rarity": "common",
+    "evolvesFrom": null
+  },
+  {
+    "number": 53,
+    "slug": "persian",
+    "name": "Persian",
+    "types": [
+      "normal"
+    ],
+    "rarity": "uncommon",
+    "evolvesFrom": "meowth"
+  },
+  {
+    "number": 54,
+    "slug": "psyduck",
+    "name": "Psyduck",
+    "types": [
+      "water"
+    ],
+    "rarity": "common",
+    "evolvesFrom": null
+  },
+  {
+    "number": 55,
+    "slug": "golduck",
+    "name": "Golduck",
+    "types": [
+      "water"
+    ],
+    "rarity": "uncommon",
+    "evolvesFrom": "psyduck"
+  },
+  {
+    "number": 56,
+    "slug": "mankey",
+    "name": "Mankey",
+    "types": [
+      "fighting"
+    ],
+    "rarity": "common",
+    "evolvesFrom": null
+  },
+  {
+    "number": 57,
+    "slug": "primeape",
+    "name": "Primeape",
+    "types": [
+      "fighting"
+    ],
+    "rarity": "uncommon",
+    "evolvesFrom": "mankey"
+  },
+  {
+    "number": 58,
+    "slug": "growlithe",
+    "name": "Growlithe",
+    "types": [
+      "fire"
+    ],
+    "rarity": "uncommon",
+    "evolvesFrom": null
+  },
+  {
+    "number": 59,
+    "slug": "arcanine",
+    "name": "Arcanine",
+    "types": [
+      "fire"
+    ],
+    "rarity": "rare",
+    "evolvesFrom": "growlithe"
+  },
+  {
+    "number": 60,
+    "slug": "poliwag",
+    "name": "Poliwag",
+    "types": [
+      "water"
+    ],
+    "rarity": "common",
+    "evolvesFrom": null
+  },
+  {
+    "number": 61,
+    "slug": "poliwhirl",
+    "name": "Poliwhirl",
+    "types": [
+      "water"
+    ],
+    "rarity": "uncommon",
+    "evolvesFrom": "poliwag"
+  },
+  {
+    "number": 62,
+    "slug": "poliwrath",
+    "name": "Poliwrath",
+    "types": [
+      "water",
+      "fighting"
+    ],
+    "rarity": "rare",
+    "evolvesFrom": "poliwhirl"
+  },
+  {
+    "number": 63,
+    "slug": "abra",
+    "name": "Abra",
+    "types": [
+      "psychic"
+    ],
+    "rarity": "uncommon",
+    "evolvesFrom": null
+  },
+  {
+    "number": 64,
+    "slug": "kadabra",
+    "name": "Kadabra",
+    "types": [
+      "psychic"
+    ],
+    "rarity": "uncommon",
+    "evolvesFrom": "abra"
+  },
+  {
+    "number": 65,
+    "slug": "alakazam",
+    "name": "Alakazam",
+    "types": [
+      "psychic"
+    ],
+    "rarity": "very_rare",
+    "evolvesFrom": "kadabra"
+  },
+  {
+    "number": 66,
+    "slug": "machop",
+    "name": "Machop",
+    "types": [
+      "fighting"
+    ],
+    "rarity": "uncommon",
+    "evolvesFrom": null
+  },
+  {
+    "number": 67,
+    "slug": "machoke",
+    "name": "Machoke",
+    "types": [
+      "fighting"
+    ],
+    "rarity": "uncommon",
+    "evolvesFrom": "machop"
+  },
+  {
+    "number": 68,
+    "slug": "machamp",
+    "name": "Machamp",
+    "types": [
+      "fighting"
+    ],
+    "rarity": "very_rare",
+    "evolvesFrom": "machoke"
+  },
+  {
+    "number": 69,
+    "slug": "bellsprout",
+    "name": "Bellsprout",
+    "types": [
+      "grass",
+      "poison"
+    ],
+    "rarity": "common",
+    "evolvesFrom": null
+  },
+  {
+    "number": 70,
+    "slug": "weepinbell",
+    "name": "Weepinbell",
+    "types": [
+      "grass",
+      "poison"
+    ],
+    "rarity": "uncommon",
+    "evolvesFrom": "bellsprout"
+  },
+  {
+    "number": 71,
+    "slug": "victreebel",
+    "name": "Victreebel",
+    "types": [
+      "grass",
+      "poison"
+    ],
+    "rarity": "rare",
+    "evolvesFrom": "weepinbell"
+  },
+  {
+    "number": 72,
+    "slug": "tentacool",
+    "name": "Tentacool",
+    "types": [
+      "water",
+      "poison"
+    ],
+    "rarity": "common",
+    "evolvesFrom": null
+  },
+  {
+    "number": 73,
+    "slug": "tentacruel",
+    "name": "Tentacruel",
+    "types": [
+      "water",
+      "poison"
+    ],
+    "rarity": "uncommon",
+    "evolvesFrom": "tentacool"
+  },
+  {
+    "number": 74,
+    "slug": "geodude",
+    "name": "Geodude",
+    "types": [
+      "rock",
+      "ground"
+    ],
+    "rarity": "common",
+    "evolvesFrom": null
+  },
+  {
+    "number": 75,
+    "slug": "graveler",
+    "name": "Graveler",
+    "types": [
+      "rock",
+      "ground"
+    ],
+    "rarity": "uncommon",
+    "evolvesFrom": "geodude"
+  },
+  {
+    "number": 76,
+    "slug": "golem",
+    "name": "Golem",
+    "types": [
+      "rock",
+      "ground"
+    ],
+    "rarity": "very_rare",
+    "evolvesFrom": "graveler"
+  },
+  {
+    "number": 77,
+    "slug": "ponyta",
+    "name": "Ponyta",
+    "types": [
+      "fire"
+    ],
+    "rarity": "uncommon",
+    "evolvesFrom": null
+  },
+  {
+    "number": 78,
+    "slug": "rapidash",
+    "name": "Rapidash",
+    "types": [
+      "fire"
+    ],
+    "rarity": "rare",
+    "evolvesFrom": "ponyta"
+  },
+  {
+    "number": 79,
+    "slug": "slowpoke",
+    "name": "Slowpoke",
+    "types": [
+      "water",
+      "psychic"
+    ],
+    "rarity": "uncommon",
+    "evolvesFrom": null
+  },
+  {
+    "number": 80,
+    "slug": "slowbro",
+    "name": "Slowbro",
+    "types": [
+      "water",
+      "psychic"
+    ],
+    "rarity": "rare",
+    "evolvesFrom": "slowpoke"
+  },
+  {
+    "number": 81,
+    "slug": "magnemite",
+    "name": "Magnemite",
+    "types": [
+      "electric"
+    ],
+    "rarity": "common",
+    "evolvesFrom": null
+  },
+  {
+    "number": 82,
+    "slug": "magneton",
+    "name": "Magneton",
+    "types": [
+      "electric"
+    ],
+    "rarity": "rare",
+    "evolvesFrom": "magnemite"
+  },
+  {
+    "number": 83,
+    "slug": "farfetchd",
+    "name": "Farfetch\u2019d",
+    "types": [
+      "normal",
+      "flying"
+    ],
+    "rarity": "uncommon",
+    "evolvesFrom": null
+  },
+  {
+    "number": 84,
+    "slug": "doduo",
+    "name": "Doduo",
+    "types": [
+      "normal",
+      "flying"
+    ],
+    "rarity": "common",
+    "evolvesFrom": null
+  },
+  {
+    "number": 85,
+    "slug": "dodrio",
+    "name": "Dodrio",
+    "types": [
+      "normal",
+      "flying"
+    ],
+    "rarity": "rare",
+    "evolvesFrom": null
+  },
+  {
+    "number": 86,
+    "slug": "seel",
+    "name": "Seel",
+    "types": [
+      "water"
+    ],
+    "rarity": "common",
+    "evolvesFrom": null
+  },
+  {
+    "number": 87,
+    "slug": "dewgong",
+    "name": "Dewgong",
+    "types": [
+      "water",
+      "ice"
+    ],
+    "rarity": "rare",
+    "evolvesFrom": "seel"
+  },
+  {
+    "number": 88,
+    "slug": "grimer",
+    "name": "Grimer",
+    "types": [
+      "poison"
+    ],
+    "rarity": "common",
+    "evolvesFrom": null
+  },
+  {
+    "number": 89,
+    "slug": "muk",
+    "name": "Muk",
+    "types": [
+      "poison"
+    ],
+    "rarity": "rare",
+    "evolvesFrom": "grimer"
+  },
+  {
+    "number": 90,
+    "slug": "shellder",
+    "name": "Shellder",
+    "types": [
+      "water"
+    ],
+    "rarity": "common",
+    "evolvesFrom": null
+  },
+  {
+    "number": 91,
+    "slug": "cloyster",
+    "name": "Cloyster",
+    "types": [
+      "water",
+      "ice"
+    ],
+    "rarity": "rare",
+    "evolvesFrom": "shellder"
+  },
+  {
+    "number": 92,
+    "slug": "gastly",
+    "name": "Gastly",
+    "types": [
+      "ghost",
+      "poison"
+    ],
+    "rarity": "uncommon",
+    "evolvesFrom": null
+  },
+  {
+    "number": 93,
+    "slug": "haunter",
+    "name": "Haunter",
+    "types": [
+      "ghost",
+      "poison"
+    ],
+    "rarity": "uncommon",
+    "evolvesFrom": "gastly"
+  },
+  {
+    "number": 94,
+    "slug": "gengar",
+    "name": "Gengar",
+    "types": [
+      "ghost",
+      "poison"
+    ],
+    "rarity": "very_rare",
+    "evolvesFrom": "haunter"
+  },
+  {
+    "number": 95,
+    "slug": "onix",
+    "name": "Onix",
+    "types": [
+      "rock",
+      "ground"
+    ],
+    "rarity": "uncommon",
+    "evolvesFrom": null
+  },
+  {
+    "number": 96,
+    "slug": "drowzee",
+    "name": "Drowzee",
+    "types": [
+      "psychic"
+    ],
+    "rarity": "common",
+    "evolvesFrom": null
+  },
+  {
+    "number": 97,
+    "slug": "hypno",
+    "name": "Hypno",
+    "types": [
+      "psychic"
+    ],
+    "rarity": "rare",
+    "evolvesFrom": "drowzee"
+  },
+  {
+    "number": 98,
+    "slug": "krabby",
+    "name": "Krabby",
+    "types": [
+      "water"
+    ],
+    "rarity": "common",
+    "evolvesFrom": null
+  },
+  {
+    "number": 99,
+    "slug": "kingler",
+    "name": "Kingler",
+    "types": [
+      "water"
+    ],
+    "rarity": "rare",
+    "evolvesFrom": "krabby"
+  },
+  {
+    "number": 100,
+    "slug": "voltorb",
+    "name": "Voltorb",
+    "types": [
+      "electric"
+    ],
+    "rarity": "common",
+    "evolvesFrom": null
+  },
+  {
+    "number": 101,
+    "slug": "electrode",
+    "name": "Electrode",
+    "types": [
+      "electric"
+    ],
+    "rarity": "rare",
+    "evolvesFrom": "voltorb"
+  },
+  {
+    "number": 102,
+    "slug": "exeggcute",
+    "name": "Exeggcute",
+    "types": [
+      "grass",
+      "psychic"
+    ],
+    "rarity": "rare",
+    "evolvesFrom": null
+  },
+  {
+    "number": 103,
+    "slug": "exeggutor",
+    "name": "Exeggutor",
+    "types": [
+      "grass",
+      "psychic"
+    ],
+    "rarity": "rare",
+    "evolvesFrom": "exeggcute"
+  },
+  {
+    "number": 104,
+    "slug": "cubone",
+    "name": "Cubone",
+    "types": [
+      "ground"
+    ],
+    "rarity": "common",
+    "evolvesFrom": null
+  },
+  {
+    "number": 105,
+    "slug": "marowak",
+    "name": "Marowak",
+    "types": [
+      "ground"
+    ],
+    "rarity": "rare",
+    "evolvesFrom": "cubone"
+  },
+  {
+    "number": 106,
+    "slug": "hitmonlee",
+    "name": "Hitmonlee",
+    "types": [
+      "fighting"
+    ],
+    "rarity": "uncommon",
+    "evolvesFrom": null
+  },
+  {
+    "number": 107,
+    "slug": "hitmonchan",
+    "name": "Hitmonchan",
+    "types": [
+      "fighting"
+    ],
+    "rarity": "uncommon",
+    "evolvesFrom": null
+  },
+  {
+    "number": 108,
+    "slug": "lickitung",
+    "name": "Lickitung",
+    "types": [
+      "normal"
+    ],
+    "rarity": "uncommon",
+    "evolvesFrom": null
+  },
+  {
+    "number": 109,
+    "slug": "koffing",
+    "name": "Koffing",
+    "types": [
+      "poison"
+    ],
+    "rarity": "common",
+    "evolvesFrom": null
+  },
+  {
+    "number": 110,
+    "slug": "weezing",
+    "name": "Weezing",
+    "types": [
+      "poison"
+    ],
+    "rarity": "rare",
+    "evolvesFrom": "koffing"
+  },
+  {
+    "number": 111,
+    "slug": "rhyhorn",
+    "name": "Rhyhorn",
+    "types": [
+      "ground",
+      "rock"
+    ],
+    "rarity": "common",
+    "evolvesFrom": null
+  },
+  {
+    "number": 112,
+    "slug": "rhydon",
+    "name": "Rhydon",
+    "types": [
+      "ground",
+      "rock"
+    ],
+    "rarity": "very_rare",
+    "evolvesFrom": "rhyhorn"
+  },
+  {
+    "number": 113,
+    "slug": "chansey",
+    "name": "Chansey",
+    "types": [
+      "normal"
+    ],
+    "rarity": "rare",
+    "evolvesFrom": null
+  },
+  {
+    "number": 114,
+    "slug": "tangela",
+    "name": "Tangela",
+    "types": [
+      "grass"
+    ],
+    "rarity": "uncommon",
+    "evolvesFrom": null
+  },
+  {
+    "number": 115,
+    "slug": "kangaskhan",
+    "name": "Kangaskhan",
+    "types": [
+      "normal"
+    ],
+    "rarity": "very_rare",
+    "evolvesFrom": null
+  },
+  {
+    "number": 116,
+    "slug": "horsea",
+    "name": "Horsea",
+    "types": [
+      "water"
+    ],
+    "rarity": "common",
+    "evolvesFrom": null
+  },
+  {
+    "number": 117,
+    "slug": "seadra",
+    "name": "Seadra",
+    "types": [
+      "water"
+    ],
+    "rarity": "uncommon",
+    "evolvesFrom": "horsea"
+  },
+  {
+    "number": 118,
+    "slug": "goldeen",
+    "name": "Goldeen",
+    "types": [
+      "water"
+    ],
+    "rarity": "common",
+    "evolvesFrom": null
+  },
+  {
+    "number": 119,
+    "slug": "seaking",
+    "name": "Seaking",
+    "types": [
+      "water"
+    ],
+    "rarity": "rare",
+    "evolvesFrom": "goldeen"
+  },
+  {
+    "number": 120,
+    "slug": "staryu",
+    "name": "Staryu",
+    "types": [
+      "water"
+    ],
+    "rarity": "common",
+    "evolvesFrom": null
+  },
+  {
+    "number": 121,
+    "slug": "starmie",
+    "name": "Starmie",
+    "types": [
+      "water",
+      "psychic"
+    ],
+    "rarity": "rare",
+    "evolvesFrom": "staryu"
+  },
+  {
+    "number": 122,
+    "slug": "mrmime",
+    "name": "Mr. Mime",
+    "types": [
+      "psychic"
+    ],
+    "rarity": "rare",
+    "evolvesFrom": null
+  },
+  {
+    "number": 123,
+    "slug": "scyther",
+    "name": "Scyther",
+    "types": [
+      "bug",
+      "flying"
+    ],
+    "rarity": "uncommon",
+    "evolvesFrom": null
+  },
+  {
+    "number": 124,
+    "slug": "jynx",
+    "name": "Jynx",
+    "types": [
+      "ice",
+      "psychic"
+    ],
+    "rarity": "rare",
+    "evolvesFrom": null
+  },
+  {
+    "number": 125,
+    "slug": "electabuzz",
+    "name": "Electabuzz",
+    "types": [
+      "electric"
+    ],
+    "rarity": "rare",
+    "evolvesFrom": null
+  },
+  {
+    "number": 126,
+    "slug": "magmar",
+    "name": "Magmar",
+    "types": [
+      "fire"
+    ],
+    "rarity": "rare",
+    "evolvesFrom": null
+  },
+  {
+    "number": 127,
+    "slug": "pinsir",
+    "name": "Pinsir",
+    "types": [
+      "bug"
+    ],
+    "rarity": "uncommon",
+    "evolvesFrom": null
+  },
+  {
+    "number": 128,
+    "slug": "tauros",
+    "name": "Tauros",
+    "types": [
+      "normal"
+    ],
+    "rarity": "rare",
+    "evolvesFrom": null
+  },
+  {
+    "number": 129,
+    "slug": "magikarp",
+    "name": "Magikarp",
+    "types": [
+      "water"
+    ],
+    "rarity": "common",
+    "evolvesFrom": null
+  },
+  {
+    "number": 130,
+    "slug": "gyarados",
+    "name": "Gyarados",
+    "types": [
+      "water",
+      "flying"
+    ],
+    "rarity": "rare",
+    "evolvesFrom": null
+  },
+  {
+    "number": 131,
+    "slug": "lapras",
+    "name": "Lapras",
+    "types": [
+      "water",
+      "ice"
+    ],
+    "rarity": "very_rare",
+    "evolvesFrom": null
+  },
+  {
+    "number": 132,
+    "slug": "ditto",
+    "name": "Ditto",
+    "types": [
+      "normal"
+    ],
+    "rarity": "very_rare",
+    "evolvesFrom": null
+  },
+  {
+    "number": 133,
+    "slug": "eevee",
+    "name": "Eevee",
+    "types": [
+      "normal"
+    ],
+    "rarity": "common",
+    "evolvesFrom": null
+  },
+  {
+    "number": 134,
+    "slug": "vaporeon",
+    "name": "Vaporeon",
+    "types": [
+      "water"
+    ],
+    "rarity": "rare",
+    "evolvesFrom": "eevee"
+  },
+  {
+    "number": 135,
+    "slug": "jolteon",
+    "name": "Jolteon",
+    "types": [
+      "electric"
+    ],
+    "rarity": "rare",
+    "evolvesFrom": "eevee"
+  },
+  {
+    "number": 136,
+    "slug": "flareon",
+    "name": "Flareon",
+    "types": [
+      "fire"
+    ],
+    "rarity": "rare",
+    "evolvesFrom": "eevee"
+  },
+  {
+    "number": 137,
+    "slug": "porygon",
+    "name": "Porygon",
+    "types": [
+      "normal"
+    ],
+    "rarity": "very_rare",
+    "evolvesFrom": null
+  },
+  {
+    "number": 138,
+    "slug": "omanyte",
+    "name": "Omanyte",
+    "types": [
+      "rock",
+      "water"
+    ],
+    "rarity": "common",
+    "evolvesFrom": null
+  },
+  {
+    "number": 139,
+    "slug": "omastar",
+    "name": "Omastar",
+    "types": [
+      "rock",
+      "water"
+    ],
+    "rarity": "rare",
+    "evolvesFrom": null
+  },
+  {
+    "number": 140,
+    "slug": "kabuto",
+    "name": "Kabuto",
+    "types": [
+      "rock",
+      "water"
+    ],
+    "rarity": "common",
+    "evolvesFrom": null
+  },
+  {
+    "number": 141,
+    "slug": "kabutops",
+    "name": "Kabutops",
+    "types": [
+      "rock",
+      "water"
+    ],
+    "rarity": "rare",
+    "evolvesFrom": null
+  },
+  {
+    "number": 142,
+    "slug": "aerodactyl",
+    "name": "Aerodactyl",
+    "types": [
+      "rock",
+      "flying"
+    ],
+    "rarity": "rare",
+    "evolvesFrom": null
+  },
+  {
+    "number": 143,
+    "slug": "snorlax",
+    "name": "Snorlax",
+    "types": [
+      "normal"
+    ],
+    "rarity": "rare",
+    "evolvesFrom": null
+  },
+  {
+    "number": 144,
+    "slug": "articuno",
+    "name": "Articuno",
+    "types": [
+      "ice",
+      "flying"
+    ],
+    "rarity": "legendary",
+    "evolvesFrom": null
+  },
+  {
+    "number": 145,
+    "slug": "zapdos",
+    "name": "Zapdos",
+    "types": [
+      "electric",
+      "flying"
+    ],
+    "rarity": "legendary",
+    "evolvesFrom": null
+  },
+  {
+    "number": 146,
+    "slug": "moltres",
+    "name": "Moltres",
+    "types": [
+      "fire",
+      "flying"
+    ],
+    "rarity": "legendary",
+    "evolvesFrom": null
+  },
+  {
+    "number": 147,
+    "slug": "dratini",
+    "name": "Dratini",
+    "types": [
+      "dragon"
+    ],
+    "rarity": "common",
+    "evolvesFrom": null
+  },
+  {
+    "number": 148,
+    "slug": "dragonair",
+    "name": "Dragonair",
+    "types": [
+      "dragon"
+    ],
+    "rarity": "rare",
+    "evolvesFrom": "dratini"
+  },
+  {
+    "number": 149,
+    "slug": "dragonite",
+    "name": "Dragonite",
+    "types": [
+      "dragon",
+      "flying"
+    ],
+    "rarity": "very_rare",
+    "evolvesFrom": "dragonair"
+  },
+  {
+    "number": 150,
+    "slug": "mewtwo",
+    "name": "Mewtwo",
+    "types": [
+      "psychic"
+    ],
+    "rarity": "legendary",
+    "evolvesFrom": null
+  },
+  {
+    "number": 151,
+    "slug": "mew",
+    "name": "Mew",
+    "types": [
+      "psychic"
+    ],
+    "rarity": "legendary",
+    "evolvesFrom": null
+  }
+]

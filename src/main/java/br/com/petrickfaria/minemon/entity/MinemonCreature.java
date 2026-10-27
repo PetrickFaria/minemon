@@ -114,6 +114,14 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         return key == null ? "bulbasaur" : key.getPath();
     }
 
+    /**
+     * Evolution implementations must call this on the old, owned entity after creating
+     * its next stage. PokéC verifies ownership and the declared species edge on the server.
+     */
+    public void notifyPokecEvolution(String evolvedSpeciesSlug) {
+        br.com.petrickfaria.minemon.pokec.PokecTransactions.onOwnedEvolution(this,evolvedSpeciesSlug);
+    }
+
     public static AttributeSupplier.Builder createAttributes() {
         return TamableAnimal.createMobAttributes()
                 .add(Attributes.MAX_HEALTH, 20.0D)
