@@ -440,7 +440,9 @@ public final class CompanionTests {
   double middle=(near.getX()+far.getX())/2.0D;
   double targetX=runner.getX()>middle?near.getX()+0.5D:far.getX()+0.5D;
   runner.getNavigation().moveTo(targetX,near.getY(),near.getZ()+0.5D,1.0D);
-  h.runAfterDelay(10,()->awaitSpontaneousRun(h,runner,elapsed+10));
+  // Sample every tick: a short test path can finish between ten-tick polls,
+  // stopping the otherwise valid run before the fixture observes its active state.
+  h.runAfterDelay(1,()->awaitSpontaneousRun(h,runner,elapsed+1));
  }
 
 }

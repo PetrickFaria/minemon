@@ -49,6 +49,11 @@ public final class MinemonFlyingCreature extends MinemonCreature {
    double altitude=this.getY()-this.naturalSurface();
    if(altitude<minimum){
     double lift=net.minecraft.util.Mth.clamp((minimum-altitude)*0.1D,0.04D,0.12D);
+    // Cancel a stale ground-level FlyingMoveControl destination left behind
+    // by SleepLanding. The controller otherwise keeps steering back down and
+    // wins against a small upward velocity on every tick.
+    this.getMoveControl().setWantedPosition(this.getX(),this.naturalSurface()+minimum+0.25D,
+        this.getZ(),Math.max(0.25D,this.getMoveControl().getSpeed()));
     // Move through the normal collision resolver in small steps. A navigation
     // goal can keep writing a ground-level vertical input while waking, so a
     // velocity-only correction gets overwritten before it changes position.
