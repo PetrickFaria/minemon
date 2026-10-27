@@ -141,7 +141,16 @@ final class NightClientSmokeTest {
      var player=level.getServer().getPlayerList().getPlayers().get(0);player.teleportTo(level,slug.equals("fearow")?distance:0,101,slug.equals("fearow")?5:5-distance,0,0);
     });return;
    }
-   ticks++;if(ticks>450)throw new IllegalStateException("Night client timeout: "+SPECIES.get(index)+" samples="+samples+" activeSamples="+activeSamples+" midday="+nocturnalMidday);
+   ticks++;if(ticks>450){
+    var observed=entity==null?null:mc.level.getEntity(entity);
+    String state=observed instanceof MinemonCreature m
+        ? " sleeping="+m.isSleeping()+" nightRest="+m.isNightResting()+" clip="+m.getSelectedAnimationForValidation()
+          +" pos="+m.position()+" support="+m.naturalSurface()+" onGround="+m.isOnGround()
+          +" noGravity="+m.isNoGravity()+" navDone="+m.getNavigation().isDone()
+          +" rendered="+mc.level.entitiesForRendering().stream().anyMatch(e->e.getUUID().equals(entity))
+        : " entityMissing="+(observed==null);
+    throw new IllegalStateException("Night client timeout: "+SPECIES.get(index)+" samples="+samples+" activeSamples="+activeSamples+" midday="+nocturnalMidday+state);
+   }
    MinemonCreature current=null;for(var e:mc.level.entitiesForRendering())if(e.getUUID().equals(entity)&&e instanceof MinemonCreature m){current=m;break;}
    if(current==null)return;
    boolean waterRest=SpeciesBehaviorProfiles.waterCapable(current.getSpeciesSlug())&&current.isInWaterOrBubble();
