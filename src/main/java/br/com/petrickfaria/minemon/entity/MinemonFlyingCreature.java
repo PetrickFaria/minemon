@@ -39,6 +39,19 @@ public final class MinemonFlyingCreature extends MinemonCreature {
    this.setDeltaMovement(this.getDeltaMovement().x,vertical,this.getDeltaMovement().z);
   }
   super.travel(input);
+  // FlyingMoveControl can replace the pre-travel lift with a downward input
+  // while an entity is waking from a landed sleep pose. Reassert the active
+  // cycle's floor after travel so the entity actually resumes its flight band.
+  if(!this.level.isClientSide&&!this.wantsNaturalLanding()&&this.naturalBehaviorActive()
+      &&this.getTarget()==null){
+   double minimum=this.naturalCycle().minimumAltitude();
+   double altitude=this.getY()-this.naturalSurface();
+   if(altitude<minimum){
+    var velocity=this.getDeltaMovement();
+    double lift=net.minecraft.util.Mth.clamp((minimum-altitude)*0.1D,0.04D,0.12D);
+    this.setDeltaMovement(velocity.x,Math.max(velocity.y,lift),velocity.z);
+   }
+  }
  }
  @Override public void tick(){
   super.tick();
