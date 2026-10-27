@@ -8,11 +8,11 @@ import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.entity.npc.VillagerType;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraftforge.event.TickEvent;
@@ -121,7 +121,7 @@ final class RocketVillagerClientSmokeTest {
     }
 
     private static void setupWorld(ServerLevel level) {
-        ServerPlayer player = level.getPlayerByUUID(localPlayer);
+        Player player = level.getPlayerByUUID(localPlayer);
         if (player == null) throw new IllegalStateException("Local test player was not found on the server");
         BlockPos origin = player.blockPosition();
         int x = origin.getX(), y = origin.getY(), z = origin.getZ();

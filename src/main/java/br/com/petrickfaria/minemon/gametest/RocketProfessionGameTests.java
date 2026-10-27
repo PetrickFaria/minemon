@@ -195,7 +195,7 @@ public final class RocketProfessionGameTests {
     @GameTest(template = "test_arena", timeoutTicks = 30)
     public static void rocketBlockProfessionAndPoiAreRegistered(GameTestHelper helper) {
         BlockState state = ModBlocks.ROCKET_BLOCK.get().defaultBlockState();
-        check(helper, state.isSolid(), "Rocket workstation must be a normal solid block");
+        check(helper, state.getMaterial().isSolid(), "Rocket workstation must be a normal solid block");
         check(helper, ModItems.ROCKET_BLOCK.get().getDefaultInstance().is(ModBlocks.ROCKET_BLOCK.get().asItem()),
                 "Rocket workstation must have its own inventory item");
         check(helper, new net.minecraft.resources.ResourceLocation(Minemon.MOD_ID, "rocket")
