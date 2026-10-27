@@ -15,6 +15,11 @@ public final class MinemonFlyingCreature extends MinemonCreature {
  private final net.minecraft.world.entity.ai.control.MoveControl groundControl;
  private int flightRecoveryAttempts;
  private int flightRecoveryMoves;
+ private boolean shouldRecoverNaturalFlight(){
+  return !this.level.isClientSide&&this.isFlyingSpecies()&&!this.wantsNaturalLanding()
+      &&!this.isSleeping()&&!this.isOrderedToSit()&&!this.isPassenger()&&!this.isNoAi()
+      &&!this.isDeadOrDying()&&this.getTarget()==null;
+ }
  public MinemonFlyingCreature(EntityType<? extends TamableAnimal> type,Level level){
   super(type,level);this.airNavigation=this.navigation;
   this.groundNavigation=new net.minecraft.world.entity.ai.navigation.GroundPathNavigation(this,level);
@@ -35,7 +40,7 @@ public final class MinemonFlyingCreature extends MinemonCreature {
    double support=this.naturalSurface();
    double clearance=this.getY()-support;
    boolean combat=this.getTarget()!=null&&this.getTarget().isAlive();
-   if(!combat&&this.naturalBehaviorActive()
+   if(!combat&&this.shouldRecoverNaturalFlight()
        &&(this.naturalCycle().phase()==BehaviorCycle.Phase.AIR||this.naturalCycle().phase()==BehaviorCycle.Phase.TAKEOFF)){
     BlockPos target=this.getNavigation().getTargetPos();
     if(target!=null&&target.getY()<support+this.naturalCycle().minimumAltitude())this.getNavigation().stop();
@@ -50,8 +55,7 @@ public final class MinemonFlyingCreature extends MinemonCreature {
   // FlyingMoveControl can replace the pre-travel lift with a downward input
   // while an entity is waking from a landed sleep pose. Reassert the active
   // cycle's floor after travel so the entity actually resumes its flight band.
-  if(!this.level.isClientSide&&this.isFlyingSpecies()&&!this.wantsNaturalLanding()&&this.naturalBehaviorActive()
-      &&this.getTarget()==null&&(this.naturalCycle().phase()==BehaviorCycle.Phase.AIR
+  if(this.shouldRecoverNaturalFlight()&&(this.naturalCycle().phase()==BehaviorCycle.Phase.AIR
           ||this.naturalCycle().phase()==BehaviorCycle.Phase.TAKEOFF)){
    double minimum=this.naturalCycle().minimumAltitude();
    double altitude=this.getY()-this.naturalSurface();
@@ -109,7 +113,7 @@ public final class MinemonFlyingCreature extends MinemonCreature {
     this.setDeltaMovement(this.getDeltaMovement().x,
         net.minecraft.util.Mth.clamp(this.getDeltaMovement().y+correction,-0.12D,0.12D),this.getDeltaMovement().z);
    }
-   if(!combat&&this.naturalBehaviorActive()
+   if(!combat&&this.shouldRecoverNaturalFlight()
        &&(this.naturalCycle().phase()==BehaviorCycle.Phase.AIR||this.naturalCycle().phase()==BehaviorCycle.Phase.TAKEOFF)
        &&altitude<this.naturalCycle().minimumAltitude()){
     double lift=net.minecraft.util.Mth.clamp((this.naturalCycle().minimumAltitude()-altitude)*0.1D,0.04D,0.12D);
