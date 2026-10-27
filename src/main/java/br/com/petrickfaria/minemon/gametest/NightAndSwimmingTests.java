@@ -27,11 +27,11 @@ public final class NightAndSwimmingTests {
  }
  private static void awaitFlightResume(GameTestHelper h,List<MinemonCreature> mixed,
      Map<MinemonCreature,Integer> clocks,int remaining,List<String> history){
-  if(mixed.stream().allMatch(m->!m.isOnGround()&&m.naturalCycle().ticks()>clocks.get(m))){h.succeed();return;}
+  if(mixed.stream().allMatch(m->flightResumeComplete(m,clocks))){h.succeed();return;}
   if(remaining<=0){
    h.getLevel().setDayTime(1000);
-   h.fail("Mixed fliers must resume their paused airborne phase after dawn; pending="
-       +mixed.stream().filter(m->m.isOnGround()||m.naturalCycle().ticks()<=clocks.get(m))
+   h.fail("Mixed flyers and fixed floaters must resume their correct daylight routine after dawn; pending="
+       +mixed.stream().filter(m->!flightResumeComplete(m,clocks))
            .map(NightAndSwimmingTests::flightResumeSnapshot).toList()+",history="+history);
    return;
   }
@@ -40,6 +40,15 @@ public final class NightAndSwimmingTests {
     history.add("time="+h.getLevel().getGameTime()+" "+flightResumeSnapshot(mixed.get(i)));
    awaitFlightResume(h,mixed,clocks,remaining-5,history);
   });
+ }
+ private static boolean flightResumeComplete(MinemonCreature m,Map<MinemonCreature,Integer> clocks){
+  if(m.isOnGround())return false;
+  double altitude=m.getY()-m.naturalSurface();
+  return switch(SpeciesBehaviorProfiles.profile(m.getSpeciesSlug())){
+   case FLOAT_HALF -> Math.abs(altitude-0.5D)<=0.12D;
+   case FLOAT_LOW -> altitude>=0.5D&&altitude<=1.0D;
+   default -> m.naturalCycle().ticks()>clocks.get(m);
+  };
  }
  private static String flightResumeSnapshot(MinemonCreature m){
   var level=m.getCommandSenderWorld();

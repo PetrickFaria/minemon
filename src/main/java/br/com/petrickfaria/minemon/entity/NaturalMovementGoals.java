@@ -166,7 +166,11 @@ public final class NaturalMovementGoals {
         }
 
         private boolean eligible() {
-            return this.mob.isFlyingSpecies() && !this.mob.wantsNaturalLanding() && this.mob.naturalBehaviorActive();
+            var profile=SpeciesBehaviorProfiles.profile(this.mob.getSpeciesSlug());
+            boolean fixedHeight=profile==SpeciesBehaviorProfiles.Profile.FLOAT_HALF
+                    ||profile==SpeciesBehaviorProfiles.Profile.FLOAT_LOW;
+            return this.mob.isFlyingSpecies()&&!fixedHeight&&!this.mob.wantsNaturalLanding()
+                    &&this.mob.naturalBehaviorActive();
         }
 
         private boolean chooseDestination() {
