@@ -125,6 +125,11 @@ final class NightClientSmokeTest {
      var mob=ModEntities.SPECIES.get(slug).get().create(level);
      boolean aquatic=SpeciesBehaviorProfiles.waterCapable(mob.getSpeciesSlug())&&!scenario.equals("vaporeon_land");
      boolean air=SpeciesBehaviorProfiles.canFly(mob.getSpeciesSlug());
+     // Each species receives a clean environment. The previous Vaporeon
+     // scenario's basin otherwise remains and changes a land species' support
+     // height and resting environment.
+     for(int x=-6;x<=6;x++)for(int z=0;z<=10;z++)for(int y=101;y<=110;y++)
+      level.setBlockAndUpdate(new BlockPos(x,y,z),Blocks.AIR.defaultBlockState());
      if(aquatic)for(int x=-6;x<=6;x++)for(int z=0;z<=10;z++)for(int y=101;y<=110;y++)
       level.setBlockAndUpdate(new BlockPos(x,y,z),Blocks.WATER.defaultBlockState());
      mob.moveTo(0,aquatic?104:air?107:101,5,180,0);
