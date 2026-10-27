@@ -75,7 +75,8 @@ public final class PokecTransactions {
         if(source==null||!source.isTame()||source.getOwnerUUID()==null||!(source.level instanceof ServerLevel level))return;
         PokecSpecies.Entry target=PokecSpecies.get(evolvedSlug);if(target==null||!source.getSpeciesSlug().equals(target.evolvesFrom()))return;
         ServerPlayer player=source.getOwner() instanceof ServerPlayer loadedOwner?loadedOwner:
-                level.getServer().getPlayerList().getPlayer(source.getOwnerUUID());
+                level.players().stream().filter(candidate->candidate.getUUID().equals(source.getOwnerUUID())).findFirst()
+                        .orElseGet(()->level.getServer().getPlayerList().getPlayer(source.getOwnerUUID()));
         if(player!=null){PokecPlayerData.unlock(player,evolvedSlug);br.com.petrickfaria.minemon.network.MinemonNetwork.refreshPokec(player);}
     }
     public static void clearTransactions(UUID player){RECENT_IDS.remove(player);}
