@@ -3,12 +3,21 @@ package br.com.petrickfaria.minemon.gametest;
 import br.com.petrickfaria.minemon.Minemon;
 import br.com.petrickfaria.minemon.entity.MinemonCreature;
 import br.com.petrickfaria.minemon.registry.ModEntities;
+import com.mojang.authlib.GameProfile;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.level.GameType;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.util.FakePlayer;
+import net.minecraftforge.event.entity.player.AttackEntityEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.gametest.GameTestHolder;
 import net.minecraftforge.gametest.PrefixGameTestTemplate;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
+import java.util.UUID;
 
 @GameTestHolder(Minemon.MOD_ID)
 @PrefixGameTestTemplate(false)
@@ -87,6 +96,40 @@ public final class CustomSoundTimerTests {
                 });
             });
         });
+    }
+
+    @GameTest(template = "test_arena", timeoutTicks = 30)
+    public static void onlyMainHandRightClickTriggersCustomSound(GameTestHelper helper) {
+        helper.getLevel().setDayTime(1000);
+        MinemonCreature creature = helper.spawn(ModEntities.BULBASAUR.get(), new BlockPos(5, 1, 5));
+        float initialHealth = creature.getHealth();
+        ServerPlayer player = new ServerPlayer(helper.getLevel().getServer(), helper.getLevel(),
+                new GameProfile(UUID.randomUUID(), "MinemonSoundTester"), null);
+        player.connection = new FakePlayer(helper.getLevel(), new GameProfile(UUID.randomUUID(), "MinemonSoundConnection")).connection;
+        player.setGameMode(GameType.SURVIVAL);
+        player.moveTo(7.5D, 1.0D, 5.5D, 0.0F, 0.0F);
+        helper.getLevel().addNewPlayer(player);
+
+        creature.setCustomSoundTicksForValidation(1);
+        MinecraftForge.EVENT_BUS.post(new AttackEntityEvent(player, creature));
+        if (creature.customSoundTicksForValidation() != 1 || creature.getHealth() != initialHealth)
+            helper.fail("left-click attack event must not play custom audio, reset its timer, or change damage");
+
+        var offHand = new PlayerInteractEvent.EntityInteract(player, InteractionHand.OFF_HAND, creature);
+        MinecraftForge.EVENT_BUS.post(offHand);
+        if (offHand.isCanceled() || creature.customSoundTicksForValidation() != 1)
+            helper.fail("off-hand right-click must not cancel interaction or trigger a duplicate sound");
+
+        var mainHand = new PlayerInteractEvent.EntityInteract(player, InteractionHand.MAIN_HAND, creature);
+        MinecraftForge.EVENT_BUS.post(mainHand);
+        int resetTicks = creature.customSoundTicksForValidation();
+        if (mainHand.isCanceled() || resetTicks < 3600 || resetTicks > 6000)
+            helper.fail("main-hand right-click must preserve interaction and reset an independent 3600..6000 tick interval");
+        if (creature.getHealth() != initialHealth)
+            helper.fail("right-clicking to play a sound must not damage the Pokémon");
+
+        player.discard();
+        helper.succeed();
     }
 
     private static boolean withinThreeToFiveMinutes(int ticks) {

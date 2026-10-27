@@ -10,6 +10,21 @@ import java.nio.file.StandardCopyOption;
 import static org.junit.Assert.*;
 
 public class CustomCreatureAudioTest {
+    @Test public void positionalAttenuationFadesSmoothlyForEachListener() {
+        assertEquals(1.0F, CustomCreatureAudio.spatialAttenuationForDistance(0), 0.0001F);
+        assertEquals(1.0F, CustomCreatureAudio.spatialAttenuationForDistance(4), 0.0001F);
+        float nearby = CustomCreatureAudio.spatialAttenuationForDistance(8);
+        float intermediate = CustomCreatureAudio.spatialAttenuationForDistance(16);
+        float distant = CustomCreatureAudio.spatialAttenuationForDistance(28);
+        assertTrue(nearby < 1.0F && nearby > intermediate);
+        assertTrue(intermediate > distant && distant > 0.0F);
+        assertEquals(0.0F, CustomCreatureAudio.spatialAttenuationForDistance(32), 0.0F);
+        assertEquals(0.0F, CustomCreatureAudio.spatialAttenuationForDistance(48), 0.0F);
+        assertTrue("near client hears more than far client",
+                CustomCreatureAudio.spatialAttenuationForDistance(5)
+                        > CustomCreatureAudio.spatialAttenuationForDistance(24));
+    }
+
     @Test public void decodesSyntheticOggAndMp3WithinLimits() throws Exception {
         Path testRoot = Files.createTempDirectory("minemon-sound-test-");
         Path testFolder = Files.createDirectory(testRoot.resolve("species"));

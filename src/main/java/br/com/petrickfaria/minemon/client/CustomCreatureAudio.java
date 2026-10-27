@@ -49,6 +49,8 @@ public final class CustomCreatureAudio {
     private static final long MAX_FILE_BYTES = 8L * 1024 * 1024;
     private static final int MAX_SECONDS = 30;
     private static final int MAX_ACTIVE = 4;
+    private static final double FULL_VOLUME_DISTANCE = 4.0D;
+    private static final double MAX_AUDIBLE_DISTANCE = 32.0D;
     private static final Executor DECODER = new ThreadPoolExecutor(1, 1, 0, TimeUnit.MILLISECONDS,
             new ArrayBlockingQueue<>(16), runnable -> {
         Thread thread = new Thread(runnable, "Minemon-audio-decoder");
@@ -93,7 +95,8 @@ public final class CustomCreatureAudio {
                         releaseRequest(uuid, cancelled);
                         return;
                     }
-                    Playback playback = new Playback(entityId, uuid, cancelled, pcm, live.getX(), live.getY() + live.getBbHeight() * 0.5, live.getZ());
+                    double x = live.getX(), y = live.getY() + live.getBbHeight() * 0.5D, z = live.getZ();
+                    Playback playback = new Playback(entityId, uuid, cancelled, pcm, x, y, z, effectiveGain(minecraft, x, y, z));
                     ACTIVE.add(playback);
                     if (!executeAudio(() -> start(playback))) {
                         MemoryUtil.memFree(pcm.bytes);
@@ -110,6 +113,25 @@ public final class CustomCreatureAudio {
     }
 
     public static boolean wasStarted(UUID entity) { return entity != null && entity.equals(lastStartedEntity); }
+
+    /** Smooth per-listener fade layered over OpenAL's native positional attenuation. */
+    static float spatialAttenuationForDistance(double distance) {
+        if (!Double.isFinite(distance) || distance >= MAX_AUDIBLE_DISTANCE) return 0.0F;
+        if (distance <= FULL_VOLUME_DISTANCE) return 1.0F;
+        double progress = (distance - FULL_VOLUME_DISTANCE) / (MAX_AUDIBLE_DISTANCE - FULL_VOLUME_DISTANCE);
+        double smoothFade = 1.0D - progress * progress * (3.0D - 2.0D * progress);
+        return (float) Math.max(0.0D, Math.min(1.0D, smoothFade));
+    }
+
+    private static float effectiveGain(Minecraft minecraft, double x, double y, double z) {
+        // Every client uses its own SoundEngine camera/listener position, never the clicker's position.
+        var listener = minecraft.gameRenderer.getMainCamera().getPosition();
+        double dx = listener.x - x, dy = listener.y - y, dz = listener.z - z;
+        double distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+        float configuredVolume = minecraft.options.getSoundSourceVolume(SoundSource.MASTER)
+                * minecraft.options.getSoundSourceVolume(SoundSource.NEUTRAL);
+        return configuredVolume * spatialAttenuationForDistance(distance);
+    }
 
     @SubscribeEvent
     public static void clientTick(TickEvent.ClientTickEvent event) {
@@ -133,8 +155,7 @@ public final class CustomCreatureAudio {
                 }
             } else {
                 double x = creature.getX(), y = creature.getY() + creature.getBbHeight() * 0.5, z = creature.getZ();
-                float gain = minecraft.options.getSoundSourceVolume(SoundSource.MASTER)
-                        * minecraft.options.getSoundSourceVolume(SoundSource.NEUTRAL);
+                float gain = effectiveGain(minecraft, x, y, z);
                 if (!executeAudio(() -> update(playback, x, y, z, gain))) playback.finished = true;
             }
             if (playback.finished) {
@@ -285,10 +306,10 @@ public final class CustomCreatureAudio {
                     playback.pcm.bytes, playback.pcm.sampleRate);
             AL10.alSourcei(source, AL10.AL_BUFFER, buffer);
             AL10.alSourcei(source, AL10.AL_SOURCE_RELATIVE, AL10.AL_FALSE);
-            AL10.alSourcef(source, AL10.AL_REFERENCE_DISTANCE, 4.0f);
-            AL10.alSourcef(source, AL10.AL_MAX_DISTANCE, 32.0f);
+            AL10.alSourcef(source, AL10.AL_REFERENCE_DISTANCE, (float) FULL_VOLUME_DISTANCE);
+            AL10.alSourcef(source, AL10.AL_MAX_DISTANCE, (float) MAX_AUDIBLE_DISTANCE);
             AL10.alSourcef(source, AL10.AL_ROLLOFF_FACTOR, 1.0f);
-            AL10.alSourcef(source, AL10.AL_GAIN, 1.0f);
+            AL10.alSourcef(source, AL10.AL_GAIN, playback.gain);
             AL10.alSource3f(source, AL10.AL_POSITION, (float)playback.x, (float)playback.y, (float)playback.z);
             AL10.alSourcePlay(source);
             lastStartedEntity = playback.uuid;
@@ -342,9 +363,10 @@ public final class CustomCreatureAudio {
     record Pcm(ByteBuffer bytes, int sampleRate, int channels) {}
     private static final class Playback {
         final int entityId; final UUID uuid; final java.util.concurrent.atomic.AtomicBoolean cancelled; final Pcm pcm; final double x, y, z;
+        final float gain;
         volatile int source, buffer;
         volatile boolean finished, stopping;
-        Playback(int entityId, UUID uuid, java.util.concurrent.atomic.AtomicBoolean cancelled, Pcm pcm, double x, double y, double z) { this.entityId = entityId; this.uuid = uuid; this.cancelled = cancelled; this.pcm = pcm; this.x=x; this.y=y; this.z=z; }
+        Playback(int entityId, UUID uuid, java.util.concurrent.atomic.AtomicBoolean cancelled, Pcm pcm, double x, double y, double z, float gain) { this.entityId = entityId; this.uuid = uuid; this.cancelled = cancelled; this.pcm = pcm; this.x=x; this.y=y; this.z=z; this.gain=gain; }
     }
 
     private CustomCreatureAudio() {}
