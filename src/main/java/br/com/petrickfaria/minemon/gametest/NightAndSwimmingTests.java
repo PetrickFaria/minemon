@@ -175,6 +175,8 @@ public final class NightAndSwimmingTests {
                     +",active="+m.naturalBehaviorActive()+",ground="+m.isOnGround()+",alt="+(m.getY()-m.naturalSurface())
                     +",min="+m.naturalCycle().minimumAltitude()+",landing="+m.wantsNaturalLanding()
                     +",sleep="+m.isSleeping()+",gravity="+!m.isNoGravity()+",vy="+m.getDeltaMovement().y
+                    +",entityTick="+m.tickCount+",noAI="+m.isNoAi()+",passenger="+m.isPassenger()
+                    +",target="+(m.getTarget()==null?"null":m.getTarget().getType())
                     +",recovery="+((MinemonFlyingCreature)m).flightRecoveryAttemptsForValidation()+"/"+((MinemonFlyingCreature)m).flightRecoveryMovesForValidation()
                     +",nav="+m.getNavigation().getTargetPos()+",upClear="+java.util.stream.IntStream.of(1,2,4)
                         .mapToObj(n->n+":"+level.noCollision(m,m.getBoundingBox().move(0,n*0.12D,0)))
