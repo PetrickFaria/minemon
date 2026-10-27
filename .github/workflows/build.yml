@@ -87,6 +87,13 @@ jobs:
           python3 tools/prepare_client_world.py
           timeout --kill-after=30s 600s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokePatrol
           grep -F 'PASS HAUNTER PATROL:' run/client-validation-patrol.txt
+      - name: Validate Gyarados near-surface animation on the real client
+        run: |
+          python3 tools/prepare_client_world.py
+          timeout --kill-after=30s 600s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeWater -PclientSmokeSpecies=gyarados
+          grep -F 'PASS ROSTER' run/client-validation.txt
+          grep -F 'PASS gyarados: idle/walk' run/client-validation.txt
+          grep -F 'ARTICULATION PROFILES:' run/client-validation.txt
       - name: Launch Minecraft client and validate GeckoLib cache
         if: ${{ success() && steps.compile.outcome == 'success' }}
         run: |

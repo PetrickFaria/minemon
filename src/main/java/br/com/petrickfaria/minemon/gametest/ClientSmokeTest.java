@@ -25,7 +25,11 @@ public final class ClientSmokeTest {
      ||Boolean.getBoolean("minemon.clientSmokeAir")&&SpeciesBehaviorProfiles.canFly(slug);}
  private static boolean fixtureWater(String slug){return SpeciesBehaviorProfiles.isAquatic(slug)
      ||Boolean.getBoolean("minemon.clientSmokeWater")&&SpeciesBehaviorProfiles.waterCapable(slug);}
- private static boolean fixtureSurface(String slug){return SpeciesBehaviorProfiles.profile(slug)==SpeciesBehaviorProfiles.Profile.AQUATIC_SURFACE;}
+ private static boolean fixtureSurface(String slug){
+  var profile=SpeciesBehaviorProfiles.profile(slug);
+  return profile==SpeciesBehaviorProfiles.Profile.AQUATIC_SURFACE
+      ||profile==SpeciesBehaviorProfiles.Profile.AQUATIC_NEAR_SURFACE;
+ }
  private static final java.util.Map<String,Integer> smokeParticleSamples=new java.util.HashMap<>();
  private static boolean opened,setup;
  private static boolean arbokScreenshotPending;
