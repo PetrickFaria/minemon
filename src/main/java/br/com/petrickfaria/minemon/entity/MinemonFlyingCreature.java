@@ -13,6 +13,8 @@ public final class MinemonFlyingCreature extends MinemonCreature {
  private final PathNavigation escapeNavigation;
  private final net.minecraft.world.entity.ai.control.MoveControl airControl;
  private final net.minecraft.world.entity.ai.control.MoveControl groundControl;
+ private int flightRecoveryAttempts;
+ private int flightRecoveryMoves;
  public MinemonFlyingCreature(EntityType<? extends TamableAnimal> type,Level level){
   super(type,level);this.airNavigation=this.navigation;
   this.groundNavigation=new net.minecraft.world.entity.ai.navigation.GroundPathNavigation(this,level);
@@ -113,12 +115,18 @@ public final class MinemonFlyingCreature extends MinemonCreature {
     double lift=net.minecraft.util.Mth.clamp((this.naturalCycle().minimumAltitude()-altitude)*0.1D,0.04D,0.12D);
     // Apply the small takeoff correction after all goals have ticked. Keep it
     // collision checked and capped at 0.12 blocks per tick so it stays smooth.
+    this.flightRecoveryAttempts++;
     var liftedBox=this.getBoundingBox().move(0.0D,lift,0.0D);
-    if(this.level.noCollision(this,liftedBox))this.setPos(this.getX(),this.getY()+lift,this.getZ());
+    if(this.level.noCollision(this,liftedBox)){
+     this.setPos(this.getX(),this.getY()+lift,this.getZ());
+     this.flightRecoveryMoves++;
+    }
    }
 
   }
   this.fallDistance=0;
  }
+ public int flightRecoveryAttemptsForValidation(){return this.flightRecoveryAttempts;}
+ public int flightRecoveryMovesForValidation(){return this.flightRecoveryMoves;}
  @Override public boolean causeFallDamage(float distance,float multiplier,DamageSource source){return this.isFlyingSpecies()||this.wantsNaturalLanding()?false:super.causeFallDamage(distance,multiplier,source);}
 }
