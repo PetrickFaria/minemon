@@ -168,7 +168,12 @@ public final class NightAndSwimmingTests {
         mixed.forEach(m->check(h,m.naturalCycle().ticks()>=clocks.get(m),"Dawn must resume saved clock"));
         await(h,()->mixed.stream().allMatch(m->!m.isOnGround()&&m.naturalCycle().ticks()>clocks.get(m)),()->{
          h.succeed();
-        },200,"Mixed fliers must resume their paused airborne phase after dawn");
+        },200,"Mixed fliers must resume their paused airborne phase after dawn; pending="
+            +mixed.stream().filter(m->m.isOnGround()||m.naturalCycle().ticks()<=clocks.get(m))
+                .map(m->m.getSpeciesSlug()+"{phase="+m.naturalCycle().phase()+",ticks="+m.naturalCycle().ticks()
+                    +",was="+clocks.get(m)+",stage="+m.naturalCycle().stage()+",air="+m.isFlyingSpecies()
+                    +",active="+m.naturalBehaviorActive()+",ground="+m.isOnGround()+",alt="+(m.getY()-m.naturalSurface())
+                    +",nav="+m.getNavigation().getTargetPos()+"}").toList());
        },30,"All night sleepers must wake at dawn");
       },180,"After combat, a creature must return to sleep while still night");
      },150,"Woken creature must physically retaliate using melee AI");
