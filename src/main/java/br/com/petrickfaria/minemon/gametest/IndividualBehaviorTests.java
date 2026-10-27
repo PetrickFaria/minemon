@@ -141,8 +141,11 @@ public final class IndividualBehaviorTests {
  private static void sample(GameTestHelper h,MinemonCreature m,Vec3 start,double[] farthest,int n){
   farthest[0]=Math.max(farthest[0],m.position().distanceToSqr(start));if(n>0)h.runAfterDelay(10,()->sample(h,m,start,farthest,n-1));
  }
- @GameTest(template="test_arena",timeoutTicks=300)
+ @GameTest(template="test_arena",batch="deep_water_ascent",timeoutTicks=300)
  public static void aquaticControllerActuallyAscendsFromDeepWater(GameTestHelper h){
+  // Other tests in defaultBatch share this world and change it to night; keep
+  // this navigation-only probe independent of the sleep routine's time gate.
+  h.getLevel().setDayTime(1000);
   arena(h,true);var fish=spawn(h,"goldeen",7,-3,7);
   fish.goalSelector.removeAllGoals();fish.targetSelector.removeAllGoals();
   await(h,fish::isInWater,()->{
