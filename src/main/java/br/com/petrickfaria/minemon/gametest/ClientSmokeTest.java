@@ -753,6 +753,9 @@ public final class ClientSmokeTest {
    return moved;
   }
   private static boolean sourceStaticIdle(String slug) {
+   // Gengar's native ground_idle is a fixed pose; its body/tail float is
+   // verified independently in the real airborne smoke.
+   if(slug.equals("gengar")&&!fixtureAir(slug))return true;
    return !java.util.Set.of("fearow","articuno","zapdos","moltres").contains(slug)&&ADDITIONAL_PROFILES.getOrDefault(slug,java.util.Map.of()).containsKey("idle_static");
   }
   private static boolean sourcePoseTransition(String slug) {
