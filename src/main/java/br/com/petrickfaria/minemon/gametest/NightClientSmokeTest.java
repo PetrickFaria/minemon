@@ -146,10 +146,10 @@ final class NightClientSmokeTest {
         mc.player.getBoundingBox().inflate(128.0D),m->m.getUUID().equals(entity)).stream().findFirst().orElse(null);
     boolean rendered=false;
     for(var candidate:mc.level.entitiesForRendering())if(candidate.getUUID().equals(entity)){rendered=true;break;}
-    String state=observed instanceof MinemonCreature m
-        ? " sleeping="+m.isSleeping()+" nightRest="+m.isNightResting()+" clip="+m.getSelectedAnimationForValidation()
-          +" pos="+m.position()+" support="+m.naturalSurface()+" onGround="+m.isOnGround()
-          +" noGravity="+m.isNoGravity()+" navDone="+m.getNavigation().isDone()
+    String state=observed!=null
+        ? " sleeping="+observed.isSleeping()+" nightRest="+observed.isNightResting()+" clip="+observed.getSelectedAnimationForValidation()
+          +" pos="+observed.position()+" support="+observed.naturalSurface()+" onGround="+observed.isOnGround()
+          +" noGravity="+observed.isNoGravity()+" navDone="+observed.getNavigation().isDone()
           +" rendered="+rendered
         : " entityMissing="+(observed==null);
     throw new IllegalStateException("Night client timeout: "+SPECIES.get(index)+" samples="+samples+" activeSamples="+activeSamples+" midday="+nocturnalMidday+state);
