@@ -10,6 +10,8 @@ import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.client.event.RegisterParticleProvidersEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraft.client.gui.screens.MenuScreens;
 
 @Mod.EventBusSubscriber(modid = Minemon.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public final class ClientEvents {
@@ -24,8 +26,8 @@ public final class ClientEvents {
     }
 
     @SubscribeEvent
-    public static void registerScreens(net.minecraftforge.client.event.RegisterMenuScreensEvent event){
-        event.register(ModMenus.POKEC.get(),PokecScreen::new);
+    public static void registerScreens(FMLClientSetupEvent event){
+        event.enqueueWork(() -> MenuScreens.register(ModMenus.POKEC.get(), PokecScreen::new));
     }
 
     private ClientEvents() {}

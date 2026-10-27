@@ -12,7 +12,7 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Axis;
+import com.mojang.math.Vector3f;
 import java.util.*;
 
 /** Page-based 3D Pokédex view. Only the current 18 previews are instantiated, never added to a level. */
@@ -44,17 +44,17 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
             int border=unlocked?0xFF2BA7E3:evolution?0xFF805765:0xFF357AA0;
             GuiComponent.fill(g,bx,by,bx+CELL_W-3,by+CELL_H-3,border);GuiComponent.fill(g,bx+1,by+1,bx+CELL_W-4,by+CELL_H-4,unlocked?0xFF102D45:0xFF0D1E2B);
             renderPreview(g,species,bx+CELL_W/2-1,by+29,partial);
-            if(evolution&&!unlocked)font.drawCenteredString(g,"X",bx+CELL_W/2-1,by+14,0xFFE95865);
+            if(evolution&&!unlocked)drawCentered(g,"X",bx+CELL_W/2-1,by+14,0xFFE95865);
             int textColor=unlocked?0xFFE8F7FF:0xFFB1C2D1;
-            font.drawCenteredString(g,String.format(Locale.ROOT,"#%03d",species.number()),bx+CELL_W/2-1,by+3,0x68CFFF);
+            drawCentered(g,String.format(Locale.ROOT,"#%03d",species.number()),bx+CELL_W/2-1,by+3,0x68CFFF);
             String label=species.name();float labelScale=Math.min(1.0F,(CELL_W-5.0F)/Math.max(1,font.width(label)));
-            g.pushPose();g.translate(bx+CELL_W/2-1,by+CELL_H-16,0);g.scale(labelScale,labelScale,1);font.drawCenteredString(g,label,0,0,textColor);g.popPose();
+            g.pushPose();g.translate(bx+CELL_W/2-1,by+CELL_H-16,0);g.scale(labelScale,labelScale,1);drawCentered(g,label,0,0,textColor);g.popPose();
             String cost;
             if(unlocked){cost=(syncedFreeAvailable?"FREE ":"")+syncedPrices.getOrDefault(species.slug(),PokecEconomy.get().coins(species.slug()))+" C";}
             else if(evolution)cost="X  EVOLUÇÃO";
             else cost="+ "+syncedDeposits.getOrDefault(species.slug(),0)+"/"+syncedRequirements.getOrDefault(species.slug(),PokecEconomy.get().souls(species.slug()))+" "+species.primaryType().toUpperCase(Locale.ROOT);
             GuiComponent.fill(g,bx+3,by+CELL_H-13,bx+14,by+CELL_H-3,0xFF7FD9FF);GuiComponent.fill(g,bx+4,by+CELL_H-12,bx+13,by+CELL_H-4,0xFF0D1E2B);
-            font.drawCenteredString(g,unlocked?"C":evolution?"X":"+",bx+8,by+CELL_H-11,unlocked?0xFFFFD76A:evolution?0xFFFF7E86:0xFF75CFF2);
+            drawCentered(g,unlocked?"C":evolution?"X":"+",bx+8,by+CELL_H-11,unlocked?0xFFFFD76A:evolution?0xFFFF7E86:0xFF75CFF2);
             float costScale=Math.min(1.0F,(CELL_W-19.0F)/Math.max(1,font.width(cost)));
             g.pushPose();g.translate(bx+16,by+CELL_H-10,0);g.scale(costScale,costScale,1);font.draw(g,cost,0,0,unlocked?0xFFFFD76A:evolution?0xFFFF7E86:0xFF75CFF2);g.popPose();
         }
@@ -63,13 +63,14 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         font.draw(g,Component.literal("‹"),x+imageWidth-41,y+imageHeight-20,0xFFFFFFFF);
         font.draw(g,Component.literal("›"),x+imageWidth-20,y+imageHeight-20,0xFFFFFFFF);
     }
+    private void drawCentered(PoseStack pose,String text,float centerX,float y,int color){font.draw(pose,text,centerX-font.width(text)/2.0F,y,color);}
     private void renderPreview(PoseStack g,PokecSpecies.Entry species,int x,int y,float partial){
         Minecraft mc=Minecraft.getInstance();if(mc.level==null)return;
         MinemonCreature entity=previews.computeIfAbsent(species.slug(),slug->{var type=ModEntities.SPECIES.get(slug);if(type==null)return null;MinemonCreature e=type.get().create(mc.level);if(e!=null)e.setNoAi(true);return e;});
         if(entity==null)return;
         entity.tickCount=(int)(System.currentTimeMillis()/50L);entity.setYRot((float)((entity.tickCount*1.1)%360));entity.yRotO=entity.getYRot();
         var def=SpeciesDefinitions.get(species.slug());float span=Math.max(def.height(),def.width());float scale=Math.min(20.0F/Math.max(span,0.2F),2.2F);
-        PoseStack pose=g;pose.pushPose();pose.translate(x,y,120);pose.scale(scale,-scale,scale);pose.mulPose(Axis.YP.rotationDegrees(entity.getYRot()));pose.mulPose(Axis.XP.rotationDegrees(-6));
+        PoseStack pose=g;pose.pushPose();pose.translate(x,y,120);pose.scale(scale,-scale,scale);pose.mulPose(Vector3f.YP.rotationDegrees(entity.getYRot()));pose.mulPose(Vector3f.XP.rotationDegrees(-6));
         var dispatcher=mc.getEntityRenderDispatcher();dispatcher.setRenderShadow(false);
         try{dispatcher.render(entity,0,0,0,0,partial,pose,mc.renderBuffers().bufferSource(),15728880);mc.renderBuffers().bufferSource().endBatch();}
         catch(RuntimeException ex){/* A bad preview must not interrupt navigation through the Pokédex. */}

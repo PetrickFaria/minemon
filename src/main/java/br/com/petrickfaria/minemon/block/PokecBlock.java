@@ -38,7 +38,7 @@ public final class PokecBlock extends Block {
     }
     @Override public void setPlacedBy(Level level,BlockPos pos,BlockState state,net.minecraft.world.entity.LivingEntity placer,net.minecraft.world.item.ItemStack stack){
         super.setPlacedBy(level,pos,state,placer,stack);
-        if(!level.isClientSide){BlockPos upper=pos.above();if(level.getBlockState(upper).canBeReplaced())level.setBlock(upper,state.setValue(HALF,DoubleBlockHalf.UPPER),Block.UPDATE_ALL);}
+        if(!level.isClientSide){BlockPos upper=pos.above();level.setBlock(upper,state.setValue(HALF,DoubleBlockHalf.UPPER),Block.UPDATE_ALL);}
     }
     @Override public InteractionResult use(BlockState state,Level level,BlockPos pos,Player player,InteractionHand hand,BlockHitResult hit){
         if(!level.isClientSide&&player instanceof ServerPlayer serverPlayer){

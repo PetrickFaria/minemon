@@ -29,6 +29,7 @@ public final class PokecGameTests {
     @net.minecraftforge.eventbus.api.SubscribeEvent public static void tickPlayers(net.minecraftforge.event.TickEvent.ServerTickEvent event){
         if(event.phase!=net.minecraftforge.event.TickEvent.Phase.END)return;TEST_PLAYERS.removeIf(net.minecraft.world.entity.Entity::isRemoved);for(ServerPlayer p:TEST_PLAYERS)p.doTick();
     }
+    private static void check(boolean condition,String message){if(!condition)throw new AssertionError(message);}
     private static void floor(GameTestHelper h){for(int x=0;x<16;x++)for(int z=0;z<16;z++){h.setBlock(new BlockPos(x,0,z),Blocks.STONE);for(int y=1;y<6;y++)h.setBlock(new BlockPos(x,y,z),Blocks.AIR);}}
     private static ServerPlayer player(GameTestHelper h,BlockPos pos){
         ServerPlayer p=new ServerPlayer(h.getLevel().getServer(),h.getLevel(),new GameProfile(UUID.randomUUID(),"PokecTester"),null);
@@ -53,13 +54,13 @@ public final class PokecGameTests {
         boolean ok=PokecTransactions.perform(buyer,p,"bulbasaur",PokecTransactions.Action.PURCHASE,0x501L);
         h.runAfterDelay(2,()->{
             var delivered=h.getLevel().getEntitiesOfClass(MinemonCreature.class,new net.minecraft.world.phys.AABB(p).inflate(5),e->e.getSpeciesSlug().equals("bulbasaur")&&buyer.getUUID().equals(e.getOwnerUUID()));
-            h.assertTrue(ok,"first purchase should succeed without coins");h.assertTrue(PokecPlayerData.usedFreePurchase(buyer),"free purchase flag must persist");h.assertTrue(!delivered.isEmpty(),"delivered Minemon must be owned by buyer");
-            h.assertTrue(!PokecTransactions.perform(buyer,p,"bulbasaur",PokecTransactions.Action.PURCHASE,0x501L),"duplicate transaction id must not deliver twice");
-            PokecPlayerData.setCoins(buyer,0);h.assertTrue(!PokecTransactions.perform(buyer,p,"bulbasaur",PokecTransactions.Action.PURCHASE,0x502L),"second purchase cannot reuse the free acquisition");
-            PokecPlayerData.setCoins(buyer,100);h.assertTrue(PokecTransactions.perform(buyer,p,"bulbasaur",PokecTransactions.Action.PURCHASE,0x503L),"later acquisition should charge the configured price");
-            h.assertTrue(PokecPlayerData.coins(buyer)==0,"successful purchase must debit PokéCoins once");
+            check(ok,"first purchase should succeed without coins");check(PokecPlayerData.usedFreePurchase(buyer),"free purchase flag must persist");check(!delivered.isEmpty(),"delivered Minemon must be owned by buyer");
+            check(!PokecTransactions.perform(buyer,p,"bulbasaur",PokecTransactions.Action.PURCHASE,0x501L),"duplicate transaction id must not deliver twice");
+            PokecPlayerData.setCoins(buyer,0);check(!PokecTransactions.perform(buyer,p,"bulbasaur",PokecTransactions.Action.PURCHASE,0x502L),"second purchase cannot reuse the free acquisition");
+            PokecPlayerData.setCoins(buyer,100);check(PokecTransactions.perform(buyer,p,"bulbasaur",PokecTransactions.Action.PURCHASE,0x503L),"later acquisition should charge the configured price");
+            check(PokecPlayerData.coins(buyer)==0,"successful purchase must debit PokéCoins once");
             var afterSecond=h.getLevel().getEntitiesOfClass(MinemonCreature.class,new net.minecraft.world.phys.AABB(p).inflate(5),e->e.getSpeciesSlug().equals("bulbasaur")&&buyer.getUUID().equals(e.getOwnerUUID()));
-            h.assertTrue(afterSecond.size()==2,"free and paid purchases should each deliver exactly one owned Minemon");
+            check(afterSecond.size()==2,"free and paid purchases should each deliver exactly one owned Minemon");
             buyer.discard();h.succeed();
         });
     }
@@ -68,15 +69,15 @@ public final class PokecGameTests {
         floor(h);BlockPos p=h.absolutePos(new BlockPos(5,1,5));terminal(h,p);ServerPlayer buyer=player(h,h.absolutePos(new BlockPos(7,1,5)));
         buyer.containerMenu=new PokecMenu(8,buyer.getInventory(),p);buyer.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,new net.minecraft.world.item.ItemStack(ModItems.SOULS.get("grass").get(),8));
         boolean all=true;for(int i=0;i<8;i++)all&=PokecTransactions.perform(buyer,p,"bulbasaur",PokecTransactions.Action.DEPOSIT,0x600L+i);
-        h.assertTrue(all,"matching Grass Soul should be accepted");h.assertTrue(PokecPlayerData.isUnlocked(buyer,"bulbasaur"),"species unlock should persist");
-        h.assertTrue(buyer.getMainHandItem().isEmpty(),"exactly the required souls should be consumed");buyer.discard();h.succeed();
+        check(all,"matching Grass Soul should be accepted");check(PokecPlayerData.isUnlocked(buyer,"bulbasaur"),"species unlock should persist");
+        check(buyer.getMainHandItem().isEmpty(),"exactly the required souls should be consumed");buyer.discard();h.succeed();
     }
     @GameTest(template="test_arena",timeoutTicks=200)
     public static void evolutionUnlockIsOwnerAndEdgeBound(GameTestHelper h){
         floor(h);ServerPlayer owner=player(h,h.absolutePos(new BlockPos(7,1,5)));
         MinemonCreature owned=h.spawn(ModEntities.SPECIES.get("charmander").get(),new BlockPos(5,1,5));owned.tame(owner);
-        owned.notifyPokecEvolution("charmeleon");h.assertTrue(PokecPlayerData.isUnlocked(owner,"charmeleon"),"owned valid evolution unlocks its target");
-        owned.notifyPokecEvolution("charizard");h.assertTrue(!PokecPlayerData.isUnlocked(owner,"charizard"),"must evolve through the declared adjacent stage");owner.discard();h.succeed();
+        owned.notifyPokecEvolution("charmeleon");check(PokecPlayerData.isUnlocked(owner,"charmeleon"),"owned valid evolution unlocks its target");
+        owned.notifyPokecEvolution("charizard");check(!PokecPlayerData.isUnlocked(owner,"charizard"),"must evolve through the declared adjacent stage");owner.discard();h.succeed();
     }
     private PokecGameTests(){}
 }
