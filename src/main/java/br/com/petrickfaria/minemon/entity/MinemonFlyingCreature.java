@@ -111,10 +111,10 @@ public final class MinemonFlyingCreature extends MinemonCreature {
        &&(this.naturalCycle().phase()==BehaviorCycle.Phase.AIR||this.naturalCycle().phase()==BehaviorCycle.Phase.TAKEOFF)
        &&altitude<this.naturalCycle().minimumAltitude()){
     double lift=net.minecraft.util.Mth.clamp((this.naturalCycle().minimumAltitude()-altitude)*0.1D,0.04D,0.12D);
-    // Apply the collision-resolved takeoff correction after all sleep and
-    // navigation goals have ticked; they can reset vertical motion later in
-    // the entity tick, after travel has already run.
-    this.move(net.minecraft.world.entity.MoverType.SELF,new net.minecraft.world.phys.Vec3(0.0D,lift,0.0D));
+    // Apply the small takeoff correction after all goals have ticked. Keep it
+    // collision checked and capped at 0.12 blocks per tick so it stays smooth.
+    var liftedBox=this.getBoundingBox().move(0.0D,lift,0.0D);
+    if(this.level.noCollision(this,liftedBox))this.setPos(this.getX(),this.getY()+lift,this.getZ());
    }
 
   }
