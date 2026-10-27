@@ -178,6 +178,7 @@ public final class NightAndSwimmingTests {
                     +",entityTick="+m.tickCount+",noAI="+m.isNoAi()+",passenger="+m.isPassenger()
                     +",target="+(m.getTarget()==null?"null":m.getTarget().getType())
                     +",recovery="+((MinemonFlyingCreature)m).flightRecoveryAttemptsForValidation()+"/"+((MinemonFlyingCreature)m).flightRecoveryMovesForValidation()
+                    +",samples="+((MinemonFlyingCreature)m).flightRecoverySamplesForValidation()
                     +",nav="+m.getNavigation().getTargetPos()+",upClear="+java.util.stream.IntStream.of(1,2,4)
                         .mapToObj(n->n+":"+level.noCollision(m,m.getBoundingBox().move(0,n*0.12D,0)))
                         .collect(java.util.stream.Collectors.joining("/"))

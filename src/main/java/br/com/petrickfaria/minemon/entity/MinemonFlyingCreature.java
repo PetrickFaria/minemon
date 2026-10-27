@@ -15,6 +15,13 @@ public final class MinemonFlyingCreature extends MinemonCreature {
  private final net.minecraft.world.entity.ai.control.MoveControl groundControl;
  private int flightRecoveryAttempts;
  private int flightRecoveryMoves;
+ private int recoveryTickSamples;
+ private int recoveryAirPhaseSamples;
+ private int recoveryNaturalActiveSamples;
+ private int recoveryAwakeSamples;
+ private int recoveryTargetFreeSamples;
+ private int recoveryNotLandingSamples;
+ private int recoveryBelowMinimumSamples;
  private boolean shouldRecoverNaturalFlight(){
   return !this.level.isClientSide&&this.isFlyingSpecies()&&!this.isSleeping()&&!this.isNightResting()
       &&!this.naturalCycle().landing()&&!this.isOrderedToSit()&&!this.isPassenger()&&!this.isNoAi()
@@ -77,6 +84,15 @@ public final class MinemonFlyingCreature extends MinemonCreature {
   super.tick();
   this.updateLocomotion();
   if(!this.isFlyingSpecies()){return;}
+  if(!this.level.isClientSide){
+   this.recoveryTickSamples++;
+   if(this.naturalCycle().phase()==BehaviorCycle.Phase.AIR||this.naturalCycle().phase()==BehaviorCycle.Phase.TAKEOFF)this.recoveryAirPhaseSamples++;
+   if(this.naturalBehaviorActive())this.recoveryNaturalActiveSamples++;
+   if(!this.isSleeping()&&!this.isNightResting())this.recoveryAwakeSamples++;
+   if(this.getTarget()==null)this.recoveryTargetFreeSamples++;
+   if(!this.naturalCycle().landing())this.recoveryNotLandingSamples++;
+   if(this.getY()-this.naturalSurface()<this.naturalCycle().minimumAltitude())this.recoveryBelowMinimumSamples++;
+  }
   boolean sleeping=this.isSleeping()||this.isNightResting()||this.naturalCycle().landing();
   // Hover safely until a dry landing path is available; follow that path
   // instead of dropping blindly into water, lava, or an obstructed column.
@@ -132,5 +148,6 @@ public final class MinemonFlyingCreature extends MinemonCreature {
  }
  public int flightRecoveryAttemptsForValidation(){return this.flightRecoveryAttempts;}
  public int flightRecoveryMovesForValidation(){return this.flightRecoveryMoves;}
+ public String flightRecoverySamplesForValidation(){return this.recoveryTickSamples+"/"+this.recoveryAirPhaseSamples+"/"+this.recoveryNaturalActiveSamples+"/"+this.recoveryAwakeSamples+"/"+this.recoveryTargetFreeSamples+"/"+this.recoveryNotLandingSamples+"/"+this.recoveryBelowMinimumSamples;}
  @Override public boolean causeFallDamage(float distance,float multiplier,DamageSource source){return this.isFlyingSpecies()||this.wantsNaturalLanding()?false:super.causeFallDamage(distance,multiplier,source);}
 }
