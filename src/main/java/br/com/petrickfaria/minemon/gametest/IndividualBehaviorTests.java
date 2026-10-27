@@ -48,19 +48,19 @@ public final class IndividualBehaviorTests {
   // Spearow has no compatible native ground gait, so it remains in its
   // source-backed continuous flight profile and alternates both altitude bands.
   restore(bird,"AIR",0,0);
-  await(h,()->bird.naturalCycle().stage()==0&&band(bird,1,3),()->{
+  await(h,()->bird.naturalCycle().stage()==0&&band(bird,3,5),()->{
    restore(bird,"AIR",0,1);
-   await(h,()->bird.naturalCycle().stage()==1&&band(bird,4,9),()->{
+   await(h,()->bird.naturalCycle().stage()==1&&band(bird,6,9),()->{
     restore(bird,"AIR",0,0);
-    await(h,()->bird.naturalCycle().stage()==0&&band(bird,1,3),()->{
+    await(h,()->bird.naturalCycle().stage()==0&&band(bird,3,5),()->{
      int ticks=bird.naturalCycle().ticks();bird.setSleeping(true);
      h.runAfterDelay(20,()->{
       check(h,bird.naturalCycle().ticks()==ticks,"Sleep must pause the exact altitude clock");
       bird.setSleeping(false);h.succeed();
      });
-   },200,"Flight must return smoothly to the 1..3 band stage="+bird.naturalCycle().stage()+" altitude="+(bird.getY()-bird.naturalSurface())+state(bird));
-   },200,"Flight must reach the 4..9 band stage="+bird.naturalCycle().stage()+" altitude="+(bird.getY()-bird.naturalSurface())+state(bird));
-  },200,"Continuous flyer must patrol at 1..3 blocks above terrain"+state(bird));
+   },200,"Flight must return smoothly to the 3..5 band stage="+bird.naturalCycle().stage()+" altitude="+(bird.getY()-bird.naturalSurface())+state(bird));
+  },200,"Flight must reach the 6..9 band stage="+bird.naturalCycle().stage()+" altitude="+(bird.getY()-bird.naturalSurface())+state(bird));
+  },200,"Continuous flyer must patrol at 3..5 blocks above terrain"+state(bird));
  }
  private static boolean band(MinemonCreature m,double low,double high){double a=m.getY()-m.naturalSurface();return a>=low-0.1D&&a<=high+0.1D;}
  @GameTest(template="test_arena",timeoutTicks=1000)
@@ -70,21 +70,21 @@ public final class IndividualBehaviorTests {
   await(h,()->mobs.stream().allMatch(MinemonCreature::isOnGround),()->{
    for(var mob:mobs){
     check(h,!mob.isFlyingSpecies(),"Mixed species must begin on land"+state(mob));
-    restore(mob,"LAND",11999,0);
+    restore(mob,"LAND",5999,0);
    }
-   await(h,()->mobs.stream().allMatch(m->m.naturalCycle().phase()==AIR&&band(m,1,3)),()->{
+   await(h,()->mobs.stream().allMatch(m->m.naturalCycle().phase()==AIR&&band(m,3,5)),()->{
     for(var mob:mobs){
      check(h,!mob.isOnGround()&&mob.isFlyingSpecies(),"Takeoff must physically occur"+state(mob));
-     restore(mob,"AIR",5999,0);
+     restore(mob,"AIR",3599,0);
     }
-    await(h,()->mobs.stream().allMatch(m->m.naturalCycle().stage()==1&&band(m,4,9)),()->{
-     for(var mob:mobs)restore(mob,"AIR",5999,1);
+    await(h,()->mobs.stream().allMatch(m->m.naturalCycle().stage()==1&&band(m,6,9)),()->{
+     for(var mob:mobs)restore(mob,"AIR",2399,1);
      await(h,()->mobs.stream().allMatch(m->m.naturalCycle().phase()==LAND),()->{
       for(var mob:mobs)check(h,mob.isOnGround()&&!mob.isFlyingSpecies()&&!mob.isNoGravity(),"Real dry landing must restore land control"+state(mob));
       h.succeed();
      },400,"All three mixed species must complete safe landing");
-    },250,"All three mixed species must physically reach the high flight band");
-   },250,"All three mixed species must physically enter the low flight band");
+    },250,"All three mixed species must physically reach the 6..9 high flight band");
+    },250,"All three mixed species must physically enter the 3..5 low flight band");
   },30,"Mixed species must first settle on their physical ground support");
  }
  @GameTest(template="test_arena",timeoutTicks=250)
@@ -106,10 +106,10 @@ public final class IndividualBehaviorTests {
  public static void visitorDivesSurfacesExitsAndHonorsLandCooldown(GameTestHelper h){
   arena(h,true);var turtle=spawn(h,"squirtle",2,1,7);
   // Start directly at the seek phase to keep this test focused on real
-  // navigation; the full 10-minute land interval is covered by unit tests.
+  // navigation; the full five-minute land interval is covered by unit tests.
   restore(turtle,"SEEK_WATER",0,0);
   await(h,()->turtle.naturalCycle().phase()==SUBMERGED&&underwater(turtle),()->{
-   restore(turtle,"SUBMERGED",11999,0);
+   restore(turtle,"SUBMERGED",5999,0);
    await(h,()->turtle.naturalCycle().phase()==COOLDOWN&&!turtle.isInWater(),()->{
     check(h,turtle.isOnGround(),"Cooldown begins only after effective return to land");
     h.runAfterDelay(100,()->{

@@ -204,16 +204,19 @@ public final class NaturalMovementGoals {
 
     static final class GroundWander extends RandomStrollGoal {
         private final MinemonCreature mob;
-        GroundWander(MinemonCreature mob){super(mob,0.8D);this.mob=mob;}
-        @Override public boolean canUse(){return !this.mob.isFlyingSpecies()&&this.mob.naturalBehaviorActive()&&super.canUse();}
-        @Override public boolean canContinueToUse(){return !this.mob.isFlyingSpecies()&&this.mob.naturalBehaviorActive()&&super.canContinueToUse();}
+        GroundWander(MinemonCreature mob){super(mob,0.8D,1);this.mob=mob;}
+        private boolean eligible(){return !this.mob.isFlyingSpecies()&&!this.mob.isInWaterOrBubble()
+                &&this.mob.naturalBehaviorActive()&&this.mob.naturalCycle().walking();}
+        @Override public boolean canUse(){return eligible()&&super.canUse();}
+        @Override public boolean canContinueToUse(){return eligible()&&super.canContinueToUse();}
     }
-    static final class AquaticLandWander extends net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal {
+    static final class AquaticLandWander extends RandomStrollGoal {
         private final MinemonCreature mob;
-        AquaticLandWander(MinemonCreature mob) { super(mob, 0.65D); this.mob = mob; }
+        AquaticLandWander(MinemonCreature mob) { super(mob, 0.65D, 1); this.mob = mob; }
         @Override protected net.minecraft.world.phys.Vec3 getPosition(){
-            var candidate=super.getPosition();if(candidate==null)return null;
-            if(SpeciesBehaviorProfiles.isVisitor(this.mob.getSpeciesSlug())&&this.mob.naturalCycle().phase()==BehaviorCycle.Phase.COOLDOWN){
+            var candidate=net.minecraft.world.entity.ai.util.LandRandomPos.getPos(this.mob,10,7);
+            if(candidate==null)return null;
+            if(SpeciesBehaviorProfiles.isVisitor(this.mob.getSpeciesSlug())){
                 var path=this.mob.getNavigation().createPath(new BlockPos(candidate),0);
                 if(path==null||!path.canReach())return null;
                 for(int i=0;i<path.getNodeCount();i++){
@@ -224,7 +227,12 @@ public final class NaturalMovementGoals {
             return candidate;
         }
         @Override public boolean canUse() {
-            return !this.mob.isInWater() && this.mob.naturalBehaviorActive() && super.canUse();
+            return SpeciesBehaviorProfiles.isVisitor(this.mob.getSpeciesSlug())&&!this.mob.isInWaterOrBubble()
+                    &&this.mob.naturalBehaviorActive()&&this.mob.naturalCycle().walking()&&super.canUse();
+        }
+        @Override public boolean canContinueToUse() {
+            return SpeciesBehaviorProfiles.isVisitor(this.mob.getSpeciesSlug())&&!this.mob.isInWaterOrBubble()
+                    &&this.mob.naturalBehaviorActive()&&this.mob.naturalCycle().walking()&&super.canContinueToUse();
         }
     }
 }

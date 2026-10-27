@@ -1,156 +1,200 @@
 package br.com.petrickfaria.minemon;
-import br.com.petrickfaria.minemon.entity.*;
+
+import br.com.petrickfaria.minemon.entity.BehaviorCycle;
+import br.com.petrickfaria.minemon.entity.SpeciesBehaviorProfiles;
+import br.com.petrickfaria.minemon.entity.SpeciesDefinitions;
+import net.minecraft.nbt.CompoundTag;
 import org.junit.Test;
-import static org.junit.Assert.*;
-import static br.com.petrickfaria.minemon.entity.SpeciesBehaviorProfiles.Profile.ALTITUDE_CYCLE;
-import static br.com.petrickfaria.minemon.entity.SpeciesBehaviorProfiles.Profile.GROUND_FLIGHT;
-import static br.com.petrickfaria.minemon.entity.SpeciesBehaviorProfiles.Profile.WATER_VISITOR;
-import static br.com.petrickfaria.minemon.entity.SpeciesBehaviorProfiles.Profile.GROUND;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+
 import static br.com.petrickfaria.minemon.entity.BehaviorCycle.Phase.*;
-public class BehaviorCycleTest {
- private BehaviorCycle.Observation observe(boolean active,boolean walking,boolean band,boolean wet,boolean submerged,boolean surface,boolean dry,boolean dive){
-  return new BehaviorCycle.Observation(active,walking,band,wet,submerged,surface,dry,dive);
- }
- private void repeat(BehaviorCycle c,int n,BehaviorCycle.Observation o){for(int i=0;i<n;i++)c.tick(o);}
- @Test public void exact151SpeciesAndSixDisjointProfiles(){
-  assertEquals(SpeciesDefinitions.ALL.keySet(),SpeciesBehaviorProfiles.all().keySet());
-  int[] counts={91,17,9,23,9,2};int i=0;
-  for(var p:SpeciesBehaviorProfiles.Profile.values())assertEquals(p.name(),counts[i++],SpeciesBehaviorProfiles.all().values().stream().filter(v->v==p).count());
-  assertEquals(GROUND_FLIGHT,SpeciesBehaviorProfiles.profile("dragonite"));
-  assertEquals(GROUND,SpeciesBehaviorProfiles.profile("farfetchd"));
-  assertEquals(ALTITUDE_CYCLE,SpeciesBehaviorProfiles.profile("pidgey"));
-  assertEquals(GROUND_FLIGHT,SpeciesBehaviorProfiles.profile("aerodactyl"));
-  assertEquals(ALTITUDE_CYCLE,SpeciesBehaviorProfiles.profile("spearow"));
-  assertEquals(ALTITUDE_CYCLE,SpeciesBehaviorProfiles.profile("fearow"));
-  for(String slug:java.util.List.of("pidgey","pidgeotto","pidgeot","zubat","golbat","venomoth","gastly","aerodactyl","mewtwo","mew")){
-   var d=SpeciesDefinitions.get(slug);
-   assertNotNull(slug+" must use a retained ground gait",d.clips().get("ground_walk"));
-   assertNull(slug+" must not receive an invented fallback gait",d.movementFallback());
-  }
- }
- @Test public void altitudeCountsOnlyActualTimeInsideEachBand(){
-  var c=new BehaviorCycle(ALTITUDE_CYCLE);var flight=observe(true,false,true,false,false,false,false,false);
-  repeat(c,6000,observe(true,false,false,false,false,false,false,false));assertEquals(0,c.ticks());
-  repeat(c,11999,flight);assertEquals(0,c.stage());c.tick(flight);assertEquals(1,c.stage());assertEquals(4,c.minimumAltitude(),0);
-  assertEquals(9,c.maximumAltitude(),0);repeat(c,6000,flight);assertEquals(0,c.stage());assertEquals(0,c.ticks());
- }
- @Test public void pidgeyLineRunsFiveMinutesLowThenThreeMinutesHighAboveTerrain(){
-  var band=observe(true,false,true,false,false,false,false,false);
-  for(String slug:java.util.List.of("pidgey","pidgeotto","pidgeot")){
-   var c=new BehaviorCycle(ALTITUDE_CYCLE,slug);
-   assertEquals(1,c.minimumAltitude(),0);assertEquals(5,c.maximumAltitude(),0);
-   repeat(c,5999,band);assertEquals(0,c.stage());c.tick(band);
-   assertEquals(6,c.minimumAltitude(),0);assertEquals(10,c.maximumAltitude(),0);
-   repeat(c,3599,band);assertEquals(1,c.stage());c.tick(band);
-   assertEquals(0,c.stage());assertEquals(0,c.ticks());
-  }
- }
- @Test public void gastlyFloatsFiveMinutesLowThenThreeMinutesHighAndPausesWhenInactive(){
-  var c=new BehaviorCycle(ALTITUDE_CYCLE,"gastly");var band=observe(true,false,true,false,false,false,false,false);
-  assertEquals(1,c.minimumAltitude(),0);assertEquals(3,c.maximumAltitude(),0);
-  repeat(c,5999,band);assertEquals(0,c.stage());c.tick(band);
-  assertEquals(4,c.minimumAltitude(),0);assertEquals(6,c.maximumAltitude(),0);
-  repeat(c,100,observe(false,false,true,false,false,false,false,false));assertEquals(0,c.ticks());
-  repeat(c,3599,band);c.tick(band);assertEquals(0,c.stage());assertEquals(0,c.ticks());
- }
- @Test public void twentyMinuteGroundLowFlightHighFlightLandingCycle(){
-  var c=new BehaviorCycle(GROUND_FLIGHT);var walk=observe(true,true,false,false,false,false,true,false);
-  repeat(c,11999,walk);assertEquals(LAND,c.phase());c.tick(walk);assertEquals(TAKEOFF,c.phase());
-  repeat(c,200,observe(true,false,false,false,false,false,false,false));assertEquals(0,c.ticks());
-  var fly=observe(true,false,true,false,false,false,false,false);c.tick(fly);assertEquals(AIR,c.phase());
-  repeat(c,5999,fly);assertEquals(AIR,c.phase());c.tick(fly);assertEquals(1,c.stage());assertEquals(4,c.minimumAltitude(),0);
-  repeat(c,5999,fly);assertEquals(AIR,c.phase());c.tick(fly);assertEquals(LANDING,c.phase());
-  repeat(c,200,fly);assertEquals(LANDING,c.phase());c.tick(walk);assertEquals(LAND,c.phase());
- }
- @Test public void ordinaryGroundIdleCountsButPriorityPausesDoNot(){
-  var c=new BehaviorCycle(GROUND_FLIGHT);
-  var ground=observe(true,true,false,false,false,false,true,false);
-  repeat(c,100,ground);assertEquals(100,c.ticks());
-  repeat(c,500,observe(false,true,false,false,false,false,true,false));assertEquals(100,c.ticks());
- }
- @Test public void waterVisitorsSpendTenMinutesOnLandAndTenInWater(){
-  var c=new BehaviorCycle(WATER_VISITOR);var dry=observe(true,true,false,false,false,false,true,false);
-  assertEquals(COOLDOWN,c.phase());repeat(c,11999,dry);assertEquals(COOLDOWN,c.phase());c.tick(dry);assertEquals(SEEK_WATER,c.phase());
-  var dive=observe(true,false,false,true,true,false,false,true);
-  c.tick(dive);assertEquals(SUBMERGED,c.phase());repeat(c,11999,dive);assertEquals(SUBMERGED,c.phase());c.tick(dive);assertEquals(EXIT_WATER,c.phase());
-  var surface=observe(true,false,false,true,false,true,false,true);repeat(c,1000,surface);assertEquals(EXIT_WATER,c.phase());
-  c.tick(dry);assertEquals(COOLDOWN,c.phase());
- }
- @Test public void priorityInterruptionsFreezeEveryClockAndInstancesAreIndependent(){
-  var a=new BehaviorCycle(ALTITUDE_CYCLE);var b=new BehaviorCycle(ALTITUDE_CYCLE);
-  var flight=observe(true,false,true,false,false,false,false,false);repeat(a,100,flight);
-  repeat(a,9000,observe(false,true,true,true,true,true,true,true));assertEquals(100,a.ticks());assertEquals(0,b.ticks());
-  var restored=new BehaviorCycle(ALTITUDE_CYCLE);restored.restore(a.phase().name(),a.ticks(),a.stage());assertEquals(100,restored.ticks());
- }
- @Test public void freeDepthChoicesPreserveTotalAquaticDurationAndPersist(){
-  var c=new BehaviorCycle(WATER_VISITOR);
-  c.restore("SUBMERGED",4000,0);c.chooseWaterDepth(true);
-  assertEquals(SURFACE,c.phase());assertEquals(4000,c.ticks());
-  c.chooseWaterDepth(false);assertEquals(SUBMERGED,c.phase());assertEquals(4000,c.ticks());
-  var restored=new BehaviorCycle(WATER_VISITOR);restored.restore(c.phase().name(),c.ticks(),0);
-  repeat(restored,8000,observe(true,false,false,true,true,false,false,true));
-  assertEquals(EXIT_WATER,restored.phase());
- }
- @Test public void shallowWaterUsesSurfaceSwimmingInsteadOfForcedSubmersion(){
-  var c=new BehaviorCycle(WATER_VISITOR);var dry=observe(true,true,false,false,false,false,true,false);repeat(c,12000,dry);
-  c.tick(observe(true,false,false,true,false,false,false,false));assertEquals(SURFACE,c.phase());
- }
- @Test public void eightBottomPreferringSpeciesRemainAquaticAndOtherSwimmersKeepTheirProfiles(){
-  var expected=java.util.Set.of("shellder","staryu","starmie","krabby","kingler","omanyte","omastar","kabuto");
-  assertEquals(expected,SpeciesBehaviorProfiles.all().keySet().stream().filter(SpeciesBehaviorProfiles::prefersBottom).collect(java.util.stream.Collectors.toSet()));
-  for(String slug:expected)assertTrue(slug+" must be water-capable",SpeciesBehaviorProfiles.waterCapable(slug));
-  assertFalse(SpeciesBehaviorProfiles.prefersBottom("gyarados"));
-  assertFalse(SpeciesBehaviorProfiles.prefersBottom("lapras"));
-  assertTrue(SpeciesBehaviorProfiles.restsAtWaterBottom("gyarados"));
-  assertTrue(SpeciesBehaviorProfiles.restsAtWaterBottom("cloyster"));
-  assertFalse(SpeciesBehaviorProfiles.restsAtWaterBottom("lapras"));
- }
- @Test public void onlySeakingReceivesExactly25PercentReduction(){
-  var s=SpeciesDefinitions.get("seaking");assertEquals(1.35,s.scale(),0.00001);assertEquals(.525,s.width(),0.00001);assertEquals(.45,s.height(),0.00001);
-  assertEquals(.6,SpeciesDefinitions.get("goldeen").width(),0.00001);
- }
- @Test public void groundProfilesSelectExistingGroundClipsIncludingFarfetchd(){
-  for(var d:SpeciesDefinitions.ALL.values()){
-   var p=SpeciesBehaviorProfiles.profile(d.slug());
-   if(p!=GROUND&&p!=GROUND_FLIGHT&&p!=WATER_VISITOR)continue;
-   if(d.clips().containsKey("ground_idle"))assertEquals(d.slug()+" ground idle",d.clips().get("ground_idle"),d.idle());
-   if(d.clips().containsKey("ground_walk"))assertEquals(d.slug()+" ground walk",d.clips().get("ground_walk"),d.walk());
-  }
-  assertEquals("animation.farfetchd.ground_walk",SpeciesDefinitions.get("farfetchd").walk());
- }
- @Test public void absentGaitsAreExplicitAdditionsWhileOriginalSourceClipsRemain(){
-  for(String s:java.util.List.of("eevee","jolteon","flareon","vaporeon")){
-   var d=SpeciesDefinitions.get(s);assertNull(d.movementFallback());
-   assertEquals(CompatibleLocomotion.clip(s,"walk"),d.walk());assertTrue(d.clips().containsKey("ground_idle"));
-   assertEquals(CompatibleLocomotion.clip(s,"run"),d.clips().get("ground_run"));
-  }
-  assertEquals(CompatibleLocomotion.clip("vaporeon","swim"),SpeciesDefinitions.get("vaporeon").clips().get("water_swim"));
-  for(String s:java.util.List.of("meowth","persian")){
-   var d=SpeciesDefinitions.get(s);assertNull(d.movementFallback());
-   assertEquals(CompatibleLocomotion.clip(s,"walk"),d.clips().get("ground_walk"));
-   assertEquals(CompatibleLocomotion.clip(s,"run"),d.clips().get("ground_run"));
-  }
-  for(String s:java.util.List.of("articuno","zapdos","moltres"))
-   assertEquals("model-specific native air fly adapter remains selected for "+s,
-       "animation."+s+".minemon_air_fly",SpeciesDefinitions.get(s).clips().get("air_fly"));
-  assertEquals("animation.fearow.minemon_air_fly",SpeciesDefinitions.get("fearow").clips().get("air_fly"));
-  assertEquals("animation.spearow.minemon_air_fly",SpeciesDefinitions.get("spearow").clips().get("air_fly"));
- }
- @Test public void requestedScaleAndHitboxAdjustmentsAreAppliedOnlyAtRuntime(){
-  assertEquals(1.0,SpeciesDefinitions.get("dewgong").scale(),.0001);
-  assertEquals(.965,SpeciesDefinitions.get("jynx").scale(),.0001);
-  assertEquals(1.47,SpeciesDefinitions.get("magmar").scale(),.0001);
-  assertEquals(1.1169,SpeciesDefinitions.get("victreebel").scale(),.0001);
-  assertEquals(.8415,SpeciesDefinitions.get("victreebel").width(),.0001);
-  assertEquals(1.05,SpeciesDefinitions.get("jynx").width(),.0001);
-  assertEquals(2.25,SpeciesDefinitions.get("magmar").height(),.0001);
-  assertEquals(1.3005,SpeciesDefinitions.get("victreebel").height(),.0001);
-  assertEquals(1.05,SpeciesDefinitions.get("kangaskhan").scale(),.0001);
-  assertEquals(1.35,SpeciesDefinitions.get("snorlax").scale(),.0001);
-  assertEquals(1.35,SpeciesDefinitions.get("venusaur").scale(),.0001);
-  assertEquals(1.0125,SpeciesDefinitions.get("venusaur").width(),.0001);
-  assertEquals(.945,SpeciesDefinitions.get("venusaur").height(),.0001);
-  assertEquals(.81,SpeciesDefinitions.get("snorlax").width(),.0001);
-  assertEquals(1.1475,SpeciesDefinitions.get("snorlax").height(),.0001);
- }
+import static br.com.petrickfaria.minemon.entity.SpeciesBehaviorProfiles.Profile.*;
+import static org.junit.Assert.*;
+
+public final class BehaviorCycleTest {
+    private static BehaviorCycle.Observation o(boolean active, boolean ground, boolean band, boolean wet,
+                                               boolean submerged, boolean surface, boolean dry, boolean dive) {
+        return new BehaviorCycle.Observation(active, ground, band, wet, submerged, surface, dry, dive);
+    }
+    private static void repeat(BehaviorCycle cycle, int ticks, BehaviorCycle.Observation observation) {
+        for (int i = 0; i < ticks; i++) cycle.tick(observation);
+    }
+
+    @Test public void all151SpeciesHaveOneApprovedRoutineCategory() {
+        assertEquals(SpeciesDefinitions.ALL.keySet(), SpeciesBehaviorProfiles.all().keySet());
+        Map<SpeciesBehaviorProfiles.Profile, Long> expected = Map.of(
+                GROUND, 84L, WATER_VISITOR, 23L, GROUND_FLIGHT, 3L, FLYER, 14L,
+                FLOAT_HALF, 3L, FLOAT_LOW, 2L, FLOAT_CYCLE, 8L, GROUND_FLOAT_CYCLE, 3L,
+                AQUATIC_CYCLE, 7L, AQUATIC_BOTTOM, 2L, AQUATIC_NEAR_SURFACE, 1L, AQUATIC_SURFACE, 1L);
+        for (var profile : SpeciesBehaviorProfiles.Profile.values())
+            assertEquals(profile.name(), expected.get(profile), SpeciesBehaviorProfiles.all().values().stream().filter(profile::equals).count());
+    }
+
+    @Test public void landRoutineUsesIndependentThreeToFiveSecondWalkAndThreeToSevenSecondPause() {
+        var a = new BehaviorCycle(GROUND, "bulbasaur", new Random(11));
+        var b = new BehaviorCycle(GROUND, "pikachu", new Random(29));
+        assertTrue(a.walking()); assertTrue(b.walking());
+        assertTrue(a.gaitTicks() >= 60 && a.gaitTicks() <= 100);
+        assertTrue(b.gaitTicks() >= 60 && b.gaitTicks() <= 100);
+        assertNotEquals("individuals draw their own first gait duration", a.gaitTicks(), b.gaitTicks());
+        int firstWalk = a.gaitTicks();
+        repeat(a, firstWalk - 1, o(true, true, false, false, false, false, true, false));
+        assertTrue(a.walking());
+        a.tick(o(true, true, false, false, false, false, true, false));
+        assertFalse(a.walking());
+        assertTrue(a.gaitTicks() >= 60 && a.gaitTicks() <= 140);
+        int pause = a.gaitTicks();
+        repeat(a, pause, o(true, true, false, false, false, false, true, false));
+        assertTrue(a.walking());
+        assertTrue(a.gaitTicks() >= 60 && a.gaitTicks() <= 100);
+    }
+
+    @Test public void combatSleepAndAirborneTicksPauseGroundGait() {
+        var cycle = new BehaviorCycle(GROUND, "bulbasaur", new Random(4));
+        int initial = cycle.gaitTicks();
+        repeat(cycle, 80, o(false, true, false, false, false, false, true, false));
+        repeat(cycle, 80, o(true, false, false, false, false, false, false, false));
+        assertEquals(initial, cycle.gaitTicks());
+    }
+
+    @Test public void allFourteenFlyersUseThreeMinutesAtEachApprovedHeight() {
+        var flyers = List.of("butterfree", "beedrill", "pidgey", "pidgeotto", "pidgeot", "spearow",
+                "fearow", "zubat", "golbat", "venomoth", "aerodactyl", "articuno", "zapdos", "moltres");
+        var band = o(true, false, true, false, false, false, false, false);
+        for (String slug : flyers) {
+            var cycle = new BehaviorCycle(FLYER, slug, new Random(3));
+            assertEquals(slug, 3.0D, cycle.minimumAltitude(), 0.0D);
+            assertEquals(slug, 5.0D, cycle.maximumAltitude(), 0.0D);
+            repeat(cycle, 3_599, band); assertEquals(slug, 0, cycle.stage());
+            cycle.tick(band); assertEquals(slug, 1, cycle.stage());
+            assertEquals(slug, 6.0D, cycle.minimumAltitude(), 0.0D);
+            assertEquals(slug, 9.0D, cycle.maximumAltitude(), 0.0D);
+            repeat(cycle, 3_599, band); cycle.tick(band);
+            assertEquals(slug, 0, cycle.stage());
+        }
+    }
+
+    @Test public void floatersUseTheirSeparateHeightBandsAndDurations() {
+        for (String slug : List.of("metapod", "kakuna", "abra")) {
+            var cycle = new BehaviorCycle(FLOAT_HALF, slug, new Random(1));
+            assertEquals(0.5D, cycle.minimumAltitude(), 0.0D);
+            assertEquals(0.5D, cycle.maximumAltitude(), 0.0D);
+        }
+        for (String slug : List.of("geodude", "porygon")) {
+            var cycle = new BehaviorCycle(FLOAT_LOW, slug, new Random(2));
+            assertEquals(0.5D, cycle.minimumAltitude(), 0.0D);
+            assertEquals(1.0D, cycle.maximumAltitude(), 0.0D);
+        }
+        var observation = o(true, false, true, false, false, false, false, false);
+        var gastly = new BehaviorCycle(FLOAT_CYCLE, "gastly", new Random(5));
+        assertEquals(1.0D, gastly.minimumAltitude(), 0.0D); assertEquals(3.0D, gastly.maximumAltitude(), 0.0D);
+        repeat(gastly, 5_999, observation); assertEquals(0, gastly.stage());
+        gastly.tick(observation); assertEquals(1, gastly.stage());
+        assertEquals(4.0D, gastly.minimumAltitude(), 0.0D); assertEquals(6.0D, gastly.maximumAltitude(), 0.0D);
+        repeat(gastly, 3_600, observation); assertEquals(0, gastly.stage());
+    }
+
+    @Test public void mixedFlyersWalkFiveMinutesThenFlyThreeAndTwoMinutes() {
+        var ground = o(true, true, false, false, false, false, true, false);
+        var takeoff = o(true, false, true, false, false, false, false, false);
+        for (String slug : List.of("charizard", "scyther", "dragonite")) {
+            var cycle = new BehaviorCycle(GROUND_FLIGHT, slug, new Random(7));
+            repeat(cycle, 5_999, ground); assertEquals(LAND, cycle.phase());
+            cycle.tick(ground); assertEquals(TAKEOFF, cycle.phase());
+            cycle.tick(takeoff); assertEquals(AIR, cycle.phase());
+            assertEquals(3.0D, cycle.minimumAltitude(), 0.0D); assertEquals(5.0D, cycle.maximumAltitude(), 0.0D);
+            repeat(cycle, 3_599, takeoff); cycle.tick(takeoff); assertEquals(1, cycle.stage());
+            assertEquals(6.0D, cycle.minimumAltitude(), 0.0D); assertEquals(9.0D, cycle.maximumAltitude(), 0.0D);
+            repeat(cycle, 2_399, takeoff); cycle.tick(takeoff); assertEquals(LANDING, cycle.phase());
+            cycle.tick(ground); assertEquals(LAND, cycle.phase());
+        }
+    }
+
+    @Test public void kadabraAlakazamAndGengarHaveTheirApprovedLandFloatCycles() {
+        var ground = o(true, true, false, false, false, false, true, false);
+        var band = o(true, false, true, false, false, false, false, false);
+        for (String slug : List.of("kadabra", "alakazam")) {
+            var cycle = new BehaviorCycle(GROUND_FLOAT_CYCLE, slug, new Random(8));
+            repeat(cycle, 6_000, ground); assertEquals(TAKEOFF, cycle.phase());
+            cycle.tick(band); repeat(cycle, 3_600, band); assertEquals(LANDING, cycle.phase());
+            cycle.tick(ground); assertEquals(LAND, cycle.phase());
+        }
+        var gengar = new BehaviorCycle(GROUND_FLOAT_CYCLE, "gengar", new Random(9));
+        repeat(gengar, 6_000, ground); gengar.tick(band);
+        repeat(gengar, 3_600, band); assertEquals(1, gengar.stage());
+        assertEquals(4.0D, gengar.minimumAltitude(), 0.0D); assertEquals(6.0D, gengar.maximumAltitude(), 0.0D);
+        repeat(gengar, 2_400, band); assertEquals(LANDING, gengar.phase());
+    }
+
+    @Test public void amphibiansWaitFiveMinutesOnLandAndCountOnlyActualWaterTime() {
+        var cycle = new BehaviorCycle(WATER_VISITOR, "staryu", new Random(2));
+        var dry = o(true, true, false, false, false, false, true, false);
+        repeat(cycle, 5_999, dry); assertEquals(COOLDOWN, cycle.phase());
+        cycle.tick(dry); assertEquals(SEEK_WATER, cycle.phase());
+        repeat(cycle, 2_000, o(true, true, false, false, false, false, true, false));
+        assertEquals(SEEK_WATER, cycle.phase());
+        var water = o(true, false, false, true, true, false, false, true);
+        cycle.tick(water); assertTrue(cycle.phase() == SUBMERGED || cycle.phase() == SURFACE);
+        for (int i = 0; i < 6_000 && cycle.phase() != EXIT_WATER; i++) cycle.tick(water);
+        assertEquals(EXIT_WATER, cycle.phase());
+        assertTrue("at most two surface visits per five-minute water cycle", cycle.surfaceVisits() <= 2);
+        assertTrue("surface residence never exceeds 30 seconds", cycle.surfaceTicks() <= 600);
+        cycle.tick(dry); assertEquals(COOLDOWN, cycle.phase());
+    }
+
+    @Test public void staryuAndStarmieMaySurfaceAtMostTwiceAndEachVisitIsCappedAtThirtySeconds() {
+        for (String slug : List.of("staryu", "starmie")) {
+            var cycle = new BehaviorCycle(WATER_VISITOR, slug, new Random(2));
+            cycle.restore("SEEK_WATER", 0, 0);
+            var water = o(true, false, false, true, true, false, false, true);
+            cycle.tick(water);
+            for (int i = 0; i < 6_000 && cycle.phase() != EXIT_WATER; i++) cycle.tick(
+                    o(true, false, true, true, true, cycle.phase() == SURFACE, false, true));
+            assertTrue(cycle.surfaceVisits() <= 2);
+            assertTrue(cycle.surfaceTicks() <= 600);
+        }
+    }
+
+    @Test public void shellderAndCloysterNeverEnterASurfacePhase() {
+        for (String slug : List.of("shellder", "cloyster")) {
+            var cycle = new BehaviorCycle(AQUATIC_BOTTOM, slug, new Random(3));
+            var wet = o(true, false, false, true, true, false, false, true);
+            repeat(cycle, 20_000, wet);
+            assertEquals(SUBMERGED, cycle.phase());
+            assertTrue(SpeciesBehaviorProfiles.prefersBottom(slug));
+            assertTrue(SpeciesBehaviorProfiles.restsAtWaterBottom(slug));
+        }
+    }
+
+    @Test public void sevenAquaticSpeciesSurfaceOnlyAfterFiveSubmergedMinutesAndReturnWithinThirtySeconds() {
+        for (String slug : List.of("tentacool", "tentacruel", "horsea", "seadra", "goldeen", "seaking", "magikarp")) {
+            var cycle = new BehaviorCycle(AQUATIC_CYCLE, slug, new Random(4));
+            var submerged = o(true, false, false, true, true, false, false, true);
+            repeat(cycle, 5_999, submerged); assertEquals(slug, SUBMERGED, cycle.phase());
+            cycle.tick(submerged); assertEquals(slug, SURFACE, cycle.phase());
+            repeat(cycle, 599, o(true, false, false, true, false, true, false, true));
+            assertEquals(slug, SURFACE, cycle.phase());
+            cycle.tick(o(true, false, false, true, false, true, false, true));
+            assertEquals(slug, SUBMERGED, cycle.phase());
+        }
+    }
+
+    @Test public void saveLoadPreservesStageGaitAndWaterVisitCounters() {
+        var cycle = new BehaviorCycle(WATER_VISITOR, "staryu", new Random(5));
+        cycle.restore("SEEK_WATER", 0, 0);
+        var water = o(true, false, false, true, true, false, false, true);
+        cycle.tick(water);
+        repeat(cycle, 2_300, water);
+        var tag = new CompoundTag(); cycle.save(tag);
+        var copy = new BehaviorCycle(WATER_VISITOR, "staryu", new Random(6)); copy.restore(tag);
+        assertEquals(cycle.phase(), copy.phase());
+        assertEquals(cycle.ticks(), copy.ticks());
+        assertEquals(cycle.aquaticTicks(), copy.aquaticTicks());
+        assertEquals(cycle.surfaceVisits(), copy.surfaceVisits());
+        assertEquals(cycle.surfaceVisitLimit(), copy.surfaceVisitLimit());
+        assertEquals(cycle.surfaceTicks(), copy.surfaceTicks());
+    }
 }

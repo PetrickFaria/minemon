@@ -46,6 +46,33 @@ public final class NightAndSwimmingTests {
   }
  }
  private static MinemonCreature spawn(GameTestHelper h,String slug,int x,int y,int z){return h.spawn(ModEntities.SPECIES.get(slug).get(),new BlockPos(x,y,z));}
+ @GameTest(template="test_arena",batch="nocturnal_schedule",timeoutTicks=800)
+ public static void nocturnalSpeciesSleepFromMiddayUntilNightAndPauseTheirRoutine(GameTestHelper h){
+  arena(h);var level=h.getLevel();level.getGameRules().getRule(net.minecraft.world.level.GameRules.RULE_DAYLIGHT).set(false,level.getServer());
+  level.setDayTime(5000);
+  var nocturnal=new ArrayList<MinemonCreature>();
+  var slugs=List.of("gastly","haunter","gengar","zubat","golbat");
+  for(int i=0;i<slugs.size();i++)nocturnal.add(spawn(h,slugs.get(i),3+i*5,1,5));
+  await(h,()->nocturnal.stream().allMatch(m->!m.isSleeping()),()->{
+   level.setDayTime(6000);
+   await(h,()->nocturnal.stream().allMatch(MinemonCreature::isSleeping),()->{
+    check(h,nocturnal.get(0).getY()-nocturnal.get(0).naturalSurface()>.8D,"Gastly must sleep at its one-block hover height");
+    check(h,nocturnal.get(1).getY()-nocturnal.get(1).naturalSurface()>.8D,"Haunter must sleep at its one-block hover height");
+    for(int i=2;i<nocturnal.size();i++)check(h,nocturnal.get(i).isOnGround(),nocturnal.get(i).getSpeciesSlug()+" must land for daytime sleep");
+    var paused=new HashMap<MinemonCreature,Integer>();nocturnal.forEach(m->paused.put(m,m.naturalCycle().ticks()));
+    h.runAfterDelay(30,()->{
+     nocturnal.forEach(m->check(h,m.naturalCycle().ticks()==paused.get(m),m.getSpeciesSlug()+" must pause its routine while asleep"));
+     level.setDayTime(12999);
+     h.runAfterDelay(5,()->{
+      check(h,nocturnal.stream().allMatch(MinemonCreature::isSleeping),"Nocturnal species must remain asleep through world time 12,999");
+      level.setDayTime(13000);
+      await(h,()->nocturnal.stream().noneMatch(MinemonCreature::isSleeping),()->h.succeed(),40,
+          "Nocturnal species must wake at the start of night (world time 13,000)");
+     });
+    });
+   },250,"Gastly, Haunter, Gengar, Zubat, and Golbat must begin daytime sleep at world time 6,000");
+  },40,"Nocturnal species must remain awake during the first half of daylight");
+ }
  @GameTest(template="test_arena",batch="night_aquatic",timeoutTicks=1000)
  public static void aquaticNightRestKeepsSurfaceAndBottomRoutinesSafe(GameTestHelper h){
   arena(h);var level=h.getLevel();
@@ -108,7 +135,7 @@ public final class NightAndSwimmingTests {
   var mixed=new ArrayList<MinemonCreature>();var air=new ArrayList<MinemonCreature>();
   int x=5;
   // Land-resting flyers include ground/air cycle species and species with an approved night landing pose.
-  var mixedSpecies=List.of("charizard","scyther","dragonite","pidgey","pidgeotto","pidgeot","zubat","golbat","venomoth","aerodactyl","mewtwo","mew","butterfree","beedrill","gengar","spearow","fearow","articuno","zapdos","moltres");
+  var mixedSpecies=List.of("charizard","scyther","dragonite","pidgey","pidgeotto","pidgeot","venomoth","aerodactyl","butterfree","beedrill","spearow","fearow","articuno","zapdos","moltres","metapod","kakuna","geodude","kadabra","alakazam");
   for(int i=0;i<mixedSpecies.size();i++){
    String slug=mixedSpecies.get(i);x=3+(i%5)*6;int z=5+(i/5)*5;
    var m=spawn(h,slug,x,7,z);
@@ -117,7 +144,7 @@ public final class NightAndSwimmingTests {
   }
   x=3;
   // These airborne species keep their one-block hover while asleep.
-  for(String slug:List.of("gastly","koffing","weezing","magnemite","magneton","haunter")){
+  for(String slug:List.of("koffing","weezing","magnemite","magneton","mewtwo","mew")){
    int airX=3+(air.size()%5)*6,airZ=4+(air.size()/5)*5;air.add(spawn(h,slug,airX,7,airZ));
   }
   h.runAfterDelay(5,()->{

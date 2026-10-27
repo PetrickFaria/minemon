@@ -25,7 +25,7 @@ public final class ClientSmokeTest {
      ||Boolean.getBoolean("minemon.clientSmokeAir")&&SpeciesBehaviorProfiles.canFly(slug);}
  private static boolean fixtureWater(String slug){return SpeciesBehaviorProfiles.isAquatic(slug)
      ||Boolean.getBoolean("minemon.clientSmokeWater")&&SpeciesBehaviorProfiles.waterCapable(slug);}
- private static boolean fixtureSurface(String slug){return SpeciesBehaviorProfiles.profile(slug)==SpeciesBehaviorProfiles.Profile.SURFACE;}
+ private static boolean fixtureSurface(String slug){return SpeciesBehaviorProfiles.profile(slug)==SpeciesBehaviorProfiles.Profile.AQUATIC_SURFACE;}
  private static final java.util.Map<String,Integer> smokeParticleSamples=new java.util.HashMap<>();
  private static boolean opened,setup;
  private static boolean arbokScreenshotPending;
@@ -524,7 +524,8 @@ public final class ClientSmokeTest {
      level.setBlockAndUpdate(new BlockPos(x,101,z),Blocks.AIR.defaultBlockState());
     }
     var next=ModEntities.SPECIES.get(slug).get().create(level);
-    if(fixtureAir(slug)&&SpeciesBehaviorProfiles.profile(slug)==SpeciesBehaviorProfiles.Profile.GROUND_FLIGHT){
+    if(fixtureAir(slug)&&(SpeciesBehaviorProfiles.profile(slug)==SpeciesBehaviorProfiles.Profile.GROUND_FLIGHT
+        ||SpeciesBehaviorProfiles.profile(slug)==SpeciesBehaviorProfiles.Profile.GROUND_FLOAT_CYCLE)){
      var saved=new net.minecraft.nbt.CompoundTag();next.addAdditionalSaveData(saved);saved.putString("NaturalBehaviorPhase","AIR");next.readAdditionalSaveData(saved);
     }
     double waterY=fixtureSurface(slug)?101.0D-WaterMovementGoal.preferredSurfaceDepth(next):101.0D-next.getBbHeight()-0.35D;
