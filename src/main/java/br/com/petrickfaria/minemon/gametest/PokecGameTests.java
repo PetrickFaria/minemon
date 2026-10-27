@@ -43,9 +43,10 @@ public final class PokecGameTests {
     @GameTest(template="test_arena",timeoutTicks=200)
     public static void terminalHasPairedTwoBlockState(GameTestHelper h){
         floor(h);BlockPos p=h.absolutePos(new BlockPos(5,1,5));terminal(h,p);
-        h.assertBlockPresent(ModBlocks.POKEC.get(),p);h.assertBlockPresent(ModBlocks.POKEC.get(),p.above());
-        h.assertBlockProperty(p,PokecBlock.HALF,net.minecraft.world.level.block.state.properties.DoubleBlockHalf.LOWER);
-        h.assertBlockProperty(p.above(),PokecBlock.HALF,net.minecraft.world.level.block.state.properties.DoubleBlockHalf.UPPER);h.succeed();
+        BlockPos relative=new BlockPos(5,1,5);
+        h.assertBlockPresent(ModBlocks.POKEC.get(),relative);h.assertBlockPresent(ModBlocks.POKEC.get(),relative.above());
+        h.assertBlockProperty(relative,PokecBlock.HALF,net.minecraft.world.level.block.state.properties.DoubleBlockHalf.LOWER);
+        h.assertBlockProperty(relative.above(),PokecBlock.HALF,net.minecraft.world.level.block.state.properties.DoubleBlockHalf.UPPER);h.succeed();
     }
     @GameTest(template="test_arena",timeoutTicks=200)
     public static void firstSuccessfulStarterPurchaseIsOwnedAndFree(GameTestHelper h){
