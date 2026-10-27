@@ -175,7 +175,9 @@ public final class NightAndSwimmingTests {
                     +",active="+m.naturalBehaviorActive()+",ground="+m.isOnGround()+",alt="+(m.getY()-m.naturalSurface())
                     +",min="+m.naturalCycle().minimumAltitude()+",landing="+m.wantsNaturalLanding()
                     +",sleep="+m.isSleeping()+",gravity="+!m.isNoGravity()+",vy="+m.getDeltaMovement().y
-                    +",entityTick="+m.tickCount+",noAI="+m.isNoAi()+",passenger="+m.isPassenger()
+                    +",entityTick="+m.tickCount+",pos="+m.position()+",motion="+m.getDeltaMovement()
+                    +",surface="+m.naturalSurface()+",chunkLoaded="+level.hasChunkAt(m.blockPosition())
+                    +",navDone="+m.getNavigation().isDone()+",noAI="+m.isNoAi()+",passenger="+m.isPassenger()
                     +",target="+(m.getTarget()==null?"null":m.getTarget().getType())
                     +",recovery="+((MinemonFlyingCreature)m).flightRecoveryAttemptsForValidation()+"/"+((MinemonFlyingCreature)m).flightRecoveryMovesForValidation()
                     +",samples="+((MinemonFlyingCreature)m).flightRecoverySamplesForValidation()
