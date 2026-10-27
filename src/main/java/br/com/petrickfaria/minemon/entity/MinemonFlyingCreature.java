@@ -53,7 +53,7 @@ public final class MinemonFlyingCreature extends MinemonCreature {
     // by SleepLanding. The controller otherwise keeps steering back down and
     // wins against a small upward velocity on every tick.
     this.getMoveControl().setWantedPosition(this.getX(),this.naturalSurface()+minimum+0.25D,
-        this.getZ(),Math.max(0.25D,this.getMoveControl().getSpeed()));
+        this.getZ(),0.5D);
     // Move through the normal collision resolver in small steps. A navigation
     // goal can keep writing a ground-level vertical input while waking, so a
     // velocity-only correction gets overwritten before it changes position.
