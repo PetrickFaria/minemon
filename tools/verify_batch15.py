@@ -2,7 +2,7 @@
 """Verify Cobblemon 1.8.2 Batch 15 and exact preservation of approved #001–#140."""
 import argparse, json, math, struct, subprocess, zipfile
 from pathlib import Path
-from verify_approved_asset_delta import is_approved_prior_asset_delta
+from verify_approved_asset_delta import is_approved_prior_asset_delta, pokec_resource_paths
 
 ROOT=Path(__file__).resolve().parents[1]
 BASE='76fcb3074cc65c62dea6b94c291de90925494e95'
@@ -94,6 +94,7 @@ allowed.add('src/main/resources/assets/minemon/textures/pokemon/arbok_cobblemon_
 allowed.update({'src/main/resources/assets/minemon_gen1/particles/gastly_ghostly_smoke.json',*(f'src/main/resources/assets/minemon_gen1/textures/particle/gastly_ghostly_smoke_{i}.png' for i in range(6))})
 changed=subprocess.check_output(['git','diff','--name-only',BASE,'--','src/main/resources'],cwd=ROOT,text=True).splitlines()
 changed+=subprocess.check_output(['git','ls-files','--others','--exclude-standard','--','src/main/resources'],cwd=ROOT,text=True).splitlines()
+allowed.update(pokec_resource_paths())
 assert set(changed)<=allowed,set(changed)-allowed
 for i,d in enumerate(defs[140:150]):
  slug=d['slug'];assert d['nationalPokedexNumber']==i+141

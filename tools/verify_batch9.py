@@ -2,7 +2,7 @@
 """Verify Batch 9 assets, source evidence, cumulative preservation, and packaged JAR."""
 import argparse, json, math, re, struct, subprocess, zipfile
 from pathlib import Path
-from verify_approved_asset_delta import is_approved_prior_asset_delta
+from verify_approved_asset_delta import is_approved_prior_asset_delta, pokec_resource_paths
 
 ROOT=Path(__file__).resolve().parents[1]
 BASE='2503dd085402211ec2e9c6287fca83ab4747d2d5'
@@ -184,6 +184,7 @@ source_fire_frames={f'src/main/resources/assets/minemon/textures/pokemon/{slug}_
 allowed_resources.update(source_fire_frames)
 allowed_resources.add('src/main/resources/assets/minemon/textures/pokemon/arbok_cobblemon_1_8_2/arbok.png')
 allowed_resources.update({'src/main/resources/assets/minemon_gen1/particles/gastly_ghostly_smoke.json',*(f'src/main/resources/assets/minemon_gen1/textures/particle/gastly_ghostly_smoke_{i}.png' for i in range(6))})
+allowed_resources.update(pokec_resource_paths())
 assert set(changed)<=allowed_resources,set(changed)-allowed_resources
 print(f'PASS BATCH 9 {start}-{end}: source 1.8.2, rig/texture/clips/events, selected profile joints, and previous 80 resource preservation')
 if args.jar:

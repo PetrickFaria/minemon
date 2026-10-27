@@ -2,7 +2,7 @@
 """Verify exclusive batch 8 resources, cumulative preservation, and the packaged JAR."""
 import argparse, json, math, re, struct, subprocess, sys, zipfile
 from pathlib import Path
-from verify_approved_asset_delta import is_approved_prior_asset_delta
+from verify_approved_asset_delta import is_approved_prior_asset_delta, pokec_resource_paths
 
 ROOT=Path(__file__).resolve().parents[1]
 BASE='b77eac9c38aa0d6a1d35c3cfab36a707ac6cab24'
@@ -181,7 +181,7 @@ gastly_native_smoke={
  'src/main/resources/assets/minemon_gen1/particles/gastly_ghostly_smoke.json',
  *(f'src/main/resources/assets/minemon_gen1/textures/particle/gastly_ghostly_smoke_{frame}.png' for frame in range(6)),
 }
-allowed_resource_paths=allowed_paths|source_fire_frames|gastly_native_smoke|{MP,VP,'src/main/resources/assets/minemon/animations/weedle/weedle.animation.json'}
+allowed_resource_paths=allowed_paths|source_fire_frames|gastly_native_smoke|{MP,VP,'src/main/resources/assets/minemon/animations/weedle/weedle.animation.json'}|pokec_resource_paths()
 assert set(changed_resources)<=allowed_resource_paths,set(changed_resources)-allowed_resource_paths
 print(f'PASS BATCH 8 {start}-{end}: exact authorized definitions; source model hierarchy/texture dimensions/animation bones/expressions/events and special anatomy validated; first 70 resources byte-preserved')
 
