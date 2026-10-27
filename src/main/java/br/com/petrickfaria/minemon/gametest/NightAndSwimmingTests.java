@@ -25,6 +25,36 @@ public final class NightAndSwimmingTests {
   if(ticks<=0){h.getLevel().setDayTime(1000);h.fail(why.get());return;}
   h.runAfterDelay(5,()->await(h,condition,next,ticks-5,why));
  }
+ private static void awaitFlightResume(GameTestHelper h,List<MinemonCreature> mixed,
+     Map<MinemonCreature,Integer> clocks,int remaining,List<String> history){
+  if(mixed.stream().allMatch(m->!m.isOnGround()&&m.naturalCycle().ticks()>clocks.get(m))){h.succeed();return;}
+  if(remaining<=0){
+   h.getLevel().setDayTime(1000);
+   h.fail("Mixed fliers must resume their paused airborne phase after dawn; pending="
+       +mixed.stream().filter(m->m.isOnGround()||m.naturalCycle().ticks()<=clocks.get(m))
+           .map(NightAndSwimmingTests::flightResumeSnapshot).toList()+",history="+history);
+   return;
+  }
+  h.runAfterDelay(5,()->{
+   for(int i:new int[]{0,15,17})if(i<mixed.size())
+    history.add("time="+h.getLevel().getGameTime()+" "+flightResumeSnapshot(mixed.get(i)));
+   awaitFlightResume(h,mixed,clocks,remaining-5,history);
+  });
+ }
+ private static String flightResumeSnapshot(MinemonCreature m){
+  var level=m.getCommandSenderWorld();
+  return m.getSpeciesSlug()+"{phase="+m.naturalCycle().phase()+",ticks="+m.naturalCycle().ticks()
+      +",entityTick="+m.tickCount+",stage="+m.naturalCycle().stage()+",air="+m.isFlyingSpecies()
+      +",active="+m.naturalBehaviorActive()
+      +",ground="+m.isOnGround()+",alt="+(m.getY()-m.naturalSurface())+",min="+m.naturalCycle().minimumAltitude()
+      +",landing="+m.wantsNaturalLanding()+",sleep="+m.isSleeping()+",night="+m.isNightResting()
+      +",gravity="+!m.isNoGravity()+",noAI="+m.isNoAi()+",passenger="+m.isPassenger()
+      +",target="+(m.getTarget()==null?"null":m.getTarget().getType())+",pos="+m.position()+",motion="+m.getDeltaMovement()
+      +",chunk="+level.hasChunkAt(m.blockPosition())+",navDone="+m.getNavigation().isDone()
+      +",nav="+m.getNavigation().getTargetPos()+",recovery="+((MinemonFlyingCreature)m).flightRecoveryAttemptsForValidation()
+      +"/"+((MinemonFlyingCreature)m).flightRecoveryMovesForValidation()+",samples="
+      +((MinemonFlyingCreature)m).flightRecoverySamplesForValidation()+"}";
+ }
  private static void awaitBottom(GameTestHelper h,MinemonCreature shellder,MinemonCreature krabby,
      double originY,int remaining,int elapsed,Runnable next){
   if(shellder.isInWater()&&krabby.isInWater()
@@ -166,27 +196,7 @@ public final class NightAndSwimmingTests {
        await(h,()->!ground.isSleeping()&&mixed.stream().noneMatch(MinemonCreature::isSleeping)&&air.stream().noneMatch(MinemonCreature::isSleeping),()->{
         check(h,ground.getTarget()==null,"Dawn must preserve neutrality");
         mixed.forEach(m->check(h,m.naturalCycle().ticks()>=clocks.get(m),"Dawn must resume saved clock"));
-        await(h,()->mixed.stream().allMatch(m->!m.isOnGround()&&m.naturalCycle().ticks()>clocks.get(m)),()->{
-         h.succeed();
-        },200,"Mixed fliers must resume their paused airborne phase after dawn; pending="
-            +mixed.stream().filter(m->m.isOnGround()||m.naturalCycle().ticks()<=clocks.get(m))
-                .map(m->m.getSpeciesSlug()+"{phase="+m.naturalCycle().phase()+",ticks="+m.naturalCycle().ticks()
-                    +",was="+clocks.get(m)+",stage="+m.naturalCycle().stage()+",air="+m.isFlyingSpecies()
-                    +",active="+m.naturalBehaviorActive()+",ground="+m.isOnGround()+",alt="+(m.getY()-m.naturalSurface())
-                    +",min="+m.naturalCycle().minimumAltitude()+",landing="+m.wantsNaturalLanding()
-                    +",sleep="+m.isSleeping()+",gravity="+!m.isNoGravity()+",vy="+m.getDeltaMovement().y
-                    +",entityTick="+m.tickCount+",pos="+m.position()+",motion="+m.getDeltaMovement()
-                    +",surface="+m.naturalSurface()+",chunkLoaded="+level.hasChunkAt(m.blockPosition())
-                    +",navDone="+m.getNavigation().isDone()+",noAI="+m.isNoAi()+",passenger="+m.isPassenger()
-                    +",target="+(m.getTarget()==null?"null":m.getTarget().getType())
-                    +",recovery="+((MinemonFlyingCreature)m).flightRecoveryAttemptsForValidation()+"/"+((MinemonFlyingCreature)m).flightRecoveryMovesForValidation()
-                    +",samples="+((MinemonFlyingCreature)m).flightRecoverySamplesForValidation()
-                    +",nav="+m.getNavigation().getTargetPos()+",upClear="+java.util.stream.IntStream.of(1,2,4)
-                        .mapToObj(n->n+":"+level.noCollision(m,m.getBoundingBox().move(0,n*0.12D,0)))
-                        .collect(java.util.stream.Collectors.joining("/"))
-                    +",above="+java.util.stream.IntStream.rangeClosed(0,3)
-                        .mapToObj(n->level.getBlockState(new BlockPos(m.getX(),m.getY()+m.getBbHeight()+n,m.getZ())).toString())
-                        .collect(java.util.stream.Collectors.joining("/"))+"}").toList());
+        awaitFlightResume(h,mixed,clocks,200,new ArrayList<>());
        },30,"All night sleepers must wake at dawn");
       },180,"After combat, a creature must return to sleep while still night");
      },150,"Woken creature must physically retaliate using melee AI");
