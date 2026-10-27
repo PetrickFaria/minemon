@@ -175,7 +175,12 @@ public final class NightAndSwimmingTests {
                     +",active="+m.naturalBehaviorActive()+",ground="+m.isOnGround()+",alt="+(m.getY()-m.naturalSurface())
                     +",min="+m.naturalCycle().minimumAltitude()+",landing="+m.wantsNaturalLanding()
                     +",sleep="+m.isSleeping()+",gravity="+!m.isNoGravity()+",vy="+m.getDeltaMovement().y
-                    +",nav="+m.getNavigation().getTargetPos()+"}").toList());
+                    +",nav="+m.getNavigation().getTargetPos()+",upClear="+java.util.stream.IntStream.of(1,2,4)
+                        .mapToObj(n->n+":"+level.noCollision(m,m.getBoundingBox().move(0,n*0.12D,0)))
+                        .collect(java.util.stream.Collectors.joining("/"))
+                    +",above="+java.util.stream.IntStream.rangeClosed(0,3)
+                        .mapToObj(n->level.getBlockState(new BlockPos(m.getX(),m.getY()+m.getBbHeight()+n,m.getZ())).toString())
+                        .collect(java.util.stream.Collectors.joining("/"))+"}").toList());
        },30,"All night sleepers must wake at dawn");
       },180,"After combat, a creature must return to sleep while still night");
      },150,"Woken creature must physically retaliate using melee AI");
