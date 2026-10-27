@@ -16,8 +16,8 @@ public final class MinemonFlyingCreature extends MinemonCreature {
  private int flightRecoveryAttempts;
  private int flightRecoveryMoves;
  private boolean shouldRecoverNaturalFlight(){
-  return !this.level.isClientSide&&this.isFlyingSpecies()&&!this.wantsNaturalLanding()
-      &&!this.isSleeping()&&!this.isOrderedToSit()&&!this.isPassenger()&&!this.isNoAi()
+  return !this.level.isClientSide&&this.isFlyingSpecies()&&!this.isSleeping()&&!this.isNightResting()
+      &&!this.naturalCycle().landing()&&!this.isOrderedToSit()&&!this.isPassenger()&&!this.isNoAi()
       &&!this.isDeadOrDying()&&this.getTarget()==null;
  }
  public MinemonFlyingCreature(EntityType<? extends TamableAnimal> type,Level level){
@@ -77,7 +77,7 @@ public final class MinemonFlyingCreature extends MinemonCreature {
   super.tick();
   this.updateLocomotion();
   if(!this.isFlyingSpecies()){return;}
-  boolean sleeping=this.wantsNaturalLanding();
+  boolean sleeping=this.isSleeping()||this.isNightResting()||this.naturalCycle().landing();
   // Hover safely until a dry landing path is available; follow that path
   // instead of dropping blindly into water, lava, or an obstructed column.
   if(sleeping){
