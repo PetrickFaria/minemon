@@ -5,6 +5,7 @@ import br.com.petrickfaria.minemon.registry.ModEntities;
 import br.com.petrickfaria.minemon.registry.ModItems;
 import br.com.petrickfaria.minemon.registry.ModParticles;
 import br.com.petrickfaria.minemon.registry.ModBlocks;
+import br.com.petrickfaria.minemon.registry.ModVillagers;
 import br.com.petrickfaria.minemon.menu.ModMenus;
 import br.com.petrickfaria.minemon.sound.CustomSoundFolders;
 import br.com.petrickfaria.minemon.network.MinemonNetwork;
@@ -27,6 +28,7 @@ public final class Minemon {
         ModEntities.ENTITIES.register(bus);
         ModParticles.PARTICLE_TYPES.register(bus);
         ModBlocks.BLOCKS.register(bus);
+        ModVillagers.register(bus);
         ModItems.ITEMS.register(bus);
         ModMenus.MENUS.register(bus);
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, MinemonConfig.SPEC);

@@ -82,6 +82,7 @@ minecraft {
             property 'minemon.clientSmokeAir', project.hasProperty('clientSmokeAir').toString()
             property 'minemon.clientSmokeWater', project.hasProperty('clientSmokeWater').toString()
             property 'minemon.clientSmokeAudio', project.hasProperty('clientSmokeAudio').toString()
+            property 'minemon.clientSmokeRocketProfession', project.hasProperty('clientSmokeRocketProfession').toString()
             property 'minemon.clientSmokeSpecies', (findProperty('clientSmokeSpecies') ?: '').toString()
         }
         server { args '--nogui' }

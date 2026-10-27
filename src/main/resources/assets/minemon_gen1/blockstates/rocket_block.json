@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "minemon_gen1:block/rocket_block" },
+    "facing=east": { "model": "minemon_gen1:block/rocket_block", "y": 90 },
+    "facing=south": { "model": "minemon_gen1:block/rocket_block", "y": 180 },
+    "facing=west": { "model": "minemon_gen1:block/rocket_block", "y": 270 }
+  }
+}

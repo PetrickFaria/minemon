@@ -16,12 +16,14 @@ public final class ModItems {
     .sorted(Comparator.comparingInt(e->SpeciesDefinitions.get(e.getKey()).nationalPokedexNumber()))
     .forEach(e->items.add(e.getValue().get().getDefaultInstance()));
   items.add(POKEC.get().getDefaultInstance());
+  items.add(ROCKET_BLOCK.get().getDefaultInstance());
   SOULS.values().forEach(s->items.add(s.get().getDefaultInstance()));
   }
  };
  public static final DeferredRegister<Item> ITEMS=DeferredRegister.create(ForgeRegistries.ITEMS,Minemon.MOD_ID);
  public static final Map<String,RegistryObject<Item>> EGGS=register();
  public static final RegistryObject<Item> POKEC=ITEMS.register("pokec",()->new PokecBlockItem(ModBlocks.POKEC.get(),new Item.Properties().tab(MINEMON_TAB)));
+ public static final RegistryObject<Item> ROCKET_BLOCK=ITEMS.register("rocket_block",()->new BlockItem(ModBlocks.ROCKET_BLOCK.get(),new Item.Properties().tab(MINEMON_TAB)));
  public static final Map<String,RegistryObject<Item>> SOULS=registerSouls();
  public static final RegistryObject<Item> BULBASAUR_SPAWN_EGG=EGGS.get("bulbasaur");
  private static Map<String,RegistryObject<Item>> register(){

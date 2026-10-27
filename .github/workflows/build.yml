@@ -22,6 +22,8 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - name: Verify extracted project resources
         run: python3 tools/verify_project.py
+      - name: Verify Rocket workstation and villager resources
+        run: python3 tools/verify_rocket.py
       - name: Preflight active animation Molang compatibility
         run: python3 tools/verify_molang_compatibility.py
       - name: Verify batches 8 to 15, prior assets, and Pidge wing rigs
@@ -57,6 +59,11 @@ jobs:
           echo eula=true > run/eula.txt
           python3 tools/prepare_gametest_world.py
           timeout 480s ./gradlew --no-daemon runGameTestServer
+      - name: Validate Rocket villager profession and uniform on the real client
+        run: |
+          python3 tools/prepare_client_world.py
+          timeout --kill-after=30s 600s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeRocketProfession
+          grep -F 'PASS ROCKET CLIENT:' run/client-validation-rocket.txt
       - name: Capture runtime API diagnostics
         if: always()
         run: python3 tools/collect_diagnostics.py
@@ -156,6 +163,18 @@ jobs:
           jar tf "$jar_file" | grep -Fx 'br/com/petrickfaria/minemon/block/PokecBlock.class'
           jar tf "$jar_file" | grep -Fx 'br/com/petrickfaria/minemon/pokec/PokecTransactions.class'
           jar tf "$jar_file" | grep -Fx 'br/com/petrickfaria/minemon/menu/PokecScreen.class'
+          jar tf "$jar_file" | grep -Fx 'br/com/petrickfaria/minemon/block/RocketBlock.class'
+          jar tf "$jar_file" | grep -Fx 'br/com/petrickfaria/minemon/registry/ModVillagers.class'
+          jar tf "$jar_file" | grep -Fx 'assets/minemon_gen1/blockstates/rocket_block.json'
+          jar tf "$jar_file" | grep -Fx 'assets/minemon_gen1/models/block/rocket_block.json'
+          jar tf "$jar_file" | grep -Fx 'assets/minemon_gen1/models/item/rocket_block.json'
+          jar tf "$jar_file" | grep -Fx 'assets/minemon_gen1/textures/block/rocket_front.png'
+          jar tf "$jar_file" | grep -Fx 'assets/minemon_gen1/textures/entity/villager/profession/rocket.png'
+          jar tf "$jar_file" | grep -Fx 'assets/minemon_gen1/textures/entity/villager/profession/rocket.png.mcmeta'
+          jar tf "$jar_file" | grep -Fx 'assets/minemon_gen1/textures/entity/zombie_villager/profession/rocket.png'
+          jar tf "$jar_file" | grep -Fx 'data/minemon_gen1/loot_tables/blocks/rocket_block.json'
+          jar tf "$jar_file" | grep -Fx 'data/minecraft/tags/point_of_interest_type/acquirable_job_site.json'
+          jar tf "$jar_file" | grep -Fx 'assets/minemon_gen1/textures/entity/zombie_villager/profession/rocket.png.mcmeta'
           jar tf "$jar_file" | grep -Fx 'data/minemon_gen1/pokec_species.json'
           jar tf "$jar_file" | grep -Fx 'assets/minemon_gen1/blockstates/pokec.json'
           jar tf "$jar_file" | grep -Fx 'assets/minemon_gen1/models/block/pokec_lower.json'
@@ -177,6 +196,7 @@ jobs:
           jar tf "$jar_file" | grep -Fx 'assets/minemon_gen1/textures/pokemon/moltres_cobblemon_1_8_2/moltres.png'
           jar tf "$jar_file" | grep -Fx 'assets/minemon_gen1/animations/dragonair_cobblemon_1_8_2/dragonair.animation.json'
           python3 tools/verify_runtime.py "$jar_file"
+          python3 tools/verify_rocket.py "$jar_file"
           python3 tools/verify_batch8.py "$jar_file"
           python3 tools/verify_batch9.py "$jar_file"
           python3 tools/verify_batch10.py "$jar_file"
@@ -192,6 +212,7 @@ jobs:
           unzip -p "$jar_file" META-INF/mods.toml | grep -F 'modId="geckolib3"'
           unzip -p "$jar_file" META-INF/ASSET_LICENSES.md | grep -F 'CC BY-NC 3.0'
           unzip -p "$jar_file" assets/minemon_gen1/models/item/bulbasaur_spawn_egg.json | grep -F 'minecraft:item/template_spawn_egg'
+          unzip -p "$jar_file" assets/minemon_gen1/lang/pt_br.json | grep -F '"block.minemon_gen1.rocket_block": "Bloco Rocket"'
           unzip -p "$jar_file" pack.mcmeta | grep -F '"pack_format": 9'
       - name: Upload Minemon JAR
         uses: actions/upload-artifact@v4

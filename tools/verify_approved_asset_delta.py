@@ -4,8 +4,8 @@ import hashlib
 ARBOK_TEXTURE_PATH = "assets/minemon/textures/pokemon/arbok_cobblemon_1_8_2/arbok.png"
 ARBOK_TEXTURE_SHA256 = "ac0a5028891be22ffa2673ff5272f2a1a7bd0bee49e299c52fc9946c10a801ea"
 
-# Exact static resources for the PokéC feature. Keep this explicit so the
-# historical species asset audits continue to reject unrelated resource edits.
+# Exact static resources for the PokéC and Rocket features. Keep this explicit
+# so the historical species asset audits continue to reject unrelated edits.
 POKEC_RESOURCES = frozenset({
     "src/main/resources/assets/minemon_gen1/blockstates/pokec.json",
     "src/main/resources/assets/minemon_gen1/models/block/pokec_lower.json",
@@ -47,6 +47,24 @@ POKEC_RESOURCES = frozenset({
     "src/main/resources/data/minemon_gen1/pokec_species.json",
 })
 
+ROCKET_RESOURCES = frozenset({
+    "src/main/resources/assets/minemon/lang/en_us.json",
+    "src/main/resources/assets/minemon/lang/pt_br.json",
+    "src/main/resources/assets/minemon_gen1/blockstates/rocket_block.json",
+    "src/main/resources/assets/minemon_gen1/models/block/rocket_block.json",
+    "src/main/resources/assets/minemon_gen1/models/item/rocket_block.json",
+    "src/main/resources/assets/minemon_gen1/textures/block/rocket_bottom.png",
+    "src/main/resources/assets/minemon_gen1/textures/block/rocket_front.png",
+    "src/main/resources/assets/minemon_gen1/textures/block/rocket_side.png",
+    "src/main/resources/assets/minemon_gen1/textures/block/rocket_top.png",
+    "src/main/resources/assets/minemon_gen1/textures/entity/villager/profession/rocket.png",
+    "src/main/resources/assets/minemon_gen1/textures/entity/villager/profession/rocket.png.mcmeta",
+    "src/main/resources/assets/minemon_gen1/textures/entity/zombie_villager/profession/rocket.png",
+    "src/main/resources/assets/minemon_gen1/textures/entity/zombie_villager/profession/rocket.png.mcmeta",
+    "src/main/resources/data/minecraft/tags/point_of_interest_type/acquirable_job_site.json",
+    "src/main/resources/data/minemon_gen1/loot_tables/blocks/rocket_block.json",
+})
+
 
 def is_approved_prior_asset_delta(path, content):
     """Accept only the reviewed Arbok atlas bytes; all other old assets stay exact."""
@@ -54,5 +72,5 @@ def is_approved_prior_asset_delta(path, content):
 
 
 def pokec_resource_paths():
-    """Return only the checked-in PokéC block, soul, and catalog resources."""
-    return POKEC_RESOURCES
+    """Return the exact reviewed resources for PokéC and the Rocket workstation."""
+    return POKEC_RESOURCES | ROCKET_RESOURCES

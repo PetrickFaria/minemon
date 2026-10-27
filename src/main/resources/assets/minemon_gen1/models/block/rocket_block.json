@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "down": "minemon_gen1:block/rocket_bottom",
+    "up": "minemon_gen1:block/rocket_top",
+    "north": "minemon_gen1:block/rocket_front",
+    "south": "minemon_gen1:block/rocket_side",
+    "east": "minemon_gen1:block/rocket_side",
+    "west": "minemon_gen1:block/rocket_side",
+    "particle": "minemon_gen1:block/rocket_front"
+  }
+}

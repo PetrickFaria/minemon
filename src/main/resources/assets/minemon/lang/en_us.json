@@ -1,4 +1,7 @@
 {
+  "block.minemon_gen1.rocket_block": "Rocket Block",
+  "entity.minecraft.villager.rocket": "Rocket",
+  "entity.minecraft.villager.minemon_gen1.rocket": "Rocket",
   "entity.minemon_gen1.bulbasaur": "Bulbasaur",
   "item.minemon_gen1.bulbasaur_spawn_egg": "Spawn Egg: Bulbasaur",
   "entity.minemon_gen1.pikachu": "Pikachu",
