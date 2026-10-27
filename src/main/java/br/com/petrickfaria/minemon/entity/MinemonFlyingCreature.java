@@ -1,6 +1,7 @@
 package br.com.petrickfaria.minemon.entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.TamableAnimal;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.ai.control.FlyingMoveControl;
 import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
@@ -32,6 +33,11 @@ public final class MinemonFlyingCreature extends MinemonCreature {
    double support=this.naturalSurface();
    double clearance=this.getY()-support;
    boolean combat=this.getTarget()!=null&&this.getTarget().isAlive();
+   if(!combat&&this.naturalBehaviorActive()
+       &&(this.naturalCycle().phase()==BehaviorCycle.Phase.AIR||this.naturalCycle().phase()==BehaviorCycle.Phase.TAKEOFF)){
+    BlockPos target=this.getNavigation().getTargetPos();
+    if(target!=null&&target.getY()<support+this.naturalCycle().minimumAltitude())this.getNavigation().stop();
+   }
    double floor=combat?0.15D:Math.max(0.15D,this.naturalCycle().minimumAltitude());
    double allowedDrop=Math.max(0.0D,clearance-floor);
    double vertical=Math.max(this.getDeltaMovement().y,-allowedDrop);
