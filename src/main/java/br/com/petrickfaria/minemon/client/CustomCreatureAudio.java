@@ -60,6 +60,8 @@ public final class CustomCreatureAudio {
     private static final AtomicInteger RESERVED = new AtomicInteger();
     private static final List<Playback> ACTIVE = new ArrayList<>();
     private static final java.util.concurrent.ConcurrentHashMap<UUID, java.util.concurrent.atomic.AtomicBoolean> REQUESTED = new java.util.concurrent.ConcurrentHashMap<>();
+    private static final java.util.concurrent.ConcurrentHashMap<UUID, Long> RECENTLY_STARTED = new java.util.concurrent.ConcurrentHashMap<>();
+    private static final long STARTED_HISTORY_NANOS = TimeUnit.MINUTES.toNanos(10);
     private static volatile Executor audioExecutor;
     private static volatile UUID lastStartedEntity;
 
@@ -110,7 +112,11 @@ public final class CustomCreatureAudio {
         }
     }
 
-    public static boolean wasStarted(UUID entity) { return entity != null && entity.equals(lastStartedEntity); }
+    public static boolean wasStarted(UUID entity) {
+        if (entity == null) return false;
+        Long startedAt = RECENTLY_STARTED.get(entity);
+        return startedAt != null && System.nanoTime() - startedAt < STARTED_HISTORY_NANOS;
+    }
 
     /** Exact linear attenuation requested for each local listener; OpenAL distance rolloff is disabled. */
     static float spatialAttenuationForDistance(double distance) {
@@ -336,6 +342,9 @@ public final class CustomCreatureAudio {
             AL10.alSource3f(source, AL10.AL_POSITION, (float)playback.x, (float)playback.y, (float)playback.z);
             AL10.alSourcePlay(source);
             lastStartedEntity = playback.uuid;
+            long now = System.nanoTime();
+            RECENTLY_STARTED.entrySet().removeIf(entry -> now - entry.getValue() >= STARTED_HISTORY_NANOS);
+            RECENTLY_STARTED.put(playback.uuid, now);
         } catch (Throwable error) {
             LOGGER.warn("Could not start Minemon positional audio", error);
             try { stop(playback); } catch (Throwable cleanupError) { LOGGER.debug("Could not clean up failed OpenAL playback", cleanupError); }
