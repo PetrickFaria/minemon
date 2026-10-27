@@ -33,6 +33,7 @@ public final class ClientSmokeTest {
  private static int worldTicks,titleTicks,frames;
  private static volatile UUID testEntity;
  private static boolean customAudioSmokeRequested;
+ private static int customAudioSmokeRequestTick=-1;
  private static volatile int initialEntityId;
  private static float minLeg=Float.MAX_VALUE,maxLeg=-Float.MAX_VALUE,minBody=Float.MAX_VALUE,maxBody=-Float.MAX_VALUE;
  private static volatile boolean combatPassed;
@@ -451,13 +452,22 @@ public final class ClientSmokeTest {
     }
    }
    worldTicks++;
-   if(Boolean.getBoolean("minemon.clientSmokeAudio")&&worldTicks==110) {
-    br.com.petrickfaria.minemon.client.CustomCreatureAudio.play(initialEntityId,testEntity);
-    customAudioSmokeRequested=true;
+   if(Boolean.getBoolean("minemon.clientSmokeAudio")&&worldTicks>=110&&worldTicks<350&&!customAudioSmokeRequested) {
+    var audioEntity=mc.level.getEntity(initialEntityId);
+    if(audioEntity instanceof MinemonCreature creature&&creature.isAlive()&&creature.getUUID().equals(testEntity)
+        &&!mc.level.isNight()) {
+     // Wait for client-side entity tracking and daytime synchronization before
+     // issuing exactly one request. Decoding and OpenAL startup are asynchronous.
+     br.com.petrickfaria.minemon.client.CustomCreatureAudio.play(initialEntityId,testEntity);
+     customAudioSmokeRequested=true;
+     customAudioSmokeRequestTick=worldTicks;
+    }
    }
-   if(Boolean.getBoolean("minemon.clientSmokeAudio")&&worldTicks==160) {
+   if(Boolean.getBoolean("minemon.clientSmokeAudio")&&worldTicks==350) {
     if(!customAudioSmokeRequested||!br.com.petrickfaria.minemon.client.CustomCreatureAudio.wasStarted(testEntity))
-     throw new IllegalStateException("Synthetic local OGG was not decoded and started through Minecraft's positional audio context");
+     throw new IllegalStateException("Synthetic local OGG did not start positionally; requested="
+         +customAudioSmokeRequested+", requestTick="+customAudioSmokeRequestTick+", clientEntity="
+         +mc.level.getEntity(initialEntityId)+", daytime="+!mc.level.isNight());
     Files.writeString(Path.of("client-validation.txt"),"PASS CUSTOM AUDIO: synthetic local OGG decoded and started positionally in the Minecraft client.\n",StandardOpenOption.APPEND);
    }
    if(worldTicks>=SPECIES_START_TICK&&worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW) {
