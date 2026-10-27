@@ -31,9 +31,11 @@ public final class MinemonFlyingCreature extends MinemonCreature {
   if(this.isFlyingSpecies()&&!this.level.isClientSide&&!this.wantsNaturalLanding()){
    double support=this.naturalSurface();
    double clearance=this.getY()-support;
-   double allowedDrop=Math.max(0.0D,clearance-0.6D);
+   boolean combat=this.getTarget()!=null&&this.getTarget().isAlive();
+   double floor=combat?0.15D:Math.max(0.15D,this.naturalCycle().minimumAltitude());
+   double allowedDrop=Math.max(0.0D,clearance-floor);
    double vertical=Math.max(this.getDeltaMovement().y,-allowedDrop);
-   if(clearance<0.6D)vertical=Math.max(vertical,0.08D);
+   if(clearance<floor)vertical=Math.max(vertical,0.06D);
    this.setDeltaMovement(this.getDeltaMovement().x,vertical,this.getDeltaMovement().z);
   }
   super.travel(input);

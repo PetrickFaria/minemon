@@ -15,9 +15,9 @@ import java.util.*;
 
 /** Additional real-client scenario: production night AI, rendered closed eyes, dawn. */
 final class NightClientSmokeTest {
- private static final List<String> SPECIES=List.of("bulbasaur","victreebel","venusaur","snorlax","charizard","scyther","dragonite","pidgey","pidgeotto","pidgeot","spearow","fearow","articuno","zapdos","moltres","gastly","haunter","gengar","koffing","weezing","butterfree","beedrill","venomoth","parasect","kakuna","tangela","poliwag","growlithe","magikarp","gyarados","lapras","dratini","omanyte","eevee","jolteon","flareon","vaporeon_land","vaporeon");
- private static boolean opened,setup,spawned,waking,gengarWakeEyesObserved;
- private static int ticks,index,samples,sleepTick,depthSettleTicks,depthStableTicks,restSettleTicks,restStableTicks;
+ private static final List<String> SPECIES=List.of("bulbasaur","victreebel","venusaur","snorlax","charizard","scyther","dragonite","pidgey","pidgeotto","pidgeot","spearow","fearow","articuno","zapdos","moltres","gastly","haunter","gengar","zubat","golbat","koffing","weezing","butterfree","beedrill","venomoth","parasect","kakuna","tangela","poliwag","growlithe","magikarp","gyarados","lapras","dratini","omanyte","eevee","jolteon","flareon","vaporeon_land","vaporeon","abra","porygon","geodude","kadabra","alakazam","shellder","cloyster","mewtwo","mew");
+ private static boolean opened,setup,spawned,waking,gengarWakeEyesObserved,nocturnalMidday;
+ private static int ticks,index,samples,activeSamples,sleepTick,depthSettleTicks,depthStableTicks,restSettleTicks,restStableTicks;
  private static volatile UUID entity;
  private static final Map<String,float[]> eyes=new HashMap<>();
  private static final Map<String,float[]> restingWings=new HashMap<>();
@@ -51,6 +51,12 @@ final class NightClientSmokeTest {
         throw new IllegalStateException("Gengar must visibly select both full closed lids only during sleep");
       }
       if(waking&&!mob.isSleeping())gengarWakeEyesObserved=true;
+     }
+     boolean nocturnal=SpeciesBehaviorProfiles.isNocturnal(mob.getSpeciesSlug());
+     if(nocturnal&&!nocturnalMidday){
+      if(mob.isSleeping())throw new IllegalStateException(mob.getSpeciesSlug()+" must stay awake through the night and first half of daylight");
+      activeSamples++;
+      return;
      }
      if(!mob.isSleeping())return;
      var definition=SpeciesDefinitions.get(mob.getSpeciesSlug());
@@ -112,7 +118,7 @@ final class NightClientSmokeTest {
     var p=level.getServer().getPlayerList().getPlayers().get(0);p.setGameMode(GameType.CREATIVE);p.teleportTo(level,0,102,-5,0,8);
    });return;}
    if(!spawned){
-    spawned=true;gengarWakeEyesObserved=false;ticks=0;samples=0;sleepTick=0;depthSettleTicks=0;depthStableTicks=0;restSettleTicks=0;restStableTicks=0;waking=false;eyes.clear();restingWings.clear();
+    spawned=true;gengarWakeEyesObserved=false;nocturnalMidday=false;ticks=0;samples=0;activeSamples=0;sleepTick=0;depthSettleTicks=0;depthStableTicks=0;restSettleTicks=0;restStableTicks=0;waking=false;eyes.clear();restingWings.clear();
     mc.getSingleplayerServer().execute(()->{
      var level=mc.getSingleplayerServer().overworld();if(entity!=null){var old=level.getEntity(entity);if(old!=null)old.discard();}
      String scenario=SPECIES.get(index);String slug=scenario.equals("vaporeon_land")?"vaporeon":scenario;
@@ -122,7 +128,8 @@ final class NightClientSmokeTest {
      if(aquatic)for(int x=-6;x<=6;x++)for(int z=0;z<=10;z++)for(int y=101;y<=110;y++)
       level.setBlockAndUpdate(new BlockPos(x,y,z),Blocks.WATER.defaultBlockState());
      mob.moveTo(0,aquatic?104:air?107:101,5,180,0);
-     if(SpeciesBehaviorProfiles.profile(mob.getSpeciesSlug())==SpeciesBehaviorProfiles.Profile.GROUND_FLIGHT){
+     if(SpeciesBehaviorProfiles.profile(mob.getSpeciesSlug())==SpeciesBehaviorProfiles.Profile.GROUND_FLIGHT
+         ||SpeciesBehaviorProfiles.profile(mob.getSpeciesSlug())==SpeciesBehaviorProfiles.Profile.GROUND_FLOAT_CYCLE){
       var tag=new net.minecraft.nbt.CompoundTag();mob.addAdditionalSaveData(tag);tag.putString("NaturalBehaviorPhase","AIR");mob.readAdditionalSaveData(tag);
      }
      level.addFreshEntity(mob);entity=mob.getUUID();level.setDayTime(18000);
@@ -134,7 +141,7 @@ final class NightClientSmokeTest {
      var player=level.getServer().getPlayerList().getPlayers().get(0);player.teleportTo(level,slug.equals("fearow")?distance:0,101,slug.equals("fearow")?5:5-distance,0,0);
     });return;
    }
-   ticks++;if(ticks>450)throw new IllegalStateException("Night client timeout: "+SPECIES.get(index)+" samples="+samples);
+   ticks++;if(ticks>450)throw new IllegalStateException("Night client timeout: "+SPECIES.get(index)+" samples="+samples+" activeSamples="+activeSamples+" midday="+nocturnalMidday);
    MinemonCreature current=null;for(var e:mc.level.entitiesForRendering())if(e.getUUID().equals(entity)&&e instanceof MinemonCreature m){current=m;break;}
    if(current==null)return;
    boolean waterRest=SpeciesBehaviorProfiles.waterCapable(current.getSpeciesSlug())&&current.isInWaterOrBubble();
@@ -153,7 +160,8 @@ final class NightClientSmokeTest {
      depthSettleTicks=0;depthStableTicks=0;
      boolean shouldHover=SpeciesBehaviorProfiles.hoversDuringNightRest(current.getSpeciesSlug());
      double support=current.naturalSurface();
-     boolean settled=shouldHover?!current.isOnGround()&&Math.abs(current.getY()-support-1.0D)<=.2D:current.isOnGround();
+     double restHeight=SpeciesBehaviorProfiles.nightRestHoverHeight(current.getSpeciesSlug());
+     boolean settled=shouldHover?!current.isOnGround()&&Math.abs(current.getY()-support-restHeight)<=.2D:current.isOnGround();
      if(!settled){
       restStableTicks=0;
       if(++restSettleTicks>20)throw new IllegalStateException(current.getSpeciesSlug()+" did not settle into its approved night-rest pose within 20 client ticks; hover="+shouldHover+" onGround="+current.isOnGround()+" y="+current.getY()+" support="+support+" deltaY="+current.getDeltaMovement().y);
@@ -166,15 +174,20 @@ final class NightClientSmokeTest {
    }
    double dx=current.getX()-mc.player.getX(),dz=current.getZ()-mc.player.getZ(),dy=current.getY()+current.getBbHeight()*.65-mc.player.getEyeY();
    mc.player.setYRot((float)(Math.toDegrees(Math.atan2(dz,dx))-90));mc.player.setXRot((float)-Math.toDegrees(Math.atan2(dy,Math.sqrt(dx*dx+dz*dz))));
-   if(!waking&&samples>=25){
-    Screenshot.grab(mc.gameDirectory,"night-"+SPECIES.get(index)+".png",mc.getMainRenderTarget(),message->{});
-    Files.writeString(Path.of("client-validation-night.txt"),"PASS NIGHT RENDER "+SPECIES.get(index)+" sleep clip="+current.getSelectedAnimationForValidation()+" closed-eye tracks="+eyes.keySet()+" samples="+samples+" grounded="+current.isOnGround()+"\n",StandardOpenOption.APPEND);
-    waking=true;mc.getSingleplayerServer().execute(()->mc.getSingleplayerServer().overworld().setDayTime(1000));
+   boolean nocturnal=SpeciesBehaviorProfiles.isNocturnal(current.getSpeciesSlug());
+   if(nocturnal&&!nocturnalMidday&&activeSamples>=25){
+    Files.writeString(Path.of("client-validation-night.txt"),"PASS NOCTURNAL ACTIVE "+current.getSpeciesSlug()+" stayed awake at night; rendered active samples="+activeSamples+"\n",StandardOpenOption.APPEND);
+    nocturnalMidday=true;samples=0;sleepTick=0;depthSettleTicks=0;depthStableTicks=0;restSettleTicks=0;restStableTicks=0;eyes.clear();restingWings.clear();
+    mc.getSingleplayerServer().execute(()->mc.getSingleplayerServer().overworld().setDayTime(6000));
+   }else if(!waking&&samples>=25){
+    Screenshot.grab(mc.gameDirectory,(nocturnal?"midday-":"night-")+SPECIES.get(index)+".png",mc.getMainRenderTarget(),message->{});
+    Files.writeString(Path.of("client-validation-night.txt"),(nocturnal?"PASS NOCTURNAL MIDDAY ":"PASS NIGHT RENDER ")+SPECIES.get(index)+" sleep clip="+current.getSelectedAnimationForValidation()+" closed-eye tracks="+eyes.keySet()+" samples="+samples+" grounded="+current.isOnGround()+"\n",StandardOpenOption.APPEND);
+    waking=true;mc.getSingleplayerServer().execute(()->mc.getSingleplayerServer().overworld().setDayTime(nocturnal?13000:1000));
    }
    if(waking&&!current.isSleeping()){
     if(current.getSpeciesSlug().equals("gengar")&&!gengarWakeEyesObserved)return;
     if(++index>=SPECIES.size()){
-     Files.writeString(Path.of("client-validation-night.txt"),"PASS NIGHT CLIENT: all "+SPECIES.size()+" species slept using production night AI, rendered held native closed-eye poses and woke at dawn.\n",StandardOpenOption.APPEND);
+     Files.writeString(Path.of("client-validation-night.txt"),"PASS NIGHT CLIENT: ordinary species slept at night; all five nocturnal species stayed active at night, slept from midday to dusk, rendered their native closed-eye poses, and woke at dusk.\n",StandardOpenOption.APPEND);
      mc.stop();return;
     }
     spawned=false;

@@ -13,7 +13,7 @@ QUERY_R = re.compile(r"\b(?:q|query)\.r\.([A-Za-z_][A-Za-z0-9_]*)\s*\(")
 # Read the explicit production assignments rather than duplicating the species list.
 PROFILE_SOURCE=(Path(__file__).resolve().parents[1]/"src/main/java/br/com/petrickfaria/minemon/entity/SpeciesBehaviorProfiles.java").read_text()
 PROFILE_GROUPS={kind:set(names.split(",")) for kind,names in re.findall(r'assign\(Profile\.([A-Z_]+), "([^\"]+)"\)',PROFILE_SOURCE)}
-AIRBORNE=PROFILE_GROUPS["ALTITUDE_CYCLE"]
+AIRBORNE=set().union(*(PROFILE_GROUPS[kind] for kind in ("FLYER","FLOAT_HALF","FLOAT_LOW","FLOAT_CYCLE")))
 
 
 

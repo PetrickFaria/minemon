@@ -35,7 +35,7 @@ public final class SpeciesDefinitions {
     };
     var profile=SpeciesBehaviorProfiles.profile(slug);
     boolean ground=profile==SpeciesBehaviorProfiles.Profile.GROUND||profile==SpeciesBehaviorProfiles.Profile.GROUND_FLIGHT
-        ||profile==SpeciesBehaviorProfiles.Profile.WATER_VISITOR;
+        ||profile==SpeciesBehaviorProfiles.Profile.GROUND_FLOAT_CYCLE||profile==SpeciesBehaviorProfiles.Profile.WATER_VISITOR;
     String idle=ground?clips.getOrDefault("ground_idle",str(o,"idle")):str(o,"idle");
     String walk=ground?clips.getOrDefault("ground_walk",str(o,"walk")):str(o,"walk");
     String fallback=CompatibleLocomotion.groundGait(slug)?null:o.has("movement_fallback")&&!o.get("movement_fallback").isJsonNull()?o.get("movement_fallback").getAsString():null;

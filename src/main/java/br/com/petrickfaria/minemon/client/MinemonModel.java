@@ -27,6 +27,7 @@ public class MinemonModel extends AnimatedGeoModel<MinemonCreature> {
         super.setLivingAnimations(entity, uniqueID, event);
         applyPidgeWingVisibility(entity);
         applyGengarEyeVisibility(entity);
+        applyNaturalBodyMotion(entity);
         if(entity.isSleeping())return;
         String slug=entity.getSpeciesSlug();
         boolean headLook=slug.equals("spearow")||slug.equals("fearow")||slug.equals("abra")
@@ -55,6 +56,33 @@ public class MinemonModel extends AnimatedGeoModel<MinemonCreature> {
             var body=getAnimationProcessor().getBone("body");
             if(body!=null)body.setRotationX(body.getRotationX()+input.headPitch*(float)Math.PI/180.0F);
         }
+    }
+
+    /** Small additive body motion keeps hovering visually distinct from the wing-driven flight clips. */
+    private void applyNaturalBodyMotion(MinemonCreature entity) {
+        String slug=entity.getSpeciesSlug();
+        boolean hoveringRest=entity.isSleeping()
+                &&br.com.petrickfaria.minemon.entity.SpeciesBehaviorProfiles.hoversDuringNightRest(slug);
+        boolean floating=br.com.petrickfaria.minemon.entity.SpeciesBehaviorProfiles.isFloating(slug)
+                &&(entity.isFlyingSpecies()||hoveringRest);
+        boolean flying=!floating&&entity.isFlyingSpecies()&&!entity.wantsNaturalLanding();
+        if(!floating&&!flying||entity.isSleeping()&&!hoveringRest)return;
+        var body=getAnimationProcessor().getBone("body");
+        if(body==null)return;
+        double time=entity.tickCount+entity.getId()*0.37D;
+        float bob, pitch, roll;
+        if(floating){
+            bob=(float)Math.sin(time*0.105D)*0.34F;
+            pitch=(float)Math.sin(time*0.071D)*0.018F;
+            roll=(float)Math.cos(time*0.083D)*0.022F;
+        }else{
+            bob=(float)Math.sin(time*0.082D)*0.22F;
+            pitch=(float)Math.sin(time*0.061D)*0.014F;
+            roll=(float)Math.cos(time*0.073D)*0.012F;
+        }
+        body.setPositionY(body.getPositionY()+bob);
+        body.setRotationX(body.getRotationX()+pitch);
+        body.setRotationZ(body.getRotationZ()+roll);
     }
 
     private void applyGengarEyeVisibility(MinemonCreature entity) {

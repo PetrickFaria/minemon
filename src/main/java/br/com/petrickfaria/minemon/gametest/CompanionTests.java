@@ -411,9 +411,9 @@ public final class CompanionTests {
  @GameTest(template="test_arena",timeoutTicks=1000)
  public static void nativeGroundRunnerUsesSpontaneousRunOnlyDuringTravel(GameTestHelper h) {
   floor(h);
-  MinemonCreature runner=h.spawn(ModEntities.SPECIES.get("geodude").get(),new BlockPos(3,1,5));
-  check(h,br.com.petrickfaria.minemon.entity.SpeciesAssetIndex.clip("geodude","ground_run","run")!=null,
-      "Geodude's native run clip must be selected for spontaneous running");
+  MinemonCreature runner=h.spawn(ModEntities.SPECIES.get("tauros").get(),new BlockPos(3,1,5));
+  check(h,br.com.petrickfaria.minemon.entity.SpeciesAssetIndex.clip("tauros","ground_run","run")!=null,
+      "Tauros's native run clip must be selected for spontaneous running");
   runner.goalSelector.removeAllGoals();
   runner.targetSelector.removeAllGoals();
   runner.getRandom().setSeed(125L);
