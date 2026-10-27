@@ -49,8 +49,11 @@ public final class MinemonFlyingCreature extends MinemonCreature {
    boolean combat=this.getTarget()!=null&&this.getTarget().isAlive();
    if(!combat&&this.shouldRecoverNaturalFlight()
        &&(this.naturalCycle().phase()==BehaviorCycle.Phase.AIR||this.naturalCycle().phase()==BehaviorCycle.Phase.TAKEOFF)){
-    BlockPos target=this.getNavigation().getTargetPos();
-    if(target!=null&&target.getY()<support+this.naturalCycle().minimumAltitude())this.getNavigation().stop();
+    // Patrol paths can end on the minimum-altitude block while the waking
+    // creature is still below the band. Let the recovery lift own movement
+    // until the full flight band is reached instead of letting the path
+    // controller keep steering toward that low endpoint.
+    if(clearance<this.naturalCycle().minimumAltitude())this.getNavigation().stop();
    }
    double floor=combat?0.15D:Math.max(0.15D,this.naturalCycle().minimumAltitude());
    double allowedDrop=Math.max(0.0D,clearance-floor);
