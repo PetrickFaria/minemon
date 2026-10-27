@@ -25,12 +25,15 @@ public final class BehaviorCycleTest {
 
     @Test public void all151SpeciesHaveOneApprovedRoutineCategory() {
         assertEquals(SpeciesDefinitions.ALL.keySet(), SpeciesBehaviorProfiles.all().keySet());
-        Map<SpeciesBehaviorProfiles.Profile, Long> expected = Map.of(
-                GROUND, 84L, WATER_VISITOR, 23L, GROUND_FLIGHT, 3L, FLYER, 14L,
-                FLOAT_HALF, 3L, FLOAT_LOW, 2L, FLOAT_CYCLE, 8L, GROUND_FLOAT_CYCLE, 3L,
-                AQUATIC_CYCLE, 7L, AQUATIC_BOTTOM, 2L, AQUATIC_NEAR_SURFACE, 1L, AQUATIC_SURFACE, 1L);
+        Map<SpeciesBehaviorProfiles.Profile, Long> expected = Map.ofEntries(
+                Map.entry(GROUND, 84L), Map.entry(WATER_VISITOR, 23L), Map.entry(GROUND_FLIGHT, 3L),
+                Map.entry(FLYER, 14L), Map.entry(FLOAT_HALF, 3L), Map.entry(FLOAT_LOW, 2L),
+                Map.entry(FLOAT_CYCLE, 8L), Map.entry(GROUND_FLOAT_CYCLE, 3L),
+                Map.entry(AQUATIC_CYCLE, 7L), Map.entry(AQUATIC_BOTTOM, 2L),
+                Map.entry(AQUATIC_NEAR_SURFACE, 1L), Map.entry(AQUATIC_SURFACE, 1L));
         for (var profile : SpeciesBehaviorProfiles.Profile.values())
-            assertEquals(profile.name(), expected.get(profile), SpeciesBehaviorProfiles.all().values().stream().filter(profile::equals).count());
+            assertEquals(profile.name(), expected.get(profile).longValue(),
+                    SpeciesBehaviorProfiles.all().values().stream().filter(profile::equals).count());
     }
 
     @Test public void landRoutineUsesIndependentThreeToFiveSecondWalkAndThreeToSevenSecondPause() {
