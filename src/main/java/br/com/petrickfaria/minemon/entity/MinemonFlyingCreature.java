@@ -43,13 +43,16 @@ public final class MinemonFlyingCreature extends MinemonCreature {
   // while an entity is waking from a landed sleep pose. Reassert the active
   // cycle's floor after travel so the entity actually resumes its flight band.
   if(!this.level.isClientSide&&this.isFlyingSpecies()&&!this.wantsNaturalLanding()&&this.naturalBehaviorActive()
-      &&this.getTarget()==null){
+      &&this.getTarget()==null&&(this.naturalCycle().phase()==BehaviorCycle.Phase.AIR
+          ||this.naturalCycle().phase()==BehaviorCycle.Phase.TAKEOFF)){
    double minimum=this.naturalCycle().minimumAltitude();
    double altitude=this.getY()-this.naturalSurface();
    if(altitude<minimum){
-    var velocity=this.getDeltaMovement();
     double lift=net.minecraft.util.Mth.clamp((minimum-altitude)*0.1D,0.04D,0.12D);
-    this.setDeltaMovement(velocity.x,Math.max(velocity.y,lift),velocity.z);
+    // Move through the normal collision resolver in small steps. A navigation
+    // goal can keep writing a ground-level vertical input while waking, so a
+    // velocity-only correction gets overwritten before it changes position.
+    this.move(net.minecraft.world.entity.MoverType.SELF,new net.minecraft.world.phys.Vec3(0.0D,lift,0.0D));
    }
   }
  }
