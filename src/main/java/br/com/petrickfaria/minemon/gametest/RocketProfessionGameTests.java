@@ -156,10 +156,14 @@ public final class RocketProfessionGameTests {
         floor(helper);
         helper.getLevel().setDayTime(5000L);
         BlockPos workstation = new BlockPos(6, 1, 6);
+        BlockPos farmerWorkstation = new BlockPos(3, 1, 8);
         helper.setBlock(workstation, ModBlocks.ROCKET_BLOCK.get());
         helper.setBlock(workstation.below(), Blocks.STONE);
+        helper.setBlock(farmerWorkstation, Blocks.COMPOSTER);
         Villager farmer = helper.spawn(EntityType.VILLAGER, new BlockPos(4, 1, 8));
         farmer.setVillagerData(farmer.getVillagerData().setProfession(VillagerProfession.FARMER));
+        farmer.getBrain().setMemory(MemoryModuleType.JOB_SITE,
+                net.minecraft.core.GlobalPos.of(helper.getLevel().dimension(), helper.absolutePos(farmerWorkstation)));
         Villager nitwit = helper.spawn(EntityType.VILLAGER, new BlockPos(6, 1, 9));
         nitwit.setVillagerData(nitwit.getVillagerData().setProfession(VillagerProfession.NITWIT));
         Villager baby = unemployed(helper, new BlockPos(8, 1, 8));
