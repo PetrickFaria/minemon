@@ -66,11 +66,23 @@ ROCKET_RESOURCES = frozenset({
 })
 
 
+TREAT_RESOURCES = frozenset(
+    f"src/main/resources/assets/minemon/{kind}/{item}{suffix}"
+    for kind, suffix in (("models/item", ".json"), ("textures/item", ".png"))
+    for item in (
+        "aquatic_treat", "frozen_treat", "dragon_treat", "electric_treat",
+        "ghost_treat", "fairy_treat", "fire_treat", "bug_treat",
+        "fighting_treat", "steel_treat", "normal_treat", "rock_treat",
+        "psychic_treat", "ground_treat", "poison_treat", "flying_treat",
+    )
+)
+
+
 def is_approved_prior_asset_delta(path, content):
     """Accept only the reviewed Arbok atlas bytes; all other old assets stay exact."""
     return path == ARBOK_TEXTURE_PATH and hashlib.sha256(content).hexdigest() == ARBOK_TEXTURE_SHA256
 
 
 def pokec_resource_paths():
-    """Return the exact reviewed resources for PokéC and the Rocket workstation."""
-    return POKEC_RESOURCES | ROCKET_RESOURCES
+    """Return exact reviewed resources for PokéC, Rocket, and Pokémon treats."""
+    return POKEC_RESOURCES | ROCKET_RESOURCES | TREAT_RESOURCES
