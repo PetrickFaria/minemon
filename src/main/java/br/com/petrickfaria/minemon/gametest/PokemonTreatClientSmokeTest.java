@@ -2,20 +2,25 @@ package br.com.petrickfaria.minemon.gametest;
 
 import br.com.petrickfaria.minemon.registry.ModItems;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.NonNullList;
 import net.minecraftforge.event.TickEvent;
 
 /** Loads each registered treat model in a real Minecraft client and verifies the creative tab. */
 public final class PokemonTreatClientSmokeTest {
-    private static int titleTicks;
+    private static int clientTicks;
     private static boolean done;
     public static void tick(TickEvent.ClientTickEvent event) {
         if (done || event.phase != TickEvent.Phase.END || !Boolean.getBoolean("minemon.clientSmokeTest")
                 || !Boolean.getBoolean("minemon.clientSmokeTreats")) return;
         Minecraft minecraft=Minecraft.getInstance();
-        if (!(minecraft.screen instanceof TitleScreen) || ++titleTicks < 20) return;
+        if (++clientTicks == 1) {
+            System.out.println("[TREAT CLIENT] tick handler active; screen="
+                    + (minecraft.screen == null ? "null" : minecraft.screen.getClass().getSimpleName()));
+        }
+        // This smoke only inspects registered item resources, so it can run in
+        // either the title screen or an already opened world.
+        if (clientTicks < 20) return;
         try {
             NonNullList<net.minecraft.world.item.ItemStack> tab=NonNullList.create();
             ModItems.MINEMON_TAB.fillItemList(tab);
