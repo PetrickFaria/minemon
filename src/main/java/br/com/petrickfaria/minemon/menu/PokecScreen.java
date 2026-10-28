@@ -19,7 +19,7 @@ import java.util.*;
 
 /** Pokédex selector and server-authoritative purchase/unlock panel. */
 public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
-    private static final int LOGICAL_WIDTH = 520, LOGICAL_HEIGHT = 320;
+    private static final int LOGICAL_WIDTH = 520, LOGICAL_HEIGHT = 410;
     private static final int LIST_X = 8, LIST_Y = 35, LIST_W = 174, LIST_H = 272, ROW_H = 12;
     private static volatile int syncedCoins;
     private static volatile boolean syncedFreeAvailable = true;
@@ -29,6 +29,10 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
     private static volatile Map<String, Integer> syncedRequirements = Map.of();
     private static volatile int syncedStagedCoins, syncedStagedSouls;
     private static volatile String syncedSelectedSlug = "bulbasaur";
+    private static volatile ItemStack syncedConversionBall = ItemStack.EMPTY, syncedConversionOutput = ItemStack.EMPTY;
+    private static volatile int syncedConversionResult = -1, syncedConversionLevel, syncedConversionMaximum, syncedConversionChance;
+    private static volatile String syncedConversionSpecies = "", syncedConversionRarity = "", syncedConversionStage = "", syncedConversionType = "";
+    private static volatile boolean syncedConversionConfirming;
 
     private float uiScale = 1.0F;
     private int scrollOffset;
@@ -45,7 +49,11 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
 
     public static void updateState(int coins, boolean freeAvailable, Set<String> unlocked,
                                    Map<String, Integer> deposits, Map<String, Integer> prices,
-                                   Map<String, Integer> requirements, String selected, int stagedCoins, int stagedSouls) {
+                                   Map<String, Integer> requirements, String selected, int stagedCoins, int stagedSouls,
+                                   ItemStack conversionBall, ItemStack conversionOutput, int conversionResult,
+                                   String conversionSpecies, String conversionRarity, String conversionStage,
+                                   String conversionType, int conversionLevel, int conversionMaximum,
+                                   int conversionChance, boolean conversionConfirming) {
         syncedCoins = coins;
         syncedFreeAvailable = freeAvailable;
         syncedUnlocked = Set.copyOf(unlocked);
@@ -55,6 +63,12 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         syncedSelectedSlug = selected;
         syncedStagedCoins = stagedCoins;
         syncedStagedSouls = stagedSouls;
+        syncedConversionBall = conversionBall.copy(); syncedConversionOutput = conversionOutput.copy();
+        syncedConversionResult = conversionResult; syncedConversionSpecies = conversionSpecies;
+        syncedConversionRarity = conversionRarity; syncedConversionStage = conversionStage;
+        syncedConversionType = conversionType; syncedConversionLevel = conversionLevel;
+        syncedConversionMaximum = conversionMaximum; syncedConversionChance = conversionChance;
+        syncedConversionConfirming = conversionConfirming;
         Minecraft mc = Minecraft.getInstance();
         if (mc.screen instanceof PokecScreen screen) {
             screen.selectedSlug = selected;
@@ -102,7 +116,7 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         font.draw(pose, "Saldo: " + syncedCoins + " PokéCoins", 346, 12, 0xFFFFD778);
 
         drawPanel(pose, LIST_X, LIST_Y - 5, LIST_W, LIST_H + 8);
-        drawPanel(pose, 190, LIST_Y - 5, 322, LIST_H + 8);
+        drawPanel(pose, 190, LIST_Y - 5, 322, LOGICAL_HEIGHT - LIST_Y - 8);
         font.draw(pose, "ESPÉCIES   001–151", LIST_X + 7, LIST_Y - 1, 0xFF75CFF5);
         int visible = visibleRows();
         for (int row = 0; row < visible; row++) {
@@ -195,6 +209,63 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
             font.draw(pose, "Raridade: " + rarityLabel(species.rarity()), 207, 278, 0xFFE1EDF4);
             font.draw(pose, "Estágio: " + evolutionStage(species), 354, 278, 0xFFE1EDF4);
         }
+
+        GuiComponent.fill(pose, 205, 296, 498, 297, 0xFF2B536B);
+        font.draw(pose, "CONVERSÃO EM ALMAS", 207, 301, 0xFF72CFF5);
+        font.draw(pose, "Entrada", 208, 315, 0xFFAFBFCA);
+        font.draw(pose, "Saída", 274, 315, 0xFFAFBFCA);
+        drawConversionSlot(pose, 208, 329, syncedConversionBall, true);
+        drawConversionSlot(pose, 274, 329, syncedConversionOutput, false);
+        drawCentered(pose, "→", 263, 342, 0xFF7AD7FF);
+        if (syncedConversionSpecies.isEmpty()) {
+            if (syncedConversionResult >= 0) {
+                font.draw(pose, "Conversão concluída.", 322, 329, 0xFFB9C8D2);
+                font.draw(pose, "Resultado: " + syncedConversionResult + " alma(s).", 322, 341, syncedConversionResult == 0 ? 0xFFFFA1A1 : 0xFF9BEEAE);
+            } else {
+                font.draw(pose, "Coloque uma Pokébola ocupada", 322, 329, 0xFFB9C8D2);
+                font.draw(pose, "de sua propriedade no slot de entrada.", 322, 341, 0xFF879CA9);
+            }
+        } else {
+            PokecSpecies.Entry stored = PokecSpecies.get(syncedConversionSpecies);
+            String storedName = stored == null ? syncedConversionSpecies : stored.name();
+            font.draw(pose, "Pokémon: " + storedName + "  Nv. " + syncedConversionLevel, 322, 327, 0xFFE4EEF5);
+            font.draw(pose, "Raridade: " + rarityLabel(syncedConversionRarity) + "  Estágio: " + conversionStageLabel(syncedConversionStage), 322, 339, 0xFFB9C8D2);
+            font.draw(pose, "Alma: " + soulTypeLabel(conversionType) + "  Máx.: " + syncedConversionMaximum + "  Chance: " + syncedConversionChance + "%", 322, 351, 0xFFB9C8D2);
+            if (syncedConversionResult >= 0) font.draw(pose, "Resultado: " + syncedConversionResult + " alma(s)", 322, 363, syncedConversionResult == 0 ? 0xFFFFA1A1 : 0xFF9BEEAE);
+        }
+        boolean hasInput = !syncedConversionBall.isEmpty() && syncedConversionResult < 0;
+        drawButton(pose, 408, 328, 82, 24, syncedConversionConfirming ? "CONFIRMAR" : "CONVERTER", hasInput, mouseX, mouseY);
+        if (syncedConversionConfirming) drawButton(pose, 408, 356, 82, 22, "CANCELAR", true, mouseX, mouseY);
+    }
+
+    private void drawConversionSlot(PoseStack pose, int x, int y, ItemStack stack, boolean input) {
+        int accent = stack.isEmpty() ? 0xFF586B78 : 0xFF52A7CE;
+        GuiComponent.fill(pose, x, y, x + 36, y + 36, accent);
+        GuiComponent.fill(pose, x + 2, y + 2, x + 34, y + 34, 0xFF0B141C);
+        if (!stack.isEmpty()) Minecraft.getInstance().getItemRenderer().renderAndDecorateItem(stack, x + 10, y + 9);
+        else if (input) {
+            GuiComponent.fill(pose, x + 11, y + 7, x + 25, y + 10, 0xFF65737C);
+            GuiComponent.fill(pose, x + 8, y + 10, x + 28, y + 17, 0xFF929DA3);
+            GuiComponent.fill(pose, x + 6, y + 17, x + 30, y + 22, 0xFF65737C);
+            GuiComponent.fill(pose, x + 8, y + 22, x + 28, y + 28, 0xFF929DA3);
+            GuiComponent.fill(pose, x + 11, y + 28, x + 25, y + 30, 0xFF65737C);
+            GuiComponent.fill(pose, x + 15, y + 14, x + 21, y + 23, 0xFF303A40);
+            GuiComponent.fill(pose, x + 16, y + 16, x + 20, y + 21, 0xFFB9C3C8);
+        } else drawCentered(pose, "→", x + 18, y + 13, 0xFF748894);
+        if (!stack.isEmpty() && stack.getCount() > 1) font.draw(pose, Integer.toString(stack.getCount()), x + 27, y + 25, 0xFFFFFFFF);
+    }
+
+    private String conversionStageLabel(String stage) {
+        return switch (stage) { case "INITIAL" -> "Inicial"; case "INTERMEDIATE" -> "Intermediário"; case "FINAL" -> "Final"; default -> "Único"; };
+    }
+
+    private String soulTypeLabel(String type) {
+        return switch (type) {
+            case "NORMAL" -> "Normal"; case "FIRE" -> "Fogo"; case "WATER" -> "Água"; case "GRASS" -> "Grama";
+            case "ELECTRIC" -> "Elétrica"; case "ICE" -> "Gelo"; case "FIGHTING" -> "Lutadora"; case "POISON" -> "Venenosa";
+            case "GROUND" -> "Terrestre"; case "FLYING" -> "Voadora"; case "PSYCHIC" -> "Psíquica"; case "BUG" -> "Inseto";
+            case "ROCK" -> "Pedra"; case "GHOST" -> "Fantasma"; case "DRAGON" -> "Dragão"; default -> type;
+        };
     }
 
     private String formatStat(double value) { return String.format(Locale.ROOT, "%.0f", value); }
@@ -295,6 +366,22 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         }
         PokecSpecies.Entry species = PokecSpecies.get(selectedSlug);
         if (species == null) return super.mouseClicked(mouseX, mouseY, button);
+        if (inRect(x, y, 208, 329, 36, 36)) {
+            MinemonNetwork.performPokecAction(menu.pos(), selectedSlug, syncedConversionBall.isEmpty() ? PokecTransactions.Action.STAGE_POKEBALL : PokecTransactions.Action.RETURN_POKEBALL);
+            return true;
+        }
+        if (inRect(x, y, 274, 329, 36, 36) && !syncedConversionOutput.isEmpty()) {
+            MinemonNetwork.performPokecAction(menu.pos(), selectedSlug, PokecTransactions.Action.CLAIM_CONVERSION_OUTPUT);
+            return true;
+        }
+        if (inRect(x, y, 408, 328, 82, 24) && !syncedConversionBall.isEmpty() && syncedConversionResult < 0) {
+            MinemonNetwork.performPokecAction(menu.pos(), selectedSlug, syncedConversionConfirming ? PokecTransactions.Action.CONFIRM_CONVERSION : PokecTransactions.Action.REQUEST_CONVERSION);
+            return true;
+        }
+        if (inRect(x, y, 408, 356, 82, 22) && syncedConversionConfirming) {
+            MinemonNetwork.performPokecAction(menu.pos(), selectedSlug, PokecTransactions.Action.CANCEL_CONVERSION);
+            return true;
+        }
         boolean unlocked = syncedUnlocked.contains(species.slug());
         boolean evolution = species.isEvolution() && !unlocked;
         if (unlocked && !syncedFreeAvailable && inRect(x, y, 208, 198, 36, 36)) {

@@ -8,11 +8,17 @@ import br.com.petrickfaria.minemon.pokec.*;
 import br.com.petrickfaria.minemon.registry.ModBlocks;
 import br.com.petrickfaria.minemon.registry.ModEntities;
 import br.com.petrickfaria.minemon.registry.ModItems;
+import br.com.petrickfaria.minemon.item.PokeballItem;
+import br.com.petrickfaria.minemon.item.PokemonBallLedger;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraft.server.level.ServerPlayer;
@@ -144,6 +150,64 @@ public final class PokecGameTests {
         MinemonCreature owned=h.spawn(ModEntities.SPECIES.get("charmander").get(),new BlockPos(5,1,5));owned.tame(owner);
         owned.notifyPokecEvolution("charmeleon");check(PokecPlayerData.isUnlocked(owner,"charmeleon"),"owned valid evolution unlocks its target");
         owned.notifyPokecEvolution("charizard");check(!PokecPlayerData.isUnlocked(owner,"charizard"),"must evolve through the declared adjacent stage");owner.discard();h.succeed();
+    }
+
+    @GameTest(template="test_arena",timeoutTicks=200)
+    public static void pokeballCapturesOnlyOwnersAndRestoresPokemonData(GameTestHelper h){
+        floor(h);ServerPlayer owner=player(h,h.absolutePos(new BlockPos(7,1,5)));
+        ServerPlayer stranger=player(h,h.absolutePos(new BlockPos(9,1,5)));
+        MinemonCreature owned=h.spawn(ModEntities.SPECIES.get("charmander").get(),new BlockPos(5,1,5));
+        owned.tame(owner);owned.setPokemonLevel(7);owned.setHealth(5.0F);
+        ItemStack occupied=new ItemStack(ModItems.POKEBALL.get());owner.setItemInHand(InteractionHand.MAIN_HAND,occupied);
+        var capture=ModItems.POKEBALL.get().interactLivingEntity(occupied,owner,owned,InteractionHand.MAIN_HAND);
+        ItemStack storedBall=owner.getMainHandItem();var stored=PokeballItem.readStored(storedBall);
+        check(capture.consumesAction()&&stored!=null,"owned tamed Pokémon should be captured in a filled Pokébola");
+        check(stored.species().equals("charmander")&&stored.owner().equals(owner.getUUID())&&stored.level()==7,"species, owner, and level must persist in the ball");
+        check(stored.health()==5.0F&&stored.entityData().getFloat("Health")==5.0F,"current health and full entity NBT must persist");
+        check(!owned.isAlive(),"capturing removes exactly the original entity");
+
+        MinemonCreature wild=h.spawn(ModEntities.SPECIES.get("squirtle").get(),new BlockPos(6,1,5));
+        ItemStack empty=new ItemStack(ModItems.POKEBALL.get());owner.setItemInHand(InteractionHand.OFF_HAND,empty);
+        check(!ModItems.POKEBALL.get().interactLivingEntity(empty,owner,wild,InteractionHand.OFF_HAND).consumesAction(),"wild Pokémon cannot be captured");
+        MinemonCreature foreign=h.spawn(ModEntities.SPECIES.get("pikachu").get(),new BlockPos(10,1,5));foreign.tame(stranger);
+        check(!ModItems.POKEBALL.get().interactLivingEntity(empty,owner,foreign,InteractionHand.OFF_HAND).consumesAction(),"another owner's Pokémon cannot be captured");
+
+        BlockPos floorPos=new BlockPos(5,0,5);
+        var hit=new BlockHitResult(Vec3.atCenterOf(h.absolutePos(floorPos)),net.minecraft.core.Direction.UP,h.absolutePos(floorPos),false);
+        var release=ModItems.POKEBALL.get().useOn(new net.minecraft.world.item.context.UseOnContext(owner,InteractionHand.MAIN_HAND,hit));
+        check(release.consumesAction()&&!PokeballItem.isOccupied(owner.getMainHandItem()),"successful release must empty, not destroy, the ball");
+        var restored=h.getLevel().getEntitiesOfClass(MinemonCreature.class,new net.minecraft.world.phys.AABB(h.absolutePos(new BlockPos(3,1,3)),h.absolutePos(new BlockPos(12,5,8))),e->e.getSpeciesSlug().equals("charmander")&&owner.getUUID().equals(e.getOwnerUUID()));
+        check(restored.size()==1&&restored.get(0).getPokemonLevel()==7&&restored.get(0).getHealth()==5.0F,"release restores one owned Pokémon with captured state");
+        check(!PokeballItem.isOccupied(empty),"empty balls stay empty after rejected capture attempts");
+        stranger.discard();owner.discard();h.succeed();
+    }
+
+    @GameTest(template="test_arena",timeoutTicks=200)
+    public static void pokecConversionRequiresConfirmationAndConsumesTokenOnce(GameTestHelper h){
+        floor(h);BlockPos p=h.absolutePos(new BlockPos(5,1,5));terminal(h,p);ServerPlayer owner=player(h,h.absolutePos(new BlockPos(7,1,5)));
+        MinemonCreature creature=h.spawn(ModEntities.SPECIES.get("charmander").get(),new BlockPos(8,1,5));creature.tame(owner);creature.setPokemonLevel(1);
+        ItemStack ball=new ItemStack(ModItems.POKEBALL.get());owner.setItemInHand(InteractionHand.MAIN_HAND,ball);
+        check(ModItems.POKEBALL.get().interactLivingEntity(ball,owner,creature,InteractionHand.MAIN_HAND).consumesAction(),"test Pokémon should be captured before conversion");
+        ItemStack filledBall=owner.getMainHandItem().copy();owner.setItemInHand(InteractionHand.MAIN_HAND,ItemStack.EMPTY);owner.getInventory().setItem(9,filledBall);
+        PokecMenu menu=new PokecMenu(20,owner.getInventory(),p);owner.containerMenu=menu;
+        check(PokecTransactions.perform(owner,p,"bulbasaur",PokecTransactions.Action.STAGE_POKEBALL,0xB00L),"filled player-owned Pokébola should be staged");
+        check(menu.conversionPreview()!=null&&menu.conversionPreview().maximum()>=1,"PokéC previews stage, rarity, level, type, and maximum souls");
+        UUID token=PokeballItem.readStored(menu.conversionBall()).token();int maximum=menu.conversionPreview().maximum();
+        check(PokeballItem.isOccupied(menu.conversionBall()),"staging must not consume the Pokémon");
+        check(PokecTransactions.perform(owner,p,"bulbasaur",PokecTransactions.Action.REQUEST_CONVERSION,0xB01L),"first confirmation request should open a short confirmation window");
+        check(PokeballItem.isOccupied(menu.conversionBall()),"requesting confirmation must leave the stored Pokémon intact");
+        check(PokecTransactions.perform(owner,p,"bulbasaur",PokecTransactions.Action.CONFIRM_CONVERSION,0xB02L),"confirmed conversion should complete");
+        int result=menu.conversionResult();
+        check(result>=0&&result<=maximum,"conversion result must be within the configured maximum");
+        check(!PokeballItem.isOccupied(menu.conversionBall()),"confirmed conversion leaves an empty Pokébola");
+        check(PokemonBallLedger.get(h.getLevel()).isConsumed(token),"spent token cannot be converted or released a second time");
+        check(!PokecTransactions.perform(owner,p,"bulbasaur",PokecTransactions.Action.CONFIRM_CONVERSION,0xB03L),"a second confirm cannot roll or deliver souls again");
+        menu.removed(owner);
+        long returned=owner.getInventory().items.stream().filter(stack->stack.is(ModItems.POKEBALL.get())).mapToLong(ItemStack::getCount).sum();
+        long souls=owner.getInventory().items.stream().filter(stack->ModItems.SOULS.values().stream().anyMatch(item->stack.is(item.get()))).mapToLong(ItemStack::getCount).sum();
+        check(returned==1,"closing PokéC returns the reusable empty Pokébola exactly once");
+        check(souls==result,"closing PokéC safely returns only the souls actually rolled");
+        owner.discard();h.succeed();
     }
     private PokecGameTests(){}
 }

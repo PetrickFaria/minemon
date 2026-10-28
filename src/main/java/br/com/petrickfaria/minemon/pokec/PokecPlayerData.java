@@ -2,6 +2,7 @@ package br.com.petrickfaria.minemon.pokec;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
 import java.util.*;
 
 /** Per-player durable PokéC state lives in Forge's player persistent data compound. */
@@ -34,7 +35,16 @@ public final class PokecPlayerData {
     public static String stagedSoulType(ServerPlayer p){return data(p).getString("stagedSoulType");}
     public static void setStagedCoins(ServerPlayer p,int value){data(p).putInt("stagedCoins",Math.max(0,value));}
     public static void setStagedSouls(ServerPlayer p,int value,String type){CompoundTag d=data(p);d.putInt("stagedSouls",Math.max(0,value));d.putString("stagedSoulType",value>0?type:"");}
-    public static void clearStaged(ServerPlayer p){CompoundTag d=data(p);d.putInt("stagedCoins",0);d.putInt("stagedSouls",0);d.putString("stagedSoulType","");}
+    public static ItemStack conversionBall(ServerPlayer p){CompoundTag d=data(p);return d.contains("conversionBall",CompoundTag.TAG_COMPOUND)?ItemStack.of(d.getCompound("conversionBall")):ItemStack.EMPTY;}
+    public static ItemStack conversionOutput(ServerPlayer p){CompoundTag d=data(p);return d.contains("conversionOutput",CompoundTag.TAG_COMPOUND)?ItemStack.of(d.getCompound("conversionOutput")):ItemStack.EMPTY;}
+    public static int conversionResult(ServerPlayer p){return data(p).getInt("conversionResult");}
+    public static void setConversion(ServerPlayer p,ItemStack ball,ItemStack output,int result){
+        CompoundTag d=data(p);
+        if(ball.isEmpty())d.remove("conversionBall");else d.put("conversionBall",ball.save(new CompoundTag()));
+        if(output.isEmpty())d.remove("conversionOutput");else d.put("conversionOutput",output.save(new CompoundTag()));
+        d.putInt("conversionResult",Math.max(-1,result));
+    }
+    public static void clearStaged(ServerPlayer p){CompoundTag d=data(p);d.putInt("stagedCoins",0);d.putInt("stagedSouls",0);d.putString("stagedSoulType","");d.remove("conversionBall");d.remove("conversionOutput");d.putInt("conversionResult",-1);}
     public static void copyOnRespawn(net.minecraft.world.entity.player.Player oldPlayer,net.minecraft.world.entity.player.Player newPlayer){
         if(oldPlayer.getPersistentData().contains(KEY))newPlayer.getPersistentData().put(KEY,oldPlayer.getPersistentData().getCompound(KEY).copy());
     }

@@ -41,10 +41,10 @@ public final class PokemonTreatClientSmokeTest {
                     throw new IllegalStateException("PokéC list click did not select Mew in the detail panel");
                 java.nio.file.Files.writeString(java.nio.file.Path.of("client-validation-treats.txt"),
                         "[TREAT CLIENT] PASS: resources, 151-species list, list selection, and animated PokéC preview rendered\n"
-                                + "PokéCoin model, translations, texture, and creative entry loaded\n");
+                                + "PokéCoin and Pokébola models, translations, textures, and creative entries loaded\n");
                 done = true;
                 System.out.println("[TREAT CLIENT] PASS: resources, 151-species list, list selection, and animated PokéC preview rendered");
-                System.out.println("PokéCoin model, translations, texture, and creative entry loaded");
+                System.out.println("PokéCoin and Pokébola models, translations, textures, and creative entries loaded");
                 minecraft.execute(minecraft::stop);
                 return;
             }
@@ -90,6 +90,24 @@ public final class PokemonTreatClientSmokeTest {
                 var image=texture==null?null:javax.imageio.ImageIO.read(texture);
                 if (image==null || image.getWidth()!=32 || image.getHeight()!=32 || !image.getColorModel().hasAlpha())
                     throw new IllegalStateException("PokéCoin texture must be a 32x32 transparent PNG");
+            }
+            var ball=ModItems.POKEBALL.get();
+            var ballId=net.minecraftforge.registries.ForgeRegistries.ITEMS.getKey(ball);
+            if(ballId==null||!ballId.toString().equals("minemon:pokeball"))throw new IllegalStateException("Pokébola has wrong registry ID: "+ballId);
+            if(ball.getMaxStackSize()!=64)throw new IllegalStateException("Empty Pokébolas must stack to 64");
+            var occupiedBall=new net.minecraft.world.item.ItemStack(ball);
+            var occupiedTag=new net.minecraft.nbt.CompoundTag();occupiedTag.put("MinemonStoredPokemon",new net.minecraft.nbt.CompoundTag());occupiedBall.setTag(occupiedTag);
+            if(ball.getMaxStackSize(occupiedBall)!=1)throw new IllegalStateException("Occupied Pokébolas must be unstackable");
+            if(tab.stream().filter(stack->stack.getItem()==ball).count()!=1)throw new IllegalStateException("Pokébola must appear exactly once in the Minemon creative tab");
+            var ballModelId=new ModelResourceLocation(ballId,"inventory");
+            if(minecraft.getModelManager().getModel(ballModelId)==minecraft.getModelManager().getMissingModel())throw new IllegalStateException("Missing baked Pokébola model: "+ballModelId);
+            var ballName="item.minemon.pokeball";
+            if(net.minecraft.client.resources.language.I18n.get(ballName).equals(ballName))throw new IllegalStateException("Missing Pokébola translation: "+ballName);
+            try(var texture=PokemonTreatClientSmokeTest.class.getResourceAsStream("/assets/minemon/textures/item/pokeball.png")){
+                var image=texture==null?null:javax.imageio.ImageIO.read(texture);
+                if(image==null||image.getWidth()!=32||image.getHeight()!=32||!image.getColorModel().hasAlpha())throw new IllegalStateException("Pokébola texture must be a 32x32 transparent PNG");
+                int upper=image.getRGB(16,8),lower=image.getRGB(16,24),center=image.getRGB(16,16);
+                if(((upper>>16)&255)<150||((lower>>16)&255)<180||((lower>>8)&255)<180||((center>>16)&255)<180)throw new IllegalStateException("Pokébola texture is missing its red/white halves or white center button");
             }
             if (minecraft.player == null || minecraft.level == null) {
                 var dataFile = java.nio.file.Path.of("saves/minemon-validation/level.dat").toFile();

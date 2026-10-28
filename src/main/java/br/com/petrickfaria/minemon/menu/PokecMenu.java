@@ -3,6 +3,8 @@ package br.com.petrickfaria.minemon.menu;
 import br.com.petrickfaria.minemon.pokec.PokecSpecies;
 import br.com.petrickfaria.minemon.pokec.PokecPlayerData;
 import br.com.petrickfaria.minemon.pokec.SoulType;
+import br.com.petrickfaria.minemon.pokec.PokemonSoulConversion;
+import br.com.petrickfaria.minemon.item.PokeballItem;
 import br.com.petrickfaria.minemon.registry.ModBlocks;
 import br.com.petrickfaria.minemon.registry.ModItems;
 import net.minecraft.core.BlockPos;
@@ -22,6 +24,11 @@ public final class PokecMenu extends AbstractContainerMenu {
     private int stagedCoins;
     private int stagedSouls;
     private int lastPurchaseTick = -20;
+    private ItemStack conversionBall = ItemStack.EMPTY;
+    private ItemStack conversionOutput = ItemStack.EMPTY;
+    private int conversionResult = -1;
+    private int conversionConfirmUntil = -1;
+    private PokemonSoulConversion.Preview conversionPreview;
 
     public PokecMenu(int id, Inventory inventory, FriendlyByteBuf buf) { this(id, inventory, buf.readBlockPos()); }
     public PokecMenu(int id, Inventory inventory, BlockPos pos) {
@@ -30,12 +37,43 @@ public final class PokecMenu extends AbstractContainerMenu {
         if (!inventory.player.level.isClientSide && inventory.player instanceof ServerPlayer serverPlayer) {
             stagedCoins = PokecPlayerData.stagedCoins(serverPlayer);
             stagedSouls = PokecPlayerData.stagedSouls(serverPlayer);
+            conversionBall = PokecPlayerData.conversionBall(serverPlayer);
+            conversionOutput = PokecPlayerData.conversionOutput(serverPlayer);
+            conversionResult = PokecPlayerData.conversionResult(serverPlayer);
+            refreshConversionPreview(serverPlayer);
         }
     }
     public BlockPos pos() { return pos; }
     public String selectedSlug() { return selectedSlug; }
     public int stagedCoins() { return stagedCoins; }
     public int stagedSouls() { return stagedSouls; }
+    public ItemStack conversionBall() { return conversionBall.copy(); }
+    public ItemStack conversionOutput() { return conversionOutput.copy(); }
+    public int conversionResult() { return conversionResult; }
+    public PokemonSoulConversion.Preview conversionPreview() { return conversionPreview; }
+    public boolean isConversionConfirming(int gameTick) { return conversionConfirmUntil >= gameTick; }
+    public boolean requestConversionConfirmation(int gameTick) {
+        if (conversionPreview == null || conversionBall.isEmpty() || !conversionOutput.isEmpty()) return false;
+        conversionConfirmUntil = gameTick + 80;
+        return true;
+    }
+    public void cancelConversionConfirmation() { conversionConfirmUntil = -1; }
+    public void setConversionState(ServerPlayer player, ItemStack ball, ItemStack output, int result) {
+        conversionBall = ball.copy();
+        conversionOutput = output.copy();
+        conversionResult = Math.max(-1, result);
+        conversionConfirmUntil = -1;
+        refreshConversionPreview(player);
+        PokecPlayerData.setConversion(player, conversionBall, conversionOutput, conversionResult);
+    }
+    public void refreshConversionPreview(ServerPlayer player) {
+        PokeballItem.StoredPokemon stored = PokeballItem.readStored(conversionBall);
+        if (stored == null || !stored.owner().equals(player.getUUID())) {
+            conversionPreview = null;
+            return;
+        }
+        conversionPreview = PokemonSoulConversion.preview(stored.species(), stored.level());
+    }
     public boolean beginPurchase(int gameTick) {
         if (gameTick - lastPurchaseTick < 4) return false;
         lastPurchaseTick = gameTick;
@@ -77,6 +115,13 @@ public final class PokecMenu extends AbstractContainerMenu {
             player.getInventory().placeItemBackInInventory(new ItemStack(soul.get(), stackSize));
             souls -= stackSize;
         }
+        if (!conversionBall.isEmpty()) player.getInventory().placeItemBackInInventory(conversionBall.copy());
+        if (!conversionOutput.isEmpty()) player.getInventory().placeItemBackInInventory(conversionOutput.copy());
+        conversionBall = ItemStack.EMPTY;
+        conversionOutput = ItemStack.EMPTY;
+        conversionResult = -1;
+        conversionPreview = null;
+        conversionConfirmUntil = -1;
         PokecPlayerData.clearStaged(player);
     }
 

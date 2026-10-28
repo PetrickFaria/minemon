@@ -321,5 +321,12 @@
   "item.minemon.ground_treat": "Ground Treat",
   "item.minemon.poison_treat": "Poison Treat",
   "item.minemon.flying_treat": "Flying Treat",
-  "item.minemon.poke_coin": "PokéCoin"
+  "item.minemon.poke_coin": "PokéCoin",
+  "item.minemon.pokeball": "Poké Ball",
+  "item.minemon.pokeball.stored": "Poké Ball containing %s",
+  "tooltip.minemon.pokeball.empty": "Empty — use on one of your tamed Pokémon.",
+  "tooltip.minemon.pokeball.species": "Pokémon: %s",
+  "tooltip.minemon.pokeball.level": "Level: %s",
+  "tooltip.minemon.pokeball.health": "Health: %s / %s",
+  "tooltip.minemon.pokeball.owner": "Owner: %s"
 }

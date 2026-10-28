@@ -321,5 +321,12 @@
   "item.minemon.ground_treat": "Petisco Barroso",
   "item.minemon.poison_treat": "Petisco Venenoso",
   "item.minemon.flying_treat": "Petisco Voador",
-  "item.minemon.poke_coin": "PokéCoin"
+  "item.minemon.poke_coin": "PokéCoin",
+  "item.minemon.pokeball": "Pokébola",
+  "item.minemon.pokeball.stored": "Pokébola de %s",
+  "tooltip.minemon.pokeball.empty": "Vazia — use em um Pokémon domesticado seu.",
+  "tooltip.minemon.pokeball.species": "Pokémon: %s",
+  "tooltip.minemon.pokeball.level": "Nível: %s",
+  "tooltip.minemon.pokeball.health": "Vida: %s / %s",
+  "tooltip.minemon.pokeball.owner": "Proprietário: %s"
 }

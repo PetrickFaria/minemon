@@ -86,6 +86,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     private int blinkCooldownTicks;
     private boolean blinkPending;
     private int attackAnimationTicks;
+    private int pokemonLevel = 1;
     private int attackSequence;
     private int playedAttackSequence;
     private int spontaneousRunTicks;
@@ -179,6 +180,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
 
     @Override public void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
+        tag.putInt("MinemonPokemonLevel", this.getPokemonLevel());
         tag.putBoolean("MinemonSleeping", this.isSleeping());
         tag.putBoolean("NightRoutine",this.nightRoutine);
         tag.putInt("WakeGraceTicks",this.wakeGraceTicks);
@@ -190,6 +192,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
 
     @Override public void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
+        this.setPokemonLevel(tag.contains("MinemonPokemonLevel") ? tag.getInt("MinemonPokemonLevel") : 1);
         this.setSleeping(tag.getBoolean("MinemonSleeping"));
         this.nightRoutine=tag.getBoolean("NightRoutine");
         this.wakeGraceTicks=tag.getInt("WakeGraceTicks");
@@ -202,6 +205,17 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
                     ? tag.getBoolean("MinemonCustomSoundDayActive") : this.customSoundTicks > 0;
         }
         this.syncNaturalState();
+    }
+
+    /** Minimal persistent level field; the mod does not currently implement XP progression. */
+    public int getPokemonLevel() { return Math.max(1, this.pokemonLevel); }
+    public void setPokemonLevel(int level) { this.pokemonLevel = Math.max(1, level); }
+
+    /** Capture is blocked while the Pokémon is sleeping, breeding, or engaged in combat. */
+    public boolean canBeStoredInPokeball() {
+        return !this.isDeadOrDying() && !this.isSleeping() && !this.isNightResting()
+                && !this.isInLove() && this.getTarget() == null && this.attackAnimationTicks <= 0
+                && !this.isPassenger();
     }
 
     @Override

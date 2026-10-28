@@ -1,6 +1,8 @@
 package br.com.petrickfaria.minemon.pokec;
 
 import br.com.petrickfaria.minemon.entity.MinemonCreature;
+import br.com.petrickfaria.minemon.item.PokeballItem;
+import br.com.petrickfaria.minemon.item.PokemonBallLedger;
 import br.com.petrickfaria.minemon.menu.PokecMenu;
 import br.com.petrickfaria.minemon.registry.ModEntities;
 import br.com.petrickfaria.minemon.registry.ModItems;
@@ -11,18 +13,24 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.network.chat.Component;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /** All PokéC state changes are validated and committed on the server. */
 public final class PokecTransactions {
-    public enum Action { DEPOSIT, PURCHASE, SELECT, STAGE_COINS, STAGE_SOULS, CONFIRM_SOULS }
+    public enum Action { DEPOSIT, PURCHASE, SELECT, STAGE_COINS, STAGE_SOULS, CONFIRM_SOULS,
+        STAGE_POKEBALL, RETURN_POKEBALL, CLAIM_CONVERSION_OUTPUT, REQUEST_CONVERSION, CONFIRM_CONVERSION, CANCEL_CONVERSION }
     private static final Map<UUID, Set<Long>> RECENT_IDS = new ConcurrentHashMap<>();
 
     public static boolean perform(ServerPlayer player, BlockPos pos, String slug, Action action, long id) {
         if (!(player.containerMenu instanceof PokecMenu menu) || !menu.pos().equals(pos) || !menu.stillValid(player)) return false;
-        if (player.distanceToSqr(pos.getX() + .5, pos.getY() + .5, pos.getZ() + .5) > 64 || !PokecSpecies.ALL.containsKey(slug)) return false;
+        if (player.distanceToSqr(pos.getX() + .5, pos.getY() + .5, pos.getZ() + .5) > 64) return false;
+        if (action != Action.STAGE_POKEBALL && action != Action.RETURN_POKEBALL
+                && action != Action.CLAIM_CONVERSION_OUTPUT && action != Action.REQUEST_CONVERSION
+                && action != Action.CONFIRM_CONVERSION && action != Action.CANCEL_CONVERSION
+                && !PokecSpecies.ALL.containsKey(slug)) return false;
         if (!remember(player.getUUID(), id)) return false;
         synchronized (player.getPersistentData()) {
             PokecSpecies.Entry species = PokecSpecies.get(slug);
@@ -30,7 +38,24 @@ public final class PokecTransactions {
                 menu.selectSpecies(player, slug);
                 return true;
             }
-            if (!menu.selectedSlug().equals(slug)) return false;
+            if (action != Action.SELECT && action != Action.STAGE_POKEBALL && action != Action.RETURN_POKEBALL
+                    && action != Action.CLAIM_CONVERSION_OUTPUT && action != Action.REQUEST_CONVERSION
+                    && action != Action.CONFIRM_CONVERSION && action != Action.CANCEL_CONVERSION
+                    && !menu.selectedSlug().equals(slug)) return false;
+            return switch (action) {
+                case STAGE_POKEBALL -> stagePokeball(player, menu);
+                case RETURN_POKEBALL -> returnPokeball(player, menu);
+                case CLAIM_CONVERSION_OUTPUT -> claimConversionOutput(player, menu);
+                case REQUEST_CONVERSION -> menu.requestConversionConfirmation(player.tickCount);
+                case CONFIRM_CONVERSION -> confirmConversion(player, menu);
+                case CANCEL_CONVERSION -> { menu.cancelConversionConfirmation(); yield true; }
+                default -> performExisting(player, menu, slug, action);
+            };
+        }
+    }
+
+    private static boolean performExisting(ServerPlayer player, PokecMenu menu, String slug, Action action) {
+            PokecSpecies.Entry species = PokecSpecies.get(slug);
             return switch (action) {
                 case DEPOSIT -> legacyDeposit(player, species);
                 case PURCHASE -> purchase(player, menu, species);
@@ -38,8 +63,60 @@ public final class PokecTransactions {
                 case STAGE_SOULS -> stageSouls(player, menu, species);
                 case CONFIRM_SOULS -> confirmSouls(player, menu, species);
                 case SELECT -> true;
+                default -> false;
             };
+    }
+
+    private static boolean stagePokeball(ServerPlayer player, PokecMenu menu) {
+        if (!menu.conversionBall().isEmpty() || !menu.conversionOutput().isEmpty()) return false;
+        for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
+            ItemStack stack = player.getInventory().getItem(i);
+            PokeballItem.StoredPokemon stored = PokeballItem.readStored(stack);
+            if (stored == null || stack.getCount() != 1 || !stored.owner().equals(player.getUUID())
+                    || PokemonBallLedger.get((ServerLevel) player.level).isConsumed(stored.token())) continue;
+            player.getInventory().removeItem(i, 1);
+            menu.setConversionState(player, stack.copy(), ItemStack.EMPTY, -1);
+            return true;
         }
+        return false;
+    }
+
+    private static boolean returnPokeball(ServerPlayer player, PokecMenu menu) {
+        ItemStack ball = menu.conversionBall();
+        if (ball.isEmpty()) return false;
+        player.getInventory().placeItemBackInInventory(ball);
+        menu.setConversionState(player, ItemStack.EMPTY, menu.conversionOutput(), menu.conversionResult());
+        return true;
+    }
+
+    private static boolean claimConversionOutput(ServerPlayer player, PokecMenu menu) {
+        ItemStack output = menu.conversionOutput();
+        if (output.isEmpty()) return false;
+        player.getInventory().placeItemBackInInventory(output);
+        menu.setConversionState(player, menu.conversionBall(), ItemStack.EMPTY, menu.conversionResult());
+        return true;
+    }
+
+    private static boolean confirmConversion(ServerPlayer player, PokecMenu menu) {
+        if (!menu.isConversionConfirming(player.tickCount) || !(player.level instanceof ServerLevel level)
+                || !menu.conversionOutput().isEmpty()) return false;
+        ItemStack ball = menu.conversionBall();
+        if (ball.getCount() != 1) return false;
+        PokeballItem.StoredPokemon stored = PokeballItem.readStored(ball);
+        if (stored == null || !stored.owner().equals(player.getUUID())) return false;
+        PokemonSoulConversion.Preview preview = menu.conversionPreview();
+        if (preview == null || !preview.species().equals(stored.species()) || preview.soulType() == null) return false;
+        var soulItem = ModItems.SOULS.get(preview.soulType().id());
+        if (soulItem == null) return false;
+        if (!PokemonBallLedger.get(level).consume(stored.token())) return false;
+        int result = PokemonSoulConversion.roll(preview, level.getRandom()::nextDouble);
+        int stackLimit = soulItem.get().getMaxStackSize();
+        int inOutput = Math.min(result, stackLimit);
+        ItemStack output = inOutput == 0 ? ItemStack.EMPTY : new ItemStack(soulItem.get(), inOutput);
+        for (int remaining = result - inOutput; remaining > 0; remaining -= Math.min(remaining, stackLimit))
+            player.getInventory().placeItemBackInInventory(new ItemStack(soulItem.get(), Math.min(remaining, stackLimit)));
+        menu.setConversionState(player, PokeballItem.emptyBall(), output, result);
+        return true;
     }
 
     private static boolean stageCoins(ServerPlayer player, PokecMenu menu, PokecSpecies.Entry species) {
@@ -112,6 +189,10 @@ public final class PokecTransactions {
 
     /** Recover staged physical items after a disconnect or crash prevented normal close cleanup. */
     public static void recoverEscrow(ServerPlayer player) {
+        if (player.containerMenu instanceof PokecMenu menu) {
+            menu.returnEscrow(player);
+            return;
+        }
         int coins = PokecPlayerData.stagedCoins(player);
         while (coins > 0) {
             int count = Math.min(coins, ModItems.POKE_COIN.get().getMaxStackSize());
@@ -128,6 +209,10 @@ public final class PokecTransactions {
             player.getInventory().placeItemBackInInventory(new ItemStack(soulItem.get(), count));
             souls -= count;
         }
+        ItemStack ball = PokecPlayerData.conversionBall(player);
+        if (!ball.isEmpty()) player.getInventory().placeItemBackInInventory(ball);
+        ItemStack output = PokecPlayerData.conversionOutput(player);
+        if (!output.isEmpty()) player.getInventory().placeItemBackInInventory(output);
         PokecPlayerData.clearStaged(player);
     }
 
