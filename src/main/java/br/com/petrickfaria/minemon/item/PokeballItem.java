@@ -96,7 +96,8 @@ public final class PokeballItem extends Item {
                 || !creature.isTame() || !creature.isOwnedBy(player) || !creature.canBeStoredInPokeball())
             return InteractionResult.FAIL;
 
-        ItemStack occupied = stack.copyWithCount(1);
+        ItemStack occupied = stack.copy();
+        occupied.setCount(1);
         try { store(occupied, creature, serverPlayer); }
         catch (RuntimeException invalidEntity) { return InteractionResult.FAIL; }
 
@@ -119,7 +120,8 @@ public final class PokeballItem extends Item {
         if (level.isClientSide) return InteractionResultHolder.sidedSuccess(ball, true);
         if (!(player instanceof ServerPlayer serverPlayer) || !(level instanceof ServerLevel serverLevel))
             return InteractionResultHolder.fail(ball);
-        BlockPos origin = BlockPos.containing(player.position().add(player.getLookAngle().scale(1.5D)));
+        net.minecraft.world.phys.Vec3 target = player.position().add(player.getLookAngle().scale(1.5D));
+        BlockPos origin = new BlockPos(target.x, target.y, target.z);
         return release(ball, serverPlayer, serverLevel, hand, origin)
                 ? InteractionResultHolder.consume(player.getItemInHand(hand))
                 : InteractionResultHolder.fail(ball);

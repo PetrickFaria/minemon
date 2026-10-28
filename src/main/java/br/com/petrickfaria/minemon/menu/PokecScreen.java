@@ -230,7 +230,7 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
             String storedName = stored == null ? syncedConversionSpecies : stored.name();
             font.draw(pose, "Pokémon: " + storedName + "  Nv. " + syncedConversionLevel, 322, 327, 0xFFE4EEF5);
             font.draw(pose, "Raridade: " + rarityLabel(syncedConversionRarity) + "  Estágio: " + conversionStageLabel(syncedConversionStage), 322, 339, 0xFFB9C8D2);
-            font.draw(pose, "Alma: " + soulTypeLabel(conversionType) + "  Máx.: " + syncedConversionMaximum + "  Chance: " + syncedConversionChance + "%", 322, 351, 0xFFB9C8D2);
+            font.draw(pose, "Alma: " + soulTypeLabel(syncedConversionType) + "  Máx.: " + syncedConversionMaximum + "  Chance: " + syncedConversionChance + "%", 322, 351, 0xFFB9C8D2);
             if (syncedConversionResult >= 0) font.draw(pose, "Resultado: " + syncedConversionResult + " alma(s)", 322, 363, syncedConversionResult == 0 ? 0xFFFFA1A1 : 0xFF9BEEAE);
         }
         boolean hasInput = !syncedConversionBall.isEmpty() && syncedConversionResult < 0;
