@@ -77,7 +77,7 @@ public final class RocketProfessionGameTests {
         BlockPos absoluteWorkstation = helper.absolutePos(workstation);
         helper.runAfterDelay(10, () -> {
             var poi = helper.getLevel().getPoiManager().getType(absoluteWorkstation);
-            check(helper, poi.isPresent() && poi.get() == ModVillagers.ROCKET_POI.get(),
+            check(helper, poi.isPresent() && poi.get().value() == ModVillagers.ROCKET_POI.get(),
                     "Rocket block state must be indexed as the registered Rocket POI; found " + poi);
             awaitProfession(helper, villager, absoluteWorkstation, 340);
         });
