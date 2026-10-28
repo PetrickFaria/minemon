@@ -113,7 +113,10 @@ public final class PokemonTreatGameTests {
         check(h, baby.isTame()&&owner.getUUID().equals(baby.getOwnerUUID()), "Baby must inherit its parents' owner");
         check(h, first.getAge()==6000&&second.getAge()==6000, "Adult cooldown should default to 6000 ticks");
         check(h, !first.canMate(second), "Adults on cooldown must not breed again");
-        check(h, baby.getY()>=1&&baby.getY()<7&&!baby.isInWater(), "Baby must be placed at a safe dry floor position");
+        BlockPos babyFeet=baby.blockPosition();
+        boolean supported=!h.getLevel().getBlockState(babyFeet.below()).getCollisionShape(h.getLevel(),babyFeet.below()).isEmpty();
+        check(h,supported&&h.getLevel().getFluidState(babyFeet).isEmpty()&&!baby.isInWater()
+                &&h.getLevel().noCollision(baby,baby.getBoundingBox()),"Baby must be placed at a safe dry floor position");
         h.succeed();
     }
 
