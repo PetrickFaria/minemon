@@ -31,6 +31,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import br.com.petrickfaria.minemon.item.PokemonTreatItem;
 import br.com.petrickfaria.minemon.pokec.PokemonTreatTypes;
+import br.com.petrickfaria.minemon.pokec.PokemonBreeding;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.level.Level;
@@ -205,10 +206,17 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
 
     @Override
     public AgeableMob getBreedOffspring(ServerLevel level, AgeableMob partner) {
-        MinemonCreature child = (MinemonCreature) this.getType().create(level);
-        if (child != null && partner instanceof MinemonCreature other
-                && this.isTame() && other.isTame()
-                && this.getOwnerUUID() != null && this.getOwnerUUID().equals(other.getOwnerUUID())) {
+        this.pendingBreedOffspring = null;
+        if (!(partner instanceof MinemonCreature other)
+                || !this.isTame() || !other.isTame()
+                || this.getOwnerUUID() == null || !this.getOwnerUUID().equals(other.getOwnerUUID())
+                || !isBreedingPermitted(this.getSpeciesSlug()) || !isBreedingPermitted(other.getSpeciesSlug())) return null;
+        String initialForm = PokemonBreeding.chooseInitialForm(
+                this.getSpeciesSlug(), other.getSpeciesSlug(), this.getRandom()::nextDouble);
+        var babyType = br.com.petrickfaria.minemon.registry.ModEntities.SPECIES.get(initialForm);
+        if (babyType == null) return null;
+        MinemonCreature child = babyType.get().create(level);
+        if (child != null) {
             child.setOwnerUUID(this.getOwnerUUID());
             child.setTame(true);
             child.setOrderedToSit(false);
@@ -222,7 +230,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         if (!(partner instanceof MinemonCreature other) || other == this) return false;
         UUID owner = this.getOwnerUUID();
         if (owner == null || !owner.equals(other.getOwnerUUID())) return false;
-        if (!this.isTame() || !other.isTame() || this.getType() != other.getType()) return false;
+        if (!this.isTame() || !other.isTame()) return false;
         if (!isBreedingPermitted(this.getSpeciesSlug()) || !isBreedingPermitted(other.getSpeciesSlug())) return false;
         if (isBreedingBusy() || other.isBreedingBusy()) return false;
         if (!hasSafeBabyPosition((ServerLevel)this.level, this) || !hasSafeBabyPosition((ServerLevel)other.level, other)) return false;

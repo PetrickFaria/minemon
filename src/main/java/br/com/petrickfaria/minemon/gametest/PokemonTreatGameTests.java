@@ -93,10 +93,12 @@ public final class PokemonTreatGameTests {
         first.mobInteract(owner,InteractionHand.MAIN_HAND);
         check(h, first.isInLove(), "Compatible full-health adult should enter love mode");
         check(h, fire.getCount()==1, "Creative use must not consume the treat");
-        MinemonCreature second=spawn(h,"charizard",new BlockPos(6,1,5)); tame(second,owner);
+        MinemonCreature second=spawn(h,"metapod",new BlockPos(6,1,5)); tame(second,owner);
+        var bug=ModItems.TREATS.get(PokemonTreatType.BUG).get().getDefaultInstance(); owner.setItemInHand(InteractionHand.MAIN_HAND,bug);
         second.mobInteract(owner,InteractionHand.MAIN_HAND);
-        check(h,second.isInLove(),"The second adult must also enter love mode from its compatible treat");
-        check(h, first.canMate(second), "Same-species adults with the same owner should be able to mate");
+        check(h,second.isInLove(),"A different species must accept its own compatible treat");
+        check(h,bug.getCount()==1,"Creative use must not consume the second parent's treat");
+        check(h, first.canMate(second), "Different species with the same owner and separate compatible treats should be able to mate");
         h.succeed();
     }
 
@@ -104,13 +106,18 @@ public final class PokemonTreatGameTests {
     public static void successfulBreedingCreatesOneOwnedSafeBabyWithCooldown(GameTestHelper h) {
         floor(h); ServerPlayer owner=player(h,new BlockPos(3,1,3),GameType.SURVIVAL);
         MinemonCreature first=spawn(h,"charizard",new BlockPos(5,1,5)); tame(first,owner);
-        MinemonCreature second=spawn(h,"charizard",new BlockPos(7,1,5)); tame(second,owner);
+        MinemonCreature second=spawn(h,"blastoise",new BlockPos(7,1,5)); tame(second,owner);
         first.setInLove(owner); second.setInLove(owner);
+        check(h,first.canMate(second),"Different evolution lines owned by the same player should be compatible");
         first.spawnChildFromBreeding(h.getLevel(),second);
-        List<MinemonCreature> babies=h.getLevel().getEntitiesOfClass(MinemonCreature.class, first.getBoundingBox().inflate(8), mob->mob.isBaby()&&mob.getType()==first.getType());
-        check(h, babies.size()==1, "One breeding event must create exactly one baby of the same species");
+        List<MinemonCreature> babies=h.getLevel().getEntitiesOfClass(MinemonCreature.class, first.getBoundingBox().inflate(8), MinemonCreature::isBaby);
+        check(h, babies.size()==1, "One cross-species breeding event must create exactly one baby");
         MinemonCreature baby=babies.get(0);
+        String babySpecies=baby.getSpeciesSlug();
+        check(h, babySpecies.equals("charmander")||babySpecies.equals("squirtle"),"Charizard and Blastoise must produce only their initial forms");
         check(h, baby.isTame()&&owner.getUUID().equals(baby.getOwnerUUID()), "Baby must inherit its parents' owner");
+        MinemonCreature adult=spawn(h,"eevee",new BlockPos(9,1,5)); tame(adult,owner); adult.setInLove(owner); baby.setInLove(owner);
+        check(h,!baby.canMate(adult),"A newborn must not start another breeding cycle");
         check(h, first.getAge()==6000&&second.getAge()==6000, "Adult cooldown should default to 6000 ticks");
         check(h, !first.canMate(second), "Adults on cooldown must not breed again");
         BlockPos babyFeet=baby.blockPosition();
@@ -124,14 +131,17 @@ public final class PokemonTreatGameTests {
     public static void differentOwnersAndMythicalsCannotBreed(GameTestHelper h) {
         floor(h); ServerPlayer one=player(h,new BlockPos(2,1,2),GameType.SURVIVAL); ServerPlayer two=player(h,new BlockPos(3,1,2),GameType.SURVIVAL);
         MinemonCreature owned=spawn(h,"pikachu",new BlockPos(5,1,5)); tame(owned,one); owned.setInLove(one);
-        MinemonCreature otherOwner=spawn(h,"pikachu",new BlockPos(6,1,5)); tame(otherOwner,two); otherOwner.setInLove(two);
-        check(h, !owned.canMate(otherOwner), "Pokémon belonging to different owners must not breed");
+        MinemonCreature otherOwner=spawn(h,"charizard",new BlockPos(6,1,5)); tame(otherOwner,two); otherOwner.setInLove(two);
+        check(h, !owned.canMate(otherOwner), "Different species belonging to different owners must not breed");
         MinemonCreature mewtwo=spawn(h,"mewtwo",new BlockPos(8,1,5)); tame(mewtwo,one); mewtwo.setInLove(one);
         MinemonCreature mewtwoPartner=spawn(h,"mewtwo",new BlockPos(9,1,5)); tame(mewtwoPartner,one); mewtwoPartner.setInLove(one);
         check(h, !mewtwo.canMate(mewtwoPartner), "Mewtwo must remain excluded from breeding");
-        MinemonCreature pikachu=spawn(h,"pikachu",new BlockPos(11,1,5)); tame(pikachu,one); pikachu.setInLove(one);
-        MinemonCreature charizard=spawn(h,"charizard",new BlockPos(12,1,5)); tame(charizard,one); charizard.setInLove(one);
-        check(h,!pikachu.canMate(charizard),"Different Pokémon species must not breed");
+        MinemonCreature mew=spawn(h,"mew",new BlockPos(10,1,5)); tame(mew,one); mew.setInLove(one);
+        MinemonCreature mewPartner=spawn(h,"mew",new BlockPos(11,1,5)); tame(mewPartner,one); mewPartner.setInLove(one);
+        check(h,!mew.canMate(mewPartner),"Mew must remain excluded from breeding");
+        MinemonCreature articuno=spawn(h,"articuno",new BlockPos(12,1,5)); tame(articuno,one); articuno.setInLove(one);
+        MinemonCreature articunoPartner=spawn(h,"articuno",new BlockPos(13,1,5)); tame(articunoPartner,one); articunoPartner.setInLove(one);
+        check(h,!articuno.canMate(articunoPartner),"Legendary birds must remain excluded from breeding");
         h.succeed();
     }
     private PokemonTreatGameTests() {}
