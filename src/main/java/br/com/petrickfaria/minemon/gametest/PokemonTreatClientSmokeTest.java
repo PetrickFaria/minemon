@@ -27,6 +27,7 @@ public final class PokemonTreatClientSmokeTest {
         }
         if (worldOpening) {
             if (minecraft.player != null && minecraft.level != null) {
+                worldOpening = false;
                 openPokecUi(minecraft);
                 return;
             }
