@@ -55,7 +55,7 @@ processResources {
         def customItemIds = ['aquatic_treat','bug_treat','dragon_treat','electric_treat','fairy_treat',
                         'fighting_treat','fire_treat','flying_treat','frozen_treat','ghost_treat',
                         'ground_treat','normal_treat','poison_treat','psychic_treat','rock_treat','steel_treat',
-                        'poke_coin']
+                        'poke_coin','pokeball']
         customItemIds.each { id ->
             ['models/item/' + id + '.json', 'textures/item/' + id + '.png'].each { relativePath ->
                 def path = assetPrefix + relativePath
