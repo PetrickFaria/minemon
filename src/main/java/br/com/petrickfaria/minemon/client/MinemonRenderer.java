@@ -27,7 +27,8 @@ public class MinemonRenderer extends GeoEntityRenderer<MinemonCreature> {
    default -> 1.0F;
   };
   this.shadowRadius=0.45F*shadowScale;
-  pose.pushPose();pose.scale(d.scale(),d.scale(),d.scale());
+  float scale=d.scale()*(entity.isBaby()?0.5F:1.0F);
+  pose.pushPose();pose.scale(scale,scale,scale);
   String previousSpecies=activeFireSpecies;activeFireSpecies=entity.getSpeciesSlug();
   try { super.render(entity,yaw,partialTick,pose,buffers,light); }
   finally { activeFireSpecies=previousSpecies;pose.popPose(); }

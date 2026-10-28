@@ -30,6 +30,7 @@ public final class Minemon {
         ModBlocks.BLOCKS.register(bus);
         ModVillagers.register(bus);
         ModItems.ITEMS.register(bus);
+        ModItems.TREAT_ITEMS.register(bus);
         ModMenus.MENUS.register(bus);
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, MinemonConfig.SPEC);
         MinemonNetwork.register();

@@ -304,5 +304,21 @@
   "entity.minemon_gen1.mew": "Mew",
   "item.minemon_gen1.mew_spawn_egg": "Ovo de invocação de Mew",
   "entity.minemon_gen1.tangela": "Tangela",
-  "item.minemon_gen1.tangela_spawn_egg": "Ovo de invocação de Tangela"
+  "item.minemon_gen1.tangela_spawn_egg": "Ovo de invocação de Tangela",
+  "item.minemon.aquatic_treat": "Petisco Aquoso",
+  "item.minemon.frozen_treat": "Petisco Congelado",
+  "item.minemon.dragon_treat": "Petisco Dracônico",
+  "item.minemon.electric_treat": "Petisco Elétrico",
+  "item.minemon.ghost_treat": "Petisco Fantasmagórico",
+  "item.minemon.fairy_treat": "Petisco Feérico",
+  "item.minemon.fire_treat": "Petisco Incandescente",
+  "item.minemon.bug_treat": "Petisco Insectóide",
+  "item.minemon.fighting_treat": "Petisco Marcial",
+  "item.minemon.steel_treat": "Petisco Metálico",
+  "item.minemon.normal_treat": "Petisco Comum",
+  "item.minemon.rock_treat": "Petisco Petrificado",
+  "item.minemon.psychic_treat": "Petisco Psicodélico",
+  "item.minemon.ground_treat": "Petisco Barroso",
+  "item.minemon.poison_treat": "Petisco Venenoso",
+  "item.minemon.flying_treat": "Petisco Voador"
 }

@@ -14,6 +14,8 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
+import net.minecraft.world.entity.ai.goal.BreedGoal;
+import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.ai.goal.FollowOwnerGoal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
@@ -27,6 +29,10 @@ import net.minecraft.world.entity.ai.goal.target.OwnerHurtTargetGoal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import br.com.petrickfaria.minemon.item.PokemonTreatItem;
+import br.com.petrickfaria.minemon.pokec.PokemonTreatTypes;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.level.Level;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.nbt.CompoundTag;
@@ -72,6 +78,8 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     private static final int WILD_UNREACHABLE_LIMIT_TICKS = 20 * 5;
     private final AnimationFactory animationFactory = GeckoLibUtil.createFactory(this);
     private int wildAggressionTicks;
+    private UUID pendingBreedOffspring;
+    private static final java.util.Set<String> NON_BREEDABLE_SPECIES = java.util.Set.of("articuno", "zapdos", "moltres", "mewtwo", "mew");
     private int wildUnreachableTicks;
     private int blinkCooldownTicks;
     private boolean blinkPending;
@@ -196,7 +204,92 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
 
     @Override
     public AgeableMob getBreedOffspring(ServerLevel level, AgeableMob partner) {
-        return (AgeableMob) this.getType().create(level);
+        MinemonCreature child = (MinemonCreature) this.getType().create(level);
+        if (child != null && partner instanceof MinemonCreature other
+                && this.isTame() && other.isTame()
+                && this.getOwnerUUID() != null && this.getOwnerUUID().equals(other.getOwnerUUID())) {
+            child.setOwnerUUID(this.getOwnerUUID());
+            child.setTame(true);
+            child.setOrderedToSit(false);
+            this.pendingBreedOffspring = child.getUUID();
+        }
+        return child;
+    }
+
+    @Override
+    public boolean canMate(Animal partner) {
+        if (!(partner instanceof MinemonCreature other) || other == this) return false;
+        UUID owner = this.getOwnerUUID();
+        if (owner == null || !owner.equals(other.getOwnerUUID())) return false;
+        if (!this.isTame() || !other.isTame() || this.getType() != other.getType()) return false;
+        if (!isBreedingPermitted(this.getSpeciesSlug()) || !isBreedingPermitted(other.getSpeciesSlug())) return false;
+        if (isBreedingBusy() || other.isBreedingBusy()) return false;
+        if (!hasSafeBabyPosition((ServerLevel)this.level, this) || !hasSafeBabyPosition((ServerLevel)other.level, other)) return false;
+        return super.canMate(other);
+    }
+
+    private boolean isBreedingBusy() {
+        return this.isSleeping() || this.isNightResting() || this.isOrderedToSit() || this.getTarget() != null || this.attackAnimationTicks > 0;
+    }
+
+    private static boolean isBreedingPermitted(String species) {
+        return MinemonConfig.TREAT_BREEDING_ENABLED.get()
+                && !NON_BREEDABLE_SPECIES.contains(species)
+                && !MinemonConfig.TREAT_DISABLED_BREEDING_SPECIES.get().contains(species);
+    }
+
+    private static boolean hasSafeBabyPosition(ServerLevel level, MinemonCreature parent) {
+        double width = Math.max(0.2D, parent.getBbWidth() * 0.5D);
+        double height = Math.max(0.2D, parent.getBbHeight() * 0.5D);
+        BlockPos origin = parent.blockPosition();
+        int[][] offsets = {{0,0},{1,0},{-1,0},{0,1},{0,-1},{1,1},{1,-1},{-1,1},{-1,-1}};
+        for (int[] offset : offsets) {
+            for (int dy = 0; dy <= 1; dy++) {
+                BlockPos feet = origin.offset(offset[0], dy, offset[1]);
+                BlockPos floor = feet.below();
+                if (level.getBlockState(floor).getCollisionShape(level, floor).isEmpty()) continue;
+                if (!level.getFluidState(feet).isEmpty() || !level.getFluidState(feet.above()).isEmpty()) continue;
+                if (level.getBlockState(feet).getMaterial().isBurnable() || level.getBlockState(feet).getMaterial().isLiquid()) continue;
+                double x = feet.getX() + 0.5D, y = feet.getY(), z = feet.getZ() + 0.5D;
+                AABB box = new AABB(x - width/2, y, z - width/2, x + width/2, y + height, z + width/2);
+                if (level.getWorldBorder().isWithinBounds(box) && level.noCollision(box)) return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public void spawnChildFromBreeding(ServerLevel level, Animal partner) {
+        super.spawnChildFromBreeding(level, partner);
+        UUID offspringId = this.pendingBreedOffspring;
+        this.pendingBreedOffspring = null;
+        if (offspringId == null) return;
+        int cooldown = MinemonConfig.TREAT_BREEDING_COOLDOWN_TICKS.get();
+        this.setAge(cooldown);
+        partner.setAge(cooldown);
+        net.minecraft.world.entity.Entity spawned = level.getEntity(offspringId);
+        if (spawned instanceof MinemonCreature baby) {
+            BlockPos safe = findSafeBabyPosition(level, this, baby);
+            if (safe != null) baby.moveTo(safe.getX() + 0.5D, safe.getY(), safe.getZ() + 0.5D, baby.getYRot(), baby.getXRot());
+        }
+    }
+
+    private static BlockPos findSafeBabyPosition(ServerLevel level, MinemonCreature parent, MinemonCreature baby) {
+        BlockPos origin = parent.blockPosition();
+        int[][] offsets = {{0,0},{1,0},{-1,0},{0,1},{0,-1},{1,1},{1,-1},{-1,1},{-1,-1}};
+        for (int[] offset : offsets) {
+            for (int dy = 0; dy <= 1; dy++) {
+                BlockPos feet = origin.offset(offset[0], dy, offset[1]);
+                BlockPos floor = feet.below();
+                if (level.getBlockState(floor).getCollisionShape(level, floor).isEmpty()) continue;
+                if (!level.getFluidState(feet).isEmpty() || !level.getFluidState(feet.above()).isEmpty()) continue;
+                if (level.getBlockState(feet).getMaterial().isBurnable() || level.getBlockState(feet).getMaterial().isLiquid()) continue;
+                baby.setPos(feet.getX() + 0.5D, feet.getY(), feet.getZ() + 0.5D);
+                AABB box = baby.getBoundingBox();
+                if (level.getWorldBorder().isWithinBounds(box) && level.noCollision(baby, box)) return feet;
+            }
+        }
+        return null;
     }
 
     @Override
@@ -204,6 +297,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         if (!this.isAquaticSpecies()) this.goalSelector.addGoal(0, new WaterEscapeGoal(this));
         this.goalSelector.addGoal(0,new NightRestGoal(this));
         this.goalSelector.addGoal(1, new SitWhenOrderedToGoal(this));
+        this.goalSelector.addGoal(1, new BreedGoal(this, 1.0D));
         this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.2D, true));
         this.goalSelector.addGoal(3, new FollowOwnerGoal(this, 1.0D, 10.0F, 2.0F, this.isFlyingSpecies()));
         this.goalSelector.addGoal(6, new NaturalSeparationGoal(this));
@@ -236,6 +330,10 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         });
     }
 
+    private static void consumeTreat(Player player, ItemStack stack) {
+        if (!player.getAbilities().instabuild) stack.shrink(1);
+    }
+
     @Override
     public boolean isFood(ItemStack stack) {
         return false;
@@ -263,6 +361,28 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     @Override
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
         ItemStack held = player.getItemInHand(hand);
+        if (held.getItem() instanceof PokemonTreatItem treat) {
+            if (this.level.isClientSide) return InteractionResult.sidedSuccess(true);
+            if (!this.isTame() || !this.isOwnedBy(player) || this.getTarget() != null || this.attackAnimationTicks > 0
+                    || !PokemonTreatTypes.accepts(this.getSpeciesSlug(), treat.getTreatType().pokemonType()))
+                return InteractionResult.sidedSuccess(false);
+            float maximum = this.getMaxHealth();
+            if (this.getHealth() < maximum) {
+                float amount = Math.min((float)MinemonConfig.TREAT_HEAL_AMOUNT.get(), maximum - this.getHealth());
+                if (amount <= 0.0F) return InteractionResult.sidedSuccess(false);
+                this.setHealth(this.getHealth() + amount);
+                consumeTreat(player, held);
+                this.level.broadcastEntityEvent(this, (byte)18);
+                return InteractionResult.sidedSuccess(false);
+            }
+            if (!this.isInLove() && !this.isBaby() && this.getAge() == 0 && !this.isBreedingBusy()
+                    && isBreedingPermitted(this.getSpeciesSlug()) && hasSafeBabyPosition((ServerLevel)this.level, this)) {
+                this.setInLove(player);
+                consumeTreat(player, held);
+                this.level.broadcastEntityEvent(this, (byte)18);
+            }
+            return InteractionResult.sidedSuccess(false);
+        }
         if (!this.isTame() && held.is(Items.BONE)) {
             if (!this.level.isClientSide) {
                 if (!player.getAbilities().instabuild) held.shrink(1);

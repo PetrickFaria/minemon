@@ -304,5 +304,21 @@
   "entity.minemon_gen1.mew": "Mew",
   "item.minemon_gen1.mew_spawn_egg": "Spawn Egg: Mew",
   "entity.minemon_gen1.tangela": "Tangela",
-  "item.minemon_gen1.tangela_spawn_egg": "Spawn Egg: Tangela"
+  "item.minemon_gen1.tangela_spawn_egg": "Spawn Egg: Tangela",
+  "item.minemon.aquatic_treat": "Aquatic Treat",
+  "item.minemon.frozen_treat": "Frozen Treat",
+  "item.minemon.dragon_treat": "Dragon Treat",
+  "item.minemon.electric_treat": "Electric Treat",
+  "item.minemon.ghost_treat": "Ghost Treat",
+  "item.minemon.fairy_treat": "Fairy Treat",
+  "item.minemon.fire_treat": "Fire Treat",
+  "item.minemon.bug_treat": "Bug Treat",
+  "item.minemon.fighting_treat": "Fighting Treat",
+  "item.minemon.steel_treat": "Steel Treat",
+  "item.minemon.normal_treat": "Common Treat",
+  "item.minemon.rock_treat": "Rock Treat",
+  "item.minemon.psychic_treat": "Psychic Treat",
+  "item.minemon.ground_treat": "Ground Treat",
+  "item.minemon.poison_treat": "Poison Treat",
+  "item.minemon.flying_treat": "Flying Treat"
 }

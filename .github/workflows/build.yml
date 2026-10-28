@@ -24,6 +24,8 @@ jobs:
         run: python3 tools/verify_project.py
       - name: Verify Rocket workstation and villager resources
         run: python3 tools/verify_rocket.py
+      - name: Verify Pokémon treat models, textures, and translations
+        run: python3 tools/verify_treats.py
       - name: Preflight active animation Molang compatibility
         run: python3 tools/verify_molang_compatibility.py
       - name: Verify batches 8 to 15, prior assets, and Pidge wing rigs
@@ -64,6 +66,10 @@ jobs:
           python3 tools/prepare_client_world.py
           ALSOFT_DRIVERS=null timeout --kill-after=30s 600s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeRocketProfession
           grep -F 'PASS ROCKET CLIENT:' run/client-validation-rocket.txt
+      - name: Validate all treat item models on the real client
+        run: |
+          ALSOFT_DRIVERS=null timeout --kill-after=30s 600s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeTreats
+          grep -F '[TREAT CLIENT] PASS:' run/client-validation-treats.txt
       - name: Capture runtime API diagnostics
         if: always()
         run: python3 tools/collect_diagnostics.py
@@ -157,6 +163,7 @@ jobs:
           set -euo pipefail
           jar_file="$(find build/libs -maxdepth 1 -type f -name 'Minemon-1.19.2-*-all.jar' -print -quit)"
           test -n "$jar_file"
+          python3 tools/verify_treats.py "$jar_file"
           jar tf "$jar_file" | grep -Fx 'META-INF/ASSET_LICENSES.md'
           jar tf "$jar_file" | grep -Fx 'pack.mcmeta'
           jar tf "$jar_file" | grep -Fx 'br/com/petrickfaria/minemon/Minemon.class'
