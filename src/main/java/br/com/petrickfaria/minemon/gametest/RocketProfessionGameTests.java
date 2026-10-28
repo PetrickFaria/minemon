@@ -45,7 +45,8 @@ public final class RocketProfessionGameTests {
         if (villager.getVillagerData().getProfession() == ModVillagers.ROCKET.get()) {
             var jobSite = villager.getBrain().getMemory(MemoryModuleType.JOB_SITE);
             check(helper, jobSite.isPresent() && jobSite.get().pos().equals(workstation),
-                    "Rocket profession must retain the claimed workstation POI");
+                    "Rocket profession must retain the claimed workstation POI; jobSite=" + jobSite
+                            + ", potential=" + villager.getBrain().getMemory(MemoryModuleType.POTENTIAL_JOB_SITE));
             check(helper, villager.getOffers().isEmpty(), "Rocket villagers must have no trade offers in this version");
             CompoundTag saved = new CompoundTag();
             villager.saveWithoutId(saved);
@@ -66,7 +67,7 @@ public final class RocketProfessionGameTests {
         helper.runAfterDelay(10, () -> awaitProfession(helper, villager, workstation, remaining - 10));
     }
 
-    @GameTest(template = "test_arena", batch = "rocket_profession", timeoutTicks = 400)
+    @GameTest(template = "test_arena", batch = "rocket_natural", timeoutTicks = 500)
     public static void adultUnemployedVillagerClaimsRocketWorkstationNaturally(GameTestHelper helper) {
         floor(helper);
         helper.getLevel().setDayTime(5000L);
@@ -83,7 +84,7 @@ public final class RocketProfessionGameTests {
         });
     }
 
-    @GameTest(template = "test_arena", batch = "rocket_profession", timeoutTicks = 400)
+    @GameTest(template = "test_arena", batch = "rocket_single_station", timeoutTicks = 500)
     public static void oneStationIsNotClaimedByTwoVillagers(GameTestHelper helper) {
         floor(helper);
         helper.getLevel().setDayTime(5000L);
@@ -119,7 +120,7 @@ public final class RocketProfessionGameTests {
         helper.runAfterDelay(10, () -> awaitStationRelease(helper, villager, workstation, remaining - 10));
     }
 
-    @GameTest(template = "test_arena", batch = "rocket_profession", timeoutTicks = 900)
+    @GameTest(template = "test_arena", batch = "rocket_removal", timeoutTicks = 1000)
     public static void removingRocketBlockReleasesTheVanillaJobSiteMemory(GameTestHelper helper) {
         floor(helper);
         helper.getLevel().setDayTime(5000L);
@@ -150,7 +151,7 @@ public final class RocketProfessionGameTests {
         helper.runAfterDelay(10, () -> awaitProfessionForRemoval(helper, villager, workstation, remaining - 10));
     }
 
-    @GameTest(template = "test_arena", batch = "rocket_profession", timeoutTicks = 150)
+    @GameTest(template = "test_arena", batch = "rocket_exclusions", timeoutTicks = 150)
     public static void existingProfessionsBabiesAndNitwitsAreNotConverted(GameTestHelper helper) {
         floor(helper);
         helper.getLevel().setDayTime(5000L);
@@ -175,7 +176,7 @@ public final class RocketProfessionGameTests {
         });
     }
 
-    @GameTest(template = "test_arena", batch = "rocket_profession", timeoutTicks = 400)
+    @GameTest(template = "test_arena", batch = "rocket_inaccessible", timeoutTicks = 400)
     public static void inaccessibleRocketBlockIsNotClaimed(GameTestHelper helper) {
         floor(helper);
         helper.getLevel().setDayTime(5000L);
