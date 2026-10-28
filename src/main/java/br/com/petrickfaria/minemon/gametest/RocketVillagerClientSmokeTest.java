@@ -132,7 +132,8 @@ final class RocketVillagerClientSmokeTest {
                                     "PASS ROCKET CLIENT: real vanilla Rocket villagers rendered for all seven 1.19.2 biome types; "
                                             + "Rocket and zombie-villager uniform textures, hat metadata, and profession translation loaded.\n");
                             completed = true;
-                            System.out.println("[ROCKET CLIENT] PASS marker written");
+                            System.out.println("[ROCKET CLIENT] PASS marker written; stopping client");
+                            minecraft.execute(minecraft::stop);
                         } catch (Exception failure) {
                             throw new IllegalStateException("Could not write Rocket client smoke result", failure);
                         }
