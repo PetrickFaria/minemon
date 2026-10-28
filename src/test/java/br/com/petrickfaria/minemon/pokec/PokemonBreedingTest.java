@@ -92,6 +92,10 @@ public class PokemonBreedingTest {
         int forward = PokemonBreeding.chanceForFirstLine(first, second, 5, 5, 5, 95);
         int reverse = PokemonBreeding.chanceForFirstLine(second, first, 5, 5, 5, 95);
         assertEquals(100, forward + reverse);
+        assertEquals(80, PokemonBreeding.chanceForFirstLine(first, second, 100, 100, 20, 95));
+        assertEquals(20, PokemonBreeding.chanceForFirstLine(second, first, 100, 100, 20, 95));
+        assertEquals(80, PokemonBreeding.chanceForFirstLine(first, second, 100, 100, 5, 80));
+        assertEquals(20, PokemonBreeding.chanceForFirstLine(second, first, 100, 100, 5, 80));
         assertEquals("charmander", PokemonBreeding.chooseInitialForm(first, second, 0.599, 5, 5, 5, 95));
         assertEquals("squirtle", PokemonBreeding.chooseInitialForm(first, second, 0.60, 5, 5, 5, 95));
     }

@@ -52,10 +52,12 @@ public final class PokemonBreeding {
             lower = upper;
             upper = swap;
         }
+        // Keep both parent orders complementary even when configurable limits are asymmetric.
+        int symmetricMargin = Math.max(0, Math.min(50 - lower, upper - 50));
         int raw = 50
                 + (first.evolutionStage() - second.evolutionStage()) * Math.max(0, stageBonusPercent)
                 + (first.rarityLevel() - second.rarityLevel()) * Math.max(0, rarityBonusPercent);
-        return clamp(raw, lower, upper);
+        return clamp(raw, 50 - symmetricMargin, 50 + symmetricMargin);
     }
 
     /** Selects only the initial form of one parent's line using one normalized server roll. */
