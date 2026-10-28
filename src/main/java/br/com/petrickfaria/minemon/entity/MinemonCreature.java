@@ -234,7 +234,11 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         if (!isBreedingPermitted(this.getSpeciesSlug()) || !isBreedingPermitted(other.getSpeciesSlug())) return false;
         if (isBreedingBusy() || other.isBreedingBusy()) return false;
         if (!hasSafeBabyPosition((ServerLevel)this.level, this) || !hasSafeBabyPosition((ServerLevel)other.level, other)) return false;
-        return super.canMate(other);
+        // Animal.canMate requires identical Java classes; aquatic Minemon use a subclass,
+        // so reproduce its remaining age/love rules without excluding cross-class species.
+        return !this.isBaby() && !other.isBaby()
+                && this.getAge() == 0 && other.getAge() == 0
+                && this.isInLove() && other.isInLove();
     }
 
     private boolean isBreedingBusy() {
