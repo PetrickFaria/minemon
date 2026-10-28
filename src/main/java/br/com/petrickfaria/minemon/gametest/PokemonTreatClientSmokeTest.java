@@ -105,7 +105,7 @@ public final class PokemonTreatClientSmokeTest {
             if(net.minecraft.client.resources.language.I18n.get(ballName).equals(ballName))throw new IllegalStateException("Missing Pokébola translation: "+ballName);
             try(var texture=PokemonTreatClientSmokeTest.class.getResourceAsStream("/assets/minemon/textures/item/pokeball.png")){
                 var image=texture==null?null:javax.imageio.ImageIO.read(texture);
-                if(image==null||image.getWidth()!=32||image.getHeight()!=32||!image.getColorModel().hasAlpha())throw new IllegalStateException("Pokébola texture must be a 32x32 transparent PNG");
+                if(image==null||image.getWidth()!=32||image.getHeight()!=32||((image.getRGB(0,0)>>>24)&255)!=0)throw new IllegalStateException("Pokébola texture must be 32x32 with transparent corner pixels (image="+(image==null?"missing":image.getWidth()+"x"+image.getHeight()+", alpha="+image.getColorModel().hasAlpha()+", corner="+Integer.toHexString(image.getRGB(0,0)))+")");
                 int upper=image.getRGB(16,8),lower=image.getRGB(16,24),center=image.getRGB(16,16);
                 if(((upper>>16)&255)<150||((lower>>16)&255)<180||((lower>>8)&255)<180||((center>>16)&255)<180)throw new IllegalStateException("Pokébola texture is missing its red/white halves or white center button");
             }
