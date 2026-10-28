@@ -50,12 +50,36 @@ processResources {
             target.parentFile.mkdirs()
             target.bytes = source.bytes
         }
+        // Treat items use their own minemon registry namespace, while the rest
+        // of the mod's source assets are repackaged as minemon_gen1.
+        def treatIds = ['aquatic_treat','bug_treat','dragon_treat','electric_treat','fairy_treat',
+                        'fighting_treat','fire_treat','flying_treat','frozen_treat','ghost_treat',
+                        'ground_treat','normal_treat','poison_treat','psychic_treat','rock_treat','steel_treat']
+        treatIds.each { id ->
+            ['models/item/' + id + '.json', 'textures/item/' + id + '.png'].each { relativePath ->
+                def path = assetPrefix + relativePath
+                def source = new File(sourceRoot, path)
+                if (!source.isFile()) throw new GradleException("Missing Pokémon treat asset: ${path}")
+                def target = new File(destinationRoot, path)
+                target.parentFile.mkdirs()
+                target.bytes = source.bytes
+            }
+        }
         ['en_us.json','pt_br.json'].each { name ->
             def source = new File(sourceRoot, "assets/minemon/lang/${name}")
             def target = new File(destinationRoot, "assets/minemon_gen1/lang/${name}")
             target.parentFile.mkdirs()
             def language = new groovy.json.JsonSlurper().parse(source)
             target.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(language)) + '\n'
+        }
+        ['en_us.json','pt_br.json'].each { name ->
+            def source = new File(sourceRoot, "assets/minemon/lang/${name}")
+            def language = new groovy.json.JsonSlurper().parse(source)
+            def treatTranslations = [:]
+            language.each { key, value -> if (key.startsWith('item.minemon.')) treatTranslations[key] = value }
+            def target = new File(destinationRoot, "assets/minemon/lang/${name}")
+            target.parentFile.mkdirs()
+            target.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(treatTranslations)) + '\n'
         }
         exec { commandLine 'python3', 'tools/prepare_runtime_assets.py', destinationDir.absolutePath }
     }
