@@ -62,7 +62,7 @@ jobs:
       - name: Validate Rocket villager profession and uniform on the real client
         run: |
           python3 tools/prepare_client_world.py
-          timeout --kill-after=30s 600s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeRocketProfession
+          ALSOFT_DRIVERS=null timeout --kill-after=30s 600s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeRocketProfession
           grep -F 'PASS ROCKET CLIENT:' run/client-validation-rocket.txt
       - name: Capture runtime API diagnostics
         if: always()

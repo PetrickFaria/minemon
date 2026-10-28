@@ -32,6 +32,7 @@ final class RocketVillagerClientSmokeTest {
     private static boolean completed;
     private static int titleTicks;
     private static int renderTicks;
+    private static int diagnosticStage;
     private static UUID localPlayer;
 
     static void tick(TickEvent.ClientTickEvent event) {
@@ -39,6 +40,11 @@ final class RocketVillagerClientSmokeTest {
                 || !Boolean.getBoolean("minemon.clientSmokeRocketProfession") || completed) return;
         Minecraft minecraft = Minecraft.getInstance();
         try {
+            if (diagnosticStage == 0) {
+                System.out.println("[ROCKET CLIENT] tick handler active; screen="
+                        + (minecraft.screen == null ? "null" : minecraft.screen.getClass().getSimpleName()));
+                diagnosticStage = 1;
+            }
             if (!opened && minecraft.screen instanceof TitleScreen) {
                 if (++titleTicks < 20) return;
                 Path levelFile = Path.of("saves/minemon-validation/level.dat");
@@ -59,12 +65,18 @@ final class RocketVillagerClientSmokeTest {
                 if (!invoked) throw new IllegalStateException("Could not open the prepared Rocket profession world");
                 minecraft.options.hideGui = true;
                 opened = true;
+                System.out.println("[ROCKET CLIENT] requested prepared world load");
                 return;
             }
 
             if (!opened || minecraft.level == null || minecraft.player == null || minecraft.getSingleplayerServer() == null)
                 return;
 
+            if (diagnosticStage == 1) {
+                System.out.println("[ROCKET CLIENT] world ready; player=" + minecraft.player.blockPosition()
+                        + ", server=" + minecraft.getSingleplayerServer().isRunning());
+                diagnosticStage = 2;
+            }
             minecraft.player.setYRot(180.0F);
             minecraft.player.yRotO = 180.0F;
             minecraft.player.setXRot(0.0F);
@@ -72,11 +84,19 @@ final class RocketVillagerClientSmokeTest {
             if (!setupRequested) {
                 setupRequested = true;
                 localPlayer = minecraft.player.getUUID();
-                minecraft.getSingleplayerServer().execute(() -> setupWorld(minecraft.getSingleplayerServer().overworld()));
+                minecraft.getSingleplayerServer().execute(() -> {
+                    System.out.println("[ROCKET CLIENT] server fixture setup started");
+                    setupWorld(minecraft.getSingleplayerServer().overworld());
+                    System.out.println("[ROCKET CLIENT] server fixture setup complete");
+                });
                 return;
             }
 
             if (++renderTicks < 50) return;
+            if (diagnosticStage == 2) {
+                System.out.println("[ROCKET CLIENT] checking rendered villagers after " + renderTicks + " ticks");
+                diagnosticStage = 3;
+            }
             var visible = minecraft.level.getEntitiesOfClass(Villager.class,
                     new net.minecraft.world.phys.AABB(minecraft.player.blockPosition()).inflate(12.0D),
                     villager -> villager.getVillagerData().getProfession() == ModVillagers.ROCKET.get());
@@ -104,6 +124,7 @@ final class RocketVillagerClientSmokeTest {
 
             if (screenshotRequested) return;
             screenshotRequested = true;
+            System.out.println("[ROCKET CLIENT] requesting screenshot callback");
             Screenshot.grab(minecraft.gameDirectory, "rocket-profession-biome-variants.png",
                     minecraft.getMainRenderTarget(), message -> {
                         try {
@@ -111,6 +132,7 @@ final class RocketVillagerClientSmokeTest {
                                     "PASS ROCKET CLIENT: real vanilla Rocket villagers rendered for all seven 1.19.2 biome types; "
                                             + "Rocket and zombie-villager uniform textures, hat metadata, and profession translation loaded.\n");
                             completed = true;
+                            System.out.println("[ROCKET CLIENT] PASS marker written");
                         } catch (Exception failure) {
                             throw new IllegalStateException("Could not write Rocket client smoke result", failure);
                         }
