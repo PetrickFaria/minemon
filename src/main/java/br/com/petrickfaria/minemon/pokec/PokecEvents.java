@@ -14,8 +14,9 @@ import net.minecraftforge.fml.common.Mod;
 @Mod.EventBusSubscriber(modid=Minemon.MOD_ID)
 public final class PokecEvents {
     @SubscribeEvent public static void serverStarting(ServerStartingEvent event){PokecEconomy.load();}
-    @SubscribeEvent public static void clonePlayer(PlayerEvent.Clone event){PokecPlayerData.copyOnRespawn(event.getOriginal(),event.getEntity());}
-    @SubscribeEvent public static void logout(PlayerEvent.PlayerLoggedOutEvent event){PokecTransactions.clearTransactions(event.getEntity().getUUID());}
+    @SubscribeEvent public static void clonePlayer(PlayerEvent.Clone event){PokecPlayerData.copyOnRespawn(event.getOriginal(),event.getEntity());if(event.getEntity() instanceof net.minecraft.server.level.ServerPlayer player)PokecTransactions.recoverEscrow(player);}
+    @SubscribeEvent public static void login(PlayerEvent.PlayerLoggedInEvent event){if(event.getEntity() instanceof net.minecraft.server.level.ServerPlayer player)PokecTransactions.recoverEscrow(player);}
+    @SubscribeEvent public static void logout(PlayerEvent.PlayerLoggedOutEvent event){if(event.getEntity() instanceof net.minecraft.server.level.ServerPlayer player)PokecTransactions.recoverEscrow(player);PokecTransactions.clearTransactions(event.getEntity().getUUID());}
     @SubscribeEvent public static void commands(RegisterCommandsEvent event){
         event.getDispatcher().register(Commands.literal("pokec").requires(source->source.hasPermission(2))
             .then(Commands.literal("coins").then(Commands.argument("player",EntityArgument.player()).then(Commands.argument("amount",IntegerArgumentType.integer(0)).executes(ctx->{

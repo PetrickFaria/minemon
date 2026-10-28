@@ -29,6 +29,12 @@ public final class PokecPlayerData {
     public static int addDeposit(ServerPlayer p,String slug){CompoundTag d=data(p);CompoundTag deposits=d.getCompound("deposits");int n=deposits.getInt(slug)+1;deposits.putInt(slug,n);d.put("deposits",deposits);return n;}
     public static boolean usedFreePurchase(ServerPlayer p){return data(p).getBoolean("freePurchaseUsed");}
     public static void setFreePurchaseUsed(ServerPlayer p){data(p).putBoolean("freePurchaseUsed",true);}
+    public static int stagedCoins(ServerPlayer p){return Math.max(0,data(p).getInt("stagedCoins"));}
+    public static int stagedSouls(ServerPlayer p){return Math.max(0,data(p).getInt("stagedSouls"));}
+    public static String stagedSoulType(ServerPlayer p){return data(p).getString("stagedSoulType");}
+    public static void setStagedCoins(ServerPlayer p,int value){data(p).putInt("stagedCoins",Math.max(0,value));}
+    public static void setStagedSouls(ServerPlayer p,int value,String type){CompoundTag d=data(p);d.putInt("stagedSouls",Math.max(0,value));d.putString("stagedSoulType",value>0?type:"");}
+    public static void clearStaged(ServerPlayer p){CompoundTag d=data(p);d.putInt("stagedCoins",0);d.putInt("stagedSouls",0);d.putString("stagedSoulType","");}
     public static void copyOnRespawn(net.minecraft.world.entity.player.Player oldPlayer,net.minecraft.world.entity.player.Player newPlayer){
         if(oldPlayer.getPersistentData().contains(KEY))newPlayer.getPersistentData().put(KEY,oldPlayer.getPersistentData().getCompound(KEY).copy());
     }

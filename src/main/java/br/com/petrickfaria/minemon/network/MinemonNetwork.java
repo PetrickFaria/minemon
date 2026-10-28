@@ -19,7 +19,7 @@ import java.util.function.Supplier;
 
 /** Sends only a playback cue; user audio remains local to each client. */
 public final class MinemonNetwork {
-    private static final String VERSION = "1";
+    private static final String VERSION = "2";
     private static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             new ResourceLocation(Minemon.MOD_ID, "main"), () -> VERSION, VERSION::equals, VERSION::equals);
 
@@ -43,7 +43,8 @@ public final class MinemonNetwork {
         var unlocked=PokecPlayerData.unlocked(player);var data=new LinkedHashMap<String,Integer>();var prices=new LinkedHashMap<String,Integer>();var requirements=new LinkedHashMap<String,Integer>();
         for(var species:PokecSpecies.ordered()){data.put(species.slug(),PokecPlayerData.deposited(player,species.slug()));prices.put(species.slug(),PokecEconomy.get().coins(species.slug()));requirements.put(species.slug(),PokecEconomy.get().souls(species.slug()));}
         boolean free=PokecEconomy.get().firstPurchaseFree()&&!PokecPlayerData.usedFreePurchase(player);
-        CHANNEL.send(PacketDistributor.PLAYER.with(()->player),new PokecState(PokecPlayerData.coins(player),free,unlocked,data,prices,requirements));
+        PokecMenu menu=(PokecMenu)player.containerMenu;
+        CHANNEL.send(PacketDistributor.PLAYER.with(()->player),new PokecState(PokecPlayerData.coins(player),free,unlocked,data,prices,requirements,menu.selectedSlug(),menu.stagedCoins(),menu.stagedSouls()));
     }
     public static void refreshPokec(ServerPlayer player){if(player.containerMenu instanceof PokecMenu)syncPokec(player);}
 
@@ -56,10 +57,10 @@ public final class MinemonNetwork {
         static PokecAction decode(FriendlyByteBuf b){return new PokecAction(b.readBlockPos(),b.readUtf(64),b.readUnsignedByte(),b.readLong());}
         static void handle(PokecAction m,Supplier<NetworkEvent.Context> s){var c=s.get();ServerPlayer p=c.getSender();c.enqueueWork(()->{if(p==null||m.action<0||m.action>=PokecTransactions.Action.values().length)return;PokecTransactions.perform(p,m.pos,m.slug,PokecTransactions.Action.values()[m.action],m.id);if(p.containerMenu instanceof PokecMenu menu&&menu.pos().equals(m.pos))syncPokec(p);});c.setPacketHandled(true);}
     }
-    private record PokecState(int coins,boolean freeAvailable,Set<String> unlocked,Map<String,Integer> deposits,Map<String,Integer> prices,Map<String,Integer> requirements){
-        static void encode(PokecState m,FriendlyByteBuf b){b.writeVarInt(m.coins);b.writeBoolean(m.freeAvailable);b.writeVarInt(m.deposits.size());m.deposits.forEach((slug,count)->{b.writeUtf(slug,64);b.writeBoolean(m.unlocked.contains(slug));b.writeVarInt(count);b.writeVarInt(m.prices.getOrDefault(slug,0));b.writeVarInt(m.requirements.getOrDefault(slug,0));});}
-        static PokecState decode(FriendlyByteBuf b){int coins=b.readVarInt();boolean free=b.readBoolean();int n=Math.min(151,b.readVarInt());Set<String> unlocked=new HashSet<>();Map<String,Integer> deposits=new LinkedHashMap<>(),prices=new LinkedHashMap<>(),requirements=new LinkedHashMap<>();for(int i=0;i<n;i++){String slug=b.readUtf(64);if(b.readBoolean())unlocked.add(slug);deposits.put(slug,b.readVarInt());prices.put(slug,b.readVarInt());requirements.put(slug,b.readVarInt());}return new PokecState(coins,free,unlocked,deposits,prices,requirements);}
-        static void handle(PokecState m,Supplier<NetworkEvent.Context> s){var c=s.get();c.enqueueWork(()->net.minecraftforge.fml.DistExecutor.unsafeRunWhenOn(net.minecraftforge.api.distmarker.Dist.CLIENT,()->()->br.com.petrickfaria.minemon.menu.PokecScreen.updateState(m.coins,m.freeAvailable,m.unlocked,m.deposits,m.prices,m.requirements)));c.setPacketHandled(true);}
+    private record PokecState(int coins,boolean freeAvailable,Set<String> unlocked,Map<String,Integer> deposits,Map<String,Integer> prices,Map<String,Integer> requirements,String selectedSlug,int stagedCoins,int stagedSouls){
+        static void encode(PokecState m,FriendlyByteBuf b){b.writeVarInt(m.coins);b.writeBoolean(m.freeAvailable);b.writeVarInt(m.deposits.size());m.deposits.forEach((slug,count)->{b.writeUtf(slug,64);b.writeBoolean(m.unlocked.contains(slug));b.writeVarInt(count);b.writeVarInt(m.prices.getOrDefault(slug,0));b.writeVarInt(m.requirements.getOrDefault(slug,0));});b.writeUtf(m.selectedSlug,64);b.writeVarInt(m.stagedCoins);b.writeVarInt(m.stagedSouls);}
+        static PokecState decode(FriendlyByteBuf b){int coins=b.readVarInt();boolean free=b.readBoolean();int n=Math.min(151,b.readVarInt());Set<String> unlocked=new HashSet<>();Map<String,Integer> deposits=new LinkedHashMap<>(),prices=new LinkedHashMap<>(),requirements=new LinkedHashMap<>();for(int i=0;i<n;i++){String slug=b.readUtf(64);if(b.readBoolean())unlocked.add(slug);deposits.put(slug,b.readVarInt());prices.put(slug,b.readVarInt());requirements.put(slug,b.readVarInt());}return new PokecState(coins,free,unlocked,deposits,prices,requirements,b.readUtf(64),b.readVarInt(),b.readVarInt());}
+        static void handle(PokecState m,Supplier<NetworkEvent.Context> s){var c=s.get();c.enqueueWork(()->net.minecraftforge.fml.DistExecutor.unsafeRunWhenOn(net.minecraftforge.api.distmarker.Dist.CLIENT,()->()->br.com.petrickfaria.minemon.menu.PokecScreen.updateState(m.coins,m.freeAvailable,m.unlocked,m.deposits,m.prices,m.requirements,m.selectedSlug,m.stagedCoins,m.stagedSouls)));c.setPacketHandled(true);}
     }
 
     public record PlayCreatureSound(int entityId, UUID uuid) {

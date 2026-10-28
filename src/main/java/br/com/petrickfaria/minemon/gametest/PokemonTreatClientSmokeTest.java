@@ -1,15 +1,20 @@
 package br.com.petrickfaria.minemon.gametest;
 
 import br.com.petrickfaria.minemon.registry.ModItems;
+import br.com.petrickfaria.minemon.menu.PokecMenu;
+import br.com.petrickfaria.minemon.menu.PokecScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.NonNullList;
+import net.minecraft.network.chat.Component;
 import net.minecraftforge.event.TickEvent;
 
 /** Loads all treat and PokéCoin models in a real Minecraft client and verifies the creative tab. */
 public final class PokemonTreatClientSmokeTest {
     private static int clientTicks;
     private static boolean done;
+    private static boolean pokecUiPhase;
+    private static boolean pokecSelectionPhase;
     public static void tick(TickEvent.ClientTickEvent event) {
         if (done || event.phase != TickEvent.Phase.END || !Boolean.getBoolean("minemon.clientSmokeTest")
                 || !Boolean.getBoolean("minemon.clientSmokeTreats")) return;
@@ -22,6 +27,27 @@ public final class PokemonTreatClientSmokeTest {
         // either the title screen or an already opened world.
         if (clientTicks < 20) return;
         try {
+            if (pokecSelectionPhase) {
+                if (!(minecraft.screen instanceof PokecScreen screen) || !screen.selectedSpeciesForSmokeTest("mew"))
+                    throw new IllegalStateException("PokéC list click did not select Mew in the detail panel");
+                java.nio.file.Files.writeString(java.nio.file.Path.of("client-validation-treats.txt"),
+                        "[TREAT CLIENT] PASS: resources, 151-species list, list selection, and animated PokéC preview rendered\n");
+                done = true;
+                System.out.println("[TREAT CLIENT] PASS: resources, 151-species list, list selection, and animated PokéC preview rendered");
+                minecraft.execute(minecraft::stop);
+                return;
+            }
+            if (pokecUiPhase) {
+                if (!(minecraft.screen instanceof PokecScreen screen))
+                    throw new IllegalStateException("PokéC selector closed during focused UI render check");
+                if (screen.catalogSizeForSmokeTest() != 151)
+                    throw new IllegalStateException("PokéC UI did not load the complete 151-species list");
+                if (!screen.clickSpeciesForSmokeTest("mew"))
+                    throw new IllegalStateException("PokéC list could not select Mew through its click handler");
+                pokecSelectionPhase = true;
+                clientTicks = 0;
+                return;
+            }
             NonNullList<net.minecraft.world.item.ItemStack> tab=NonNullList.create();
             ModItems.MINEMON_TAB.fillItemList(tab);
             long treatCount=tab.stream().filter(stack->stack.getItem() instanceof br.com.petrickfaria.minemon.item.PokemonTreatItem).count();
@@ -54,10 +80,18 @@ public final class PokemonTreatClientSmokeTest {
                 if (image==null || image.getWidth()!=32 || image.getHeight()!=32 || !image.getColorModel().hasAlpha())
                     throw new IllegalStateException("PokéCoin texture must be a 32x32 transparent PNG");
             }
+            if (minecraft.player != null && minecraft.level != null) {
+                pokecUiPhase = true;
+                clientTicks = 0;
+                var menu = new PokecMenu(minecraft.player.containerMenu.containerId + 1,
+                        minecraft.player.getInventory(), minecraft.player.blockPosition());
+                minecraft.setScreen(new PokecScreen(menu, minecraft.player.getInventory(), Component.literal("PokéC")));
+                return;
+            }
             java.nio.file.Files.writeString(java.nio.file.Path.of("client-validation-treats.txt"),
-                    "[TREAT CLIENT] PASS: all 16 treat models and the PokéCoin model, translations, texture, and creative entry loaded\n");
-            done=true;
-            System.out.println("[TREAT CLIENT] PASS: all 16 treat models and the PokéCoin model, translations, texture, and creative entry loaded");
+                    "[TREAT CLIENT] PASS: resources loaded; no world was available for the PokéC screen render check\n");
+            done = true;
+            System.out.println("[TREAT CLIENT] PASS: resources loaded; screen render check skipped (no world)");
             minecraft.execute(minecraft::stop);
         } catch (Exception failure) {
             throw new IllegalStateException("Treat client validation failed",failure);
