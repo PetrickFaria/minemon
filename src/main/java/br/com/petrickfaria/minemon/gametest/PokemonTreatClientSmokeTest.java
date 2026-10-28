@@ -13,8 +13,10 @@ import net.minecraftforge.event.TickEvent;
 public final class PokemonTreatClientSmokeTest {
     private static int clientTicks;
     private static boolean done;
+    private static boolean worldOpening;
     private static boolean pokecUiPhase;
     private static boolean pokecSelectionPhase;
+    private static int worldWaitTicks;
     public static void tick(TickEvent.ClientTickEvent event) {
         if (done || event.phase != TickEvent.Phase.END || !Boolean.getBoolean("minemon.clientSmokeTest")
                 || !Boolean.getBoolean("minemon.clientSmokeTreats")) return;
@@ -23,8 +25,14 @@ public final class PokemonTreatClientSmokeTest {
             System.out.println("[TREAT CLIENT] tick handler active; screen="
                     + (minecraft.screen == null ? "null" : minecraft.screen.getClass().getSimpleName()));
         }
-        // This smoke only inspects registered item resources, so it can run in
-        // either the title screen or an already opened world.
+        if (worldOpening) {
+            if (minecraft.player != null && minecraft.level != null) {
+                openPokecUi(minecraft);
+                return;
+            }
+            if (++worldWaitTicks > 600) throw new IllegalStateException("Timed out opening the prepared PokéC client world");
+            return;
+        }
         if (clientTicks < 20) return;
         try {
             if (pokecSelectionPhase) {
@@ -80,22 +88,37 @@ public final class PokemonTreatClientSmokeTest {
                 if (image==null || image.getWidth()!=32 || image.getHeight()!=32 || !image.getColorModel().hasAlpha())
                     throw new IllegalStateException("PokéCoin texture must be a 32x32 transparent PNG");
             }
-            if (minecraft.player != null && minecraft.level != null) {
-                pokecUiPhase = true;
-                clientTicks = 0;
-                var menu = new PokecMenu(minecraft.player.containerMenu.containerId + 1,
-                        minecraft.player.getInventory(), minecraft.player.blockPosition());
-                minecraft.setScreen(new PokecScreen(menu, minecraft.player.getInventory(), Component.literal("PokéC")));
+            if (minecraft.player == null || minecraft.level == null) {
+                var dataFile = java.nio.file.Path.of("saves/minemon-validation/level.dat").toFile();
+                var tag = net.minecraft.nbt.NbtIo.readCompressed(dataFile);
+                tag.getCompound("Data").putBoolean("confirmedExperimentalSettings", true);
+                net.minecraft.nbt.NbtIo.writeCompressed(tag, dataFile);
+                Object flows = Minecraft.class.getMethod("createWorldOpenFlows").invoke(minecraft);
+                boolean invoked = false;
+                for (var method : flows.getClass().getMethods()) if (method.getName().equals("loadLevel")) {
+                    if (method.getParameterCount() == 2 && method.getParameterTypes()[1] == String.class) {
+                        method.invoke(flows, minecraft.screen, "minemon-validation"); invoked = true; break;
+                    }
+                    if (method.getParameterCount() == 1 && method.getParameterTypes()[0] == String.class) {
+                        method.invoke(flows, "minemon-validation"); invoked = true; break;
+                    }
+                }
+                if (!invoked) throw new IllegalStateException("Could not locate WorldOpenFlows.loadLevel for PokéC UI validation");
+                worldOpening = true;
+                worldWaitTicks = 0;
                 return;
             }
-            java.nio.file.Files.writeString(java.nio.file.Path.of("client-validation-treats.txt"),
-                    "[TREAT CLIENT] PASS: resources loaded; no world was available for the PokéC screen render check\n");
-            done = true;
-            System.out.println("[TREAT CLIENT] PASS: resources loaded; screen render check skipped (no world)");
-            minecraft.execute(minecraft::stop);
+            openPokecUi(minecraft);
         } catch (Exception failure) {
             throw new IllegalStateException("Treat client validation failed",failure);
         }
+    }
+    private static void openPokecUi(Minecraft minecraft) {
+        pokecUiPhase = true;
+        clientTicks = 0;
+        var menu = new PokecMenu(minecraft.player.containerMenu.containerId + 1,
+                minecraft.player.getInventory(), minecraft.player.blockPosition());
+        minecraft.setScreen(new PokecScreen(menu, minecraft.player.getInventory(), Component.literal("PokéC")));
     }
     private PokemonTreatClientSmokeTest() {}
 }
