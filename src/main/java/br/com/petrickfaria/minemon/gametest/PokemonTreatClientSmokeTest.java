@@ -40,9 +40,11 @@ public final class PokemonTreatClientSmokeTest {
                 if (!(minecraft.screen instanceof PokecScreen screen) || !screen.selectedSpeciesForSmokeTest("mew"))
                     throw new IllegalStateException("PokéC list click did not select Mew in the detail panel");
                 java.nio.file.Files.writeString(java.nio.file.Path.of("client-validation-treats.txt"),
-                        "[TREAT CLIENT] PASS: resources, 151-species list, list selection, and animated PokéC preview rendered\n");
+                        "[TREAT CLIENT] PASS: resources, 151-species list, list selection, and animated PokéC preview rendered\n"
+                                + "PokéCoin model, translations, texture, and creative entry loaded\n");
                 done = true;
                 System.out.println("[TREAT CLIENT] PASS: resources, 151-species list, list selection, and animated PokéC preview rendered");
+                System.out.println("PokéCoin model, translations, texture, and creative entry loaded");
                 minecraft.execute(minecraft::stop);
                 return;
             }
