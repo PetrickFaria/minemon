@@ -34,6 +34,7 @@ import br.com.petrickfaria.minemon.pokec.PokemonTreatTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.RandomSource;
@@ -238,6 +239,13 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
                 && !MinemonConfig.TREAT_DISABLED_BREEDING_SPECIES.get().contains(species);
     }
 
+    private static boolean isUnsafeBabyBlock(Level level, BlockPos pos) {
+        var state = level.getBlockState(pos);
+        return state.is(Blocks.FIRE) || state.is(Blocks.SOUL_FIRE) || state.is(Blocks.LAVA)
+                || state.is(Blocks.MAGMA_BLOCK) || state.is(Blocks.CACTUS) || state.is(Blocks.SWEET_BERRY_BUSH)
+                || state.is(Blocks.WITHER_ROSE) || state.is(Blocks.CAMPFIRE) || state.is(Blocks.SOUL_CAMPFIRE);
+    }
+
     private static boolean hasSafeBabyPosition(ServerLevel level, MinemonCreature parent) {
         double width = Math.max(0.2D, parent.getBbWidth() * 0.5D);
         double height = Math.max(0.2D, parent.getBbHeight() * 0.5D);
@@ -249,7 +257,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
                 BlockPos floor = feet.below();
                 if (level.getBlockState(floor).getCollisionShape(level, floor).isEmpty()) continue;
                 if (!level.getFluidState(feet).isEmpty() || !level.getFluidState(feet.above()).isEmpty()) continue;
-                if (level.getBlockState(feet).getMaterial().isBurnable() || level.getBlockState(feet).getMaterial().isLiquid()) continue;
+                if (isUnsafeBabyBlock(level, floor) || isUnsafeBabyBlock(level, feet) || isUnsafeBabyBlock(level, feet.above())) continue;
                 double x = feet.getX() + 0.5D, y = feet.getY(), z = feet.getZ() + 0.5D;
                 AABB box = new AABB(x - width/2, y, z - width/2, x + width/2, y + height, z + width/2);
                 if (level.getWorldBorder().isWithinBounds(box) && level.noCollision(box)) return true;
@@ -283,7 +291,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
                 BlockPos floor = feet.below();
                 if (level.getBlockState(floor).getCollisionShape(level, floor).isEmpty()) continue;
                 if (!level.getFluidState(feet).isEmpty() || !level.getFluidState(feet.above()).isEmpty()) continue;
-                if (level.getBlockState(feet).getMaterial().isBurnable() || level.getBlockState(feet).getMaterial().isLiquid()) continue;
+                if (isUnsafeBabyBlock(level, floor) || isUnsafeBabyBlock(level, feet) || isUnsafeBabyBlock(level, feet.above())) continue;
                 baby.setPos(feet.getX() + 0.5D, feet.getY(), feet.getZ() + 0.5D);
                 AABB box = baby.getBoundingBox();
                 if (level.getWorldBorder().isWithinBounds(box) && level.noCollision(baby, box)) return feet;
