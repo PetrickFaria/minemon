@@ -74,8 +74,9 @@ public final class PokecTransactions {
             PokeballItem.StoredPokemon stored = PokeballItem.readStored(stack);
             if (stored == null || stack.getCount() != 1 || !stored.owner().equals(player.getUUID())
                     || PokemonBallLedger.get((ServerLevel) player.level).isConsumed(stored.token())) continue;
-            player.getInventory().removeItem(i, 1);
-            menu.setConversionState(player, stack.copy(), ItemStack.EMPTY, -1);
+            ItemStack staged = player.getInventory().removeItem(i, 1);
+            if (staged.isEmpty()) return false;
+            menu.setConversionState(player, staged, ItemStack.EMPTY, -1);
             return true;
         }
         return false;
