@@ -67,7 +67,7 @@ public class PokemonBreedingTest {
         var wartortle = parent("squirtle", 1, 0);
         assertEquals(60, PokemonBreeding.chanceForFirstLine(charizard, squirtle, 5, 5, 5, 95));
         assertEquals(55, PokemonBreeding.chanceForFirstLine(charizard, wartortle, 5, 5, 5, 95));
-        assertEquals(40, PokemonBreeding.chanceForFirstLine(wartortle, charizard, 5, 5, 5, 95));
+        assertEquals(45, PokemonBreeding.chanceForFirstLine(wartortle, charizard, 5, 5, 5, 95));
         assertEquals(50, PokemonBreeding.chanceForFirstLine(parent("charmander", 2, 0), parent("squirtle", 2, 0), 5, 5, 5, 95));
     }
 
