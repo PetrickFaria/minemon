@@ -4,7 +4,7 @@ import hashlib
 ARBOK_TEXTURE_PATH = "assets/minemon/textures/pokemon/arbok_cobblemon_1_8_2/arbok.png"
 ARBOK_TEXTURE_SHA256 = "ac0a5028891be22ffa2673ff5272f2a1a7bd0bee49e299c52fc9946c10a801ea"
 
-# Exact static resources for the PokéC and Rocket features. Keep this explicit
+# Exact static resources for the PokéC, Rocket, Pokémon treats, and PokéCoin. Keep this explicit
 # so the historical species asset audits continue to reject unrelated edits.
 POKEC_RESOURCES = frozenset({
     "src/main/resources/assets/minemon_gen1/blockstates/pokec.json",
@@ -74,6 +74,7 @@ TREAT_RESOURCES = frozenset(
         "ghost_treat", "fairy_treat", "fire_treat", "bug_treat",
         "fighting_treat", "steel_treat", "normal_treat", "rock_treat",
         "psychic_treat", "ground_treat", "poison_treat", "flying_treat",
+        "poke_coin",
     )
 )
 

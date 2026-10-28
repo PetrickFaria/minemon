@@ -320,5 +320,6 @@
   "item.minemon.psychic_treat": "Petisco Psicodélico",
   "item.minemon.ground_treat": "Petisco Barroso",
   "item.minemon.poison_treat": "Petisco Venenoso",
-  "item.minemon.flying_treat": "Petisco Voador"
+  "item.minemon.flying_treat": "Petisco Voador",
+  "item.minemon.poke_coin": "PokéCoin"
 }

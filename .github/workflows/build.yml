@@ -26,6 +26,8 @@ jobs:
         run: python3 tools/verify_rocket.py
       - name: Verify Pokémon treat models, textures, and translations
         run: python3 tools/verify_treats.py
+      - name: Verify PokéCoin registration and resources
+        run: python3 tools/verify_poke_coin.py
       - name: Preflight active animation Molang compatibility
         run: python3 tools/verify_molang_compatibility.py
       - name: Verify batches 8 to 15, prior assets, and Pidge wing rigs
@@ -66,10 +68,11 @@ jobs:
           python3 tools/prepare_client_world.py
           ALSOFT_DRIVERS=null timeout --kill-after=30s 600s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeRocketProfession
           grep -F 'PASS ROCKET CLIENT:' run/client-validation-rocket.txt
-      - name: Validate all treat item models on the real client
+      - name: Validate treat and PokéCoin models on the real client
         run: |
           ALSOFT_DRIVERS=null timeout --kill-after=30s 600s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeTreats
           grep -F '[TREAT CLIENT] PASS:' run/client-validation-treats.txt
+          grep -F 'PokéCoin model, translations, texture, and creative entry loaded' run/client-validation-treats.txt
       - name: Capture runtime API diagnostics
         if: always()
         run: python3 tools/collect_diagnostics.py
@@ -164,6 +167,9 @@ jobs:
           jar_file="$(find build/libs -maxdepth 1 -type f -name 'Minemon-1.19.2-*-all.jar' -print -quit)"
           test -n "$jar_file"
           python3 tools/verify_treats.py "$jar_file"
+          python3 tools/verify_poke_coin.py "$jar_file"
+          jar tf "$jar_file" | grep -Fx 'assets/minemon/models/item/poke_coin.json'
+          jar tf "$jar_file" | grep -Fx 'assets/minemon/textures/item/poke_coin.png'
           jar tf "$jar_file" | grep -Fx 'META-INF/ASSET_LICENSES.md'
           jar tf "$jar_file" | grep -Fx 'pack.mcmeta'
           jar tf "$jar_file" | grep -Fx 'br/com/petrickfaria/minemon/Minemon.class'

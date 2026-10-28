@@ -50,12 +50,13 @@ processResources {
             target.parentFile.mkdirs()
             target.bytes = source.bytes
         }
-        // Treat items use their own minemon registry namespace, while the rest
+        // The treat and coin items use their own minemon registry namespace, while the rest
         // of the mod's source assets are repackaged as minemon_gen1.
-        def treatIds = ['aquatic_treat','bug_treat','dragon_treat','electric_treat','fairy_treat',
+        def customItemIds = ['aquatic_treat','bug_treat','dragon_treat','electric_treat','fairy_treat',
                         'fighting_treat','fire_treat','flying_treat','frozen_treat','ghost_treat',
-                        'ground_treat','normal_treat','poison_treat','psychic_treat','rock_treat','steel_treat']
-        treatIds.each { id ->
+                        'ground_treat','normal_treat','poison_treat','psychic_treat','rock_treat','steel_treat',
+                        'poke_coin']
+        customItemIds.each { id ->
             ['models/item/' + id + '.json', 'textures/item/' + id + '.png'].each { relativePath ->
                 def path = assetPrefix + relativePath
                 def source = new File(sourceRoot, path)

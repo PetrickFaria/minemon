@@ -21,6 +21,7 @@ public final class ModItems {
   items.add(ROCKET_BLOCK.get().getDefaultInstance());
   SOULS.values().forEach(s->items.add(s.get().getDefaultInstance()));
   TREATS.values().forEach(s->items.add(s.get().getDefaultInstance()));
+  items.add(POKE_COIN.get().getDefaultInstance());
   }
  };
  public static final DeferredRegister<Item> ITEMS=DeferredRegister.create(ForgeRegistries.ITEMS,Minemon.MOD_ID);
@@ -30,6 +31,7 @@ public final class ModItems {
  public static final RegistryObject<Item> ROCKET_BLOCK=ITEMS.register("rocket_block",()->new BlockItem(ModBlocks.ROCKET_BLOCK.get(),new Item.Properties().tab(MINEMON_TAB)));
  public static final Map<String,RegistryObject<Item>> SOULS=registerSouls();
  public static final Map<PokemonTreatType,RegistryObject<Item>> TREATS=registerTreats();
+ public static final RegistryObject<Item> POKE_COIN=TREAT_ITEMS.register("poke_coin",()->new Item(new Item.Properties().stacksTo(64).tab(MINEMON_TAB)));
  public static final RegistryObject<Item> BULBASAUR_SPAWN_EGG=EGGS.get("bulbasaur");
  private static Map<String,RegistryObject<Item>> register(){
   Map<String,RegistryObject<Item>> map=new LinkedHashMap<>();

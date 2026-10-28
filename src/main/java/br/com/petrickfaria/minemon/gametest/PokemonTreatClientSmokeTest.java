@@ -6,7 +6,7 @@ import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.NonNullList;
 import net.minecraftforge.event.TickEvent;
 
-/** Loads each registered treat model in a real Minecraft client and verifies the creative tab. */
+/** Loads all treat and PokéCoin models in a real Minecraft client and verifies the creative tab. */
 public final class PokemonTreatClientSmokeTest {
     private static int clientTicks;
     private static boolean done;
@@ -36,10 +36,28 @@ public final class PokemonTreatClientSmokeTest {
                 var key="item.minemon."+entry.getKey().itemId();
                 if (net.minecraft.client.resources.language.I18n.get(key).equals(key)) throw new IllegalStateException("Missing translated treat name: "+key);
             }
+            var coin=ModItems.POKE_COIN.get();
+            var coinId=net.minecraftforge.registries.ForgeRegistries.ITEMS.getKey(coin);
+            if (coinId==null || !coinId.toString().equals("minemon:poke_coin"))
+                throw new IllegalStateException("PokéCoin has wrong registry ID: "+coinId);
+            if (coin.getMaxStackSize()!=64) throw new IllegalStateException("PokéCoin must stack to 64");
+            if (tab.stream().filter(stack->stack.getItem()==coin).count()!=1)
+                throw new IllegalStateException("PokéCoin must appear exactly once in the Minemon creative tab");
+            var coinModelId=new ModelResourceLocation(coinId,"inventory");
+            if (minecraft.getModelManager().getModel(coinModelId)==minecraft.getModelManager().getMissingModel())
+                throw new IllegalStateException("Missing baked PokéCoin model: "+coinModelId);
+            var coinName="item.minemon.poke_coin";
+            if (net.minecraft.client.resources.language.I18n.get(coinName).equals(coinName))
+                throw new IllegalStateException("Missing PokéCoin translation: "+coinName);
+            try (var texture=PokemonTreatClientSmokeTest.class.getResourceAsStream("/assets/minemon/textures/item/poke_coin.png")) {
+                var image=texture==null?null:javax.imageio.ImageIO.read(texture);
+                if (image==null || image.getWidth()!=32 || image.getHeight()!=32 || !image.getColorModel().hasAlpha())
+                    throw new IllegalStateException("PokéCoin texture must be a 32x32 transparent PNG");
+            }
             java.nio.file.Files.writeString(java.nio.file.Path.of("client-validation-treats.txt"),
-                    "[TREAT CLIENT] PASS: all 16 item models, translations, and creative entries loaded\n");
+                    "[TREAT CLIENT] PASS: all 16 treat models and the PokéCoin model, translations, texture, and creative entry loaded\n");
             done=true;
-            System.out.println("[TREAT CLIENT] PASS: all 16 item models, translations, and creative entries loaded");
+            System.out.println("[TREAT CLIENT] PASS: all 16 treat models and the PokéCoin model, translations, texture, and creative entry loaded");
             minecraft.execute(minecraft::stop);
         } catch (Exception failure) {
             throw new IllegalStateException("Treat client validation failed",failure);
