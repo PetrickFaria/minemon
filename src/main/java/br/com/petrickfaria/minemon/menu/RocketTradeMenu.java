@@ -54,13 +54,13 @@ public final class RocketTradeMenu extends AbstractContainerMenu {
         addSlot(new Slot(result, 0, 142, 35) {
             @Override public boolean mayPlace(ItemStack stack) { return false; }
             @Override public boolean mayPickup(Player player) { return !getItem().isEmpty() && eligibleCount() >= 10; }
-            @Override public ItemStack onTake(Player player, ItemStack stack) {
+            @Override public void onTake(Player player, ItemStack stack) {
+                super.onTake(player, stack);
                 if (!player.level.isClientSide && player instanceof ServerPlayer && isUnlocked()) {
                     consumeTen();
                     updateResult();
                     broadcastChanges();
                 }
-                return super.onTake(player, stack);
             }
         });
         for (int row = 0; row < 3; row++) for (int column = 0; column < 9; column++)
