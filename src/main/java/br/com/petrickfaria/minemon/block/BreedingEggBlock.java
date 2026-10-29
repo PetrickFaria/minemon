@@ -6,6 +6,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
@@ -26,7 +27,7 @@ public final class BreedingEggBlock extends BaseEntityBlock {
     @Override public RenderShape getRenderShape(BlockState state) { return RenderShape.MODEL; }
     @Override public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) { return SHAPE; }
     @Override public VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) { return SHAPE; }
-    @Override public boolean canSurvive(BlockState state, Level level, BlockPos pos) {
+    @Override public boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
         return level.getFluidState(pos).isEmpty() && level.getBlockState(pos.below()).isFaceSturdy(level, pos.below(), net.minecraft.core.Direction.UP);
     }
     @Override public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {

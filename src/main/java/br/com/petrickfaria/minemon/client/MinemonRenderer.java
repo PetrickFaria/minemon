@@ -36,7 +36,7 @@ public class MinemonRenderer extends GeoEntityRenderer<MinemonCreature> {
   if(validationObserver!=null)validationObserver.accept(entity,this.minemonModel);
  }
 
- @Override protected boolean shouldShowName(MinemonCreature entity){return entity.isTame()||super.shouldShowName(entity);}
+ @Override public boolean shouldShowName(MinemonCreature entity){return entity.isTame();}
  @Override protected void renderNameTag(MinemonCreature entity,Component name,com.mojang.blaze3d.vertex.PoseStack pose,
       net.minecraft.client.renderer.MultiBufferSource buffers,int packedLight){
   if(!entity.isTame()){super.renderNameTag(entity,name,pose,buffers,packedLight);return;}

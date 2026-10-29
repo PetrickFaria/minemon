@@ -103,14 +103,6 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         imageWidth = Math.round(LOGICAL_WIDTH * uiScale);
         imageHeight = Math.round(LOGICAL_HEIGHT * uiScale);
         super.init();
-        for (int i = 0; i < menu.slots.size(); i++) {
-            var slot = menu.slots.get(i);
-            int column = i % 9;
-            int baseX = 200 + column * 18;
-            int baseY = i < 27 ? 320 + (i / 9) * 18 : 378;
-            slot.x = Math.round(baseX * uiScale);
-            slot.y = Math.round(baseY * uiScale);
-        }
         ordered = PokecSpecies.ordered();
         selectedSlug = PokecSpecies.get(syncedSelectedSlug) == null ? "bulbasaur" : syncedSelectedSlug;
         MinemonNetwork.requestPokecState(menu.pos());
