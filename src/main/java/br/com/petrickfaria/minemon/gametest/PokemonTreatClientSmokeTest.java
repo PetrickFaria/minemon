@@ -241,7 +241,7 @@ public final class PokemonTreatClientSmokeTest {
         PokecScreen.updateState(0, true, java.util.Set.of("bulbasaur", "charmander", "squirtle", "pikachu", "eevee"),
                 java.util.Map.of(), java.util.Map.of(), java.util.Map.of(), "bulbasaur", 0, 0,
                 net.minecraft.world.item.ItemStack.EMPTY, net.minecraft.world.item.ItemStack.EMPTY, -1,
-                "", "", "", "", 0, 0, 0, false);
+                "", "", "", "", 0, 0, 0, 0, false);
     }
     private PokemonTreatClientSmokeTest() {}
 }
