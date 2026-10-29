@@ -106,10 +106,10 @@ public final class MinemonFlyingCreature extends MinemonCreature {
   double support=this.naturalSurface();
   net.minecraft.core.BlockPos feet=new net.minecraft.core.BlockPos(this.getX(),support,this.getZ());
   boolean safe=WaterMovementGoal.safeDry(this,feet);
-  // Once a collision-safe landing column is found, gravity performs the
-  // gradual descent. If the column is unsafe, keep hovering while the rest
-  // goal searches for a nearby dry landing instead of dropping blindly.
-  this.setNoGravity(!safe && !this.isOnGround());
+  // Keep hovering while the column is unsafe, even if the entity touched the
+  // bottom of water. The rest goal can then move it toward a dry landing.
+  // Gravity starts the gradual descent only inside a collision-safe column.
+  this.setNoGravity(!safe);
   // Ground navigation can finish while a small fixed-height floater is still
   // fractionally above its support. Keep the sleep landing state authoritative
   // and carry it through the final descent instead of letting the move control
