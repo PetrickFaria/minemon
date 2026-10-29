@@ -30,6 +30,13 @@ public final class PokemonInfoMenu extends AbstractContainerMenu {
     }
 
     @Override public boolean clickMenuButton(Player player, int button) {
+        if (Boolean.getBoolean("minemon.clientSmokeTest")) {
+            System.out.println("[POKEMON MENU CLICK] side=" + (player.level.isClientSide ? "client" : "server")
+                    + " button=" + button + " pokemon=" + (pokemon == null ? "null" : pokemon.getId())
+                    + " sit=" + (pokemon != null && pokemon.isOrderedToSit())
+                    + " valid=" + (pokemon != null && stillValid(player))
+                    + " player=" + player.getUUID());
+        }
         if (!(player instanceof ServerPlayer serverPlayer) || !stillValid(player) || pokemon == null) return false;
         if (button == 0) {
             pokemon.setOrderedToSit(false);
@@ -41,6 +48,8 @@ public final class PokemonInfoMenu extends AbstractContainerMenu {
             pokemon.setOrderedToSit(true);
             pokemon.setTarget(null);
             pokemon.getNavigation().stop();
+            if (Boolean.getBoolean("minemon.clientSmokeTest"))
+                System.out.println("[POKEMON MENU CLICK] server sit-after=true pokemon=" + pokemon.getId());
             return true;
         }
         if (button == 2) {
