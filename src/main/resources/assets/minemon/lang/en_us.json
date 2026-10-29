@@ -323,6 +323,8 @@
   "item.minemon.flying_treat": "Flying Treat",
   "item.minemon.poke_coin": "PokéCoin",
   "item.minemon.pokeball": "Poké Ball",
+  "item.minemon.master_ball": "Master Ball",
+  "item.minemon.master_ball.stored": "Master Ball containing %s",
   "item.minemon.pokeball.stored": "Poké Ball containing %s",
   "tooltip.minemon.pokeball.empty": "Empty — use on one of your tamed Pokémon.",
   "tooltip.minemon.pokeball.species": "Pokémon: %s",
