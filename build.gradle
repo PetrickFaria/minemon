@@ -116,6 +116,7 @@ minecraft {
             property 'minemon.clientSmokeAudio', project.hasProperty('clientSmokeAudio').toString()
             property 'minemon.clientSmokeRocketProfession', project.hasProperty('clientSmokeRocketProfession').toString()
             property 'minemon.clientSmokeTreats', project.hasProperty('clientSmokeTreats').toString()
+            property 'minemon.clientSmokePokemonManagement', project.hasProperty('clientSmokePokemonManagement').toString()
             property 'minemon.clientSmokeSpecies', (findProperty('clientSmokeSpecies') ?: '').toString()
         }
         server { args '--nogui' }

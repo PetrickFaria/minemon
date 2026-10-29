@@ -85,6 +85,19 @@ public final class NightAndSwimmingTests {
   }
  }
  private static MinemonCreature spawn(GameTestHelper h,String slug,int x,int y,int z){return h.spawn(ModEntities.SPECIES.get(slug).get(),new BlockPos(x,y,z));}
+ @GameTest(template="test_arena",batch="night_landing_water",timeoutTicks=700)
+ public static void landRestingFlyerFindsDryGroundBeforeStartingSleepOverWater(GameTestHelper h){
+  arena(h);var level=h.getLevel();
+  for(int x=2;x<=12;x++)for(int z=2;z<=12;z++)for(int y=1;y<=8;y++)h.setBlock(new BlockPos(x,y,z),Blocks.WATER);
+  var pidgeot=spawn(h,"pidgeot",7,10,7);level.setDayTime(18000);
+  await(h,()->pidgeot.isSleeping()&&pidgeot.isOnGround(),()->{
+   check(h,!pidgeot.isInWaterOrBubble()&&WaterMovementGoal.safeDry(pidgeot,pidgeot.blockPosition()),
+       "a land-resting flyer must reach a safe dry support before entering sleep");
+   h.succeed();
+  },500,()->"A flyer over water must navigate to a reachable shoreline and sleep there; pos="+pidgeot.position()
+      +",night="+pidgeot.isNightResting()+",sleep="+pidgeot.isSleeping()+",ground="+pidgeot.isOnGround()
+      +",target="+pidgeot.getNavigation().getTargetPos()+",navDone="+pidgeot.getNavigation().isDone());
+ }
  @GameTest(template="test_arena",batch="nocturnal_schedule",timeoutTicks=800)
  public static void nocturnalSpeciesSleepFromMiddayUntilNightAndPauseTheirRoutine(GameTestHelper h){
   arena(h);var level=h.getLevel();level.getGameRules().getRule(net.minecraft.world.level.GameRules.RULE_DAYLIGHT).set(false,level.getServer());

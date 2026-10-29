@@ -7,6 +7,7 @@ import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
+import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import br.com.petrickfaria.minemon.entity.MinemonCreature;
 import br.com.petrickfaria.minemon.registry.ModItems;
 import br.com.petrickfaria.minemon.config.MinemonConfig;
@@ -19,6 +20,14 @@ import net.minecraftforge.fml.common.Mod;
 @Mod.EventBusSubscriber(modid=Minemon.MOD_ID)
 public final class PokecEvents {
     @SubscribeEvent public static void serverStarting(ServerStartingEvent event){PokecEconomy.load();}
+    @SubscribeEvent public static void companionExperience(LivingDeathEvent event) {
+        if (event.getEntity().level.isClientSide || !(event.getSource().getEntity() instanceof MinemonCreature attacker)
+                || !attacker.isTame() || !(event.getEntity() instanceof net.minecraft.world.entity.Mob defeated)) return;
+        var marker = event.getEntity().getPersistentData();
+        if (marker.getBoolean("MinemonCompanionXpHandled")) return;
+        marker.putBoolean("MinemonCompanionXpHandled", true);
+        attacker.awardPokemonExperience(Math.max(0, defeated.getExperienceReward()));
+    }
     @SubscribeEvent public static void pokemonSoulDrops(LivingDropsEvent event) {
         if (!(event.getEntity() instanceof MinemonCreature pokemon) || event.getEntity().level.isClientSide) return;
         var marker = pokemon.getPersistentData();

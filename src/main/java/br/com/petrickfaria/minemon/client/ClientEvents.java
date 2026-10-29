@@ -6,6 +6,7 @@ import br.com.petrickfaria.minemon.registry.ModParticles;
 import br.com.petrickfaria.minemon.menu.ModMenus;
 import br.com.petrickfaria.minemon.menu.PokecScreen;
 import br.com.petrickfaria.minemon.menu.RocketTradeScreen;
+import br.com.petrickfaria.minemon.menu.PokemonInfoScreen;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.client.event.RegisterParticleProvidersEvent;
@@ -31,6 +32,7 @@ public final class ClientEvents {
         event.enqueueWork(() -> {
             MenuScreens.register(ModMenus.POKEC.get(), PokecScreen::new);
             MenuScreens.register(ModMenus.ROCKET_TRADE.get(), RocketTradeScreen::new);
+            MenuScreens.register(ModMenus.POKEMON_INFO.get(), PokemonInfoScreen::new);
         });
     }
 

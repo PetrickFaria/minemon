@@ -9,6 +9,8 @@ public final class MinemonConfig {
     public static final int DEFAULT_BREEDING_MAX_CHANCE_PERCENT = 95;
     private static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
     public static final ForgeConfigSpec.IntValue TAME_CHANCE_PERCENT;
+    public static final ForgeConfigSpec.IntValue POKEMON_MAX_LEVEL;
+    public static final ForgeConfigSpec.IntValue POKEMON_XP_PER_ZOMBIE;
     public static final ForgeConfigSpec.BooleanValue NATURAL_SPAWNING_ENABLED;
     public static final ForgeConfigSpec.IntValue TREAT_HEAL_AMOUNT;
     public static final ForgeConfigSpec.IntValue TREAT_BREEDING_COOLDOWN_TICKS;
@@ -29,6 +31,10 @@ public final class MinemonConfig {
 
     static {
         BUILDER.push("companions");
+        POKEMON_MAX_LEVEL = BUILDER.comment("Maximum level for domesticated Pokémon.")
+                .defineInRange("pokemonMaxLevel", 10, 1, 1000);
+        POKEMON_XP_PER_ZOMBIE = BUILDER.comment("Base companion XP equivalent to one adult zombie.")
+                .defineInRange("pokemonXpPerZombie", 5, 1, 1000000);
         TAME_CHANCE_PERCENT = BUILDER.comment("Chance that a compatible elemental treat tames a wild Minemon (0-100).")
                 .defineInRange("tameChancePercent", 33, 0, 100);
         NATURAL_SPAWNING_ENABLED = BUILDER.comment("Natural spawning is disabled until species-specific spawn data is validated.")
