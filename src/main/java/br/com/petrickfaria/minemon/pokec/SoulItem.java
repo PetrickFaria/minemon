@@ -7,7 +7,7 @@ public final class SoulItem extends Item {
     public SoulItem(SoulType type,Properties properties){super(properties);this.type=type;}
     public SoulType soulType(){return type;}
     @Override public Component getName(ItemStack stack){
-        String name=switch(type){case NORMAL->"Alma Normal";case FIRE->"Alma de Fogo";case WATER->"Alma de Água";case GRASS->"Alma de Planta";case ELECTRIC->"Alma Elétrica";case ICE->"Alma de Gelo";case FIGHTING->"Alma de Lutador";case POISON->"Alma de Veneno";case GROUND->"Alma de Terra";case FLYING->"Alma Voadora";case PSYCHIC->"Alma Psíquica";case BUG->"Alma de Inseto";case ROCK->"Alma de Pedra";case GHOST->"Alma Fantasma";case DRAGON->"Alma de Dragão";};
+        String name=switch(type){case NORMAL->"Alma Normal";case FIRE->"Alma de Fogo";case WATER->"Alma de Água";case GRASS->"Alma de Planta";case ELECTRIC->"Alma Elétrica";case ICE->"Alma de Gelo";case FIGHTING->"Alma de Lutador";case POISON->"Alma de Veneno";case GROUND->"Alma de Terra";case FLYING->"Alma Voadora";case PSYCHIC->"Alma Psíquica";case BUG->"Alma de Inseto";case ROCK->"Alma de Pedra";case GHOST->"Alma Fantasma";case DRAGON->"Alma de Dragão";case FAIRY->"Alma de Fada";case STEEL->"Alma de Aço";case DARK->"Alma Sombria";};
         return Component.literal(name);
     }
 }

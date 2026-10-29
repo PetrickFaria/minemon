@@ -140,6 +140,20 @@ public final class PokemonTreatClientSmokeTest {
             }
             NonNullList<net.minecraft.world.item.ItemStack> tab=NonNullList.create();
             ModItems.MINEMON_TAB.fillItemList(tab);
+            long soulCount = tab.stream().filter(stack -> stack.getItem() instanceof br.com.petrickfaria.minemon.pokec.SoulItem).count();
+            if (soulCount != 18) throw new IllegalStateException("Creative tab must expose all 18 elemental souls, found " + soulCount);
+            for (var entry : ModItems.SOULS.entrySet()) {
+                var item = entry.getValue().get();
+                var id = net.minecraftforge.registries.ForgeRegistries.ITEMS.getKey(item);
+                if (id == null || minecraft.getModelManager().getModel(new ModelResourceLocation(id, "inventory")) == minecraft.getModelManager().getMissingModel())
+                    throw new IllegalStateException("Missing elemental soul inventory model: " + entry.getKey());
+                try (var texture = PokemonTreatClientSmokeTest.class.getResourceAsStream("/assets/minemon_gen1/textures/item/" + entry.getKey() + "_soul.png")) {
+                    var image = texture == null ? null : javax.imageio.ImageIO.read(texture);
+                    if (image == null || image.getWidth() != 256 || image.getHeight() != 256 || !image.getColorModel().hasAlpha())
+                        throw new IllegalStateException("Missing transparent soul texture: " + entry.getKey());
+                }
+            }
+            com.mojang.logging.LogUtils.getLogger().info("[SOUL CLIENT] PASS: all 18 elemental souls registered in creative tab with baked inventory models and transparent textures");
             long treatCount=tab.stream().filter(stack->stack.getItem() instanceof br.com.petrickfaria.minemon.item.PokemonTreatItem).count();
             if (treatCount != 17) throw new IllegalStateException("Creative tab exposes "+treatCount+" treats instead of 17");
             for (var entry : ModItems.TREATS.entrySet()) {
