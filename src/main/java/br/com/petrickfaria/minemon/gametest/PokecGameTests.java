@@ -235,9 +235,15 @@ public final class PokecGameTests {
         MinemonCreature creature=h.spawn(ModEntities.SPECIES.get("charmander").get(),new BlockPos(8,1,5));creature.tame(owner);creature.setPokemonLevel(1);
         ItemStack ball=new ItemStack(ModItems.POKEBALL.get());owner.setItemInHand(InteractionHand.MAIN_HAND,ball);
         check(ModItems.POKEBALL.get().interactLivingEntity(ball,owner,creature,InteractionHand.MAIN_HAND).consumesAction(),"test Pokémon should be captured before conversion");
-        ItemStack filledBall=owner.getMainHandItem().copy();owner.setItemInHand(InteractionHand.MAIN_HAND,ItemStack.EMPTY);owner.getInventory().setItem(9,filledBall);
+        ItemStack filledBall=owner.getMainHandItem().copy();owner.setItemInHand(InteractionHand.MAIN_HAND,ItemStack.EMPTY);
         PokecMenu menu=new PokecMenu(20,owner.getInventory(),p);owner.containerMenu=menu;
+        owner.getInventory().setItem(9,new ItemStack(ModItems.POKEBALL.get()));
         check(!PokecTransactions.perform(owner,p,"bulbasaur",PokecTransactions.Action.STAGE_POKEBALL,0xAFFL),"an empty Pokébola cannot be staged as a stored Pokémon");
+        ItemStack foreignBall=filledBall.copy();foreignBall.getOrCreateTag().getCompound("MinemonStoredPokemon").putUUID("Owner",UUID.randomUUID());
+        owner.getInventory().setItem(9,foreignBall);
+        check(!PokecTransactions.perform(owner,p,"bulbasaur",PokecTransactions.Action.STAGE_POKEBALL,0xAFEL),"PokéC rejects a stored Pokémon owned by another player");
+        check(PokeballItem.isOccupied(owner.getInventory().getItem(9)),"a rejected foreign Pokébola remains untouched");
+        owner.getInventory().setItem(9,filledBall);
         check(PokecTransactions.perform(owner,p,"bulbasaur",PokecTransactions.Action.STAGE_POKEBALL,0xB00L),"filled player-owned Pokébola should be staged");
         check(menu.conversionPreview()!=null&&menu.conversionPreview().base()>=3&&menu.conversionPreview().base()<=13,"PokéC previews the 3–13 base from stage, rarity, level, and type");
         UUID token=PokeballItem.readStored(menu.conversionBall()).token();int minimum=menu.conversionPreview().minimum(),maximum=menu.conversionPreview().maximum();
