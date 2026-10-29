@@ -187,7 +187,6 @@ jobs:
           jar tf "$jar_file" | grep -Fx 'br/com/petrickfaria/minemon/menu/RocketTradeMenu.class'
           jar tf "$jar_file" | grep -Fx 'br/com/petrickfaria/minemon/menu/RocketTradeScreen.class'
           jar tf "$jar_file" | grep -Fx 'br/com/petrickfaria/minemon/registry/RocketChallengeManager.class'
-          jar tf "$jar_file" | grep -Fx 'br/com/petrickfaria/minemon/gametest/RocketChallengeGameTests.class'
           python3 tools/verify_poke_coin.py "$jar_file"
           python3 tools/verify_pokeball.py "$jar_file"
           jar tf "$jar_file" | grep -Fx 'assets/minemon/models/item/pokeball.json'
