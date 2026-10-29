@@ -116,16 +116,14 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         pose.pushPose();
         pose.translate(leftPos, topPos, 0);
         pose.scale(uiScale, uiScale, 1);
-        GuiComponent.fill(pose, 0, 0, LOGICAL_WIDTH, LOGICAL_HEIGHT, 0xF20A1018);
-        GuiComponent.fill(pose, 2, 2, LOGICAL_WIDTH - 2, LOGICAL_HEIGHT - 2, 0xFF111D29);
-        GuiComponent.fill(pose, 5, 5, LOGICAL_WIDTH - 5, 29, 0xFF152B3D);
-        GuiComponent.fill(pose, 5, 29, LOGICAL_WIDTH - 5, 31, 0xFF2384BB);
-        font.draw(pose, "POKÉC  /  POKÉDEX", 12, 12, 0xFF9BDFFF);
-        font.draw(pose, "Saldo: " + syncedCoins + " PokéCoins", 346, 12, 0xFFFFD778);
+        MinemonGui.panel(pose, 0, 0, LOGICAL_WIDTH, LOGICAL_HEIGHT);
+        GuiComponent.fill(pose, 8, 28, LOGICAL_WIDTH - 8, 29, 0xFF9A4545);
+        font.draw(pose, "POKÉC  /  POKÉDEX", 12, 12, 0xFF404040);
+        font.draw(pose, "Saldo: " + syncedCoins + " PokéCoins", 346, 12, 0xFF705028);
 
         drawPanel(pose, LIST_X, LIST_Y - 5, LIST_W, LIST_H + 8);
         drawPanel(pose, 190, LIST_Y - 5, 322, LOGICAL_HEIGHT - LIST_Y - 8);
-        font.draw(pose, "ESPÉCIES   001–151", LIST_X + 7, LIST_Y - 1, 0xFF75CFF5);
+        font.draw(pose, "ESPÉCIES   001–151", LIST_X + 7, LIST_Y - 1, 0xFF404040);
         int visible = visibleRows();
         for (int row = 0; row < visible; row++) {
             int index = scrollOffset + row;
@@ -135,25 +133,25 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
             boolean selected = species.slug().equals(selectedSlug);
             boolean unlocked = syncedUnlocked.contains(species.slug());
             GuiComponent.fill(pose, LIST_X + 5, y, LIST_X + LIST_W - 5, y + ROW_H - 1,
-                    selected ? 0xFF245879 : (row % 2 == 0 ? 0xFF142330 : 0xFF111F2A));
-            if (selected) GuiComponent.fill(pose, LIST_X + 5, y, LIST_X + 7, y + ROW_H - 1, 0xFF56CFFF);
-            int color = unlocked ? 0xFFE5F4FC : 0xFF9BAFBD;
+                    selected ? 0xFFB3C3CF : (row % 2 == 0 ? 0xFFB7B7B7 : 0xFFAEAEAE));
+            if (selected) GuiComponent.fill(pose, LIST_X + 5, y, LIST_X + 7, y + ROW_H - 1, 0xFF404040);
+            int color = unlocked ? 0xFF202020 : 0xFF555555;
             font.draw(pose, String.format(Locale.ROOT, "%03d - %s", species.number(), species.name()), LIST_X + 11, y + 2, color);
         }
         int maxScroll = Math.max(0, ordered.size() - visible);
         int trackX = LIST_X + LIST_W - 8, trackY = LIST_Y + 13;
-        GuiComponent.fill(pose, trackX, trackY, trackX + 2, trackY + visible * ROW_H, 0xFF263B4A);
+        GuiComponent.fill(pose, trackX, trackY, trackX + 2, trackY + visible * ROW_H, 0xFFC6C6C6);
         int thumbHeight = Math.max(18, (visible * ROW_H * visible) / Math.max(1, ordered.size()));
         int thumbY = trackY + (maxScroll == 0 ? 0 : (visible * ROW_H - thumbHeight) * scrollOffset / maxScroll);
-        GuiComponent.fill(pose, trackX, thumbY, trackX + 2, thumbY + thumbHeight, 0xFF53B9E7);
+        GuiComponent.fill(pose, trackX, thumbY, trackX + 2, thumbY + thumbHeight, 0xFF404040);
         drawLeftConversion(pose);
-        font.draw(pose, "INVENTÁRIO", 200, 305, 0xFF72CFF5);
+        font.draw(pose, "INVENTÁRIO", 200, 305, 0xFF404040);
         for (int i = 0; i < 36; i++) {
             int column = i % 9;
             int baseX = 200 + column * 18;
             int baseY = i < 27 ? 320 + (i / 9) * 18 : 378;
-            GuiComponent.fill(pose, baseX, baseY, baseX + 18, baseY + 18, 0xFF657785);
-            GuiComponent.fill(pose, baseX + 1, baseY + 1, baseX + 17, baseY + 17, 0xFF0B141C);
+            GuiComponent.fill(pose, baseX, baseY, baseX + 18, baseY + 18, 0xFFC6C6C6);
+            GuiComponent.fill(pose, baseX + 1, baseY + 1, baseX + 17, baseY + 17, 0xFFC6C6C6);
         }
         drawSelectedPanel(pose, partialTick, mouseX, mouseY);
         pose.popPose();
@@ -161,11 +159,7 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
 
     private int visibleRows() { return Math.max(1, (LIST_H - 21) / ROW_H); }
     private void drawPanel(PoseStack pose, int x, int y, int w, int h) {
-        GuiComponent.fill(pose, x, y, x + w, y + h, 0xFF10202D);
-        GuiComponent.fill(pose, x, y, x + w, y + 1, 0xFF286183);
-        GuiComponent.fill(pose, x, y + h - 1, x + w, y + h, 0xFF223E51);
-        GuiComponent.fill(pose, x, y, x + 1, y + h, 0xFF223E51);
-        GuiComponent.fill(pose, x + w - 1, y, x + w, y + h, 0xFF223E51);
+        MinemonGui.slot(pose, x, y, w, h);
     }
 
     private void drawSelectedPanel(PoseStack pose, float partialTick, int mouseX, int mouseY) {
@@ -174,32 +168,32 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         boolean unlocked = syncedUnlocked.contains(species.slug());
         boolean evolution = species.isEvolution() && !unlocked;
         int x = 200;
-        font.draw(pose, String.format(Locale.ROOT, "%03d  %s", species.number(), species.name()), x, 37, 0xFFEAF8FF);
-        font.draw(pose, rarityLabel(PokecEconomy.get().rarity(species.slug())), 426, 38, 0xFF78D7F6);
+        font.draw(pose, String.format(Locale.ROOT, "%03d  %s", species.number(), species.name()), x, 37, 0xFF404040);
+        font.draw(pose, rarityLabel(PokecEconomy.get().rarity(species.slug())), 426, 38, 0xFF404040);
         if (unlocked) {
             renderPreview(pose, species, 354, 119, partialTick);
         } else {
             drawPanel(pose, 220, 48, 268, 112);
-            GuiComponent.fill(pose, 222, 50, 486, 158, 0xFF080D12);
-            drawCentered(pose, "?", 354, 72, 0xFF82919B);
-            drawCentered(pose, "ESPÉCIE BLOQUEADA", 354, 132, 0xFF9BAFBD);
+            GuiComponent.fill(pose, 222, 50, 486, 158, 0xFFC6C6C6);
+            drawCentered(pose, "?", 354, 72, 0xFF404040);
+            drawCentered(pose, "ESPÉCIE BLOQUEADA", 354, 132, 0xFF404040);
         }
-        GuiComponent.fill(pose, 205, 164, 498, 165, 0xFF2B536B);
+        GuiComponent.fill(pose, 205, 164, 498, 165, 0xFFC6C6C6);
 
         if (evolution) {
-            font.draw(pose, "DESBLOQUEIO POR EVOLUÇÃO", 207, 173, 0xFFFF9298);
-            drawSlot(pose, 208, 190, "X", 0xFFCB4E5C, false);
-            font.draw(pose, "Evolua um Minemon seu para esta espécie.", 258, 202, 0xFFC3D1DB);
-            font.draw(pose, "Almas e PokéCoins não podem desbloqueá-la.", 258, 216, 0xFF879CA9);
+            font.draw(pose, "DESBLOQUEIO POR EVOLUÇÃO", 207, 173, 0xFF705028);
+            drawSlot(pose, 208, 190, "X", 0xFF705028, false);
+            font.draw(pose, "Evolua um Minemon seu para esta espécie.", 258, 202, 0xFF404040);
+            font.draw(pose, "Almas e PokéCoins não podem desbloqueá-la.", 258, 216, 0xFF404040);
         } else if (unlocked) {
             int price = syncedPrices.getOrDefault(species.slug(), PokecEconomy.get().coins(species.slug()));
             int staged = syncedStagedCoins;
             int balance = syncedCoins;
             int due = syncedFreeAvailable ? 0 : price;
             font.draw(pose, "AQUISIÇÃO DE ESPÉCIE", 207, 171,
-                    syncedFreeAvailable ? 0xFFFFD778 : 0xFF79D9FF);
-            font.draw(pose, "Preço: " + (syncedFreeAvailable ? 0 : price) + " PokéCoins", 207, 183, 0xFFE4EEF5);
-            drawItemSlot(pose, 208, 198, ModItems.POKE_COIN.get(), staged, 0xFFFFD16A);
+                    syncedFreeAvailable ? 0xFF705028 : 0xFF404040);
+            font.draw(pose, "Preço: " + (syncedFreeAvailable ? 0 : price) + " PokéCoins", 207, 183, 0xFF404040);
+            drawItemSlot(pose, 208, 198, ModItems.POKE_COIN.get(), staged, 0xFF705028);
 
             boolean canBuy = syncedFreeAvailable || balance + staged >= due;
             drawButton(pose, 408, 197, 82, 30, "ADQUIRIR", canBuy, mouseX, mouseY);
@@ -208,56 +202,56 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
             int deposited = syncedDeposits.getOrDefault(species.slug(), 0);
             int staged = syncedStagedSouls;
             String type = species.primaryType();
-            font.draw(pose, "ALMAS DE " + type.toUpperCase(Locale.ROOT), 207, 171, 0xFF79D9FF);
-            font.draw(pose, "Necessárias: " + required + "   Progresso: " + deposited + "/" + required, 207, 183, 0xFFE4EEF5);
+            font.draw(pose, "ALMAS DE " + type.toUpperCase(Locale.ROOT), 207, 171, 0xFF404040);
+            font.draw(pose, "Necessárias: " + required + "   Progresso: " + deposited + "/" + required, 207, 183, 0xFF404040);
             var soulType = SoulType.fromSpeciesType(type);
             var soulItem = soulType == null ? null : ModItems.SOULS.get(soulType.id());
             if (soulItem != null) {
-                drawItemSlot(pose, 208, 198, soulItem.get(), Math.min(64, staged), 0xFFB9D7EF);
-                drawItemSlot(pose, 250, 198, soulItem.get(), Math.max(0, staged - 64), 0xFFB9D7EF);
+                drawItemSlot(pose, 208, 198, soulItem.get(), Math.min(64, staged), 0xFF404040);
+                drawItemSlot(pose, 250, 198, soulItem.get(), Math.max(0, staged - 64), 0xFF404040);
             }
-            font.draw(pose, "No slot: " + staged, 300, 202, 0xFFB6C8D4);
-            font.draw(pose, "Clique para inserir", 300, 216, 0xFF8FA6B5);
+            font.draw(pose, "No slot: " + staged, 300, 202, 0xFF404040);
+            font.draw(pose, "Clique para inserir", 300, 216, 0xFF404040);
             boolean ready = deposited + staged >= required;
             drawButton(pose, 408, 198, 82, 36, "LIBERAR", ready, mouseX, mouseY);
         }
 
-        GuiComponent.fill(pose, 205, 240, 498, 241, 0xFF2B536B);
-        font.draw(pose, "DADOS DA ESPÉCIE", 207, 246, 0xFF72CFF5);
+        GuiComponent.fill(pose, 205, 240, 498, 241, 0xFFC6C6C6);
+        font.draw(pose, "DADOS DA ESPÉCIE", 207, 246, 0xFF404040);
         var definition = SpeciesDefinitions.get(species.slug());
         if (definition != null) {
-            font.draw(pose, "Vida:", 207, 260, 0xFFE1EDF4);
+            font.draw(pose, "Vida:", 207, 260, 0xFF404040);
             drawHealthHearts(pose, (int)Math.ceil(definition.health()), 246, 259);
-            font.draw(pose, "Dano: " + formatStat(definition.attack()), 354, 260, 0xFFE1EDF4);
-            font.draw(pose, "Raridade: " + rarityLabel(PokecEconomy.get().rarity(species.slug())), 207, 289, 0xFFE1EDF4);
-            font.draw(pose, "Estágio: " + evolutionStage(species), 354, 289, 0xFFE1EDF4);
+            font.draw(pose, "Dano: " + formatStat(definition.attack()), 354, 260, 0xFF404040);
+            font.draw(pose, "Raridade: " + rarityLabel(PokecEconomy.get().rarity(species.slug())), 207, 289, 0xFF404040);
+            font.draw(pose, "Estágio: " + evolutionStage(species), 354, 289, 0xFF404040);
         }
     }
 
     private void drawLeftConversion(PoseStack pose) {
-        GuiComponent.fill(pose, 8, 219, 182, 220, 0xFF2B536B);
-        font.draw(pose, "DEVOLVER À NATUREZA", 13, 223, 0xFF72CFF5);
-        font.draw(pose, "POKÉBOLA", 20, 240, 0xFFAFBFCA);
+        GuiComponent.fill(pose, 8, 219, 182, 220, 0xFFC6C6C6);
+        font.draw(pose, "DEVOLVER À NATUREZA", 13, 223, 0xFF404040);
+        font.draw(pose, "POKÉBOLA", 20, 240, 0xFF404040);
         drawConversionSlot(pose, 20, 253, syncedConversionBall, true);
         if (syncedConversionBall.isEmpty()) {
-            font.draw(pose, "Insira uma Pokébola ocupada", 63, 258, 0xFFB9C8D2);
+            font.draw(pose, "Insira uma Pokébola ocupada", 63, 258, 0xFF404040);
         } else if (!syncedConversionSpecies.isEmpty()) {
             var species = PokecSpecies.get(syncedConversionSpecies);
             String name = species == null ? syncedConversionSpecies : species.name();
-            font.draw(pose, fitText(name, 110), 63, 250, 0xFFE7F8FF);
-            font.draw(pose, String.format(Locale.ROOT, "#%03d  Nível %d", species == null ? 0 : species.number(), syncedConversionLevel), 63, 261, 0xFFB9C8D2);
-            font.draw(pose, rarityLabel(syncedConversionRarity) + " / " + conversionStageLabel(syncedConversionStage), 63, 272, 0xFFB9C8D2);
-            font.draw(pose, "Base: " + syncedConversionBase + " almas", 20, 294, 0xFFE7F8FF);
-            font.draw(pose, "Recebe: " + syncedConversionMinimum + "–" + syncedConversionMaximum + " almas", 20, 306, 0xFF80D9FF);
+            font.draw(pose, fitText(name, 110), 63, 250, 0xFF404040);
+            font.draw(pose, String.format(Locale.ROOT, "#%03d  Nível %d", species == null ? 0 : species.number(), syncedConversionLevel), 63, 261, 0xFF404040);
+            font.draw(pose, rarityLabel(syncedConversionRarity) + " / " + conversionStageLabel(syncedConversionStage), 63, 272, 0xFF404040);
+            font.draw(pose, "Base: " + syncedConversionBase + " almas", 20, 294, 0xFF404040);
+            font.draw(pose, "Recebe: " + syncedConversionMinimum + "–" + syncedConversionMaximum + " almas", 20, 306, 0xFF404040);
             if (syncedConversionResult >= 0) {
-                font.draw(pose, "Devolução concluída: " + syncedConversionResult, 20, 323, 0xFF9AE6A5);
+                font.draw(pose, "Devolução concluída: " + syncedConversionResult, 20, 323, 0xFF404040);
             } else {
                 drawButton(pose, 20, 341, 152, 22, syncedConversionConfirming ? "CONFIRMAR DEVOLUÇÃO" : "DEVOLVER", true, -1, -1);
                 if (syncedConversionConfirming) drawButton(pose, 20, 367, 152, 18, "CANCELAR", true, -1, -1);
             }
         } else if (syncedConversionResult >= 0) {
-            font.draw(pose, "Devolução concluída:", 20, 294, 0xFF9AE6A5);
-            font.draw(pose, syncedConversionResult + " almas entregues", 20, 306, 0xFF9AE6A5);
+            font.draw(pose, "Devolução concluída:", 20, 294, 0xFF404040);
+            font.draw(pose, syncedConversionResult + " almas entregues", 20, 306, 0xFF404040);
         }
     }
 
@@ -268,20 +262,19 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
     }
 
     private void drawConversionSlot(PoseStack pose, int x, int y, ItemStack stack, boolean input) {
-        int accent = stack.isEmpty() ? 0xFF586B78 : 0xFF52A7CE;
-        GuiComponent.fill(pose, x, y, x + 36, y + 36, accent);
-        GuiComponent.fill(pose, x + 2, y + 2, x + 34, y + 34, 0xFF0B141C);
+        int accent = stack.isEmpty() ? 0xFFC6C6C6 : 0xFF404040;
+        MinemonGui.slot(pose, x, y, 36, 36);
         if (!stack.isEmpty()) Minecraft.getInstance().getItemRenderer().renderAndDecorateItem(stack, x + 10, y + 9);
         else if (input) {
-            GuiComponent.fill(pose, x + 11, y + 7, x + 25, y + 10, 0xFF65737C);
-            GuiComponent.fill(pose, x + 8, y + 10, x + 28, y + 17, 0xFF929DA3);
-            GuiComponent.fill(pose, x + 6, y + 17, x + 30, y + 22, 0xFF65737C);
-            GuiComponent.fill(pose, x + 8, y + 22, x + 28, y + 28, 0xFF929DA3);
-            GuiComponent.fill(pose, x + 11, y + 28, x + 25, y + 30, 0xFF65737C);
-            GuiComponent.fill(pose, x + 15, y + 14, x + 21, y + 23, 0xFF303A40);
-            GuiComponent.fill(pose, x + 16, y + 16, x + 20, y + 21, 0xFFB9C3C8);
-        } else drawCentered(pose, "→", x + 18, y + 13, 0xFF748894);
-        if (!stack.isEmpty() && stack.getCount() > 1) font.draw(pose, Integer.toString(stack.getCount()), x + 27, y + 25, 0xFFFFFFFF);
+            GuiComponent.fill(pose, x + 11, y + 7, x + 25, y + 10, 0xFFC6C6C6);
+            GuiComponent.fill(pose, x + 8, y + 10, x + 28, y + 17, 0xFF404040);
+            GuiComponent.fill(pose, x + 6, y + 17, x + 30, y + 22, 0xFFC6C6C6);
+            GuiComponent.fill(pose, x + 8, y + 22, x + 28, y + 28, 0xFF404040);
+            GuiComponent.fill(pose, x + 11, y + 28, x + 25, y + 30, 0xFFC6C6C6);
+            GuiComponent.fill(pose, x + 15, y + 14, x + 21, y + 23, 0xFFC6C6C6);
+            GuiComponent.fill(pose, x + 16, y + 16, x + 20, y + 21, 0xFF404040);
+        } else drawCentered(pose, "→", x + 18, y + 13, 0xFFC6C6C6);
+        if (!stack.isEmpty() && stack.getCount() > 1) font.draw(pose, Integer.toString(stack.getCount()), x + 27, y + 25, 0xFF303030);
     }
 
     private String conversionStageLabel(String stage) {
@@ -310,7 +303,7 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
             else if (halfHeart) GuiComponent.blit(pose, hx, hy, 0, 61, 0, 9, 9, 256, 256);
         }
         int remaining = Math.max(0, fullHearts + (halfHeart ? 1 : 0) - visible);
-        if (remaining > 0) font.draw(pose, "+" + remaining, x, y + 19, 0xFFE1EDF4);
+        if (remaining > 0) font.draw(pose, "+" + remaining, x, y + 19, 0xFF404040);
     }
     private String formatStat(double value) { return String.format(Locale.ROOT, "%.0f", value); }
     private String rarityLabel(String rarity) {
@@ -335,28 +328,25 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
     }
 
     private void drawSlot(PoseStack pose, int x, int y, String icon, int accent, boolean active) {
-        int border = active ? accent : 0xFF657785;
-        GuiComponent.fill(pose, x, y, x + 36, y + 36, border);
-        GuiComponent.fill(pose, x + 2, y + 2, x + 34, y + 34, 0xFF0B141C);
-        drawCentered(pose, icon, x + 18, y + 12, active ? accent : 0xFF8998A3);
-        if (!active) drawCentered(pose, "X", x + 18, y + 12, 0xFFE85765);
+        int border = active ? accent : 0xFFC6C6C6;
+        MinemonGui.slot(pose, x, y, 36, 36);
+        drawCentered(pose, icon, x + 18, y + 12, active ? accent : 0xFF404040);
+        if (!active) drawCentered(pose, "X", x + 18, y + 12, 0xFF705028);
     }
 
     private void drawItemSlot(PoseStack pose, int x, int y, net.minecraft.world.item.Item item, int count, int accent) {
-        GuiComponent.fill(pose, x, y, x + 36, y + 36, accent);
-        GuiComponent.fill(pose, x + 2, y + 2, x + 34, y + 34, 0xFF0B141C);
+        MinemonGui.slot(pose, x, y, 36, 36);
         Minecraft.getInstance().getItemRenderer().renderAndDecorateItem(new ItemStack(item), x + 10, y + 9);
-        if (count > 0) font.draw(pose, Integer.toString(count), x + 24 - font.width(Integer.toString(count)), y + 26, 0xFFFFFFFF);
+        if (count > 0) font.draw(pose, Integer.toString(count), x + 24 - font.width(Integer.toString(count)), y + 26, 0xFF303030);
     }
 
     private void drawButton(PoseStack pose, int x, int y, int w, int h, String label, boolean enabled, int mouseX, int mouseY) {
-        int color = enabled ? 0xFF2476A1 : 0xFF394852;
-        GuiComponent.fill(pose, x, y, x + w, y + h, color);
-        GuiComponent.fill(pose, x + 1, y + 1, x + w - 1, y + h - 1, enabled ? 0xFF173D54 : 0xFF202B32);
         int mx = (int) ((mouseX - leftPos) / uiScale), my = (int) ((mouseY - topPos) / uiScale);
-        if (enabled && mx >= x && mx < x + w && my >= y && my < y + h)
-            GuiComponent.fill(pose, x + 1, y + 1, x + w - 1, y + 3, 0xFF68D5FF);
-        drawCentered(pose, label, x + w / 2.0F, y + (h - 8) / 2.0F, enabled ? 0xFFE7F8FF : 0xFF9CA8AF);
+        boolean hover = enabled && mx >= x && mx < x + w && my >= y && my < y + h;
+        MinemonGui.panel(pose, x, y, w, h);
+        GuiComponent.fill(pose, x + 3, y + 3, x + w - 3, y + h - 3,
+                !enabled ? 0xFFAAAAAA : hover ? 0xFFB3C3CF : 0xFFC6C6C6);
+        drawCentered(pose, label, x + w / 2.0F, y + (h - 8) / 2.0F, enabled ? 0xFF202020 : 0xFF666666);
     }
 
     private void drawCentered(PoseStack pose, String text, float x, float y, int color) {
@@ -366,7 +356,7 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
     private void renderPreview(PoseStack pose, PokecSpecies.Entry species, int x, int y, float partialTick) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null) {
-            drawCentered(pose, "Modelo disponível no mundo", x, y, 0xFF7794A7);
+            drawCentered(pose, "Modelo disponível no mundo", x, y, 0xFF404040);
             return;
         }
         MinemonCreature entity = previews.computeIfAbsent(species.slug(), slug -> {

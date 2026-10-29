@@ -31,12 +31,14 @@ public final class RocketTradeScreen extends AbstractContainerScreen<RocketTrade
     }
 
     @Override protected void renderBg(PoseStack pose, float partialTick, int mouseX, int mouseY) {
-        GuiComponent.blit(pose, leftPos, topPos, 0, 0, 0, 276, 166, 512, 256);
-        GuiComponent.blit(pose, leftPos + 50, topPos + 53, 0, 0, 0, 176, 166, 256, 256);
+        MinemonGui.panel(pose, leftPos, topPos, imageWidth, imageHeight);
+        for (net.minecraft.world.inventory.Slot slot : menu.slots)
+            MinemonGui.slot(pose, leftPos + slot.x - 1, topPos + slot.y - 1, 18, 18);
+        font.draw(pose, "R", leftPos + imageWidth - 20, topPos + 9, 0xFFA33535);
         font.draw(pose, "TROCAS ROCKET", leftPos + 12, topPos + 9, 0x404040);
         font.draw(pose, "5 almas de entrada", leftPos + 63, topPos + 25, 0x404040);
         font.draw(pose, "→", leftPos + 199, topPos + 40, 0x404040);
-        font.draw(pose, "Oferta: " + menu.selectedLabel(), leftPos + 68, topPos + 62, 0x404040);
+        font.draw(pose, font.plainSubstrByWidth("Oferta: " + menu.selectedLabel(), 160), leftPos + 68, topPos + 62, 0x404040);
     }
 
     @Override protected void renderLabels(PoseStack pose, int mouseX, int mouseY) {

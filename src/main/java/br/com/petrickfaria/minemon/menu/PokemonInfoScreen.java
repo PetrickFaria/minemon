@@ -59,7 +59,7 @@ public final class PokemonInfoScreen extends AbstractContainerScreen<PokemonInfo
             int optionY = topPos + 187;
             for (int i = 0; i < options.size(); i++) {
                 final int index = i;
-                Button choice = new Button(leftPos + 22, optionY + i * 20, 212, 18,
+                Button choice = new Button(leftPos + 8 + i * 80, optionY, 78, 18,
                         Component.literal(options.get(i).name()), button -> sendButton(3 + index));
                 choice.visible = false;
                 evolutionButtons.add(addRenderableWidget(choice));
@@ -91,23 +91,22 @@ public final class PokemonInfoScreen extends AbstractContainerScreen<PokemonInfo
     }
 
     @Override protected void renderBg(PoseStack pose, float partialTick, int mouseX, int mouseY) {
-        GuiComponent.fill(pose, leftPos, topPos, leftPos + imageWidth, topPos + imageHeight, 0xFF172B3C);
-        GuiComponent.fill(pose, leftPos + 3, topPos + 3, leftPos + imageWidth - 3, topPos + imageHeight - 3, 0xFF263F52);
-        GuiComponent.fill(pose, leftPos + 8, topPos + 8, leftPos + imageWidth - 8, topPos + 35, 0xFF132532);
+        MinemonGui.panel(pose, leftPos, topPos, imageWidth, imageHeight);
+        GuiComponent.fill(pose, leftPos + 8, topPos + 34, leftPos + imageWidth - 8, topPos + 35, 0xFF647E92);
         MinemonCreature pokemon = menu.pokemon();
         if (pokemon == null) return;
         PokecSpecies.Entry species = PokecSpecies.get(pokemon.getSpeciesSlug());
         if (species == null) return;
         String title = String.format(java.util.Locale.ROOT, "%03d - %s", species.number(), species.name());
-        font.draw(pose, title, leftPos + (imageWidth - font.width(title)) / 2.0F, topPos + 17, 0xFFFFFFFF);
+        font.draw(pose, title, leftPos + (imageWidth - font.width(title)) / 2.0F, topPos + 17, 0xFF303030);
         float maxHealth = pokemon.getMaxHealth();
         double attack = pokemon.getAttribute(Attributes.ATTACK_DAMAGE) == null ? 0.0D
                 : pokemon.getAttribute(Attributes.ATTACK_DAMAGE).getValue();
         font.draw(pose, String.format(java.util.Locale.ROOT, "Vida: %.1f / %.1f", pokemon.getHealth(), maxHealth),
-                leftPos + 18, topPos + 43, 0xFFF4F4F4);
-        font.draw(pose, String.format(java.util.Locale.ROOT, "Dano: %.1f", attack), leftPos + 142, topPos + 43, 0xFFF4F4F4);
-        font.draw(pose, "Raridade: " + pokemon.getPokemonRarity(), leftPos + 18, topPos + 58, 0xFFD9E8F2);
-        font.draw(pose, "Estágio: " + evolutionStage(pokemon.getSpeciesSlug()), leftPos + 142, topPos + 58, 0xFFD9E8F2);
+                leftPos + 18, topPos + 43, 0xFF404040);
+        font.draw(pose, String.format(java.util.Locale.ROOT, "Dano: %.1f", attack), leftPos + 142, topPos + 43, 0xFF404040);
+        font.draw(pose, "Raridade: " + pokemon.getPokemonRarity(), leftPos + 18, topPos + 58, 0xFF404040);
+        font.draw(pose, "Estágio: " + evolutionStage(pokemon.getSpeciesSlug()), leftPos + 142, topPos + 58, 0xFF404040);
 
         int barX = leftPos + 37, barY = topPos + 119;
         int needed = pokemon.getPokemonXpToNextLevel();
@@ -117,14 +116,14 @@ public final class PokemonInfoScreen extends AbstractContainerScreen<PokemonInfo
         int fill = Math.round(progress * 182.0F);
         if (fill > 0) GuiComponent.blit(pose, barX, barY, 0, 69, fill, 5, 256, 256);
         String level = "Nível " + pokemon.getPokemonLevel();
-        font.draw(pose, level, leftPos + (imageWidth - font.width(level)) / 2.0F, barY - 12, 0xFFFFFFFF);
+        font.draw(pose, level, leftPos + (imageWidth - font.width(level)) / 2.0F, barY - 12, 0xFF303030);
         String xp = needed == 0 ? "XP máximo" : pokemon.getPokemonExperience() + " / " + needed + " XP";
-        font.draw(pose, xp, leftPos + (imageWidth - font.width(xp)) / 2.0F, barY + 8, 0xFFD9E8F2);
+        font.draw(pose, xp, leftPos + (imageWidth - font.width(xp)) / 2.0F, barY + 8, 0xFF404040);
         List<PokecSpecies.Entry> options = menu.evolutionOptions();
         if (!options.isEmpty()) {
             int required = PokemonEvolutionRules.requiredLevel(pokemon.getSpeciesSlug());
             String line = "Evolui no nível " + required;
-            font.draw(pose, line, leftPos + (imageWidth - font.width(line)) / 2.0F, topPos + 91, 0xFFB9D8E8);
+            font.draw(pose, line, leftPos + (imageWidth - font.width(line)) / 2.0F, topPos + 91, 0xFF404040);
         }
     }
 

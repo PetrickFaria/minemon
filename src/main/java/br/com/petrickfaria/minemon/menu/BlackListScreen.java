@@ -24,7 +24,8 @@ public final class BlackListScreen extends Screen {
     private int top;
     private int left;
     private static final int ROW_HEIGHT = 22;
-    private static final int VISIBLE_ROWS = 15;
+    private int visibleRows = 15;
+    private int panelHeight;
 
     public BlackListScreen(PokemonInfoScreen parent, int entityId, UUID pokemonUuid, Map<String, Boolean> overrides) {
         super(Component.literal("Black List"));
@@ -54,7 +55,10 @@ public final class BlackListScreen extends Screen {
 
     @Override protected void init() {
         left = (width - 430) / 2;
-        top = (height - 390) / 2;
+        panelHeight = Math.min(390, height - 12);
+        visibleRows = Math.max(1, (panelHeight - 70) / ROW_HEIGHT);
+        top = (height - panelHeight) / 2;
+        firstRow = Math.min(firstRow, Math.max(0, rows.size() - visibleRows));
     }
 
     private boolean selected(Row row) {
@@ -62,13 +66,13 @@ public final class BlackListScreen extends Screen {
     }
 
     @Override public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
-        firstRow = Math.max(0, Math.min(Math.max(0, rows.size() - VISIBLE_ROWS), firstRow + (delta < 0 ? 3 : -3)));
+        firstRow = Math.max(0, Math.min(Math.max(0, rows.size() - visibleRows), firstRow + (delta < 0 ? 3 : -3)));
         return true;
     }
 
     @Override public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (button == 0 && mouseX >= left + 14 && mouseX <= left + 416
-                && mouseY >= top + 52 && mouseY < top + 52 + VISIBLE_ROWS * ROW_HEIGHT) {
+                && mouseY >= top + 52 && mouseY < top + 52 + visibleRows * ROW_HEIGHT) {
             int index = firstRow + (int) ((mouseY - top - 52) / ROW_HEIGHT);
             if (index >= 0 && index < rows.size()) {
                 Row row = rows.get(index);
@@ -90,28 +94,27 @@ public final class BlackListScreen extends Screen {
 
     @Override public void render(PoseStack pose, int mouseX, int mouseY, float partialTick) {
         renderBackground(pose);
-        GuiComponent.fill(pose, left, top, left + 430, top + 390, 0xFF14232F);
-        GuiComponent.fill(pose, left + 3, top + 3, left + 427, top + 387, 0xFF263F52);
-        font.draw(pose, "Black List", left + 14, top + 14, 0xFFFFFFFF);
-        font.draw(pose, "Selecione os tipos de entidade que o Pokémon atacará.", left + 14, top + 31, 0xFFD8E8F0);
-        int end = Math.min(rows.size(), firstRow + VISIBLE_ROWS);
+        MinemonGui.panel(pose, left, top, 430, panelHeight);
+        font.draw(pose, "Black List", left + 14, top + 14, 0xFF303030);
+        font.draw(pose, "Selecione os tipos de entidade que o Pokémon atacará.", left + 14, top + 31, 0xFF404040);
+        int end = Math.min(rows.size(), firstRow + visibleRows);
         for (int i = firstRow; i < end; i++) {
             Row row = rows.get(i);
             int y = top + 52 + (i - firstRow) * ROW_HEIGHT;
             int color = mouseX >= left + 14 && mouseX < left + 416 && mouseY >= y && mouseY < y + ROW_HEIGHT
-                    ? 0xFF3A5B70 : 0xFF213747;
+                    ? 0xFFB3C3CF : 0xFFB7B7B7;
             GuiComponent.fill(pose, left + 12, y, left + 418, y + ROW_HEIGHT - 1, color);
-            font.draw(pose, selected(row) ? "[✓]" : "[ ]", left + 19, y + 6, selected(row) ? 0xFF9FE29A : 0xFFE5E5E5);
-            font.draw(pose, row.name(), left + 55, y + 3, 0xFFFFFFFF);
-            font.draw(pose, row.id().toString(), left + 55, y + 12, 0xFFB7CBD6);
+            font.draw(pose, selected(row) ? "[✓]" : "[ ]", left + 19, y + 6, selected(row) ? 0xFF705028 : 0xFF404040);
+            font.draw(pose, font.plainSubstrByWidth(row.name(), 350), left + 55, y + 3, 0xFF303030);
+            font.draw(pose, font.plainSubstrByWidth(row.id().toString(), 350), left + 55, y + 12, 0xFF404040);
         }
-        int thumbHeight = Math.max(18, (VISIBLE_ROWS * ROW_HEIGHT * VISIBLE_ROWS) / Math.max(VISIBLE_ROWS, rows.size()));
-        int trackTop = top + 52, trackHeight = VISIBLE_ROWS * ROW_HEIGHT;
-        int thumbY = trackTop + (rows.size() <= VISIBLE_ROWS ? 0
-                : (trackHeight - thumbHeight) * firstRow / Math.max(1, rows.size() - VISIBLE_ROWS));
-        GuiComponent.fill(pose, left + 421, trackTop, left + 426, trackTop + trackHeight, 0xFF101A20);
-        GuiComponent.fill(pose, left + 421, thumbY, left + 426, thumbY + thumbHeight, 0xFF9CB5C2);
-        font.draw(pose, "Tipos: " + rows.size(), left + 14, top + 386, 0xFFD8E8F0);
+        int thumbHeight = Math.max(18, (visibleRows * ROW_HEIGHT * visibleRows) / Math.max(visibleRows, rows.size()));
+        int trackTop = top + 52, trackHeight = visibleRows * ROW_HEIGHT;
+        int thumbY = trackTop + (rows.size() <= visibleRows ? 0
+                : (trackHeight - thumbHeight) * firstRow / Math.max(1, rows.size() - visibleRows));
+        GuiComponent.fill(pose, left + 421, trackTop, left + 426, trackTop + trackHeight, 0xFFC6C6C6);
+        GuiComponent.fill(pose, left + 421, thumbY, left + 426, thumbY + thumbHeight, 0xFF404040);
+        font.draw(pose, "Tipos: " + rows.size(), left + 14, top + panelHeight - 13, 0xFF404040);
         super.render(pose, mouseX, mouseY, partialTick);
     }
 }
