@@ -15,6 +15,8 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -35,11 +37,15 @@ public final class PokeballItem extends Item {
     private static final String TOKEN_KEY = "Token";
     private static final String HEALTH_KEY = "Health";
     private static final String MAX_HEALTH_KEY = "MaxHealth";
+    private final boolean masterBall;
 
     public record StoredPokemon(String species, UUID owner, String ownerName, UUID token,
                                 int level, float health, float maxHealth, CompoundTag entityData) { }
+    public record StoredEntity(String entityType, UUID owner, String ownerName, UUID token, CompoundTag entityData) { }
 
-    public PokeballItem(Properties properties) { super(properties); }
+    public PokeballItem(Properties properties) { this(properties, false); }
+    public PokeballItem(Properties properties, boolean masterBall) { super(properties); this.masterBall = masterBall; }
+    public boolean isMasterBall() { return masterBall; }
 
     /** Forge's stack-aware limit lets empty balls stack to 64 and stored balls to one. */
     @Override public int getMaxStackSize(ItemStack stack) { return isOccupied(stack) ? 1 : 64; }
@@ -55,15 +61,30 @@ public final class PokeballItem extends Item {
         CompoundTag entityData = data.getCompound(POKEMON_KEY);
         if (!data.hasUUID(OWNER_KEY) || !data.hasUUID(TOKEN_KEY) || entityData.isEmpty()) return null;
         String species = data.getString(SLUG_KEY);
-        if (PokecSpecies.get(species) == null) return null;
+        if (PokecSpecies.get(species) == null || !ModEntities.SPECIES.containsKey(species)) return null;
         return new StoredPokemon(species, data.getUUID(OWNER_KEY), data.getString(OWNER_NAME_KEY),
                 data.getUUID(TOKEN_KEY), Math.max(1, data.getInt("Level")),
                 data.getFloat(HEALTH_KEY), data.getFloat(MAX_HEALTH_KEY), entityData.copy());
     }
 
-    public static ItemStack emptyBall() { return new ItemStack(br.com.petrickfaria.minemon.registry.ModItems.POKEBALL.get()); }
+    public static StoredEntity readStoredEntity(ItemStack stack) {
+        if (!isOccupied(stack)) return null;
+        CompoundTag data = stack.getTag().getCompound(DATA_KEY);
+        CompoundTag entityData = data.getCompound(POKEMON_KEY);
+        String entityType = data.getString("EntityType");
+        if (entityType.isBlank() || !data.hasUUID(OWNER_KEY) || !data.hasUUID(TOKEN_KEY) || entityData.isEmpty()) return null;
+        ResourceLocation id = ResourceLocation.tryParse(entityType);
+        if (id == null || ForgeRegistries.ENTITY_TYPES.getValue(id) == null) return null;
+        return new StoredEntity(entityType, data.getUUID(OWNER_KEY), data.getString(OWNER_NAME_KEY), data.getUUID(TOKEN_KEY), entityData.copy());
+    }
 
-    private static void store(ItemStack ball, MinemonCreature creature, ServerPlayer owner) {
+    public static ItemStack emptyBall() { return new ItemStack(br.com.petrickfaria.minemon.registry.ModItems.POKEBALL.get()); }
+    public static ItemStack emptyBall(ItemStack ball) {
+        if (ball == null || ball.isEmpty() || !(ball.getItem() instanceof PokeballItem)) return emptyBall();
+        ItemStack result = ball.copy(); result.setCount(1); clearStored(result); return result;
+    }
+
+    private static void store(ItemStack ball, Mob creature, ServerPlayer owner) {
         CompoundTag entityData = new CompoundTag();
         creature.saveWithoutId(entityData);
         var typeId = ForgeRegistries.ENTITY_TYPES.getKey(creature.getType());
@@ -72,11 +93,12 @@ public final class PokeballItem extends Item {
 
         CompoundTag data = new CompoundTag();
         data.put(POKEMON_KEY, entityData);
-        data.putString(SLUG_KEY, creature.getSpeciesSlug());
+        if (creature instanceof MinemonCreature pokemon) data.putString(SLUG_KEY, pokemon.getSpeciesSlug());
+        data.putString("EntityType", typeId.toString());
         data.putUUID(OWNER_KEY, owner.getUUID());
         data.putString(OWNER_NAME_KEY, owner.getGameProfile().getName());
         data.putUUID(TOKEN_KEY, UUID.randomUUID());
-        data.putInt("Level", creature.getPokemonLevel());
+        data.putInt("Level", creature instanceof MinemonCreature pokemon ? pokemon.getPokemonLevel() : 0);
         data.putFloat(HEALTH_KEY, creature.getHealth());
         data.putFloat(MAX_HEALTH_KEY, creature.getMaxHealth());
         ball.getOrCreateTag().put(DATA_KEY, data);
@@ -90,27 +112,27 @@ public final class PokeballItem extends Item {
 
     @Override public InteractionResult interactLivingEntity(ItemStack stack, Player player,
                                                             LivingEntity target, InteractionHand hand) {
-        if (!(target instanceof MinemonCreature creature) || isOccupied(stack)) return InteractionResult.PASS;
+        if (!(target instanceof Mob mob) || isOccupied(stack)) return InteractionResult.PASS;
         if (player.level.isClientSide) return InteractionResult.sidedSuccess(true);
-        if (!(player instanceof ServerPlayer serverPlayer) || !(player.level instanceof ServerLevel)
-                || !creature.isTame() || !creature.isOwnedBy(player) || !creature.canBeStoredInPokeball())
+        if (!(player instanceof ServerPlayer serverPlayer) || !(player.level instanceof ServerLevel))
             return InteractionResult.FAIL;
+        if (!masterBall && (!(mob instanceof MinemonCreature creature)
+                || !creature.isTame() || !creature.isOwnedBy(player) || !creature.canBeStoredInPokeball()))
+            return InteractionResult.FAIL;
+        if (mob.isRemoved() || !mob.isAlive() || mob.isPassenger() || mob.isVehicle()) return InteractionResult.FAIL;
 
         ItemStack occupied = stack.copy();
         occupied.setCount(1);
-        try { store(occupied, creature, serverPlayer); }
+        try { store(occupied, mob, serverPlayer); }
         catch (RuntimeException invalidEntity) { return InteractionResult.FAIL; }
+        if (readStoredEntity(occupied) == null) return InteractionResult.FAIL;
 
-        if (stack.getCount() == 1) {
-            player.setItemInHand(hand, occupied);
-        } else {
+        if (stack.getCount() == 1) player.setItemInHand(hand, occupied);
+        else {
             stack.shrink(1);
-            if (!player.getInventory().add(occupied)) {
-                stack.grow(1);
-                return InteractionResult.FAIL;
-            }
+            if (!player.getInventory().add(occupied)) { stack.grow(1); return InteractionResult.FAIL; }
         }
-        creature.discard();
+        mob.discard();
         return InteractionResult.CONSUME;
     }
 
@@ -140,31 +162,33 @@ public final class PokeballItem extends Item {
     private static boolean release(ItemStack ball, ServerPlayer player, ServerLevel level,
                                    InteractionHand hand, BlockPos origin) {
         if (ball.getCount() != 1) return false;
-        StoredPokemon stored = readStored(ball);
+        StoredEntity stored = readStoredEntity(ball);
         if (stored == null || !stored.owner().equals(player.getUUID())) return false;
         PokemonBallLedger ledger = PokemonBallLedger.get(level);
         if (ledger.isConsumed(stored.token())) return false;
-        var entityType = ModEntities.SPECIES.get(stored.species());
+        ResourceLocation entityId = ResourceLocation.tryParse(stored.entityType());
+        var entityType = entityId == null ? null : ForgeRegistries.ENTITY_TYPES.getValue(entityId);
         if (entityType == null) return false;
-        MinemonCreature restored;
+        Entity restoredEntity = null;
         try {
-            restored = entityType.get().create(level);
-            if (restored == null) return false;
-            restored.load(stored.entityData().copy());
+            restoredEntity = entityType.create(level);
+            if (!(restoredEntity instanceof Mob)) return false;
+            restoredEntity.load(stored.entityData().copy());
         } catch (RuntimeException invalidData) {
+            if (restoredEntity != null) restoredEntity.discard();
             return false;
         }
-        if (!restored.isTame() || !player.getUUID().equals(restored.getOwnerUUID())) {
-            restored.discard();
-            return false;
+        if (restoredEntity instanceof MinemonCreature restoredPokemon
+                && (!restoredPokemon.isTame() || restoredPokemon.getOwnerUUID() == null
+                || (!((PokeballItem) ball.getItem()).isMasterBall() && !player.getUUID().equals(restoredPokemon.getOwnerUUID())))) {
+            restoredEntity.discard(); return false;
         }
-        BlockPos safe = findSafePosition(level, restored, origin);
-        if (safe == null) { restored.discard(); return false; }
-        restored.moveTo(safe.getX() + 0.5D, safe.getY(), safe.getZ() + 0.5D,
-                player.getYRot(), 0.0F);
-        if (!level.addFreshEntity(restored)) { restored.discard(); return false; }
+        BlockPos safe = findSafePosition(level, restoredEntity, origin);
+        if (safe == null) { restoredEntity.discard(); return false; }
+        restoredEntity.moveTo(safe.getX() + 0.5D, safe.getY(), safe.getZ() + 0.5D, player.getYRot(), 0.0F);
+        if (!level.addFreshEntity(restoredEntity)) { restoredEntity.discard(); return false; }
         if (!ledger.consume(stored.token())) {
-            restored.discard();
+            restoredEntity.discard();
             return false;
         }
         clearStored(ball);
@@ -201,24 +225,26 @@ public final class PokeballItem extends Item {
     }
 
     @Override public Component getName(ItemStack stack) {
-        StoredPokemon stored = readStored(stack);
-        if (stored == null) return Component.translatable("item.minemon.pokeball");
-        PokecSpecies.Entry species = PokecSpecies.get(stored.species());
-        return Component.translatable("item.minemon.pokeball.stored", species == null ? stored.species() : species.name());
+        StoredEntity stored = readStoredEntity(stack);
+        if (stored == null) return Component.translatable(masterBall ? "item.minemon.master_ball" : "item.minemon.pokeball");
+        StoredPokemon pokemon = readStored(stack);
+        if (pokemon != null) { PokecSpecies.Entry species = PokecSpecies.get(pokemon.species()); return Component.translatable(masterBall ? "item.minemon.master_ball.stored" : "item.minemon.pokeball.stored", species == null ? pokemon.species() : species.name()); }
+        ResourceLocation id = ResourceLocation.tryParse(stored.entityType());
+        return Component.translatable("item.minemon.ball.stored_mob", id == null ? stored.entityType() : ForgeRegistries.ENTITY_TYPES.getValue(id).getDescription().getString());
     }
 
     @Override public void appendHoverText(ItemStack stack, Level level, List<Component> tooltip, TooltipFlag flag) {
         super.appendHoverText(stack, level, tooltip, flag);
+        StoredEntity storedEntity = readStoredEntity(stack);
+        if (storedEntity == null) { tooltip.add(Component.translatable(masterBall ? "tooltip.minemon.master_ball.empty" : "tooltip.minemon.pokeball.empty")); return; }
         StoredPokemon stored = readStored(stack);
-        if (stored == null) {
-            tooltip.add(Component.translatable("tooltip.minemon.pokeball.empty"));
-            return;
-        }
-        PokecSpecies.Entry species = PokecSpecies.get(stored.species());
-        tooltip.add(Component.translatable("tooltip.minemon.pokeball.species", species == null ? stored.species() : species.name()));
-        tooltip.add(Component.translatable("tooltip.minemon.pokeball.level", stored.level()));
-        tooltip.add(Component.translatable("tooltip.minemon.pokeball.health", stored.health(), stored.maxHealth()));
-        tooltip.add(Component.translatable("tooltip.minemon.pokeball.owner", stored.ownerName()));
+        if (stored != null) {
+            PokecSpecies.Entry species = PokecSpecies.get(stored.species());
+            tooltip.add(Component.translatable("tooltip.minemon.pokeball.species", species == null ? stored.species() : species.name()));
+            tooltip.add(Component.translatable("tooltip.minemon.pokeball.level", stored.level()));
+            tooltip.add(Component.translatable("tooltip.minemon.pokeball.health", stored.health(), stored.maxHealth()));
+        } else tooltip.add(Component.translatable("tooltip.minemon.ball.mob", storedEntity.entityType()));
+        tooltip.add(Component.translatable("tooltip.minemon.pokeball.owner", storedEntity.ownerName()));
     }
 
     @Override public boolean isFoil(ItemStack stack) { return isOccupied(stack); }

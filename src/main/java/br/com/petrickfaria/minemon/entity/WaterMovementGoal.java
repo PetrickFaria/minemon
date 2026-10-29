@@ -244,6 +244,8 @@ public final class WaterMovementGoal extends Goal {
   return true;
  }
  public static double preferredSurfaceDepth(MinemonCreature mob){
+  if(java.util.Set.of("blastoise","poliwrath","dewgong","vaporeon").contains(mob.getSpeciesSlug()))
+   return 0.5D + mob.getBbHeight()*0.5D;
   // The generic surface depth is measured from the feet; Gyarados instead
   // keeps its body center 1.5 blocks below the surface and its full hitbox wet.
   return mob.getSpeciesSlug().equals("gyarados")?1.5D+mob.getBbHeight()*0.5D:Math.min(0.8D,mob.getBbHeight()*0.3D);

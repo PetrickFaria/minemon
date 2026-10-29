@@ -5,47 +5,42 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 
-/** Compact Rocket trade UI with five soul inputs and one result slot. */
+/** Vanilla-style trade window adapted to retain the Rocket's five soul-input slots. */
 public final class RocketTradeScreen extends AbstractContainerScreen<RocketTradeMenu> {
+    private static final ResourceLocation VILLAGER = new ResourceLocation("minecraft", "textures/gui/container/villager.png");
+    private static final ResourceLocation INVENTORY = new ResourceLocation("minecraft", "textures/gui/container/container.png");
+
     public RocketTradeScreen(RocketTradeMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
-        imageWidth = 176;
-        imageHeight = 196;
-        inventoryLabelY = 87;
+        imageWidth = 276;
+        imageHeight = 226;
+        inventoryLabelY = 123;
     }
 
     @Override protected void init() {
         super.init();
-        addRenderableWidget(new Button(leftPos + 8, topPos + 59, 20, 18, Component.literal("<"), button -> {
+        addRenderableWidget(new Button(leftPos + 18, topPos + 58, 20, 18, Component.literal("<"), button -> {
             if (minecraft.gameMode != null) minecraft.gameMode.handleInventoryButtonClick(menu.containerId, 0);
         }));
-        addRenderableWidget(new Button(leftPos + 148, topPos + 59, 20, 18, Component.literal(">"), button -> {
+        addRenderableWidget(new Button(leftPos + 238, topPos + 58, 20, 18, Component.literal(">"), button -> {
             if (minecraft.gameMode != null) minecraft.gameMode.handleInventoryButtonClick(menu.containerId, 1);
         }));
     }
 
     @Override protected void renderBg(PoseStack pose, float partialTick, int mouseX, int mouseY) {
-        GuiComponent.fill(pose, leftPos, topPos, leftPos + imageWidth, topPos + imageHeight, 0xEE0A1018);
-        GuiComponent.fill(pose, leftPos + 1, topPos + 1, leftPos + imageWidth - 1, topPos + imageHeight - 1, 0xFF152331);
-        GuiComponent.fill(pose, leftPos + 3, topPos + 3, leftPos + imageWidth - 3, topPos + 22, 0xFF1A3448);
-        font.draw(pose, "TROCAS ROCKET", leftPos + 8, topPos + 9, 0xFF9BDFFF);
-        font.draw(pose, "5 slots: almas de entrada", leftPos + 8, topPos + 25, 0xFFD5E4EC);
-        font.draw(pose, "←", leftPos + 119, topPos + 39, 0xFF75D7FF);
-        font.draw(pose, "Troca: " + menu.selectedLabel(), leftPos + 32, topPos + 64, 0xFFFFD778);
-        for (int i = 0; i < 5; i++) drawSlot(pose, leftPos + 8 + i * 18, topPos + 35);
-        drawSlot(pose, leftPos + 142, topPos + 35);
-        GuiComponent.fill(pose, leftPos + 5, topPos + 94, leftPos + imageWidth - 5, topPos + 95, 0xFF2B536B);
-    }
-
-    private void drawSlot(PoseStack pose, int x, int y) {
-        GuiComponent.fill(pose, x, y, x + 18, y + 18, 0xFF6A8292);
-        GuiComponent.fill(pose, x + 1, y + 1, x + 17, y + 17, 0xFF101A22);
+        GuiComponent.blit(pose, leftPos, topPos, 0, 0, 0, 276, 166, 512, 256);
+        GuiComponent.blit(pose, leftPos + 50, topPos + 53, 0, 0, 0, 176, 166, 256, 256);
+        font.draw(pose, "TROCAS ROCKET", leftPos + 12, topPos + 9, 0x404040);
+        font.draw(pose, "5 almas de entrada", leftPos + 63, topPos + 25, 0x404040);
+        font.draw(pose, "→", leftPos + 199, topPos + 40, 0x404040);
+        font.draw(pose, "Oferta: " + menu.selectedLabel(), leftPos + 68, topPos + 62, 0x404040);
     }
 
     @Override protected void renderLabels(PoseStack pose, int mouseX, int mouseY) {
-        font.draw(pose, "Inventário", 8, inventoryLabelY, 0xFFE1EDF4);
+        font.draw(pose, "Inventário", 50, inventoryLabelY, 0x404040);
     }
 
     @Override public void render(PoseStack pose, int mouseX, int mouseY, float partialTick) {

@@ -1,6 +1,7 @@
 package br.com.petrickfaria.minemon.client;
 import br.com.petrickfaria.minemon.entity.MinemonCreature;
 import br.com.petrickfaria.minemon.entity.SpeciesDefinitions;
+import net.minecraft.network.chat.Component;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import software.bernie.geckolib3.renderers.geo.GeoEntityRenderer;
 public class MinemonRenderer extends GeoEntityRenderer<MinemonCreature> {
@@ -35,6 +36,16 @@ public class MinemonRenderer extends GeoEntityRenderer<MinemonCreature> {
   if(validationObserver!=null)validationObserver.accept(entity,this.minemonModel);
  }
 
+ @Override protected boolean shouldShowName(MinemonCreature entity){return entity.isTame()||super.shouldShowName(entity);}
+ @Override protected void renderNameTag(MinemonCreature entity,Component name,com.mojang.blaze3d.vertex.PoseStack pose,
+      net.minecraft.client.renderer.MultiBufferSource buffers,int packedLight){
+  if(!entity.isTame()){super.renderNameTag(entity,name,pose,buffers,packedLight);return;}
+  Component shownName=entity.hasCustomName()?entity.getCustomName():entity.getName();
+  super.renderNameTag(entity,shownName,pose,buffers,packedLight);
+  pose.pushPose();
+  try{pose.translate(0.0D,-0.22D,0.0D);super.renderNameTag(entity,Component.literal("Nível: "+entity.getPokemonLevel()),pose,buffers,packedLight);}
+  finally{pose.popPose();}
+ }
  @Override public void renderRecursively(software.bernie.geckolib3.geo.render.built.GeoBone bone,
       com.mojang.blaze3d.vertex.PoseStack pose,com.mojang.blaze3d.vertex.VertexConsumer buffer,
       int light,int overlay,float red,float green,float blue,float alpha) {

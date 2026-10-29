@@ -5,7 +5,7 @@ import java.util.function.DoubleSupplier;
 
 /** Server-side soul yield rules for a Pokémon stored in a Pokébola. */
 public final class PokemonSoulConversion {
-    public enum Stage { SINGLE, INITIAL, INTERMEDIATE, FINAL }
+    public enum Stage { INITIAL, INTERMEDIATE, FINAL }
 
     public record Settings(int initialBase, int intermediateBase, int finalBase,
                            int rarityPerTier, int levelsPerBonus, int maxLevelBonus,
@@ -28,14 +28,10 @@ public final class PokemonSoulConversion {
 
     public static Stage stage(String slug) {
         PokecSpecies.Entry entry = PokecSpecies.get(slug);
-        if (entry == null) return Stage.SINGLE;
-        if (entry.evolvesFrom() == null || entry.evolvesFrom().isBlank()) {
-            boolean hasEvolution = PokecSpecies.ALL.values().stream()
-                    .anyMatch(candidate -> slug.equals(candidate.evolvesFrom()));
-            return hasEvolution ? Stage.INITIAL : Stage.SINGLE;
-        }
-        boolean hasEvolution = PokecSpecies.ALL.values().stream()
-                .anyMatch(candidate -> slug.equals(candidate.evolvesFrom()));
+        if (entry == null) return Stage.FINAL;
+        boolean hasEvolution = PokecSpecies.ALL.values().stream().anyMatch(candidate -> slug.equals(candidate.evolvesFrom()));
+        if (entry.evolvesFrom() == null || entry.evolvesFrom().isBlank())
+            return hasEvolution ? Stage.INITIAL : Stage.FINAL;
         if (!hasEvolution) return Stage.FINAL;
         PokecSpecies.Entry parent = PokecSpecies.get(entry.evolvesFrom());
         return parent != null && parent.evolvesFrom() != null ? Stage.FINAL : Stage.INTERMEDIATE;
@@ -46,8 +42,9 @@ public final class PokemonSoulConversion {
             case "common" -> 0;
             case "uncommon" -> 1;
             case "rare" -> 2;
-            case "very_rare" -> 3;
-            case "legendary" -> 4;
+            case "legendary" -> 3;
+            case "mythic" -> 4;
+            case "very_rare" -> 2;
             default -> 0;
         };
     }
@@ -61,7 +58,7 @@ public final class PokemonSoulConversion {
         if (species == null) return null;
         Stage stage = stage(slug);
         int base = switch (stage) {
-            case SINGLE, INITIAL -> settings.initialBase();
+            case INITIAL -> settings.initialBase();
             case INTERMEDIATE -> settings.intermediateBase();
             case FINAL -> settings.finalBase();
         };
@@ -89,6 +86,30 @@ public final class PokemonSoulConversion {
             if (Double.isFinite(draw) && draw >= 0.0D && draw < 1.0D && draw < chance) obtained++;
         }
         return obtained;
+    }
+
+
+    /** New physical death-drop rule, separate from the existing PokéC conversion yield. */
+    public static int deathDropMaximum(String slug, int level) {
+        Stage stage = stage(slug);
+        int stageBase = switch (stage) {
+            case INITIAL -> 1;
+            case INTERMEDIATE -> 2;
+            case FINAL -> 3;
+        };
+        return stageBase + (Math.max(1, level) + 1) / 2;
+    }
+
+    public static int rollDeathDrops(String slug, int level, int chancePercent,
+                                     DoubleSupplier serverRandom) {
+        int maximum = deathDropMaximum(slug, level);
+        double chance = Math.max(0, Math.min(100, chancePercent)) / 100.0D;
+        int result = 0;
+        for (int i = 0; i < maximum; i++) {
+            double draw = serverRandom.getAsDouble();
+            if (Double.isFinite(draw) && draw >= 0 && draw < 1 && draw < chance) result++;
+        }
+        return result;
     }
 
     private PokemonSoulConversion() { }

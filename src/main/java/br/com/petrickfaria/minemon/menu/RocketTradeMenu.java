@@ -46,12 +46,12 @@ public final class RocketTradeMenu extends AbstractContainerMenu {
         this.villager = villager;
         for (int i = 0; i < 5; i++) {
             final int slot = i;
-            addSlot(new Slot(input, slot, 8 + i * 18, 35) {
+            addSlot(new Slot(input, slot, 63 + i * 18, 37) {
                 @Override public boolean mayPlace(ItemStack stack) { return stack.getItem() instanceof SoulItem; }
                 @Override public int getMaxStackSize() { return 64; }
             });
         }
-        addSlot(new Slot(result, 0, 142, 35) {
+        addSlot(new Slot(result, 0, 221, 37) {
             @Override public boolean mayPlace(ItemStack stack) { return false; }
             @Override public boolean mayPickup(Player player) { return !getItem().isEmpty() && eligibleCount() >= 10; }
             @Override public void onTake(Player player, ItemStack stack) {
@@ -64,8 +64,8 @@ public final class RocketTradeMenu extends AbstractContainerMenu {
             }
         });
         for (int row = 0; row < 3; row++) for (int column = 0; column < 9; column++)
-            addSlot(new Slot(inventory, column + row * 9 + 9, 8 + column * 18, 99 + row * 18));
-        for (int column = 0; column < 9; column++) addSlot(new Slot(inventory, column, 8 + column * 18, 157));
+            addSlot(new Slot(inventory, column + row * 9 + 9, 50 + column * 18, 137 + row * 18));
+        for (int column = 0; column < 9; column++) addSlot(new Slot(inventory, column, 50 + column * 18, 195));
         addDataSlot(selectedSync);
         if (!inventory.player.level.isClientSide) updateResult();
     }

@@ -25,8 +25,10 @@ public final class PokemonBreeding {
             if (current == null) throw new IllegalStateException("Unknown evolution parent " + parentSlug + " for " + speciesSlug);
             stage++;
         }
+        boolean hasEvolution = PokecSpecies.ALL.values().stream().anyMatch(candidate -> speciesSlug.equals(candidate.evolvesFrom()));
+        int stageRank = stage == 0 && hasEvolution ? 0 : hasEvolution ? 1 : 2;
         String rarity = PokecEconomy.get().rarity(speciesSlug);
-        return new ParentProfile(current.slug(), Math.min(2, stage), rarityLevel(rarity));
+        return new ParentProfile(current.slug(), stageRank, rarityLevel(rarity));
     }
 
     public static int rarityLevel(String rarity) {
@@ -34,8 +36,9 @@ public final class PokemonBreeding {
             case "common" -> 0;
             case "uncommon" -> 1;
             case "rare" -> 2;
-            case "very_rare" -> 3;
-            case "legendary" -> 4;
+            case "legendary" -> 3;
+            case "mythic" -> 4;
+            case "very_rare" -> 2;
             default -> 0;
         };
     }

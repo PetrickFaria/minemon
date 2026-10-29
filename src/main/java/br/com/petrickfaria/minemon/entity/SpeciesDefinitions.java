@@ -23,6 +23,7 @@ public final class SpeciesDefinitions {
     // sum cube volume and vertical extent, balanced geometrically against the
     // approved Electabuzz/Rhydon render bounds. The source manifest stays raw.
     float factor=switch(slug){
+     case "pidgeot" -> 1.10F;
      case "seaking" -> 0.75F;
      case "dewgong" -> 0.50F;
      case "kangaskhan" -> 0.75F;

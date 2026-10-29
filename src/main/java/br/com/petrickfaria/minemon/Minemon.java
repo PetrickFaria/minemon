@@ -28,6 +28,7 @@ public final class Minemon {
         ModEntities.ENTITIES.register(bus);
         ModParticles.PARTICLE_TYPES.register(bus);
         ModBlocks.BLOCKS.register(bus);
+        br.com.petrickfaria.minemon.registry.ModBlockEntities.TYPES.register(bus);
         ModVillagers.register(bus);
         ModItems.ITEMS.register(bus);
         ModItems.TREAT_ITEMS.register(bus);

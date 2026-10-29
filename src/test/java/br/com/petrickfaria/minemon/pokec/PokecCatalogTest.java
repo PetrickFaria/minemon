@@ -6,7 +6,7 @@ import static org.junit.Assert.*;
 
 public class PokecCatalogTest {
     private static final Set<String> TYPES=Set.of("normal","fire","water","grass","electric","ice","fighting","poison","ground","flying","psychic","bug","rock","ghost","dragon");
-    private static final Set<String> RARITIES=Set.of("common","uncommon","rare","very_rare","legendary");
+    private static final Set<String> RARITIES=Set.of("common","uncommon","rare","legendary","mythic");
 
     @Test public void completeNationalDexHasValidTypesAndRarities(){
         assertEquals(151,PokecSpecies.ordered().size());
@@ -17,6 +17,12 @@ public class PokecCatalogTest {
             for(String type:species.types())assertTrue("unknown Gen I type "+type+" for "+species.slug(),TYPES.contains(type));
             if(species.evolvesFrom()!=null)assertNotNull("unknown evolution parent",PokecSpecies.get(species.evolvesFrom()));
         }
+    }
+
+    @Test public void newRarityMigrationKeepsExactlyFiveRanksAndAllPricesFlat(){
+        assertEquals("mythic", PokecSpecies.get("mew").rarity());
+        for(var species:PokecSpecies.ordered()) assertEquals("all PokéC species have the same price",5,PokecEconomy.get().coins(species.slug()));
+        assertEquals("rare", PokecEconomy.resolveRarity("very_rare","rare"));
     }
 
     @Test public void approvedFreeStartersAndSoulTypesArePresent(){

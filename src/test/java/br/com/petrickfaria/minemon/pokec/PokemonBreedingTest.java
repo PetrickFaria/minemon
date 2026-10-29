@@ -26,6 +26,8 @@ public class PokemonBreedingTest {
         assertEquals("gastly", PokemonBreeding.profile("gengar").initialForm());
         assertEquals("caterpie", PokemonBreeding.profile("butterfree").initialForm());
         assertEquals("weedle", PokemonBreeding.profile("beedrill").initialForm());
+        assertEquals(2, PokemonBreeding.profile("snorlax").evolutionStage());
+        assertEquals(2, PokemonBreeding.profile("raichu").evolutionStage());
     }
 
     @Test public void sameEvolutionLineAlwaysProducesItsInitialForm() {
@@ -76,7 +78,8 @@ public class PokemonBreedingTest {
         assertEquals(40, PokemonBreeding.chanceForFirstLine(parent("a", 0, 0), parent("b", 0, 2), 5, 5, 5, 95));
         assertEquals(40, PokemonBreeding.chanceForFirstLine(parent("a", 0, 1), parent("b", 0, 3), 5, 5, 5, 95));
         assertEquals(30, PokemonBreeding.chanceForFirstLine(parent("a", 0, 0), parent("b", 0, 4), 5, 5, 5, 95));
-        assertEquals(4, PokemonBreeding.rarityLevel("legendary"));
+        assertEquals(3, PokemonBreeding.rarityLevel("legendary"));
+        assertEquals(4, PokemonBreeding.rarityLevel("mythic"));
     }
 
     @Test public void stageAndRarityBonusesAddAndCanCompensate() {

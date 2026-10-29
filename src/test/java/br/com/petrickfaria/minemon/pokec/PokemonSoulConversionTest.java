@@ -13,7 +13,7 @@ public class PokemonSoulConversionTest {
         assertEquals(PokemonSoulConversion.Stage.FINAL, PokemonSoulConversion.stage("charizard"));
         assertEquals(PokemonSoulConversion.Stage.INITIAL, PokemonSoulConversion.stage("pikachu"));
         assertEquals(PokemonSoulConversion.Stage.FINAL, PokemonSoulConversion.stage("raichu"));
-        assertEquals(PokemonSoulConversion.Stage.SINGLE, PokemonSoulConversion.stage("snorlax"));
+        assertEquals(PokemonSoulConversion.Stage.FINAL, PokemonSoulConversion.stage("snorlax"));
     }
 
     @Test public void maximumCombinesStageRarityAndLevelWithLevelCap() {
@@ -28,7 +28,7 @@ public class PokemonSoulConversionTest {
 
     @Test public void configurableBonusesAndChanceAreUsed() {
         var settings = new PokemonSoulConversion.Settings(2, 4, 6, 2, 3, 4, 40);
-        var preview = PokemonSoulConversion.preview("charizard", 9, "very_rare", settings);
+        var preview = PokemonSoulConversion.preview("charizard", 9, "rare", settings);
         assertEquals(6, preview.stageBase());
         assertEquals(6, preview.rarityBonus());
         assertEquals(3, preview.levelBonus());
@@ -42,6 +42,17 @@ public class PokemonSoulConversionTest {
         int result = PokemonSoulConversion.roll(preview, () -> draws.getAndIncrement() % 2 == 0 ? 0.74D : 0.75D);
         assertEquals(4, draws.get());
         assertEquals(2, result);
+    }
+
+    @Test public void physicalDeathDropRuleUsesStageAndCeilingLevelBonus() {
+        assertEquals(2, PokemonSoulConversion.deathDropMaximum("charmander", 1));
+        assertEquals(3, PokemonSoulConversion.deathDropMaximum("charmeleon", 1));
+        assertEquals(6, PokemonSoulConversion.deathDropMaximum("charmeleon", 7));
+        assertEquals(4, PokemonSoulConversion.deathDropMaximum("snorlax", 1));
+        AtomicInteger calls = new AtomicInteger();
+        assertEquals(1, PokemonSoulConversion.rollDeathDrops("charmander", 1, 75,
+                () -> calls.getAndIncrement() % 2 == 0 ? 0.5D : 0.9D));
+        assertEquals(2, calls.get());
     }
 
     @Test public void rollHandlesZeroMaximumAndChanceBounds() {

@@ -7,6 +7,9 @@ import br.com.petrickfaria.minemon.pokec.PokemonSoulConversion;
 import br.com.petrickfaria.minemon.item.PokeballItem;
 import br.com.petrickfaria.minemon.registry.ModBlocks;
 import br.com.petrickfaria.minemon.registry.ModItems;
+import br.com.petrickfaria.minemon.network.MinemonNetwork;
+import br.com.petrickfaria.minemon.pokec.PokecTransactions;
+import br.com.petrickfaria.minemon.pokec.SoulItem;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
@@ -34,6 +37,11 @@ public final class PokecMenu extends AbstractContainerMenu {
     public PokecMenu(int id, Inventory inventory, BlockPos pos) {
         super(ModMenus.POKEC.get(), id);
         this.pos = pos;
+        for (int row = 0; row < 3; row++) for (int column = 0; column < 9; column++)
+            addSlot(new net.minecraft.world.inventory.Slot(inventory, column + row * 9 + 9,
+                    200 + column * 18, 320 + row * 18));
+        for (int column = 0; column < 9; column++)
+            addSlot(new net.minecraft.world.inventory.Slot(inventory, column, 200 + column * 18, 378));
         if (!inventory.player.level.isClientSide && inventory.player instanceof ServerPlayer serverPlayer) {
             stagedCoins = PokecPlayerData.stagedCoins(serverPlayer);
             stagedSouls = PokecPlayerData.stagedSouls(serverPlayer);
@@ -132,7 +140,17 @@ public final class PokecMenu extends AbstractContainerMenu {
         PokecPlayerData.setStagedSouls(player, stagedSouls, type);
     }
 
-    @Override public ItemStack quickMoveStack(Player player, int slot) { return ItemStack.EMPTY; }
+    @Override public ItemStack quickMoveStack(Player player, int slotIndex) {
+        if (!player.level.isClientSide || slotIndex < 0 || slotIndex >= 36) return ItemStack.EMPTY;
+        ItemStack stack = slots.get(slotIndex).getItem();
+        if (stack.isEmpty()) return ItemStack.EMPTY;
+        PokecTransactions.Action action = null;
+        if (stack.getItem() == ModItems.POKE_COIN.get()) action = PokecTransactions.Action.STAGE_COINS;
+        else if (stack.getItem() instanceof SoulItem) action = PokecTransactions.Action.STAGE_SOULS;
+        else if (PokeballItem.readStored(stack) != null) action = PokecTransactions.Action.STAGE_POKEBALL;
+        if (action != null) MinemonNetwork.performPokecAction(pos, selectedSlug, action);
+        return ItemStack.EMPTY;
+    }
     @Override public boolean stillValid(Player player) { return stillValid(ContainerLevelAccess.create(player.level, pos), player, ModBlocks.POKEC.get()); }
     @Override public void removed(Player player) {
         if (!player.level.isClientSide && player instanceof ServerPlayer serverPlayer) returnEscrow(serverPlayer);

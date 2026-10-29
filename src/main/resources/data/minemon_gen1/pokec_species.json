@@ -90,7 +90,7 @@
     "types": [
       "water"
     ],
-    "rarity": "very_rare",
+    "rarity": "rare",
     "evolvesFrom": "wartortle"
   },
   {
@@ -154,7 +154,7 @@
       "bug",
       "poison"
     ],
-    "rarity": "very_rare",
+    "rarity": "rare",
     "evolvesFrom": "kakuna"
   },
   {
@@ -187,7 +187,7 @@
       "normal",
       "flying"
     ],
-    "rarity": "very_rare",
+    "rarity": "rare",
     "evolvesFrom": "pidgeotto"
   },
   {
@@ -671,7 +671,7 @@
     "types": [
       "psychic"
     ],
-    "rarity": "very_rare",
+    "rarity": "rare",
     "evolvesFrom": "kadabra"
   },
   {
@@ -701,7 +701,7 @@
     "types": [
       "fighting"
     ],
-    "rarity": "very_rare",
+    "rarity": "rare",
     "evolvesFrom": "machoke"
   },
   {
@@ -789,7 +789,7 @@
       "rock",
       "ground"
     ],
-    "rarity": "very_rare",
+    "rarity": "rare",
     "evolvesFrom": "graveler"
   },
   {
@@ -857,7 +857,7 @@
   {
     "number": 83,
     "slug": "farfetchd",
-    "name": "Farfetch\u2019d",
+    "name": "Farfetch’d",
     "types": [
       "normal",
       "flying"
@@ -979,7 +979,7 @@
       "ghost",
       "poison"
     ],
-    "rarity": "very_rare",
+    "rarity": "rare",
     "evolvesFrom": "haunter"
   },
   {
@@ -1164,7 +1164,7 @@
       "ground",
       "rock"
     ],
-    "rarity": "very_rare",
+    "rarity": "rare",
     "evolvesFrom": "rhyhorn"
   },
   {
@@ -1194,7 +1194,7 @@
     "types": [
       "normal"
     ],
-    "rarity": "very_rare",
+    "rarity": "rare",
     "evolvesFrom": null
   },
   {
@@ -1359,7 +1359,7 @@
       "water",
       "ice"
     ],
-    "rarity": "very_rare",
+    "rarity": "rare",
     "evolvesFrom": null
   },
   {
@@ -1369,7 +1369,7 @@
     "types": [
       "normal"
     ],
-    "rarity": "very_rare",
+    "rarity": "rare",
     "evolvesFrom": null
   },
   {
@@ -1419,7 +1419,7 @@
     "types": [
       "normal"
     ],
-    "rarity": "very_rare",
+    "rarity": "rare",
     "evolvesFrom": null
   },
   {
@@ -1548,7 +1548,7 @@
       "dragon",
       "flying"
     ],
-    "rarity": "very_rare",
+    "rarity": "rare",
     "evolvesFrom": "dragonair"
   },
   {
@@ -1568,7 +1568,7 @@
     "types": [
       "psychic"
     ],
-    "rarity": "legendary",
+    "rarity": "mythic",
     "evolvesFrom": null
   }
 ]

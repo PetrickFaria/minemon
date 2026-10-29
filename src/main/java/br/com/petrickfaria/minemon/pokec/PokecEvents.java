@@ -6,6 +6,11 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.entity.living.LivingDropsEvent;
+import br.com.petrickfaria.minemon.entity.MinemonCreature;
+import br.com.petrickfaria.minemon.registry.ModItems;
+import br.com.petrickfaria.minemon.config.MinemonConfig;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -14,6 +19,19 @@ import net.minecraftforge.fml.common.Mod;
 @Mod.EventBusSubscriber(modid=Minemon.MOD_ID)
 public final class PokecEvents {
     @SubscribeEvent public static void serverStarting(ServerStartingEvent event){PokecEconomy.load();}
+    @SubscribeEvent public static void pokemonSoulDrops(LivingDropsEvent event) {
+        if (!(event.getEntity() instanceof MinemonCreature pokemon) || event.getEntity().level.isClientSide) return;
+        var marker = pokemon.getPersistentData();
+        if (marker.getBoolean("MinemonSoulDropHandled")) return;
+        marker.putBoolean("MinemonSoulDropHandled", true);
+        var preview = PokemonSoulConversion.preview(pokemon.getSpeciesSlug(), pokemon.getPokemonLevel());
+        if (preview == null || preview.soulType() == null) return;
+        int count = PokemonSoulConversion.rollDeathDrops(pokemon.getSpeciesSlug(), pokemon.getPokemonLevel(),
+                MinemonConfig.POKEBALL_SOUL_CHANCE_PERCENT.get(), pokemon.getRandom()::nextDouble);
+        if (count <= 0) return;
+        var soul = ModItems.SOULS.get(preview.soulType().id());
+        if (soul != null) { var drop = new net.minecraft.world.entity.item.ItemEntity(pokemon.level, pokemon.getX(), pokemon.getY(), pokemon.getZ(), new ItemStack(soul.get(), count)); event.getDrops().add(drop); }
+    }
     @SubscribeEvent public static void clonePlayer(PlayerEvent.Clone event){PokecPlayerData.copyOnRespawn(event.getOriginal(),event.getEntity());if(event.getEntity() instanceof net.minecraft.server.level.ServerPlayer player)PokecTransactions.recoverEscrow(player);}
     @SubscribeEvent public static void login(PlayerEvent.PlayerLoggedInEvent event){if(event.getEntity() instanceof net.minecraft.server.level.ServerPlayer player)PokecTransactions.recoverEscrow(player);}
     @SubscribeEvent public static void logout(PlayerEvent.PlayerLoggedOutEvent event){if(event.getEntity() instanceof net.minecraft.server.level.ServerPlayer player)PokecTransactions.recoverEscrow(player);PokecTransactions.clearTransactions(event.getEntity().getUUID());}

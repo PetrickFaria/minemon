@@ -116,7 +116,7 @@ public final class PokecTransactions {
         ItemStack output = inOutput == 0 ? ItemStack.EMPTY : new ItemStack(soulItem.get(), inOutput);
         for (int remaining = result - inOutput; remaining > 0; remaining -= Math.min(remaining, stackLimit))
             player.getInventory().placeItemBackInInventory(new ItemStack(soulItem.get(), Math.min(remaining, stackLimit)));
-        menu.setConversionState(player, PokeballItem.emptyBall(), output, result);
+        menu.setConversionState(player, PokeballItem.emptyBall(ball), output, result);
         return true;
     }
 
@@ -232,32 +232,26 @@ public final class PokecTransactions {
     }
 
     private static boolean purchase(ServerPlayer player, PokecMenu menu, PokecSpecies.Entry species) {
-        if (!PokecPlayerData.isUnlocked(player, species.slug())) return false;
-        if (!menu.beginPurchase(player.tickCount)) return false;
-        if (!(player.level instanceof ServerLevel level)) return false;
-        var type = ModEntities.SPECIES.get(species.slug());
-        if (type == null) return false;
-        MinemonCreature creature = type.get().create(level);
-        if (creature == null) return false;
-        BlockPos safe = findSafePosition(level, player, creature);
-        if (safe == null) { creature.discard(); return false; }
-        creature.moveTo(safe.getX() + .5, safe.getY(), safe.getZ() + .5, player.getYRot(), 0);
-        creature.tame(player);
-        creature.setOrderedToSit(true);
+        if (!PokecPlayerData.isUnlocked(player, species.slug()) || !menu.beginPurchase(player.tickCount)) return false;
+        var egg = ModItems.EGGS.get(species.slug());
+        if (egg == null) return false;
         boolean free = PokecEconomy.get().firstPurchaseFree() && !PokecPlayerData.usedFreePurchase(player);
         int price = free ? 0 : PokecEconomy.get().coins(species.slug());
         int wallet = PokecPlayerData.coins(player);
-        if (wallet + menu.stagedCoins() < price) { creature.discard(); return false; }
-        if (!level.addFreshEntity(creature)) { creature.discard(); return false; }
-        if (free) {
-            PokecPlayerData.setFreePurchaseUsed(player);
-        } else {
+        if (wallet + menu.stagedCoins() < price) return false;
+
+        ItemStack purchasedEgg = br.com.petrickfaria.minemon.item.PokecOwnedSpawnEggItem.ownedStack(
+                egg.get().getDefaultInstance(), player.getUUID(), player.getGameProfile().getName());
+        // Deliver first. placeItemBackInInventory safely drops a remainder at the player if every slot is full.
+        player.getInventory().placeItemBackInInventory(purchasedEgg);
+        if (free) PokecPlayerData.setFreePurchaseUsed(player);
+        else {
             int walletUse = Math.min(wallet, price);
             PokecPlayerData.setCoins(player, wallet - walletUse);
             menu.consumeStagedCoins(price - walletUse);
             menu.persistEscrow(player);
         }
-        menu.returnEscrow(player); // returns unused physical coins, including coins on the free acquisition
+        menu.returnEscrow(player);
         return true;
     }
 

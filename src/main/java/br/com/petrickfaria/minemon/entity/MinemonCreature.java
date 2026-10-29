@@ -143,7 +143,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     }
 
     public static AttributeSupplier.Builder createAttributes(SpeciesDefinitions.Definition d) {
-        return createAttributes().add(Attributes.FOLLOW_RANGE,SpeciesBehaviorProfiles.waterCapable(d.slug())?128.0D:24.0D).add(Attributes.MAX_HEALTH,d.health()).add(Attributes.ATTACK_DAMAGE,d.attack()).add(Attributes.MOVEMENT_SPEED,d.speed()).add(Attributes.FLYING_SPEED,0.4D);
+        return createAttributes().add(Attributes.FOLLOW_RANGE,SpeciesBehaviorProfiles.waterCapable(d.slug())?128.0D:24.0D).add(Attributes.MAX_HEALTH,d.health()).add(Attributes.ATTACK_DAMAGE,d.attack()*2.0D).add(Attributes.MOVEMENT_SPEED,d.speed()).add(Attributes.FLYING_SPEED,0.4D);
     }
     public boolean isFlyingSpecies() { return SpeciesBehaviorProfiles.isAirborne(this.getSpeciesSlug())
             &&!(this.isNightResting()&&SpeciesBehaviorProfiles.landsForNightRest(this.getSpeciesSlug()))
@@ -314,7 +314,18 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         net.minecraft.world.entity.Entity spawned = level.getEntity(offspringId);
         if (spawned instanceof MinemonCreature baby) {
             BlockPos safe = findSafeBabyPosition(level, this, baby);
-            if (safe != null) baby.moveTo(safe.getX() + 0.5D, safe.getY(), safe.getZ() + 0.5D, baby.getYRot(), baby.getXRot());
+            if (safe != null && level.getBlockState(safe).canBeReplaced()) {
+                var eggBlock = br.com.petrickfaria.minemon.registry.ModBlocks.BREEDING_EGG.get();
+                if (level.setBlock(safe, eggBlock.defaultBlockState(), 3)) {
+                    var blockEntity = level.getBlockEntity(safe);
+                    if (blockEntity instanceof BreedingEggBlockEntity egg) {
+                        egg.initialize(baby.getSpeciesSlug(), baby.getOwnerUUID(), 24_000);
+                        baby.discard();
+                    } else {
+                        level.setBlock(safe, Blocks.AIR.defaultBlockState(), 3);
+                    }
+                }
+            }
         }
     }
 
