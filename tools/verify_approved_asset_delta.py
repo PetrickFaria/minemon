@@ -7,6 +7,12 @@ ARBOK_TEXTURE_SHA256 = "ac0a5028891be22ffa2673ff5272f2a1a7bd0bee49e299c52fc9946c
 # Exact static resources for the PokéC, Rocket, Pokémon treats, PokéCoin, Pokébolas, and breeding egg. Keep this explicit
 # so the historical species asset audits continue to reject unrelated edits.
 POKEC_RESOURCES = frozenset({
+    "src/main/resources/assets/minemon_gen1/models/item/fairy_soul.json",
+    "src/main/resources/assets/minemon_gen1/models/item/steel_soul.json",
+    "src/main/resources/assets/minemon_gen1/models/item/dark_soul.json",
+    "src/main/resources/assets/minemon_gen1/textures/item/fairy_soul.png",
+    "src/main/resources/assets/minemon_gen1/textures/item/steel_soul.png",
+    "src/main/resources/assets/minemon_gen1/textures/item/dark_soul.png",
     "src/main/resources/assets/minemon_gen1/blockstates/pokec.json",
     "src/main/resources/assets/minemon_gen1/models/block/pokec_lower.json",
     "src/main/resources/assets/minemon_gen1/models/block/pokec_upper.json",
@@ -93,3 +99,4 @@ def is_approved_prior_asset_delta(path, content):
 def pokec_resource_paths():
     """Return exact reviewed resources for PokéC, Rocket, treats, Pokébolas, and the breeding egg."""
     return POKEC_RESOURCES | ROCKET_RESOURCES | TREAT_RESOURCES
+
