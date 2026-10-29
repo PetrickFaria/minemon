@@ -7,6 +7,7 @@ import net.minecraft.util.Mth;
 /** Holds terrestrial sleep or a collision-respecting hover one block above support. */
 final class NightRestGoal extends Goal {
  private final MinemonCreature mob;
+ private int unsafeLandingSearchDelay;
  NightRestGoal(MinemonCreature mob){this.mob=mob;setFlags(EnumSet.of(Flag.MOVE,Flag.LOOK,Flag.JUMP));}
  @Override public boolean canUse(){
   boolean resting=mob.isSleeping()||mob.isNightResting();
@@ -24,6 +25,8 @@ final class NightRestGoal extends Goal {
   if(!SpeciesBehaviorProfiles.hoversDuringNightRest(mob.getSpeciesSlug())&&!mob.isSleeping()
       &&!WaterMovementGoal.safeDry(mob,mob.blockPosition())){
    if(!mob.getNavigation().isDone())return;
+   if(unsafeLandingSearchDelay>0){unsafeLandingSearchDelay--;return;}
+   unsafeLandingSearchDelay=40;
    for(int radius=1;radius<=8;radius++)for(int dx=-radius;dx<=radius;dx++)for(int dz=-radius;dz<=radius;dz++){
     if(Math.max(Math.abs(dx),Math.abs(dz))!=radius)continue;
     var feet=new net.minecraft.core.BlockPos(mob.getX(),mob.naturalSurface(),mob.getZ()).offset(dx,0,dz);
@@ -35,6 +38,7 @@ final class NightRestGoal extends Goal {
    }
    return;
   }
+  unsafeLandingSearchDelay=0;
   mob.getNavigation().stop();mob.setJumping(false);mob.setSpeed(0);mob.setXxa(0);mob.setYya(0);mob.setZza(0);
   boolean hover=SpeciesBehaviorProfiles.hoversDuringNightRest(mob.getSpeciesSlug());
   double restHeight=SpeciesBehaviorProfiles.nightRestHoverHeight(mob.getSpeciesSlug());
