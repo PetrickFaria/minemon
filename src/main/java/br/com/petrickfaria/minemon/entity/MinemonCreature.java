@@ -61,6 +61,7 @@ import software.bernie.geckolib3.util.GeckoLibUtil;
 /** Shared wolf-like companion behavior. This first registered species is the integration fixture. */
 public class MinemonCreature extends TamableAnimal implements IAnimatable {
     private static final EntityDataAccessor<Boolean> SLEEPING = SynchedEntityData.defineId(MinemonCreature.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> ORDERED_SIT = SynchedEntityData.defineId(MinemonCreature.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> NATURAL_FLIGHT = SynchedEntityData.defineId(MinemonCreature.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> NATURAL_SURFACE = SynchedEntityData.defineId(MinemonCreature.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> NATURAL_LANDING = SynchedEntityData.defineId(MinemonCreature.class, EntityDataSerializers.BOOLEAN);
@@ -170,6 +171,12 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         }
     }
 
+    @Override public boolean isOrderedToSit() { return this.entityData.get(ORDERED_SIT); }
+    @Override public void setOrderedToSit(boolean orderedToSit) {
+        super.setOrderedToSit(orderedToSit);
+        this.entityData.set(ORDERED_SIT, orderedToSit);
+    }
+
     public boolean isSleeping() { return this.entityData.get(SLEEPING); }
     public void setSleeping(boolean sleeping) {
         this.entityData.set(SLEEPING, sleeping);
@@ -188,6 +195,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         this.entityData.define(NATURAL_FLIGHT, false);
         this.entityData.define(NATURAL_SURFACE, SpeciesBehaviorProfiles.profile(this.getSpeciesSlug())==SpeciesBehaviorProfiles.Profile.AQUATIC_SURFACE);
         this.entityData.define(SLEEPING, false);
+        this.entityData.define(ORDERED_SIT, false);
         this.entityData.define(SPONTANEOUS_RUN, false);
         this.entityData.define(ROCKET_SPECIAL, false);
         this.entityData.define(POKEMON_LEVEL, 1);
