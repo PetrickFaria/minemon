@@ -1,6 +1,3 @@
-Warning: truncated output (original token count: 13305)
-Total output lines: 928
-
 package br.com.petrickfaria.minemon.entity;
 
 import br.com.petrickfaria.minemon.config.MinemonConfig;
@@ -339,7 +336,244 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
             for (int dy = 0; dy <= 1; dy++) {
                 BlockPos feet = origin.offset(offset[0], dy, offset[1]);
                 BlockPos floor = feet.below();
-                if (level.getBlockState(floor).getCollisionSha…3305 tokens truncated…/
+                if (level.getBlockState(floor).getCollisionShape(level, floor).isEmpty()) continue;
+                if (!level.getFluidState(feet).isEmpty() || !level.getFluidState(feet.above()).isEmpty()) continue;
+                if (isUnsafeBabyBlock(level, floor) || isUnsafeBabyBlock(level, feet) || isUnsafeBabyBlock(level, feet.above())) continue;
+                baby.setPos(feet.getX() + 0.5D, feet.getY(), feet.getZ() + 0.5D);
+                AABB box = baby.getBoundingBox();
+                if (level.getWorldBorder().isWithinBounds(box) && level.noCollision(baby, box)) return feet;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    protected void registerGoals() {
+        if (!this.isAquaticSpecies()) this.goalSelector.addGoal(0, new WaterEscapeGoal(this));
+        this.goalSelector.addGoal(0,new NightRestGoal(this));
+        this.goalSelector.addGoal(1, new SitWhenOrderedToGoal(this));
+        this.goalSelector.addGoal(1, new BreedGoal(this, 1.0D));
+        this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.2D, true));
+        this.goalSelector.addGoal(3, new FollowOwnerGoal(this, 1.0D, 10.0F, 2.0F, this.isFlyingSpecies()));
+        this.goalSelector.addGoal(6, new NaturalSeparationGoal(this));
+        if (SpeciesBehaviorProfiles.canFly(this.getSpeciesSlug())) {
+            this.goalSelector.addGoal(0, new NaturalMovementGoals.SleepLanding(this));
+            this.goalSelector.addGoal(4, new NaturalMovementGoals.AirPatrol(this));
+            this.goalSelector.addGoal(5, new NaturalMovementGoals.GroundWander(this));
+        } else if (this.isAquaticSpecies()) {
+            this.getNavigation().setCanFloat(true);
+            this.setPathfindingMalus(BlockPathTypes.WATER, 0.0F);
+            this.goalSelector.addGoal(4, new WaterMovementGoal(this));
+            this.goalSelector.addGoal(5, new NaturalMovementGoals.AquaticLandWander(this));
+        } else {
+            this.goalSelector.addGoal(4, new NaturalMovementGoals.GroundWander(this));
+        }
+        this.goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, 8.0F));
+        this.goalSelector.addGoal(7, new RandomLookAroundGoal(this));
+
+        // Wild creatures only acquire a target after being hurt. Tamed creatures also protect
+        // their owner and assist against the owner's current target.
+        this.targetSelector.addGoal(1, new OwnerHurtByTargetGoal(this));
+        this.targetSelector.addGoal(2, new OwnerHurtTargetGoal(this));
+        this.targetSelector.addGoal(3, new HurtByTargetGoal(this) {
+            @Override public boolean canUse() {
+                return (MinemonCreature.this.isTame() || MinemonCreature.this.wildAggressionTicks > 0) && super.canUse();
+            }
+            @Override public boolean canContinueToUse() {
+                return (MinemonCreature.this.isTame() || MinemonCreature.this.wildAggressionTicks > 0) && super.canContinueToUse();
+            }
+        });
+    }
+
+    private static void consumeTreat(Player player, ItemStack stack) {
+        if (!player.getAbilities().instabuild) stack.shrink(1);
+    }
+
+    @Override
+    public boolean isFood(ItemStack stack) {
+        return false;
+    }
+
+    @Override
+    public boolean canAttack(LivingEntity target) {
+        if (target == null || target == this || this.isOwnerEntity(target)) return false;
+        // Ordered sitting companions may defend themselves or their owner at close
+        // range, but must not start walking after a distant target.
+        if (this.isTame() && this.isOrderedToSit() && target.distanceToSqr(this) > 16.0D) return false;
+        if (target instanceof MinemonCreature other) {
+            UUID ownerId = this.getOwnerUUID();
+            UUID otherOwnerId = other.getOwnerUUID();
+            if (ownerId != null && ownerId.equals(otherOwnerId)) return false;
+        }
+        return super.canAttack(target);
+    }
+
+    private boolean isOwnerEntity(LivingEntity target) {
+        UUID ownerId = this.getOwnerUUID();
+        return ownerId != null && ownerId.equals(target.getUUID());
+    }
+
+    @Override
+    public InteractionResult mobInteract(Player player, InteractionHand hand) {
+        ItemStack held = player.getItemInHand(hand);
+        // Route capture through the Pokébola's existing server-authoritative handler.
+        // Returning its result prevents the generic entity interaction from invoking it twice.
+        if (held.getItem() instanceof br.com.petrickfaria.minemon.item.PokeballItem pokeball) {
+            return pokeball.interactLivingEntity(held, player, this, hand);
+        }
+        if (held.getItem() instanceof PokemonTreatItem treat) {
+            boolean compatible = PokemonTreatTypes.accepts(this.getSpeciesSlug(), treat.getTreatType().pokemonType());
+            if (this.level.isClientSide) return InteractionResult.sidedSuccess(compatible);
+            if (!compatible || this.getTarget() != null || this.attackAnimationTicks > 0)
+                return InteractionResult.sidedSuccess(false);
+            if (!this.isTame()) {
+                if (!player.getAbilities().instabuild) held.shrink(1);
+                int chance = MinemonConfig.TAME_CHANCE_PERCENT.get();
+                if (this.getRandom().nextInt(100) < chance) {
+                    this.tame(player);
+                    this.setOrderedToSit(true);
+                    this.setTarget(null);
+                    this.getNavigation().stop();
+                    this.level.broadcastEntityEvent(this, (byte) 7);
+                } else {
+                    this.level.broadcastEntityEvent(this, (byte) 6);
+                }
+                return InteractionResult.sidedSuccess(false);
+            }
+            if (!this.isOwnedBy(player)) return InteractionResult.sidedSuccess(false);
+            float maximum = this.getMaxHealth();
+            if (this.getHealth() < maximum) {
+                float amount = Math.min((float)MinemonConfig.TREAT_HEAL_AMOUNT.get(), maximum - this.getHealth());
+                if (amount <= 0.0F) return InteractionResult.sidedSuccess(false);
+                this.setHealth(this.getHealth() + amount);
+                consumeTreat(player, held);
+                this.level.broadcastEntityEvent(this, (byte)18);
+                return InteractionResult.sidedSuccess(false);
+            }
+            if (!this.isInLove() && !this.isBaby() && this.getAge() == 0 && !this.isBreedingBusy()
+                    && isBreedingPermitted(this.getSpeciesSlug()) && hasSafeBabyPosition((ServerLevel)this.level, this)) {
+                this.setInLove(player);
+                consumeTreat(player, held);
+                this.level.broadcastEntityEvent(this, (byte)18);
+            }
+            return InteractionResult.sidedSuccess(false);
+        }
+        // TamableAnimal has vanilla bone taming; handle it here without mutation.
+        if (held.is(Items.BONE)) {
+            return InteractionResult.sidedSuccess(this.level.isClientSide);
+        }
+
+        if (this.isTame() && this.isOwnedBy(player) && !this.isFood(held)) {
+            if (!this.level.isClientSide) {
+                this.setOrderedToSit(!this.isOrderedToSit());
+                this.getNavigation().stop();
+                this.setTarget(null);
+            }
+            return InteractionResult.sidedSuccess(this.level.isClientSide);
+        }
+        return super.mobInteract(player, hand);
+    }
+
+    @Override
+    public boolean hurt(DamageSource source, float amount) {
+        boolean wokeFromRest=this.isSleeping()||this.isNightResting();
+        boolean hurt = super.hurt(source, amount);
+        if(hurt&&!this.level.isClientSide){
+            this.setSleeping(false);this.entityData.set(NIGHT_REST,false);this.wakeGraceTicks=100;this.syncNaturalState();
+        }
+        if (hurt && !this.level.isClientSide && source.getEntity() instanceof LivingEntity attacker
+                && this.canAttack(attacker)) {
+            this.setTarget(attacker);
+            if(wokeFromRest){this.nightCombatTicks=WILD_AGGRESSION_DURATION_TICKS;this.nightUnreachableTicks=0;}
+            if (!this.isTame()) {
+                this.wildAggressionTicks = WILD_AGGRESSION_DURATION_TICKS;
+                this.wildUnreachableTicks = 0;
+            }
+        }
+        return hurt;
+    }
+
+    @Override
+    public void tick() {
+        if(this.escapeNavigation!=null){
+            var desired=this.isInWater()?this.escapeNavigation:this.dryNavigation;
+            if(this.navigation!=desired){this.navigation.stop();this.navigation=desired;}
+        }
+        if(!this.level.isClientSide&&!(Boolean.getBoolean("minemon.clientSmokeTest")&&this.getTags().contains("minemon-locomotion-fixture")))this.tickNightRest();
+        super.tick();
+        if (!this.level.isClientSide) {
+            this.tickNaturalCycle();
+            this.tickCustomSoundTimer();
+            // Keep the challenge entity in the Rocket workstation's loaded area so an
+            // unloaded chunk cannot look like a vanished Rattata and spawn a duplicate.
+            if (this.isRocketSpecial() && this.getPersistentData().hasUUID("RocketVillager")
+                    && this.level instanceof ServerLevel serverLevel) {
+                var linked = serverLevel.getEntity(this.getPersistentData().getUUID("RocketVillager"));
+                if (linked instanceof net.minecraft.world.entity.npc.Villager villager
+                        && this.distanceToSqr(villager) > 36.0D * 36.0D) {
+                    this.moveTo(villager.getX() + 1.5D, villager.getY(), villager.getZ() + 0.5D,
+                            this.getYRot(), this.getXRot());
+                    this.setTarget(null);
+                    this.getNavigation().stop();
+                }
+            }
+        }
+        if (this.level.isClientSide) {
+            if (this.isRocketSpecial() && !this.isDeadOrDying() && this.tickCount % 3 == 0) {
+                double spread = Math.max(0.15D, this.getBbWidth() * 0.38D);
+                this.level.addParticle(new net.minecraft.core.particles.DustParticleOptions(
+                                new com.mojang.math.Vector3f(0.19F, 0.025F, 0.27F), 1.0F),
+                        this.getX() + (this.random.nextDouble() - 0.5D) * spread,
+                        this.getY() + this.getBbHeight() * (0.35D + this.random.nextDouble() * 0.45D),
+                        this.getZ() + (this.random.nextDouble() - 0.5D) * spread,
+                        0.0D, 0.025D, 0.0D);
+            }
+            if ((this.getSpeciesSlug().equals("koffing")||this.getSpeciesSlug().equals("weezing"))
+                    && !this.isDeadOrDying() && this.tickCount%5==Math.floorMod(this.getId(),5)) {
+                double radius=this.getBbWidth()*0.35D;
+                for(int i=0;i<2;i++){
+                    double angle=this.random.nextDouble()*Math.PI*2.0D;
+                    double spread=radius*(0.5D+this.random.nextDouble()*0.8D);
+                    this.level.addParticle(net.minecraft.core.particles.ParticleTypes.SMOKE,
+                        this.getX()+Math.cos(angle)*spread,this.getY()+this.getBbHeight()*(0.30D+this.random.nextDouble()*0.42D),
+                        this.getZ()+Math.sin(angle)*spread,0.0D,0.015D+this.random.nextDouble()*0.02D,0.0D);
+                    this.smokeParticles++;
+                }
+            }
+            if (this.getSpeciesSlug().equals("gastly") && !this.isOrderedToSit()
+                    && !this.isDeadOrDying() && this.attackAnimationTicks <= 0) {
+                // Cobblemon ground_idle/ground_walk each emit ghostly_smoke
+                // twice at locator `gas`, with two 10 particles/s emitters.
+                // This one client particle per game tick preserves that rate.
+                double scale = SpeciesDefinitions.get("gastly").scale();
+                double yaw = Math.toRadians(this.getYRot());
+                double locatorForward = 4.0D / 16.0D * scale;
+                double centerX = this.getX() - Math.sin(yaw) * locatorForward;
+                double centerY = this.getY() + 4.0D / 16.0D * scale;
+                double centerZ = this.getZ() + Math.cos(yaw) * locatorForward;
+                double angle = this.getRandom().nextDouble() * Math.PI * 2.0D;
+                double radius = 0.34D * scale;
+                double px = centerX + Math.cos(angle) * radius;
+                double pz = centerZ + Math.sin(angle) * radius;
+                double inwardSpeed = 0.10D * scale;
+                this.level.addParticle(br.com.petrickfaria.minemon.registry.ModParticles.GASTLY_GHOSTLY_SMOKE.get(),
+                        px, centerY, pz, -Math.cos(angle) * inwardSpeed, 0.0D,
+                        -Math.sin(angle) * inwardSpeed);
+            }
+            if (this.attackAnimationTicks > 0) this.attackAnimationTicks--;
+            if (this.blinkCooldownTicks > 0) this.blinkCooldownTicks--;
+            if (this.blinkCooldownTicks == 0) {
+                this.blinkPending = true;
+                this.blinkCooldownTicks = 80 + this.getRandom().nextInt(120);
+            }
+        } else {
+            if (!this.level.isClientSide) this.tickSpontaneousRun();
+            this.tickWildAggression();
+            this.tickNightCombat();
+        }
+    }
+
+    /** Independent, persisted world-time counter. Unloaded chunks do not advance it. */
     private void tickCustomSoundTimer() {
         if (!this.isAlive() || this.isRemoved()) return;
         if (!this.isCustomSoundDaytime()) {
