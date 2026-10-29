@@ -91,7 +91,10 @@ public final class NightAndSwimmingTests {
   for(int x=2;x<=12;x++)for(int z=2;z<=12;z++)for(int y=1;y<=8;y++)h.setBlock(new BlockPos(x,y,z),Blocks.WATER);
   var pidgeot=spawn(h,"pidgeot",7,10,7);level.setDayTime(18000);
   await(h,()->pidgeot.isSleeping()&&pidgeot.isOnGround(),()->{
-   check(h,!pidgeot.isInWaterOrBubble()&&WaterMovementGoal.safeDry(pidgeot,pidgeot.blockPosition()),
+   var support=pidgeot.blockPosition().below();
+   var supportState=level.getBlockState(support);
+   check(h,!pidgeot.isInWaterOrBubble()&&level.getFluidState(support).isEmpty()
+           &&supportState.isSolidRender(level,support),
        "a land-resting flyer must reach a safe dry support before entering sleep");
    h.succeed();
   },500,()->"A flyer over water must navigate to a reachable shoreline and sleep there; pos="+pidgeot.position()

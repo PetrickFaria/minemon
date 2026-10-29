@@ -510,7 +510,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     private static final String BLACK_LIST_KEY = "MinemonBlackList";
     public boolean isBlackListTarget(net.minecraft.world.entity.Mob target) {
         if (target == null || target == this || target.isInvulnerable() || !target.isAlive()
-                || target instanceof Player || this.isOwnerEntity(target)) return false;
+                || this.isOwnerEntity(target)) return false;
         if (target instanceof MinemonCreature pokemon && pokemon.isTame()
                 && this.getOwnerUUID() != null && this.getOwnerUUID().equals(pokemon.getOwnerUUID())) return false;
         ResourceLocation id = ForgeRegistries.ENTITY_TYPES.getKey(target.getType());
