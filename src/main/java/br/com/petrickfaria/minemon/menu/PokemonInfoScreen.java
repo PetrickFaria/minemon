@@ -68,6 +68,8 @@ public final class PokemonInfoScreen extends AbstractContainerScreen<PokemonInfo
     }
 
     private void sendButton(int action) {
+        if (Boolean.getBoolean("minemon.clientSmokeTest"))
+            com.mojang.logging.LogUtils.getLogger().info("[POKEMON SCREEN BUTTON] action={} container={}", action, menu.containerId);
         if (minecraft != null && minecraft.gameMode != null)
             minecraft.gameMode.handleInventoryButtonClick(menu.containerId, action);
     }
