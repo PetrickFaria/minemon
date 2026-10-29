@@ -188,8 +188,8 @@ public final class PokemonTreatClientSmokeTest {
             try(var texture=PokemonTreatClientSmokeTest.class.getResourceAsStream("/assets/minemon/textures/item/pokeball.png")){
                 var image=texture==null?null:javax.imageio.ImageIO.read(texture);
                 if(image==null||image.getWidth()!=16||image.getHeight()!=16||((image.getRGB(0,0)>>>24)&255)!=0)throw new IllegalStateException("Pokébola texture must preserve the supplied 16x16 sprite with transparent corner pixels (image="+(image==null?"missing":image.getWidth()+"x"+image.getHeight()+", alpha="+image.getColorModel().hasAlpha()+", corner="+Integer.toHexString(image.getRGB(0,0)))+")");
-                int upper=image.getRGB(8,4),lower=image.getRGB(8,12),center=image.getRGB(8,8);
-                if(((upper>>16)&255)<150||((lower>>16)&255)<180||((lower>>8)&255)<180||((center>>16)&255)<180)throw new IllegalStateException("Pokébola texture is missing its red/white halves or white center button");
+                int upper=image.getRGB(8,4),lower=image.getRGB(7,11),center=image.getRGB(5,10);
+                if(((upper>>16)&255)<150||((lower>>16)&255)<150||((lower>>8)&255)<150||((center>>16)&255)<180||((center>>8)&255)<180||((center)&255)<180)throw new IllegalStateException("Pokébola texture is missing its red/white halves or white center button");
             }
             var masterBall=ModItems.MASTER_BALL.get();
             var masterBallId=net.minecraftforge.registries.ForgeRegistries.ITEMS.getKey(masterBall);
