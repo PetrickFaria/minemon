@@ -190,6 +190,36 @@ public final class PokecGameTests {
     }
 
     @GameTest(template="test_arena",timeoutTicks=200)
+    public static void masterBallStoresAndRestoresSerializableWildMobs(GameTestHelper h){
+        floor(h);BlockPos p=h.absolutePos(new BlockPos(5,1,5));terminal(h,p);
+        ServerPlayer owner=player(h,h.absolutePos(new BlockPos(7,1,5)));
+        var cow=h.spawn(net.minecraft.world.entity.EntityType.COW,new BlockPos(5,1,7));
+        cow.setNoAi(true);cow.setHealth(4.0F);cow.setCustomName(net.minecraft.network.chat.Component.literal("Stored Cow"));
+        ItemStack masterBall=new ItemStack(ModItems.MASTER_BALL.get());owner.setItemInHand(InteractionHand.MAIN_HAND,masterBall);
+        var capture=ModItems.MASTER_BALL.get().interactLivingEntity(masterBall,owner,cow,InteractionHand.MAIN_HAND);
+        ItemStack occupied=owner.getMainHandItem();
+        var stored=PokeballItem.readStoredEntity(occupied);
+        check(capture.consumesAction()&&stored!=null,"Master Ball should store a serializable wild Mob");
+        check(!cow.isAlive()&&stored.entityType().equals("minecraft:cow")
+                &&stored.entityData().getFloat("Health")==4.0F,"capturing preserves mob type and full saved health without leaving the source entity");
+        owner.getInventory().setItem(9,occupied.copy());
+        PokecMenu menu=new PokecMenu(21,owner.getInventory(),p);owner.containerMenu=menu;
+        check(!PokecTransactions.perform(owner,p,"bulbasaur",PokecTransactions.Action.STAGE_POKEBALL,0xB04L)
+                &&PokeballItem.isOccupied(owner.getMainHandItem()),"PokéC rejects a Master Ball containing a non-Pokémon Mob without consuming it");
+        menu.removed(owner);
+        owner.getInventory().setItem(9,ItemStack.EMPTY);
+        var hit=new BlockHitResult(Vec3.atCenterOf(h.absolutePos(new BlockPos(5,0,5))),net.minecraft.core.Direction.UP,
+                h.absolutePos(new BlockPos(5,0,5)),false);
+        var release=ModItems.MASTER_BALL.get().useOn(new net.minecraft.world.item.context.UseOnContext(owner,InteractionHand.MAIN_HAND,hit));
+        check(release.consumesAction()&&!PokeballItem.isOccupied(owner.getMainHandItem()),"releasing a saved Mob empties and retains the Master Ball");
+        var cows=h.getLevel().getEntitiesOfClass(net.minecraft.world.entity.animal.Cow.class,
+                new net.minecraft.world.phys.AABB(h.absolutePos(new BlockPos(3,1,3)),h.absolutePos(new BlockPos(12,5,8))),
+                entity->entity.hasCustomName()&&entity.getCustomName().getString().equals("Stored Cow"));
+        check(cows.size()==1&&cows.get(0).getHealth()==4.0F,"Master Ball restores one wild mob with its custom name and health");
+        owner.discard();h.succeed();
+    }
+
+    @GameTest(template="test_arena",timeoutTicks=200)
     public static void pokecConversionRequiresConfirmationAndConsumesTokenOnce(GameTestHelper h){
         floor(h);BlockPos p=h.absolutePos(new BlockPos(5,1,5));terminal(h,p);ServerPlayer owner=player(h,h.absolutePos(new BlockPos(7,1,5)));
         MinemonCreature creature=h.spawn(ModEntities.SPECIES.get("charmander").get(),new BlockPos(8,1,5));creature.tame(owner);creature.setPokemonLevel(1);

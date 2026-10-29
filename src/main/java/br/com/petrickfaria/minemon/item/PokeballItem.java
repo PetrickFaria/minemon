@@ -179,8 +179,9 @@ public final class PokeballItem extends Item {
             return false;
         }
         if (restoredEntity instanceof MinemonCreature restoredPokemon
+                && !((PokeballItem) ball.getItem()).isMasterBall()
                 && (!restoredPokemon.isTame() || restoredPokemon.getOwnerUUID() == null
-                || (!((PokeballItem) ball.getItem()).isMasterBall() && !player.getUUID().equals(restoredPokemon.getOwnerUUID())))) {
+                || !player.getUUID().equals(restoredPokemon.getOwnerUUID()))) {
             restoredEntity.discard(); return false;
         }
         BlockPos safe = findSafePosition(level, restoredEntity, origin);

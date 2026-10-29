@@ -94,7 +94,7 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
     public boolean conversionSlotsBelowListForSmokeTest() { return 253 > LIST_Y + LIST_H && 20 + 36 < LIST_X + LIST_W; }
     public float previewScaleForSmokeTest(String slug) {
         var definition = SpeciesDefinitions.get(slug);
-        return definition == null ? 0.0F : computePreviewScale(definition.width(), definition.height(), definition.scale()) * ("pidgeot".equals(slug) ? 1.1F : 1.0F);
+        return definition == null ? 0.0F : computePreviewScale(definition.width(), definition.height(), definition.scale());
     }
 
     @Override protected void init() {
@@ -368,7 +368,7 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         entity.setYRot(180.0F + (float) Math.sin(entity.tickCount * .006F) * 4.0F);
         entity.yRotO = entity.getYRot();
         var def = SpeciesDefinitions.get(species.slug());
-        float scale = computePreviewScale(def.width(), def.height(), def.scale()) * ("pidgeot".equals(species.slug()) ? 1.1F : 1.0F);
+        float scale = computePreviewScale(def.width(), def.height(), def.scale());
         pose.pushPose();
         pose.translate(x, y, 120);
         pose.scale(scale, -scale, scale);
