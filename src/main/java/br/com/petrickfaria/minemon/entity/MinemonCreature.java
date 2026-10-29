@@ -223,6 +223,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
 
     @Override public void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
+        this.entityData.set(ORDERED_SIT, super.isOrderedToSit());
         this.setPokemonProgress(tag.contains("MinemonPokemonLevel") ? tag.getInt("MinemonPokemonLevel") : 1,
                 tag.getInt("MinemonPokemonExperience"));
         this.entityData.set(POKEMON_RARITY, br.com.petrickfaria.minemon.pokec.PokecEconomy.get().rarity(this.getSpeciesSlug()));
