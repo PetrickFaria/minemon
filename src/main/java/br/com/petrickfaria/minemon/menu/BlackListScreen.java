@@ -26,6 +26,7 @@ public final class BlackListScreen extends Screen {
     private static final int ROW_HEIGHT = 22;
     private int visibleRows = 15;
     private int panelHeight;
+    private int panelWidth;
 
     public BlackListScreen(PokemonInfoScreen parent, int entityId, UUID pokemonUuid, Map<String, Boolean> overrides) {
         super(Component.literal("Black List"));
@@ -54,7 +55,8 @@ public final class BlackListScreen extends Screen {
     }
 
     @Override protected void init() {
-        left = (width - 430) / 2;
+        panelWidth = Math.min(430, width - 12);
+        left = (width - panelWidth) / 2;
         panelHeight = Math.min(390, height - 12);
         visibleRows = Math.max(1, (panelHeight - 70) / ROW_HEIGHT);
         top = (height - panelHeight) / 2;
@@ -71,7 +73,7 @@ public final class BlackListScreen extends Screen {
     }
 
     @Override public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (button == 0 && mouseX >= left + 14 && mouseX <= left + 416
+        if (button == 0 && mouseX >= left + 14 && mouseX <= left + panelWidth - 14
                 && mouseY >= top + 52 && mouseY < top + 52 + visibleRows * ROW_HEIGHT) {
             int index = firstRow + (int) ((mouseY - top - 52) / ROW_HEIGHT);
             if (index >= 0 && index < rows.size()) {
@@ -94,26 +96,26 @@ public final class BlackListScreen extends Screen {
 
     @Override public void render(PoseStack pose, int mouseX, int mouseY, float partialTick) {
         renderBackground(pose);
-        MinemonGui.panel(pose, left, top, 430, panelHeight);
+        MinemonGui.panel(pose, left, top, panelWidth, panelHeight);
         font.draw(pose, "Black List", left + 14, top + 14, 0xFF303030);
-        font.draw(pose, "Selecione os tipos de entidade que o Pokémon atacará.", left + 14, top + 31, 0xFF404040);
+        font.draw(pose, font.plainSubstrByWidth("Selecione os alvos do Pokémon.", panelWidth - 28), left + 14, top + 31, 0xFF404040);
         int end = Math.min(rows.size(), firstRow + visibleRows);
         for (int i = firstRow; i < end; i++) {
             Row row = rows.get(i);
             int y = top + 52 + (i - firstRow) * ROW_HEIGHT;
-            int color = mouseX >= left + 14 && mouseX < left + 416 && mouseY >= y && mouseY < y + ROW_HEIGHT
+            int color = mouseX >= left + 14 && mouseX < left + panelWidth - 14 && mouseY >= y && mouseY < y + ROW_HEIGHT
                     ? 0xFFB3C3CF : 0xFFB7B7B7;
-            GuiComponent.fill(pose, left + 12, y, left + 418, y + ROW_HEIGHT - 1, color);
+            GuiComponent.fill(pose, left + 12, y, left + panelWidth - 12, y + ROW_HEIGHT - 1, color);
             font.draw(pose, selected(row) ? "[✓]" : "[ ]", left + 19, y + 6, selected(row) ? 0xFF705028 : 0xFF404040);
-            font.draw(pose, font.plainSubstrByWidth(row.name(), 350), left + 55, y + 3, 0xFF303030);
-            font.draw(pose, font.plainSubstrByWidth(row.id().toString(), 350), left + 55, y + 12, 0xFF404040);
+            font.draw(pose, font.plainSubstrByWidth(row.name(), panelWidth - 75), left + 55, y + 3, 0xFF303030);
+            font.draw(pose, font.plainSubstrByWidth(row.id().toString(), panelWidth - 75), left + 55, y + 12, 0xFF404040);
         }
         int thumbHeight = Math.max(18, (visibleRows * ROW_HEIGHT * visibleRows) / Math.max(visibleRows, rows.size()));
         int trackTop = top + 52, trackHeight = visibleRows * ROW_HEIGHT;
         int thumbY = trackTop + (rows.size() <= visibleRows ? 0
                 : (trackHeight - thumbHeight) * firstRow / Math.max(1, rows.size() - visibleRows));
-        GuiComponent.fill(pose, left + 421, trackTop, left + 426, trackTop + trackHeight, 0xFFC6C6C6);
-        GuiComponent.fill(pose, left + 421, thumbY, left + 426, thumbY + thumbHeight, 0xFF404040);
+        GuiComponent.fill(pose, left + panelWidth - 9, trackTop, left + panelWidth - 4, trackTop + trackHeight, 0xFFC6C6C6);
+        GuiComponent.fill(pose, left + panelWidth - 9, thumbY, left + panelWidth - 4, thumbY + thumbHeight, 0xFF404040);
         font.draw(pose, "Tipos: " + rows.size(), left + 14, top + panelHeight - 13, 0xFF404040);
         super.render(pose, mouseX, mouseY, partialTick);
     }

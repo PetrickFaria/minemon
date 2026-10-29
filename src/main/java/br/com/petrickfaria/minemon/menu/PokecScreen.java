@@ -150,8 +150,7 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
             int column = i % 9;
             int baseX = 200 + column * 18;
             int baseY = i < 27 ? 320 + (i / 9) * 18 : 378;
-            GuiComponent.fill(pose, baseX, baseY, baseX + 18, baseY + 18, 0xFFC6C6C6);
-            GuiComponent.fill(pose, baseX + 1, baseY + 1, baseX + 17, baseY + 17, 0xFFC6C6C6);
+            MinemonGui.slot(pose, baseX, baseY, 18, 18);
         }
         drawSelectedPanel(pose, partialTick, mouseX, mouseY);
         pose.popPose();
