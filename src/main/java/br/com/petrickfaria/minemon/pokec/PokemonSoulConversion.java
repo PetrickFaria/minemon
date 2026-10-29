@@ -1,116 +1,65 @@
 package br.com.petrickfaria.minemon.pokec;
 
-import br.com.petrickfaria.minemon.config.MinemonConfig;
 import java.util.function.DoubleSupplier;
 
-/** Server-side soul yield rules for a Pokémon stored in a Pokébola. */
+/** Shared PokéC soul formula and uniform yield rolls for deaths and nature returns. */
 public final class PokemonSoulConversion {
     public enum Stage { INITIAL, INTERMEDIATE, FINAL }
+    public record Preview(String species,int level,String rarity,Stage stage,int stageBase,int rarityBonus,
+                          int levelBonus,SoulType soulType,int base,int minimum,int maximum) { }
 
-    public record Settings(int initialBase, int intermediateBase, int finalBase,
-                           int rarityPerTier, int levelsPerBonus, int maxLevelBonus,
-                           int soulChancePercent) {
-        public static Settings configured() {
-            return new Settings(
-                    MinemonConfig.POKEBALL_INITIAL_SOULS.get(),
-                    MinemonConfig.POKEBALL_INTERMEDIATE_SOULS.get(),
-                    MinemonConfig.POKEBALL_FINAL_SOULS.get(),
-                    MinemonConfig.POKEBALL_RARITY_BONUS.get(),
-                    MinemonConfig.POKEBALL_LEVELS_PER_BONUS.get(),
-                    MinemonConfig.POKEBALL_MAX_LEVEL_BONUS.get(),
-                    MinemonConfig.POKEBALL_SOUL_CHANCE_PERCENT.get());
-        }
-    }
-
-    public record Preview(String species, int level, String rarity, Stage stage,
-                          int stageBase, int rarityBonus, int levelBonus,
-                          SoulType soulType, int maximum, int chancePercent) { }
-
+    /** Last available form is Final; a species without an evolution line is Initial. */
     public static Stage stage(String slug) {
-        PokecSpecies.Entry entry = PokecSpecies.get(slug);
-        if (entry == null) return Stage.FINAL;
-        boolean hasEvolution = PokecSpecies.ALL.values().stream().anyMatch(candidate -> slug.equals(candidate.evolvesFrom()));
-        if (entry.evolvesFrom() == null || entry.evolvesFrom().isBlank())
-            return hasEvolution ? Stage.INITIAL : Stage.FINAL;
-        if (!hasEvolution) return Stage.FINAL;
-        PokecSpecies.Entry parent = PokecSpecies.get(entry.evolvesFrom());
-        return parent != null && parent.evolvesFrom() != null ? Stage.FINAL : Stage.INTERMEDIATE;
+        PokecSpecies.Entry entry=PokecSpecies.get(slug); if(entry==null)return Stage.INITIAL;
+        boolean hasEvolution=PokecSpecies.ALL.values().stream().anyMatch(candidate->slug.equals(candidate.evolvesFrom()));
+        if(entry.evolvesFrom()==null||entry.evolvesFrom().isBlank())return Stage.INITIAL;
+        return hasEvolution?Stage.INTERMEDIATE:Stage.FINAL;
     }
-
     public static int rarityTier(String rarity) {
-        return switch (rarity == null ? "common" : rarity) {
-            case "common" -> 0;
-            case "uncommon" -> 1;
-            case "rare" -> 2;
-            case "legendary" -> 3;
-            case "mythic" -> 4;
-            case "very_rare" -> 2;
-            default -> 0;
-        };
+        return switch(PokecEconomy.resolveRarity(rarity,"common")){
+            case "common"->1;case "uncommon"->2;case "rare"->3;case "legendary"->4;case "mythic"->5;default->1;};
     }
+    public static int levelBonus(int level){return PokecEconomy.get().levelSouls(level);}
 
-    public static int levelBonus(int level, int levelsPerBonus, int maximumBonus) {
-        return Math.min(Math.max(0, maximumBonus), Math.max(1, level) / Math.max(1, levelsPerBonus));
+    public static Preview preview(String slug,int level,String configuredRarity){return preview(slug,level,configuredRarity,75,100);}
+    public static Preview preview(String slug,int level,String configuredRarity,int minimumPercent,int maximumPercent){
+        PokecSpecies.Entry species=PokecSpecies.get(slug); if(species==null)return null;
+        PokecEconomy economy=PokecEconomy.get(); Stage stage=stage(slug);String rarity=PokecEconomy.resolveRarity(configuredRarity,species.rarity());
+        int stageBase=economy.stageSouls(stage),rarityBonus=economy.raritySouls(rarity),levelBonus=economy.levelSouls(level);
+        int base=Math.max(0,stageBase+rarityBonus+levelBonus);
+        int minPct=clampPercent(minimumPercent),maxPct=clampPercent(maximumPercent);if(minPct>maxPct){minPct=0;maxPct=100;}
+        int minimum=ceilPercent(base,minPct),maximum=ceilPercent(base,maxPct);
+        // Upper percentage is a ceiling too, but never let a value over 100% exceed the base.
+        maximum=Math.min(base,maximum);minimum=Math.min(maximum,minimum);
+        return new Preview(slug,Math.max(1,level),rarity,stage,stageBase,rarityBonus,levelBonus,
+                SoulType.fromSpeciesType(species.primaryType()),base,minimum,maximum);
     }
-
-    public static Preview preview(String slug, int level, String configuredRarity, Settings settings) {
-        PokecSpecies.Entry species = PokecSpecies.get(slug);
-        if (species == null) return null;
-        Stage stage = stage(slug);
-        int base = switch (stage) {
-            case INITIAL -> settings.initialBase();
-            case INTERMEDIATE -> settings.intermediateBase();
-            case FINAL -> settings.finalBase();
-        };
-        int rarityBonus = rarityTier(configuredRarity) * Math.max(0, settings.rarityPerTier());
-        int levelBonus = levelBonus(level, settings.levelsPerBonus(), settings.maxLevelBonus());
-        int maximum = Math.max(0, base + rarityBonus + levelBonus);
-        int chance = Math.max(0, Math.min(100, settings.soulChancePercent()));
-        return new Preview(slug, Math.max(1, level), configuredRarity, stage, base,
-                rarityBonus, levelBonus, SoulType.fromSpeciesType(species.primaryType()), maximum, chance);
+    public static Preview preview(String slug,int level){
+        PokecSpecies.Entry species=PokecSpecies.get(slug);if(species==null)return null;
+        PokecEconomy e=PokecEconomy.get();return preview(slug,level,e.rarity(slug),e.releaseMinPercent(),e.releaseMaxPercent());
     }
+    private static int clampPercent(int value){return Math.max(0,Math.min(100,value));}
+    private static int ceilPercent(int base,int percent){return (int)(((long)Math.max(0,base)*clampPercent(percent)+99L)/100L);}
 
-    public static Preview preview(String slug, int level) {
-        PokecSpecies.Entry species = PokecSpecies.get(slug);
-        if (species == null) return null;
-        return preview(slug, level, PokecEconomy.get().rarity(slug), Settings.configured());
+    /** Every integer in the inclusive valid range has equal probability. */
+    public static int roll(Preview preview,DoubleSupplier serverRandom){return rollBetween(preview==null?0:preview.minimum(),preview==null?0:preview.maximum(),serverRandom);}
+    public static int rollBetween(int minimum,int maximum,DoubleSupplier serverRandom){
+        if(maximum<minimum||maximum<0)return 0;
+        minimum=Math.max(0,minimum);int span=maximum-minimum+1;if(span<=1)return minimum;
+        double draw=serverRandom.getAsDouble();if(!Double.isFinite(draw)||draw<0.0D||draw>=1.0D)return minimum;
+        return minimum+(int)Math.floor(draw*span);
     }
-
-    /** Draws once per possible soul; the supplier is always called maximum times. */
-    public static int roll(Preview preview, DoubleSupplier serverRandom) {
-        if (preview == null) return 0;
-        int obtained = 0;
-        double chance = preview.chancePercent() / 100.0D;
-        for (int i = 0; i < preview.maximum(); i++) {
-            double draw = serverRandom.getAsDouble();
-            if (Double.isFinite(draw) && draw >= 0.0D && draw < 1.0D && draw < chance) obtained++;
-        }
-        return obtained;
+    public static int deathDropMaximum(String slug,int level){
+        PokecSpecies.Entry species=PokecSpecies.get(slug);if(species==null)return 0;PokecEconomy e=PokecEconomy.get();
+        return preview(slug,level,e.rarity(slug),e.deathMaxPercent(),e.deathMaxPercent()).maximum();
     }
-
-
-    /** New physical death-drop rule, separate from the existing PokéC conversion yield. */
-    public static int deathDropMaximum(String slug, int level) {
-        Stage stage = stage(slug);
-        int stageBase = switch (stage) {
-            case INITIAL -> 1;
-            case INTERMEDIATE -> 2;
-            case FINAL -> 3;
-        };
-        return stageBase + (Math.max(1, level) + 1) / 2;
+    public static int deathDropMinimum(String slug,int level){
+        PokecSpecies.Entry species=PokecSpecies.get(slug);if(species==null)return 0;PokecEconomy e=PokecEconomy.get();
+        return preview(slug,level,e.rarity(slug),e.deathMinPercent(),e.deathMinPercent()).minimum();
     }
-
-    public static int rollDeathDrops(String slug, int level, int chancePercent,
-                                     DoubleSupplier serverRandom) {
-        int maximum = deathDropMaximum(slug, level);
-        double chance = Math.max(0, Math.min(100, chancePercent)) / 100.0D;
-        int result = 0;
-        for (int i = 0; i < maximum; i++) {
-            double draw = serverRandom.getAsDouble();
-            if (Double.isFinite(draw) && draw >= 0 && draw < 1 && draw < chance) result++;
-        }
-        return result;
+    public static int rollDeathDrops(String slug,int level,DoubleSupplier serverRandom){
+        PokecSpecies.Entry species=PokecSpecies.get(slug);if(species==null)return 0;PokecEconomy e=PokecEconomy.get();
+        return roll(preview(slug,level,e.rarity(slug),e.deathMinPercent(),e.deathMaxPercent()),serverRandom);
     }
-
-    private PokemonSoulConversion() { }
+    private PokemonSoulConversion(){}
 }

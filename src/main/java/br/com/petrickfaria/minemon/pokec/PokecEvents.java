@@ -10,7 +10,6 @@ import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import br.com.petrickfaria.minemon.entity.MinemonCreature;
 import br.com.petrickfaria.minemon.registry.ModItems;
-import br.com.petrickfaria.minemon.config.MinemonConfig;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
@@ -30,16 +29,20 @@ public final class PokecEvents {
     }
     @SubscribeEvent public static void pokemonSoulDrops(LivingDropsEvent event) {
         if (!(event.getEntity() instanceof MinemonCreature pokemon) || event.getEntity().level.isClientSide) return;
+        // Wild Pokémon can reward souls; a domesticated Pokémon's protection and ownership rules remain intact.
+        if (pokemon.isTame()) return;
         var marker = pokemon.getPersistentData();
         if (marker.getBoolean("MinemonSoulDropHandled")) return;
         marker.putBoolean("MinemonSoulDropHandled", true);
         var preview = PokemonSoulConversion.preview(pokemon.getSpeciesSlug(), pokemon.getPokemonLevel());
         if (preview == null || preview.soulType() == null) return;
-        int count = PokemonSoulConversion.rollDeathDrops(pokemon.getSpeciesSlug(), pokemon.getPokemonLevel(),
-                MinemonConfig.POKEBALL_SOUL_CHANCE_PERCENT.get(), pokemon.getRandom()::nextDouble);
+        int count = PokemonSoulConversion.rollDeathDrops(pokemon.getSpeciesSlug(), pokemon.getPokemonLevel(), pokemon.getRandom()::nextDouble);
         if (count <= 0) return;
         var soul = ModItems.SOULS.get(preview.soulType().id());
-        if (soul != null) { var drop = new net.minecraft.world.entity.item.ItemEntity(pokemon.level, pokemon.getX(), pokemon.getY(), pokemon.getZ(), new ItemStack(soul.get(), count)); event.getDrops().add(drop); }
+        if (soul != null) for(int remaining=count;remaining>0;remaining-=Math.min(remaining,soul.get().getMaxStackSize())) {
+            int stackSize=Math.min(remaining,soul.get().getMaxStackSize());
+            event.getDrops().add(new net.minecraft.world.entity.item.ItemEntity(pokemon.level,pokemon.getX(),pokemon.getY(),pokemon.getZ(),new ItemStack(soul.get(),stackSize)));
+        }
     }
     @SubscribeEvent public static void clonePlayer(PlayerEvent.Clone event){PokecPlayerData.copyOnRespawn(event.getOriginal(),event.getEntity());if(event.getEntity() instanceof net.minecraft.server.level.ServerPlayer player)PokecTransactions.recoverEscrow(player);}
     @SubscribeEvent public static void login(PlayerEvent.PlayerLoggedInEvent event){if(event.getEntity() instanceof net.minecraft.server.level.ServerPlayer player)PokecTransactions.recoverEscrow(player);}

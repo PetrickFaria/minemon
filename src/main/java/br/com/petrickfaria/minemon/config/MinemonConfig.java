@@ -18,13 +18,6 @@ public final class MinemonConfig {
     public static final ForgeConfigSpec.IntValue BREEDING_RARITY_BONUS_PERCENT;
     public static final ForgeConfigSpec.IntValue BREEDING_MIN_CHANCE_PERCENT;
     public static final ForgeConfigSpec.IntValue BREEDING_MAX_CHANCE_PERCENT;
-    public static final ForgeConfigSpec.IntValue POKEBALL_INITIAL_SOULS;
-    public static final ForgeConfigSpec.IntValue POKEBALL_INTERMEDIATE_SOULS;
-    public static final ForgeConfigSpec.IntValue POKEBALL_FINAL_SOULS;
-    public static final ForgeConfigSpec.IntValue POKEBALL_RARITY_BONUS;
-    public static final ForgeConfigSpec.IntValue POKEBALL_LEVELS_PER_BONUS;
-    public static final ForgeConfigSpec.IntValue POKEBALL_MAX_LEVEL_BONUS;
-    public static final ForgeConfigSpec.IntValue POKEBALL_SOUL_CHANCE_PERCENT;
     public static final ForgeConfigSpec.BooleanValue TREAT_BREEDING_ENABLED;
     public static final ForgeConfigSpec.ConfigValue<java.util.List<? extends String>> TREAT_DISABLED_BREEDING_SPECIES;
     public static final ForgeConfigSpec SPEC;
@@ -57,22 +50,6 @@ public final class MinemonConfig {
                 .define("breedingEnabled", true);
         TREAT_DISABLED_BREEDING_SPECIES = BUILDER.comment("Species slugs disabled for breeding, in addition to the hard legendary and mythical exclusions.")
                 .defineList("disabledBreedingSpecies", java.util.List.of(), value -> value instanceof String);
-        BUILDER.pop();
-        BUILDER.push("pokeball_conversion");
-        POKEBALL_INITIAL_SOULS = BUILDER.comment("Maximum base souls for initial or single-stage Pokémon.")
-                .defineInRange("initialStageSouls", 1, 0, 64);
-        POKEBALL_INTERMEDIATE_SOULS = BUILDER.comment("Maximum base souls for intermediate evolutions.")
-                .defineInRange("intermediateStageSouls", 3, 0, 64);
-        POKEBALL_FINAL_SOULS = BUILDER.comment("Maximum base souls for final evolutions.")
-                .defineInRange("finalStageSouls", 5, 0, 64);
-        POKEBALL_RARITY_BONUS = BUILDER.comment("Maximum extra souls per rarity tier above Common.")
-                .defineInRange("soulsPerRarityTier", 1, 0, 16);
-        POKEBALL_LEVELS_PER_BONUS = BUILDER.comment("Whole Pokémon levels required for each level-based soul bonus.")
-                .defineInRange("levelsPerSoulBonus", 2, 1, 100);
-        POKEBALL_MAX_LEVEL_BONUS = BUILDER.comment("Maximum level-based soul bonus.")
-                .defineInRange("maxLevelSoulBonus", 5, 0, 64);
-        POKEBALL_SOUL_CHANCE_PERCENT = BUILDER.comment("Independent chance for each possible soul during conversion.")
-                .defineInRange("soulChancePercent", 75, 0, 100);
         BUILDER.pop();
         SPEC = BUILDER.build();
     }

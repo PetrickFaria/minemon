@@ -105,11 +105,13 @@ public final class PokecTransactions {
         if (ball.getCount() != 1) return false;
         PokeballItem.StoredPokemon stored = PokeballItem.readStored(ball);
         if (stored == null || !stored.owner().equals(player.getUUID())) return false;
-        PokemonSoulConversion.Preview preview = menu.conversionPreview();
-        if (preview == null || !preview.species().equals(stored.species()) || preview.soulType() == null) return false;
+        PokemonBallLedger ledger = PokemonBallLedger.get(level);
+        if (ledger.isConsumed(stored.token())) return false;
+        PokemonSoulConversion.Preview preview = PokemonSoulConversion.preview(stored.species(), stored.level());
+        if (preview == null || preview.soulType() == null) return false;
         var soulItem = ModItems.SOULS.get(preview.soulType().id());
         if (soulItem == null) return false;
-        if (!PokemonBallLedger.get(level).consume(stored.token())) return false;
+        if (!ledger.consume(stored.token())) return false;
         int result = PokemonSoulConversion.roll(preview, level.getRandom()::nextDouble);
         int stackLimit = soulItem.get().getMaxStackSize();
         for (int remaining = result; remaining > 0; remaining -= Math.min(remaining, stackLimit))

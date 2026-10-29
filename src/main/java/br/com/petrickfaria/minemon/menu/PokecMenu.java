@@ -71,7 +71,7 @@ public final class PokecMenu extends AbstractContainerMenu {
         conversionOutput = output.copy();
         conversionResult = Math.max(-1, result);
         conversionConfirmUntil = -1;
-        refreshConversionPreview(player);
+        if (!conversionBall.isEmpty() || conversionResult < 0) refreshConversionPreview(player);
         PokecPlayerData.setConversion(player, conversionBall, conversionOutput, conversionResult);
     }
     public void refreshConversionPreview(ServerPlayer player) {

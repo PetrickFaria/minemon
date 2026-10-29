@@ -237,15 +237,16 @@ public final class PokecGameTests {
         check(ModItems.POKEBALL.get().interactLivingEntity(ball,owner,creature,InteractionHand.MAIN_HAND).consumesAction(),"test Pokémon should be captured before conversion");
         ItemStack filledBall=owner.getMainHandItem().copy();owner.setItemInHand(InteractionHand.MAIN_HAND,ItemStack.EMPTY);owner.getInventory().setItem(9,filledBall);
         PokecMenu menu=new PokecMenu(20,owner.getInventory(),p);owner.containerMenu=menu;
+        check(!PokecTransactions.perform(owner,p,"bulbasaur",PokecTransactions.Action.STAGE_POKEBALL,0xAFFL),"an empty Pokébola cannot be staged as a stored Pokémon");
         check(PokecTransactions.perform(owner,p,"bulbasaur",PokecTransactions.Action.STAGE_POKEBALL,0xB00L),"filled player-owned Pokébola should be staged");
-        check(menu.conversionPreview()!=null&&menu.conversionPreview().maximum()>=1,"PokéC previews stage, rarity, level, type, and maximum souls");
-        UUID token=PokeballItem.readStored(menu.conversionBall()).token();int maximum=menu.conversionPreview().maximum();
+        check(menu.conversionPreview()!=null&&menu.conversionPreview().base()>=3&&menu.conversionPreview().base()<=13,"PokéC previews the 3–13 base from stage, rarity, level, and type");
+        UUID token=PokeballItem.readStored(menu.conversionBall()).token();int minimum=menu.conversionPreview().minimum(),maximum=menu.conversionPreview().maximum();
         check(PokeballItem.isOccupied(menu.conversionBall()),"staging must not consume the Pokémon");
         check(PokecTransactions.perform(owner,p,"bulbasaur",PokecTransactions.Action.REQUEST_CONVERSION,0xB01L),"first confirmation request should open a short confirmation window");
         check(PokeballItem.isOccupied(menu.conversionBall()),"requesting confirmation must leave the stored Pokémon intact");
         check(PokecTransactions.perform(owner,p,"bulbasaur",PokecTransactions.Action.CONFIRM_CONVERSION,0xB02L),"confirmed conversion should complete");
         int result=menu.conversionResult();
-        check(result>=0&&result<=maximum,"conversion result must be within the configured maximum");
+        check(result>=minimum&&result<=maximum,"nature return must use the configured 75–100 percent integer range");
         check(menu.conversionOutput().isEmpty(),"conversion must deliver souls directly without keeping a PokéC result slot");
         check(owner.getInventory().items.stream().filter(stack->ModItems.SOULS.values().stream().anyMatch(item->stack.is(item.get()))).mapToInt(ItemStack::getCount).sum()==result,
                 "confirmed conversion must place its rolled souls directly in the player's inventory");

@@ -19,11 +19,19 @@ public class PokecCatalogTest {
         }
     }
 
-    @Test public void newRarityMigrationKeepsExactlyFiveRanksAndAllPricesFlat(){
+    @Test public void rarityEconomyUsesFiveRanksAndConfiguredTiers(){
         assertEquals("mythic", PokecSpecies.get("mew").rarity());
-        for(var species:PokecSpecies.ordered()) assertEquals("all PokéC species have the same price",5,PokecEconomy.get().coins(species.slug()));
-        for(int legacyPrice:new int[]{100,250,600,1500,4000})
-            assertEquals("configured legacy species prices must never override the fixed price",5,PokecEconomy.enforceFixedCoinPrice(legacyPrice));
+        assertEquals(10,PokecEconomy.get().coins("rattata"));
+        assertEquals(20,PokecEconomy.get().coins("charmander"));
+        assertEquals(30,PokecEconomy.get().coins("charizard"));
+        assertEquals(40,PokecEconomy.get().coins("mewtwo"));
+        assertEquals(50,PokecEconomy.get().coins("mew"));
+        assertEquals(25,PokecEconomy.get().souls("rattata"));
+        assertEquals(50,PokecEconomy.get().souls("charmander"));
+        assertEquals(75,PokecEconomy.get().souls("charizard"));
+        assertEquals(100,PokecEconomy.get().souls("mewtwo"));
+        assertEquals(150,PokecEconomy.get().souls("mew"));
+        assertEquals(37,PokecEconomy.enforceFixedCoinPrice(37));
         assertEquals("rare", PokecEconomy.resolveRarity("very_rare","rare"));
     }
 
