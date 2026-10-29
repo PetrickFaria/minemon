@@ -116,8 +116,10 @@ public final class PokeballItem extends Item {
         if (player.level.isClientSide) return InteractionResult.sidedSuccess(true);
         if (!(player instanceof ServerPlayer serverPlayer) || !(player.level instanceof ServerLevel))
             return InteractionResult.FAIL;
+        if (mob instanceof MinemonCreature creature && creature.isTame() && !creature.isOwnedBy(player))
+            return InteractionResult.FAIL;
         if (!masterBall && (!(mob instanceof MinemonCreature creature)
-                || !creature.isTame() || !creature.isOwnedBy(player) || !creature.canBeStoredInPokeball()))
+                || !creature.isTame() || !creature.canBeStoredInPokeball()))
             return InteractionResult.FAIL;
         if (mob.isRemoved() || !mob.isAlive() || mob.isPassenger() || mob.isVehicle()) return InteractionResult.FAIL;
 

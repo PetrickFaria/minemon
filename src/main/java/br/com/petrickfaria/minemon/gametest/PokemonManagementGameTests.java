@@ -82,6 +82,13 @@ public final class PokemonManagementGameTests {
                 "a ball that cannot capture must remain empty and must not remove the Pokémon");
 
         owner.setItemInHand(InteractionHand.OFF_HAND, new ItemStack(ModItems.MASTER_BALL.get()));
+        var protectedAttempt = pokemon.mobInteract(owner, InteractionHand.MAIN_HAND);
+        check(h, protectedAttempt.consumesAction() && pokemon.isAlive()
+                        && !br.com.petrickfaria.minemon.item.PokeballItem.isOccupied(owner.getOffhandItem())
+                        && owner.containerMenu == owner.inventoryMenu,
+                "a Master Ball must not capture another player's Pokémon or open its status menu");
+
+        pokemon.tame(owner);
         var master = pokemon.mobInteract(owner, InteractionHand.MAIN_HAND);
         check(h, master.consumesAction() && !pokemon.isAlive()
                         && br.com.petrickfaria.minemon.item.PokeballItem.isOccupied(owner.getOffhandItem()),
