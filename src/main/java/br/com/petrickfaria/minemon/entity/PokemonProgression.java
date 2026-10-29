@@ -15,9 +15,14 @@ public final class PokemonProgression {
     }
 
     public static int xpForNextLevelForRarity(int currentLevel, String rarity) {
-        if (currentLevel >= maxLevel()) return 0;
+        return xpForNextLevelForRarity(currentLevel, rarity,
+                MinemonConfig.POKEMON_XP_PER_ZOMBIE.get(), MinemonConfig.POKEMON_MAX_LEVEL.get());
+    }
+
+    public static int xpForNextLevelForRarity(int currentLevel, String rarity, int baseXp, int maximumLevel) {
+        if (currentLevel >= maximumLevel) return 0;
         long n = (long) currentLevel + 1L;
-        long base = (long) MinemonConfig.POKEMON_XP_PER_ZOMBIE.get() * n * (n - 1L) / 2L;
+        long base = (long) baseXp * n * (n - 1L) / 2L;
         long needed = base * rarityMultiplier(rarity);
         return (int) Math.max(1L, Math.min(Integer.MAX_VALUE, needed));
     }

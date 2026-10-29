@@ -6,17 +6,17 @@ import static org.junit.Assert.*;
 
 public final class PokemonProgressionTest {
     @Test public void levelCostsAndRarityMultipliersMatchTheRequestedTable() {
-        assertEquals(5, PokemonProgression.xpForNextLevelForRarity(1, "common"));
-        assertEquals(15, PokemonProgression.xpForNextLevelForRarity(2, "common"));
-        assertEquals(30, PokemonProgression.xpForNextLevelForRarity(3, "common"));
-        assertEquals(75, PokemonProgression.xpForNextLevelForRarity(5, "common"));
-        assertEquals(225, PokemonProgression.xpForNextLevelForRarity(9, "common"));
-        assertEquals(10, PokemonProgression.xpForNextLevelForRarity(1, "uncommon"));
-        assertEquals(20, PokemonProgression.xpForNextLevelForRarity(1, "rare"));
-        assertEquals(40, PokemonProgression.xpForNextLevelForRarity(1, "very_rare"));
-        assertEquals(80, PokemonProgression.xpForNextLevelForRarity(1, "legendary"));
-        assertEquals(80, PokemonProgression.xpForNextLevelForRarity(1, "mythic"));
-        assertEquals(0, PokemonProgression.xpForNextLevelForRarity(10, "common"));
+        assertEquals(5, cost(1, "common"));
+        assertEquals(15, cost(2, "common"));
+        assertEquals(30, cost(3, "common"));
+        assertEquals(75, cost(5, "common"));
+        assertEquals(225, cost(9, "common"));
+        assertEquals(10, cost(1, "uncommon"));
+        assertEquals(20, cost(1, "rare"));
+        assertEquals(40, cost(1, "very_rare"));
+        assertEquals(80, cost(1, "legendary"));
+        assertEquals(80, cost(1, "mythic"));
+        assertEquals(0, cost(10, "common"));
     }
 
     @Test public void evolutionRequirementsFollowCatalogEdgesAndBranches() {
@@ -36,5 +36,9 @@ public final class PokemonProgressionTest {
         assertEquals(3600, PokemonProgression.chanseyCooldownTicks(6));
         assertEquals(2400, PokemonProgression.chanseyCooldownTicks(8));
         assertEquals(1200, PokemonProgression.chanseyCooldownTicks(10));
+    }
+
+    private static int cost(int level, String rarity) {
+        return PokemonProgression.xpForNextLevelForRarity(level, rarity, 5, 10);
     }
 }
