@@ -123,6 +123,8 @@ public final class IndividualBehaviorTests {
  private static boolean atSurface(MinemonCreature m){return m instanceof MinemonAquaticCreature a&&Math.abs(m.getY()-(a.waterSurface()-WaterMovementGoal.preferredSurfaceDepth(m)))<.3D;}
  @GameTest(template="test_arena",timeoutTicks=320)
  public static void permanentSwimmersMoveUnderwaterAndSurfaceSpeciesFloat(GameTestHelper h){
+  // This probe checks ordinary daytime swimming; separate night tests own the sleep transition.
+  h.getLevel().setDayTime(1000);
   arena(h,true);var fish=spawn(h,"magikarp",4,-2,3);fish.setDeltaMovement(-0.12D,0,-0.12D);var lapras=spawn(h,"lapras",8,0,9);var gyarados=spawn(h,"gyarados",11,0,5);
   Vec3 start=fish.position();double[] farthest={0};
   sample(h,fish,start,farthest,20);

@@ -63,6 +63,7 @@ public final class PokemonManagementClientSmokeTest {
                     var type = ModEntities.SPECIES.get("pikachu");
                     var pokemon = type == null ? null : type.get().create(level);
                     if (pokemon == null) return;
+                    pokemon.setNoAi(true);
                     pokemon.tame(owner);
                     pokemon.setOrderedToSit(true);
                     pokemon.moveTo(owner.getX() + 2.0D, owner.getY(), owner.getZ(), owner.getYRot(), 0.0F);
