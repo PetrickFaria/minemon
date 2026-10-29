@@ -130,8 +130,11 @@ public final class CompanionTests {
    check(h,b.isTame()&&p.getUUID().equals(b.getOwnerUUID())&&b.isOrderedToSit(),"Compatible Grass Treat must tame, assign owner and sit");
    check(h,treat.isEmpty(),"Successful survival treat taming must consume one treat");
    p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,net.minecraft.world.item.ItemStack.EMPTY);
-   b.mobInteract(p,net.minecraft.world.InteractionHand.MAIN_HAND);check(h,!b.isOrderedToSit(),"Owner must be able to order standing");
-   b.mobInteract(p,net.minecraft.world.InteractionHand.MAIN_HAND);check(h,b.isOrderedToSit(),"Owner must be able to order sitting");
+   b.mobInteract(p,net.minecraft.world.InteractionHand.MAIN_HAND);
+   check(h,p.containerMenu instanceof br.com.petrickfaria.minemon.menu.PokemonInfoMenu,"Owned Pokémon interaction must open its management interface");
+   var menu=(br.com.petrickfaria.minemon.menu.PokemonInfoMenu)p.containerMenu;
+   check(h,menu.clickMenuButton(p,0)&&!b.isOrderedToSit(),"Seguir must be able to order standing");
+   check(h,menu.clickMenuButton(p,1)&&b.isOrderedToSit(),"Sentar must be able to order sitting");
   }finally {br.com.petrickfaria.minemon.config.MinemonConfig.TAME_CHANCE_PERCENT.set(previous);p.discard();}
   h.succeed();
  }

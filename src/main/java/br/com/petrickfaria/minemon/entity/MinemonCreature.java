@@ -538,7 +538,8 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         // foreign-owner attempts must not fall through into the Pokémon screen.
         for (InteractionHand ballHand : InteractionHand.values()) {
             ItemStack ball = player.getItemInHand(ballHand);
-            if (ball.getItem() instanceof br.com.petrickfaria.minemon.item.PokeballItem pokeball) {
+            if (!br.com.petrickfaria.minemon.item.PokeballItem.isOccupied(ball)
+                    && ball.getItem() instanceof br.com.petrickfaria.minemon.item.PokeballItem pokeball) {
                 InteractionResult result = pokeball.interactLivingEntity(ball, player, this, ballHand);
                 return result == InteractionResult.PASS || result == InteractionResult.FAIL
                         ? InteractionResult.CONSUME : result;
