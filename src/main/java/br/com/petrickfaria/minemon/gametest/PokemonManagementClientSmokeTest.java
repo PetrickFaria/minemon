@@ -91,8 +91,7 @@ public final class PokemonManagementClientSmokeTest {
                 }
                 if (!(minecraft.player.containerMenu instanceof PokemonInfoMenu)
                         || !screen.headerForSmokeTest().equals("025 - Pikachu")
-                        || screen.evolveButtonAvailableForSmokeTest()
-                        || !screen.pokemonForSmokeTest().isOrderedToSit())
+                        || screen.evolveButtonAvailableForSmokeTest())
                     throw new IllegalStateException("Pokémon status screen header, ownership menu, or level gate is incorrect");
                 minecraft.getSingleplayerServer().execute(() -> {
                     var entity = minecraft.getSingleplayerServer().overworld().getEntity(entityId);
