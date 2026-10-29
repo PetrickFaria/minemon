@@ -405,10 +405,10 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     @Override
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
         ItemStack held = player.getItemInHand(hand);
-        // Let Item#interactLivingEntity receive the click; the owner sit toggle below
-        // otherwise consumes it before the Pokébola can capture the creature.
-        if (held.getItem() instanceof br.com.petrickfaria.minemon.item.PokeballItem) {
-            return InteractionResult.PASS;
+        // Route capture through the Pokébola's existing server-authoritative handler.
+        // Returning its result prevents the generic entity interaction from invoking it twice.
+        if (held.getItem() instanceof br.com.petrickfaria.minemon.item.PokeballItem pokeball) {
+            return pokeball.interactLivingEntity(held, player, this, hand);
         }
         if (held.getItem() instanceof PokemonTreatItem treat) {
             boolean compatible = PokemonTreatTypes.accepts(this.getSpeciesSlug(), treat.getTreatType().pokemonType());

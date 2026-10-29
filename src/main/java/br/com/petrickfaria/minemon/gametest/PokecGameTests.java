@@ -166,6 +166,13 @@ public final class PokecGameTests {
         check(stored.health()==5.0F&&stored.entityData().getFloat("Health")==5.0F,"current health and full entity NBT must persist");
         check(!owned.isAlive(),"capturing removes exactly the original entity");
 
+        MinemonCreature clickRouted=h.spawn(ModEntities.SPECIES.get("pikachu").get(),new BlockPos(6,1,6));
+        clickRouted.tame(owner);
+        ItemStack clickBall=new ItemStack(ModItems.POKEBALL.get());owner.setItemInHand(InteractionHand.OFF_HAND,clickBall);
+        var routedResult=clickRouted.mobInteract(owner,InteractionHand.OFF_HAND);
+        check(routedResult.consumesAction()&&PokeballItem.isOccupied(owner.getOffhandItem())&&!clickRouted.isAlive(),
+                "Pokémon mob interaction must route a Pokébola click to the existing capture handler");
+
         MinemonCreature wild=h.spawn(ModEntities.SPECIES.get("squirtle").get(),new BlockPos(6,1,5));
         ItemStack empty=new ItemStack(ModItems.POKEBALL.get());owner.setItemInHand(InteractionHand.OFF_HAND,empty);
         check(!ModItems.POKEBALL.get().interactLivingEntity(empty,owner,wild,InteractionHand.OFF_HAND).consumesAction(),"wild Pokémon cannot be captured");
