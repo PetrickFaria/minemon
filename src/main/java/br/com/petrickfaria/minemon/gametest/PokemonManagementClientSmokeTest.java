@@ -95,7 +95,7 @@ public final class PokemonManagementClientSmokeTest {
                 minecraft.getSingleplayerServer().execute(() -> {
                     var entity = minecraft.getSingleplayerServer().overworld().getEntity(entityId);
                     if (entity instanceof br.com.petrickfaria.minemon.entity.MinemonCreature pokemon)
-                        pokemon.awardPokemonExperience(5);
+                        pokemon.awardPokemonExperience(pokemon.getPokemonXpToNextLevel());
                 });
                 phase = 4;
                 ticks = 0;
