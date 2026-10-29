@@ -61,14 +61,19 @@ public final class PokecGameTests {
         PokecTransactions.perform(buyer,p,"bulbasaur",PokecTransactions.Action.SELECT,0x500L);
         boolean ok=PokecTransactions.perform(buyer,p,"bulbasaur",PokecTransactions.Action.PURCHASE,0x501L);
         h.runAfterDelay(2,()->{
-            var delivered=h.getLevel().getEntitiesOfClass(MinemonCreature.class,new net.minecraft.world.phys.AABB(p).inflate(5),e->e.getSpeciesSlug().equals("bulbasaur")&&buyer.getUUID().equals(e.getOwnerUUID()));
-            check(ok,"first purchase should succeed without coins");check(PokecPlayerData.usedFreePurchase(buyer),"free purchase flag must persist");check(!delivered.isEmpty(),"delivered Minemon must be owned by buyer");
+            var egg=ModItems.EGGS.get("bulbasaur").get();
+            long delivered=buyer.getInventory().items.stream().filter(stack->stack.is(egg)&&stack.hasTag()
+                    &&stack.getTag().hasUUID("MinemonPokecOwner")&&buyer.getUUID().equals(stack.getTag().getUUID("MinemonPokecOwner")))
+                    .mapToLong(net.minecraft.world.item.ItemStack::getCount).sum();
+            check(ok,"first purchase should succeed without coins");check(PokecPlayerData.usedFreePurchase(buyer),"free purchase flag must persist");check(delivered==1,"free purchase delivers one spawn egg bound to the buyer");
             check(!PokecTransactions.perform(buyer,p,"bulbasaur",PokecTransactions.Action.PURCHASE,0x501L),"duplicate transaction id must not deliver twice");
             PokecPlayerData.setCoins(buyer,0);check(!PokecTransactions.perform(buyer,p,"bulbasaur",PokecTransactions.Action.PURCHASE,0x502L),"second purchase cannot reuse the free acquisition");
             PokecPlayerData.setCoins(buyer,PokecEconomy.get().coins("bulbasaur"));buyer.tickCount+=4;check(PokecTransactions.perform(buyer,p,"bulbasaur",PokecTransactions.Action.PURCHASE,0x503L),"later acquisition should charge the configured price");
             check(PokecPlayerData.coins(buyer)==0,"successful purchase must debit PokéCoins once");
-            var afterSecond=h.getLevel().getEntitiesOfClass(MinemonCreature.class,new net.minecraft.world.phys.AABB(p).inflate(5),e->e.getSpeciesSlug().equals("bulbasaur")&&buyer.getUUID().equals(e.getOwnerUUID()));
-            check(afterSecond.size()==2,"free and paid purchases should each deliver exactly one owned Minemon");
+            long afterSecond=buyer.getInventory().items.stream().filter(stack->stack.is(egg)&&stack.hasTag()
+                    &&stack.getTag().hasUUID("MinemonPokecOwner")&&buyer.getUUID().equals(stack.getTag().getUUID("MinemonPokecOwner")))
+                    .mapToLong(net.minecraft.world.item.ItemStack::getCount).sum();
+            check(afterSecond==2,"free and paid purchases deliver exactly two owned spawn eggs without spawning Pokémon");
             buyer.discard();h.succeed();
         });
     }
@@ -95,8 +100,11 @@ public final class PokecGameTests {
         check(PokecTransactions.perform(buyer,p,"bulbasaur",PokecTransactions.Action.PURCHASE,0x702L),"staged coins should complete purchase");
         check(menu.stagedCoins()==0,"spent coins must leave escrow exactly once");
         check(buyer.getInventory().items.stream().filter(s->s.is(ModItems.POKE_COIN.get())).mapToInt(net.minecraft.world.item.ItemStack::getCount).sum()==5,"purchase must not consume excess coins");
-        var owned=h.getLevel().getEntitiesOfClass(MinemonCreature.class,new net.minecraft.world.phys.AABB(p).inflate(5),e->e.getSpeciesSlug().equals("bulbasaur")&&buyer.getUUID().equals(e.getOwnerUUID()));
-        check(owned.size()==1,"one accepted payment delivers one owned Minemon");buyer.discard();h.succeed();
+        var egg=ModItems.EGGS.get("bulbasaur").get();
+        long ownedEggs=buyer.getInventory().items.stream().filter(stack->stack.is(egg)&&stack.hasTag()
+                &&stack.getTag().hasUUID("MinemonPokecOwner")&&buyer.getUUID().equals(stack.getTag().getUUID("MinemonPokecOwner")))
+                .mapToLong(net.minecraft.world.item.ItemStack::getCount).sum();
+        check(ownedEggs==1,"one accepted payment delivers one owner-bound spawn egg");buyer.discard();h.succeed();
     }
 
     @GameTest(template="test_arena",timeoutTicks=200)
@@ -124,7 +132,9 @@ public final class PokecGameTests {
         buyer.getInventory().setItem(0,new net.minecraft.world.item.ItemStack(ModItems.POKE_COIN.get(),12));
         PokecTransactions.perform(buyer,p,"bulbasaur",PokecTransactions.Action.SELECT,0x900L);
         check(PokecTransactions.perform(buyer,p,"bulbasaur",PokecTransactions.Action.STAGE_COINS,0x901L),"coins should move into the temporary slot");
-        check(menu.stagedCoins()==12&&buyer.getInventory().getItem(0).isEmpty(),"staged coins leave inventory temporarily");
+        int staged=Math.min(12,PokecEconomy.get().coins("bulbasaur"));
+        check(menu.stagedCoins()==staged&&buyer.getInventory().items.stream().filter(s->s.is(ModItems.POKE_COIN.get())).mapToInt(net.minecraft.world.item.ItemStack::getCount).sum()==12-staged,
+                "only coins needed for the configured price leave inventory temporarily");
         menu.removed(buyer);
         check(menu.stagedCoins()==0,"closing clears the temporary slot");
         check(buyer.getInventory().items.stream().filter(s->s.is(ModItems.POKE_COIN.get())).mapToInt(net.minecraft.world.item.ItemStack::getCount).sum()==12,"uncommitted coins return on close");

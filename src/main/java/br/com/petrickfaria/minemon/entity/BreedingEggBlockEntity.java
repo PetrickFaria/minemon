@@ -31,6 +31,7 @@ public final class BreedingEggBlockEntity extends BlockEntity {
         setChanged();
     }
     public String species() { return species; }
+    public UUID owner() { return owner; }
     public int remainingTicks() { return remainingTicks; }
     public static void serverTick(net.minecraft.world.level.Level level, BlockPos pos, BlockState state, BreedingEggBlockEntity egg) {
         if (!(level instanceof ServerLevel server) || egg.hatched || egg.species.isBlank()) return;

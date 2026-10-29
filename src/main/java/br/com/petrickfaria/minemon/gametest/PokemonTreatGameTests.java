@@ -7,6 +7,8 @@ import br.com.petrickfaria.minemon.item.PokemonTreatType;
 import br.com.petrickfaria.minemon.pokec.PokemonTreatTypes;
 import br.com.petrickfaria.minemon.registry.ModEntities;
 import br.com.petrickfaria.minemon.registry.ModItems;
+import br.com.petrickfaria.minemon.registry.ModBlocks;
+import br.com.petrickfaria.minemon.entity.BreedingEggBlockEntity;
 import com.mojang.authlib.GameProfile;
 import java.util.*;
 import net.minecraft.core.BlockPos;
@@ -124,28 +126,41 @@ public final class PokemonTreatGameTests {
     }
 
     @GameTest(template="test_arena", timeoutTicks=100)
-    public static void successfulBreedingCreatesOneOwnedSafeBabyWithCooldown(GameTestHelper h) {
+    public static void successfulBreedingCreatesOneOwnedIncubatingEggWithCooldown(GameTestHelper h) {
         floor(h); ServerPlayer owner=player(h,new BlockPos(3,1,3),GameType.SURVIVAL);
         MinemonCreature first=spawn(h,"charizard",new BlockPos(5,1,5)); tame(first,owner);
         MinemonCreature second=spawn(h,"blastoise",new BlockPos(7,1,5)); tame(second,owner);
         first.setInLove(owner); second.setInLove(owner);
         check(h,first.canMate(second),"Different evolution lines owned by the same player should be compatible");
         first.spawnChildFromBreeding(h.getLevel(),second);
-        List<MinemonCreature> babies=h.getLevel().getEntitiesOfClass(MinemonCreature.class, first.getBoundingBox().inflate(8), MinemonCreature::isBaby);
-        check(h, babies.size()==1, "One cross-species breeding event must create exactly one baby");
-        MinemonCreature baby=babies.get(0);
-        String babySpecies=baby.getSpeciesSlug();
+        BlockPos eggPos=null;
+        BlockPos origin=first.blockPosition();
+        for(BlockPos candidate:BlockPos.betweenClosed(origin.offset(-3,0,-3),origin.offset(3,1,3)))
+            if(h.getLevel().getBlockState(candidate).is(ModBlocks.BREEDING_EGG.get())){eggPos=candidate.immutable();break;}
+        check(h,eggPos!=null,"One cross-species breeding event must create one physical egg instead of a baby entity");
+        BlockPos eggPosition=eggPos==null?origin:eggPos;
+        var blockEntity=eggPos==null?null:h.getLevel().getBlockEntity(eggPos);
+        if(!(blockEntity instanceof BreedingEggBlockEntity egg)){h.fail("Physical breeding egg must have persistent incubation data");return;}
+        String babySpecies=egg.species();
         check(h, babySpecies.equals("charmander")||babySpecies.equals("squirtle"),"Charizard and Blastoise must produce only their initial forms");
-        check(h, baby.isTame()&&owner.getUUID().equals(baby.getOwnerUUID()), "Baby must inherit its parents' owner");
-        MinemonCreature adult=spawn(h,"eevee",new BlockPos(9,1,5)); tame(adult,owner); adult.setInLove(owner); baby.setInLove(owner);
-        check(h,!baby.canMate(adult),"A newborn must not start another breeding cycle");
+        check(h,owner.getUUID().equals(egg.owner()), "Incubating egg must preserve the parents' owner");
+        check(h,egg.remainingTicks()==24_000,"Egg incubation must preserve the configured adult-growth duration");
+        List<MinemonCreature> babies=h.getLevel().getEntitiesOfClass(MinemonCreature.class, first.getBoundingBox().inflate(8), MinemonCreature::isBaby);
+        check(h,babies.isEmpty(),"Breeding must not spawn a baby Pokémon alongside the egg");
         check(h, first.getAge()==6000&&second.getAge()==6000, "Adult cooldown should default to 6000 ticks");
         check(h, !first.canMate(second), "Adults on cooldown must not breed again");
-        BlockPos babyFeet=baby.blockPosition();
-        boolean supported=!h.getLevel().getBlockState(babyFeet.below()).getCollisionShape(h.getLevel(),babyFeet.below()).isEmpty();
-        check(h,supported&&h.getLevel().getFluidState(babyFeet).isEmpty()&&!baby.isInWater()
-                &&h.getLevel().noCollision(baby,baby.getBoundingBox()),"Baby must be placed at a safe dry floor position");
-        h.succeed();
+        check(h,h.getLevel().getFluidState(eggPosition).isEmpty()
+                &&h.getLevel().getBlockState(eggPosition.below()).isFaceSturdy(h.getLevel(),eggPosition.below(),net.minecraft.core.Direction.UP),
+                "Physical egg must be centered on a dry, supported floor position");
+        egg.initialize(babySpecies,owner.getUUID(),2);
+        h.runAfterDelay(4,()->{
+            List<MinemonCreature> hatched=h.getLevel().getEntitiesOfClass(MinemonCreature.class,first.getBoundingBox().inflate(8),
+                    pokemon->pokemon.getSpeciesSlug().equals(babySpecies));
+            check(h,!h.getLevel().getBlockState(eggPosition).is(ModBlocks.BREEDING_EGG.get()),"Egg block must disappear after incubation");
+            check(h,hatched.size()==1&&!hatched.get(0).isBaby()&&owner.getUUID().equals(hatched.get(0).getOwnerUUID()),
+                    "Egg must hatch once into one owned adult of the selected initial species");
+            h.succeed();
+        });
     }
 
     @GameTest(template="test_arena", timeoutTicks=100)
