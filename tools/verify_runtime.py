@@ -302,6 +302,7 @@ if __name__=='__main__':
    allowed.update(runtime_path(f'assets/minemon/textures/pokemon/{slug}_cobblemon_1_8_2/fire/normal/{i}.png') for slug in SOURCE_FIRE_HASHES for i in range(1,5))
    allowed.update(f'assets/minemon_gen1/textures/emissive/{slug}_tail_flame.png' for slug in ('charmander','charmeleon','charizard'))
    allowed.add('assets/minemon_gen1/textures/emissive/moltres_fire.png')
+   allowed.add('assets/minemon_gen1/textures/pokemon/rattata_rocket.png')
    roots=('assets/minemon_gen1/geo/','assets/minemon_gen1/animations/','assets/minemon_gen1/textures/pokemon/','assets/minemon_gen1/sounds/pokemon/','assets/minemon_gen1/licenses/pokemon/')
    roots=roots+('assets/minemon_gen1/textures/emissive/',)
    unexpected=[n for n in z.namelist() if not n.endswith('/') and n.startswith(roots) and n not in allowed]
