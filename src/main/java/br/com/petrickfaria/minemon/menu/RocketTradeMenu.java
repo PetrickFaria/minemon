@@ -22,7 +22,7 @@ import br.com.petrickfaria.minemon.registry.RocketChallengeManager;
 /** Server-authoritative five-slot Rocket soul exchange unlocked by its challenge. */
 public final class RocketTradeMenu extends AbstractContainerMenu {
     private static final List<SoulType> ALPHABETICAL_TYPES = java.util.Arrays.stream(SoulType.values())
-            .sorted(Comparator.comparing(type -> new SoulItem(type, new net.minecraft.world.item.Item.Properties()).getName(ItemStack.EMPTY).getString(), String.CASE_INSENSITIVE_ORDER))
+            .sorted(Comparator.comparing(RocketTradeMenu::soulDisplayName, String.CASE_INSENSITIVE_ORDER))
             .toList();
     private final Inventory playerInventory;
     private final Container input = new SimpleContainer(5) {
@@ -74,7 +74,11 @@ public final class RocketTradeMenu extends AbstractContainerMenu {
     public String selectedLabel() {
         if (selectedIndex == 0) return "1 PokéCoin / 10 almas";
         SoulType type = ALPHABETICAL_TYPES.get(Math.min(ALPHABETICAL_TYPES.size() - 1, selectedIndex - 1));
-        return new SoulItem(type, new net.minecraft.world.item.Item.Properties()).getName(ItemStack.EMPTY).getString();
+        return soulDisplayName(type);
+    }
+    private static String soulDisplayName(SoulType type) {
+        var registeredItem = ModItems.SOULS.get(type.id());
+        return registeredItem == null ? type.id() : registeredItem.get().getName(ItemStack.EMPTY).getString();
     }
     public Villager villager() { return villager; }
     public boolean isUnlocked() { return villager != null && RocketChallengeManager.isChallengeComplete(villager); }
