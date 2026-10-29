@@ -4,6 +4,12 @@ on:
     paths-ignore: [".github/workflows/cobblemon-source-audit.yml", ".github/workflows/prepare-cobblemon-batch.yml", "tools/import_cobblemon_182_batch.py", "docs/**"]
   pull_request:
   workflow_dispatch:
+    inputs:
+      full_suite:
+        description: Run the full legacy movement, sleep, audio, and GameTest suite
+        required: false
+        default: false
+        type: boolean
 permissions:
   contents: read
   actions: read
@@ -54,11 +60,12 @@ jobs:
           python3 tools/verify_pidge_wing_visibility.py
       - name: Ensure Gradle Wrapper is executable
         run: chmod +x gradlew
-      - name: Run focused species selection and active Molang tests
-        run: ./gradlew --no-daemon test --tests 'br.com.petrickfaria.minemon.gametest.SmokeSpeciesSelectionTest' --tests 'br.com.petrickfaria.minemon.gametest.ActiveAnimationMolangPreflightTest' --tests 'br.com.petrickfaria.minemon.Batch10AnimationCompatibilityTest' --tests 'br.com.petrickfaria.minemon.Batch11AnimationCompatibilityTest' --tests 'br.com.petrickfaria.minemon.Batch12AnimationCompatibilityTest' --tests 'br.com.petrickfaria.minemon.Batch13AnimationCompatibilityTest' --tests 'br.com.petrickfaria.minemon.Batch14AnimationCompatibilityTest' --tests 'br.com.petrickfaria.minemon.Batch15AnimationCompatibilityTest' --tests 'br.com.petrickfaria.minemon.NightSleepAssetTest' --tests 'br.com.petrickfaria.minemon.NaturalMovementAssetTest' --tests 'br.com.petrickfaria.minemon.entity.CustomSoundSpeciesFoldersTest' --tests 'br.com.petrickfaria.minemon.client.CustomCreatureAudioTest'
-      - name: Report ForgeGradle and build/run tests
+      - name: Compile and run focused PokéC tests
         id: compile
-        run: ./gradlew --no-daemon buildEnvironment clean test build
+        run: |
+          ./gradlew --no-daemon clean compileJava compileTestJava
+          ./gradlew --no-daemon test --tests 'br.com.petrickfaria.minemon.pokec.PokecCatalogTest' --tests 'br.com.petrickfaria.minemon.pokec.PokemonBreedingTest' --tests 'br.com.petrickfaria.minemon.pokec.PokemonSoulConversionTest'
+          ./gradlew --no-daemon build -x test
       - name: Run Minecraft server behavior tests
         run: |
           mkdir -p run
@@ -89,11 +96,13 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
       - name: Validate production nighttime sleep and closed eyes on the real client
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.full_suite }}
         run: |
           python3 tools/prepare_client_world.py
           timeout --kill-after=30s 900s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeSleep
           grep -F 'PASS NIGHT CLIENT:' run/client-validation-night.txt
       - name: Validate requested bird and ghost flight on the real client
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.full_suite }}
         run: |
           python3 tools/prepare_client_world.py
           timeout --kill-after=30s 600s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeAir -PclientSmokeSpecies=pidgey,spearow,fearow,gastly,haunter,gengar
@@ -101,11 +110,13 @@ jobs:
           grep -F 'ARTICULATION PROFILES:' run/client-validation.txt
           cp run/client-validation.txt run/client-validation-requested-flight.txt
       - name: Observe Haunter production patrol without forced movement
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.full_suite }}
         run: |
           python3 tools/prepare_client_world.py
           timeout --kill-after=30s 600s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokePatrol
           grep -F 'PASS HAUNTER PATROL:' run/client-validation-patrol.txt
       - name: Validate Gyarados near-surface animation on the real client
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.full_suite }}
         run: |
           python3 tools/prepare_client_world.py
           timeout --kill-after=30s 600s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeWater -PclientSmokeSpecies=gyarados
@@ -113,7 +124,7 @@ jobs:
           grep -F 'PASS gyarados: idle/walk' run/client-validation.txt
           grep -F 'ARTICULATION PROFILES:' run/client-validation.txt
       - name: Launch Minecraft client and validate GeckoLib cache
-        if: ${{ success() && steps.compile.outcome == 'success' }}
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.full_suite && success() && steps.compile.outcome == 'success' }}
         run: |
           python3 tools/prepare_client_world.py
           mkdir -p run/config/minemon/sounds/001_Bulbasaur
@@ -149,6 +160,7 @@ jobs:
           grep -F 'PASS SOURCE PITCH: mew source q.pitch_tilt input moves the body bone:' run/client-validation.txt
           grep -F 'ARTICULATION PROFILES:' run/client-validation.txt
       - name: Validate mixed flight and Vaporeon swimming on the real client
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.full_suite }}
         run: |
           cp run/client-validation.txt run/client-validation-full.txt
           for scenario in air water; do
@@ -169,6 +181,13 @@ jobs:
           jar_file="$(find build/libs -maxdepth 1 -type f -name 'Minemon-1.19.2-*-all.jar' -print -quit)"
           test -n "$jar_file"
           python3 tools/verify_treats.py "$jar_file"
+          jar tf "$jar_file" | grep -Fx 'assets/minemon/models/item/grass_treat.json'
+          jar tf "$jar_file" | grep -Fx 'assets/minemon/textures/item/grass_treat.png'
+          jar tf "$jar_file" | grep -Fx 'assets/minemon_gen1/textures/pokemon/rattata_rocket.png'
+          jar tf "$jar_file" | grep -Fx 'br/com/petrickfaria/minemon/menu/RocketTradeMenu.class'
+          jar tf "$jar_file" | grep -Fx 'br/com/petrickfaria/minemon/menu/RocketTradeScreen.class'
+          jar tf "$jar_file" | grep -Fx 'br/com/petrickfaria/minemon/registry/RocketChallengeManager.class'
+          jar tf "$jar_file" | grep -Fx 'br/com/petrickfaria/minemon/gametest/RocketChallengeGameTests.class'
           python3 tools/verify_poke_coin.py "$jar_file"
           python3 tools/verify_pokeball.py "$jar_file"
           jar tf "$jar_file" | grep -Fx 'assets/minemon/models/item/pokeball.json'

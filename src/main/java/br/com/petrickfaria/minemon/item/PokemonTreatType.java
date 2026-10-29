@@ -1,6 +1,6 @@
 package br.com.petrickfaria.minemon.item;
 
-/** The 16 element-specific Pokémon treats in the first release. */
+/** Element-specific Pokémon treats. */
 public enum PokemonTreatType {
     AQUATIC("aquatic_treat", "water"), FROZEN("frozen_treat", "ice"),
     DRAGON("dragon_treat", "dragon"), ELECTRIC("electric_treat", "electric"),
@@ -9,7 +9,8 @@ public enum PokemonTreatType {
     FIGHTING("fighting_treat", "fighting"), STEEL("steel_treat", "steel"),
     NORMAL("normal_treat", "normal"), ROCK("rock_treat", "rock"),
     PSYCHIC("psychic_treat", "psychic"), GROUND("ground_treat", "ground"),
-    POISON("poison_treat", "poison"), FLYING("flying_treat", "flying");
+    POISON("poison_treat", "poison"), FLYING("flying_treat", "flying"),
+    GRASS("grass_treat", "grass");
 
     private final String itemId;
     private final String pokemonType;

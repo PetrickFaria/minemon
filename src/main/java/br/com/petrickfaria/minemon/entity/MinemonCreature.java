@@ -72,6 +72,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     private int surfaceTick;
     private double cachedSurface;
     private static final EntityDataAccessor<Boolean> SPONTANEOUS_RUN = SynchedEntityData.defineId(MinemonCreature.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> ROCKET_SPECIAL = SynchedEntityData.defineId(MinemonCreature.class, EntityDataSerializers.BOOLEAN);
     private static final java.util.UUID SPONTANEOUS_RUN_SPEED_ID = java.util.UUID.fromString("b4db65e0-39b8-43a6-a454-3c6e9f16d920");
     private static final AttributeModifier SPONTANEOUS_RUN_SPEED = new AttributeModifier(
             SPONTANEOUS_RUN_SPEED_ID, "Minemon spontaneous natural run", 0.55D, AttributeModifier.Operation.MULTIPLY_TOTAL);
@@ -176,11 +177,15 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         this.entityData.define(NATURAL_SURFACE, SpeciesBehaviorProfiles.profile(this.getSpeciesSlug())==SpeciesBehaviorProfiles.Profile.AQUATIC_SURFACE);
         this.entityData.define(SLEEPING, false);
         this.entityData.define(SPONTANEOUS_RUN, false);
+        this.entityData.define(ROCKET_SPECIAL, false);
     }
 
     @Override public void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
         tag.putInt("MinemonPokemonLevel", this.getPokemonLevel());
+        tag.putBoolean("MinemonRocketSpecial", this.isRocketSpecial());
+        if (this.getPersistentData().hasUUID("RocketVillager"))
+            tag.putUUID("MinemonRocketVillager", this.getPersistentData().getUUID("RocketVillager"));
         tag.putBoolean("MinemonSleeping", this.isSleeping());
         tag.putBoolean("NightRoutine",this.nightRoutine);
         tag.putInt("WakeGraceTicks",this.wakeGraceTicks);
@@ -193,6 +198,8 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     @Override public void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
         this.setPokemonLevel(tag.contains("MinemonPokemonLevel") ? tag.getInt("MinemonPokemonLevel") : 1);
+        this.setRocketSpecial(tag.getBoolean("MinemonRocketSpecial"));
+        if (tag.hasUUID("MinemonRocketVillager")) this.getPersistentData().putUUID("RocketVillager", tag.getUUID("MinemonRocketVillager"));
         this.setSleeping(tag.getBoolean("MinemonSleeping"));
         this.nightRoutine=tag.getBoolean("NightRoutine");
         this.wakeGraceTicks=tag.getInt("WakeGraceTicks");
@@ -210,6 +217,9 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     /** Minimal persistent level field; the mod does not currently implement XP progression. */
     public int getPokemonLevel() { return Math.max(1, this.pokemonLevel); }
     public void setPokemonLevel(int level) { this.pokemonLevel = Math.max(1, level); }
+    public boolean isRocketSpecial() { return this.entityData.get(ROCKET_SPECIAL); }
+    public void setRocketSpecial(boolean special) { this.entityData.set(ROCKET_SPECIAL, special); }
+    public void setRocketVillager(UUID villager) { this.getPersistentData().putUUID("RocketVillager", villager); }
 
     /** Capture is blocked while the Pokémon is sleeping, breeding, or engaged in combat. */
     public boolean canBeStoredInPokeball() {
@@ -395,11 +405,31 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     @Override
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
         ItemStack held = player.getItemInHand(hand);
+        // Let Item#interactLivingEntity receive the click; the owner sit toggle below
+        // otherwise consumes it before the Pokébola can capture the creature.
+        if (held.getItem() instanceof br.com.petrickfaria.minemon.item.PokeballItem) {
+            return InteractionResult.PASS;
+        }
         if (held.getItem() instanceof PokemonTreatItem treat) {
-            if (this.level.isClientSide) return InteractionResult.sidedSuccess(true);
-            if (!this.isTame() || !this.isOwnedBy(player) || this.getTarget() != null || this.attackAnimationTicks > 0
-                    || !PokemonTreatTypes.accepts(this.getSpeciesSlug(), treat.getTreatType().pokemonType()))
+            boolean compatible = PokemonTreatTypes.accepts(this.getSpeciesSlug(), treat.getTreatType().pokemonType());
+            if (this.level.isClientSide) return InteractionResult.sidedSuccess(compatible);
+            if (!compatible || this.getTarget() != null || this.attackAnimationTicks > 0)
                 return InteractionResult.sidedSuccess(false);
+            if (!this.isTame()) {
+                if (!player.getAbilities().instabuild) held.shrink(1);
+                int chance = MinemonConfig.TAME_CHANCE_PERCENT.get();
+                if (this.getRandom().nextInt(100) < chance) {
+                    this.tame(player);
+                    this.setOrderedToSit(true);
+                    this.setTarget(null);
+                    this.getNavigation().stop();
+                    this.level.broadcastEntityEvent(this, (byte) 7);
+                } else {
+                    this.level.broadcastEntityEvent(this, (byte) 6);
+                }
+                return InteractionResult.sidedSuccess(false);
+            }
+            if (!this.isOwnedBy(player)) return InteractionResult.sidedSuccess(false);
             float maximum = this.getMaxHealth();
             if (this.getHealth() < maximum) {
                 float amount = Math.min((float)MinemonConfig.TREAT_HEAL_AMOUNT.get(), maximum - this.getHealth());
@@ -417,20 +447,8 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
             }
             return InteractionResult.sidedSuccess(false);
         }
-        if (!this.isTame() && held.is(Items.BONE)) {
-            if (!this.level.isClientSide) {
-                if (!player.getAbilities().instabuild) held.shrink(1);
-                int chance = MinemonConfig.TAME_CHANCE_PERCENT.get();
-                if (this.getRandom().nextInt(100) < chance) {
-                    this.tame(player);
-                    this.setOrderedToSit(true);
-                    this.setTarget(null);
-                    this.getNavigation().stop();
-                    this.level.broadcastEntityEvent(this, (byte) 7);
-                } else {
-                    this.level.broadcastEntityEvent(this, (byte) 6);
-                }
-            }
+        // TamableAnimal has vanilla bone taming; handle it here without mutation.
+        if (held.is(Items.BONE)) {
             return InteractionResult.sidedSuccess(this.level.isClientSide);
         }
 
@@ -475,8 +493,30 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         if (!this.level.isClientSide) {
             this.tickNaturalCycle();
             this.tickCustomSoundTimer();
+            // Keep the challenge entity in the Rocket workstation's loaded area so an
+            // unloaded chunk cannot look like a vanished Rattata and spawn a duplicate.
+            if (this.isRocketSpecial() && this.getPersistentData().hasUUID("RocketVillager")
+                    && this.level instanceof ServerLevel serverLevel) {
+                var linked = serverLevel.getEntity(this.getPersistentData().getUUID("RocketVillager"));
+                if (linked instanceof net.minecraft.world.entity.npc.Villager villager
+                        && this.distanceToSqr(villager) > 36.0D * 36.0D) {
+                    this.moveTo(villager.getX() + 1.5D, villager.getY(), villager.getZ() + 0.5D,
+                            this.getYRot(), this.getXRot());
+                    this.setTarget(null);
+                    this.getNavigation().stop();
+                }
+            }
         }
         if (this.level.isClientSide) {
+            if (this.isRocketSpecial() && !this.isDeadOrDying() && this.tickCount % 3 == 0) {
+                double spread = Math.max(0.15D, this.getBbWidth() * 0.38D);
+                this.level.addParticle(new net.minecraft.core.particles.DustParticleOptions(
+                                new com.mojang.math.Vector3f(0.19F, 0.025F, 0.27F), 1.0F),
+                        this.getX() + (this.random.nextDouble() - 0.5D) * spread,
+                        this.getY() + this.getBbHeight() * (0.35D + this.random.nextDouble() * 0.45D),
+                        this.getZ() + (this.random.nextDouble() - 0.5D) * spread,
+                        0.0D, 0.025D, 0.0D);
+            }
             if ((this.getSpeciesSlug().equals("koffing")||this.getSpeciesSlug().equals("weezing"))
                     && !this.isDeadOrDying() && this.tickCount%5==Math.floorMod(this.getId(),5)) {
                 double radius=this.getBbWidth()*0.35D;

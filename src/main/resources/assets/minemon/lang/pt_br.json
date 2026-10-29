@@ -328,5 +328,6 @@
   "tooltip.minemon.pokeball.species": "Pokémon: %s",
   "tooltip.minemon.pokeball.level": "Nível: %s",
   "tooltip.minemon.pokeball.health": "Vida: %s / %s",
-  "tooltip.minemon.pokeball.owner": "Proprietário: %s"
+  "tooltip.minemon.pokeball.owner": "Proprietário: %s",
+  "item.minemon.grass_treat": "Petisco Vegetal"
 }

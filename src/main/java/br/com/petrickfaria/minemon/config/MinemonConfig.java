@@ -29,7 +29,7 @@ public final class MinemonConfig {
 
     static {
         BUILDER.push("companions");
-        TAME_CHANCE_PERCENT = BUILDER.comment("Chance that a bone tames a wild Minemon (0-100).")
+        TAME_CHANCE_PERCENT = BUILDER.comment("Chance that a compatible elemental treat tames a wild Minemon (0-100).")
                 .defineInRange("tameChancePercent", 33, 0, 100);
         NATURAL_SPAWNING_ENABLED = BUILDER.comment("Natural spawning is disabled until species-specific spawn data is validated.")
                 .define("naturalSpawningEnabled", false);

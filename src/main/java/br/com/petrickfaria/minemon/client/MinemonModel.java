@@ -14,6 +14,8 @@ public class MinemonModel extends AnimatedGeoModel<MinemonCreature> {
 
     @Override
     public ResourceLocation getTextureResource(MinemonCreature entity) {
+        if (entity.isRocketSpecial())
+            return new ResourceLocation(Minemon.MOD_ID, "textures/pokemon/rattata_rocket.png");
         return location(entity, "textures", "textures/pokemon/" + entity.getSpeciesSlug() + "/" + entity.getSpeciesSlug() + ".png");
     }
 

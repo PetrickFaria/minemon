@@ -9,5 +9,6 @@ import net.minecraftforge.registries.RegistryObject;
 public final class ModMenus {
     public static final DeferredRegister<net.minecraft.world.inventory.MenuType<?>> MENUS=DeferredRegister.create(ForgeRegistries.MENU_TYPES,Minemon.MOD_ID);
     public static final RegistryObject<net.minecraft.world.inventory.MenuType<PokecMenu>> POKEC=MENUS.register("pokec",()->IForgeMenuType.create(PokecMenu::new));
+    public static final RegistryObject<net.minecraft.world.inventory.MenuType<RocketTradeMenu>> ROCKET_TRADE=MENUS.register("rocket_trade",()->IForgeMenuType.create(RocketTradeMenu::new));
     private ModMenus(){}
 }

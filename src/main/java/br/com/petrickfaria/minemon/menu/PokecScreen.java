@@ -23,7 +23,8 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
     private static final int LIST_X = 8, LIST_Y = 35, LIST_W = 174, LIST_H = 272, ROW_H = 12;
     private static volatile int syncedCoins;
     private static volatile boolean syncedFreeAvailable = true;
-    private static volatile Set<String> syncedUnlocked = Set.of("bulbasaur", "charmander", "squirtle", "pikachu", "eevee");
+    // Empty until the server sends the current player's real unlock state.
+    private static volatile Set<String> syncedUnlocked = Set.of();
     private static volatile Map<String, Integer> syncedDeposits = Map.of();
     private static volatile Map<String, Integer> syncedPrices = Map.of();
     private static volatile Map<String, Integer> syncedRequirements = Map.of();
@@ -88,10 +89,17 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         return mouseClicked(x, y, 0) && selectedSlug.equals(slug);
     }
     public boolean selectedSpeciesForSmokeTest(String slug) { return selectedSlug.equals(slug); }
+    public boolean previewExistsForSmokeTest(String slug) { return previews.containsKey(slug); }
+    public boolean speciesUnlockedForSmokeTest(String slug) { return syncedUnlocked.contains(slug); }
+    public boolean conversionSlotsBelowListForSmokeTest() { return 348 > LIST_Y + LIST_H && 20 + 36 < LIST_X + LIST_W; }
+    public float previewScaleForSmokeTest(String slug) {
+        var definition = SpeciesDefinitions.get(slug);
+        return definition == null ? 0.0F : computePreviewScale(definition.width(), definition.height(), definition.scale());
+    }
 
     @Override protected void init() {
         uiScale = Math.min(1.0F, Math.min((width - 8.0F) / LOGICAL_WIDTH, (height - 8.0F) / LOGICAL_HEIGHT));
-        uiScale = Math.max(0.55F, uiScale);
+        uiScale = Math.max(0.1F, uiScale);
         imageWidth = Math.round(LOGICAL_WIDTH * uiScale);
         imageHeight = Math.round(LOGICAL_HEIGHT * uiScale);
         super.init();
@@ -138,6 +146,7 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         int thumbHeight = Math.max(18, (visible * ROW_H * visible) / Math.max(1, ordered.size()));
         int thumbY = trackY + (maxScroll == 0 ? 0 : (visible * ROW_H - thumbHeight) * scrollOffset / maxScroll);
         GuiComponent.fill(pose, trackX, thumbY, trackX + 2, thumbY + thumbHeight, 0xFF53B9E7);
+        drawLeftConversion(pose);
         drawSelectedPanel(pose, partialTick, mouseX, mouseY);
         pose.popPose();
     }
@@ -159,7 +168,14 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         int x = 200;
         font.draw(pose, String.format(Locale.ROOT, "%03d  %s", species.number(), species.name()), x, 37, 0xFFEAF8FF);
         font.draw(pose, rarityLabel(species.rarity()), 426, 38, 0xFF78D7F6);
-        renderPreview(pose, species, 354, 119, partialTick);
+        if (unlocked) {
+            renderPreview(pose, species, 354, 119, partialTick);
+        } else {
+            drawPanel(pose, 220, 48, 268, 112);
+            GuiComponent.fill(pose, 222, 50, 486, 158, 0xFF080D12);
+            drawCentered(pose, "?", 354, 72, 0xFF82919B);
+            drawCentered(pose, "ESPÉCIE BLOQUEADA", 354, 132, 0xFF9BAFBD);
+        }
         GuiComponent.fill(pose, 205, 164, 498, 165, 0xFF2B536B);
 
         if (evolution) {
@@ -211,12 +227,7 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         }
 
         GuiComponent.fill(pose, 205, 296, 498, 297, 0xFF2B536B);
-        font.draw(pose, "CONVERSÃO EM ALMAS", 207, 301, 0xFF72CFF5);
-        font.draw(pose, "Entrada", 208, 315, 0xFFAFBFCA);
-        font.draw(pose, "Saída", 274, 315, 0xFFAFBFCA);
-        drawConversionSlot(pose, 208, 329, syncedConversionBall, true);
-        drawConversionSlot(pose, 274, 329, syncedConversionOutput, false);
-        drawCentered(pose, "→", 263, 342, 0xFF7AD7FF);
+        font.draw(pose, "RESULTADO DA CONVERSÃO", 207, 301, 0xFF72CFF5);
         if (syncedConversionSpecies.isEmpty()) {
             if (syncedConversionResult >= 0) {
                 font.draw(pose, "Conversão concluída.", 322, 329, 0xFFB9C8D2);
@@ -236,6 +247,16 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         boolean hasInput = !syncedConversionBall.isEmpty() && syncedConversionResult < 0;
         drawButton(pose, 408, 328, 82, 24, syncedConversionConfirming ? "CONFIRMAR" : "CONVERTER", hasInput, mouseX, mouseY);
         if (syncedConversionConfirming) drawButton(pose, 408, 356, 82, 22, "CANCELAR", true, mouseX, mouseY);
+    }
+
+    private void drawLeftConversion(PoseStack pose) {
+        GuiComponent.fill(pose, 8, 313, 182, 314, 0xFF2B536B);
+        font.draw(pose, "CONVERSÃO", 13, 317, 0xFF72CFF5);
+        font.draw(pose, "ENTRADA", 20, 335, 0xFFAFBFCA);
+        font.draw(pose, "SAÍDA", 132, 335, 0xFFAFBFCA);
+        drawConversionSlot(pose, 20, 348, syncedConversionBall, true);
+        drawCentered(pose, "→", 96, 360, 0xFF7AD7FF);
+        drawConversionSlot(pose, 132, 348, syncedConversionOutput, false);
     }
 
     private void drawConversionSlot(PoseStack pose, int x, int y, ItemStack stack, boolean input) {
@@ -337,8 +358,7 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         entity.setYRot(180.0F + (float) Math.sin(entity.tickCount * .006F) * 4.0F);
         entity.yRotO = entity.getYRot();
         var def = SpeciesDefinitions.get(species.slug());
-        float span = Math.max(def.height() * def.scale(), def.width() * def.scale());
-        float scale = Math.min(82.0F / Math.max(span, .2F), 2.6F);
+        float scale = computePreviewScale(def.width(), def.height(), def.scale());
         pose.pushPose();
         pose.translate(x, y, 120);
         pose.scale(scale, -scale, scale);
@@ -356,6 +376,13 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         }
     }
 
+    private static float computePreviewScale(float width, float height, float modelScale) {
+        float span = Math.max(height * modelScale, width * modelScale);
+        // Fill most of the preview for small species, while scaling giant models
+        // to the same available bounding box without changing world dimensions.
+        return Math.min(112.0F / Math.max(span, .2F), 180.0F);
+    }
+
     @Override public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (button != 0) return super.mouseClicked(mouseX, mouseY, button);
         int x = (int) ((mouseX - leftPos) / uiScale), y = (int) ((mouseY - topPos) / uiScale);
@@ -366,11 +393,11 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         }
         PokecSpecies.Entry species = PokecSpecies.get(selectedSlug);
         if (species == null) return super.mouseClicked(mouseX, mouseY, button);
-        if (inRect(x, y, 208, 329, 36, 36)) {
+        if (inRect(x, y, 20, 348, 36, 36)) {
             MinemonNetwork.performPokecAction(menu.pos(), selectedSlug, syncedConversionBall.isEmpty() ? PokecTransactions.Action.STAGE_POKEBALL : PokecTransactions.Action.RETURN_POKEBALL);
             return true;
         }
-        if (inRect(x, y, 274, 329, 36, 36) && !syncedConversionOutput.isEmpty()) {
+        if (inRect(x, y, 132, 348, 36, 36) && !syncedConversionOutput.isEmpty()) {
             MinemonNetwork.performPokecAction(menu.pos(), selectedSlug, PokecTransactions.Action.CLAIM_CONVERSION_OUTPUT);
             return true;
         }

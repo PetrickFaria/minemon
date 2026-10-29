@@ -122,8 +122,13 @@ public final class CompanionTests {
    br.com.petrickfaria.minemon.config.MinemonConfig.TAME_CHANCE_PERCENT.set(100);
    p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.BONE,2));
    b.mobInteract(p,net.minecraft.world.InteractionHand.MAIN_HAND);
-   check(h,b.isTame()&&p.getUUID().equals(b.getOwnerUUID())&&b.isOrderedToSit(),"Bone interaction must tame, assign owner and sit");
-   check(h,p.getMainHandItem().getCount()==1,"Survival taming must consume one bone");
+   check(h,!b.isTame(),"Bone interaction must never tame a Minemon");
+   check(h,p.getMainHandItem().getCount()==2,"Bone interaction must preserve the bone stack");
+   var treat=br.com.petrickfaria.minemon.registry.ModItems.TREATS.get(br.com.petrickfaria.minemon.item.PokemonTreatType.GRASS).get().getDefaultInstance();
+   p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,treat);
+   b.mobInteract(p,net.minecraft.world.InteractionHand.MAIN_HAND);
+   check(h,b.isTame()&&p.getUUID().equals(b.getOwnerUUID())&&b.isOrderedToSit(),"Compatible Grass Treat must tame, assign owner and sit");
+   check(h,treat.isEmpty(),"Successful survival treat taming must consume one treat");
    p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,net.minecraft.world.item.ItemStack.EMPTY);
    b.mobInteract(p,net.minecraft.world.InteractionHand.MAIN_HAND);check(h,!b.isOrderedToSit(),"Owner must be able to order standing");
    b.mobInteract(p,net.minecraft.world.InteractionHand.MAIN_HAND);check(h,b.isOrderedToSit(),"Owner must be able to order sitting");

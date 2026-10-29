@@ -328,5 +328,6 @@
   "tooltip.minemon.pokeball.species": "Pokémon: %s",
   "tooltip.minemon.pokeball.level": "Level: %s",
   "tooltip.minemon.pokeball.health": "Health: %s / %s",
-  "tooltip.minemon.pokeball.owner": "Owner: %s"
+  "tooltip.minemon.pokeball.owner": "Owner: %s",
+  "item.minemon.grass_treat": "Grass Treat"
 }

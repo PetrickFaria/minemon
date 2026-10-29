@@ -61,6 +61,7 @@ ROCKET_RESOURCES = frozenset({
     "src/main/resources/assets/minemon_gen1/textures/entity/villager/profession/rocket.png.mcmeta",
     "src/main/resources/assets/minemon_gen1/textures/entity/zombie_villager/profession/rocket.png",
     "src/main/resources/assets/minemon_gen1/textures/entity/zombie_villager/profession/rocket.png.mcmeta",
+    "src/main/resources/assets/minemon/textures/pokemon/rattata_rocket.png",
     "src/main/resources/data/minecraft/tags/point_of_interest_type/acquirable_job_site.json",
     "src/main/resources/data/minemon_gen1/loot_tables/blocks/rocket_block.json",
 })
@@ -73,7 +74,7 @@ TREAT_RESOURCES = frozenset(
         "aquatic_treat", "frozen_treat", "dragon_treat", "electric_treat",
         "ghost_treat", "fairy_treat", "fire_treat", "bug_treat",
         "fighting_treat", "steel_treat", "normal_treat", "rock_treat",
-        "psychic_treat", "ground_treat", "poison_treat", "flying_treat",
+        "psychic_treat", "ground_treat", "poison_treat", "flying_treat", "grass_treat",
         "poke_coin", "pokeball",
     )
 )

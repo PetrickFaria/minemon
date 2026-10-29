@@ -54,7 +54,7 @@ processResources {
         // of the mod's source assets are repackaged as minemon_gen1.
         def customItemIds = ['aquatic_treat','bug_treat','dragon_treat','electric_treat','fairy_treat',
                         'fighting_treat','fire_treat','flying_treat','frozen_treat','ghost_treat',
-                        'ground_treat','normal_treat','poison_treat','psychic_treat','rock_treat','steel_treat',
+                        'ground_treat','grass_treat','normal_treat','poison_treat','psychic_treat','rock_treat','steel_treat',
                         'poke_coin','pokeball']
         customItemIds.each { id ->
             ['models/item/' + id + '.json', 'textures/item/' + id + '.png'].each { relativePath ->
@@ -66,6 +66,13 @@ processResources {
                 target.bytes = source.bytes
             }
         }
+        // The special Rocket Rattata has its own red-eye texture; ordinary Rattata
+        // continues to use the selected source texture unchanged.
+        def rocketEyeSource = new File(sourceRoot, 'assets/minemon/textures/pokemon/rattata_rocket.png')
+        if (!rocketEyeSource.isFile()) throw new GradleException('Missing Rocket Rattata texture')
+        def rocketEyeTarget = new File(destinationRoot, 'assets/minemon_gen1/textures/pokemon/rattata_rocket.png')
+        rocketEyeTarget.parentFile.mkdirs()
+        rocketEyeTarget.bytes = rocketEyeSource.bytes
         ['en_us.json','pt_br.json'].each { name ->
             def source = new File(sourceRoot, "assets/minemon/lang/${name}")
             def target = new File(destinationRoot, "assets/minemon_gen1/lang/${name}")

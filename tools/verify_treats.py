@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify that the 16 Pokémon treat items have complete, unique client assets."""
+"""Verify that the 17 Pokémon treat items have complete, unique client assets."""
 from __future__ import annotations
 import hashlib, json, struct, sys, zipfile
 from pathlib import Path
@@ -12,8 +12,9 @@ NAMES={
     'fire_treat':'Petisco Incandescente','bug_treat':'Petisco Insectóide','fighting_treat':'Petisco Marcial',
     'steel_treat':'Petisco Metálico','normal_treat':'Petisco Comum','rock_treat':'Petisco Petrificado',
     'psychic_treat':'Petisco Psicodélico','ground_treat':'Petisco Barroso','poison_treat':'Petisco Venenoso',
+    'grass_treat':'Petisco Vegetal',
     'flying_treat':'Petisco Voador'}
-assert len(NAMES)==16
+assert len(NAMES)==17
 hashes=set()
 for item,name in NAMES.items():
     model=json.loads((ASSETS/'models/item'/f'{item}.json').read_text())
@@ -48,4 +49,4 @@ if len(sys.argv)>1:
         for path in ('br/com/petrickfaria/minemon/item/PokemonTreatItem.class',
                      'br/com/petrickfaria/minemon/pokec/PokemonTreatTypes.class'):
             assert path in names, f'missing compiled treat class: {path}'
-print('PASS: 16 unique treat models/textures and pt_br/en_us names verified'+(' in JAR' if len(sys.argv)>1 else ''))
+print('PASS: 17 unique treat models/textures and pt_br/en_us names verified'+(' in JAR' if len(sys.argv)>1 else ''))

@@ -52,8 +52,8 @@ public final class PokemonTreatGameTests {
     private static void tame(MinemonCreature mob, ServerPlayer owner) { mob.tame(owner); mob.setOrderedToSit(false); }
 
     @GameTest(template="test_arena", timeoutTicks=100)
-    public static void allSixteenTreatItemsAndModernTypeOverrides(GameTestHelper h) {
-        check(h, ModItems.TREATS.size()==16, "Exactly 16 treats must be registered");
+    public static void allSeventeenTreatItemsAndModernTypeOverrides(GameTestHelper h) {
+        check(h, ModItems.TREATS.size()==17, "Exactly 17 treats must be registered");
         for (PokemonTreatType type : PokemonTreatType.values()) {
             var item=ModItems.TREATS.get(type).get();
             var id=net.minecraftforge.registries.ForgeRegistries.ITEMS.getKey(item);
@@ -66,7 +66,28 @@ public final class PokemonTreatGameTests {
         check(h, PokemonTreatTypes.accepts("gyarados","water")&&PokemonTreatTypes.accepts("gyarados","flying"), "Both Gyarados types must match");
         check(h, PokemonTreatTypes.accepts("clefairy","fairy")&&PokemonTreatTypes.accepts("jigglypuff","fairy")&&PokemonTreatTypes.accepts("mrmime","fairy"), "Modern Fairy types must match");
         check(h, PokemonTreatTypes.accepts("magnemite","steel")&&PokemonTreatTypes.accepts("magneton","steel"), "Modern Steel types must match");
+        check(h, PokemonTreatTypes.accepts("bulbasaur","grass")&&PokemonTreatTypes.accepts("oddish","grass"), "Grass treats must match Grass Pokémon");
         check(h, !PokemonTreatTypes.accepts("bulbasaur","fire"), "Incompatible types must not match");
+        h.succeed();
+    }
+
+    @GameTest(template="test_arena", timeoutTicks=100)
+    public static void compatibleGrassTreatTamesAndBoneDoesNot(GameTestHelper h) {
+        floor(h); ServerPlayer owner=player(h,new BlockPos(3,1,3),GameType.SURVIVAL);
+        MinemonCreature bulbasaur=spawn(h,"bulbasaur",new BlockPos(5,1,5));
+        int previous=br.com.petrickfaria.minemon.config.MinemonConfig.TAME_CHANCE_PERCENT.get();
+        try {
+            br.com.petrickfaria.minemon.config.MinemonConfig.TAME_CHANCE_PERCENT.set(100);
+            var bone=new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.BONE,2);
+            owner.setItemInHand(InteractionHand.MAIN_HAND,bone);
+            bulbasaur.mobInteract(owner,InteractionHand.MAIN_HAND);
+            check(h,!bulbasaur.isTame()&&bone.getCount()==2,"Bone must not tame or be consumed");
+            var grass=ModItems.TREATS.get(PokemonTreatType.GRASS).get().getDefaultInstance();
+            owner.setItemInHand(InteractionHand.MAIN_HAND,grass);
+            bulbasaur.mobInteract(owner,InteractionHand.MAIN_HAND);
+            check(h,bulbasaur.isTame()&&owner.getUUID().equals(bulbasaur.getOwnerUUID()),"Compatible grass treat must tame and assign owner");
+            check(h,grass.isEmpty(),"Successful treat taming consumes one treat");
+        } finally { br.com.petrickfaria.minemon.config.MinemonConfig.TAME_CHANCE_PERCENT.set(previous); }
         h.succeed();
     }
 

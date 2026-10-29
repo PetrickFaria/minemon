@@ -5,6 +5,7 @@ import br.com.petrickfaria.minemon.registry.ModEntities;
 import br.com.petrickfaria.minemon.registry.ModParticles;
 import br.com.petrickfaria.minemon.menu.ModMenus;
 import br.com.petrickfaria.minemon.menu.PokecScreen;
+import br.com.petrickfaria.minemon.menu.RocketTradeScreen;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.client.event.RegisterParticleProvidersEvent;
@@ -27,7 +28,10 @@ public final class ClientEvents {
 
     @SubscribeEvent
     public static void registerScreens(FMLClientSetupEvent event){
-        event.enqueueWork(() -> MenuScreens.register(ModMenus.POKEC.get(), PokecScreen::new));
+        event.enqueueWork(() -> {
+            MenuScreens.register(ModMenus.POKEC.get(), PokecScreen::new);
+            MenuScreens.register(ModMenus.ROCKET_TRADE.get(), RocketTradeScreen::new);
+        });
     }
 
     private ClientEvents() {}

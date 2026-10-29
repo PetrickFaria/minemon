@@ -16,6 +16,11 @@ public final class PokemonTreatClientSmokeTest {
     private static boolean worldOpening;
     private static boolean pokecUiPhase;
     private static boolean pokecSelectionPhase;
+    private static boolean pokecUnlockedPreviewPhase;
+    private static boolean pokeballPhase;
+    private static boolean pokeballInteractionSent;
+    private static volatile int pokeballFixtureEntityId = -1;
+    private static volatile boolean pokeballCaptureVerified;
     private static int worldWaitTicks;
     public static void tick(TickEvent.ClientTickEvent event) {
         if (done || event.phase != TickEvent.Phase.END || !Boolean.getBoolean("minemon.clientSmokeTest")
@@ -36,16 +41,84 @@ public final class PokemonTreatClientSmokeTest {
         }
         if (clientTicks < 20) return;
         try {
+            if (pokeballPhase) {
+                var server = minecraft.getSingleplayerServer();
+                if (server == null || minecraft.player == null || minecraft.level == null)
+                    throw new IllegalStateException("Pokébola interaction smoke requires the integrated client world");
+                if (pokeballFixtureEntityId < 0) {
+                    pokeballFixtureEntityId = -2;
+                    server.execute(() -> {
+                        var owner = server.getPlayerList().getPlayer(minecraft.player.getUUID());
+                        var level = server.getLevel(net.minecraft.world.level.Level.OVERWORLD);
+                        if (owner == null || level == null) return;
+                        var type = br.com.petrickfaria.minemon.registry.ModEntities.SPECIES.get("pikachu");
+                        var creature = type == null ? null : type.get().create(level);
+                        if (creature == null) return;
+                        creature.tame(owner);
+                        creature.setOrderedToSit(false);
+                        creature.moveTo(owner.getX() + 2.0D, owner.getY(), owner.getZ(), owner.getYRot(), 0.0F);
+                        if (level.addFreshEntity(creature)) {
+                            owner.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,
+                                    new net.minecraft.world.item.ItemStack(ModItems.POKEBALL.get()));
+                            pokeballFixtureEntityId = creature.getId();
+                        }
+                    });
+                    return;
+                }
+                if (pokeballFixtureEntityId == -2) return;
+                var target = minecraft.level.getEntity(pokeballFixtureEntityId);
+                if (!pokeballInteractionSent && target instanceof br.com.petrickfaria.minemon.entity.MinemonCreature) {
+                    minecraft.setScreen(null);
+                    minecraft.player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,
+                            new net.minecraft.world.item.ItemStack(ModItems.POKEBALL.get()));
+                    minecraft.gameMode.interact(minecraft.player, target, net.minecraft.world.InteractionHand.MAIN_HAND);
+                    pokeballInteractionSent = true;
+                    clientTicks = 0;
+                    return;
+                }
+                if (pokeballCaptureVerified) {
+                    var held = minecraft.player.getMainHandItem();
+                    if (!br.com.petrickfaria.minemon.item.PokeballItem.isOccupied(held)) return;
+                    java.nio.file.Files.writeString(java.nio.file.Path.of("client-validation-treats.txt"),
+                            "[TREAT CLIENT] PASS: grass treat resources, PokéC locked/unlocked preview rules, and live Pokébola entity interaction captured an owned creature\n"
+                                    + "PokéCoin and Pokébola models, translations, textures, and creative entries loaded\n");
+                    done = true;
+                    System.out.println("[TREAT CLIENT] PASS: real client right-click interaction captured the owned Pikachu into the Pokébola");
+                    System.out.println("PokéCoin and Pokébola models, translations, textures, and creative entries loaded");
+                    minecraft.execute(minecraft::stop);
+                    return;
+                }
+                if (pokeballInteractionSent) {
+                    server.execute(() -> {
+                        var owner = server.getPlayerList().getPlayer(minecraft.player.getUUID());
+                        var level = server.getLevel(net.minecraft.world.level.Level.OVERWORLD);
+                        if (owner != null && level != null && br.com.petrickfaria.minemon.item.PokeballItem.isOccupied(owner.getMainHandItem())
+                                && level.getEntity(pokeballFixtureEntityId) == null) pokeballCaptureVerified = true;
+                    });
+                    if (clientTicks > 400) throw new IllegalStateException("Live client Pokébola interaction did not capture the owned Pokémon");
+                }
+                return;
+            }
+            if (pokecUnlockedPreviewPhase) {
+                if (!(minecraft.screen instanceof PokecScreen screen) || !screen.selectedSpeciesForSmokeTest("bulbasaur")
+                        || !screen.previewExistsForSmokeTest("bulbasaur"))
+                    throw new IllegalStateException("Unlocked Bulbasaur preview was not instantiated after selection");
+                pokeballPhase = true;
+                pokeballFixtureEntityId = -1;
+                clientTicks = 0;
+                return;
+            }
             if (pokecSelectionPhase) {
                 if (!(minecraft.screen instanceof PokecScreen screen) || !screen.selectedSpeciesForSmokeTest("mew"))
                     throw new IllegalStateException("PokéC list click did not select Mew in the detail panel");
-                java.nio.file.Files.writeString(java.nio.file.Path.of("client-validation-treats.txt"),
-                        "[TREAT CLIENT] PASS: resources, 151-species list, list selection, and animated PokéC preview rendered\n"
-                                + "PokéCoin and Pokébola models, translations, textures, and creative entries loaded\n");
-                done = true;
-                System.out.println("[TREAT CLIENT] PASS: resources, 151-species list, list selection, and animated PokéC preview rendered");
-                System.out.println("PokéCoin and Pokébola models, translations, textures, and creative entries loaded");
-                minecraft.execute(minecraft::stop);
+                if (screen.speciesUnlockedForSmokeTest("mew") && !screen.previewExistsForSmokeTest("mew"))
+                    throw new IllegalStateException("Unlocked Mew preview was not created");
+                if (!screen.speciesUnlockedForSmokeTest("mew") && screen.previewExistsForSmokeTest("mew"))
+                    throw new IllegalStateException("Locked Mew preview must not be instantiated");
+                if (!screen.clickSpeciesForSmokeTest("bulbasaur"))
+                    throw new IllegalStateException("PokéC list could not return to Bulbasaur through its click handler");
+                pokecUnlockedPreviewPhase = true;
+                clientTicks = 0;
                 return;
             }
             if (pokecUiPhase) {
@@ -53,6 +126,10 @@ public final class PokemonTreatClientSmokeTest {
                     throw new IllegalStateException("PokéC selector closed during focused UI render check");
                 if (screen.catalogSizeForSmokeTest() != 151)
                     throw new IllegalStateException("PokéC UI did not load the complete 151-species list");
+                if (!screen.conversionSlotsBelowListForSmokeTest())
+                    throw new IllegalStateException("PokéC conversion slots must remain below the left Pokédex list");
+                if (screen.previewScaleForSmokeTest("pikachu") <= screen.previewScaleForSmokeTest("onix"))
+                    throw new IllegalStateException("PokéC preview should scale Pikachu larger than giant Onix");
                 if (!screen.clickSpeciesForSmokeTest("mew"))
                     throw new IllegalStateException("PokéC list could not select Mew through its click handler");
                 pokecSelectionPhase = true;
@@ -62,7 +139,7 @@ public final class PokemonTreatClientSmokeTest {
             NonNullList<net.minecraft.world.item.ItemStack> tab=NonNullList.create();
             ModItems.MINEMON_TAB.fillItemList(tab);
             long treatCount=tab.stream().filter(stack->stack.getItem() instanceof br.com.petrickfaria.minemon.item.PokemonTreatItem).count();
-            if (treatCount != 16) throw new IllegalStateException("Creative tab exposes "+treatCount+" treats instead of 16");
+            if (treatCount != 17) throw new IllegalStateException("Creative tab exposes "+treatCount+" treats instead of 17");
             for (var entry : ModItems.TREATS.entrySet()) {
                 var item=entry.getValue().get();
                 var id=net.minecraftforge.registries.ForgeRegistries.ITEMS.getKey(item);
@@ -72,6 +149,11 @@ public final class PokemonTreatClientSmokeTest {
                 if (model==minecraft.getModelManager().getMissingModel()) throw new IllegalStateException("Missing baked treat model: "+modelId);
                 var key="item.minemon."+entry.getKey().itemId();
                 if (net.minecraft.client.resources.language.I18n.get(key).equals(key)) throw new IllegalStateException("Missing translated treat name: "+key);
+            }
+            try (var texture=PokemonTreatClientSmokeTest.class.getResourceAsStream("/assets/minemon/textures/item/grass_treat.png")) {
+                var image=texture==null?null:javax.imageio.ImageIO.read(texture);
+                if (image==null || image.getWidth()!=16 || image.getHeight()!=16 || !image.getColorModel().hasAlpha())
+                    throw new IllegalStateException("Grass Treat needs a transparent 16x16 pixel texture");
             }
             var coin=ModItems.POKE_COIN.get();
             var coinId=net.minecraftforge.registries.ForgeRegistries.ITEMS.getKey(coin);
@@ -140,6 +222,12 @@ public final class PokemonTreatClientSmokeTest {
         var menu = new PokecMenu(minecraft.player.containerMenu.containerId + 1,
                 minecraft.player.getInventory(), minecraft.player.blockPosition());
         minecraft.setScreen(new PokecScreen(menu, minecraft.player.getInventory(), Component.literal("PokéC")));
+        // This standalone UI smoke uses the same starter unlock snapshot the server
+        // sends for a fresh profile, so locked Mew and unlocked Bulbasaur are deterministic.
+        PokecScreen.updateState(0, true, java.util.Set.of("bulbasaur", "charmander", "squirtle", "pikachu", "eevee"),
+                java.util.Map.of(), java.util.Map.of(), java.util.Map.of(), "bulbasaur", 0, 0,
+                net.minecraft.world.item.ItemStack.EMPTY, net.minecraft.world.item.ItemStack.EMPTY, -1,
+                "", "", "", "", 0, 0, 0, false);
     }
     private PokemonTreatClientSmokeTest() {}
 }

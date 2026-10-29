@@ -109,7 +109,8 @@ final class RocketVillagerClientSmokeTest {
             for (String path : List.of(
                     "/assets/minemon_gen1/textures/entity/villager/profession/rocket.png",
                     "/assets/minemon_gen1/textures/entity/villager/profession/rocket.png.mcmeta",
-                    "/assets/minemon_gen1/textures/entity/zombie_villager/profession/rocket.png")) {
+                    "/assets/minemon_gen1/textures/entity/zombie_villager/profession/rocket.png",
+                    "/assets/minemon_gen1/textures/pokemon/rattata_rocket.png")) {
                 try (var input = RocketVillagerClientSmokeTest.class.getResourceAsStream(path)) {
                     if (input == null) throw new IllegalStateException("Missing Rocket villager visual resource " + path);
                     if (path.endsWith(".png") && javax.imageio.ImageIO.read(input) == null)
@@ -163,6 +164,9 @@ final class RocketVillagerClientSmokeTest {
             if (villager == null) throw new IllegalStateException("Could not create vanilla villager");
             villager.setVillagerData(villager.getVillagerData().setType(TYPES.get(i)).setProfession(VillagerProfession.NONE));
             villager.setVillagerData(villager.getVillagerData().setProfession(ModVillagers.ROCKET.get()));
+            // This fixture validates the profession uniform only; challenge behavior
+            // is exercised by RocketChallengeGameTests.
+            villager.getPersistentData().putBoolean("MinemonRocketChallengeComplete", true);
             villager.setNoAi(true);
             villager.setInvulnerable(true);
             villager.moveTo(x - 3 + i + 0.5D, y, z + 6.0D, 0.0F, 0.0F);
