@@ -66,7 +66,6 @@ public final class PokemonManagementClientSmokeTest {
                     pokemon.setNoAi(true);
                     pokemon.setNoGravity(true);
                     pokemon.tame(owner);
-                    pokemon.setOrderedToSit(true);
                     pokemon.moveTo(owner.getX() + 2.0D, owner.getY(), owner.getZ(), owner.getYRot(), 0.0F);
                     if (level.addFreshEntity(pokemon)) entityId = pokemon.getId();
                 });
@@ -110,25 +109,25 @@ public final class PokemonManagementClientSmokeTest {
                     if (++ticks > 120) throw new IllegalStateException("Pokémon status XP/level state did not sync to the client");
                     return;
                 }
-                minecraft.gameMode.handleInventoryButtonClick(minecraft.player.containerMenu.containerId, 0);
+                minecraft.gameMode.handleInventoryButtonClick(minecraft.player.containerMenu.containerId, 1);
                 phase = 5;
                 ticks = 0;
                 return;
             }
             if (phase == 5) {
                 if (!(minecraft.screen instanceof PokemonInfoScreen screen)
-                        || screen.pokemonForSmokeTest() == null || screen.pokemonForSmokeTest().isOrderedToSit()) {
-                    if (++ticks > 120) throw new IllegalStateException("Seguir command did not clear the sit state");
+                        || screen.pokemonForSmokeTest() == null || !screen.pokemonForSmokeTest().isOrderedToSit()) {
+                    if (++ticks > 120) throw new IllegalStateException("Sentar command did not set the sit state");
                     return;
                 }
-                minecraft.gameMode.handleInventoryButtonClick(minecraft.player.containerMenu.containerId, 1);
+                minecraft.gameMode.handleInventoryButtonClick(minecraft.player.containerMenu.containerId, 0);
                 phase = 6;
                 ticks = 0;
                 return;
             }
             if (phase == 6) {
                 if (!(minecraft.screen instanceof PokemonInfoScreen screen)
-                        || screen.pokemonForSmokeTest() == null || !screen.pokemonForSmokeTest().isOrderedToSit()) {
+                        || screen.pokemonForSmokeTest() == null || screen.pokemonForSmokeTest().isOrderedToSit()) {
                     if (++ticks > 120) {
                         String screenName = minecraft.screen == null ? "null" : minecraft.screen.getClass().getSimpleName();
                         var clientPokemon = minecraft.level == null ? null : minecraft.level.getEntity(entityId);
@@ -137,7 +136,7 @@ public final class PokemonManagementClientSmokeTest {
                                   + " pokemonPos=" + current.position() + " playerPos=" + minecraft.player.position()
                                   + " distanceSqr=" + current.distanceToSqr(minecraft.player)
                                 : " pokemon=untracked";
-                        throw new IllegalStateException("Sentar command did not set the sit state; screen="
+                        throw new IllegalStateException("Seguir command did not clear the sit state; screen="
                                 + screenName + state);
                     }
                     return;
