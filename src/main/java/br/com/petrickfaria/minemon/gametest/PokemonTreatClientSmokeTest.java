@@ -51,11 +51,13 @@ public final class PokemonTreatClientSmokeTest {
                         var owner = server.getPlayerList().getPlayer(minecraft.player.getUUID());
                         var level = server.getLevel(net.minecraft.world.level.Level.OVERWORLD);
                         if (owner == null || level == null) return;
+                        level.setDayTime(6000L);
                         var type = br.com.petrickfaria.minemon.registry.ModEntities.SPECIES.get("pikachu");
                         var creature = type == null ? null : type.get().create(level);
                         if (creature == null) return;
                         creature.tame(owner);
-                        creature.setOrderedToSit(false);
+                        creature.setOrderedToSit(true);
+                        creature.setNoAi(true);
                         creature.moveTo(owner.getX() + 2.0D, owner.getY(), owner.getZ(), owner.getYRot(), 0.0F);
                         if (level.addFreshEntity(creature)) {
                             owner.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,
