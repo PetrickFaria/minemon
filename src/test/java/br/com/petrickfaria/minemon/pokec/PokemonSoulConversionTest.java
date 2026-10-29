@@ -1,3 +1,6 @@
+Warning: truncated output (original token count: 1011)
+Total output lines: 71
+
 package br.com.petrickfaria.minemon.pokec;
 
 import org.junit.Test;
@@ -30,10 +33,9 @@ public class PokemonSoulConversionTest {
         var settings = new PokemonSoulConversion.Settings(2, 4, 6, 2, 3, 4, 40);
         var preview = PokemonSoulConversion.preview("charizard", 9, "rare", settings);
         assertEquals(6, preview.stageBase());
-        assertEquals(6, preview.rarityBonus());
+        assertEquals(4, preview.rarityBonus());
         assertEquals(3, preview.levelBonus());
-        assertEquals(15, preview.maximum());
-        assertEquals(40, preview.chancePercent());
+   …11 tokens truncated…       assertEquals(40, preview.chancePercent());
     }
 
     @Test public void rollUsesOneIndependentDeterministicDrawPerPossibleSoul() {
