@@ -112,11 +112,10 @@ public final class PokecTransactions {
         if (!PokemonBallLedger.get(level).consume(stored.token())) return false;
         int result = PokemonSoulConversion.roll(preview, level.getRandom()::nextDouble);
         int stackLimit = soulItem.get().getMaxStackSize();
-        int inOutput = Math.min(result, stackLimit);
-        ItemStack output = inOutput == 0 ? ItemStack.EMPTY : new ItemStack(soulItem.get(), inOutput);
-        for (int remaining = result - inOutput; remaining > 0; remaining -= Math.min(remaining, stackLimit))
+        for (int remaining = result; remaining > 0; remaining -= Math.min(remaining, stackLimit))
             player.getInventory().placeItemBackInInventory(new ItemStack(soulItem.get(), Math.min(remaining, stackLimit)));
-        menu.setConversionState(player, PokeballItem.emptyBall(ball), output, result);
+        player.getInventory().placeItemBackInInventory(PokeballItem.emptyBall(ball));
+        menu.setConversionState(player, ItemStack.EMPTY, ItemStack.EMPTY, result);
         return true;
     }
 

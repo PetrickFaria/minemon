@@ -22,6 +22,8 @@ public class PokecCatalogTest {
     @Test public void newRarityMigrationKeepsExactlyFiveRanksAndAllPricesFlat(){
         assertEquals("mythic", PokecSpecies.get("mew").rarity());
         for(var species:PokecSpecies.ordered()) assertEquals("all PokéC species have the same price",5,PokecEconomy.get().coins(species.slug()));
+        for(int legacyPrice:new int[]{100,250,600,1500,4000})
+            assertEquals("configured legacy species prices must never override the fixed price",5,PokecEconomy.enforceFixedCoinPrice(legacyPrice));
         assertEquals("rare", PokecEconomy.resolveRarity("very_rare","rare"));
     }
 

@@ -238,14 +238,10 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         GuiComponent.fill(pose, 8, 219, 182, 220, 0xFF2B536B);
         font.draw(pose, "CONVERSÃO DE ALMAS", 13, 223, 0xFF72CFF5);
         font.draw(pose, "ENTRADA", 20, 240, 0xFFAFBFCA);
-        font.draw(pose, "SAÍDA", 132, 240, 0xFFAFBFCA);
         drawConversionSlot(pose, 20, 253, syncedConversionBall, true);
-        drawCentered(pose, "→", 96, 265, 0xFF7AD7FF);
-        drawConversionSlot(pose, 132, 253, syncedConversionOutput, false);
-        String state = syncedConversionResult >= 0 ? "Resultado: " + syncedConversionResult + " alma(s)"
-                : syncedConversionSpecies.isEmpty() ? "Insira uma Pokébola ocupada" : "Máx. " + syncedConversionMaximum + " almas · " + syncedConversionChance + "%";
-        font.draw(pose, state, 13, 293, syncedConversionResult == 0 ? 0xFFFFA1A1 : 0xFFB9C8D2);
-        if (!syncedConversionBall.isEmpty() && syncedConversionResult < 0) {
+        font.draw(pose, syncedConversionBall.isEmpty() ? "Insira uma Pokébola ocupada" : "Confirme para converter",
+                63, 258, 0xFFB9C8D2);
+        if (!syncedConversionBall.isEmpty() && syncedConversionResult < 0 && !syncedConversionSpecies.isEmpty()) {
             drawButton(pose, 20, 307, 152, 22, syncedConversionConfirming ? "CONFIRMAR CONVERSÃO" : "CONVERTER", true, -1, -1);
             if (syncedConversionConfirming) drawButton(pose, 20, 332, 152, 18, "CANCELAR", true, -1, -1);
         }
@@ -405,10 +401,6 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         if (species == null) return super.mouseClicked(mouseX, mouseY, button);
         if (inRect(x, y, 20, 253, 36, 36)) {
             MinemonNetwork.performPokecAction(menu.pos(), selectedSlug, syncedConversionBall.isEmpty() ? PokecTransactions.Action.STAGE_POKEBALL : PokecTransactions.Action.RETURN_POKEBALL);
-            return true;
-        }
-        if (inRect(x, y, 132, 253, 36, 36) && !syncedConversionOutput.isEmpty()) {
-            MinemonNetwork.performPokecAction(menu.pos(), selectedSlug, PokecTransactions.Action.CLAIM_CONVERSION_OUTPUT);
             return true;
         }
         if (inRect(x, y, 20, 307, 152, 22) && !syncedConversionBall.isEmpty() && syncedConversionResult < 0) {

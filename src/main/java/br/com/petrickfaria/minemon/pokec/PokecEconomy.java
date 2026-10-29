@@ -34,8 +34,10 @@ public final class PokecEconomy {
     public static PokecEconomy get() { return active; }
     public int coins(String slug) {
         var species = PokecSpecies.get(slug);
-        return Math.max(0, speciesCoins.getOrDefault(slug, rarityCoins.getOrDefault(rarity(slug), 5)));
+        int configured = speciesCoins.getOrDefault(slug, rarityCoins.getOrDefault(rarity(slug), 5));
+        return enforceFixedCoinPrice(configured);
     }
+    static int enforceFixedCoinPrice(int configured) { return 5; }
     public int souls(String slug) {
         var species = PokecSpecies.get(slug);
         return Math.max(0, speciesSouls.getOrDefault(slug, raritySouls.getOrDefault(species == null ? "common" : rarity(slug), 8)));
@@ -62,7 +64,8 @@ public final class PokecEconomy {
             if (!Files.exists(file)) writeDefaults(file);
             List<String> lines = Files.readAllLines(file, StandardCharsets.UTF_8);
             Map<String,String> values = parse(lines);
-            boolean migratePrices = !"2".equals(values.get("economyVersion"));
+            boolean migratePrices = !"3".equals(values.get("economyVersion"))
+                    || values.entrySet().stream().anyMatch(entry -> entry.getKey().endsWith(".coins") && !"5".equals(entry.getValue()));
             boolean migrateRarities = !"2".equals(values.get("rarityVersion"));
             Map<String,Integer> coins = new HashMap<>(BASE_COINS);
             Map<String,Integer> souls = new HashMap<>(BASE_SOULS);
@@ -104,11 +107,12 @@ public final class PokecEconomy {
             if (migratePrices || migrateRarities) {
                 List<String> migrated = new ArrayList<>();
                 migrated.add("# One-time migration: species prices are 5 PokéCoins; legacy rarity tiers are normalized.");
-                migrated.add("economyVersion = 2");
+                migrated.add("economyVersion = 3");
                 migrated.add("rarityVersion = 2");
                 for (String line : lines) {
                     String trimmed = line.strip();
-                    if (trimmed.startsWith("economyVersion") || trimmed.startsWith("rarityVersion") || trimmed.startsWith("#")) {
+                    if (trimmed.startsWith("economyVersion") || trimmed.startsWith("rarityVersion")) continue;
+                    if (trimmed.startsWith("#")) {
                         migrated.add(line);
                         continue;
                     }
@@ -165,12 +169,12 @@ public final class PokecEconomy {
     }
 
     private static void writeDefaults(Path file) throws IOException {
-        StringBuilder out = new StringBuilder("# PokéC economy. Changes apply after /pokec reload.\neconomyVersion = 2\nrarityVersion = 2\nfirstPurchaseFree = true\n");
+        StringBuilder out = new StringBuilder("# PokéC economy. Changes apply after /pokec reload.\neconomyVersion = 3\nrarityVersion = 2\nfirstPurchaseFree = true\n");
         out.append("starters = [\"bulbasaur\", \"charmander\", \"squirtle\", \"pikachu\", \"eevee\"]\n\n");
         for (String rarity : BASE_COINS.keySet())
             out.append("rarity.").append(rarity).append(".souls = ").append(BASE_SOULS.get(rarity))
                     .append("\nrarity.").append(rarity).append(".coins = 5\n");
-        out.append("\n# Species prices remain individually configurable.\n");
+        out.append("\n# Every Pokémon has a fixed price of exactly 5 PokéCoins.\n");
         for (var species : PokecSpecies.ordered())
             out.append("species.").append(species.slug()).append(".rarity = \"").append(species.rarity())
                     .append("\"\nspecies.").append(species.slug()).append(".coins = 5\n");

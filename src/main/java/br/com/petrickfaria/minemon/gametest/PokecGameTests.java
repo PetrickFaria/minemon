@@ -246,6 +246,9 @@ public final class PokecGameTests {
         check(PokecTransactions.perform(owner,p,"bulbasaur",PokecTransactions.Action.CONFIRM_CONVERSION,0xB02L),"confirmed conversion should complete");
         int result=menu.conversionResult();
         check(result>=0&&result<=maximum,"conversion result must be within the configured maximum");
+        check(menu.conversionOutput().isEmpty(),"conversion must deliver souls directly without keeping a PokéC result slot");
+        check(owner.getInventory().items.stream().filter(stack->ModItems.SOULS.values().stream().anyMatch(item->stack.is(item.get()))).mapToInt(ItemStack::getCount).sum()==result,
+                "confirmed conversion must place its rolled souls directly in the player's inventory");
         check(!PokeballItem.isOccupied(menu.conversionBall()),"confirmed conversion leaves an empty Pokébola");
         check(PokemonBallLedger.get(h.getLevel()).isConsumed(token),"spent token cannot be converted or released a second time");
         check(!PokecTransactions.perform(owner,p,"bulbasaur",PokecTransactions.Action.CONFIRM_CONVERSION,0xB03L),"a second confirm cannot roll or deliver souls again");
