@@ -187,9 +187,21 @@ public final class PokemonTreatClientSmokeTest {
             if(net.minecraft.client.resources.language.I18n.get(ballName).equals(ballName))throw new IllegalStateException("Missing Pokébola translation: "+ballName);
             try(var texture=PokemonTreatClientSmokeTest.class.getResourceAsStream("/assets/minemon/textures/item/pokeball.png")){
                 var image=texture==null?null:javax.imageio.ImageIO.read(texture);
-                if(image==null||image.getWidth()!=32||image.getHeight()!=32||((image.getRGB(0,0)>>>24)&255)!=0)throw new IllegalStateException("Pokébola texture must be 32x32 with transparent corner pixels (image="+(image==null?"missing":image.getWidth()+"x"+image.getHeight()+", alpha="+image.getColorModel().hasAlpha()+", corner="+Integer.toHexString(image.getRGB(0,0)))+")");
-                int upper=image.getRGB(16,8),lower=image.getRGB(16,24),center=image.getRGB(16,16);
+                if(image==null||image.getWidth()!=16||image.getHeight()!=16||((image.getRGB(0,0)>>>24)&255)!=0)throw new IllegalStateException("Pokébola texture must preserve the supplied 16x16 sprite with transparent corner pixels (image="+(image==null?"missing":image.getWidth()+"x"+image.getHeight()+", alpha="+image.getColorModel().hasAlpha()+", corner="+Integer.toHexString(image.getRGB(0,0)))+")");
+                int upper=image.getRGB(8,4),lower=image.getRGB(8,12),center=image.getRGB(8,8);
                 if(((upper>>16)&255)<150||((lower>>16)&255)<180||((lower>>8)&255)<180||((center>>16)&255)<180)throw new IllegalStateException("Pokébola texture is missing its red/white halves or white center button");
+            }
+            var masterBall=ModItems.MASTER_BALL.get();
+            var masterBallId=net.minecraftforge.registries.ForgeRegistries.ITEMS.getKey(masterBall);
+            if(masterBallId==null||!masterBallId.toString().equals("minemon:master_ball"))throw new IllegalStateException("Master Ball has wrong registry ID: "+masterBallId);
+            if(tab.stream().filter(stack->stack.getItem()==masterBall).count()!=1)throw new IllegalStateException("Master Ball must appear exactly once in the Minemon creative tab");
+            var masterBallModelId=new ModelResourceLocation(masterBallId,"inventory");
+            if(minecraft.getModelManager().getModel(masterBallModelId)==minecraft.getModelManager().getMissingModel())throw new IllegalStateException("Missing baked Master Ball model: "+masterBallModelId);
+            var masterBallName="item.minemon.master_ball";
+            if(net.minecraft.client.resources.language.I18n.get(masterBallName).equals(masterBallName))throw new IllegalStateException("Missing Master Ball translation: "+masterBallName);
+            try(var texture=PokemonTreatClientSmokeTest.class.getResourceAsStream("/assets/minemon/textures/item/master_ball.png")){
+                var image=texture==null?null:javax.imageio.ImageIO.read(texture);
+                if(image==null||image.getWidth()!=16||image.getHeight()!=16||!image.getColorModel().hasAlpha())throw new IllegalStateException("Master Ball needs its supplied transparent 16x16 sprite");
             }
             if (minecraft.player == null || minecraft.level == null) {
                 var dataFile = java.nio.file.Path.of("saves/minemon-validation/level.dat").toFile();
