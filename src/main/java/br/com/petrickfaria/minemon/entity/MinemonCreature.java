@@ -552,6 +552,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         // range, but must not start walking after a distant target.
         if (this.isTame() && this.isOrderedToSit() && target.distanceToSqr(this) > 16.0D) return false;
         if (target instanceof MinemonCreature other) {
+            if(other.isDefeated())return false;
             UUID ownerId = this.getOwnerUUID();
             UUID otherOwnerId = other.getOwnerUUID();
             if (ownerId != null && ownerId.equals(otherOwnerId)) return false;
@@ -566,7 +567,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
 
     private static final String BLACK_LIST_KEY = "MinemonBlackList";
     public boolean isBlackListTarget(net.minecraft.world.entity.Mob target) {
-        if (target == null || target == this || target.isInvulnerable() || !target.isAlive()
+        if (target == null || target == this || target instanceof MinemonCreature pokemonTarget && pokemonTarget.isDefeated() || target.isInvulnerable() || !target.isAlive()
                 || this.isOwnerEntity(target)) return false;
         if (target instanceof MinemonCreature pokemon && pokemon.isTame()
                 && this.getOwnerUUID() != null && this.getOwnerUUID().equals(pokemon.getOwnerUUID())) return false;
@@ -941,6 +942,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         level.broadcastEntityEvent(this,(byte)61);return true;
     }
     public boolean isDefeated(){return entityData.get(DEFEATED);}
+    @Override public boolean isPushable(){return !isDefeated() && super.isPushable();}
     @Override public boolean isAlive(){return isDefeated()?!isRemoved():super.isAlive();}
     @Override public boolean isDeadOrDying(){return !isDefeated() && super.isDeadOrDying();}
     @Override public void heal(float amount){if(!isDefeated())super.heal(amount);}

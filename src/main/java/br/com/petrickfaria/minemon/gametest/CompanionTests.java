@@ -240,7 +240,7 @@ public final class CompanionTests {
    for(var bird:birds){bird.setTame(true);bird.setOwnerUUID(UUID.randomUUID());bird.setOrderedToSit(true);}
    ordered=true;
   }
-  if(ordered && birds.stream().allMatch(b->b.isOnGround() && WaterMovementGoal.safeLandingBelow(b))){
+  if(ordered && birds.stream().allMatch(b->b.isOnGround() && WaterMovementGoal.safeDry(b,b.blockPosition()))){
    for(var bird:birds)check(h,bird.isOrderedToSit()&&!bird.isSleeping(),"Commanded flyer must land and remain awake/sitting");
    var positions=birds.stream().map(MinemonCreature::position).toList();
    h.runAfterDelay(30,()->{
