@@ -85,7 +85,7 @@ TREAT_RESOURCES = frozenset(
         "aquatic_treat", "frozen_treat", "dragon_treat", "electric_treat",
         "ghost_treat", "fairy_treat", "fire_treat", "bug_treat",
         "fighting_treat", "steel_treat", "normal_treat", "rock_treat",
-        "psychic_treat", "ground_treat", "poison_treat", "flying_treat", "grass_treat",
+        "psychic_treat", "ground_treat", "poison_treat", "flying_treat", "grass_treat", "dark_treat",
         "poke_coin", "pokeball",
     )
 )
