@@ -25,4 +25,14 @@ public class RefinementRulesTest {
   var gastly=SpeciesDefinitions.get("gastly");
   assertTrue(ModelMetrics.width("gastly",gastly.scale())>gastly.width()*2);
  }
+ @Test public void fractionalBodyWidthsAcceptReachedNativePathNodes(){
+  for(var d:SpeciesDefinitions.ALL.values()){
+   float width=ModelMetrics.width(d.slug(),d.scale());
+   if(width>.75F&&width<1F){
+    double nativeAcceptanceCenter=(width+1F)/2D;
+    double actualSteeringCenter=.5D;
+    assertTrue(d.slug(),nativeAcceptanceCenter-actualSteeringCenter<=width/2D);
+   }
+  }
+ }
 }
