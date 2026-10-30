@@ -131,6 +131,10 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     @Override public void travel(net.minecraft.world.phys.Vec3 input){
         if(!this.level.isClientSide&&!this.isAquaticSpecies()&&!SpeciesBehaviorProfiles.canFly(this.getSpeciesSlug()))
             this.setNoGravity(this.isInWater());
+        if (this.isOrderedToSit()) {
+            input=net.minecraft.world.phys.Vec3.ZERO;
+            this.setSpeed(0); this.setXxa(0); this.setYya(0); this.setZza(0); this.setJumping(false);
+        }
         super.travel(input);
     }
 
@@ -180,6 +184,9 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         if (orderedToSit) {
             this.setSleeping(false); this.entityData.set(NIGHT_REST, false); this.nightRoutine=false;
             this.getNavigation().stop(); this.stopSpontaneousRun(); this.setFollowingRun(false);
+            this.getMoveControl().setWantedPosition(this.getX(),this.getY(),this.getZ(),0);
+            this.setSpeed(0); this.setXxa(0); this.setYya(0); this.setZza(0); this.setJumping(false);
+            this.setDeltaMovement(0,this.getDeltaMovement().y,0);
         }
     }
 

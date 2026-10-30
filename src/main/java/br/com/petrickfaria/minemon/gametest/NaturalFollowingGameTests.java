@@ -18,10 +18,13 @@ import net.minecraftforge.gametest.PrefixGameTestTemplate;
 @GameTestHolder(Minemon.MOD_ID)
 @PrefixGameTestTemplate(false)
 public final class NaturalFollowingGameTests {
-    @GameTest(template="test_arena", timeoutTicks=180)
+    @GameTest(template="test_arena", batch="natural_following", timeoutTicks=180)
     public static void followsWithContinuousMovementThenObeysSit(GameTestHelper h) {
         h.getLevel().setDayTime(1000);
-        for(int x=0;x<40;x++)for(int z=0;z<10;z++)h.setBlock(new BlockPos(x,0,z),Blocks.STONE);
+        for(int x=0;x<40;x++)for(int z=0;z<10;z++) {
+            h.setBlock(new BlockPos(x,0,z),Blocks.STONE);
+            for(int y=1;y<5;y++)h.setBlock(new BlockPos(x,y,z),Blocks.AIR);
+        }
         ServerPlayer owner=new ServerPlayer(h.getLevel().getServer(),h.getLevel(),new GameProfile(UUID.randomUUID(),"FollowOwner"),null);
         owner.connection=new FakePlayer(h.getLevel(),new GameProfile(UUID.randomUUID(),"FollowConnection")).connection;
         BlockPos end=h.absolutePos(new BlockPos(30,1,5));
@@ -43,7 +46,7 @@ public final class NaturalFollowingGameTests {
             mob.setOrderedToSit(true);sitting[0]=mob.position();
         });
         h.runAtTickTime(140,()->{
-            if(mob.position().distanceTo(sitting[0])>.5)h.fail("Sitting companion abandoned its order");
+            if(mob.position().distanceTo(sitting[0])>.5)h.fail("Sitting companion abandoned its order: start="+sitting[0]+" end="+mob.position()+" velocity="+mob.getDeltaMovement()+" target="+mob.getTarget());
             if(mob.isSleeping()||mob.isFollowingRun())h.fail("Sitting must remain awake without following run");
             owner.discard();mob.discard();h.succeed();
         });
