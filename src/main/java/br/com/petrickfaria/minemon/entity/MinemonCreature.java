@@ -140,7 +140,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
             this.moveControl=new WaterAwareMoveControl(this);
             this.dryNavigation=this.navigation;this.escapeNavigation=new EscapeNavigation(this,level);
         }
-        if(this.isAquaticSpecies())this.maxUpStep=1.0F;
+
         this.blinkCooldownTicks = 80 + this.getRandom().nextInt(120);
     }
 
@@ -930,7 +930,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
 
     @Override
     public boolean doHurtTarget(net.minecraft.world.entity.Entity target) {
-        if (!(target instanceof LivingEntity living) || !this.canAttack(living) || !combatReady() || !CombatGeometry.inRange(this,living,.5D) || !getSensing().hasLineOfSight(living)) return false;
+        if (!(target instanceof LivingEntity living) || !this.canAttack(living) || !combatReady() || (isTame() && (!CombatGeometry.inRange(this,living,.5D) || !getSensing().hasLineOfSight(living))) || (!isTame()&&projectileReady())) return false;
         boolean hit=super.doHurtTarget(target);
         if(hit && !this.level.isClientSide){
             if(!isTame())successfulMeleeAttacks++;nextCombatTick=level.getGameTime()+(isTame()?60:50);

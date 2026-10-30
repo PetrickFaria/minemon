@@ -158,8 +158,8 @@ public final class MinemonAquaticCreature extends MinemonCreature {
                 if (MinemonAquaticCreature.this.isInWater()) {
                     if (MinemonAquaticCreature.this.naturalBehaviorActive()
                             && MinemonAquaticCreature.this.isNaturalSurface()
-                            && level.getFluidState(new net.minecraft.core.BlockPos(waypoint)).is(net.minecraft.tags.FluidTags.WATER)
-                            && !ShoreTraversal.exiting(MinemonAquaticCreature.this)) {
+                            && (!SpeciesBehaviorProfiles.isVisitor(getSpeciesSlug()) || level.getFluidState(new net.minecraft.core.BlockPos(waypoint)).is(net.minecraft.tags.FluidTags.WATER)
+                            && !ShoreTraversal.exiting(MinemonAquaticCreature.this))) {
                         double surface=WaterMovementGoal.surfaceAt(MinemonAquaticCreature.this,
                                 new net.minecraft.core.BlockPos(waypoint));
                         // Surface depth is fractional and model-sized. Steering
