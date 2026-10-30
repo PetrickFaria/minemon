@@ -14,7 +14,7 @@ public final class PokemonEvolution {
 
     public static MinemonCreature evolve(ServerPlayer player, MinemonCreature source, String targetSlug) {
         if (player == null || source == null || !(source.level instanceof ServerLevel level)
-                || !source.isAlive() || !source.isTame() || !source.isOwnedBy(player)
+                || source.isDefeated() || !source.isAlive() || !source.isTame() || !source.isOwnedBy(player)
                 || !PokemonEvolutionRules.isValidEdge(source.getSpeciesSlug(), targetSlug)
                 || source.getPokemonLevel() < PokemonEvolutionRules.requiredLevel(source.getSpeciesSlug())) return null;
         PokecSpecies.Entry targetSpecies = PokecSpecies.get(targetSlug);

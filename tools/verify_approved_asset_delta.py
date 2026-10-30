@@ -102,5 +102,8 @@ def is_approved_prior_asset_delta(path, content):
 
 def pokec_resource_paths():
     """Return exact reviewed resources for PokéC, Rocket, treats, Pokébolas, and the breeding egg."""
-    return POKEC_RESOURCES | ROCKET_RESOURCES | TREAT_RESOURCES
+    recipes = frozenset(f"src/main/resources/data/minemon/recipes/{item}_treat.json" for item in (
+        "aquatic", "frozen", "dragon", "electric", "ghost", "fairy", "fire", "bug", "fighting",
+        "steel", "normal", "rock", "psychic", "ground", "poison", "flying", "grass", "dark"))
+    return POKEC_RESOURCES | ROCKET_RESOURCES | TREAT_RESOURCES | recipes
 

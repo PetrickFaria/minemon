@@ -144,8 +144,14 @@ public final class PokeballItem extends Item {
         if (level.isClientSide) return InteractionResultHolder.sidedSuccess(ball, true);
         if (!(player instanceof ServerPlayer serverPlayer) || !(level instanceof ServerLevel serverLevel))
             return InteractionResultHolder.fail(ball);
+        var hit=getPlayerPOVHitResult(level,player,net.minecraft.world.level.ClipContext.Fluid.NONE);
+        if(hit.getType()==net.minecraft.world.phys.HitResult.Type.MISS)
+            hit=getPlayerPOVHitResult(level,player,net.minecraft.world.level.ClipContext.Fluid.ANY);
         net.minecraft.world.phys.Vec3 target = player.position().add(player.getLookAngle().scale(1.5D));
-        BlockPos origin = new BlockPos(target.x, target.y, target.z);
+        BlockPos origin = hit.getType()==net.minecraft.world.phys.HitResult.Type.BLOCK
+                ? (level.getFluidState(hit.getBlockPos()).is(net.minecraft.tags.FluidTags.WATER)
+                   ? hit.getBlockPos() : hit.getBlockPos().relative(hit.getDirection()))
+                : new BlockPos(target.x, target.y, target.z);
         return release(ball, serverPlayer, serverLevel, hand, origin)
                 ? InteractionResultHolder.consume(player.getItemInHand(hand))
                 : InteractionResultHolder.fail(ball);
