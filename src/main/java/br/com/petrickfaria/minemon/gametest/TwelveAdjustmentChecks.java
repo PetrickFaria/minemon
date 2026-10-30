@@ -109,7 +109,13 @@ final class TwelveAdjustmentChecks {
  }
  private static void verifyExactHatching(GameTestHelper h){
   var level=h.getLevel();var pos=h.absolutePos(new BlockPos(12,1,12));
-  var previousFloor=level.getBlockState(pos.below());var previous=level.getBlockState(pos);
+  var previousBlocks=new java.util.LinkedHashMap<BlockPos,net.minecraft.world.level.block.state.BlockState>();
+  // Legacy GameTest templates contain a floor only: prior water batches may
+  // leave fluid above it. Establish an explicit dry, collision-free hatch site.
+  for(int dx=-1;dx<=1;dx++)for(int dz=-1;dz<=1;dz++)for(int dy=-1;dy<=2;dy++){
+   var at=pos.offset(dx,dy,dz);previousBlocks.put(at,level.getBlockState(at));
+   level.setBlock(at,(dy==-1?net.minecraft.world.level.block.Blocks.STONE:net.minecraft.world.level.block.Blocks.AIR).defaultBlockState(),3);
+  }
   var state=ModBlocks.BREEDING_EGG.get().defaultBlockState();var owner=UUID.randomUUID();
   level.setBlock(pos.below(),net.minecraft.world.level.block.Blocks.STONE.defaultBlockState(),3);
   level.setBlock(pos,state,3);
@@ -120,12 +126,12 @@ final class TwelveAdjustmentChecks {
    egg.load(egg.saveWithoutMetadata());
    BreedingEggBlockEntity.serverTick(level,pos,state,egg);
    var hatchlings=level.getEntitiesOfClass(MinemonCreature.class,new net.minecraft.world.phys.AABB(pos).inflate(4),m->owner.equals(m.getOwnerUUID()));
-   if(hatchlings.size()!=1 || !level.getBlockState(pos).isAir())h.fail("Egg did not hatch exactly once at tick 6000");
+   if(hatchlings.size()!=1 || !level.getBlockState(pos).isAir())h.fail("Egg did not hatch exactly once at tick 6000: remaining="+egg.remainingTicks()+" count="+hatchlings.size()+" block="+level.getBlockState(pos)+" data="+egg.saveWithoutMetadata());
    BreedingEggBlockEntity.serverTick(level,pos,state,egg);
    if(level.getEntitiesOfClass(MinemonCreature.class,new net.minecraft.world.phys.AABB(pos).inflate(4),m->owner.equals(m.getOwnerUUID())).size()!=1)h.fail("Egg duplicated hatchling");
   }finally{
    for(var child:level.getEntitiesOfClass(MinemonCreature.class,new net.minecraft.world.phys.AABB(pos).inflate(4),m->owner.equals(m.getOwnerUUID())))child.discard();
-   level.setBlock(pos,previous,3);level.setBlock(pos.below(),previousFloor,3);
+   for(var entry:previousBlocks.entrySet())level.setBlock(entry.getKey(),entry.getValue(),3);
   }
  }
 
