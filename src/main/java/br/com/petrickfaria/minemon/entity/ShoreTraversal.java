@@ -75,7 +75,7 @@ final class ShoreTraversal {
   // nearby path-reachable landing; once on land the normal follow goal closes
   // the remaining distance safely.
   candidates.sort(java.util.Comparator.comparingDouble(p->p.distSqr(owner.blockPosition())+.25*p.distSqr(mob.blockPosition())));
-  int tried=0;
+  int tried=0;BlockPos physicalFallback=null;
   for(var feet:candidates){
    var path=mob.getNavigation().createPath(feet,0);
    if(path!=null&&path.canReach()){
@@ -83,7 +83,16 @@ final class ShoreTraversal {
     mob.getMoveControl().setWantedPosition(feet.getX()+.5D,feet.getY(),feet.getZ()+.5D,speed);
     return true;
    }
-   state.blocked.put(feet,mob.tickCount+200);if(++tried>=12)break;
+   // A one-block bank can be physically jumpable even when an amphibious
+   // path reports it unreachable. Try one safe landing directly; collision
+   // and the existing stall blacklist decide whether another bank is needed.
+   if(physicalFallback==null)physicalFallback=feet;
+   if(++tried>=12)break;
+  }
+  if(physicalFallback!=null){
+   state.bank=physicalFallback;mob.getNavigation().stop();
+   mob.getMoveControl().setWantedPosition(physicalFallback.getX()+.5D,physicalFallback.getY(),physicalFallback.getZ()+.5D,speed);
+   return true;
   }
   return false;
  }

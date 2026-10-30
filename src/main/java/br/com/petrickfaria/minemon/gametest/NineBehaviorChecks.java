@@ -28,6 +28,16 @@ final class NineBehaviorChecks {
   if(mob.getTarget() instanceof net.minecraft.world.entity.monster.Slime slime){
    slime.discard();mob.setTarget(null);
   }
+  if(remaining%50==0){
+   var path=mob.getNavigation().getPath();
+   com.mojang.logging.LogUtils.getLogger().info("SHORE TRACE entering="+entering+" remaining="+remaining
+       +" pos="+mob.position()+" water="+mob.isInWater()+" ground="+mob.isOnGround()
+       +" following="+mob.isFollowingOwner()+" target="+mob.getTarget()
+       +" navDone="+mob.getNavigation().isDone()+" navTarget="+mob.getNavigation().getTargetPos()
+       +" next="+(path==null||path.isDone()?"null":path.getNextEntityPos(mob))
+       +" wanted="+mob.getMoveControl().getWantedX()+","+mob.getMoveControl().getWantedY()+","+mob.getMoveControl().getWantedZ()
+       +" pitch="+mob.getXRot()+" motion="+mob.getDeltaMovement());
+  }
   var origin=h.absolutePos(BlockPos.ZERO);var localXAxis=h.absolutePos(new BlockPos(1,0,0));
   double axisX=localXAxis.getX()-origin.getX(),axisZ=localXAxis.getZ()-origin.getZ();
   double localX=((mob.getX()-origin.getX())*axisX+(mob.getZ()-origin.getZ())*axisZ)/(axisX*axisX+axisZ*axisZ);
