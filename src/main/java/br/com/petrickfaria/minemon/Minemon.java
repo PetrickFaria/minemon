@@ -30,6 +30,7 @@ public final class Minemon {
         ModBlocks.BLOCKS.register(bus);
         br.com.petrickfaria.minemon.registry.ModBlockEntities.TYPES.register(bus);
         ModVillagers.register(bus);
+        br.com.petrickfaria.minemon.registry.ModRecipes.SERIALIZERS.register(bus);
         ModItems.ITEMS.register(bus);
         ModItems.TREAT_ITEMS.register(bus);
         ModMenus.MENUS.register(bus);

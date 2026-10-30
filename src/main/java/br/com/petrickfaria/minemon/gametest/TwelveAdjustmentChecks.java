@@ -42,7 +42,7 @@ final class TwelveAdjustmentChecks {
   var id=new net.minecraft.resources.ResourceLocation("minecraft","creeper");copy.setBlackListOverride(id,true);
   saved=copy.saveWithoutId(new CompoundTag());mob.load(saved);
   if(!mob.isBlackListTarget(creeper))h.fail("Explicit creeper choice did not persist");
-  creeper.setPos(mob.getX()+6,mob.getY(),mob.getZ());if(mob.canAttack(creeper))h.fail("Tamed attacker accepted target beyond five blocks");
+  creeper.setPos(mob.getX()+12,mob.getY(),mob.getZ());if(mob.canAttack(creeper))h.fail("Tamed attacker accepted target beyond ten blocks");
   verifyCombat(h);
   verifyRecipes(h,owner);
   verifyExactHatching(h);
@@ -61,35 +61,34 @@ final class TwelveAdjustmentChecks {
   var point=h.absolutePos(new BlockPos(5,2,5));attacker.moveTo(point.getX()+.5,point.getY(),point.getZ()+.5,0,0);
   attacker.setTame(true);attacker.setOwnerUUID(UUID.randomUUID());attacker.setNoAi(true);
   var cow=EntityType.COW.create(level);cow.moveTo(attacker.getX()+2,attacker.getY(),attacker.getZ(),0,0);
-  cow.setNoAi(true);cow.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).setBaseValue(200);cow.setHealth(200);
-  level.addFreshEntity(cow);
+  cow.setNoAi(true);cow.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).setBaseValue(200);cow.setHealth(200);level.addFreshEntity(cow);
   try{
-   for(int i=0;i<4;i++){
-    cow.invulnerableTime=0;
-    if(!attacker.doHurtTarget(cow))h.fail("Valid melee strike was cancelled at sequence "+i);
-    if(attacker.doHurtTarget(cow))h.fail("Melee cooldown permitted a strike before 50 ticks");
-    level.getServer().getWorldData().overworldData().setGameTime(level.getGameTime()+50);
+   if(attacker.rangedCharges().charges()!=3)h.fail("New companion must have three ranged charges");
+   for(int i=0;i<3;i++){
+    cow.invulnerableTime=0;float before=cow.getHealth();
+    if(!attacker.fireElementalProjectile(cow))h.fail("Charged ranged strike was cancelled");
+    if(attacker.fireElementalProjectile(cow)||attacker.doHurtTarget(cow))h.fail("Switching attack mode bypassed shared cooldown");
+    var shots=level.getEntitiesOfClass(ElementalProjectile.class,attacker.getBoundingBox().inflate(12),shot->shot.getOwner()==attacker);
+    if(shots.size()!=1)h.fail("Projectile absent or duplicated");var shot=shots.get(0);
+    if(shot.color()!=EggAppearance.color("fire"))h.fail("Wrong first elemental color");
+    for(int tick=0;tick<30&&!shot.isRemoved();tick++)shot.tick();
+    float expected=(float)attacker.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE);
+    if(Math.abs(before-cow.getHealth()-expected)>.001||cow.isOnFire())h.fail("Projectile damage changed or ignited target");
+    level.getServer().getWorldData().overworldData().setGameTime(level.getGameTime()+59);
+    if(attacker.combatReady())h.fail("Attack cooldown ended before 60 ticks");
+    level.getServer().getWorldData().overworldData().setGameTime(level.getGameTime()+1);
    }
-   if(!attacker.projectileReady())h.fail("Four successful melee strikes must prepare a projectile");
-   if(attacker.doHurtTarget(cow))h.fail("Fifth strike incorrectly remained melee");
-   var saved=attacker.saveWithoutId(new CompoundTag());
-   var restored=ModEntities.SPECIES.get("charmander").get().create(level);restored.load(saved);
-   if(!restored.projectileReady())h.fail("Combat sequence did not persist");
-   cow.invulnerableTime=0;float before=cow.getHealth();
-   if(!attacker.fireElementalProjectile(cow) || attacker.projectileReady())h.fail("Fifth strike did not spawn exactly one projectile and reset sequence");
-   var shots=level.getEntitiesOfClass(ElementalProjectile.class,attacker.getBoundingBox().inflate(5));
-   if(shots.size()!=1)h.fail("Projectile was absent or duplicated");
-   var shot=shots.get(0);
-   if(shot.color()!=EggAppearance.color("fire"))h.fail("Projectile did not use the first elemental type");
-   for(int tick=0;tick<15 && !shot.isRemoved();tick++)shot.tick();
-   float expected=(float)attacker.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE);
-   if(Math.abs(before-cow.getHealth()-expected)>.001 || cow.isOnFire())h.fail("Projectile damage must equal basic attack damage, once, without burning");
+   if(attacker.projectileReady()||attacker.rangedCharges().charges()!=0)h.fail("Three shots must consume three charges");
+   cow.invulnerableTime=0;cow.setPos(attacker.getX()+.7,attacker.getY(),attacker.getZ());
+   if(!attacker.doHurtTarget(cow))h.fail("Empty companion failed to execute close melee");
+   cow.setPos(attacker.getX(),attacker.getY()+8,attacker.getZ());if(!attacker.canAttack(cow))h.fail("Target above eight blocks rejected");
+   cow.setPos(attacker.getX(),attacker.getY()-8,attacker.getZ());if(!attacker.canAttack(cow))h.fail("Target below eight blocks rejected");
+   cow.setPos(attacker.getX(),attacker.getY()+20,attacker.getZ());if(attacker.canAttack(cow))h.fail("Target beyond 3D radius accepted");
   }finally{
-   for(var shot:level.getEntitiesOfClass(ElementalProjectile.class,attacker.getBoundingBox().inflate(8)))shot.discard();
+   for(var shot:level.getEntitiesOfClass(ElementalProjectile.class,attacker.getBoundingBox().inflate(16),shot->shot.getOwner()==attacker))shot.discard();
    cow.discard();level.getServer().getWorldData().overworldData().setGameTime(originalTime);
   }
  }
-
  private static void verifyRecipes(GameTestHelper h,net.minecraft.server.level.ServerPlayer owner){
   for(var type:br.com.petrickfaria.minemon.item.PokemonTreatType.values()){
    var id=new net.minecraft.resources.ResourceLocation("minemon",type.itemId());

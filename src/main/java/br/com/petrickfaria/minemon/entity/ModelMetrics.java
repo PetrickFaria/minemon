@@ -14,6 +14,9 @@ public final class ModelMetrics {
         }catch(java.io.IOException e){throw new IllegalStateException(e);}
     }
     private static double metric(String slug,String key){return DATA.getAsJsonObject(slug).get(key).getAsDouble();}
+    public static double bodyWidth(String slug){var a=DATA.getAsJsonObject(slug).getAsJsonArray("core_bounds");return a.get(3).getAsDouble()-a.get(0).getAsDouble();}
+    public static double bodyHeight(String slug){var a=DATA.getAsJsonObject(slug).getAsJsonArray("core_bounds");return a.get(4).getAsDouble()-a.get(1).getAsDouble();}
+    public static double bodyCenterY(String slug){var a=DATA.getAsJsonObject(slug).getAsJsonArray("core_bounds");return (a.get(4).getAsDouble()+a.get(1).getAsDouble())*.5;}
     public static float width(String slug,float scale){
         float width=(float)(metric(slug,"width")*scale);
         // Native path acceptance adds 1 in float precision, but steering rounds

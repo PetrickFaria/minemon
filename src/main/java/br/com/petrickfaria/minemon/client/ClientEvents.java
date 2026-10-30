@@ -26,6 +26,7 @@ public final class ClientEvents {
     @SubscribeEvent
     public static void registerParticleProviders(RegisterParticleProvidersEvent event) {
         event.register(ModParticles.GASTLY_GHOSTLY_SMOKE.get(), GastlySmokeParticle.Provider::new);
+        event.register(ModParticles.GASTLY_SMALL_SMOKE.get(),sprites->new GastlySmokeParticle.Provider(sprites,true));
     }
 
     @SubscribeEvent

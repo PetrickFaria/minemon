@@ -21,7 +21,7 @@ final class NaturalFollowOwnerGoal extends Goal {
     private boolean eligible() {
         LivingEntity current = mob.getOwner();
         if (current == null || !current.isAlive() || current.isSpectator()
-                || current.level != mob.level || mob.isOrderedToSit() || mob.isSleeping()
+                || current.level != mob.level || mob.isDefeated() || mob.isOrderedToSit() || mob.isSleeping()
                 || mob.isNightResting() || mob.isPassenger() || mob.getTarget() != null) return false;
         return !mob.isAquaticSpecies() || SpeciesBehaviorProfiles.isVisitor(mob.getSpeciesSlug())
                 || current.isInWaterOrBubble() && mob.isInWaterOrBubble();
@@ -29,7 +29,7 @@ final class NaturalFollowOwnerGoal extends Goal {
 
     @Override public boolean canUse() { return eligible(); }
     @Override public boolean canContinueToUse() { return eligible() && owner == mob.getOwner(); }
-    @Override public void start() { owner = mob.getOwner(); mob.stopSpontaneousRun(); running = false; moving = mob.distanceToSqr(owner) > 25.0D; speed = 0.8D; recalculate = 0; }
+    @Override public void start() { owner = mob.getOwner(); mob.setFollowingOwner(true); mob.stopSpontaneousRun(); running = false; moving = mob.distanceToSqr(owner) > 25.0D; speed = 0.8D; recalculate = 0; }
     @Override public boolean requiresUpdateEveryTick() { return true; }
     @Override public void tick() {
         double distance = mob.distanceToSqr(owner);
@@ -47,8 +47,11 @@ final class NaturalFollowOwnerGoal extends Goal {
         mob.getNavigation().setSpeedModifier(speed);
         if (--recalculate <= 0) {
             recalculate = 10;
-            mob.getNavigation().moveTo(owner, speed);
+            if(mob.isFlyingSpecies()){
+                double surface=NaturalMovementGoals.surfaceBelow(mob.level,owner.getX(),Math.max(owner.getY()+4,mob.getY()),owner.getZ());
+                mob.getNavigation().moveTo(owner.getX(),surface+mob.followAltitude(),owner.getZ(),speed);
+            }else mob.getNavigation().moveTo(owner, speed);
         }
     }
-    @Override public void stop() { mob.getNavigation().stop(); mob.setFollowingRun(false); owner = null; }
+    @Override public void stop() { mob.getNavigation().stop(); mob.setFollowingRun(false); mob.setFollowingOwner(false); owner = null; }
 }

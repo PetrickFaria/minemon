@@ -27,6 +27,14 @@ public class MinemonModel extends AnimatedGeoModel<MinemonCreature> {
     @Override
     public void setLivingAnimations(MinemonCreature entity, Integer uniqueID, software.bernie.geckolib3.core.event.predicate.AnimationEvent event) {
         super.setLivingAnimations(entity, uniqueID, event);
+        if(entity.getSpeciesSlug().equals("dewgong")){
+            boolean closed=entity.isSleeping()||entity.isDefeated();
+            boolean was=entity.getPersistentData().getBoolean("DewgongClosedEyes");
+            if(closed||was)for(String side:java.util.List.of("left","right")){
+                var lid=getAnimationProcessor().getBone("eyelid_"+side);if(lid!=null)lid.setPositionZ(closed?0F:-.1F);
+            }
+            entity.getPersistentData().putBoolean("DewgongClosedEyes",closed);
+        }
         applyPidgeWingVisibility(entity);
         applyGengarEyeVisibility(entity);
         applyNaturalBodyMotion(entity);
@@ -62,7 +70,7 @@ public class MinemonModel extends AnimatedGeoModel<MinemonCreature> {
 
     /** Small additive body motion keeps hovering visually distinct from the wing-driven flight clips. */
     private void applyNaturalBodyMotion(MinemonCreature entity) {
-        if(entity.isOrderedToSit())return;
+        if(entity.isOrderedToSit()||entity.isDefeated())return;
         String slug=entity.getSpeciesSlug();
         boolean hoveringRest=entity.isSleeping()
                 &&br.com.petrickfaria.minemon.entity.SpeciesBehaviorProfiles.hoversDuringNightRest(slug);

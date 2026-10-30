@@ -88,7 +88,7 @@ public final class MinemonAquaticCreature extends MinemonCreature {
         double target=surface?top-WaterMovementGoal.preferredSurfaceDepth(this):top-this.getBbHeight()-0.3D;
         // Surface and submerged correction share the swimming controller; do not
         // add another navigation goal or override horizontal pursuit.
-        if(surface||this.getY()>target){
+        if(!ShoreTraversal.exiting(this)&&(surface||this.getY()>target)){
             double vy=net.minecraft.util.Mth.clamp(this.getDeltaMovement().y*0.5D+(target-this.getY())*0.05D,-0.09D,0.09D);
             this.setDeltaMovement(this.getDeltaMovement().x,vy,this.getDeltaMovement().z);
         }
@@ -157,7 +157,9 @@ public final class MinemonAquaticCreature extends MinemonCreature {
                 // node onto the current Y and prevents any vertical progress.
                 if (MinemonAquaticCreature.this.isInWater()) {
                     if (MinemonAquaticCreature.this.naturalBehaviorActive()
-                            && MinemonAquaticCreature.this.isNaturalSurface()) {
+                            && MinemonAquaticCreature.this.isNaturalSurface()
+                            && level.getFluidState(new net.minecraft.core.BlockPos(waypoint)).is(net.minecraft.tags.FluidTags.WATER)
+                            && !ShoreTraversal.exiting(MinemonAquaticCreature.this)) {
                         double surface=WaterMovementGoal.surfaceAt(MinemonAquaticCreature.this,
                                 new net.minecraft.core.BlockPos(waypoint));
                         // Surface depth is fractional and model-sized. Steering

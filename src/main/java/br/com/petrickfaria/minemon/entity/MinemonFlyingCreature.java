@@ -61,9 +61,9 @@ public final class MinemonFlyingCreature extends MinemonCreature {
     // creature is still below the band. Let the recovery lift own movement
     // until the full flight band is reached instead of letting the path
     // controller keep steering toward that low endpoint.
-    if(clearance<this.naturalCycle().minimumAltitude())this.getNavigation().stop();
+    if(clearance<this.flightMinimum())this.getNavigation().stop();
    }
-   double floor=combat?0.15D:Math.max(0.15D,this.naturalCycle().minimumAltitude());
+   double floor=combat?0.15D:Math.max(0.15D,this.flightMinimum());
    double allowedDrop=Math.max(0.0D,clearance-floor);
    double vertical=Math.max(this.getDeltaMovement().y,-allowedDrop);
    if(clearance<floor)vertical=Math.max(vertical,0.06D);
@@ -72,7 +72,7 @@ public final class MinemonFlyingCreature extends MinemonCreature {
   boolean fixed=this.fixedFloater()&&!this.wantsNaturalLanding()&&!this.isSleeping()
       &&!this.isOrderedToSit()&&this.getTarget()==null&&!this.isInWater();
   if(fixed){
-   double error=this.naturalSurface()+this.naturalCycle().minimumAltitude()-this.getY();
+   double error=this.naturalSurface()+this.flightMinimum()-this.getY();
    this.setYya(0);input=new net.minecraft.world.phys.Vec3(input.x,0,input.z);
    this.setDeltaMovement(this.getDeltaMovement().x,net.minecraft.util.Mth.clamp(error*.25D,-.08D,.08D),this.getDeltaMovement().z);
   }
@@ -82,7 +82,7 @@ public final class MinemonFlyingCreature extends MinemonCreature {
   // cycle's floor after travel so the entity actually resumes its flight band.
   if(this.shouldRecoverNaturalFlight()&&(this.naturalCycle().phase()==BehaviorCycle.Phase.AIR
           ||this.naturalCycle().phase()==BehaviorCycle.Phase.TAKEOFF)){
-   double minimum=this.naturalCycle().minimumAltitude();
+   double minimum=this.flightMinimum();
    double altitude=this.getY()-this.naturalSurface();
    if(altitude<minimum){
     double lift=net.minecraft.util.Mth.clamp((minimum-altitude)*0.1D,0.04D,0.12D);
@@ -100,7 +100,7 @@ public final class MinemonFlyingCreature extends MinemonCreature {
  }
  @Override public void tick(){
   super.tick();
-  if(isDefeated()){this.setNoGravity(!WaterMovementGoal.safeLandingBelow(this));return;}
+  if(isDefeated()){this.setNoGravity(true);return;}
   this.updateLocomotion();
   if(!this.isFlyingSpecies() && !this.wantsNaturalLanding()){return;}
   if(!this.level.isClientSide){
@@ -110,7 +110,7 @@ public final class MinemonFlyingCreature extends MinemonCreature {
    if(!this.isSleeping()&&!this.isNightResting())this.recoveryAwakeSamples++;
    if(this.getTarget()==null)this.recoveryTargetFreeSamples++;
    if(!this.naturalCycle().landing())this.recoveryNotLandingSamples++;
-   if(this.getY()-this.naturalSurface()<this.naturalCycle().minimumAltitude())this.recoveryBelowMinimumSamples++;
+   if(this.getY()-this.naturalSurface()<this.flightMinimum())this.recoveryBelowMinimumSamples++;
   }
   boolean sleeping=this.commandLanding()||this.isSleeping()||this.isNightResting()||this.naturalCycle().landing();
   // Hover safely until a dry landing path is available; follow that path
@@ -150,16 +150,16 @@ public final class MinemonFlyingCreature extends MinemonCreature {
     // navigation stopping distance keeps Pidgey outside vanilla melee reach.
     double lift=net.minecraft.util.Mth.clamp((0.6D-altitude)*0.1D,0.02D,0.10D);
     this.setDeltaMovement(this.getDeltaMovement().x,Math.max(this.getDeltaMovement().y,lift),this.getDeltaMovement().z);
-   }else if(!this.fixedFloater()&&!combat&&this.naturalBehaviorActive()&&(altitude<this.naturalCycle().minimumAltitude()||altitude>this.naturalCycle().maximumAltitude())){
-    double desired=surface+(this.naturalCycle().minimumAltitude()+this.naturalCycle().maximumAltitude())*0.5D;
+   }else if(!this.fixedFloater()&&!combat&&this.naturalBehaviorActive()&&(altitude<this.flightMinimum()||altitude>this.flightMaximum())){
+    double desired=surface+(this.flightMinimum()+this.flightMaximum())*0.5D;
     double correction=net.minecraft.util.Mth.clamp((desired-this.getY())*0.025D-this.getDeltaMovement().y*0.15D,-0.08D,0.08D);
     this.setDeltaMovement(this.getDeltaMovement().x,
         net.minecraft.util.Mth.clamp(this.getDeltaMovement().y+correction,-0.12D,0.12D),this.getDeltaMovement().z);
    }
    if(!combat&&this.shouldRecoverNaturalFlight()
        &&(this.naturalCycle().phase()==BehaviorCycle.Phase.AIR||this.naturalCycle().phase()==BehaviorCycle.Phase.TAKEOFF)
-       &&altitude<this.naturalCycle().minimumAltitude()){
-    double lift=net.minecraft.util.Mth.clamp((this.naturalCycle().minimumAltitude()-altitude)*0.1D,0.04D,0.12D);
+       &&altitude<this.flightMinimum()){
+    double lift=net.minecraft.util.Mth.clamp((this.flightMinimum()-altitude)*0.1D,0.04D,0.12D);
     // Apply the small takeoff correction after all goals have ticked. Keep it
     // collision checked and capped at 0.12 blocks per tick so it stays smooth.
     this.flightRecoveryAttempts++;

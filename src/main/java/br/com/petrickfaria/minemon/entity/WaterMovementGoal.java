@@ -263,8 +263,8 @@ public final class WaterMovementGoal extends Goal {
   if(java.util.Set.of("blastoise","poliwrath","dewgong","vaporeon").contains(mob.getSpeciesSlug()))
    return 0.5D + mob.getBbHeight()*0.5D;
   // The generic surface depth is measured from the feet; Gyarados instead
-  // keeps its body center 1.5 blocks below the surface and its full hitbox wet.
-  return mob.getSpeciesSlug().equals("gyarados")?1.5D+mob.getBbHeight()*0.5D:Math.min(0.8D,mob.getBbHeight()*0.3D);
+  // keeps its body center one block below the surface and its full hitbox wet.
+  return mob.getSpeciesSlug().equals("gyarados")?1.0D+mob.getBbHeight()*0.5D:Math.min(0.8D,mob.getBbHeight()*0.3D);
  }
  public static boolean withinSearchRadius(BlockPos origin,BlockPos candidate){return origin.distSqr(candidate)<=SEARCH_RADIUS*SEARCH_RADIUS;}
  public static boolean requiresNavigableVolume(String speciesSlug){return SpeciesBehaviorProfiles.waterCapable(speciesSlug);}

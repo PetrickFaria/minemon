@@ -382,6 +382,7 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         entity.tickCount = (int) (System.currentTimeMillis() / 50L);
         entity.setYRot(180.0F);
         entity.yRotO = entity.getYRot();
+        entity.yBodyRot=entity.yBodyRotO=180;entity.yHeadRot=entity.yHeadRotO=180;
         var def = SpeciesDefinitions.get(species.slug());
         var fit = previewFits.computeIfAbsent(species.slug(),slug->PreviewBounds.fit(slug,def.scale()));
         previewYaw += net.minecraft.util.Mth.wrapDegrees(targetPreviewYaw-previewYaw)*.25F;
