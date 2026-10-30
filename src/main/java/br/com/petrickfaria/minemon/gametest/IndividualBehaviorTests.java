@@ -130,9 +130,10 @@ public final class IndividualBehaviorTests {
   for(int x=3;x<=14;x++)for(int z=2;z<=14;z++)for(int y=4;y<=22;y++)
    h.setBlock(new BlockPos(x,y,z),x==3||x==14||z==2||z==14?Blocks.STONE:y<=18?Blocks.WATER:Blocks.AIR);
   var fish=spawn(h,"magikarp",5,-2,4);fish.setDeltaMovement(-0.12D,0,-0.12D);var lapras=spawn(h,"lapras",8,0,9);var gyarados=spawn(h,"gyarados",11,0,5);
-  Vec3 start=fish.position();double[] farthest={0};
+  Vec3[] start={fish.position()};double[] farthest={0};
   traceAscent(h,fish,0);
-  sample(h,fish,start,farthest,20);
+  // Observe autonomous swimming after the explicit initial push has dissipated.
+  h.runAfterDelay(40,()->{start[0]=fish.position();sample(h,fish,start[0],farthest,20);});
   h.runAfterDelay(240,()->{
    BlockPos head=new BlockPos(fish.getX(),fish.getY()+fish.getBbHeight()+.1D,fish.getZ());
    check(h,fish.isInWater(),"Permanent swimmer must stay in water"+state(fish));
@@ -141,7 +142,7 @@ public final class IndividualBehaviorTests {
        +" waterSurface="+(fish instanceof MinemonAquaticCreature aquatic?aquatic.waterSurface():Double.NaN)
        +" velocity="+fish.getDeltaMovement()+state(fish));
    check(h,farthest[0]>.5D,"Permanent swimmer must travel at least 0.5 blocks during the observation window; maxDistanceSquared="+farthest[0]
-       +" start="+start+" current="+fish.position()+" target="+fish.getNavigation().getTargetPos()+" velocity="+fish.getDeltaMovement());
+       +" start="+start[0]+" current="+fish.position()+" target="+fish.getNavigation().getTargetPos()+" velocity="+fish.getDeltaMovement());
    for(var m:java.util.List.of(lapras,gyarados))check(h,m.isInWater()&&atSurface(m),"Surface species must keep their model-sized surface position"+state(m));
    h.succeed();
   });

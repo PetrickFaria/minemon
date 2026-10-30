@@ -60,10 +60,12 @@ public final class WaterMovementGoal extends Goal {
    var path=mob.getNavigation().getPath();
    Vec3 waypoint=Vec3.atCenterOf(destination);
    if(path!=null&&!path.isDone()){
-    var node=path.getNode(path.getNextNodeIndex());
-    waypoint=new Vec3(node.x+0.5D,node.y,node.z+0.5D);
+    // Match Path's width-aware steering point, including wide swimmers.
+    waypoint=path.getNextEntityPos(mob);
    }
-   Vec3 toward=waypoint.subtract(mob.position()).normalize().scale(0.5D);
+   Vec3 delta=waypoint.subtract(mob.position());
+   // Never probe past a nearby node into a wall on its opposite side.
+   Vec3 toward=delta.normalize().scale(Math.min(0.5D,delta.length()));
    if(!mob.level.noCollision(mob,mob.getBoundingBox().move(toward))){
     stalled=60;mob.getNavigation().stop();
    }

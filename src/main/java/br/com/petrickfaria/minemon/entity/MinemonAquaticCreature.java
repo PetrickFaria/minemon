@@ -155,8 +155,20 @@ public final class MinemonAquaticCreature extends MinemonCreature {
                 // Land navigation projects nodes onto the block below. Water
                 // has no collision floor: that projection lowers an ascending
                 // node onto the current Y and prevents any vertical progress.
-                return MinemonAquaticCreature.this.isInWater()
-                        ? waypoint.y : super.getGroundY(waypoint);
+                if (MinemonAquaticCreature.this.isInWater()) {
+                    if (MinemonAquaticCreature.this.naturalBehaviorActive()
+                            && MinemonAquaticCreature.this.isNaturalSurface()) {
+                        double surface=WaterMovementGoal.surfaceAt(MinemonAquaticCreature.this,
+                                new net.minecraft.core.BlockPos(waypoint));
+                        // Surface depth is fractional and model-sized. Steering
+                        // toward a rounded path Y must not fight the existing
+                        // continuous surface-depth correction.
+                        if (Double.isFinite(surface)) return surface
+                                - WaterMovementGoal.preferredSurfaceDepth(MinemonAquaticCreature.this);
+                    }
+                    return waypoint.y;
+                }
+                return super.getGroundY(waypoint);
             }
         };
     }
