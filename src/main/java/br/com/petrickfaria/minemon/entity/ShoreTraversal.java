@@ -141,7 +141,7 @@ static boolean followBank(MinemonCreature mob,net.minecraft.world.entity.LivingE
   // Reach the owner's side of the shore first. Among those banks, prefer a
   // nearby path-reachable landing; once on land the normal follow goal closes
   // the remaining distance safely.
-  candidates.sort(java.util.Comparator.comparingDouble(p->p.distSqr(owner.blockPosition())+.25*p.distSqr(mob.blockPosition())));
+  candidates.sort(java.util.Comparator.comparingDouble(p->p.distSqr(mob.blockPosition())+.25*p.distSqr(owner.blockPosition())));
   int tried=0;BlockPos physicalFallback=null;
   for(var feet:candidates){
    var path=mob.getNavigation().createPath(feet,0);
