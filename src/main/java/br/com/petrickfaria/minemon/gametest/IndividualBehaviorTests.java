@@ -32,7 +32,7 @@ public final class IndividualBehaviorTests {
   if(phase.equals("SUBMERGED")||phase.equals("SURFACE"))tag.putInt("NaturalAquaticTicks",ticks);
   tag.putInt("NaturalBehaviorStartDelay",0);tag.putString("NaturalBehaviorPhase",phase);tag.putInt("NaturalBehaviorTicks",ticks);tag.putInt("NaturalAltitudeStage",stage);mob.readAdditionalSaveData(tag);
  }
- private static String state(MinemonCreature m){return " species="+m.getSpeciesSlug()+" phase="+m.naturalCycle().phase()+" ticks="+m.naturalCycle().ticks()+" pos="+m.position()+" wet="+m.isInWater()+" grounded="+m.isOnGround()+" target="+m.getTarget()+" nav="+m.getNavigation().getTargetPos();}
+ private static String state(MinemonCreature m){return " species="+m.getSpeciesSlug()+" phase="+m.naturalCycle().phase()+" ticks="+m.naturalCycle().ticks()+" pos="+m.position()+" wet="+m.isInWater()+" sleep="+m.isSleeping()+" night="+m.isNightResting()+" grounded="+m.isOnGround()+" target="+m.getTarget()+" nav="+m.getNavigation().getTargetPos();}
  private static void await(GameTestHelper h,BooleanSupplier condition,Runnable next,int remaining,String error){
   if(condition.getAsBoolean()){next.run();return;}
   if(remaining<=0){
@@ -121,7 +121,7 @@ public final class IndividualBehaviorTests {
  }
  private static boolean underwater(MinemonCreature m){return m.level.getFluidState(new BlockPos(m.getX(),m.getY()+m.getBbHeight()+.1D,m.getZ())).is(net.minecraft.tags.FluidTags.WATER);}
  private static boolean atSurface(MinemonCreature m){return m instanceof MinemonAquaticCreature a&&Math.abs(m.getY()-(a.waterSurface()-WaterMovementGoal.preferredSurfaceDepth(m)))<.3D;}
- @GameTest(template="test_arena",timeoutTicks=320)
+ @GameTest(template="test_arena",batch="daytime_swimming",timeoutTicks=320)
  public static void permanentSwimmersMoveUnderwaterAndSurfaceSpeciesFloat(GameTestHelper h){
   // This probe checks ordinary daytime swimming; separate night tests own the sleep transition.
   h.getLevel().setDayTime(1000);
@@ -131,6 +131,7 @@ public final class IndividualBehaviorTests {
    h.setBlock(new BlockPos(x,y,z),x==3||x==14||z==2||z==14?Blocks.STONE:y<=18?Blocks.WATER:Blocks.AIR);
   var fish=spawn(h,"magikarp",5,-2,4);fish.setDeltaMovement(-0.12D,0,-0.12D);var lapras=spawn(h,"lapras",8,0,9);var gyarados=spawn(h,"gyarados",11,0,5);
   Vec3 start=fish.position();double[] farthest={0};
+  traceAscent(h,fish,0);
   sample(h,fish,start,farthest,20);
   h.runAfterDelay(240,()->{
    BlockPos head=new BlockPos(fish.getX(),fish.getY()+fish.getBbHeight()+.1D,fish.getZ());
