@@ -49,7 +49,6 @@ public final class NaturalMovementGoals {
         private Path landingPath;
         private int retryDelay;
         private int pathTicks;
-        private BlockPos landingSite;
         private BlockPos approachSite;
 
         SleepLanding(MinemonCreature mob) {
@@ -78,7 +77,7 @@ public final class NaturalMovementGoals {
             // control before allowing gravity to lower a wide body into water.
             var feet=new BlockPos(this.mob.getX(),this.mob.naturalSurface(),this.mob.getZ());
             if(this.mob.getNavigation().isDone() && this.approachSite!=null
-                    && !WaterMovementGoal.safeLanding(this.mob,feet))
+                    && !WaterMovementGoal.safeLandingBelow(this.mob))
                 this.mob.getMoveControl().setWantedPosition(this.approachSite.getX()+.5,
                         this.approachSite.getY(),this.approachSite.getZ()+.5,.7);
         }
@@ -117,7 +116,7 @@ public final class NaturalMovementGoals {
                     if(!this.mob.level.noCollision(this.mob,this.mob.getBoundingBox().move(
                             x-this.mob.getX(),approach.getY()-this.mob.getY(),z-this.mob.getZ())))continue;
                     Path path = this.mob.getNavigation().createPath(approach, 0);
-                    if (path != null && path.canReach()) { this.landingSite=feet; this.approachSite=approach; return path; }
+                    if (path != null && path.canReach()) { this.approachSite=approach; return path; }
                 }
             }
             return null;

@@ -231,6 +231,14 @@ public final class WaterMovementGoal extends Goal {
  static boolean safeLanding(MinemonCreature mob,BlockPos feet){
   if(!safeDry(mob,feet))return false;
   var box=mob.getBoundingBox().move(feet.getX()+.5D-mob.getX(),feet.getY()-mob.getY(),feet.getZ()+.5D-mob.getZ());
+  return dryLandingBox(mob,box);
+ }
+ static boolean safeLandingBelow(MinemonCreature mob){
+  var feet=new BlockPos(mob.getX(),mob.naturalSurface(),mob.getZ());
+  return safeDry(mob,feet)&&dryLandingBox(mob,mob.getBoundingBox().move(0,feet.getY()-mob.getY(),0));
+ }
+ private static boolean dryLandingBox(MinemonCreature mob,net.minecraft.world.phys.AABB box){
+  if(!mob.level.noCollision(mob,box))return false;
   for(int x=(int)Math.floor(box.minX+.001);x<=Math.floor(box.maxX-.001);x++)
    for(int y=(int)Math.floor(box.minY+.001);y<=Math.floor(box.maxY-.001);y++)
     for(int z=(int)Math.floor(box.minZ+.001);z<=Math.floor(box.maxZ-.001);z++)
