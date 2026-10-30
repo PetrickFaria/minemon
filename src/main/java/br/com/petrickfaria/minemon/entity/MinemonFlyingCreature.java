@@ -50,7 +50,8 @@ public final class MinemonFlyingCreature extends MinemonCreature {
  }
  @Override protected PathNavigation createNavigation(Level level){FlyingPathNavigation n=new FlyingPathNavigation(this,level);n.setCanOpenDoors(false);n.setCanFloat(true);n.setCanPassDoors(true);return n;}
  @Override public void travel(net.minecraft.world.phys.Vec3 input){
-  if(!this.fixedFloater()&&this.isFlyingSpecies()&&!this.level.isClientSide&&!this.wantsNaturalLanding()){
+  if(!this.fixedFloater()&&this.isFlyingSpecies()&&!this.level.isClientSide&&!this.wantsNaturalLanding()
+      &&!this.isSleeping()&&!this.isNightResting()&&!this.isOrderedToSit()&&!this.isDefeated()){
    double support=this.naturalSurface();
    double clearance=this.getY()-support;
    boolean combat=this.getTarget()!=null&&this.getTarget().isAlive();

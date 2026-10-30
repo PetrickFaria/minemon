@@ -61,7 +61,7 @@ final class TwelveAdjustmentChecks {
     cow.invulnerableTime=0;
     if(!attacker.doHurtTarget(cow))h.fail("Valid melee strike was cancelled at sequence "+i);
     if(attacker.doHurtTarget(cow))h.fail("Melee cooldown permitted a strike before 50 ticks");
-    level.setGameTime(level.getGameTime()+50);
+    level.getServer().getWorldData().overworldData().setGameTime(level.getGameTime()+50);
    }
    if(!attacker.projectileReady())h.fail("Four successful melee strikes must prepare a projectile");
    if(attacker.doHurtTarget(cow))h.fail("Fifth strike incorrectly remained melee");
@@ -79,7 +79,7 @@ final class TwelveAdjustmentChecks {
    if(Math.abs(before-cow.getHealth()-expected)>.001 || cow.isOnFire())h.fail("Projectile damage must equal basic attack damage, once, without burning");
   }finally{
    for(var shot:level.getEntitiesOfClass(ElementalProjectile.class,attacker.getBoundingBox().inflate(8)))shot.discard();
-   cow.discard();level.setGameTime(originalTime);
+   cow.discard();level.getServer().getWorldData().overworldData().setGameTime(originalTime);
   }
  }
 
