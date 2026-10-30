@@ -85,6 +85,11 @@ public final class MinemonAquaticCreature extends MinemonCreature {
                     holdY=localTop-WaterMovementGoal.preferredSurfaceDepth(this);
             }
             this.getMoveControl().setWantedPosition(this.getX(),holdY,this.getZ(),0.5D);
+            // The completed route no longer owns horizontal motion. Damp its
+            // residual momentum so inertia cannot carry Gyarados over a bank
+            // after the controller has already cleared the stale waypoint.
+            var motion=this.getDeltaMovement();
+            this.setDeltaMovement(motion.x*0.2D,motion.y,motion.z*0.2D);
         }
         if(!this.isInWater()||(!this.naturalBehaviorActive()&&!this.isSleeping()&&!this.isNightResting()))return;
         double top=this.waterSurface();
