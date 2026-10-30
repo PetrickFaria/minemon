@@ -21,7 +21,7 @@ public final class NaturalFollowingGameTests {
     private static void fail(GameTestHelper h,ServerPlayer owner,MinemonCreature mob,String message) {
         owner.discard(); mob.discard(); h.fail(message);
     }
-    @GameTest(template="test_arena", batch="natural_following", timeoutTicks=180)
+    @GameTest(template="test_arena", batch="natural_following", timeoutTicks=500)
     public static void followsWithContinuousMovementThenObeysSit(GameTestHelper h) {
         h.getLevel().setDayTime(1000);
         var arenaBox=new net.minecraft.world.phys.AABB(h.absolutePos(new BlockPos(0,0,0)),h.absolutePos(new BlockPos(40,14,10)));
@@ -55,7 +55,7 @@ public final class NaturalFollowingGameTests {
         h.runAtTickTime(140,()->{
             if(mob.position().distanceTo(sitting[0])>.5)fail(h,owner,mob,"Sitting companion abandoned its order: start="+sitting[0]+" end="+mob.position()+" velocity="+mob.getDeltaMovement()+" target="+mob.getTarget());
             if(mob.isSleeping()||mob.isFollowingRun())fail(h,owner,mob,"Sitting must remain awake without following run");
-            owner.discard();mob.discard();h.succeed();
+            owner.discard();mob.discard();NineBehaviorChecks.followingAltitudes(h);
         });
     }
 }

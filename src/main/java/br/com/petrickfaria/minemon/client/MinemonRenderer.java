@@ -31,7 +31,7 @@ public class MinemonRenderer extends GeoEntityRenderer<MinemonCreature> {
   this.shadowRadius=0.45F*shadowScale;
   float scale=d.scale()*(entity.isBaby()?0.5F:1.0F);
   pose.pushPose();
-  if(!previewRendering)pose.translate(0,br.com.petrickfaria.minemon.entity.ModelMetrics.floatOffset(entity.getSpeciesSlug(),scale),0);
+  if(!previewRendering)pose.translate(0,entity.isDefeated()?br.com.petrickfaria.minemon.entity.ModelMetrics.defeatedOffset(entity.getSpeciesSlug(),scale):br.com.petrickfaria.minemon.entity.ModelMetrics.floatOffset(entity.getSpeciesSlug(),scale),0);
   pose.scale(scale,scale,scale);
   String previousSpecies=activeFireSpecies;activeFireSpecies=entity.getSpeciesSlug();
   try { super.render(entity,yaw,partialTick,pose,buffers,light); }

@@ -5,7 +5,7 @@ import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 final class ElementalCombatGoal extends MeleeAttackGoal {
  private final MinemonCreature pokemon;
  ElementalCombatGoal(MinemonCreature pokemon){super(pokemon,1.2D,true);this.pokemon=pokemon;}
- @Override public boolean canUse(){return !pokemon.isDefeated()&&super.canUse();}
+ @Override public boolean canUse(){var target=pokemon.getTarget();return !pokemon.isDefeated() && (target!=null && pokemon.projectileReady() && pokemon.canFireAt(target) || super.canUse());}
  @Override public void tick(){
   var target=pokemon.getTarget();
   if(target==null||!pokemon.canAttack(target)){pokemon.setTarget(null);pokemon.getNavigation().stop();return;}

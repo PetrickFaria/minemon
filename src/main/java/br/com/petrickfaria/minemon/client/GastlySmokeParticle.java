@@ -73,6 +73,7 @@ public final class GastlySmokeParticle extends TextureSheetParticle {
         double angle=slot*2.3999632297+owner.tickCount*.012;
         double radius=.55*br.com.petrickfaria.minemon.entity.ModelMetrics.bodyWidth("gastly")*scale;
         double center=br.com.petrickfaria.minemon.entity.ModelMetrics.bodyCenterY("gastly")*scale;
+        if(owner instanceof br.com.petrickfaria.minemon.entity.MinemonCreature pokemon && pokemon.isDefeated())center+=br.com.petrickfaria.minemon.entity.ModelMetrics.defeatedOffset("gastly",scale);
         double height=br.com.petrickfaria.minemon.entity.ModelMetrics.bodyHeight("gastly")*scale;
         double px=owner.getX()+Math.cos(angle)*radius,pz=owner.getZ()+Math.sin(angle)*radius;
         double py=owner.getY()+center+((slot%3)-.65)*height*.32;

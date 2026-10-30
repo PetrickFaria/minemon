@@ -13,6 +13,9 @@ public final class ModelMetrics {
             return JsonParser.parseReader(new InputStreamReader(in,StandardCharsets.UTF_8)).getAsJsonObject();
         }catch(java.io.IOException e){throw new IllegalStateException(e);}
     }
+    private static final JsonObject REST=loadRest();
+    private static JsonObject loadRest(){try(var in=ModelMetrics.class.getResourceAsStream("/data/minemon_gen1/defeated_rest_metrics.json")){return JsonParser.parseReader(new InputStreamReader(in,StandardCharsets.UTF_8)).getAsJsonObject();}catch(java.io.IOException e){throw new IllegalStateException(e);}}
+    public static double defeatedOffset(String slug,float scale){return -REST.getAsJsonObject(slug).get("bottom").getAsDouble()*scale;}
     private static double metric(String slug,String key){return DATA.getAsJsonObject(slug).get(key).getAsDouble();}
     public static double bodyWidth(String slug){var a=DATA.getAsJsonObject(slug).getAsJsonArray("core_bounds");return a.get(3).getAsDouble()-a.get(0).getAsDouble();}
     public static double bodyHeight(String slug){var a=DATA.getAsJsonObject(slug).getAsJsonArray("core_bounds");return a.get(4).getAsDouble()-a.get(1).getAsDouble();}

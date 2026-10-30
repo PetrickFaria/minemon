@@ -25,6 +25,11 @@ public final class MinemonFlyingCreature extends MinemonCreature {
  private boolean fixedFloater(){
   return java.util.Set.of("abra","porygon","kakuna","metapod","geodude").contains(this.getSpeciesSlug());
  }
+ private boolean followingObstacle(){
+  if(!isFollowingOwner())return false;var path=getNavigation().getPath();if(path==null||path.isDone())return false;
+  var next=path.getNextEntityPos(this);var toward=next.subtract(position());
+  return next.y>naturalSurface()+followAltitude()+.2 && (horizontalCollision || !level.noCollision(this,getBoundingBox().move(toward.normalize().multiply(.7,0,.7))));
+ }
  private boolean shouldRecoverNaturalFlight(){
   return !this.fixedFloater()&&!this.level.isClientSide&&this.isFlyingSpecies()&&!this.isSleeping()&&!this.isNightResting()
       &&!this.naturalCycle().landing()&&!this.isOrderedToSit()&&!this.isPassenger()&&!this.isNoAi()
@@ -70,7 +75,7 @@ public final class MinemonFlyingCreature extends MinemonCreature {
    this.setDeltaMovement(this.getDeltaMovement().x,vertical,this.getDeltaMovement().z);
   }
   boolean fixed=this.fixedFloater()&&!this.wantsNaturalLanding()&&!this.isSleeping()
-      &&!this.isOrderedToSit()&&this.getTarget()==null&&!this.isInWater();
+      &&!this.isOrderedToSit()&&this.getTarget()==null&&!this.isInWater()&&!this.followingObstacle();
   if(fixed){
    double error=this.naturalSurface()+this.flightMinimum()-this.getY();
    this.setYya(0);input=new net.minecraft.world.phys.Vec3(input.x,0,input.z);
@@ -150,7 +155,7 @@ public final class MinemonFlyingCreature extends MinemonCreature {
     // navigation stopping distance keeps Pidgey outside vanilla melee reach.
     double lift=net.minecraft.util.Mth.clamp((0.6D-altitude)*0.1D,0.02D,0.10D);
     this.setDeltaMovement(this.getDeltaMovement().x,Math.max(this.getDeltaMovement().y,lift),this.getDeltaMovement().z);
-   }else if(!this.fixedFloater()&&!combat&&this.naturalBehaviorActive()&&(altitude<this.flightMinimum()||altitude>this.flightMaximum())){
+   }else if(!this.fixedFloater()&&!combat&&!this.followingObstacle()&&this.naturalBehaviorActive()&&(altitude<this.flightMinimum()||altitude>this.flightMaximum())){
     double desired=surface+(this.flightMinimum()+this.flightMaximum())*0.5D;
     double correction=net.minecraft.util.Mth.clamp((desired-this.getY())*0.025D-this.getDeltaMovement().y*0.15D,-0.08D,0.08D);
     this.setDeltaMovement(this.getDeltaMovement().x,

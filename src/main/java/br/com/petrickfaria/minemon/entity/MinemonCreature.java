@@ -932,7 +932,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
 
     @Override
     public boolean doHurtTarget(net.minecraft.world.entity.Entity target) {
-        if (!(target instanceof LivingEntity living) || !this.canAttack(living) || !combatReady() || !CombatGeometry.inRange(this,living,.5D)) return false;
+        if (!(target instanceof LivingEntity living) || !this.canAttack(living) || !combatReady() || !CombatGeometry.inRange(this,living,.5D) || !getSensing().hasLineOfSight(living)) return false;
         boolean hit=super.doHurtTarget(target);
         if(hit && !this.level.isClientSide){
             if(!isTame())successfulMeleeAttacks++;nextCombatTick=level.getGameTime()+(isTame()?60:50);
@@ -941,7 +941,11 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         return hit;
     }
     public boolean projectileReady(){return isTame()?rangedCharges.charges()>0:successfulMeleeAttacks>=4;}
-    public boolean canFireAt(LivingEntity target){return canAttack(target) && target.isAlive() && CombatGeometry.inRange(this,target,isTame()?10:5) && getSensing().hasLineOfSight(target);}
+    public boolean canFireAt(LivingEntity target){
+        if(!canAttack(target)||!target.isAlive()||!CombatGeometry.inRange(this,target,isTame()?10:5)||!getSensing().hasLineOfSight(target))return false;
+        var start=new net.minecraft.world.phys.Vec3(getX(),getEyeY()-.1,getZ());
+        return level.clip(new net.minecraft.world.level.ClipContext(start,target.getBoundingBox().getCenter(),net.minecraft.world.level.ClipContext.Block.COLLIDER,net.minecraft.world.level.ClipContext.Fluid.NONE,this)).getType()==net.minecraft.world.phys.HitResult.Type.MISS;
+    }
     public boolean combatReady(){return !isDefeated() && !isSleeping() && level.getGameTime()>=nextCombatTick;}
     public boolean fireElementalProjectile(LivingEntity target){
         if(level.isClientSide || !projectileReady() || !combatReady() || !canAttack(target)

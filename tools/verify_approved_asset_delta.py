@@ -105,5 +105,5 @@ def pokec_resource_paths():
     recipes = frozenset(f"src/main/resources/data/minemon/recipes/{item}_treat.json" for item in (
         "aquatic", "frozen", "dragon", "electric", "ghost", "fairy", "fire", "bug", "fighting",
         "steel", "normal", "rock", "psychic", "ground", "poison", "flying", "grass", "dark"))
-    return POKEC_RESOURCES | ROCKET_RESOURCES | TREAT_RESOURCES | recipes | {"src/main/resources/data/minemon_gen1/preview_body_pivots.json", "src/main/resources/assets/minemon_gen1/particles/gastly_small_smoke.json", "src/main/resources/data/minemon/recipes/pokeball.json", "src/main/resources/data/minemon/recipes/master_ball.json"}
+    return POKEC_RESOURCES | ROCKET_RESOURCES | TREAT_RESOURCES | recipes | {"src/main/resources/data/minemon_gen1/preview_body_pivots.json", "src/main/resources/data/minemon_gen1/defeated_rest_metrics.json", "src/main/resources/assets/minemon_gen1/particles/gastly_small_smoke.json", "src/main/resources/data/minemon/recipes/pokeball.json", "src/main/resources/data/minemon/recipes/master_ball.json"}
 

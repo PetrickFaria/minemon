@@ -16,7 +16,7 @@ final class DefeatedRest {
  void tick(){
   mob.setNoGravity(true);mob.fallDistance=0;mob.setDeltaMovement(Vec3.ZERO);
   if(WaterMovementGoal.safeLandingBelow(mob)){
-   path=null;double floor=mob.naturalSurface();double dy=Math.min(.08,Math.max(0,mob.getY()-floor));
+   path=null;double floor=mob.naturalSurface();double dy=Math.min(.08,Math.max(.02,mob.getY()-floor));
    if(dy>0)mob.move(MoverType.SELF,new Vec3(0,-dy,0));return;
   }
   if(navigation==null){navigation=new FlyingPathNavigation(mob,mob.level);navigation.setCanFloat(true);navigation.setCanPassDoors(true);}
