@@ -160,12 +160,22 @@ public final class WaterMovementGoal extends Goal {
   return null;
  }
  private boolean surfacePathIsWater(net.minecraft.world.level.pathfinder.Path path){
-  // Surface destinations are already checked for full hitbox clearance. Keep
-  // Gyarados' route in water as well: an amphibious shortest path can leave a
-  // small lake over a bank, then follow shallow flowing water back downward.
+  // Gyarados' body center follows the surface one block below it. Checking
+  // only the path node lets a wide body clip over a bank while the node itself
+  // remains in water, so validate collision clearance and the body's water
+  // footprint at every point along the path.
   for(int i=0;i<path.getNodeCount();i++){
    var node=path.getNode(i);
-   if(!mob.level.getFluidState(new BlockPos(node.x,node.y,node.z)).is(FluidTags.WATER))return false;
+   BlockPos column=new BlockPos(node.x,node.y,node.z);
+   double top=surfaceAt(mob,column);
+   if(!Double.isFinite(top))return false;
+   double feetY=top-preferredSurfaceDepth(mob);
+   var box=mob.getBoundingBox().move(node.x+.5D-mob.getX(),feetY-mob.getY(),node.z+.5D-mob.getZ());
+   if(!mob.level.noCollision(mob,box))return false;
+   int bodyY=net.minecraft.util.Mth.floor(feetY+mob.getBbHeight()*.5D);
+   for(int x=net.minecraft.util.Mth.floor(box.minX+.001D);x<=net.minecraft.util.Mth.floor(box.maxX-.001D);x++)
+    for(int z=net.minecraft.util.Mth.floor(box.minZ+.001D);z<=net.minecraft.util.Mth.floor(box.maxZ-.001D);z++)
+     if(!mob.level.getFluidState(new BlockPos(x,bodyY,z)).is(FluidTags.WATER))return false;
   }
   return path.getNodeCount()>0;
  }

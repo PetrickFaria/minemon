@@ -59,12 +59,17 @@ final class ShoreTraversal {
    var column=mob.blockPosition().offset(dx,0,dz);if(!mob.level.hasChunkAt(column))continue;
    int y=mob.level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,column.getX(),column.getZ());
    var feet=new BlockPos(column.getX(),y,column.getZ());
+   double towardOwnerX=owner.getX()-mob.getX(),towardOwnerZ=owner.getZ()-mob.getZ();
+   double bankX=feet.getX()+.5D-mob.getX(),bankZ=feet.getZ()+.5D-mob.getZ();
+   // Keep the landing on the owner's side of the swimmer. A reachable bank
+   // across the pool is not useful: it makes the creature leave by the wrong
+   // shore and can complete a path before it ever reaches its trainer.
+   if(bankX*towardOwnerX+bankZ*towardOwnerZ<=0.0D)continue;
    if(y<=top+1.05 && y>=top-.5 && !state.blocked.containsKey(feet) && WaterMovementGoal.safeDry(mob,feet))candidates.add(feet);
   }
-  // Reach dry land first. Biasing the search toward the owner can select a
-  // distant bank on the far side of the water, where amphibious paths often
-  // fail to leave a vertical shoreline. Once on land the normal follow goal
-  // can close the remaining distance safely.
+  // Reach the owner's side of the shore first. Among those banks, prefer a
+  // nearby path-reachable landing; once on land the normal follow goal closes
+  // the remaining distance safely.
   candidates.sort(java.util.Comparator.comparingDouble(p->p.distSqr(mob.blockPosition())+.15*p.distSqr(owner.blockPosition())));
   int tried=0;
   for(var feet:candidates){
