@@ -48,6 +48,7 @@ final class NaturalFollowOwnerGoal extends Goal {
         mob.getNavigation().setSpeedModifier(speed);
         if (--recalculate <= 0) {
             recalculate = 10;
+            if(ShoreTraversal.followBank(mob,owner,speed))return;
             if(mob.isFlyingSpecies()){
                 double surface=NaturalMovementGoals.surfaceBelow(mob.level,owner.getX(),Math.max(owner.getY()+4,mob.getY()),owner.getZ());
                 mob.getNavigation().moveTo(owner.getX(),surface+mob.followAltitude(),owner.getZ(),speed);

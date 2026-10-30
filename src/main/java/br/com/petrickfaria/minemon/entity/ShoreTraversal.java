@@ -21,5 +21,30 @@ final class ShoreTraversal {
    mob.getJumpControl().jump();
   }
  }
+ private static final java.util.Map<MinemonCreature,State> STATES=new java.util.WeakHashMap<>();
+ private static final class State {BlockPos bank;Vec3 previous;int stalled;final java.util.Map<BlockPos,Integer> blocked=new java.util.HashMap<>();}
+ static boolean followBank(MinemonCreature mob,net.minecraft.world.entity.LivingEntity owner,double speed){
+  if(!SpeciesBehaviorProfiles.isVisitor(mob.getSpeciesSlug())||!mob.isInWater()||owner.isInWaterOrBubble()){STATES.remove(mob);return false;}
+  var state=STATES.computeIfAbsent(mob,m->new State());state.blocked.entrySet().removeIf(e->e.getValue()<mob.tickCount);
+  if(state.previous!=null && mob.position().distanceToSqr(state.previous)<.015)state.stalled+=10;else state.stalled=0;state.previous=mob.position();
+  if(state.stalled>=40 && state.bank!=null){state.blocked.put(state.bank,mob.tickCount+200);state.bank=null;mob.getNavigation().stop();state.stalled=0;}
+  if(state.bank!=null && !mob.getNavigation().isDone()){mob.getNavigation().setSpeedModifier(speed);return true;}
+  double top=WaterMovementGoal.restSurfaceAt(mob,mob.blockPosition());if(!Double.isFinite(top))return false;
+  var candidates=new java.util.ArrayList<BlockPos>();
+  for(int dx=-12;dx<=12;dx++)for(int dz=-12;dz<=12;dz++){
+   var column=mob.blockPosition().offset(dx,0,dz);if(!mob.level.hasChunkAt(column))continue;
+   int y=mob.level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,column.getX(),column.getZ());
+   var feet=new BlockPos(column.getX(),y,column.getZ());
+   if(y<=top+1.05 && y>=top-.5 && !state.blocked.containsKey(feet) && WaterMovementGoal.safeDry(mob,feet))candidates.add(feet);
+  }
+  candidates.sort(java.util.Comparator.comparingDouble(p->p.distSqr(owner.blockPosition())+.5*p.distSqr(mob.blockPosition())));
+  int tried=0;
+  for(var feet:candidates){
+   var path=mob.getNavigation().createPath(feet,0);
+   if(path!=null&&path.canReach()){state.bank=feet;mob.getNavigation().moveTo(path,speed);return true;}
+   state.blocked.put(feet,mob.tickCount+200);if(++tried>=3)break;
+  }
+  return false;
+ }
  private ShoreTraversal(){}
 }
