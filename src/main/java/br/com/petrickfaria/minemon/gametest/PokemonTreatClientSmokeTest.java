@@ -155,7 +155,7 @@ public final class PokemonTreatClientSmokeTest {
             }
             com.mojang.logging.LogUtils.getLogger().info("[SOUL CLIENT] PASS: all 18 elemental souls registered in creative tab with baked inventory models and transparent textures");
             long treatCount=tab.stream().filter(stack->stack.getItem() instanceof br.com.petrickfaria.minemon.item.PokemonTreatItem).count();
-            if (treatCount != 17) throw new IllegalStateException("Creative tab exposes "+treatCount+" treats instead of 17");
+            if (treatCount != 18) throw new IllegalStateException("Creative tab exposes "+treatCount+" treats instead of 18");
             for (var entry : ModItems.TREATS.entrySet()) {
                 var item=entry.getValue().get();
                 var id=net.minecraftforge.registries.ForgeRegistries.ITEMS.getKey(item);

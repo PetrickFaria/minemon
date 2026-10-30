@@ -331,5 +331,6 @@
   "tooltip.minemon.pokeball.level": "Level: %s",
   "tooltip.minemon.pokeball.health": "Health: %s / %s",
   "tooltip.minemon.pokeball.owner": "Owner: %s",
-  "item.minemon.grass_treat": "Grass Treat"
+  "item.minemon.grass_treat": "Grass Treat",
+  "item.minemon.dark_treat": "Dark Treat"
 }

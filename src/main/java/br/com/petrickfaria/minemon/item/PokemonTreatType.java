@@ -10,7 +10,7 @@ public enum PokemonTreatType {
     NORMAL("normal_treat", "normal"), ROCK("rock_treat", "rock"),
     PSYCHIC("psychic_treat", "psychic"), GROUND("ground_treat", "ground"),
     POISON("poison_treat", "poison"), FLYING("flying_treat", "flying"),
-    GRASS("grass_treat", "grass");
+    GRASS("grass_treat", "grass"), DARK("dark_treat", "dark");
 
     private final String itemId;
     private final String pokemonType;

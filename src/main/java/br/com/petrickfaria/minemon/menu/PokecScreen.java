@@ -170,7 +170,8 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         font.draw(pose, String.format(Locale.ROOT, "%03d  %s", species.number(), species.name()), x, 37, 0xFF404040);
         font.draw(pose, rarityLabel(PokecEconomy.get().rarity(species.slug())), 426, 38, 0xFF404040);
         if (unlocked) {
-            renderPreview(pose, species, 354, 119, partialTick);
+            drawPanel(pose, 220, 48, 268, 112);
+            renderPreview(pose, species, 354, 104, partialTick);
         } else {
             drawPanel(pose, 220, 48, 268, 112);
             GuiComponent.fill(pose, 222, 50, 486, 158, 0xFFC6C6C6);
@@ -370,11 +371,18 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         entity.setYRot(180.0F + (float) Math.sin(entity.tickCount * .006F) * 4.0F);
         entity.yRotO = entity.getYRot();
         var def = SpeciesDefinitions.get(species.slug());
-        float scale = computePreviewScale(def.width(), def.height(), def.scale());
+        var fit = PreviewBounds.fit(species.slug(), def.scale());
+        float scale = fit.scale();
+        double windowScale = mc.getWindow().getGuiScale();
+        int sx=(int)Math.floor((leftPos+222*uiScale)*windowScale);
+        int sy=(int)Math.floor(mc.getWindow().getHeight()-(topPos+158*uiScale)*windowScale);
+        com.mojang.blaze3d.systems.RenderSystem.enableScissor(sx,sy,
+                (int)Math.ceil(264*uiScale*windowScale),(int)Math.ceil(108*uiScale*windowScale));
         pose.pushPose();
         pose.translate(x, y, 120);
         pose.scale(scale, -scale, scale);
         pose.mulPose(Vector3f.XP.rotationDegrees(-6));
+        pose.translate(-fit.x(), -fit.y(), -fit.z());
         var dispatcher = mc.getEntityRenderDispatcher();
         dispatcher.setRenderShadow(false);
         try {
@@ -383,16 +391,10 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         } catch (RuntimeException ex) {
             if (Boolean.getBoolean("minemon.clientSmokeTest")) throw ex;
         } finally {
+            com.mojang.blaze3d.systems.RenderSystem.disableScissor();
             dispatcher.setRenderShadow(true);
             pose.popPose();
         }
-    }
-
-    private static float computePreviewScale(float width, float height, float modelScale) {
-        float span = Math.max(height * modelScale, width * modelScale);
-        // Fill most of the preview for small species, while scaling giant models
-        // to the same available bounding box without changing world dimensions.
-        return Math.min(112.0F / Math.max(span, .2F), 180.0F);
     }
 
     @Override public boolean mouseClicked(double mouseX, double mouseY, int button) {

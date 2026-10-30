@@ -22,8 +22,11 @@ public final class MinemonFlyingCreature extends MinemonCreature {
  private int recoveryTargetFreeSamples;
  private int recoveryNotLandingSamples;
  private int recoveryBelowMinimumSamples;
+ private boolean fixedFloater(){
+  return java.util.Set.of("abra","kakuna","metapod").contains(this.getSpeciesSlug());
+ }
  private boolean shouldRecoverNaturalFlight(){
-  return !this.level.isClientSide&&this.isFlyingSpecies()&&!this.isSleeping()&&!this.isNightResting()
+  return !this.fixedFloater()&&!this.level.isClientSide&&this.isFlyingSpecies()&&!this.isSleeping()&&!this.isNightResting()
       &&!this.naturalCycle().landing()&&!this.isOrderedToSit()&&!this.isPassenger()&&!this.isNoAi()
       &&!this.isDeadOrDying()&&this.getTarget()==null;
  }
@@ -36,14 +39,18 @@ public final class MinemonFlyingCreature extends MinemonCreature {
   this.updateLocomotion();
  }
  private void updateLocomotion(){
-  boolean flying=this.isFlyingSpecies()&&!this.isInWater();PathNavigation desired=this.isInWater()?this.escapeNavigation:flying?this.airNavigation:this.groundNavigation;
+  boolean landing=this.wantsNaturalLanding() && (this.isNightResting() || this.isSleeping());
+  var feet=new BlockPos(this.getX(),this.naturalSurface(),this.getZ());
+  boolean dry=WaterMovementGoal.safeDry(this,feet);
+  boolean flying=landing?!dry:this.isFlyingSpecies()&&!this.isInWater();
+  PathNavigation desired=flying?this.airNavigation:this.isInWater()&&!landing?this.escapeNavigation:this.groundNavigation;
   if(this.navigation!=desired){this.navigation.stop();this.navigation=desired;}
   this.moveControl=flying?this.airControl:this.groundControl;
   if(!this.level.isClientSide||!this.wantsNaturalLanding())this.setNoGravity(flying||this.isInWater());
  }
  @Override protected PathNavigation createNavigation(Level level){FlyingPathNavigation n=new FlyingPathNavigation(this,level);n.setCanOpenDoors(false);n.setCanFloat(true);n.setCanPassDoors(true);return n;}
  @Override public void travel(net.minecraft.world.phys.Vec3 input){
-  if(this.isFlyingSpecies()&&!this.level.isClientSide&&!this.wantsNaturalLanding()){
+  if(!this.fixedFloater()&&this.isFlyingSpecies()&&!this.level.isClientSide&&!this.wantsNaturalLanding()){
    double support=this.naturalSurface();
    double clearance=this.getY()-support;
    boolean combat=this.getTarget()!=null&&this.getTarget().isAlive();
@@ -60,6 +67,13 @@ public final class MinemonFlyingCreature extends MinemonCreature {
    double vertical=Math.max(this.getDeltaMovement().y,-allowedDrop);
    if(clearance<floor)vertical=Math.max(vertical,0.06D);
    this.setDeltaMovement(this.getDeltaMovement().x,vertical,this.getDeltaMovement().z);
+  }
+  boolean fixed=this.fixedFloater()&&!this.wantsNaturalLanding()&&!this.isSleeping()
+      &&!this.isOrderedToSit()&&this.getTarget()==null&&!this.isInWater();
+  if(fixed){
+   double error=this.naturalSurface()+this.naturalCycle().minimumAltitude()-this.getY();
+   this.setYya(0);input=new net.minecraft.world.phys.Vec3(input.x,0,input.z);
+   this.setDeltaMovement(this.getDeltaMovement().x,net.minecraft.util.Mth.clamp(error*.25D,-.08D,.08D),this.getDeltaMovement().z);
   }
   super.travel(input);
   // FlyingMoveControl can replace the pre-travel lift with a downward input
@@ -86,7 +100,7 @@ public final class MinemonFlyingCreature extends MinemonCreature {
  @Override public void tick(){
   super.tick();
   this.updateLocomotion();
-  if(!this.isFlyingSpecies()){return;}
+  if(!this.isFlyingSpecies() && !this.wantsNaturalLanding()){return;}
   if(!this.level.isClientSide){
    this.recoveryTickSamples++;
    if(this.naturalCycle().phase()==BehaviorCycle.Phase.AIR||this.naturalCycle().phase()==BehaviorCycle.Phase.TAKEOFF)this.recoveryAirPhaseSamples++;
@@ -110,6 +124,8 @@ public final class MinemonFlyingCreature extends MinemonCreature {
   // bottom of water. The rest goal can then move it toward a dry landing.
   // Gravity starts the gradual descent only inside a collision-safe column.
   this.setNoGravity(!safe);
+  if(!safe && this.getNavigation().isDone())
+   this.setDeltaMovement(this.getDeltaMovement().x*.6D,0,this.getDeltaMovement().z*.6D);
   // Ground navigation can finish while a small fixed-height floater is still
   // fractionally above its support. Keep the sleep landing state authoritative
   // and carry it through the final descent instead of letting the move control
@@ -132,7 +148,7 @@ public final class MinemonFlyingCreature extends MinemonCreature {
     // navigation stopping distance keeps Pidgey outside vanilla melee reach.
     double lift=net.minecraft.util.Mth.clamp((0.6D-altitude)*0.1D,0.02D,0.10D);
     this.setDeltaMovement(this.getDeltaMovement().x,Math.max(this.getDeltaMovement().y,lift),this.getDeltaMovement().z);
-   }else if(!combat&&this.naturalBehaviorActive()&&(altitude<this.naturalCycle().minimumAltitude()||altitude>this.naturalCycle().maximumAltitude())){
+   }else if(!this.fixedFloater()&&!combat&&this.naturalBehaviorActive()&&(altitude<this.naturalCycle().minimumAltitude()||altitude>this.naturalCycle().maximumAltitude())){
     double desired=surface+(this.naturalCycle().minimumAltitude()+this.naturalCycle().maximumAltitude())*0.5D;
     double correction=net.minecraft.util.Mth.clamp((desired-this.getY())*0.025D-this.getDeltaMovement().y*0.15D,-0.08D,0.08D);
     this.setDeltaMovement(this.getDeltaMovement().x,

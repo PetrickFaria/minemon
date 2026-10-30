@@ -46,12 +46,12 @@ public final class RocketTradeMenu extends AbstractContainerMenu {
         this.villager = villager;
         for (int i = 0; i < 5; i++) {
             final int slot = i;
-            addSlot(new Slot(input, slot, 63 + i * 18, 37) {
+            addSlot(new Slot(input, slot, 111 + i * 18, 37) {
                 @Override public boolean mayPlace(ItemStack stack) { return stack.getItem() instanceof SoulItem; }
                 @Override public int getMaxStackSize() { return 64; }
             });
         }
-        addSlot(new Slot(result, 0, 221, 37) {
+        addSlot(new Slot(result, 0, 243, 37) {
             @Override public boolean mayPlace(ItemStack stack) { return false; }
             @Override public boolean mayPickup(Player player) { return !getItem().isEmpty() && eligibleCount() >= 10; }
             @Override public void onTake(Player player, ItemStack stack) {
@@ -64,12 +64,18 @@ public final class RocketTradeMenu extends AbstractContainerMenu {
             }
         });
         for (int row = 0; row < 3; row++) for (int column = 0; column < 9; column++)
-            addSlot(new Slot(inventory, column + row * 9 + 9, 50 + column * 18, 137 + row * 18));
-        for (int column = 0; column < 9; column++) addSlot(new Slot(inventory, column, 50 + column * 18, 195));
+            addSlot(new Slot(inventory, column + row * 9 + 9, 108 + column * 18, 84 + row * 18));
+        for (int column = 0; column < 9; column++) addSlot(new Slot(inventory, column, 108 + column * 18, 142));
         addDataSlot(selectedSync);
         if (!inventory.player.level.isClientSide) updateResult();
     }
 
+    public int offerCount() { return ALPHABETICAL_TYPES.size() + 1; }
+    public ItemStack offerResult(int index) {
+        if (index == 0) return new ItemStack(ModItems.POKE_COIN.get());
+        if (index < 1 || index >= offerCount()) return ItemStack.EMPTY;
+        return new ItemStack(ModItems.SOULS.get(ALPHABETICAL_TYPES.get(index - 1).id()).get());
+    }
     public int selectedIndex() { return selectedIndex; }
     public String selectedLabel() {
         if (selectedIndex == 0) return "1 PokéCoin / 10 almas";
@@ -84,7 +90,12 @@ public final class RocketTradeMenu extends AbstractContainerMenu {
     public boolean isUnlocked() { return villager != null && RocketChallengeManager.isChallengeComplete(villager); }
 
     @Override public boolean clickMenuButton(Player player, int button) {
-        if (button != 0 && button != 1 || !isUnlocked()) return false;
+        if (!isUnlocked()) return false;
+        if (button >= 100 && button < 100 + offerCount()) {
+            selectedIndex = button - 100;
+            updateResult(); broadcastChanges(); return true;
+        }
+        if (button != 0 && button != 1) return false;
         int max = ALPHABETICAL_TYPES.size();
         selectedIndex = Math.floorMod(selectedIndex + (button == 0 ? 1 : -1), max + 1);
         updateResult();

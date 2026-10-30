@@ -55,7 +55,7 @@ public final class PokemonTreatGameTests {
 
     @GameTest(template="test_arena", timeoutTicks=100)
     public static void allSeventeenTreatItemsAndModernTypeOverrides(GameTestHelper h) {
-        check(h, ModItems.TREATS.size()==17, "Exactly 17 treats must be registered");
+        check(h, ModItems.TREATS.size()==18, "Exactly 18 treats must be registered");
         for (PokemonTreatType type : PokemonTreatType.values()) {
             var item=ModItems.TREATS.get(type).get();
             var id=net.minecraftforge.registries.ForgeRegistries.ITEMS.getKey(item);

@@ -48,6 +48,7 @@ public final class NaturalMovementGoals {
         private final MinemonCreature mob;
         private Path landingPath;
         private int retryDelay;
+        private int pathTicks;
 
         SleepLanding(MinemonCreature mob) {
             this.mob = mob;
@@ -55,7 +56,7 @@ public final class NaturalMovementGoals {
         }
 
         @Override public boolean canUse() {
-            if (!this.mob.wantsNaturalLanding() || (!this.mob.isSleeping()&&!this.mob.isNightResting()&&!this.mob.naturalBehaviorActive()) || this.mob.isOnGround() || this.mob.isPassenger()) return false;
+            if (!this.mob.wantsNaturalLanding() || (!this.mob.isSleeping()&&!this.mob.isNightResting()&&!this.mob.naturalBehaviorActive()) || this.mob.isOnGround() && !this.mob.isInWaterOrBubble() || this.mob.isPassenger()) return false;
             if (this.retryDelay > 0) { this.retryDelay--; return false; }
             this.landingPath = findLandingPath();
             if (this.landingPath == null) this.retryDelay = 40;
@@ -63,21 +64,24 @@ public final class NaturalMovementGoals {
         }
 
         @Override public boolean canContinueToUse() {
-            return this.mob.wantsNaturalLanding() && (this.mob.isSleeping()||this.mob.isNightResting()||this.mob.naturalBehaviorActive()) && !this.mob.isOnGround()
-                    && !this.mob.getNavigation().isDone();
+            return this.mob.wantsNaturalLanding() && (this.mob.isSleeping()||this.mob.isNightResting()||this.mob.naturalBehaviorActive()) && (!this.mob.isOnGround() || this.mob.isInWaterOrBubble())
+                    && this.pathTicks < 200 && !this.mob.getNavigation().isDone();
         }
 
-        @Override public void start() { this.mob.getNavigation().moveTo(this.landingPath, 0.7D); }
-        @Override public void stop() { this.mob.getNavigation().stop(); this.landingPath = null; }
+        @Override public void start() { this.pathTicks=0; this.mob.getNavigation().moveTo(this.landingPath, 0.7D); }
+        @Override public void tick() { this.pathTicks++; }
+        @Override public void stop() { this.mob.getNavigation().stop(); this.landingPath = null; this.retryDelay=20; }
 
         private Path findLandingPath() {
             BlockPos origin = this.mob.blockPosition();
+            double waterTop=WaterMovementGoal.surfaceAt(this.mob,origin);
+            double searchHeight=Double.isFinite(waterTop)?Math.max(this.mob.getY(),waterTop+2):this.mob.getY();
             // Prefer the closest safe dry surface, and expand only if obstructed.
             for (int radius = 0; radius <= 25; radius++) {
                 for (int dx = -radius; dx <= radius; dx++) for (int dz = -radius; dz <= radius; dz++) {
                     if (Math.max(Math.abs(dx), Math.abs(dz)) != radius) continue;
                     double x = origin.getX() + dx + 0.5D, z = origin.getZ() + dz + 0.5D;
-                    double surface = surfaceBelow(this.mob.level, x, this.mob.getY(), z);
+                    double surface = surfaceBelow(this.mob.level, x, searchHeight, z);
                     BlockPos floor = new BlockPos(x, surface - 0.001D, z);
                     if (!this.mob.level.hasChunkAt(floor) || !this.mob.level.getFluidState(floor).isEmpty()) continue;
                     BlockState state = this.mob.level.getBlockState(floor);

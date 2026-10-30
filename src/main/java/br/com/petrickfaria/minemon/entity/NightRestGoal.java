@@ -14,7 +14,7 @@ final class NightRestGoal extends Goal {
   boolean waterRest=SpeciesBehaviorProfiles.waterCapable(mob.getSpeciesSlug())&&mob.isInWaterOrBubble();
   // Let SleepLanding own MOVE while a land-resting flyer is still airborne.
   // A resting airborne species that never lands remains eligible to hover.
-  return resting&&(waterRest||mob.isOnGround()||!mob.wantsNaturalLanding());
+  return resting&&(waterRest||mob.isOnGround() && !mob.isInWaterOrBubble()||!mob.wantsNaturalLanding());
  }
  @Override public boolean canContinueToUse(){return canUse()&&mob.getTarget()==null;}
  @Override public void start(){mob.getNavigation().stop();}

@@ -203,9 +203,9 @@ public final class WaterMovementGoal extends Goal {
   }
   var profile=SpeciesBehaviorProfiles.profile(mob.getSpeciesSlug());
   if(profile==SpeciesBehaviorProfiles.Profile.AQUATIC_SURFACE
-      ||profile==SpeciesBehaviorProfiles.Profile.AQUATIC_NEAR_SURFACE)return top-preferredSurfaceDepth(mob);
-  if(profile==SpeciesBehaviorProfiles.Profile.AQUATIC_CYCLE)return top-1.0D-mob.getBbHeight()*0.5D;
-  return top-mob.getBbHeight()-0.2D;
+      ||profile==SpeciesBehaviorProfiles.Profile.AQUATIC_NEAR_SURFACE)return top-Math.min(1.0D,preferredSurfaceDepth(mob));
+  if(profile==SpeciesBehaviorProfiles.Profile.AQUATIC_CYCLE)return top-0.75D;
+  return top-Math.min(1.0D,mob.getBbHeight()+0.2D);
  }
  private static boolean safeWaterFloor(MinemonCreature mob,BlockPos column,int floorWater){
   int min=mob.level.getMinBuildHeight();if(floorWater<=min)return false;
@@ -279,7 +279,7 @@ public final class WaterMovementGoal extends Goal {
   // Surface followers may be fractionally above water after interpolation.
   if(!mob.level.getFluidState(q).is(FluidTags.WATER))q=q.below();
   if(!mob.level.getFluidState(q).is(FluidTags.WATER))return Double.NaN;
-  for(int n=0;n<32&&mob.level.getFluidState(q.above()).is(FluidTags.WATER);n++)q=q.above();
+  while(q.getY()<mob.level.getMaxBuildHeight()-1&&mob.level.getFluidState(q.above()).is(FluidTags.WATER))q=q.above();
   return q.getY()+mob.level.getFluidState(q).getHeight(mob.level,q);
  }
 }

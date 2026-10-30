@@ -30,7 +30,7 @@ public class MinemonModel extends AnimatedGeoModel<MinemonCreature> {
         applyPidgeWingVisibility(entity);
         applyGengarEyeVisibility(entity);
         applyNaturalBodyMotion(entity);
-        if(entity.isSleeping())return;
+        if(entity.isSleeping()||entity.isOrderedToSit())return;
         String slug=entity.getSpeciesSlug();
         boolean headLook=slug.equals("spearow")||slug.equals("fearow")||slug.equals("abra")
             ||slug.equals("kadabra")||slug.equals("alakazam")||slug.equals("bellsprout")
@@ -62,6 +62,7 @@ public class MinemonModel extends AnimatedGeoModel<MinemonCreature> {
 
     /** Small additive body motion keeps hovering visually distinct from the wing-driven flight clips. */
     private void applyNaturalBodyMotion(MinemonCreature entity) {
+        if(entity.isOrderedToSit())return;
         String slug=entity.getSpeciesSlug();
         boolean hoveringRest=entity.isSleeping()
                 &&br.com.petrickfaria.minemon.entity.SpeciesBehaviorProfiles.hoversDuringNightRest(slug);

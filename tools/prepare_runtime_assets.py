@@ -4,6 +4,8 @@ import json,re,sys,struct,zlib
 from pathlib import Path
 root=Path(sys.argv[1])
 count=0
+preview_bounds={}
+from preview_bounds import mesh_bounds
 manifest=root/'data/minemon_gen1/runtime_species.json'
 definitions={d['animation'].replace('assets/minemon/','assets/minemon_gen1/'):d for d in json.loads(manifest.read_text())} if manifest.exists() else {}
 def add_pose_animation(data, geo, d, name, kind):
@@ -382,6 +384,25 @@ def night_sleep_clip(data,geo,d):
   animations['animation.vaporeon.minemon_night_sleep_water']=water
   animations['animation.vaporeon.minemon_night_sleep_land']=copy.deepcopy(clip)
 
+def awake_rest_clips(data,geo,d):
+ """Reuse final sleep body tracks verbatim, restoring only awake eye tracks."""
+ import copy
+ animations=data['animations'];slug=d['slug'];clips=d.get('clips',{})
+ idle=animations.get(clips.get('ground_idle',d['idle']),{}).get('bones',{})
+ blink=animations.get(clips.get('blink'),{}).get('bones',{})
+ eye_bones={b['name'] for g in geo.get('minecraft:geometry',[]) for b in g.get('bones',[])
+            if any(k in b['name'].lower() for k in ('eye','lid','pupil'))}
+ eye_bones.update(blink)
+ for suffix in ('','_water'):
+  source='animation.'+slug+'.minemon_night_sleep'+suffix
+  if source not in animations:continue
+  clip=copy.deepcopy(animations[source]);bones=clip.setdefault('bones',{})
+  for bone in eye_bones:
+   bones.pop(bone,None)
+   if bone in idle:bones[bone]=copy.deepcopy(idle[bone])
+  for field in ('sound_effects','particle_effects','timeline'):clip.pop(field,None)
+  animations['animation.'+slug+'.minemon_awake_rest'+suffix]=clip
+
 def build_runtime_clips(data,geo,d):
  animations=data.setdefault('animations',{});clips=d.get('clips',{})
  walk_name=d.get('walk')
@@ -612,10 +633,12 @@ for p in (root/'assets/minemon_gen1/animations').rglob('*.animation.json'):
   model=root/'assets/minemon_gen1'/definition['model'].removeprefix('assets/minemon/')
   if model.exists():
    geometry=json.loads(model.read_text())
+   preview_bounds[definition["slug"]]=mesh_bounds(geometry)
    build_runtime_clips(data,geometry,definition)
    compatible_locomotion(data,geometry,definition)
    native_air_pose_adaptations(data,geometry,definition)
    night_sleep_clip(data,geometry,definition)
+   awake_rest_clips(data,geometry,definition)
   prepare_tail_flame(root,definition)
   prepare_moltres_emissive_mask(root,definition)
  # GeckoLib 3.1.40 dereferences this field while parsing every clip, including
@@ -636,3 +659,7 @@ for definition in definitions.values():
   if 'locators' in bone:bone.pop('locators');changed=True
  if changed:model.write_text(json.dumps(geo,ensure_ascii=False,indent=2)+'\n')
 print('GeckoLib 3 runtime animations prepared:',count)
+
+preview_path=root/"data/minemon_gen1/preview_bounds.json"
+preview_path.parent.mkdir(parents=True,exist_ok=True)
+preview_path.write_text(json.dumps(preview_bounds,indent=2)+"\n")

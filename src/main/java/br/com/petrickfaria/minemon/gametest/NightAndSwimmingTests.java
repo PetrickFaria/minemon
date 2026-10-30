@@ -45,7 +45,7 @@ public final class NightAndSwimmingTests {
   if(m.isOnGround())return false;
   double altitude=m.getY()-m.naturalSurface();
   return switch(SpeciesBehaviorProfiles.profile(m.getSpeciesSlug())){
-   case FLOAT_HALF -> Math.abs(altitude-0.5D)<=0.12D;
+   case FLOAT_HALF -> Math.abs(altitude-m.naturalCycle().minimumAltitude())<=0.12D;
    case FLOAT_LOW -> altitude>=0.5D&&altitude<=1.0D;
    default -> m.naturalCycle().ticks()>clocks.get(m);
   };

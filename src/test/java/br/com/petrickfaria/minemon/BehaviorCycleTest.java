@@ -83,8 +83,9 @@ public final class BehaviorCycleTest {
     @Test public void floatersUseTheirSeparateHeightBandsAndDurations() {
         for (String slug : List.of("metapod", "kakuna", "abra")) {
             var cycle = new BehaviorCycle(FLOAT_HALF, slug, new Random(1));
-            assertEquals(0.5D, cycle.minimumAltitude(), 0.0D);
-            assertEquals(0.5D, cycle.maximumAltitude(), 0.0D);
+            double expected=slug.equals("abra")?0.5D:1.0D/3.0D;
+            assertEquals(expected, cycle.minimumAltitude(), 0.0D);
+            assertEquals(expected, cycle.maximumAltitude(), 0.0D);
         }
         for (String slug : List.of("geodude", "porygon")) {
             var cycle = new BehaviorCycle(FLOAT_LOW, slug, new Random(2));

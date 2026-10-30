@@ -16,7 +16,6 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.BreedGoal;
 import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.entity.ai.goal.FollowOwnerGoal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
@@ -77,6 +76,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     private net.minecraft.core.BlockPos surfaceColumn;
     private int surfaceTick;
     private double cachedSurface;
+    private static final EntityDataAccessor<Boolean> FOLLOWING_RUN = SynchedEntityData.defineId(MinemonCreature.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> SPONTANEOUS_RUN = SynchedEntityData.defineId(MinemonCreature.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> ROCKET_SPECIAL = SynchedEntityData.defineId(MinemonCreature.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Integer> POKEMON_LEVEL = SynchedEntityData.defineId(MinemonCreature.class, EntityDataSerializers.INT);
@@ -162,6 +162,8 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
             &&!(this.isNightResting()&&SpeciesBehaviorProfiles.landsForNightRest(this.getSpeciesSlug()))
             ||this.entityData.get(NATURAL_FLIGHT)&&!this.wantsNaturalLanding(); }
     public boolean isAquaticSpecies() { return SpeciesBehaviorProfiles.waterCapable(this.getSpeciesSlug()); }
+    void setFollowingRun(boolean value) { this.entityData.set(FOLLOWING_RUN, value); }
+    public boolean isFollowingRun() { return this.entityData.get(FOLLOWING_RUN); }
     public boolean isSpontaneouslyRunning() { return this.entityData.get(SPONTANEOUS_RUN); }
     public void setSpontaneousRunForValidation(boolean running) {
         if (Boolean.getBoolean("minemon.clientSmokeTest") && !this.level.isClientSide
@@ -175,6 +177,10 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     @Override public void setOrderedToSit(boolean orderedToSit) {
         super.setOrderedToSit(orderedToSit);
         this.entityData.set(ORDERED_SIT, orderedToSit);
+        if (orderedToSit) {
+            this.setSleeping(false); this.entityData.set(NIGHT_REST, false); this.nightRoutine=false;
+            this.getNavigation().stop(); this.stopSpontaneousRun(); this.setFollowingRun(false);
+        }
     }
 
     public boolean isSleeping() { return this.entityData.get(SLEEPING); }
@@ -197,6 +203,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         this.entityData.define(SLEEPING, false);
         this.entityData.define(ORDERED_SIT, false);
         this.entityData.define(SPONTANEOUS_RUN, false);
+        this.entityData.define(FOLLOWING_RUN, false);
         this.entityData.define(ROCKET_SPECIAL, false);
         this.entityData.define(POKEMON_LEVEL, 1);
         this.entityData.define(POKEMON_XP, 0);
@@ -444,16 +451,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         this.goalSelector.addGoal(1, new SitWhenOrderedToGoal(this));
         this.goalSelector.addGoal(1, new BreedGoal(this, 1.0D));
         this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.2D, true));
-        this.goalSelector.addGoal(3, new FollowOwnerGoal(this, 1.0D, 10.0F, 2.0F, this.isFlyingSpecies()) {
-            private boolean waterFollowReady() {
-                if (!MinemonCreature.this.isAquaticSpecies()
-                        || SpeciesBehaviorProfiles.isVisitor(MinemonCreature.this.getSpeciesSlug())) return true;
-                LivingEntity owner = MinemonCreature.this.getOwner();
-                return owner != null && owner.isInWaterOrBubble() && MinemonCreature.this.isInWaterOrBubble();
-            }
-            @Override public boolean canUse() { return waterFollowReady() && super.canUse(); }
-            @Override public boolean canContinueToUse() { return waterFollowReady() && super.canContinueToUse(); }
-        });
+        this.goalSelector.addGoal(3, new NaturalFollowOwnerGoal(this));
         this.goalSelector.addGoal(6, new NaturalSeparationGoal(this));
         if (SpeciesBehaviorProfiles.canFly(this.getSpeciesSlug())) {
             this.goalSelector.addGoal(0, new NaturalMovementGoals.SleepLanding(this));
@@ -761,8 +759,8 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         boolean night=this.level.dimensionType().hasSkyLight()
                 &&SpeciesBehaviorProfiles.shouldSleep(this.getSpeciesSlug(), this.level.getDayTime());
         boolean waterRest=SpeciesBehaviorProfiles.waterCapable(this.getSpeciesSlug())&&this.isInWaterOrBubble();
-        boolean restingEnvironment=waterRest||!SpeciesBehaviorProfiles.isAquatic(this.getSpeciesSlug())&&!this.isInWaterOrBubble();
-        boolean eligible=restingEnvironment&&!this.isNoAi()
+        boolean restingEnvironment=SpeciesBehaviorProfiles.canFly(this.getSpeciesSlug())||waterRest||!SpeciesBehaviorProfiles.isAquatic(this.getSpeciesSlug())&&!this.isInWaterOrBubble();
+        boolean eligible=restingEnvironment&&!this.isOrderedToSit()&&!this.isNoAi()
             &&!this.isPassenger()&&!this.isDeadOrDying()
             &&target==null&&this.wakeGraceTicks==0;
         if(night&&eligible){
@@ -894,7 +892,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
             // landing path looks like Spearow/Fearow are walking in mid-air.
             clip = firstClip(slug, "air_idle", "air_fly");
         } else if (this.isOrderedToSit()) {
-            clip = SpeciesAssetIndex.clip(slug, "sit", "sit");
+            clip = SpeciesAssetIndex.clip(slug, slug.equals("vaporeon") && this.isInWaterOrBubble() ? "awake_rest_water" : "awake_rest", "night_sleep");
         } else if (this.isAquaticSpecies() && this.isInWater()) {
             String swim = this.isNaturalSurface() ? firstClip(slug,"surface_water_swim","surfacewater_swim","water_surface_swim","water_swim")
                     : firstClip(slug,"water_swim","water_surface_swim","surface_water_swim","surfacewater_swim");
@@ -908,7 +906,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
             } else {
                 clip = definition.walk();
                 String run=SpeciesAssetIndex.clip(slug,"ground_run","run");
-                if(this.isSpontaneouslyRunning() && run!=null) clip=run;
+                if((this.isSpontaneouslyRunning() || this.isFollowingRun()) && run!=null) clip=run;
             }
         } else {
             String airIdle = this.isFlyingSpecies() ? SpeciesAssetIndex.clip(slug, "air_idle", "air_idle") : null;
@@ -981,7 +979,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
             &&!this.isDeadOrDying()&&this.getTarget()==null&&this.attackAnimationTicks<=0
             &&(this.getOwner()==null||this.distanceToSqr(this.getOwner())<100.0D)
             &&this.goalSelector.getAvailableGoals().stream().noneMatch(goal->goal.isRunning()
-                &&goal.getGoal() instanceof FollowOwnerGoal);
+                &&goal.getGoal() instanceof NaturalFollowOwnerGoal);
     }
     public double naturalSurface(){
         var column=this.blockPosition();

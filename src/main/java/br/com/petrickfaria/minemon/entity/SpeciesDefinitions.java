@@ -14,6 +14,8 @@ public final class SpeciesDefinitions {
     JsonObject o=element.getAsJsonObject();Map<String,String> clips=new HashMap<>();o.getAsJsonObject("clips").entrySet().forEach(e->clips.put(e.getKey(),e.getValue().getAsString()));
     String slug=str(o,"slug");
     CompatibleLocomotion.apply(slug,clips);
+    clips.put("awake_rest","animation."+slug+".minemon_awake_rest");
+    clips.put("awake_rest_water","animation."+slug+".minemon_awake_rest_water");
     clips.put("night_sleep","animation."+slug+".minemon_night_sleep");
     if(slug.equals("vaporeon")){
      clips.put("night_sleep_land","animation.vaporeon.minemon_night_sleep_land");
