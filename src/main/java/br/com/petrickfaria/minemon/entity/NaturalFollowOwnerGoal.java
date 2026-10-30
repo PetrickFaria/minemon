@@ -22,7 +22,7 @@ final class NaturalFollowOwnerGoal extends Goal {
         LivingEntity current = mob.getOwner();
         if (current == null || !current.isAlive() || current.isSpectator()
                 || current.level != mob.level || mob.isDefeated() || mob.isOrderedToSit() || mob.isSleeping()
-                || mob.isNightResting() || mob.isPassenger() || mob.getTarget() != null) return false;
+                || mob.isNightResting() || mob.isPassenger()) return false;
         return true;
     }
 

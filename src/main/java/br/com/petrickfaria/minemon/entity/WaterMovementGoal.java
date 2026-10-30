@@ -47,7 +47,10 @@ public final class WaterMovementGoal extends Goal {
  }
  @Override public void start(){
   var path=mob.getNavigation().createPath(destination,0);
-  if(path==null||!path.canReach()){blocked.put(destination,mob.tickCount+200);destination=null;return;}
+  if(path==null||!path.canReach()
+      ||mob.getSpeciesSlug().equals("gyarados")&&!surfacePathIsWater(path)){
+   blocked.put(destination,mob.tickCount+200);mob.getNavigation().stop();destination=null;return;
+  }
   mob.getNavigation().moveTo(path,0.85D);lastPosition=mob.position();stalled=0;
  }
  @Override public void tick(){
