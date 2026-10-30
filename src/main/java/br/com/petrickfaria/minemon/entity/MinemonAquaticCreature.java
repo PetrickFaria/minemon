@@ -72,8 +72,21 @@ public final class MinemonAquaticCreature extends MinemonCreature {
     }
     @Override public void tick(){
         super.tick();
-        if(this.isDefeated()||this.level.isClientSide||!this.isInWater()
-                ||(!this.naturalBehaviorActive()&&!this.isSleeping()&&!this.isNightResting()))return;
+        if(this.isDefeated()||this.level.isClientSide)return;
+        // A completed surface route can leave SmoothSwimmingMoveControl holding
+        // its last horizontal waypoint. Clear it even if the body has just
+        // crossed the waterline and the current column has no measurable top.
+        if(this.getSpeciesSlug().equals("gyarados")&&this.isNaturalSurface()
+                &&!this.isSleeping()&&!this.isNightResting()&&this.getNavigation().isDone()){
+            double holdY=this.getY();
+            if(this.isInWater()){
+                double localTop=this.waterSurface();
+                if(Double.isFinite(localTop))
+                    holdY=localTop-WaterMovementGoal.preferredSurfaceDepth(this);
+            }
+            this.getMoveControl().setWantedPosition(this.getX(),holdY,this.getZ(),0.5D);
+        }
+        if(!this.isInWater()||(!this.naturalBehaviorActive()&&!this.isSleeping()&&!this.isNightResting()))return;
         double top=this.waterSurface();
         if(!Double.isFinite(top))return;
         if(this.isSleeping()||this.isNightResting()){
@@ -96,13 +109,6 @@ public final class MinemonAquaticCreature extends MinemonCreature {
         // higher and must not pull Gyarados away from its local surface.
         boolean surface=this.isNaturalSurface();
         double target=surface?top-WaterMovementGoal.preferredSurfaceDepth(this):top-this.getBbHeight()-0.3D;
-        if(surface&&this.getSpeciesSlug().equals("gyarados")&&this.getNavigation().isDone()){
-            // A completed path can leave SmoothSwimmingMoveControl holding its
-            // old waypoint. Keep horizontal patrolling navigation untouched,
-            // but replace that stale vertical command with the local surface
-            // depth so Gyarados can settle after waking or finishing a route.
-            this.getMoveControl().setWantedPosition(this.getX(),target,this.getZ(),0.5D);
-        }
         // Surface and submerged correction share the swimming controller; do not
         // add another navigation goal or override horizontal pursuit.
         if(!ShoreTraversal.exiting(this)&&(surface||this.getY()>target)){

@@ -23,6 +23,11 @@ final class NineBehaviorChecks {
   awaitShore(h,mob,owner,index,false,400);
  }
  private static void awaitShore(GameTestHelper h,MinemonCreature mob,net.minecraft.server.level.ServerPlayer owner,int index,boolean entering,int remaining){
+  // Combat has higher goal priority than following. Keep random underground
+  // slimes from turning this navigation-only probe into a combat test.
+  if(mob.getTarget() instanceof net.minecraft.world.entity.monster.Slime slime){
+   slime.discard();mob.setTarget(null);
+  }
   var origin=h.absolutePos(BlockPos.ZERO);var localXAxis=h.absolutePos(new BlockPos(1,0,0));
   double axisX=localXAxis.getX()-origin.getX(),axisZ=localXAxis.getZ()-origin.getZ();
   double localX=((mob.getX()-origin.getX())*axisX+(mob.getZ()-origin.getZ())*axisZ)/(axisX*axisX+axisZ*axisZ);
