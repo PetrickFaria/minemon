@@ -40,7 +40,7 @@ final class ShoreTraversal {
  private static final java.util.Map<MinemonCreature,State> STATES=new java.util.WeakHashMap<>();
  private static final class State {BlockPos bank;Vec3 previous;int stalled;final java.util.Map<BlockPos,Integer> blocked=new java.util.HashMap<>();}
  static boolean followBank(MinemonCreature mob,net.minecraft.world.entity.LivingEntity owner,double speed){
-  if(!SpeciesBehaviorProfiles.isVisitor(mob.getSpeciesSlug())||!mob.isInWater()||owner.isInWaterOrBubble()){STATES.remove(mob);return false;}
+  if(!mob.isAquaticSpecies()||!mob.isInWater()||owner.isInWaterOrBubble()){STATES.remove(mob);return false;}
   var state=STATES.computeIfAbsent(mob,m->new State());state.blocked.entrySet().removeIf(e->e.getValue()<mob.tickCount);
   if(state.previous!=null && mob.position().distanceToSqr(state.previous)<.015)state.stalled+=10;else state.stalled=0;state.previous=mob.position();
   if(state.stalled>=40 && state.bank!=null){state.blocked.put(state.bank,mob.tickCount+200);state.bank=null;mob.getNavigation().stop();state.stalled=0;}

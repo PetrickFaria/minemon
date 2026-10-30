@@ -173,6 +173,12 @@ public final class WaterMovementGoal extends Goal {
    if(!Double.isFinite(routeTop))routeTop=top;
    else if(Math.abs(top-routeTop)>.5D)return false;
    double feetY=top-preferredSurfaceDepth(mob);
+   // GroundPathNavigation can occasionally return a reachable amphibious
+   // route whose nodes are at a different vertical band than the surface
+   // swimmer's actual destination. Checking only a surface-aligned copy of
+   // the hitbox would accept that route and let Gyarados climb out of the
+   // pool while navigation steers toward the stale higher nodes.
+   if(Math.abs(node.y-feetY)>1.0D)return false;
    var box=mob.getBoundingBox().move(node.x+.5D-mob.getX(),feetY-mob.getY(),node.z+.5D-mob.getZ());
    if(!mob.level.noCollision(mob,box))return false;
    int bodyY=net.minecraft.util.Mth.floor(feetY+mob.getBbHeight()*.5D);
