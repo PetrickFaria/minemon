@@ -15,6 +15,10 @@ public final class MinemonAquaticCreature extends MinemonCreature {
     public MinemonAquaticCreature(EntityType<? extends TamableAnimal> type, Level level) {
         super(type, level);
         this.lookControl = new net.minecraft.world.entity.ai.control.LookControl(this) {
+            @Override public void tick(){
+                float swimmingPitch=MinemonAquaticCreature.this.getXRot();super.tick();
+                if(SpeciesBehaviorProfiles.isVisitor(getSpeciesSlug()) && MinemonAquaticCreature.this.isInWater() && !getNavigation().isDone())MinemonAquaticCreature.this.setXRot(swimmingPitch);
+            }
             @Override protected boolean resetXRotOnTick() {
                 // LookControl ticks after MoveControl. Its land default resets
                 // pitch to zero every tick, preventing smooth swimming from
@@ -123,7 +127,7 @@ public final class MinemonAquaticCreature extends MinemonCreature {
                 super.doStuckDetection(position);
             }
             @Override protected PathFinder createPathFinder(int maxVisitedNodes) {
-                this.nodeEvaluator = new AmphibiousNodeEvaluator(false);
+                this.nodeEvaluator = SpeciesBehaviorProfiles.isVisitor(getSpeciesSlug())?new ShoreNodeEvaluator():new AmphibiousNodeEvaluator(false);
                 this.nodeEvaluator.setCanPassDoors(true);
                 return new PathFinder(this.nodeEvaluator, maxVisitedNodes);
             }

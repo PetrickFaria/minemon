@@ -128,6 +128,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     public MinemonCreature(EntityType<? extends TamableAnimal> type, Level level) {
         super(type, level);
         if(!this.isAquaticSpecies())this.lookControl=new net.minecraft.world.entity.ai.control.LookControl(this){
+            @Override public void tick(){float pitch=MinemonCreature.this.getXRot();super.tick();if(MinemonCreature.this.isInWater()&&!MinemonCreature.this.getNavigation().isDone())MinemonCreature.this.setXRot(pitch);}
             @Override protected boolean resetXRotOnTick(){return !MinemonCreature.this.isInWater()||MinemonCreature.this.getNavigation().isDone();}
         };
         this.naturalCycle = new BehaviorCycle(SpeciesBehaviorProfiles.profile(this.getSpeciesSlug()), this.getSpeciesSlug(),

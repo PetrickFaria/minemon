@@ -10,7 +10,7 @@ import net.minecraft.world.phys.Vec3;
 final class EscapeNavigation extends GroundPathNavigation {
  EscapeNavigation(Mob mob,Level level){super(mob,level);setCanFloat(true);}
  @Override protected PathFinder createPathFinder(int limit){
-  this.nodeEvaluator=new AmphibiousNodeEvaluator(false);
+  this.nodeEvaluator=new ShoreNodeEvaluator();
   this.nodeEvaluator.setCanPassDoors(true);
   return new PathFinder(this.nodeEvaluator,limit);
  }
