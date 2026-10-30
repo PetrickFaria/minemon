@@ -89,6 +89,18 @@ public final class NightAndSwimmingTests {
   }
  }
  private static MinemonCreature spawn(GameTestHelper h,String slug,int x,int y,int z){return h.spawn(ModEntities.SPECIES.get(slug).get(),new BlockPos(x,y,z));}
+ private static void traceAwakeGyarados(GameTestHelper h,MinemonCreature mob,int elapsed){
+  double top=WaterMovementGoal.restSurfaceAt(mob,mob.blockPosition());
+  var path=mob.getNavigation().getPath();
+  String next=path==null||path.isDone()?"null":path.getNextNode().toString();
+  com.mojang.logging.LogUtils.getLogger().info("GYARADOS TRACE elapsed="+elapsed+" pos="+mob.position()
+      +" water="+mob.isInWater()+" surfaceMode="+mob.isNaturalSurface()+" surface="+top
+      +" centerDepth="+(top-(mob.getY()+mob.getBbHeight()*.5D))
+      +" target="+mob.getNavigation().getTargetPos()+" navDone="+mob.getNavigation().isDone()
+      +" next="+next+" wanted="+mob.getMoveControl().getWantedX()+","+mob.getMoveControl().getWantedY()+","+mob.getMoveControl().getWantedZ()
+      +" motion="+mob.getDeltaMovement());
+  if(elapsed<300)h.runAfterDelay(50,()->traceAwakeGyarados(h,mob,elapsed+50));
+ }
  @GameTest(template="test_arena",batch="night_landing_water",timeoutTicks=700)
  public static void landRestingFlyerFindsDryGroundBeforeStartingSleepOverWater(GameTestHelper h){
   arena(h);var level=h.getLevel();
@@ -157,6 +169,7 @@ public final class NightAndSwimmingTests {
     attacker.discard();await(h,dratini::isSleeping,()->{
      level.setDayTime(1000);
       await(h,()->!gyarados.isSleeping()&&!magikarp.isSleeping()&&!dratini.isSleeping()&&!shellder.isSleeping()&&!vaporeon.isSleeping()&&!cloyster.isSleeping(),()->{
+      traceAwakeGyarados(h,gyarados,0);
       h.runAfterDelay(300,()->{
        double top=WaterMovementGoal.restSurfaceAt(gyarados,gyarados.blockPosition());
        double depth=top-(gyarados.getY()+gyarados.getBbHeight()*.5);

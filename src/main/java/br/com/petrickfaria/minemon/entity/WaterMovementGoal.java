@@ -163,31 +163,34 @@ public final class WaterMovementGoal extends Goal {
   return null;
  }
  private boolean surfacePathIsWater(net.minecraft.world.level.pathfinder.Path path){
-  // Gyarados' body center follows the surface one block below it. Checking
-  // only the path node lets a wide body clip over a bank while the node itself
-  // remains in water, so validate collision clearance and the body's water
-  // footprint at every point along the path.
-  double routeTop=Double.NaN;
+  // Validate the whole route, including the space between path nodes. Wide
+  // surface swimmers can clear each node yet clip a shallow corner while the
+  // navigator interpolates toward the following node.
+  double routeTop=Double.NaN,previousX=Double.NaN,previousY=Double.NaN,previousZ=Double.NaN;
   for(int i=0;i<path.getNodeCount();i++){
    var node=path.getNode(i);
-   BlockPos column=new BlockPos(node.x,node.y,node.z);
-   double top=surfaceAt(mob,column);
-   if(!Double.isFinite(top)||!waterRegion(mob,column))return false;
-   if(!Double.isFinite(routeTop))routeTop=top;
-   else if(Math.abs(top-routeTop)>.5D)return false;
-   double feetY=top-preferredSurfaceDepth(mob);
-   // GroundPathNavigation can occasionally return a reachable amphibious
-   // route whose nodes are at a different vertical band than the surface
-   // swimmer's actual destination. Checking only a surface-aligned copy of
-   // the hitbox would accept that route and let Gyarados climb out of the
-   // pool while navigation steers toward the stale higher nodes.
-   if(Math.abs(node.y-feetY)>1.0D)return false;
-   var box=mob.getBoundingBox().move(node.x+.5D-mob.getX(),feetY-mob.getY(),node.z+.5D-mob.getZ());
-   if(!mob.level.noCollision(mob,box))return false;
-   int bodyY=net.minecraft.util.Mth.floor(feetY+mob.getBbHeight()*.5D);
-   for(int x=net.minecraft.util.Mth.floor(box.minX+.001D);x<=net.minecraft.util.Mth.floor(box.maxX-.001D);x++)
-    for(int z=net.minecraft.util.Mth.floor(box.minZ+.001D);z<=net.minecraft.util.Mth.floor(box.maxZ-.001D);z++)
-     if(!mob.level.getFluidState(new BlockPos(x,bodyY,z)).is(FluidTags.WATER))return false;
+   double endX=node.x+.5D,endY=node.y,endZ=node.z+.5D;
+   int samples=Double.isFinite(previousX)?4:1;
+   for(int sample=1;sample<=samples;sample++){
+    double t=sample/(double)samples;
+    double x=Double.isFinite(previousX)?previousX+(endX-previousX)*t:endX;
+    double navY=Double.isFinite(previousY)?previousY+(endY-previousY)*t:endY;
+    double z=Double.isFinite(previousZ)?previousZ+(endZ-previousZ)*t:endZ;
+    BlockPos column=new BlockPos(net.minecraft.util.Mth.floor(x),net.minecraft.util.Mth.floor(navY),net.minecraft.util.Mth.floor(z));
+    double top=surfaceAt(mob,column);
+    if(!Double.isFinite(top)||!waterRegion(mob,column))return false;
+    if(!Double.isFinite(routeTop))routeTop=top;
+    else if(Math.abs(top-routeTop)>.5D)return false;
+    double feetY=top-preferredSurfaceDepth(mob);
+    if(Math.abs(navY-feetY)>1.0D)return false;
+    var box=mob.getBoundingBox().move(x-mob.getX(),feetY-mob.getY(),z-mob.getZ());
+    if(!mob.level.noCollision(mob,box))return false;
+    int bodyY=net.minecraft.util.Mth.floor(feetY+mob.getBbHeight()*.5D);
+    for(int bx=net.minecraft.util.Mth.floor(box.minX+.001D);bx<=net.minecraft.util.Mth.floor(box.maxX-.001D);bx++)
+     for(int bz=net.minecraft.util.Mth.floor(box.minZ+.001D);bz<=net.minecraft.util.Mth.floor(box.maxZ-.001D);bz++)
+      if(!mob.level.getFluidState(new BlockPos(bx,bodyY,bz)).is(FluidTags.WATER))return false;
+   }
+   previousX=endX;previousY=endY;previousZ=endZ;
   }
   return path.getNodeCount()>0;
  }
