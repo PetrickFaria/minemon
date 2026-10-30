@@ -186,6 +186,12 @@ public final class NightAndSwimmingTests {
  @GameTest(template="test_arena",batch="night_mixed",timeoutTicks=1000)
  public static void realNightLandingHoverWakeRetaliationReturnAndDawn(GameTestHelper h){
   arena(h);var level=h.getLevel();level.setDayTime(1000);
+  // Keep sleeping hoverers clear of the wide grounded sleepers: collision
+  // pushing is physical displacement, not autonomous sleep travel.
+  for(int ax=0;ax<32;ax++)for(int az=26;az<44;az++){
+   h.setBlock(new BlockPos(ax,0,az),Blocks.STONE);
+   for(int ay=1;ay<20;ay++)h.setBlock(new BlockPos(ax,ay,az),Blocks.AIR);
+  }
   var ground=spawn(h,"bulbasaur",3,1,3);
   var mixed=new ArrayList<MinemonCreature>();var air=new ArrayList<MinemonCreature>();
   int x=5;
@@ -200,7 +206,7 @@ public final class NightAndSwimmingTests {
   x=3;
   // These airborne species keep their one-block hover while asleep.
   for(String slug:List.of("koffing","weezing","magnemite","magneton","mewtwo","mew")){
-   int airX=3+(air.size()%5)*6,airZ=4+(air.size()/5)*5;air.add(spawn(h,slug,airX,7,airZ));
+   int airX=3+(air.size()%5)*6,airZ=29+(air.size()/5)*8;air.add(spawn(h,slug,airX,7,airZ));
   }
   h.runAfterDelay(5,()->{
    level.setDayTime(18000);
