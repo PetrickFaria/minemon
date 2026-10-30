@@ -27,7 +27,9 @@ jobs:
           python-version: '3.12'
       - uses: gradle/actions/setup-gradle@v4
       - name: Verify extracted project resources
-        run: python3 tools/verify_project.py
+        run: |
+          python3 tools/verify_project.py
+          python3 -m unittest discover -s tools -p test_model_metrics.py
       - name: Verify Rocket workstation and villager resources
         run: python3 tools/verify_rocket.py
       - name: Verify Pokémon treat models, textures, and translations

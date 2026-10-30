@@ -33,6 +33,10 @@ def vector(v,t,default):
 
 def rotate(p,pivot,angles):
  x,y,z=[p[i]-pivot[i] for i in range(3)]
+ # GeckoLib 3 GeoBuilder/GeoCube reflect the raw X coordinates and negate
+ # X/Y rotations; RenderUtils composes Z,Y,X. In this raw-coordinate frame
+ # that is Rz(-z) Ry(y) Rx(-x), including animation-controller rotations.
+ angles=[-angles[0],angles[1],-angles[2]]
  for axis,a in enumerate(angles):
   c,s=COS(a),SIN(a)
   if axis==0:y,z=y*c-z*s,y*s+z*c
@@ -51,8 +55,9 @@ def measure(geo,clip):
    appendage=any(re.search(r'wing|tail|flame|fire|spine|horn|mane|feather|antenna|whisker|tongue|gas|locator|fin|leaf|leaves|flower|petal|vine|tentacle',n['name'],re.I) for n in chain)
    if any(min(vector(tracks.get(n['name'],{}).get('scale'),t,[1,1,1]))<.05 for n in chain):continue
    for cube in b.get('cubes',[]):
+    inflate=cube.get('inflate',b.get('inflate',0)) or 0
     for mask in range(8):
-     p=[cube['origin'][i]+(cube['size'][i] if mask&(1<<i) else 0) for i in range(3)]
+     p=[cube['origin'][i]+(cube['size'][i]+inflate if mask&(1<<i) else -inflate) for i in range(3)]
      p=rotate(p,cube.get('pivot',[0,0,0]),cube.get('rotation',[0,0,0]))
      for n in chain:
       tr=tracks.get(n['name'],{});pivot=n.get('pivot',[0,0,0]);scale=vector(tr.get('scale'),t,[1,1,1])
@@ -65,21 +70,24 @@ def measure(geo,clip):
  bounds=lambda a:[min(p[i] for p in a) for i in range(3)]+[max(p[i] for p in a) for i in range(3)]
  return bounds(core),bounds(full)
 
-result={}
-for d in json.loads((ROOT/'src/main/resources/data/minemon_gen1/runtime_species.json').read_text()):
- geo=json.loads((ROOT/'src/main/resources'/d['model']).read_text());a=ROOT/'src/main/resources'/d['animation']
- animations=json.loads(a.read_text()).get('animations',{}) if a.exists() else {}
- clip=animations.get(d['idle'],animations.get(d['clips'].get('ground_idle'),{}))
- core,full=measure(geo,clip);w=core[3]-core[0];depth=core[5]-core[2]
- # Vanilla collision boxes are square in X/Z. Long slender articulated bodies
- # use their thickness, rather than a tail-length-sized square on every turn.
- width=min(w,depth)*1.25 if max(w,depth)>2.5*max(.05,min(w,depth)) else max(w,depth)
- if d['slug'] in ('ekans','arbok','onix','gyarados','dratini','dragonair'):
-  # A square box around an entire articulated coil obstructs paths. Use the
-  # measured largest solid segment cross-section for these serpentine bodies.
-  sizes=[c['size'] for g in geo['minecraft:geometry'] for b in g['bones'] if not re.search(r'tail|wing|horn|spine|fin|whisker|eye|pupil|lip|tooth',b['name'],re.I) for c in b.get('cubes',[]) if all(v>0 for v in c['size'])]
-  if sizes:width=max(max(v[0],v[2]) for v in sizes)/16
- result[d['slug']]={'width':max(.15,width),'height':max(.15,core[4]-min(0,core[1])),'top':full[4],'bottom':full[1],'core_bounds':core,'source':d['model']}
-out=ROOT/'src/main/resources/data/minemon_gen1/model_metrics.json';out.write_text(json.dumps(result,indent=2)+'\n')
-print('Measured',len(result),'models')
-for slug in ('charmander','gastly','gyarados','onix','abra','porygon'):print(slug,{k:round(v,3) for k,v in result[slug].items() if isinstance(v,(float,int))})
+def generate():
+ result={}
+ for d in json.loads((ROOT/'src/main/resources/data/minemon_gen1/runtime_species.json').read_text()):
+  geo=json.loads((ROOT/'src/main/resources'/d['model']).read_text());a=ROOT/'src/main/resources'/d['animation']
+  animations=json.loads(a.read_text()).get('animations',{}) if a.exists() else {}
+  clip=animations.get(d['idle'],animations.get(d['clips'].get('ground_idle'),{}))
+  core,full=measure(geo,clip);w=core[3]-core[0];depth=core[5]-core[2]
+  # Vanilla collision boxes are square in X/Z. Long slender articulated bodies
+  # use their thickness, rather than a tail-length-sized square on every turn.
+  width=min(w,depth)*1.25 if max(w,depth)>2.5*max(.05,min(w,depth)) else max(w,depth)
+  if d['slug'] in ('ekans','arbok','onix','gyarados','dratini','dragonair'):
+   # A square box around an entire articulated coil obstructs paths. Use the
+   # measured largest solid segment cross-section for these serpentine bodies.
+   sizes=[c['size'] for g in geo['minecraft:geometry'] for b in g['bones'] if not re.search(r'tail|wing|horn|spine|fin|whisker|eye|pupil|lip|tooth',b['name'],re.I) for c in b.get('cubes',[]) if all(v>0 for v in c['size'])]
+   if sizes:width=max(max(v[0],v[2]) for v in sizes)/16
+  result[d['slug']]={'width':max(.15,width),'height':max(.15,core[4]-min(0,core[1])),'top':full[4],'bottom':full[1],'core_bounds':core,'source':d['model']}
+ out=ROOT/'src/main/resources/data/minemon_gen1/model_metrics.json';out.write_text(json.dumps(result,indent=2)+'\n')
+ print('Measured',len(result),'models')
+ for slug in ('charmander','gastly','gyarados','onix','abra','porygon'):print(slug,{k:round(v,3) for k,v in result[slug].items() if isinstance(v,(float,int))})
+
+if __name__=="__main__":generate()

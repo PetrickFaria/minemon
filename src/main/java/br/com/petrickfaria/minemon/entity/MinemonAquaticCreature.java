@@ -129,19 +129,19 @@ public final class MinemonAquaticCreature extends MinemonCreature {
             }
 
             @Override protected void followThePath() {
-                // Native waypoint acceptance uses (width + 1) / 2, whereas
-                // Path's steering point rounds that width down. With fractional
-                // model widths a swimmer can reach the steering point exactly
-                // and still fail acceptance through float rounding. Advance a
-                // genuinely reached node before normal path following resumes.
+                // Follow the native path's actual steering point. Land-style
+                // width rounding can reject an exactly reached fractional-width
+                // node; its one-block vertical tolerance can also finish a dive
+                // before reaching the bottom. Water needs 3D arrival checks.
                 if (this.mob.isInWater() && this.path != null && !this.path.isDone()) {
                     var point = this.path.getNextEntityPos(this.mob);
-                    if (Math.abs(this.mob.getX()-point.x)<0.1D
-                            && Math.abs(this.mob.getZ()-point.z)<0.1D
-                            && Math.abs(this.mob.getY()-point.y)<0.4D) {
+                    if (Math.abs(this.mob.getX()-point.x)<0.35D
+                            && Math.abs(this.mob.getZ()-point.z)<0.35D
+                            && Math.abs(this.mob.getY()-this.getGroundY(point))<0.30D) {
                         this.path.advance();
-                        if (this.path.isDone()) return;
                     }
+                    this.doStuckDetection(this.getTempMobPos());
+                    return;
                 }
                 super.followThePath();
             }
