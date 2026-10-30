@@ -168,7 +168,7 @@ public final class WaterMovementGoal extends Goal {
    var node=path.getNode(i);
    BlockPos column=new BlockPos(node.x,node.y,node.z);
    double top=surfaceAt(mob,column);
-   if(!Double.isFinite(top))return false;
+   if(!Double.isFinite(top)||!waterRegion(mob,column))return false;
    double feetY=top-preferredSurfaceDepth(mob);
    var box=mob.getBoundingBox().move(node.x+.5D-mob.getX(),feetY-mob.getY(),node.z+.5D-mob.getZ());
    if(!mob.level.noCollision(mob,box))return false;
