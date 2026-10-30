@@ -28,7 +28,7 @@ public class RefinementGameTests {
   TwelveAdjustmentChecks.verify(h);
   h.succeed();
  }
- @GameTest(template="test_arena",batch="refinement_water_sleep",timeoutTicks=240)
+ @GameTest(template="test_arena",batch="refinement_water_sleep",timeoutTicks=2000)
  public static void submergedSleepKeepsDepthAndSurfaceSleepSinksTwoBlocks(GameTestHelper h){
   for(int x=0;x<16;x++)for(int z=0;z<16;z++)for(int y=0;y<=11;y++)
    h.setBlock(new BlockPos(x,y,z),y==0||x==0||x==15||z==0||z==15?Blocks.STONE:y<=8?Blocks.WATER:Blocks.AIR);
@@ -45,7 +45,7 @@ public class RefinementGameTests {
    if(!lapras.isSleeping()||Math.abs(lapras.getY()-laprasY)>.2)h.fail("Lapras must sleep at the surface");
    var saved=surface.saveWithoutId(new CompoundTag());var copy=ModEntities.SPECIES.get("magikarp").get().create(h.getLevel());copy.load(saved);
    if(Math.abs(copy.aquaticSleepY()-surface.aquaticSleepY())>.001)h.fail("Sleep depth anchor did not persist");
-   deep.discard();surface.discard();lapras.discard();h.getLevel().setDayTime(1000);h.succeed();
+   deep.discard();surface.discard();lapras.discard();h.getLevel().setDayTime(1000);NineBehaviorChecks.shore(h);
   });
  }
  @GameTest(template="test_arena",batch="refinement_egg",timeoutTicks=40)

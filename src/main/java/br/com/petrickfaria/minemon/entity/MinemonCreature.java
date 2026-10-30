@@ -64,7 +64,9 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     private final DefeatedRest defeatedRest=new DefeatedRest(this);
     private boolean defeatTargetsCleared;
     private int successfulMeleeAttacks;
+    private static final EntityDataAccessor<Integer> RANGED_CHARGES=SynchedEntityData.defineId(MinemonCreature.class,EntityDataSerializers.INT);
     private final CombatCharges rangedCharges=new CombatCharges();
+    public int getRangedCharges(){return entityData.get(RANGED_CHARGES);}
     public CombatCharges rangedCharges(){return rangedCharges;}
     private long nextCombatTick;
     private static final EntityDataAccessor<Boolean> SLEEPING = SynchedEntityData.defineId(MinemonCreature.class, EntityDataSerializers.BOOLEAN);
@@ -224,6 +226,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
 
     @Override protected void defineSynchedData() {
         super.defineSynchedData();
+        this.entityData.define(RANGED_CHARGES,3);
         this.entityData.define(DEFEATED, false);
         this.entityData.define(NIGHT_REST, false);
         this.entityData.define(NATURAL_LANDING, false);
@@ -270,7 +273,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         this.loadingPokemonData=true;
         this.entityData.set(DEFEATED,tag.getBoolean("MinemonDefeated"));
         this.aiBeforeDefeat=tag.getBoolean("MinemonAiBeforeDefeat");
-        rangedCharges.load(tag);
+        rangedCharges.load(tag);entityData.set(RANGED_CHARGES,rangedCharges.charges());
         this.successfulMeleeAttacks=Math.max(0,Math.min(4,tag.getInt("MinemonMeleeSequence")));
         this.nextCombatTick=level.getGameTime()+Math.max(0,tag.getInt("MinemonCombatCooldown"));
         this.setRocketSpecial(tag.getBoolean("MinemonRocketSpecial"));
@@ -700,7 +703,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         }
         if(!this.level.isClientSide&&!(Boolean.getBoolean("minemon.clientSmokeTest")&&this.getTags().contains("minemon-locomotion-fixture"))){if(!isDefeated())this.tickNightRest();}
         super.tick();
-        if(!level.isClientSide && isTame())rangedCharges.tick(!isDefeated());
+        if(!level.isClientSide && isTame()){rangedCharges.tick(!isDefeated());entityData.set(RANGED_CHARGES,rangedCharges.charges());}
         if(level.isClientSide)tickGastlySmoke();
         if(isDefeated()){
             this.getNavigation().stop();this.setTarget(null);this.setJumping(false);
@@ -945,7 +948,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
                 || !canFireAt(target))return false;
         ElementalProjectile shot=new ElementalProjectile(this,target);
         if(!level.addFreshEntity(shot))return false;
-        if(isTame())rangedCharges.consume();else successfulMeleeAttacks=0;nextCombatTick=level.getGameTime()+(isTame()?60:50);
+        if(isTame()){rangedCharges.consume();entityData.set(RANGED_CHARGES,rangedCharges.charges());}else successfulMeleeAttacks=0;nextCombatTick=level.getGameTime()+(isTame()?60:50);
         level.broadcastEntityEvent(this,(byte)61);return true;
     }
     public boolean isDefeated(){return entityData.get(DEFEATED);}

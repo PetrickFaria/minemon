@@ -105,6 +105,18 @@ final class TwelveAdjustmentChecks {
    grid.setItem(1,new ItemStack(ModItems.SOULS.get(other).get()));
    if(recipe.matches(grid,h.getLevel()))h.fail("Mixed elemental souls accepted: "+id);
   }
+  var ball=(net.minecraft.world.item.crafting.ShapedRecipe)h.getLevel().getRecipeManager().byKey(new net.minecraft.resources.ResourceLocation("minemon","pokeball")).orElseThrow();
+  var upgrade=(net.minecraft.world.item.crafting.ShapedRecipe)h.getLevel().getRecipeManager().byKey(new net.minecraft.resources.ResourceLocation("minemon","master_ball")).orElseThrow();
+  var grid=new net.minecraft.world.inventory.CraftingContainer(owner.inventoryMenu,3,3);
+  for(int i=0;i<9;i++)grid.setItem(i,new ItemStack(i==4?net.minecraft.world.item.Items.ENDER_PEARL:net.minecraft.world.item.Items.IRON_INGOT));
+  if(!ball.matches(grid,h.getLevel())||ball.getResultItem().getItem()!=ModItems.POKEBALL.get()||ball.getResultItem().getCount()!=1)h.fail("Pokeball recipe mismatch");
+  grid.clearContent();for(int i:new int[]{1,3,5,7})grid.setItem(i,new ItemStack(net.minecraft.world.item.Items.DIAMOND));
+  grid.setItem(4,new ItemStack(ModItems.POKEBALL.get()));
+  if(!upgrade.matches(grid,h.getLevel())||upgrade.getResultItem().getItem()!=ModItems.MASTER_BALL.get()||upgrade.getResultItem().getCount()!=1)h.fail("Master Ball recipe mismatch");
+  grid.getItem(4).getOrCreateTag().putString("CustomData","must survive");
+  if(upgrade.matches(grid,h.getLevel()))h.fail("Master Ball accepted a special tagged Pokeball");
+  grid.getItem(4).getOrCreateTag().put("MinemonStoredPokemon",new CompoundTag());
+  if(upgrade.matches(grid,h.getLevel()))h.fail("Master Ball accepted an occupied Pokeball");
  }
  private static void verifyExactHatching(GameTestHelper h){
   var level=h.getLevel();var pos=h.absolutePos(new BlockPos(12,1,12));

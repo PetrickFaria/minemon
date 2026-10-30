@@ -250,7 +250,7 @@ public final class CompanionTests {
     }
     h.runAfterDelay(60,()->{
      for(var bird:birds)check(h,!bird.isOrderedToSit()&&!bird.isOnGround(),"Following order must resume natural flight after sitting");
-     for(var bird:birds)bird.discard();h.succeed();
+     for(var bird:birds)bird.discard();NineBehaviorChecks.defeatedFloaters(h);
     });
    });return;
   }

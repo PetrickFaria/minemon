@@ -132,7 +132,7 @@ public final class NightAndSwimmingTests {
    },250,"Gastly, Haunter, Gengar, Zubat, and Golbat must begin daytime sleep at world time 6,000");
   },40,"Nocturnal species must remain awake during the first half of daylight");
  }
- @GameTest(template="test_arena",batch="night_aquatic",timeoutTicks=1000)
+ @GameTest(template="test_arena",batch="night_aquatic",timeoutTicks=1500)
  public static void aquaticNightRestKeepsSurfaceAndBottomRoutinesSafe(GameTestHelper h){
   arena(h);var level=h.getLevel();
   for(int x=2;x<=15;x++)for(int z=3;z<=10;z++)for(int y=1;y<=14;y++)h.setBlock(new BlockPos(x,y,z),Blocks.WATER);
@@ -157,7 +157,12 @@ public final class NightAndSwimmingTests {
     attacker.discard();await(h,dratini::isSleeping,()->{
      level.setDayTime(1000);
       await(h,()->!gyarados.isSleeping()&&!magikarp.isSleeping()&&!dratini.isSleeping()&&!shellder.isSleeping()&&!vaporeon.isSleeping()&&!cloyster.isSleeping(),()->{
-      h.succeed();
+      h.runAfterDelay(300,()->{
+       double top=WaterMovementGoal.restSurfaceAt(gyarados,gyarados.blockPosition());
+       double depth=top-(gyarados.getY()+gyarados.getBbHeight()*.5);
+       check(h,Math.abs(depth-1)<.3,"Awake Gyarados must return to body-center depth one block: "+depth);
+       h.succeed();
+      });
      },40,"Aquatic sleepers must wake at dawn");
     },220,"A water visitor must return to sleep after combat while it is still night; sleeping="+dratini.isSleeping()+" target="+dratini.getTarget()+" y="+dratini.getY());
    },180,()->"The woken water visitor must physically retaliate in water; pos="+dratini.position()+" target="+dratini.getTarget()+" sleep="+dratini.isSleeping()+" attacker="+attacker.position()+" health="+attacker.getHealth());

@@ -76,7 +76,7 @@ jobs:
           mkdir -p run
           echo eula=true > run/eula.txt
           python3 tools/prepare_gametest_world.py
-          timeout 480s ./gradlew --no-daemon runGameTestServer
+          timeout 600s ./gradlew --no-daemon runGameTestServer
       - name: Validate Rocket villager profession and uniform on the real client
         run: |
           python3 tools/prepare_client_world.py
