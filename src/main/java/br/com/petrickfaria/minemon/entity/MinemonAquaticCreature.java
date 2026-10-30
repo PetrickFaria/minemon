@@ -89,6 +89,17 @@ public final class MinemonAquaticCreature extends MinemonCreature {
             return;
         }
         boolean surface=this.isNaturalSurface();
+        if(surface&&getSpeciesSlug().equals("gyarados")&&!this.getNavigation().isDone()){
+            // A path can ascend from a falling/shallower edge into the main
+            // lake. Anchor the body-depth correction to that higher water
+            // surface while the route is active, or the local waterfall
+            // surface can pull Gyarados down and away from the lake surface.
+            var destination=this.getNavigation().getTargetPos();
+            if(destination!=null){
+                double routeTop=WaterMovementGoal.surfaceAt(this,destination);
+                if(Double.isFinite(routeTop))top=Math.max(top,routeTop);
+            }
+        }
         double target=surface?top-WaterMovementGoal.preferredSurfaceDepth(this):top-this.getBbHeight()-0.3D;
         // Surface and submerged correction share the swimming controller; do not
         // add another navigation goal or override horizontal pursuit.

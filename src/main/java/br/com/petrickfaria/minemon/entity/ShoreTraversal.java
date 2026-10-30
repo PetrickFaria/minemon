@@ -44,7 +44,15 @@ final class ShoreTraversal {
   var state=STATES.computeIfAbsent(mob,m->new State());state.blocked.entrySet().removeIf(e->e.getValue()<mob.tickCount);
   if(state.previous!=null && mob.position().distanceToSqr(state.previous)<.015)state.stalled+=10;else state.stalled=0;state.previous=mob.position();
   if(state.stalled>=40 && state.bank!=null){state.blocked.put(state.bank,mob.tickCount+200);state.bank=null;mob.getNavigation().stop();state.stalled=0;}
-  if(state.bank!=null && !mob.getNavigation().isDone()){mob.getNavigation().setSpeedModifier(speed);return true;}
+  if(state.bank!=null){
+   // Amphibious path nodes can complete on the water side of a one-block
+   // bank. Keep steering toward the already reachability-checked landing
+   // point directly; block collision still governs movement and the stalled
+   // route check below selects another bank if this line is obstructed.
+   mob.getNavigation().stop();
+   mob.getMoveControl().setWantedPosition(state.bank.getX()+.5D,state.bank.getY(),state.bank.getZ()+.5D,speed);
+   return true;
+  }
   double top=WaterMovementGoal.restSurfaceAt(mob,mob.blockPosition());if(!Double.isFinite(top))return false;
   var candidates=new java.util.ArrayList<BlockPos>();
   for(int dx=-12;dx<=12;dx++)for(int dz=-12;dz<=12;dz++){
@@ -61,7 +69,11 @@ final class ShoreTraversal {
   int tried=0;
   for(var feet:candidates){
    var path=mob.getNavigation().createPath(feet,0);
-   if(path!=null&&path.canReach()){state.bank=feet;mob.getNavigation().moveTo(path,speed);return true;}
+   if(path!=null&&path.canReach()){
+    state.bank=feet;mob.getNavigation().stop();
+    mob.getMoveControl().setWantedPosition(feet.getX()+.5D,feet.getY(),feet.getZ()+.5D,speed);
+    return true;
+   }
    state.blocked.put(feet,mob.tickCount+200);if(++tried>=12)break;
   }
   return false;
