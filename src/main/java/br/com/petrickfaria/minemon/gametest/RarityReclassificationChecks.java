@@ -11,9 +11,7 @@ import net.minecraftforge.gametest.*;
 import net.minecraftforge.fml.loading.FMLPaths;
 import java.nio.file.*;
 
-@GameTestHolder(Minemon.MOD_ID) @PrefixGameTestTemplate(false)
-public final class RarityReclassificationGameTests {
- @GameTest(template="test_arena",batch="rarity_entities",timeoutTicks=40)
+public final class RarityReclassificationChecks {
  public static void all151EntitiesUseCatalogStatsAndSavedProgress(GameTestHelper h){
   for(var s:PokecSpecies.ordered()){
    var m=ModEntities.SPECIES.get(s.slug()).get().create(h.getLevel());
@@ -26,9 +24,7 @@ public final class RarityReclassificationGameTests {
    if(copy.getPokemonLevel()!=5||copy.getHealth()!=3||copy.getMaxHealth()!=m.getMaxHealth()
      ||!copy.getPokemonRarity().equals(s.rarity()))h.fail("Reload changed progress: "+s.slug());
   }
-  h.succeed();
  }
- @GameTest(template="test_arena",batch="rarity_xp",timeoutTicks=40)
  public static void reclassificationKeepsOverflowXpUntilNextAward(GameTestHelper h){
   var m=ModEntities.SPECIES.get("rattata").get().create(h.getLevel());
   var owner=java.util.UUID.randomUUID();m.setTame(true);m.setOwnerUUID(owner);m.setPokemonLevel(3);m.setHealth(3);
@@ -36,9 +32,7 @@ public final class RarityReclassificationGameTests {
   m.load(saved);m.load(m.saveWithoutId(new CompoundTag()));
   if(m.getPokemonLevel()!=3||m.getPokemonExperience()!=37||m.getHealth()!=3||!owner.equals(m.getOwnerUUID()))h.fail("Existing XP, level, health or owner was lost");
   if(m.awardPokemonExperience(1)!=1||m.getPokemonLevel()!=4||m.getPokemonExperience()!=8||m.getHealth()!=5)h.fail("Saved overflow must carry forward without duplicated growth");
-  h.succeed();
  }
- @GameTest(template="test_arena",batch="rarity_config_migration",timeoutTicks=40)
  public static void oldConfigCannotOverrideCatalogAndUnrelatedSettingsSurvive(GameTestHelper h) throws Exception{
   Path file=FMLPaths.CONFIGDIR.get().resolve("minemon/pokec-economy.toml");byte[] original=Files.readAllBytes(file);
   try{
@@ -50,6 +44,5 @@ public final class RarityReclassificationGameTests {
     ||PokecEconomy.get().stageSouls(PokemonSoulConversion.Stage.INITIAL)!=7)h.fail("Migration duplicated rarities or changed unrelated settings");
    PokecEconomy.load();if(!Files.readString(file).equals(migrated))h.fail("Migration is not idempotent");
   }finally{Files.write(file,original);PokecEconomy.load();}
-  h.succeed();
  }
 }

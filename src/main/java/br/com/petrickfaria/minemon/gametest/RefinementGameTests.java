@@ -11,7 +11,7 @@ import net.minecraftforge.gametest.*;
 @GameTestHolder(Minemon.MOD_ID) @PrefixGameTestTemplate(false)
 public class RefinementGameTests {
  @GameTest(template="test_arena",batch="refinement_stats",timeoutTicks=40)
- public static void levelAttributesPersistWithoutHealingOrDuplicating(GameTestHelper h){
+ public static void levelAttributesPersistWithoutHealingOrDuplicating(GameTestHelper h) throws Exception{
   var mob=ModEntities.SPECIES.get("charmander").get().create(h.getLevel());
   mob.setPokemonLevel(1);double hp=PokemonProgression.healthForRarity(mob.getPokemonRarity(),1);
   mob.setHealth(3);mob.setPokemonLevel(5);
@@ -20,6 +20,11 @@ public class RefinementGameTests {
   var data=mob.saveWithoutId(new CompoundTag());var copy=ModEntities.SPECIES.get("charmander").get().create(h.getLevel());copy.load(data);
   if(copy.getMaxHealth()!=mob.getMaxHealth()||copy.getHealth()!=11||copy.getAttributeValue(Attributes.ATTACK_DAMAGE)!=damage)h.fail("Reload duplicated stat growth or healed");
   copy.setPokemonProgress(5,copy.getPokemonExperience());if(copy.getHealth()!=11)h.fail("Same-level update must not heal");
+  // Keep rarity checks in the existing persistence batch: new named batches
+  // reorder shared-world legacy arenas and contaminate their water/time fixtures.
+  RarityReclassificationChecks.all151EntitiesUseCatalogStatsAndSavedProgress(h);
+  RarityReclassificationChecks.reclassificationKeepsOverflowXpUntilNextAward(h);
+  RarityReclassificationChecks.oldConfigCannotOverrideCatalogAndUnrelatedSettingsSurvive(h);
   h.succeed();
  }
  @GameTest(template="test_arena",batch="refinement_water_sleep",timeoutTicks=240)
