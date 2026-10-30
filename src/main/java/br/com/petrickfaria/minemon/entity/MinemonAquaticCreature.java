@@ -15,26 +15,6 @@ public final class MinemonAquaticCreature extends MinemonCreature {
     public MinemonAquaticCreature(EntityType<? extends TamableAnimal> type, Level level) {
         super(type, level);
         this.lookControl = new net.minecraft.world.entity.ai.control.LookControl(this) {
-            private double nearbyWaterSurface(){
-        var box=this.getBoundingBox();
-        int minX=net.minecraft.util.Mth.floor(box.minX+.001D),maxX=net.minecraft.util.Mth.floor(box.maxX-.001D);
-        int minZ=net.minecraft.util.Mth.floor(box.minZ+.001D),maxZ=net.minecraft.util.Mth.floor(box.maxZ-.001D);
-        int minY=net.minecraft.util.Mth.floor(this.getY())-1;
-        int maxY=net.minecraft.util.Mth.ceil(this.getY()+this.getBbHeight())+1;
-        double best=Double.NaN,bestScore=Double.POSITIVE_INFINITY;
-        double bodyCenter=this.getY()+this.getBbHeight()*.5D;
-        for(int x=minX;x<=maxX;x++)for(int z=minZ;z<=maxZ;z++){
-            double dx=x+.5D-this.getX(),dz=z+.5D-this.getZ();
-            double horizontal=dx*dx+dz*dz;
-            for(int y=minY;y<=maxY;y++){
-                double top=WaterMovementGoal.surfaceAt(this,new net.minecraft.core.BlockPos(x,y,z));
-                if(!Double.isFinite(top))continue;
-                double score=horizontal+.25D*Math.abs(top-(bodyCenter+1.0D));
-                if(score<bestScore){bestScore=score;best=top;}
-            }
-        }
-        return best;
-    }
     @Override public void tick(){
                 float swimmingPitch=MinemonAquaticCreature.this.getXRot();super.tick();
                 if(SpeciesBehaviorProfiles.isVisitor(getSpeciesSlug()) && MinemonAquaticCreature.this.isInWater() && !getNavigation().isDone())MinemonAquaticCreature.this.setXRot(swimmingPitch);
@@ -93,6 +73,26 @@ public final class MinemonAquaticCreature extends MinemonCreature {
             this.waterCache=new BlockPosCache(column,this.tickCount,top);
         }
         return this.waterCache.top();
+    }
+    private double nearbyWaterSurface(){
+        var box=this.getBoundingBox();
+        int minX=net.minecraft.util.Mth.floor(box.minX+.001D),maxX=net.minecraft.util.Mth.floor(box.maxX-.001D);
+        int minZ=net.minecraft.util.Mth.floor(box.minZ+.001D),maxZ=net.minecraft.util.Mth.floor(box.maxZ-.001D);
+        int minY=net.minecraft.util.Mth.floor(this.getY())-1;
+        int maxY=net.minecraft.util.Mth.ceil(this.getY()+this.getBbHeight())+1;
+        double best=Double.NaN,bestScore=Double.POSITIVE_INFINITY;
+        double bodyCenter=this.getY()+this.getBbHeight()*.5D;
+        for(int x=minX;x<=maxX;x++)for(int z=minZ;z<=maxZ;z++){
+            double dx=x+.5D-this.getX(),dz=z+.5D-this.getZ();
+            double horizontal=dx*dx+dz*dz;
+            for(int y=minY;y<=maxY;y++){
+                double top=WaterMovementGoal.surfaceAt(this,new net.minecraft.core.BlockPos(x,y,z));
+                if(!Double.isFinite(top))continue;
+                double score=horizontal+.25D*Math.abs(top-(bodyCenter+1.0D));
+                if(score<bestScore){bestScore=score;best=top;}
+            }
+        }
+        return best;
     }
     @Override public void tick(){
         super.tick();
