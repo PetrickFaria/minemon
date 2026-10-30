@@ -7,6 +7,18 @@ import br.com.petrickfaria.minemon.pokec.PokecEconomy;
 public final class PokemonProgression {
     private PokemonProgression() {}
 
+    public static String rarityKey(String rarity) {
+        String key=rarity==null?"common":rarity.toLowerCase(java.util.Locale.ROOT);
+        return switch(key) {case "mythical","legendary_mythical" -> "mythic";case "very_rare" -> "rare";default -> key;};
+    }
+    public static double healthForRarity(String rarity,int level) {
+        double base=switch(rarityKey(rarity)){case "uncommon"->14;case "rare"->18;case "legendary"->22;case "mythic"->30;default->10;};
+        return base+2.0D*(Math.max(1,level)-1);
+    }
+    public static double damageForRarity(String rarity,int level) {
+        double base=switch(rarityKey(rarity)){case "uncommon"->6;case "rare"->8;case "legendary"->10;case "mythic"->14;default->4;};
+        return base+Math.max(1,level)-1;
+    }
     public static int maxLevel() { return MinemonConfig.POKEMON_MAX_LEVEL.get(); }
 
     /** XP needed for the next level. For level 1 this is 5; for level 2 it is 15. */

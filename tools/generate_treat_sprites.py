@@ -9,14 +9,17 @@ COLORS={'normal':(184,191,199),'fire':(238,89,37),'aquatic':(46,111,220),
 'flying':(142,181,241),'psychic':(235,64,137),'bug':(135,156,36),
 'rock':(139,127,94),'ghost':(89,64,139),'dragon':(94,77,219),
 'dark':(54,58,68),'steel':(137,159,169),'fairy':(242,162,199)}
-# Horizontal dog-biscuit bone, two distinct rounded lobes at each broad end.
-ROWS=['................','................','..###......###..','.#####....#####.','.#####....#####.','..############..','...##########...','...##########...','..############..','.#####....#####.','.#####....#####.','..###......###..','................','................','................','................']
-MASK={(x,y) for y,row in enumerate(ROWS) for x,c in enumerate(row) if c=='#'}
+# Unmodified vanilla 1.19.2 pixels, mirrored from InventivetalentDev/minecraft-assets.
+# Runtime client validation compares the reference against minecraft:textures/item/bone.png.
+reference=Image.open(Path(__file__).parent/'reference/minecraft-1.19.2-bone.png').convert('RGBA')
 for kind,base in COLORS.items():
- image=Image.new('RGBA',(16,16))
- for x,y in MASK:
-  edge=any((x+dx,y+dy) not in MASK for dx,dy in ((1,0),(-1,0),(0,1),(0,-1)))
-  factor=.48 if edge else 1.18 if (x,y-1) not in MASK or (x-1,y-1) not in MASK else .83 if (x+1,y+1) not in MASK else 1
-  image.putpixel((x,y),tuple(min(255,round(v*factor)) for v in base)+(255,))
+ image=reference.copy()
+ for y in range(16):
+  for x in range(16):
+   r,g,b,a=reference.getpixel((x,y))
+   if not a:continue
+   # The vanilla luminance and alpha stay structurally identical; only RGB changes.
+   light=(r+g+b)/(3*255)
+   image.putpixel((x,y),tuple(min(255,round(v*light)) for v in base)+(a,))
  image.save(ROOT/f'{kind}_treat.png')
-print('Generated 18 palette variants with identical alpha masks.')
+print('Recolored 18 treats from the exact vanilla 1.19.2 bone sprite.')

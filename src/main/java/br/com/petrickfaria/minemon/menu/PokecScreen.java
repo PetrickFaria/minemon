@@ -36,6 +36,8 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
     private static volatile boolean syncedConversionConfirming;
 
     private float uiScale = 1.0F;
+    private boolean draggingPreview;
+    private float previewYaw,previewPitch,targetPreviewYaw,targetPreviewPitch;
     private int scrollOffset;
     private String selectedSlug = "bulbasaur";
     private Map<String, MinemonCreature> previews = new HashMap<>();
@@ -91,6 +93,15 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
     public boolean selectedSpeciesForSmokeTest(String slug) { return selectedSlug.equals(slug); }
     public boolean previewExistsForSmokeTest(String slug) { return previews.containsKey(slug); }
     public boolean speciesUnlockedForSmokeTest(String slug) { return syncedUnlocked.contains(slug); }
+    public boolean dragPreviewForSmokeTest(){
+        double x=leftPos+354*uiScale,y=topPos+104*uiScale;
+        if(!mouseClicked(x,y,0))return false;
+        mouseDragged(x+20*uiScale,y+10*uiScale,0,20*uiScale,10*uiScale);
+        mouseReleased(x,y,0);
+        boolean moved=targetPreviewYaw!=0&&targetPreviewPitch!=0;
+        previewYaw=previewPitch=targetPreviewYaw=targetPreviewPitch=0;
+        return moved&&!draggingPreview;
+    }
     public boolean conversionSlotsBelowListForSmokeTest() { return 253 > LIST_Y + LIST_H && 20 + 36 < LIST_X + LIST_W; }
     public float previewScaleForSmokeTest(String slug) {
         var definition = SpeciesDefinitions.get(slug);
@@ -221,8 +232,8 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         var definition = SpeciesDefinitions.get(species.slug());
         if (definition != null) {
             font.draw(pose, "Vida:", 207, 260, 0xFF404040);
-            drawHealthHearts(pose, (int)Math.ceil(definition.health()), 246, 259);
-            font.draw(pose, "Dano: " + formatStat(definition.attack()), 354, 260, 0xFF404040);
+            drawHealthHearts(pose, (int)Math.ceil(br.com.petrickfaria.minemon.entity.PokemonProgression.healthForRarity(PokecEconomy.get().rarity(species.slug()),1)), 246, 259);
+            font.draw(pose, "Dano: " + formatStat(br.com.petrickfaria.minemon.entity.PokemonProgression.damageForRarity(PokecEconomy.get().rarity(species.slug()),1)), 354, 260, 0xFF404040);
             font.draw(pose, "Raridade: " + rarityLabel(PokecEconomy.get().rarity(species.slug())), 207, 289, 0xFF404040);
             font.draw(pose, "Estágio: " + evolutionStage(species), 354, 289, 0xFF404040);
         }
@@ -372,7 +383,9 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         entity.yRotO = entity.getYRot();
         var def = SpeciesDefinitions.get(species.slug());
         var fit = PreviewBounds.fit(species.slug(), def.scale());
-        float scale = fit.scale();
+        previewYaw += net.minecraft.util.Mth.wrapDegrees(targetPreviewYaw-previewYaw)*.25F;
+        previewPitch += (targetPreviewPitch-previewPitch)*.25F;
+        float scale = PreviewBounds.rotationScale(species.slug(),def.scale(),fit.scale(),previewYaw,previewPitch-6);
         double windowScale = mc.getWindow().getGuiScale();
         int sx=(int)Math.floor((leftPos+222*uiScale)*windowScale);
         int sy=(int)Math.floor(mc.getWindow().getHeight()-(topPos+158*uiScale)*windowScale);
@@ -381,16 +394,19 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         pose.pushPose();
         pose.translate(x, y, 120);
         pose.scale(scale, -scale, scale);
-        pose.mulPose(Vector3f.XP.rotationDegrees(-6));
+        pose.mulPose(Vector3f.XP.rotationDegrees(previewPitch-6));
+        pose.mulPose(Vector3f.YP.rotationDegrees(previewYaw));
         pose.translate(-fit.x(), -fit.y(), -fit.z());
         var dispatcher = mc.getEntityRenderDispatcher();
         dispatcher.setRenderShadow(false);
         try {
+            br.com.petrickfaria.minemon.client.MinemonRenderer.previewRendering=true;
             dispatcher.render(entity, 0, 0, 0, 0, partialTick, pose, mc.renderBuffers().bufferSource(), 15728880);
             mc.renderBuffers().bufferSource().endBatch();
         } catch (RuntimeException ex) {
             if (Boolean.getBoolean("minemon.clientSmokeTest")) throw ex;
         } finally {
+            br.com.petrickfaria.minemon.client.MinemonRenderer.previewRendering=false;
             com.mojang.blaze3d.systems.RenderSystem.disableScissor();
             dispatcher.setRenderShadow(true);
             pose.popPose();
@@ -406,6 +422,7 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
             return true;
         }
         PokecSpecies.Entry species = PokecSpecies.get(selectedSlug);
+        if (species != null && syncedUnlocked.contains(species.slug()) && inRect(x,y,220,48,268,112)) { draggingPreview=true; return true; }
         if (species == null) return super.mouseClicked(mouseX, mouseY, button);
         if (inRect(x, y, 20, 253, 36, 36)) {
             MinemonNetwork.performPokecAction(menu.pos(), selectedSlug, syncedConversionBall.isEmpty() ? PokecTransactions.Action.STAGE_POKEBALL : PokecTransactions.Action.RETURN_POKEBALL);
@@ -445,10 +462,23 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
     private void selectSpecies(String slug) {
         if (slug.equals(selectedSlug)) return;
         selectedSlug = slug;
+        draggingPreview=false;previewYaw=previewPitch=targetPreviewYaw=targetPreviewPitch=0;
         previews.clear();
         MinemonNetwork.performPokecAction(menu.pos(), slug, PokecTransactions.Action.SELECT);
     }
 
+    @Override public boolean mouseDragged(double x,double y,int button,double dx,double dy) {
+        if(draggingPreview&&button==0){
+            targetPreviewYaw=(targetPreviewYaw+(float)(dx/uiScale)*3.0F)%360.0F;
+            targetPreviewPitch=net.minecraft.util.Mth.clamp(targetPreviewPitch+(float)(dy/uiScale)*1.5F,-40,40);
+            return true;
+        }
+        return super.mouseDragged(x,y,button,dx,dy);
+    }
+    @Override public boolean mouseReleased(double x,double y,int button) {
+        if(button==0&&draggingPreview){draggingPreview=false;return true;}
+        return super.mouseReleased(x,y,button);
+    }
     @Override public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
         int x = (int) ((mouseX - leftPos) / uiScale), y = (int) ((mouseY - topPos) / uiScale);
         if (x >= LIST_X && x < LIST_X + LIST_W && y >= LIST_Y && y < LIST_Y + LIST_H) {

@@ -36,6 +36,11 @@ public final class BreedingEggBlock extends BaseEntityBlock {
     @Override public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
         return level.isClientSide ? null : createTickerHelper(type, ModBlockEntities.BREEDING_EGG.get(), BreedingEggBlockEntity::serverTick);
     }
+    @Override public net.minecraft.world.item.ItemStack getCloneItemStack(BlockGetter level,BlockPos pos,BlockState state){
+        var stack=new net.minecraft.world.item.ItemStack(br.com.petrickfaria.minemon.registry.ModItems.BREEDING_EGG.get());
+        if(level.getBlockEntity(pos) instanceof BreedingEggBlockEntity egg)stack.addTagElement("BlockEntityTag",egg.saveWithoutMetadata());
+        return stack;
+    }
     @Override public void onRemove(BlockState state, Level level, BlockPos pos, BlockState next, boolean moving) {
         if (!state.is(next.getBlock())) super.onRemove(state, level, pos, next, moving);
     }

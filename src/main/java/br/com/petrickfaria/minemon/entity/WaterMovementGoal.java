@@ -201,11 +201,7 @@ public final class WaterMovementGoal extends Goal {
    double target=preferredBottomY(mob,mob.blockPosition(),top);
    if(Double.isFinite(target))return target;
   }
-  var profile=SpeciesBehaviorProfiles.profile(mob.getSpeciesSlug());
-  if(profile==SpeciesBehaviorProfiles.Profile.AQUATIC_SURFACE
-      ||profile==SpeciesBehaviorProfiles.Profile.AQUATIC_NEAR_SURFACE)return top-Math.min(1.0D,preferredSurfaceDepth(mob));
-  if(profile==SpeciesBehaviorProfiles.Profile.AQUATIC_CYCLE)return top-0.75D;
-  return top-Math.min(1.0D,mob.getBbHeight()+0.2D);
+  return Double.isFinite(mob.aquaticSleepY())?mob.aquaticSleepY():mob.getY();
  }
  private static boolean safeWaterFloor(MinemonCreature mob,BlockPos column,int floorWater){
   int min=mob.level.getMinBuildHeight();if(floorWater<=min)return false;

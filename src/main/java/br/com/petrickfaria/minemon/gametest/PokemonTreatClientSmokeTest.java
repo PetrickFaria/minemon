@@ -105,6 +105,7 @@ public final class PokemonTreatClientSmokeTest {
                 if (!(minecraft.screen instanceof PokecScreen screen) || !screen.selectedSpeciesForSmokeTest("bulbasaur")
                         || !screen.previewExistsForSmokeTest("bulbasaur"))
                     throw new IllegalStateException("Unlocked Bulbasaur preview was not instantiated after selection");
+                if(!screen.dragPreviewForSmokeTest())throw new IllegalStateException("Pokec drag did not rotate both axes");
                 pokeballPhase = true;
                 pokeballFixtureEntityId = -1;
                 clientTicks = 0;
@@ -137,6 +138,11 @@ public final class PokemonTreatClientSmokeTest {
                 pokecSelectionPhase = true;
                 clientTicks = 0;
                 return;
+            }
+            try(var vanilla=minecraft.getResourceManager().getResource(new net.minecraft.resources.ResourceLocation("minecraft","textures/item/bone.png")).orElseThrow().open()) {
+                var reference=javax.imageio.ImageIO.read(java.nio.file.Path.of("../tools/reference/minecraft-1.19.2-bone.png").toFile());
+                var original=javax.imageio.ImageIO.read(vanilla);
+                for(int y=0;y<16;y++)for(int x=0;x<16;x++)if(reference.getRGB(x,y)!=original.getRGB(x,y))throw new IllegalStateException("Treat reference is not the exact vanilla 1.19.2 bone");
             }
             NonNullList<net.minecraft.world.item.ItemStack> tab=NonNullList.create();
             ModItems.MINEMON_TAB.fillItemList(tab);

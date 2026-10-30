@@ -17,6 +17,8 @@ import net.minecraft.world.phys.AABB;
 public final class BreedingEggBlockEntity extends BlockEntity {
     private String species = "";
     private UUID owner;
+    private String elementType="normal";
+    public String elementType(){return elementType;}
     private int remainingTicks = 24_000;
     private boolean hatched;
 
@@ -25,10 +27,13 @@ public final class BreedingEggBlockEntity extends BlockEntity {
     }
     public void initialize(String species, UUID owner, int incubationTicks) {
         this.species = species;
+        this.elementType=EggAppearance.choose(br.com.petrickfaria.minemon.pokec.PokemonTreatTypes.forSpecies(species),
+                (this.level==null?net.minecraft.util.RandomSource.create():this.level.random).nextBoolean());
         this.owner = owner;
         this.remainingTicks = Math.max(1, incubationTicks);
         this.hatched = false;
         setChanged();
+        if(this.level!=null)this.level.sendBlockUpdated(this.worldPosition,getBlockState(),getBlockState(),3);
     }
     public String species() { return species; }
     public UUID owner() { return owner; }
@@ -62,7 +67,7 @@ public final class BreedingEggBlockEntity extends BlockEntity {
             pokemon.discard();
             level.setBlock(pos, ModBlocks.BREEDING_EGG.get().defaultBlockState(), 3);
             BlockEntity restored = level.getBlockEntity(pos);
-            if (restored instanceof BreedingEggBlockEntity replacement) replacement.initialize(species, owner, 20);
+            if (restored instanceof BreedingEggBlockEntity replacement) { replacement.initialize(species, owner, 20); replacement.elementType=this.elementType; replacement.setChanged(); }
         }
     }
     private static BlockPos safePosition(ServerLevel level, Entity entity, BlockPos origin) {
@@ -85,13 +90,17 @@ public final class BreedingEggBlockEntity extends BlockEntity {
     @Override protected void saveAdditional(CompoundTag tag) {
         super.saveAdditional(tag);
         tag.putString("Species", species);
+        tag.putString("EggElement",elementType);
         if (owner != null) tag.putUUID("Owner", owner);
         tag.putInt("RemainingTicks", remainingTicks);
         tag.putBoolean("Hatched", hatched);
     }
+    @Override public CompoundTag getUpdateTag(){return this.saveWithoutMetadata();}
+    @Override public net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket getUpdatePacket(){return net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket.create(this);}
     @Override public void load(CompoundTag tag) {
         super.load(tag);
         species = tag.getString("Species");
+        elementType=tag.contains("EggElement")?tag.getString("EggElement"):EggAppearance.choose(br.com.petrickfaria.minemon.pokec.PokemonTreatTypes.forSpecies(species),(java.util.Objects.hash(species,worldPosition)&1)==1);
         owner = tag.hasUUID("Owner") ? tag.getUUID("Owner") : null;
         remainingTicks = Math.max(0, tag.getInt("RemainingTicks"));
         hatched = tag.getBoolean("Hatched");

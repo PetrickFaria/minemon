@@ -23,7 +23,7 @@ public final class MinemonFlyingCreature extends MinemonCreature {
  private int recoveryNotLandingSamples;
  private int recoveryBelowMinimumSamples;
  private boolean fixedFloater(){
-  return java.util.Set.of("abra","kakuna","metapod").contains(this.getSpeciesSlug());
+  return java.util.Set.of("abra","porygon","kakuna","metapod").contains(this.getSpeciesSlug());
  }
  private boolean shouldRecoverNaturalFlight(){
   return !this.fixedFloater()&&!this.level.isClientSide&&this.isFlyingSpecies()&&!this.isSleeping()&&!this.isNightResting()

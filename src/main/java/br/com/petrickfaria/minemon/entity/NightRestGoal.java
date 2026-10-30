@@ -17,7 +17,7 @@ final class NightRestGoal extends Goal {
   return resting&&(waterRest||mob.isOnGround() && !mob.isInWaterOrBubble()||!mob.wantsNaturalLanding());
  }
  @Override public boolean canContinueToUse(){return canUse()&&mob.getTarget()==null;}
- @Override public void start(){mob.getNavigation().stop();}
+ @Override public void start(){mob.getNavigation().stop();mob.getMoveControl().setWantedPosition(mob.getX(),mob.getY(),mob.getZ(),0);}
  @Override public void tick(){
   if(mob.isInWaterOrBubble()&&SpeciesBehaviorProfiles.waterCapable(mob.getSpeciesSlug())){
    holdWaterRest();return;

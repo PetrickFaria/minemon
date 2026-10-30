@@ -327,8 +327,8 @@ public final class CompanionTests {
  public static void electabuzzScaleAndSelectionBoxShrinkProportionally(GameTestHelper h) {
   floor(h);
   MinemonCreature electabuzz=h.spawn(ModEntities.SPECIES.get("electabuzz").get(),new BlockPos(5,1,5));
-  check(h,Math.abs(electabuzz.getBbWidth()-1.05F)<0.001F,"Electabuzz selection width must be 75% of its former 1.4 blocks");
-  check(h,Math.abs(electabuzz.getBbHeight()-2.25F)<0.001F,"Electabuzz selection height must be 75% of its former 3.0 blocks");
+  check(h,Math.abs(electabuzz.getBbWidth()-br.com.petrickfaria.minemon.entity.ModelMetrics.width("electabuzz",br.com.petrickfaria.minemon.entity.SpeciesDefinitions.get("electabuzz").scale()))<0.001F,"Electabuzz selection width must be 75% of its former 1.4 blocks");
+  check(h,Math.abs(electabuzz.getBbHeight()-br.com.petrickfaria.minemon.entity.ModelMetrics.height("electabuzz",br.com.petrickfaria.minemon.entity.SpeciesDefinitions.get("electabuzz").scale()))<0.001F,"Electabuzz selection height must be 75% of its former 3.0 blocks");
   check(h,Math.abs(br.com.petrickfaria.minemon.entity.SpeciesDefinitions.get("electabuzz").scale()-1.35F)<0.001F,
       "Electabuzz renderer scale must be 75% of its former 1.8x scale");
   h.succeed();

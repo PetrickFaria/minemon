@@ -332,5 +332,11 @@
   "tooltip.minemon.pokeball.health": "Health: %s / %s",
   "tooltip.minemon.pokeball.owner": "Owner: %s",
   "item.minemon.grass_treat": "Grass Treat",
-  "item.minemon.dark_treat": "Dark Treat"
+  "item.minemon.dark_treat": "Dark Treat",
+  "rarity.minemon_gen1.common": "Common",
+  "rarity.minemon_gen1.uncommon": "Uncommon",
+  "rarity.minemon_gen1.rare": "Rare",
+  "rarity.minemon_gen1.legendary": "Legendary",
+  "rarity.minemon_gen1.mythic": "Mythical",
+  "block.minemon_gen1.breeding_egg": "Breeding Egg"
 }

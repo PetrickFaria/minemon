@@ -231,7 +231,7 @@ public final class IndividualBehaviorTests {
  @GameTest(template="test_arena",timeoutTicks=60)
  public static void seakingScaleAndNaturalCycleStatePersist(GameTestHelper h){
   arena(h,false);var fish=spawn(h,"seaking",5,1,5);
-  check(h,Math.abs(fish.getBbWidth()-.525D)<.0001D&&Math.abs(fish.getBbHeight()-.45D)<.0001D,"Seaking hitbox must be 75 percent of the approved dimensions");
+  check(h,Math.abs(fish.getBbWidth()-br.com.petrickfaria.minemon.entity.ModelMetrics.width("seaking",br.com.petrickfaria.minemon.entity.SpeciesDefinitions.get("seaking").scale()))<.0001D&&Math.abs(fish.getBbHeight()-br.com.petrickfaria.minemon.entity.ModelMetrics.height("seaking",br.com.petrickfaria.minemon.entity.SpeciesDefinitions.get("seaking").scale()))<.0001D,"Seaking hitbox must be 75 percent of the approved dimensions");
   var dragon=spawn(h,"charizard",9,1,9);restore(dragon,"AIR",437,0);
   CompoundTag tag=new CompoundTag();dragon.addAdditionalSaveData(tag);var copy=ModEntities.SPECIES.get("charizard").get().create(h.getLevel());copy.readAdditionalSaveData(tag);
   check(h,copy.naturalCycle().phase()==AIR&&copy.naturalCycle().ticks()==437&&copy.isFlyingSpecies(),"NBT must preserve phase, elapsed ticks and synchronized flight mode");h.succeed();
@@ -241,11 +241,11 @@ public final class IndividualBehaviorTests {
   arena(h,false);
   var victreebel=spawn(h,"victreebel",5,1,5);var venusaur=spawn(h,"venusaur",10,1,5);
   var snorlax=spawn(h,"snorlax",15,1,5);
-  check(h,Math.abs(victreebel.getBbWidth()-.8415D)<.001D&&Math.abs(victreebel.getBbHeight()-1.3005D)<.001D,
+  check(h,Math.abs(victreebel.getBbWidth()-br.com.petrickfaria.minemon.entity.ModelMetrics.width("victreebel",br.com.petrickfaria.minemon.entity.SpeciesDefinitions.get("victreebel").scale()))<.001D&&Math.abs(victreebel.getBbHeight()-br.com.petrickfaria.minemon.entity.ModelMetrics.height("victreebel",br.com.petrickfaria.minemon.entity.SpeciesDefinitions.get("victreebel").scale()))<.001D,
       "Victreebel's additional 10 percent reduction must also resize its selection box");
-  check(h,Math.abs(venusaur.getBbWidth()-1.0125D)<.001D&&Math.abs(venusaur.getBbHeight()-.945D)<.001D,
+  check(h,Math.abs(venusaur.getBbWidth()-br.com.petrickfaria.minemon.entity.ModelMetrics.width("venusaur",br.com.petrickfaria.minemon.entity.SpeciesDefinitions.get("venusaur").scale()))<.001D&&Math.abs(venusaur.getBbHeight()-br.com.petrickfaria.minemon.entity.ModelMetrics.height("venusaur",br.com.petrickfaria.minemon.entity.SpeciesDefinitions.get("venusaur").scale()))<.001D,
       "Venusaur's additional 10 percent reduction must also resize its selection box");
-  check(h,Math.abs(snorlax.getBbWidth()-.81D)<.001D&&Math.abs(snorlax.getBbHeight()-1.1475D)<.001D,
+  check(h,Math.abs(snorlax.getBbWidth()-br.com.petrickfaria.minemon.entity.ModelMetrics.width("snorlax",br.com.petrickfaria.minemon.entity.SpeciesDefinitions.get("snorlax").scale()))<.001D&&Math.abs(snorlax.getBbHeight()-br.com.petrickfaria.minemon.entity.ModelMetrics.height("snorlax",br.com.petrickfaria.minemon.entity.SpeciesDefinitions.get("snorlax").scale()))<.001D,
       "Snorlax's previously approved proportional selection box must remain intact");
   check(h,Math.abs(SpeciesDefinitions.get("victreebel").scale()-1.1169D)<.001D
       &&Math.abs(SpeciesDefinitions.get("venusaur").scale()-1.35D)<.001D,

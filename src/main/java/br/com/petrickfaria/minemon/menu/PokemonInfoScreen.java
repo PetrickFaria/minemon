@@ -105,7 +105,7 @@ public final class PokemonInfoScreen extends AbstractContainerScreen<PokemonInfo
         font.draw(pose, String.format(java.util.Locale.ROOT, "Vida: %.1f / %.1f", pokemon.getHealth(), maxHealth),
                 leftPos + 18, topPos + 43, 0xFF404040);
         font.draw(pose, String.format(java.util.Locale.ROOT, "Dano: %.1f", attack), leftPos + 142, topPos + 43, 0xFF404040);
-        font.draw(pose, "Raridade: " + pokemon.getPokemonRarity(), leftPos + 18, topPos + 58, 0xFF404040);
+        font.draw(pose, "Raridade: " + Component.translatable("rarity.minemon_gen1."+br.com.petrickfaria.minemon.entity.PokemonProgression.rarityKey(pokemon.getPokemonRarity())).getString(), leftPos + 18, topPos + 58, 0xFF404040);
         font.draw(pose, "Estágio: " + evolutionStage(pokemon.getSpeciesSlug()), leftPos + 142, topPos + 58, 0xFF404040);
 
         int barX = leftPos + 37, barY = topPos + 119;

@@ -58,7 +58,7 @@ public final class BehaviorCycle {
             case FLYER, GROUND_FLIGHT -> stage == 0 ? 3.0D : 6.0D;
             case FLOAT_CYCLE, GROUND_FLOAT_CYCLE -> stage == 0 ? 1.0D : 4.0D;
             case FLOAT_HALF -> SpeciesBehaviorProfiles.nightRestHoverHeight(speciesSlug == null ? "abra" : speciesSlug);
-            case FLOAT_LOW -> 0.5D;
+            case FLOAT_LOW -> "porygon".equals(speciesSlug)?1.0D/3.0D:0.5D;
             default -> 0.0D;
         };
     }
@@ -68,7 +68,7 @@ public final class BehaviorCycle {
             case FLYER, GROUND_FLIGHT -> stage == 0 ? 5.0D : 9.0D;
             case FLOAT_CYCLE, GROUND_FLOAT_CYCLE -> stage == 0 ? 3.0D : 6.0D;
             case FLOAT_HALF -> SpeciesBehaviorProfiles.nightRestHoverHeight(speciesSlug == null ? "abra" : speciesSlug);
-            case FLOAT_LOW -> 1.0D;
+            case FLOAT_LOW -> "porygon".equals(speciesSlug)?1.0D/3.0D:1.0D;
             default -> 0.0D;
         };
     }

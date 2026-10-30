@@ -84,8 +84,8 @@ public final class NaturalBehaviorProfileTest {
                         "metapod", "kakuna", "geodude", "kadabra", "alakazam", "gengar"),
                 SpeciesBehaviorProfiles.all().keySet().stream().filter(SpeciesBehaviorProfiles::landsForNightRest)
                         .collect(java.util.stream.Collectors.toSet()));
-        assertEquals(0.5D, SpeciesBehaviorProfiles.nightRestHoverHeight("abra"), 0.0D);
-        assertEquals(0.5D, SpeciesBehaviorProfiles.nightRestHoverHeight("porygon"), 0.0D);
+        assertEquals(1.0D/3.0D, SpeciesBehaviorProfiles.nightRestHoverHeight("abra"), 0.0D);
+        assertEquals(1.0D/3.0D, SpeciesBehaviorProfiles.nightRestHoverHeight("porygon"), 0.0D);
         assertEquals(1.0D, SpeciesBehaviorProfiles.nightRestHoverHeight("gastly"), 0.0D);
         assertEquals(Set.of("abra", "porygon", "gastly", "haunter", "magnemite", "magneton", "koffing", "weezing", "mewtwo", "mew"),
                 SpeciesBehaviorProfiles.all().keySet().stream().filter(SpeciesBehaviorProfiles::hoversDuringNightRest)

@@ -8,9 +8,9 @@ import static org.junit.Assert.*;
 
 public class RequestedBehaviorAssetsTest {
     @Test public void fixedHoverSpeciesHaveIndependentRequestedHeights() {
-        for(String slug:java.util.List.of("abra","kakuna","metapod")) {
+        for(String slug:java.util.List.of("abra","porygon","kakuna","metapod")) {
             var cycle=new BehaviorCycle(SpeciesBehaviorProfiles.profile(slug),slug);
-            double expected=slug.equals("abra")?.5:1.0/3.0;
+            double expected=1.0/3.0;
             assertEquals(slug,expected,cycle.minimumAltitude(),1e-9);
             assertEquals(slug,expected,cycle.maximumAltitude(),1e-9);
         }

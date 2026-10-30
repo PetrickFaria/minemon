@@ -104,7 +104,7 @@ public final class SpeciesBehaviorProfiles {
         return profile(slug) == Profile.FLOAT_HALF || profile(slug) == Profile.FLOAT_LOW || profile(slug) == Profile.FLOAT_CYCLE;
     }
     public static double nightRestHoverHeight(String slug) {
-        if (slug.equals("kakuna") || slug.equals("metapod")) return 1.0D / 3.0D;
+        if (slug.equals("abra") || slug.equals("porygon") || slug.equals("kakuna") || slug.equals("metapod")) return 1.0D / 3.0D;
         return profile(slug) == Profile.FLOAT_HALF || profile(slug) == Profile.FLOAT_LOW ? 0.5D : 1.0D;
     }
 

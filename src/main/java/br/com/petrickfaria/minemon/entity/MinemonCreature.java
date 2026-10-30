@@ -101,6 +101,9 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     private int chanseyScanDelay;
     private int attackSequence;
     private int playedAttackSequence;
+    private boolean loadingPokemonData;
+    private double aquaticSleepY=Double.NaN;
+    public double aquaticSleepY() { return aquaticSleepY; }
     private int spontaneousRunTicks;
     private int spontaneousRunCooldown = 50 + this.getRandom().nextInt(100);
     private int spontaneousRunCount;
@@ -121,6 +124,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         this.naturalStartDelay=this.getRandom().nextInt(30);
         this.entityData.set(POKEMON_RARITY, br.com.petrickfaria.minemon.pokec.PokecEconomy.get().rarity(this.getSpeciesSlug()));
         this.refreshPokemonXpThreshold();
+        this.refreshPokemonAttributes(0); this.setHealth(this.getMaxHealth());
         if(!this.isAquaticSpecies()&&!SpeciesBehaviorProfiles.canFly(this.getSpeciesSlug())){
             this.moveControl=new WaterAwareMoveControl(this);
             this.dryNavigation=this.navigation;this.escapeNavigation=new EscapeNavigation(this,level);
@@ -153,14 +157,14 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
 
     public static AttributeSupplier.Builder createAttributes() {
         return TamableAnimal.createMobAttributes()
-                .add(Attributes.MAX_HEALTH, 20.0D)
+                .add(Attributes.MAX_HEALTH, PokemonProgression.healthForRarity("common",1))
                 .add(Attributes.MOVEMENT_SPEED, 0.25D)
-                .add(Attributes.ATTACK_DAMAGE, 3.0D)
+                .add(Attributes.ATTACK_DAMAGE, PokemonProgression.damageForRarity("common",1))
                 .add(Attributes.FOLLOW_RANGE, 24.0D);
     }
 
     public static AttributeSupplier.Builder createAttributes(SpeciesDefinitions.Definition d) {
-        return createAttributes().add(Attributes.FOLLOW_RANGE,SpeciesBehaviorProfiles.waterCapable(d.slug())?128.0D:24.0D).add(Attributes.MAX_HEALTH,d.health()).add(Attributes.ATTACK_DAMAGE,d.attack()*2.0D).add(Attributes.MOVEMENT_SPEED,d.speed()).add(Attributes.FLYING_SPEED,0.4D);
+        return createAttributes().add(Attributes.FOLLOW_RANGE,SpeciesBehaviorProfiles.waterCapable(d.slug())?128.0D:24.0D).add(Attributes.MAX_HEALTH,PokemonProgression.healthForRarity(br.com.petrickfaria.minemon.pokec.PokecEconomy.get().rarity(d.slug()),1)).add(Attributes.ATTACK_DAMAGE,PokemonProgression.damageForRarity(br.com.petrickfaria.minemon.pokec.PokecEconomy.get().rarity(d.slug()),1)).add(Attributes.MOVEMENT_SPEED,d.speed()).add(Attributes.FLYING_SPEED,0.4D);
     }
     public boolean isFlyingSpecies() { return SpeciesBehaviorProfiles.isAirborne(this.getSpeciesSlug())
             &&!(this.isNightResting()&&SpeciesBehaviorProfiles.landsForNightRest(this.getSpeciesSlug()))
@@ -192,6 +196,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
 
     public boolean isSleeping() { return this.entityData.get(SLEEPING); }
     public void setSleeping(boolean sleeping) {
+        if (!sleeping) this.aquaticSleepY=Double.NaN;
         this.entityData.set(SLEEPING, sleeping);
         if (sleeping) {
             this.getNavigation().stop(); this.setTarget(null); this.stopSpontaneousRun();
@@ -228,6 +233,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
             tag.putUUID("MinemonRocketVillager", this.getPersistentData().getUUID("RocketVillager"));
         tag.putBoolean("MinemonSleeping", this.isSleeping());
         tag.putBoolean("NightRoutine",this.nightRoutine);
+        if(Double.isFinite(this.aquaticSleepY))tag.putDouble("AquaticSleepAnchorY",this.aquaticSleepY);
         tag.putInt("WakeGraceTicks",this.wakeGraceTicks);
         tag.putInt("NaturalBehaviorStartDelay",this.naturalStartDelay);
         this.naturalCycle.save(tag);
@@ -238,6 +244,8 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     @Override public void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
         this.entityData.set(ORDERED_SIT, super.isOrderedToSit());
+        this.loadingPokemonData=true;
+        this.setRocketSpecial(tag.getBoolean("MinemonRocketSpecial"));
         this.setPokemonProgress(tag.contains("MinemonPokemonLevel") ? tag.getInt("MinemonPokemonLevel") : 1,
                 tag.getInt("MinemonPokemonExperience"));
         this.entityData.set(POKEMON_RARITY, br.com.petrickfaria.minemon.pokec.PokecEconomy.get().rarity(this.getSpeciesSlug()));
@@ -256,6 +264,10 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
             this.customSoundDayActive = tag.contains("MinemonCustomSoundDayActive")
                     ? tag.getBoolean("MinemonCustomSoundDayActive") : this.customSoundTicks > 0;
         }
+        this.aquaticSleepY=tag.contains("AquaticSleepAnchorY")?tag.getDouble("AquaticSleepAnchorY"):Double.NaN;
+        this.refreshPokemonAttributes(0);
+        if(tag.contains("Health"))this.setHealth(Math.min(this.getMaxHealth(),tag.getFloat("Health")));
+        this.loadingPokemonData=false;
         this.syncNaturalState();
     }
 
@@ -265,14 +277,17 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     public int getPokemonXpToNextLevel() { return Math.max(0, this.entityData.get(POKEMON_XP_TO_NEXT)); }
     public void setPokemonLevel(int level) { setPokemonProgress(level, 0); }
     public void setPokemonProgress(int level, int experience) {
+        int oldLevel=this.getPokemonLevel();
         int boundedLevel = Math.max(1, Math.min(PokemonProgression.maxLevel(), level));
         this.entityData.set(POKEMON_LEVEL, boundedLevel);
         int needed = PokemonProgression.xpForNextLevel(boundedLevel, this.getSpeciesSlug());
         this.entityData.set(POKEMON_XP, needed <= 0 ? 0 : Math.max(0, Math.min(needed - 1, experience)));
         this.refreshPokemonXpThreshold();
+        this.refreshPokemonAttributes(loadingPokemonData?0:Math.max(0,boundedLevel-oldLevel));
     }
     public int awardPokemonExperience(int amount) {
         if (amount <= 0 || !this.isTame() || this.level.isClientSide) return 0;
+        int oldLevel=this.getPokemonLevel();
         int awarded = 0;
         long pending = Math.min((long) amount, Integer.MAX_VALUE);
         while (pending > 0 && this.getPokemonLevel() < PokemonProgression.maxLevel()) {
@@ -288,7 +303,17 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
             }
         }
         this.refreshPokemonXpThreshold();
+        this.refreshPokemonAttributes(Math.max(0,this.getPokemonLevel()-oldLevel));
         return awarded;
+    }
+    private void refreshPokemonAttributes(int gainedLevels) {
+        if(this.level.isClientSide||this.isRocketSpecial())return;
+        String rarity=br.com.petrickfaria.minemon.pokec.PokecEconomy.get().rarity(this.getSpeciesSlug());
+        this.entityData.set(POKEMON_RARITY,rarity);
+        float health=this.getHealth();
+        this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(PokemonProgression.healthForRarity(rarity,this.getPokemonLevel()));
+        this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(PokemonProgression.damageForRarity(rarity,this.getPokemonLevel()));
+        this.setHealth(Math.min(this.getMaxHealth(),health+2.0F*gainedLevels));
     }
     private void refreshPokemonXpThreshold() {
         if (this.entityData == null) return;
@@ -771,8 +796,16 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
             &&!this.isPassenger()&&!this.isDeadOrDying()
             &&target==null&&this.wakeGraceTicks==0;
         if(night&&eligible){
-            if(!this.nightRoutine){this.nightRoutine=true;this.getNavigation().stop();this.stopSpontaneousRun();}
+            if(!this.nightRoutine){
+                this.nightRoutine=true;this.getNavigation().stop();this.stopSpontaneousRun();
+            }
             this.entityData.set(NIGHT_REST,true);
+            if(waterRest&&!Double.isFinite(this.aquaticSleepY)&&!SpeciesBehaviorProfiles.restsAtWaterBottom(this.getSpeciesSlug())){
+                double surface=WaterMovementGoal.restSurfaceAt(this,this.blockPosition());
+                // Choose once per sleep episode, including migration of older saves.
+                boolean atSurface=Double.isFinite(surface)&&this.getBoundingBox().maxY>=surface-.08D;
+                this.aquaticSleepY=atSurface?Math.min(this.getY(),surface-2):this.getY();
+            }
             boolean hover=SpeciesBehaviorProfiles.hoversDuringNightRest(this.getSpeciesSlug());
             double restHeight=SpeciesBehaviorProfiles.nightRestHoverHeight(this.getSpeciesSlug());
             boolean settled=waterRest?Math.abs(this.getY()-WaterMovementGoal.waterRestY(this))<0.18D
@@ -781,7 +814,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
             if(settled&&!this.isSleeping())this.setSleeping(true);
         }else{
             this.entityData.set(NIGHT_REST,false);
-            if(this.nightRoutine){this.nightRoutine=false;this.setSleeping(false);this.getNavigation().stop();}
+            if(this.nightRoutine){this.nightRoutine=false;this.aquaticSleepY=Double.NaN;this.setSleeping(false);this.getNavigation().stop();}
         }
         this.syncNaturalState();
     }

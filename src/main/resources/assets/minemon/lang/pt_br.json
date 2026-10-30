@@ -335,5 +335,11 @@
   "tooltip.minemon.pokeball.health": "Vida: %s / %s",
   "tooltip.minemon.pokeball.owner": "Proprietário: %s",
   "item.minemon.grass_treat": "Petisco Vegetal",
-  "item.minemon.dark_treat": "Petisco Sombrio"
+  "item.minemon.dark_treat": "Petisco Sombrio",
+  "rarity.minemon_gen1.common": "Comum",
+  "rarity.minemon_gen1.uncommon": "Incomum",
+  "rarity.minemon_gen1.rare": "Raro",
+  "rarity.minemon_gen1.legendary": "Lendário",
+  "rarity.minemon_gen1.mythic": "Mítico",
+  "block.minemon_gen1.breeding_egg": "Ovo de reprodução"
 }

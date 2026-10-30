@@ -64,7 +64,7 @@ jobs:
         id: compile
         run: |
           ./gradlew --no-daemon clean compileJava compileTestJava
-          ./gradlew --no-daemon test --tests 'br.com.petrickfaria.minemon.pokec.PokecCatalogTest' --tests 'br.com.petrickfaria.minemon.pokec.PokemonBreedingTest' --tests 'br.com.petrickfaria.minemon.pokec.PokemonSoulConversionTest' --tests 'br.com.petrickfaria.minemon.entity.PokemonProgressionTest' --tests 'br.com.petrickfaria.minemon.RequestedBehaviorAssetsTest' --tests 'br.com.petrickfaria.minemon.BehaviorCycleTest' --tests 'br.com.petrickfaria.minemon.NightSleepAssetTest'
+          ./gradlew --no-daemon test --tests 'br.com.petrickfaria.minemon.pokec.PokecCatalogTest' --tests 'br.com.petrickfaria.minemon.pokec.PokemonBreedingTest' --tests 'br.com.petrickfaria.minemon.pokec.PokemonSoulConversionTest' --tests 'br.com.petrickfaria.minemon.entity.PokemonProgressionTest' --tests 'br.com.petrickfaria.minemon.RequestedBehaviorAssetsTest' --tests 'br.com.petrickfaria.minemon.RefinementRulesTest' --tests 'br.com.petrickfaria.minemon.BehaviorCycleTest' --tests 'br.com.petrickfaria.minemon.NightSleepAssetTest'
           ./gradlew --no-daemon build -x test
       - name: Run Minecraft server behavior tests
         run: |

@@ -17,7 +17,7 @@ public final class ModEntities {
   for(var d:SpeciesDefinitions.ALL.values())map.put(d.slug(),ENTITIES.register(d.slug(),()->{
    EntityType.EntityFactory<MinemonCreature> factory=SpeciesBehaviorProfiles.canFly(d.slug())?MinemonFlyingCreature::new:
        SpeciesBehaviorProfiles.waterCapable(d.slug())?MinemonAquaticCreature::new:MinemonCreature::new;
-   return EntityType.Builder.of(factory,MobCategory.CREATURE).sized(d.width(),d.height()).clientTrackingRange(10).build(Minemon.MOD_ID+":"+d.slug());
+   return EntityType.Builder.of(factory,MobCategory.CREATURE).sized(ModelMetrics.width(d.slug(),d.scale()),ModelMetrics.height(d.slug(),d.scale())).clientTrackingRange(10).build(Minemon.MOD_ID+":"+d.slug());
   }));
   return Collections.unmodifiableMap(map);
  }

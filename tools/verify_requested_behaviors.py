@@ -9,6 +9,13 @@ images=list((assets/'textures/item').glob('*_treat.png'))
 assert len(images)==18
 masks=[Image.open(p).getchannel('A').tobytes() for p in images]
 assert all(m==masks[0] for m in masks),'Treat silhouettes differ'
+reference=Image.open(ROOT/'tools/reference/minecraft-1.19.2-bone.png').convert('RGBA')
+assert all(m==reference.getchannel('A').tobytes() for m in masks),'Treat alpha differs from vanilla bone'
+for path in images:
+ image=Image.open(path).convert('RGBA')
+ for y in range(16):
+  for x in range(16):
+   if reference.getpixel((x,y))[3]==0:assert image.getpixel((x,y))==reference.getpixel((x,y))
 if len(sys.argv)>1:
  root=Path(sys.argv[1]);bounds=json.loads((root/'data/minemon_gen1/preview_bounds.json').read_text())
  manifest=json.loads((root/'data/minemon_gen1/runtime_species.json').read_text())

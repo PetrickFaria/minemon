@@ -13,6 +13,7 @@ public class MinemonRenderer extends GeoEntityRenderer<MinemonCreature> {
  public static java.util.Map<String,java.util.Set<String>> drawnFireBoneSamples(){return java.util.Map.copyOf(drawnFireBones);}
  private static final java.util.Map<String,java.util.Set<Integer>> fireOverlayFrames=new java.util.concurrent.ConcurrentHashMap<>();
  private static final java.util.Map<String,java.util.Set<String>> fireOverlayBones=new java.util.concurrent.ConcurrentHashMap<>();
+ public static boolean previewRendering;
  public static java.util.function.Consumer<MinemonCreature> validationInput;
  public static java.util.function.BiConsumer<MinemonCreature,MinemonModel> validationObserver;
  public static java.util.Map<String,java.util.Set<Integer>> fireOverlayFrameSamples(){return java.util.Map.copyOf(fireOverlayFrames);}
@@ -29,7 +30,9 @@ public class MinemonRenderer extends GeoEntityRenderer<MinemonCreature> {
   };
   this.shadowRadius=0.45F*shadowScale;
   float scale=d.scale()*(entity.isBaby()?0.5F:1.0F);
-  pose.pushPose();pose.scale(scale,scale,scale);
+  pose.pushPose();
+  if(!previewRendering)pose.translate(0,br.com.petrickfaria.minemon.entity.ModelMetrics.floatOffset(entity.getSpeciesSlug(),scale),0);
+  pose.scale(scale,scale,scale);
   String previousSpecies=activeFireSpecies;activeFireSpecies=entity.getSpeciesSlug();
   try { super.render(entity,yaw,partialTick,pose,buffers,light); }
   finally { activeFireSpecies=previousSpecies;pose.popPose(); }
@@ -41,10 +44,18 @@ public class MinemonRenderer extends GeoEntityRenderer<MinemonCreature> {
       net.minecraft.client.renderer.MultiBufferSource buffers,int packedLight){
   if(!entity.isTame()){super.renderNameTag(entity,name,pose,buffers,packedLight);return;}
   Component shownName=entity.hasCustomName()?entity.getCustomName():entity.getName();
-  super.renderNameTag(entity,shownName,pose,buffers,packedLight);
+  float scale=SpeciesDefinitions.get(entity.getSpeciesSlug()).scale()*(entity.isBaby()?.5F:1);
   pose.pushPose();
-  try{pose.translate(0.0D,-0.22D,0.0D);super.renderNameTag(entity,Component.literal("Nível: "+entity.getPokemonLevel()),pose,buffers,packedLight);}
-  finally{pose.popPose();}
+  try{
+   // Name tags are world-sized; cancel the species mesh scale before using
+   // the measured visible top, rather than scaling the hitbox height twice.
+   pose.scale(1/scale,1/scale,1/scale);
+   double top=br.com.petrickfaria.minemon.entity.ModelMetrics.top(entity.getSpeciesSlug(),scale);
+   pose.translate(0,Math.max(0,top-entity.getBbHeight()),0);
+   super.renderNameTag(entity,shownName,pose,buffers,packedLight);
+   pose.translate(0,-.22D,0);
+   super.renderNameTag(entity,Component.literal("Nível: "+entity.getPokemonLevel()),pose,buffers,packedLight);
+  }finally{pose.popPose();}
  }
  @Override public void renderRecursively(software.bernie.geckolib3.geo.render.built.GeoBone bone,
       com.mojang.blaze3d.vertex.PoseStack pose,com.mojang.blaze3d.vertex.VertexConsumer buffer,
