@@ -68,9 +68,9 @@ public final class RocketChallengeManager {
                 player.getYRot(), 0.0F);
         var maxHealth = rattata.getAttribute(Attributes.MAX_HEALTH);
         var damage = rattata.getAttribute(Attributes.ATTACK_DAMAGE);
-        if (maxHealth != null) maxHealth.setBaseValue(5.0D);
-        if (damage != null) damage.setBaseValue(3.0D);
-        rattata.setHealth(5.0F);
+        if (maxHealth != null) maxHealth.setBaseValue(br.com.petrickfaria.minemon.entity.PokemonProgression.healthForRarity(rattata.getPokemonRarity(),1));
+        if (damage != null) damage.setBaseValue(br.com.petrickfaria.minemon.entity.PokemonProgression.damageForRarity(rattata.getPokemonRarity(),1));
+        rattata.setHealth(rattata.getMaxHealth());
         rattata.setRocketSpecial(true);
         rattata.setRocketVillager(villager.getUUID());
         rattata.getPersistentData().putBoolean("RocketRattata", true);

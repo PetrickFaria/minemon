@@ -307,7 +307,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         return awarded;
     }
     private void refreshPokemonAttributes(int gainedLevels) {
-        if(this.level.isClientSide||this.isRocketSpecial())return;
+        if(this.level.isClientSide)return;
         String rarity=br.com.petrickfaria.minemon.pokec.PokecEconomy.get().rarity(this.getSpeciesSlug());
         this.entityData.set(POKEMON_RARITY,rarity);
         float health=this.getHealth();

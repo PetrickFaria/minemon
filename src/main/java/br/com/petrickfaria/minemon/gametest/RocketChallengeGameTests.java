@@ -48,10 +48,10 @@ public final class RocketChallengeGameTests {
         if (rattata == null) { helper.fail("Rocket challenge Rattata did not spawn"); return; }
         check(helper, rattata != null && rattata.isRocketSpecial(), "Rocket villager must create its special Rattata");
         check(helper, rattata != null && rattata.getTarget() == player, "Special Rattata must target the activating player");
-        check(helper, rattata != null && rattata.getMaxHealth() == 5.0F && rattata.getHealth() == 5.0F,
-                "Special Rattata must have exactly five health");
-        check(helper, rattata.getAttributeValue(Attributes.ATTACK_DAMAGE) == 3.0D,
-                "Special Rattata must deal exactly three damage");
+        check(helper, rattata != null && rattata.getMaxHealth() == 10.0F && rattata.getHealth() == 10.0F,
+                "Special Rattata must use the Common level-one base of ten HP");
+        check(helper, rattata.getAttributeValue(Attributes.ATTACK_DAMAGE) == 4.0D,
+                "Special Rattata must use the Common level-one base of four damage");
         check(helper, RocketChallengeManager.spawnChallengeRattata(helper.getLevel(), villager, player) == null,
                 "One Rocket villager may not spawn a second active Rattata");
         rattata.hurt(net.minecraft.world.damagesource.DamageSource.playerAttack(player), 20.0F);
