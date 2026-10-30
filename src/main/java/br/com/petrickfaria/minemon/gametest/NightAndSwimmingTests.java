@@ -143,11 +143,11 @@ public final class NightAndSwimmingTests {
    double gyaradosY=WaterMovementGoal.waterRestY(gyarados),fishY=WaterMovementGoal.waterRestY(magikarp),visitorY=WaterMovementGoal.waterRestY(dratini),cloysterY=WaterMovementGoal.waterRestY(cloyster);
    double shellderY=WaterMovementGoal.waterRestY(shellder),originY=h.absolutePos(BlockPos.ZERO).getY();
    check(h,Math.abs(gyarados.getY()-gyaradosY)<.2D&&gyarados.getY()-originY<2.5D,"Gyarados must rest at the safe water bottom at night");
-   check(h,Math.abs(cloyster.getY()-cloysterY)<.2D&&cloyster.getY()-originY<2.5D,"Cloyster must rest at the safe water bottom at night");
+   check(h,Math.abs(cloyster.getY()-cloysterY)<.2D&&Math.abs(cloyster.getY()-originY-7)<.2D,"Exclusively aquatic Cloyster must preserve its submerged starting depth");
    check(h,Math.abs(magikarp.getY()-fishY)<.2D,"Permanent submerged species must float at a safe, fully wet depth");
    check(h,Math.abs(dratini.getY()-visitorY)<.2D&&dratini.getY()-originY<2.5D,"A water visitor caught in water at night must settle at the bottom");
-   check(h,Math.abs(shellder.getY()-shellderY)<.2D&&shellder.getY()-originY>=1.0D&&shellder.getY()-originY<2.5D,
-       "A bottom-preferring aquatic sleeper must rest just above the lake floor");
+   check(h,Math.abs(shellder.getY()-shellderY)<.2D&&Math.abs(shellder.getY()-originY-8)<.2D,
+       "Exclusively aquatic Shellder must preserve its submerged starting depth");
    // Keep the aggressor north of Dratini, clear of the sleeping Vaporeon body.
    var attacker=h.spawn(EntityType.COW,new BlockPos(12,1,5));attacker.setNoAi(true);
    float health=attacker.getHealth();

@@ -950,7 +950,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         attackAnimationTicks=0;stopSpontaneousRun();setFollowingRun(false);
         setSleeping(true);setDeltaMovement(0,0,0);fallDistance=0;
         var owner=getOwner();
-        if(owner instanceof ServerPlayer player)player.sendSystemMessage(Component.literal(getName().getString()+" foi derrotado."));
+        if(owner instanceof ServerPlayer player)player.sendSystemMessage(net.minecraft.network.chat.Component.literal(getName().getString()+" foi derrotado."));
     }
 
     @Override
