@@ -49,6 +49,8 @@ public final class NaturalMovementGoals {
         private Path landingPath;
         private int retryDelay;
         private int pathTicks;
+        private BlockPos landingSite;
+        private BlockPos approachSite;
 
         SleepLanding(MinemonCreature mob) {
             this.mob = mob;
@@ -65,11 +67,21 @@ public final class NaturalMovementGoals {
 
         @Override public boolean canContinueToUse() {
             return this.mob.wantsNaturalLanding() && (this.mob.isSleeping()||this.mob.isNightResting()||this.mob.naturalBehaviorActive()) && (!this.mob.isOnGround() || this.mob.isInWaterOrBubble())
-                    && this.pathTicks < 200 && !this.mob.getNavigation().isDone();
+                    && this.pathTicks < 200;
         }
 
         @Override public void start() { this.pathTicks=0; this.mob.getNavigation().moveTo(this.landingPath, 0.7D); }
-        @Override public void tick() { this.pathTicks++; }
+        @Override public void tick() {
+            this.pathTicks++;
+            // Native air paths stop within a width-dependent radius. Complete
+            // the final short approach with the same collision-respecting move
+            // control before allowing gravity to lower a wide body into water.
+            var feet=new BlockPos(this.mob.getX(),this.mob.naturalSurface(),this.mob.getZ());
+            if(this.mob.getNavigation().isDone() && this.approachSite!=null
+                    && !WaterMovementGoal.safeLanding(this.mob,feet))
+                this.mob.getMoveControl().setWantedPosition(this.approachSite.getX()+.5,
+                        this.approachSite.getY(),this.approachSite.getZ()+.5,.7);
+        }
         @Override public void stop() { this.mob.getNavigation().stop(); this.landingPath = null; this.retryDelay=20; }
 
         private Path findLandingPath() {
@@ -90,7 +102,7 @@ public final class NaturalMovementGoals {
                             || state.is(net.minecraft.world.level.block.Blocks.CAMPFIRE)
                             || state.is(net.minecraft.world.level.block.Blocks.SOUL_CAMPFIRE)) continue;
                     BlockPos feet = new BlockPos(x, Math.ceil(surface), z);
-                    if (!this.mob.level.getFluidState(feet).isEmpty()
+                    if (!WaterMovementGoal.safeLanding(this.mob,feet) || !this.mob.level.getFluidState(feet).isEmpty()
                             || !this.mob.level.getBlockState(feet).isAir()
                             || !this.mob.level.noCollision(this.mob, this.mob.getBoundingBox().move(
                                     x - this.mob.getX(), surface - this.mob.getY(), z - this.mob.getZ()))) continue;
@@ -100,11 +112,12 @@ public final class NaturalMovementGoals {
                     double currentSurface=this.mob.naturalSurface();
                     BlockPos under=new BlockPos(this.mob.getX(),currentSurface-0.001D,this.mob.getZ());
                     boolean overFluid=!this.mob.level.getFluidState(under).isEmpty();
-                    BlockPos approach=overFluid?feet.above(2):feet;
+                    double approachY=Math.max(feet.getY()+2,Math.max(this.mob.getY(),Double.isFinite(waterTop)?waterTop+1:this.mob.getY()));
+                    BlockPos approach=overFluid?new BlockPos(x,Math.ceil(approachY),z):feet;
                     if(!this.mob.level.noCollision(this.mob,this.mob.getBoundingBox().move(
                             x-this.mob.getX(),approach.getY()-this.mob.getY(),z-this.mob.getZ())))continue;
                     Path path = this.mob.getNavigation().createPath(approach, 0);
-                    if (path != null && path.canReach()) return path;
+                    if (path != null && path.canReach()) { this.landingSite=feet; this.approachSite=approach; return path; }
                 }
             }
             return null;
