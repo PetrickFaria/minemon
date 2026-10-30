@@ -89,13 +89,13 @@ public final class MinemonAquaticCreature extends MinemonCreature {
             return;
         }
         boolean surface=this.isNaturalSurface();
-        if(surface&&getSpeciesSlug().equals("gyarados")&&!this.getNavigation().isDone()){
-            // A path can ascend from a falling/shallower edge into the main
-            // lake. Anchor the body-depth correction to that higher water
-            // surface while the route is active, or the local waterfall
+        if(surface&&getSpeciesSlug().equals("gyarados")){
+            // A recent path can ascend from a falling/shallower edge into the
+            // main lake. Keep its nearby destination surface as the depth
+            // reference after path completion too, or the local waterfall
             // surface can pull Gyarados down and away from the lake surface.
             var destination=this.getNavigation().getTargetPos();
-            if(destination!=null){
+            if(destination!=null&&destination.distSqr(this.blockPosition())<=144.0D){
                 double routeTop=WaterMovementGoal.surfaceAt(this,destination);
                 if(Double.isFinite(routeTop))top=Math.max(top,routeTop);
             }

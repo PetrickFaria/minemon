@@ -153,10 +153,21 @@ public final class WaterMovementGoal extends Goal {
    }
    if(!clear)continue;
    var path=mob.getNavigation().createPath(p,0);
-   if(path!=null&&path.canReach())return p;
+   if(path!=null&&path.canReach()
+       &&(!mob.getSpeciesSlug().equals("gyarados")||surfacePathIsWater(path)))return p;
    blocked.put(p.immutable(),mob.tickCount+200);
   }
   return null;
+ }
+ private boolean surfacePathIsWater(net.minecraft.world.level.pathfinder.Path path){
+  // Surface destinations are already checked for full hitbox clearance. Keep
+  // Gyarados' route in water as well: an amphibious shortest path can leave a
+  // small lake over a bank, then follow shallow flowing water back downward.
+  for(int i=0;i<path.getNodeCount();i++){
+   var node=path.getNode(i);
+   if(!mob.level.getFluidState(new BlockPos(node.x,node.y,node.z)).is(FluidTags.WATER))return false;
+  }
+  return path.getNodeCount()>0;
  }
  private BlockPos nearbyBottomDestination(){
   // Bottom-seeking species should settle locally before choosing a distant

@@ -23,13 +23,15 @@ final class NineBehaviorChecks {
   awaitShore(h,mob,owner,index,false,400);
  }
  private static void awaitShore(GameTestHelper h,MinemonCreature mob,net.minecraft.server.level.ServerPlayer owner,int index,boolean entering,int remaining){
-  double localX=mob.getX()-h.absolutePos(BlockPos.ZERO).getX();
+  var origin=h.absolutePos(BlockPos.ZERO);var localXAxis=h.absolutePos(new BlockPos(1,0,0));
+  double axisX=localXAxis.getX()-origin.getX(),axisZ=localXAxis.getZ()-origin.getZ();
+  double localX=((mob.getX()-origin.getX())*axisX+(mob.getZ()-origin.getZ())*axisZ)/(axisX*axisX+axisZ*axisZ);
   boolean reached=entering?mob.isInWater()&&localX<7.5:!mob.isInWater()&&mob.isOnGround()&&localX>=8.5;
   if(reached){
    if(!entering){var at=h.absolutePos(new BlockPos(2,3,7));owner.moveTo(at.getX()+.5,at.getY(),at.getZ()+.5,0,0);awaitShore(h,mob,owner,index,true,400);}
    else{mob.discard();owner.discard();shore(h,index+1);}return;
   }
-  if(remaining<=0){String state=mob.getSpeciesSlug()+" pos="+mob.position()+" water="+mob.isInWater()+" horizontalCollision="+mob.horizontalCollision+" path="+mob.getNavigation().getTargetPos()+" next="+(mob.getNavigation().getPath()==null||mob.getNavigation().getPath().isDone()?null:mob.getNavigation().getPath().getNextEntityPos(mob))+" pitch="+mob.getXRot()+" velocity="+mob.getDeltaMovement();mob.discard();owner.discard();h.fail("One-block shoreline traversal did not finish: entering="+entering+" "+state);return;}
+  if(remaining<=0){String state=mob.getSpeciesSlug()+" pos="+mob.position()+" localX="+localX+" onGround="+mob.isOnGround()+" owner="+owner.position()+" water="+mob.isInWater()+" horizontalCollision="+mob.horizontalCollision+" path="+mob.getNavigation().getTargetPos()+" next="+(mob.getNavigation().getPath()==null||mob.getNavigation().getPath().isDone()?null:mob.getNavigation().getPath().getNextEntityPos(mob))+" pitch="+mob.getXRot()+" velocity="+mob.getDeltaMovement();mob.discard();owner.discard();h.fail("One-block shoreline traversal did not finish: entering="+entering+" "+state);return;}
   h.runAfterDelay(5,()->awaitShore(h,mob,owner,index,entering,remaining-5));
  }
  static void defeatedFloaters(GameTestHelper h){
