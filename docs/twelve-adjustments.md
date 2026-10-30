@@ -14,7 +14,7 @@ Compatibilidade alvo: Minecraft 1.19.2, Forge 43.5.0, Java 17.
 9. **Pokébolas:** a liberação aceita volumes de água com espaço para a hitbox; mantém colisões sólidas, rejeição de perigos, NBT e controle de token contra duplicação. O apontamento pode atingir o fundo submerso ou a água.
 10. **Petiscos:** 18 receitas de bancada, cada uma com osso central e quatro almas do mesmo tipo em cruz, produzindo uma unidade. Sprites e obtenção das almas permanecem intactos.
 11. **Geodude:** banda fixa de um bloco, considerando o fundo visível do modelo, sem animação de rolamento enquanto flutua. Demais espécies mantêm suas alturas.
-12. **Gastly:** fase baixa de 6.000 ticks a um bloco e fase variável de 3.600 ticks entre dois e cinco blocos. Estado/timer persistem e pausam durante estados incompatíveis com movimento. Fumaça em todos os estados, 10 partículas/s (antes 20), tamanho 2,5 vezes o anterior, 75% de opacidade e raio reduzido pela metade.
+12. **Gastly:** fase baixa de 6.000 ticks a um bloco e fase variável de 3.600 ticks entre dois e cinco blocos. Estado/timer persistem e pausam durante estados incompatíveis com movimento. Fumaça em todos os estados, 10 partículas/s (antes 20), tamanho 2,5 vezes o anterior, 75% de opacidade e raio reduzido pela metade. A velocidade interna é controlada para manter a fumaça junto ao corpo, preservando a duração de 16 ticks.
 
 ## Preservação e validação
 

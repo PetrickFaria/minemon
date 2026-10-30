@@ -20,6 +20,9 @@ public final class GastlySmokeParticle extends TextureSheetParticle {
         super(level, x, y, z, xd, yd, zd);
         SPAWN_COUNT.incrementAndGet();
         this.sprites = sprites;
+        // Particle's default constructor adds random velocity. Keep the inward
+        // aura trajectory inside its compact source radius instead of scattering.
+        this.xd = xd;this.yd = yd;this.zd = zd;
         this.lifetime = 16; // Native maximum lifetime: 0.8 s.
         this.gravity = 0.0F;
         this.friction = 0.96F;

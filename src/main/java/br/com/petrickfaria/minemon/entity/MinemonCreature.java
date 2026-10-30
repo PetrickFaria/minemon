@@ -764,7 +764,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
                 double radius = 0.17D * scale;
                 double px = centerX + Math.cos(angle) * radius;
                 double pz = centerZ + Math.sin(angle) * radius;
-                double inwardSpeed = 0.10D * scale;
+                double inwardSpeed = 0.02D * scale;
                 this.level.addParticle(br.com.petrickfaria.minemon.registry.ModParticles.GASTLY_GHOSTLY_SMOKE.get(),
                         px, centerY, pz, -Math.cos(angle) * inwardSpeed, 0.0D,
                         -Math.sin(angle) * inwardSpeed);
