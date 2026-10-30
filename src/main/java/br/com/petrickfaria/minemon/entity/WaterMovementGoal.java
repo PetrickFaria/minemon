@@ -1,3 +1,6 @@
+Warning: truncated output (original token count: 4321)
+Total output lines: 309
+
 package br.com.petrickfaria.minemon.entity;
 
 import java.util.*;
@@ -118,98 +121,7 @@ public final class WaterMovementGoal extends Goal {
   boolean surface=mob.isNaturalSurface();
   boolean bottomPreferred=SpeciesBehaviorProfiles.prefersBottom(mob.getSpeciesSlug());
   if(bottomPreferred&&!surface){
-   BlockPos nearby=nearbyBottomDestination();
-   if(nearby!=null)return nearby;
-  }
-  // Far choices distribute swimmers through large lakes; local and fixed
-  // probes prevent small ponds/corners from depending on lucky random draws.
-  for(int n=0;n<48;n++){
-   int dx,dz;
-   // Surface swimmers patrol locally instead of selecting a point across an
-   // entire lake. This keeps near-surface species such as Gyarados in shallow
-   // pools and leaves room for the vertical depth correction to do its work.
-   if(surface&&n<12){dx=mob.getRandom().nextInt(9)-4;dz=mob.getRandom().nextInt(9)-4;}
-   else if(surface&&n<24){int[] direction=SWIM_DIRECTIONS[(n-12)%8];int distance=2+(n-12)/8;dx=direction[0]*distance;dz=direction[1]*distance;}
-   else if(n<12){dx=mob.getRandom().nextInt(49)-24;dz=mob.getRandom().nextInt(49)-24;}
-   else if(n<24){dx=mob.getRandom().nextInt(13)-6;dz=mob.getRandom().nextInt(13)-6;}
-   else {int[] direction=SWIM_DIRECTIONS[(n-24)%8];int distance=2+2*((n-24)/8);dx=direction[0]*distance;dz=direction[1]*distance;}
-   if(dx*dx+dz*dz<4)continue;
-   int x=mob.blockPosition().getX()+dx,z=mob.blockPosition().getZ()+dz;
-   BlockPos column=new BlockPos(x,mob.getY(),z);
-   double top=surfaceAt(mob,column);
-   if(!Double.isFinite(top))continue;
-   double bottomY=bottomPreferred&&!surface?preferredBottomY(mob,column,top):Double.NaN;
-   double y=Double.isFinite(bottomY)?bottomY:surface?top-preferredSurfaceDepth(mob)
-       :n>=24?top-Math.max(2.0D,mob.getBbHeight()+0.3D)
-       :Math.min(top-mob.getBbHeight()-0.3D,mob.getY()+mob.getRandom().nextInt(5)-2);
-   BlockPos p=new BlockPos(x,bottomPreferred&&Double.isFinite(bottomY)?Math.ceil(y):y,z);
-   if(blocked.containsKey(p)||!waterFits(mob,p,!surface)
-       ||requiresNavigableVolume(mob.getSpeciesSlug())&&!waterRegion(mob,p))continue;
-   boolean clear=true;
-   for(int step=1;step<=4;step++){
-    Vec3 point=mob.position().lerp(Vec3.atCenterOf(p),step/4.0D);
-    if(!mob.level.noCollision(mob,mob.getBoundingBox().move(point.subtract(mob.position())))){clear=false;break;}
-   }
-   if(!clear)continue;
-   var path=mob.getNavigation().createPath(p,0);
-   if(path!=null&&path.canReach())return p;
-   blocked.put(p.immutable(),mob.tickCount+200);
-  }
-  return null;
- }
- private BlockPos nearbyBottomDestination(){
-  // Bottom-seeking species should settle locally before choosing a distant
-  // patrol destination. This keeps the requested depth behavior observable
-  // and prevents a large lake from sending them across the entire basin first.
-  for(int radius=0;radius<=4;radius++)for(int d=0;d<(radius==0?1:SWIM_DIRECTIONS.length);d++){
-   int[] direction=SWIM_DIRECTIONS[d];
-   int dx=direction[0]*radius,dz=direction[1]*radius;
-   int x=mob.blockPosition().getX()+dx,z=mob.blockPosition().getZ()+dz;
-   BlockPos column=new BlockPos(x,mob.getY(),z);
-   double top=surfaceAt(mob,column);
-   if(!Double.isFinite(top))continue;
-   double y=preferredBottomY(mob,column,top);
-   if(!Double.isFinite(y))continue;
-   // Path nodes use whole block Y coordinates. Round upward so the node keeps
-   // the full collision clearance that preferredBottomY validated.
-   BlockPos p=new BlockPos(x,Math.ceil(y),z);
-   if(blocked.containsKey(p)||!waterFits(mob,p,true)
-       ||requiresNavigableVolume(mob.getSpeciesSlug())&&!waterRegion(mob,p))continue;
-   boolean clear=true;
-   for(int step=1;step<=4;step++){
-    Vec3 point=mob.position().lerp(Vec3.atCenterOf(p),step/4.0D);
-    if(!mob.level.noCollision(mob,mob.getBoundingBox().move(point.subtract(mob.position())))){clear=false;break;}
-   }
-   if(!clear)continue;
-   var path=mob.getNavigation().createPath(p,0);
-   if(path!=null&&path.canReach())return p;
-   blocked.put(p.immutable(),mob.tickCount+200);
-  }
-  return null;
- }
- private static double preferredBottomY(MinemonCreature mob,BlockPos column,double surface){
-  int floorWater=bottomWaterBlock(mob,column,surface);
-  if(!safeWaterFloor(mob,column,floorWater))return Double.NaN;
-  if(surface-floorWater<=mob.getBbHeight()+0.45D)return Double.NaN;
-  // Keep a useful collision margin above the floor. A nearly zero clearance
-  // can place the navigation node inside the support block after interpolation.
-  double target=floorWater+0.30D;
-  var box=mob.getBoundingBox().move(column.getX()+0.5D-mob.getX(),target-mob.getY(),column.getZ()+0.5D-mob.getZ());
-  if(!mob.level.noCollision(mob,box))return Double.NaN;
-  for(int x=(int)Math.floor(box.minX+0.001D);x<=Math.floor(box.maxX-0.001D);x++)
-   for(int z=(int)Math.floor(box.minZ+0.001D);z<=Math.floor(box.maxZ-0.001D);z++)
-    if(!mob.level.getFluidState(new BlockPos(x,floorWater,z)).is(FluidTags.WATER))return Double.NaN;
-  return target;
- }
- public static double waterRestY(MinemonCreature mob){
-  double top=restSurfaceAt(mob,mob.blockPosition());
-  if(!Double.isFinite(top))return Double.NaN;
-  if(mob.getSpeciesSlug().equals("lapras"))return top-preferredSurfaceDepth(mob);
-  if(SpeciesBehaviorProfiles.restsAtWaterBottom(mob.getSpeciesSlug())){
-   double target=preferredBottomY(mob,mob.blockPosition(),top);
-   if(Double.isFinite(target))return target;
-  }
-  return Double.isFinite(mob.aquaticSleepY())?mob.aquaticSleepY():mob.getY();
+   BlockPos near…1321 tokens truncated…cSleepY():mob.getY();
  }
  private static boolean safeWaterFloor(MinemonCreature mob,BlockPos column,int floorWater){
   int min=mob.level.getMinBuildHeight();if(floorWater<=min)return false;

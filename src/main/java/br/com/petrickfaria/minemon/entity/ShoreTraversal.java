@@ -31,7 +31,7 @@ final class ShoreTraversal {
     mob.setDeltaMovement(velocity.x*.55D+dx/distance*steer,velocity.y,velocity.z*.55D+dz/distance*steer);
    }
   }
-  if((mob.horizontalCollision || shore.subtract(mob.position()).horizontalDistanceSqr()<6.25D)
+  if((mob.horizontalCollision || shore.subtract(mob.position()).horizontalDistanceSqr()<20.25D)
       &&mob.level.noCollision(mob,mob.getBoundingBox().move(0,.12,0))){
    mob.setDeltaMovement(mob.getDeltaMovement().x,Math.max(.42,mob.getDeltaMovement().y),mob.getDeltaMovement().z);
    mob.getJumpControl().jump();
