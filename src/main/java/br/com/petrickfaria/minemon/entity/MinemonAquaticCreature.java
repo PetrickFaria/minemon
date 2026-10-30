@@ -72,11 +72,14 @@ public final class MinemonAquaticCreature extends MinemonCreature {
     }
     @Override public void tick(){
         super.tick();
-        if(this.isDefeated()||this.level.isClientSide||!this.isInWater()||(!this.naturalBehaviorActive()&&!this.isSleeping()))return;
+        if(this.isDefeated()||this.level.isClientSide||!this.isInWater()
+                ||(!this.naturalBehaviorActive()&&!this.isSleeping()&&!this.isNightResting()))return;
         double top=this.waterSurface();
         if(!Double.isFinite(top))return;
-        if(this.isSleeping()){
-            // Night rest has its own species-specific depth. In particular,
+        if(this.isSleeping()||this.isNightResting()){
+            // Night rest has its own species-specific depth. Ease toward it
+            // before the settled check marks the creature asleep, then keep
+            // holding that depth for the duration of sleep. In particular,
             // visitors that entered the water during their land cooldown are
             // marked EXIT_WATER (a surface phase), but must remain asleep at
             // the safe bottom until dawn rather than being pulled upward.
