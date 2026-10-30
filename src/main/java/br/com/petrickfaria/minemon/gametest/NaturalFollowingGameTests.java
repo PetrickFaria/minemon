@@ -24,12 +24,15 @@ public final class NaturalFollowingGameTests {
     @GameTest(template="test_arena", batch="natural_following", timeoutTicks=180)
     public static void followsWithContinuousMovementThenObeysSit(GameTestHelper h) {
         h.getLevel().setDayTime(1000);
+        var arenaBox=new net.minecraft.world.phys.AABB(h.absolutePos(new BlockPos(0,0,0)),h.absolutePos(new BlockPos(40,14,10)));
+        h.getLevel().getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class,arenaBox).forEach(net.minecraft.world.entity.Entity::discard);
         for(int x=0;x<40;x++)for(int z=0;z<10;z++) {
             h.setBlock(new BlockPos(x,0,z),Blocks.STONE);
             for(int y=1;y<=12;y++)h.setBlock(new BlockPos(x,y,z),
                     x==0||x==39||z==0||z==9?Blocks.STONE:Blocks.AIR);
         }
         ServerPlayer owner=new ServerPlayer(h.getLevel().getServer(),h.getLevel(),new GameProfile(UUID.randomUUID(),"FollowOwner"),null);
+        owner.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
         owner.connection=new FakePlayer(h.getLevel(),new GameProfile(UUID.randomUUID(),"FollowConnection")).connection;
         BlockPos end=h.absolutePos(new BlockPos(30,1,5));
         owner.moveTo(end.getX()+.5,end.getY(),end.getZ()+.5,0,0);
