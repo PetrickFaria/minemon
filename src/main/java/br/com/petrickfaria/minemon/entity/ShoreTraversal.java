@@ -61,16 +61,20 @@ final class ShoreTraversal {
    var feet=new BlockPos(column.getX(),y,column.getZ());
    double towardOwnerX=owner.getX()-mob.getX(),towardOwnerZ=owner.getZ()-mob.getZ();
    double bankX=feet.getX()+.5D-mob.getX(),bankZ=feet.getZ()+.5D-mob.getZ();
-   // Keep the landing on the owner's side of the swimmer. A reachable bank
-   // across the pool is not useful: it makes the creature leave by the wrong
-   // shore and can complete a path before it ever reaches its trainer.
-   if(bankX*towardOwnerX+bankZ*towardOwnerZ<=0.0D)continue;
+   double ownerDistanceSqr=towardOwnerX*towardOwnerX+towardOwnerZ*towardOwnerZ;
+   double bankDistanceSqr=bankX*bankX+bankZ*bankZ;
+   double towardOwner=towardOwnerX*bankX+towardOwnerZ*bankZ;
+   // Keep the landing clearly on the owner's side and make sure it shortens
+   // the remaining distance. An angled path around the pool can otherwise
+   // select a nearby, reachable bank behind or beside the trainer.
+   if(towardOwner<=0.0D||towardOwner*towardOwner<.5D*ownerDistanceSqr*bankDistanceSqr
+       ||feet.distSqr(owner.blockPosition())>=mob.distanceToSqr(owner))continue;
    if(y<=top+1.05 && y>=top-.5 && !state.blocked.containsKey(feet) && WaterMovementGoal.safeDry(mob,feet))candidates.add(feet);
   }
   // Reach the owner's side of the shore first. Among those banks, prefer a
   // nearby path-reachable landing; once on land the normal follow goal closes
   // the remaining distance safely.
-  candidates.sort(java.util.Comparator.comparingDouble(p->p.distSqr(mob.blockPosition())+.15*p.distSqr(owner.blockPosition())));
+  candidates.sort(java.util.Comparator.comparingDouble(p->p.distSqr(owner.blockPosition())+.25*p.distSqr(mob.blockPosition())));
   int tried=0;
   for(var feet:candidates){
    var path=mob.getNavigation().createPath(feet,0);

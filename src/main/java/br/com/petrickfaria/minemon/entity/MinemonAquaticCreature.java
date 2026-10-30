@@ -88,18 +88,10 @@ public final class MinemonAquaticCreature extends MinemonCreature {
             }
             return;
         }
+        // Awake swimmers follow the surface in their own column. A stale
+        // navigation target across a waterfall can refer to water many blocks
+        // higher and must not pull Gyarados away from its local surface.
         boolean surface=this.isNaturalSurface();
-        if(surface&&getSpeciesSlug().equals("gyarados")){
-            // A recent path can ascend from a falling/shallower edge into the
-            // main lake. Keep its nearby destination surface as the depth
-            // reference after path completion too, or the local waterfall
-            // surface can pull Gyarados down and away from the lake surface.
-            var destination=this.getNavigation().getTargetPos();
-            if(destination!=null&&destination.distSqr(this.blockPosition())<=144.0D){
-                double routeTop=WaterMovementGoal.surfaceAt(this,destination);
-                if(Double.isFinite(routeTop))top=Math.max(top,routeTop);
-            }
-        }
         double target=surface?top-WaterMovementGoal.preferredSurfaceDepth(this):top-this.getBbHeight()-0.3D;
         // Surface and submerged correction share the swimming controller; do not
         // add another navigation goal or override horizontal pursuit.
