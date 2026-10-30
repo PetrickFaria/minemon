@@ -27,8 +27,6 @@ final class NaturalFollowOwnerGoal extends Goal {
                 || current.isInWaterOrBubble();
     }
 
-    private boolean isAtShore() {
-        i
     @Override public boolean canUse() { return eligible(); }
     @Override public boolean canContinueToUse() { return eligible() && owner == mob.getOwner(); }
     @Override public void start() { owner = mob.getOwner(); mob.setFollowingOwner(true); mob.stopSpontaneousRun(); running = false; moving = mob.distanceToSqr(owner) > 25.0D; speed = 0.8D; recalculate = 0; }
