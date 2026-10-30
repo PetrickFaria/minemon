@@ -115,6 +115,13 @@ static boolean followBank(MinemonCreature mob,net.minecraft.world.entity.LivingE
    // point directly; block collision still governs movement and the stalled
    // route check below selects another bank if this line is obstructed.
    mob.getNavigation().stop();
+   double dx=state.bank.getX()+.5D-mob.getX(),dz=state.bank.getZ()+.5D-mob.getZ();
+   if(state.bank.getY()>mob.getY()+.4D&&dx*dx+dz*dz<36.0D
+       &&mob.level.noCollision(mob,mob.getBoundingBox().move(0,.2D,0))){
+    var velocity=mob.getDeltaMovement();
+    mob.setDeltaMovement(velocity.x,Math.max(.42D,velocity.y),velocity.z);
+    mob.getJumpControl().jump();
+   }
    mob.getMoveControl().setWantedPosition(state.bank.getX()+.5D,state.bank.getY(),state.bank.getZ()+.5D,speed);
    return true;
   }
