@@ -96,6 +96,13 @@ public final class MinemonAquaticCreature extends MinemonCreature {
         // higher and must not pull Gyarados away from its local surface.
         boolean surface=this.isNaturalSurface();
         double target=surface?top-WaterMovementGoal.preferredSurfaceDepth(this):top-this.getBbHeight()-0.3D;
+        if(surface&&this.getSpeciesSlug().equals("gyarados")&&this.getNavigation().isDone()){
+            // A completed path can leave SmoothSwimmingMoveControl holding its
+            // old waypoint. Keep horizontal patrolling navigation untouched,
+            // but replace that stale vertical command with the local surface
+            // depth so Gyarados can settle after waking or finishing a route.
+            this.getMoveControl().setWantedPosition(this.getX(),target,this.getZ(),0.5D);
+        }
         // Surface and submerged correction share the swimming controller; do not
         // add another navigation goal or override horizontal pursuit.
         if(!ShoreTraversal.exiting(this)&&(surface||this.getY()>target)){
