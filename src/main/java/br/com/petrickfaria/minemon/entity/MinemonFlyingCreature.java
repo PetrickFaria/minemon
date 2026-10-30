@@ -155,8 +155,14 @@ public final class MinemonFlyingCreature extends MinemonCreature {
     // navigation stopping distance keeps Pidgey outside vanilla melee reach.
     double lift=net.minecraft.util.Mth.clamp((0.6D-altitude)*0.1D,0.02D,0.10D);
     this.setDeltaMovement(this.getDeltaMovement().x,Math.max(this.getDeltaMovement().y,lift),this.getDeltaMovement().z);
-   }else if(!this.fixedFloater()&&!combat&&!this.followingObstacle()&&(this.naturalBehaviorActive()||this.isFollowingOwner())&&(altitude<this.flightMinimum()||altitude>this.flightMaximum())){
-    double desired=surface+(this.flightMinimum()+this.flightMaximum())*0.5D;
+   }else if(!this.fixedFloater()&&!combat&&!this.followingObstacle()
+       &&(this.naturalBehaviorActive()||this.isFollowingOwner())
+       &&(this.isFollowingOwner()?altitude>this.followAltitude()+0.08D
+           ||altitude<this.followAltitude()-0.08D:altitude<this.flightMinimum()||altitude>this.flightMaximum())){
+    // Companions stay at their species' lowest natural follow height. Free
+    // flyers still use the midpoint of their normal patrol band.
+    double desired=surface+(this.isFollowingOwner()?this.followAltitude()
+        :(this.flightMinimum()+this.flightMaximum())*0.5D);
     double correction=net.minecraft.util.Mth.clamp((desired-this.getY())*0.025D-this.getDeltaMovement().y*0.15D,-0.08D,0.08D);
     this.setDeltaMovement(this.getDeltaMovement().x,
         net.minecraft.util.Mth.clamp(this.getDeltaMovement().y+correction,-0.12D,0.12D),this.getDeltaMovement().z);

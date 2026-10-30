@@ -160,7 +160,10 @@ public final class NightAndSwimmingTests {
       h.runAfterDelay(300,()->{
        double top=WaterMovementGoal.restSurfaceAt(gyarados,gyarados.blockPosition());
        double depth=top-(gyarados.getY()+gyarados.getBbHeight()*.5);
-       check(h,Math.abs(depth-1)<.3,"Awake Gyarados must return to body-center depth one block: "+depth);
+       check(h,Math.abs(depth-1)<.3,"Awake Gyarados must return to body-center depth one block: "+depth
+           +" pos="+gyarados.position()+" inWater="+gyarados.isInWater()+" sleep="+gyarados.isSleeping()
+           +" surface="+top+" target="+gyarados.getNavigation().getTargetPos()+" navDone="+gyarados.getNavigation().isDone()
+           +" motion="+gyarados.getDeltaMovement()+" time="+level.getDayTime());
        h.succeed();
       });
      },40,"Aquatic sleepers must wake at dawn");
