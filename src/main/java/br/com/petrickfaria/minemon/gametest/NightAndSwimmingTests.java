@@ -148,7 +148,8 @@ public final class NightAndSwimmingTests {
    check(h,Math.abs(dratini.getY()-visitorY)<.2D&&dratini.getY()-originY<2.5D,"A water visitor caught in water at night must settle at the bottom");
    check(h,Math.abs(shellder.getY()-shellderY)<.2D&&shellder.getY()-originY>=1.0D&&shellder.getY()-originY<2.5D,
        "A bottom-preferring aquatic sleeper must rest just above the lake floor");
-   var attacker=h.spawn(EntityType.COW,new BlockPos(13,2,6));attacker.setNoAi(true);
+   // Keep the aggressor north of Dratini, clear of the sleeping Vaporeon body.
+   var attacker=h.spawn(EntityType.COW,new BlockPos(12,1,5));attacker.setNoAi(true);
    float health=attacker.getHealth();
    check(h,dratini.hurt(DamageSource.mobAttack(attacker),1)&&!dratini.isSleeping()&&dratini.getTarget()==attacker,
        "An aquatic night sleeper must wake and retain its attacker");
@@ -159,7 +160,7 @@ public final class NightAndSwimmingTests {
       h.succeed();
      },40,"Aquatic sleepers must wake at dawn");
     },220,"A water visitor must return to sleep after combat while it is still night; sleeping="+dratini.isSleeping()+" target="+dratini.getTarget()+" y="+dratini.getY());
-   },180,"The woken water visitor must physically retaliate in water");
+   },180,()->"The woken water visitor must physically retaliate in water; pos="+dratini.position()+" target="+dratini.getTarget()+" sleep="+dratini.isSleeping()+" attacker="+attacker.position()+" health="+attacker.getHealth());
   },500,"Permanent swimmers must rest in water and water visitors must settle at the bottom");
  }
  @GameTest(template="test_arena",batch="water_bottom",timeoutTicks=900)
