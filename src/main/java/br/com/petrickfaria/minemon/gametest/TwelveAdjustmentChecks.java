@@ -17,7 +17,11 @@ import java.util.UUID;
 final class TwelveAdjustmentChecks {
  static void verify(GameTestHelper h){
   var level=h.getLevel();
-  var owner=new FakePlayer(level,new GameProfile(UUID.randomUUID(),"RecoveryTester"));
+  var owner=new net.minecraft.server.level.ServerPlayer(level.getServer(),level,new GameProfile(UUID.randomUUID(),"RecoveryTester"),null);
+  owner.connection=new FakePlayer(level,new GameProfile(UUID.randomUUID(),"RecoveryConnection")).connection;
+  var ownerPos=h.absolutePos(new BlockPos(7,1,7));owner.moveTo(ownerPos.getX()+.5,ownerPos.getY(),ownerPos.getZ()+.5,0,0);
+  level.addNewPlayer(owner);
+  try{
   var mob=ModEntities.SPECIES.get("bulbasaur").get().create(level);
   mob.tame(owner);mob.setPokemonProgress(3,2);
   mob.die(DamageSource.GENERIC);
@@ -49,6 +53,7 @@ final class TwelveAdjustmentChecks {
   if(restored.remainingTicks()!=4766)h.fail("Egg timer lost effective tick progress");
   var legacy=new BreedingEggBlockEntity(pos,state);legacy.initialize("bulbasaur",owner.getUUID(),12000);
   restored.load(legacy.saveWithoutMetadata());if(restored.remainingTicks()!=12000)h.fail("Existing egg progress was reset");
+  }finally{owner.discard();}
  }
  private static void verifyCombat(GameTestHelper h){
   var level=h.getLevel();long originalTime=level.getGameTime();
@@ -85,7 +90,7 @@ final class TwelveAdjustmentChecks {
   }
  }
 
- private static void verifyRecipes(GameTestHelper h,FakePlayer owner){
+ private static void verifyRecipes(GameTestHelper h,net.minecraft.server.level.ServerPlayer owner){
   for(var type:br.com.petrickfaria.minemon.item.PokemonTreatType.values()){
    var id=new net.minecraft.resources.ResourceLocation("minemon",type.itemId());
    var found=h.getLevel().getRecipeManager().byKey(id).orElse(null);
