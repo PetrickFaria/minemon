@@ -773,11 +773,9 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
 
     private void tickGastlySmoke(){
         if(!getSpeciesSlug().equals("gastly") || isRemoved())return;
-        int phase=Math.floorMod(tickCount,16);
-        int large=switch(phase){case 0->0;case 3->1;case 6->2;case 9->3;case 12->4;default->-1;};
-        int small=phase%2==1 && phase<14?phase/2:-1;
+        int large=GastlyAura.largeSlot(tickCount),small=GastlyAura.smallSlot(tickCount);
         if(large>=0)level.addParticle(br.com.petrickfaria.minemon.registry.ModParticles.GASTLY_GHOSTLY_SMOKE.get(),getX(),getY(),getZ(),getId(),large,0);
-        if(small>=0)level.addParticle(br.com.petrickfaria.minemon.registry.ModParticles.GASTLY_SMALL_SMOKE.get(),getX(),getY(),getZ(),getId(),small+5,0);
+        if(small>=0)level.addParticle(br.com.petrickfaria.minemon.registry.ModParticles.GASTLY_SMALL_SMOKE.get(),getX(),getY(),getZ(),getId(),small,0);
     }
 
     /** Independent, persisted world-time counter. Unloaded chunks do not advance it. */
@@ -967,7 +965,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         if(isDefeated())return;
         entityData.set(DEFEATED,true);aiBeforeDefeat=isNoAi();setNoAi(true);
         setHealth(0);setTarget(null);getNavigation().stop();resetLove();
-        attackAnimationTicks=0;stopSpontaneousRun();setFollowingRun(false);
+        attackAnimationTicks=0;stopSpontaneousRun();setFollowingRun(false);setFollowingOwner(false);
         setSleeping(true);setDeltaMovement(0,0,0);fallDistance=0;
         var owner=getOwner();
         if(owner instanceof ServerPlayer player)player.sendSystemMessage(net.minecraft.network.chat.Component.literal(getName().getString()+" foi derrotado."));

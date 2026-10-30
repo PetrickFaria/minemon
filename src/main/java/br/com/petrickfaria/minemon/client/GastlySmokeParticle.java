@@ -27,11 +27,11 @@ public final class GastlySmokeParticle extends TextureSheetParticle {
         // aura trajectory inside its compact source radius instead of scattering.
         this.xd = this.yd = this.zd = 0;
         this.owner=level.getEntity((int)xd);this.slot=(int)yd;this.small=small;
-        this.lifetime = 16; // Native maximum lifetime: 0.8 s.
+        this.lifetime = br.com.petrickfaria.minemon.entity.GastlyAura.LIFETIME; // Native maximum lifetime: 0.8 s.
         this.gravity = 0.0F;
         this.friction = 0.96F;
         this.hasPhysics = false;
-        this.setAlpha(0.75F);
+        this.setAlpha(br.com.petrickfaria.minemon.entity.GastlyAura.OPACITY);
         this.setSpriteFromAge(sprites);
         this.setColor(0xBE / 255.0F, 0x81 / 255.0F, 0xE8 / 255.0F);
         this.updateSourceSize(0.0F);
@@ -64,7 +64,7 @@ public final class GastlySmokeParticle extends TextureSheetParticle {
         int low = (int) position;
         int high = Math.min(nodes.length - 1, low + 1);
         float sample = nodes[low] + (nodes[high] - nodes[low]) * (position - low);
-        this.quadSize = (small?0.34F:0.85F) * SpeciesDefinitions.get("gastly").scale() * sample;
+        this.quadSize = (small?br.com.petrickfaria.minemon.entity.GastlyAura.SMALL_SIZE:br.com.petrickfaria.minemon.entity.GastlyAura.LARGE_SIZE) * SpeciesDefinitions.get("gastly").scale() * sample;
     }
 
     private void followBody(){

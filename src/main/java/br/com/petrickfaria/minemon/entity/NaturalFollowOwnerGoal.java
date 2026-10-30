@@ -32,6 +32,7 @@ final class NaturalFollowOwnerGoal extends Goal {
     @Override public void start() { owner = mob.getOwner(); mob.setFollowingOwner(true); mob.stopSpontaneousRun(); running = false; moving = mob.distanceToSqr(owner) > 25.0D; speed = 0.8D; recalculate = 0; }
     @Override public boolean requiresUpdateEveryTick() { return true; }
     @Override public void tick() {
+        mob.setFollowingOwner(true);
         double distance = mob.distanceToSqr(owner);
         if (moving && distance <= 20.25D) moving = false;
         else if (!moving && distance > 25.0D) moving = true;
