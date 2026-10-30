@@ -99,7 +99,7 @@ public final class MinemonFlyingCreature extends MinemonCreature {
  }
  @Override public void tick(){
   super.tick();
-  if(isDefeated()){this.setNoGravity(true);return;}
+  if(isDefeated()){this.setNoGravity(!WaterMovementGoal.safeLandingBelow(this));return;}
   this.updateLocomotion();
   if(!this.isFlyingSpecies() && !this.wantsNaturalLanding()){return;}
   if(!this.level.isClientSide){

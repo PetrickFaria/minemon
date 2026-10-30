@@ -687,7 +687,9 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         if(isDefeated()){
             this.getNavigation().stop();this.setTarget(null);this.setJumping(false);
             this.setSpeed(0);this.setXxa(0);this.setYya(0);this.setZza(0);
-            this.setDeltaMovement(0,0,0);this.fallDistance=0;
+            boolean safeDescent=this instanceof MinemonFlyingCreature && !this.isOnGround() && WaterMovementGoal.safeLandingBelow(this);
+            this.setNoGravity(!safeDescent);
+            this.setDeltaMovement(0,safeDescent?-.08D:0,0);this.fallDistance=0;
             if(!level.isClientSide && tickCount%12==0)((ServerLevel)level).sendParticles(net.minecraft.core.particles.ParticleTypes.SMOKE,
                     getX(),getY()+getBbHeight()*.5,getZ(),1,getBbWidth()*.2,getBbHeight()*.15,getBbWidth()*.2,.005);
             return;

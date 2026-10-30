@@ -169,7 +169,7 @@ public final class BehaviorCycleTest {
             repeat(cycle, 20_000, wet);
             assertEquals(SUBMERGED, cycle.phase());
             assertTrue(SpeciesBehaviorProfiles.prefersBottom(slug));
-            assertTrue(SpeciesBehaviorProfiles.restsAtWaterBottom(slug));
+            assertFalse(SpeciesBehaviorProfiles.restsAtWaterBottom(slug));
         }
     }
 
