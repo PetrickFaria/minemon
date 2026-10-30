@@ -40,6 +40,8 @@ final class TwelveAdjustmentChecks {
   if(!mob.isBlackListTarget(creeper))h.fail("Explicit creeper choice did not persist");
   creeper.setPos(mob.getX()+6,mob.getY(),mob.getZ());if(mob.canAttack(creeper))h.fail("Tamed attacker accepted target beyond five blocks");
   verifyCombat(h);
+  verifyRecipes(h,owner);
+  verifyExactHatching(h);
   var pos=new BlockPos(0,1,0);var state=ModBlocks.BREEDING_EGG.get().defaultBlockState();
   var egg=new BreedingEggBlockEntity(pos,state);egg.initialize("bulbasaur",owner.getUUID(),6000);
   for(int n=0;n<1234;n++)BreedingEggBlockEntity.serverTick(level,pos,state,egg);
@@ -80,6 +82,45 @@ final class TwelveAdjustmentChecks {
   }finally{
    for(var shot:level.getEntitiesOfClass(ElementalProjectile.class,attacker.getBoundingBox().inflate(8)))shot.discard();
    cow.discard();level.getServer().getWorldData().overworldData().setGameTime(originalTime);
+  }
+ }
+
+ private static void verifyRecipes(GameTestHelper h,FakePlayer owner){
+  for(var type:br.com.petrickfaria.minemon.item.PokemonTreatType.values()){
+   var id=new net.minecraft.resources.ResourceLocation("minemon",type.itemId());
+   var found=h.getLevel().getRecipeManager().byKey(id).orElse(null);
+   if(!(found instanceof net.minecraft.world.item.crafting.ShapedRecipe))h.fail("Missing shaped treat recipe: "+id);
+   var recipe=(net.minecraft.world.item.crafting.ShapedRecipe)found;
+   var grid=new net.minecraft.world.inventory.CraftingContainer(owner.inventoryMenu,3,3);
+   var soul=ModItems.SOULS.get(type.pokemonType()).get();
+   grid.setItem(4,new ItemStack(net.minecraft.world.item.Items.BONE));
+   for(int slot:new int[]{1,3,5,7})grid.setItem(slot,new ItemStack(soul));
+   if(!recipe.matches(grid,h.getLevel()) || recipe.getResultItem().getItem()!=ModItems.TREATS.get(type).get() || recipe.getResultItem().getCount()!=1)
+    h.fail("Invalid cross-shaped treat recipe: "+id);
+   var other=type.pokemonType().equals("fire")?"water":"fire";
+   grid.setItem(1,new ItemStack(ModItems.SOULS.get(other).get()));
+   if(recipe.matches(grid,h.getLevel()))h.fail("Mixed elemental souls accepted: "+id);
+  }
+ }
+ private static void verifyExactHatching(GameTestHelper h){
+  var level=h.getLevel();var pos=h.absolutePos(new BlockPos(12,1,12));
+  var previousFloor=level.getBlockState(pos.below());var previous=level.getBlockState(pos);
+  var state=ModBlocks.BREEDING_EGG.get().defaultBlockState();var owner=UUID.randomUUID();
+  level.setBlock(pos.below(),net.minecraft.world.level.block.Blocks.STONE.defaultBlockState(),3);
+  level.setBlock(pos,state,3);
+  var egg=(BreedingEggBlockEntity)level.getBlockEntity(pos);egg.initialize("caterpie",owner,6000);
+  try{
+   for(int tick=0;tick<5999;tick++)BreedingEggBlockEntity.serverTick(level,pos,state,egg);
+   if(egg.remainingTicks()!=1 || level.getBlockEntity(pos)!=egg)h.fail("Egg hatched before 6000 ticks");
+   egg.load(egg.saveWithoutMetadata());
+   BreedingEggBlockEntity.serverTick(level,pos,state,egg);
+   var hatchlings=level.getEntitiesOfClass(MinemonCreature.class,new net.minecraft.world.phys.AABB(pos).inflate(4),m->owner.equals(m.getOwnerUUID()));
+   if(hatchlings.size()!=1 || !level.getBlockState(pos).isAir())h.fail("Egg did not hatch exactly once at tick 6000");
+   BreedingEggBlockEntity.serverTick(level,pos,state,egg);
+   if(level.getEntitiesOfClass(MinemonCreature.class,new net.minecraft.world.phys.AABB(pos).inflate(4),m->owner.equals(m.getOwnerUUID())).size()!=1)h.fail("Egg duplicated hatchling");
+  }finally{
+   for(var child:level.getEntitiesOfClass(MinemonCreature.class,new net.minecraft.world.phys.AABB(pos).inflate(4),m->owner.equals(m.getOwnerUUID())))child.discard();
+   level.setBlock(pos,previous,3);level.setBlock(pos.below(),previousFloor,3);
   }
  }
 

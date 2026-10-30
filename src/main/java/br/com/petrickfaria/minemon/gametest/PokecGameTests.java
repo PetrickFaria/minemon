@@ -189,12 +189,15 @@ public final class PokecGameTests {
         MinemonCreature foreign=h.spawn(ModEntities.SPECIES.get("pikachu").get(),new BlockPos(10,1,5));foreign.tame(stranger);
         check(!ModItems.POKEBALL.get().interactLivingEntity(empty,owner,foreign,InteractionHand.OFF_HAND).consumesAction(),"another owner's Pokémon cannot be captured");
 
+        for(int y=1;y<=4;y++)h.setBlock(new BlockPos(5,y,5),Blocks.WATER);
         BlockPos floorPos=new BlockPos(5,0,5);
         var hit=new BlockHitResult(Vec3.atCenterOf(h.absolutePos(floorPos)),net.minecraft.core.Direction.UP,h.absolutePos(floorPos),false);
         var release=ModItems.POKEBALL.get().useOn(new net.minecraft.world.item.context.UseOnContext(owner,InteractionHand.MAIN_HAND,hit));
         check(release.consumesAction()&&!PokeballItem.isOccupied(owner.getMainHandItem()),"successful release must empty, not destroy, the ball");
         var restored=h.getLevel().getEntitiesOfClass(MinemonCreature.class,new net.minecraft.world.phys.AABB(h.absolutePos(new BlockPos(3,1,3)),h.absolutePos(new BlockPos(12,5,8))),e->e.getSpeciesSlug().equals("charmander")&&owner.getUUID().equals(e.getOwnerUUID()));
         check(restored.size()==1&&restored.get(0).getPokemonLevel()==7&&restored.get(0).getHealth()==5.0F,"release restores one owned Pokémon with captured state");
+        check(h.getLevel().getFluidState(restored.get(0).blockPosition()).is(net.minecraft.tags.FluidTags.WATER),"Pokébola must release directly inside submerged space");
+        for(int y=1;y<=4;y++)h.setBlock(new BlockPos(5,y,5),Blocks.AIR);
         check(!PokeballItem.isOccupied(empty),"empty balls stay empty after rejected capture attempts");
         stranger.discard();owner.discard();h.succeed();
     }

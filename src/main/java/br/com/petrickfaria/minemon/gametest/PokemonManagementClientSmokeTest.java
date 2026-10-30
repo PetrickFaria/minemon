@@ -156,8 +156,24 @@ public final class PokemonManagementClientSmokeTest {
                         || !screen.containsTypeForSmokeTest(cow) || !screen.selectedForSmokeTest(zombie)
                         || screen.selectedForSmokeTest(cow))
                     throw new IllegalStateException("Black List did not load registered hostile/passive mob defaults");
+                var creeper=new ResourceLocation("minecraft","creeper");
+                if(screen.selectedForSmokeTest(creeper))throw new IllegalStateException("Creeper was selected by default");
+                java.util.Set<ResourceLocation> all=new java.util.HashSet<>();
+                int panelWidth=Math.min(430,minecraft.getWindow().getGuiScaledWidth()-12);
+                int panelHeight=Math.min(390,minecraft.getWindow().getGuiScaledHeight()-12);
+                int left=(minecraft.getWindow().getGuiScaledWidth()-panelWidth)/2;
+                int top=(minecraft.getWindow().getGuiScaledHeight()-panelHeight)/2;
+                for(int tab=0;tab<3;tab++){
+                    screen.mouseClicked(left+14+(tab+.5)*(panelWidth-28)/3.0,top+35,0);
+                    if(screen.firstRowForSmokeTest()!=0)throw new IllegalStateException("Filter did not reset scroll");
+                    for(var id:screen.visibleIdsForSmokeTest())if(!all.add(id))throw new IllegalStateException("Mob duplicated between tabs: "+id);
+                    screen.mouseScrolled(left+20,top+60,-1);
+                }
+                if(all.size()!=screen.rowCountForSmokeTest() || !all.contains(cow) || !all.contains(zombie) || !all.contains(creeper))
+                    throw new IllegalStateException("Blacklist tabs discarded registered mobs");
+                if(!screen.selectedForSmokeTest(zombie) || screen.selectedForSmokeTest(cow))throw new IllegalStateException("Filter changed selections");
                 Files.writeString(Path.of("client-validation-pokemon-management.txt"),
-                        "PASS: owned Pokémon status screen, Pokédex header, XP level sync, Seguir/Sentar controls, and registry-backed Black List defaults\n");
+                        "PASS: owned Pokémon status screen, Pokédex header, XP level sync, Seguir/Sentar controls, and registry-backed Black List defaults; all three filter tabs clicked, complete disjoint mob partition, scrolling, preserved selections and unselected Creeper\n");
                 done = true;
                 System.out.println("[POKEMON MANAGEMENT CLIENT] PASS: status, XP sync, follow/sit commands, and dynamic Black List");
                 minecraft.execute(minecraft::stop);

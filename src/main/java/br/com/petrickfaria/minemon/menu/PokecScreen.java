@@ -41,6 +41,7 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
     private int scrollOffset;
     private String selectedSlug = "bulbasaur";
     private Map<String, MinemonCreature> previews = new HashMap<>();
+    private final Map<String, PreviewBounds.Fit> previewFits = new HashMap<>();
     private List<PokecSpecies.Entry> ordered = List.of();
 
     public PokecScreen(PokecMenu menu, Inventory inventory, Component title) {
@@ -382,10 +383,10 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         entity.setYRot(180.0F);
         entity.yRotO = entity.getYRot();
         var def = SpeciesDefinitions.get(species.slug());
-        var fit = PreviewBounds.fit(species.slug(), def.scale());
+        var fit = previewFits.computeIfAbsent(species.slug(),slug->PreviewBounds.fit(slug,def.scale()));
         previewYaw += net.minecraft.util.Mth.wrapDegrees(targetPreviewYaw-previewYaw)*.25F;
         previewPitch += (targetPreviewPitch-previewPitch)*.25F;
-        float scale = PreviewBounds.rotationScale(species.slug(),def.scale(),fit.scale(),previewYaw,previewPitch-6);
+        float scale = fit.scale();
         double windowScale = mc.getWindow().getGuiScale();
         int sx=(int)Math.floor((leftPos+222*uiScale)*windowScale);
         int sy=(int)Math.floor(mc.getWindow().getHeight()-(topPos+158*uiScale)*windowScale);

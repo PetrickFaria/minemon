@@ -48,6 +48,8 @@ public final class BlackListScreen extends Screen {
         this.overrides.clear();
         this.overrides.putAll(state);
     }
+    public java.util.List<ResourceLocation> visibleIdsForSmokeTest(){return visible().stream().map(Row::id).toList();}
+    public int firstRowForSmokeTest(){return firstRow;}
     public int rowCountForSmokeTest() { return rows.size(); }
     public boolean containsTypeForSmokeTest(ResourceLocation id) {
         return rows.stream().anyMatch(row -> row.id().equals(id));

@@ -203,7 +203,7 @@ public final class CompanionTests {
   });
  }
 
- @GameTest(template="test_arena",batch="night_landing",timeoutTicks=600)
+ @GameTest(template="test_arena",batch="night_landing",timeoutTicks=1200)
  public static void requestedBirdsLandAndHoldTheirFoldedSleepPose(GameTestHelper h) {
   floor(h);h.getLevel().setDayTime(18000);
   var slugs=java.util.List.of("spearow","fearow","articuno","zapdos","moltres");
@@ -223,7 +223,7 @@ public final class CompanionTests {
    h.getLevel().setDayTime(1000);
    h.runAfterDelay(3,()->{
     for(var bird:birds)check(h,!bird.isSleeping()&&!bird.isNightResting(),bird.getSpeciesSlug()+" must wake at dawn");
-    h.succeed();
+    awaitCommandedLanding(h,birds,500,false);
    });
    return;
   }
@@ -233,6 +233,30 @@ public final class CompanionTests {
    return;
   }
   h.runAfterDelay(5,()->awaitRequestedBirdLanding(h,birds,remaining-5));
+ }
+
+ private static void awaitCommandedLanding(GameTestHelper h,java.util.List<MinemonCreature> birds,int remaining,boolean ordered){
+  if(!ordered && birds.stream().allMatch(b->!b.isOnGround() && b.getY()-b.naturalSurface()>.6)){
+   for(var bird:birds){bird.setTame(true);bird.setOwnerUUID(UUID.randomUUID());bird.setOrderedToSit(true);}
+   ordered=true;
+  }
+  if(ordered && birds.stream().allMatch(b->b.isOnGround() && WaterMovementGoal.safeLandingBelow(b))){
+   for(var bird:birds)check(h,bird.isOrderedToSit()&&!bird.isSleeping(),"Commanded flyer must land and remain awake/sitting");
+   var positions=birds.stream().map(MinemonCreature::position).toList();
+   h.runAfterDelay(30,()->{
+    for(int i=0;i<birds.size();i++){
+     check(h,birds.get(i).position().distanceTo(positions.get(i))<.3,"Seated flyer moved away from its landing place");
+     birds.get(i).setOrderedToSit(false);
+    }
+    h.runAfterDelay(60,()->{
+     for(var bird:birds)check(h,!bird.isOrderedToSit()&&!bird.isOnGround(),"Following order must resume natural flight after sitting");
+     for(var bird:birds)bird.discard();h.succeed();
+    });
+   });return;
+  }
+  check(h,remaining>0,"Commanded flyers failed to take off or land safely");
+  final boolean next=ordered;
+  h.runAfterDelay(5,()->awaitCommandedLanding(h,birds,remaining-5,next));
  }
 
  private static void awaitAwakeFlightBand(GameTestHelper h,MinemonCreature bird,int remaining,int stable){
