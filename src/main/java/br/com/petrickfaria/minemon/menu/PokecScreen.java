@@ -94,7 +94,7 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
     public boolean conversionSlotsBelowListForSmokeTest() { return 253 > LIST_Y + LIST_H && 20 + 36 < LIST_X + LIST_W; }
     public float previewScaleForSmokeTest(String slug) {
         var definition = SpeciesDefinitions.get(slug);
-        return definition == null ? 0.0F : computePreviewScale(definition.width(), definition.height(), definition.scale());
+        return definition == null ? 0.0F : PreviewBounds.fit(slug, definition.scale()).scale();
     }
 
     @Override protected void init() {
