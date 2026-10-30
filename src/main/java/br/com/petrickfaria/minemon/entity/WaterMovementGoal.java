@@ -125,7 +125,12 @@ public final class WaterMovementGoal extends Goal {
   // probes prevent small ponds/corners from depending on lucky random draws.
   for(int n=0;n<48;n++){
    int dx,dz;
-   if(n<12){dx=mob.getRandom().nextInt(49)-24;dz=mob.getRandom().nextInt(49)-24;}
+   // Surface swimmers patrol locally instead of selecting a point across an
+   // entire lake. This keeps near-surface species such as Gyarados in shallow
+   // pools and leaves room for the vertical depth correction to do its work.
+   if(surface&&n<12){dx=mob.getRandom().nextInt(9)-4;dz=mob.getRandom().nextInt(9)-4;}
+   else if(surface&&n<24){int[] direction=SWIM_DIRECTIONS[(n-12)%8];int distance=2+(n-12)/8;dx=direction[0]*distance;dz=direction[1]*distance;}
+   else if(n<12){dx=mob.getRandom().nextInt(49)-24;dz=mob.getRandom().nextInt(49)-24;}
    else if(n<24){dx=mob.getRandom().nextInt(13)-6;dz=mob.getRandom().nextInt(13)-6;}
    else {int[] direction=SWIM_DIRECTIONS[(n-24)%8];int distance=2+2*((n-24)/8);dx=direction[0]*distance;dz=direction[1]*distance;}
    if(dx*dx+dz*dz<4)continue;

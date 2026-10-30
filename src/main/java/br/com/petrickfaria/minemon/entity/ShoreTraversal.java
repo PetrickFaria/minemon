@@ -6,17 +6,31 @@ import net.minecraft.world.phys.Vec3;
 final class ShoreTraversal {
  static boolean exiting(MinemonCreature mob){
   if(mob.isAquaticSpecies()&&!SpeciesBehaviorProfiles.isVisitor(mob.getSpeciesSlug()))return false;
+  State state=STATES.get(mob);
+  if(mob.isInWater()&&state!=null&&state.bank!=null&&mob.level.getFluidState(state.bank).isEmpty())return true;
   var path=mob.getNavigation().getPath();if(!mob.isInWater()||path==null||path.isDone())return false;
   var point=path.getNextEntityPos(mob);
-  return point.y>mob.getY()+.15 && !mob.level.getFluidState(new BlockPos(point)).is(FluidTags.WATER);
+  return point.y>=mob.getY()-.2 && !mob.level.getFluidState(new BlockPos(point)).is(FluidTags.WATER);
  }
  static void tick(MinemonCreature mob){
   if(mob.isDefeated()||mob.isSleeping()||mob.isNightResting()||mob.isOrderedToSit()||!exiting(mob))return;
   var point=mob.getNavigation().getPath().getNextEntityPos(mob);
+  State state=STATES.get(mob);
+  Vec3 shore=state!=null&&state.bank!=null
+      ?new Vec3(state.bank.getX()+.5D,state.bank.getY(),state.bank.getZ()+.5D):point;
   double dy=point.y-mob.getY();
   double top=WaterMovementGoal.restSurfaceAt(mob,mob.blockPosition());
-  if(!Double.isFinite(top)||point.y>top+1.05||dy<.05)return;
-  if((mob.horizontalCollision || point.subtract(mob.position()).horizontalDistanceSqr()<4) && mob.level.noCollision(mob,mob.getBoundingBox().move(0,.12,0))){
+  if(!Double.isFinite(top)||point.y>top+1.05||dy<-.35)return;
+  if(state!=null&&state.bank!=null){
+   double dx=shore.x-mob.getX(),dz=shore.z-mob.getZ(),distance=Math.sqrt(dx*dx+dz*dz);
+   if(distance>1.0D){
+    var velocity=mob.getDeltaMovement();
+    double steer=Math.min(.12D,.035D+distance*.008D);
+    mob.setDeltaMovement(velocity.x*.55D+dx/distance*steer,velocity.y,velocity.z*.55D+dz/distance*steer);
+   }
+  }
+  if((mob.horizontalCollision || shore.subtract(mob.position()).horizontalDistanceSqr()<6.25D)
+      &&mob.level.noCollision(mob,mob.getBoundingBox().move(0,.12,0))){
    mob.setDeltaMovement(mob.getDeltaMovement().x,Math.max(.42,mob.getDeltaMovement().y),mob.getDeltaMovement().z);
    mob.getJumpControl().jump();
   }
