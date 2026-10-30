@@ -23,7 +23,7 @@ final class ShoreTraversal {
       ?new Vec3(state.bank.getX()+.5D,state.bank.getY(),state.bank.getZ()+.5D):point;
   double dy=point.y-mob.getY();
   double top=WaterMovementGoal.restSurfaceAt(mob,mob.blockPosition());
-  if(!Double.isFinite(top)||point.y>top+1.05||dy<-.35)return;
+  if(!Double.isFinite(top)||point.y>top+1.5||dy<-.35)return;
   if(state!=null&&state.bank!=null){
    double dx=shore.x-mob.getX(),dz=shore.z-mob.getZ(),distance=Math.sqrt(dx*dx+dz*dz);
    if(distance>1.0D){
@@ -136,7 +136,7 @@ static boolean followBank(MinemonCreature mob,net.minecraft.world.entity.LivingE
    if(towardOwner<=0.0D||towardOwner*towardOwner<.9D*ownerDistanceSqr*bankDistanceSqr
        ||cross*cross>2.25D*ownerDistanceSqr
        ||feet.distSqr(owner.blockPosition())>=mob.distanceToSqr(owner))continue;
-   if(y<=top+1.05 && y>=top-.5 && !state.blocked.containsKey(feet) && WaterMovementGoal.safeDry(mob,feet))candidates.add(feet);
+   if(y<=top+1.5 && y>=top-.5 && !state.blocked.containsKey(feet) && WaterMovementGoal.safeDry(mob,feet))candidates.add(feet);
   }
   // Reach the owner's side of the shore first. Among those banks, prefer a
   // nearby path-reachable landing; once on land the normal follow goal closes
