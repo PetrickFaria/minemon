@@ -23,16 +23,29 @@ public class PokecCatalogTest {
         assertEquals("mythic", PokecSpecies.get("mew").rarity());
         assertEquals(10,PokecEconomy.get().coins("rattata"));
         assertEquals(20,PokecEconomy.get().coins("charmander"));
-        assertEquals(30,PokecEconomy.get().coins("charizard"));
-        assertEquals(40,PokecEconomy.get().coins("mewtwo"));
+        assertEquals(20,PokecEconomy.get().coins("charizard"));
+        assertEquals(50,PokecEconomy.get().coins("mewtwo"));
         assertEquals(50,PokecEconomy.get().coins("mew"));
         assertEquals(25,PokecEconomy.get().souls("rattata"));
         assertEquals(50,PokecEconomy.get().souls("charmander"));
-        assertEquals(75,PokecEconomy.get().souls("charizard"));
-        assertEquals(100,PokecEconomy.get().souls("mewtwo"));
+        assertEquals(50,PokecEconomy.get().souls("charizard"));
+        assertEquals(150,PokecEconomy.get().souls("mewtwo"));
         assertEquals(150,PokecEconomy.get().souls("mew"));
         assertEquals(37,PokecEconomy.enforceFixedCoinPrice(37));
         assertEquals("rare", PokecEconomy.resolveRarity("very_rare","rare"));
+    }
+
+    @Test public void exactRequestedDistributionAndConsumersAgree(){
+        var counts=new java.util.HashMap<String,Integer>();
+        for(var species:PokecSpecies.ordered()){
+            int n=species.number();
+            String expected=n>=10&&n<=22?"common":n>=147&&n<=149?"rare":n>=144&&n<=146?"legendary":n>=150?"mythic":"uncommon";
+            assertEquals(species.slug(),expected,species.rarity());
+            assertEquals(species.slug(),expected,PokecEconomy.get().rarity(species.slug()));
+            assertEquals(species.slug(),expected,PokemonSoulConversion.preview(species.slug(),1).rarity());
+            counts.merge(expected,1,Integer::sum);
+        }
+        assertEquals(java.util.Map.of("common",13,"uncommon",130,"rare",3,"legendary",3,"mythic",2),counts);
     }
 
     @Test public void approvedFreeStartersAndSoulTypesArePresent(){

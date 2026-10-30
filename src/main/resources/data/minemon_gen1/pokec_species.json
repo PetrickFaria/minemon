@@ -29,7 +29,7 @@
       "grass",
       "poison"
     ],
-    "rarity": "rare",
+    "rarity": "uncommon",
     "evolvesFrom": "ivysaur"
   },
   {
@@ -60,7 +60,7 @@
       "fire",
       "flying"
     ],
-    "rarity": "rare",
+    "rarity": "uncommon",
     "evolvesFrom": "charmeleon"
   },
   {
@@ -90,7 +90,7 @@
     "types": [
       "water"
     ],
-    "rarity": "rare",
+    "rarity": "uncommon",
     "evolvesFrom": "wartortle"
   },
   {
@@ -121,7 +121,7 @@
       "bug",
       "flying"
     ],
-    "rarity": "uncommon",
+    "rarity": "common",
     "evolvesFrom": "metapod"
   },
   {
@@ -154,7 +154,7 @@
       "bug",
       "poison"
     ],
-    "rarity": "rare",
+    "rarity": "common",
     "evolvesFrom": "kakuna"
   },
   {
@@ -176,7 +176,7 @@
       "normal",
       "flying"
     ],
-    "rarity": "uncommon",
+    "rarity": "common",
     "evolvesFrom": "pidgey"
   },
   {
@@ -187,7 +187,7 @@
       "normal",
       "flying"
     ],
-    "rarity": "rare",
+    "rarity": "common",
     "evolvesFrom": "pidgeotto"
   },
   {
@@ -207,7 +207,7 @@
     "types": [
       "normal"
     ],
-    "rarity": "uncommon",
+    "rarity": "common",
     "evolvesFrom": "rattata"
   },
   {
@@ -229,7 +229,7 @@
       "normal",
       "flying"
     ],
-    "rarity": "uncommon",
+    "rarity": "common",
     "evolvesFrom": "spearow"
   },
   {
@@ -239,7 +239,7 @@
     "types": [
       "poison"
     ],
-    "rarity": "common",
+    "rarity": "uncommon",
     "evolvesFrom": null
   },
   {
@@ -269,7 +269,7 @@
     "types": [
       "electric"
     ],
-    "rarity": "rare",
+    "rarity": "uncommon",
     "evolvesFrom": "pikachu"
   },
   {
@@ -279,7 +279,7 @@
     "types": [
       "ground"
     ],
-    "rarity": "common",
+    "rarity": "uncommon",
     "evolvesFrom": null
   },
   {
@@ -299,7 +299,7 @@
     "types": [
       "poison"
     ],
-    "rarity": "common",
+    "rarity": "uncommon",
     "evolvesFrom": null
   },
   {
@@ -320,7 +320,7 @@
       "poison",
       "ground"
     ],
-    "rarity": "rare",
+    "rarity": "uncommon",
     "evolvesFrom": "nidorina"
   },
   {
@@ -330,7 +330,7 @@
     "types": [
       "poison"
     ],
-    "rarity": "common",
+    "rarity": "uncommon",
     "evolvesFrom": null
   },
   {
@@ -351,7 +351,7 @@
       "poison",
       "ground"
     ],
-    "rarity": "rare",
+    "rarity": "uncommon",
     "evolvesFrom": "nidorino"
   },
   {
@@ -361,7 +361,7 @@
     "types": [
       "normal"
     ],
-    "rarity": "common",
+    "rarity": "uncommon",
     "evolvesFrom": null
   },
   {
@@ -371,7 +371,7 @@
     "types": [
       "normal"
     ],
-    "rarity": "rare",
+    "rarity": "uncommon",
     "evolvesFrom": "clefairy"
   },
   {
@@ -391,7 +391,7 @@
     "types": [
       "fire"
     ],
-    "rarity": "rare",
+    "rarity": "uncommon",
     "evolvesFrom": "vulpix"
   },
   {
@@ -401,7 +401,7 @@
     "types": [
       "normal"
     ],
-    "rarity": "common",
+    "rarity": "uncommon",
     "evolvesFrom": null
   },
   {
@@ -411,7 +411,7 @@
     "types": [
       "normal"
     ],
-    "rarity": "rare",
+    "rarity": "uncommon",
     "evolvesFrom": "jigglypuff"
   },
   {
@@ -422,7 +422,7 @@
       "poison",
       "flying"
     ],
-    "rarity": "common",
+    "rarity": "uncommon",
     "evolvesFrom": null
   },
   {
@@ -433,7 +433,7 @@
       "poison",
       "flying"
     ],
-    "rarity": "rare",
+    "rarity": "uncommon",
     "evolvesFrom": "zubat"
   },
   {
@@ -444,7 +444,7 @@
       "grass",
       "poison"
     ],
-    "rarity": "common",
+    "rarity": "uncommon",
     "evolvesFrom": null
   },
   {
@@ -466,7 +466,7 @@
       "grass",
       "poison"
     ],
-    "rarity": "rare",
+    "rarity": "uncommon",
     "evolvesFrom": "gloom"
   },
   {
@@ -477,7 +477,7 @@
       "bug",
       "grass"
     ],
-    "rarity": "common",
+    "rarity": "uncommon",
     "evolvesFrom": null
   },
   {
@@ -499,7 +499,7 @@
       "bug",
       "poison"
     ],
-    "rarity": "common",
+    "rarity": "uncommon",
     "evolvesFrom": null
   },
   {
@@ -520,7 +520,7 @@
     "types": [
       "ground"
     ],
-    "rarity": "common",
+    "rarity": "uncommon",
     "evolvesFrom": null
   },
   {
@@ -540,7 +540,7 @@
     "types": [
       "normal"
     ],
-    "rarity": "common",
+    "rarity": "uncommon",
     "evolvesFrom": null
   },
   {
@@ -560,7 +560,7 @@
     "types": [
       "water"
     ],
-    "rarity": "common",
+    "rarity": "uncommon",
     "evolvesFrom": null
   },
   {
@@ -580,7 +580,7 @@
     "types": [
       "fighting"
     ],
-    "rarity": "common",
+    "rarity": "uncommon",
     "evolvesFrom": null
   },
   {
@@ -610,7 +610,7 @@
     "types": [
       "fire"
     ],
-    "rarity": "rare",
+    "rarity": "uncommon",
     "evolvesFrom": "growlithe"
   },
   {
@@ -620,7 +620,7 @@
     "types": [
       "water"
     ],
-    "rarity": "common",
+    "rarity": "uncommon",
     "evolvesFrom": null
   },
   {
@@ -641,7 +641,7 @@
       "water",
       "fighting"
     ],
-    "rarity": "rare",
+    "rarity": "uncommon",
     "evolvesFrom": "poliwhirl"
   },
   {
@@ -671,7 +671,7 @@
     "types": [
       "psychic"
     ],
-    "rarity": "rare",
+    "rarity": "uncommon",
     "evolvesFrom": "kadabra"
   },
   {
@@ -701,7 +701,7 @@
     "types": [
       "fighting"
     ],
-    "rarity": "rare",
+    "rarity": "uncommon",
     "evolvesFrom": "machoke"
   },
   {
@@ -712,7 +712,7 @@
       "grass",
       "poison"
     ],
-    "rarity": "common",
+    "rarity": "uncommon",
     "evolvesFrom": null
   },
   {
@@ -734,7 +734,7 @@
       "grass",
       "poison"
     ],
-    "rarity": "rare",
+    "rarity": "uncommon",
     "evolvesFrom": "weepinbell"
   },
   {
@@ -745,7 +745,7 @@
       "water",
       "poison"
     ],
-    "rarity": "common",
+    "rarity": "uncommon",
     "evolvesFrom": null
   },
   {
@@ -767,7 +767,7 @@
       "rock",
       "ground"
     ],
-    "rarity": "common",
+    "rarity": "uncommon",
     "evolvesFrom": null
   },
   {
@@ -789,7 +789,7 @@
       "rock",
       "ground"
     ],
-    "rarity": "rare",
+    "rarity": "uncommon",
     "evolvesFrom": "graveler"
   },
   {
@@ -809,7 +809,7 @@
     "types": [
       "fire"
     ],
-    "rarity": "rare",
+    "rarity": "uncommon",
     "evolvesFrom": "ponyta"
   },
   {
@@ -831,7 +831,7 @@
       "water",
       "psychic"
     ],
-    "rarity": "rare",
+    "rarity": "uncommon",
     "evolvesFrom": "slowpoke"
   },
   {
@@ -841,7 +841,7 @@
     "types": [
       "electric"
     ],
-    "rarity": "common",
+    "rarity": "uncommon",
     "evolvesFrom": null
   },
   {
@@ -851,7 +851,7 @@
     "types": [
       "electric"
     ],
-    "rarity": "rare",
+    "rarity": "uncommon",
     "evolvesFrom": "magnemite"
   },
   {
@@ -873,7 +873,7 @@
       "normal",
       "flying"
     ],
-    "rarity": "common",
+    "rarity": "uncommon",
     "evolvesFrom": null
   },
   {
@@ -884,7 +884,7 @@
       "normal",
       "flying"
     ],
-    "rarity": "rare",
+    "rarity": "uncommon",
     "evolvesFrom": null
   },
   {
@@ -894,7 +894,7 @@
     "types": [
       "water"
     ],
-    "rarity": "common",
+    "rarity": "uncommon",
     "evolvesFrom": null
   },
   {
@@ -905,7 +905,7 @@
       "water",
       "ice"
     ],
-    "rarity": "rare",
+    "rarity": "uncommon",
     "evolvesFrom": "seel"
   },
   {
@@ -915,7 +915,7 @@
     "types": [
       "poison"
     ],
-    "rarity": "common",
+    "rarity": "uncommon",
     "evolvesFrom": null
   },
   {
@@ -925,7 +925,7 @@
     "types": [
       "poison"
     ],
-    "rarity": "rare",
+    "rarity": "uncommon",
     "evolvesFrom": "grimer"
   },
   {
@@ -935,7 +935,7 @@
     "types": [
       "water"
     ],
-    "rarity": "common",
+    "rarity": "uncommon",
     "evolvesFrom": null
   },
   {
@@ -946,7 +946,7 @@
       "water",
       "ice"
     ],
-    "rarity": "rare",
+    "rarity": "uncommon",
     "evolvesFrom": "shellder"
   },
   {
@@ -979,7 +979,7 @@
       "ghost",
       "poison"
     ],
-    "rarity": "rare",
+    "rarity": "uncommon",
     "evolvesFrom": "haunter"
   },
   {
@@ -1000,7 +1000,7 @@
     "types": [
       "psychic"
     ],
-    "rarity": "common",
+    "rarity": "uncommon",
     "evolvesFrom": null
   },
   {
@@ -1010,7 +1010,7 @@
     "types": [
       "psychic"
     ],
-    "rarity": "rare",
+    "rarity": "uncommon",
     "evolvesFrom": "drowzee"
   },
   {
@@ -1020,7 +1020,7 @@
     "types": [
       "water"
     ],
-    "rarity": "common",
+    "rarity": "uncommon",
     "evolvesFrom": null
   },
   {
@@ -1030,7 +1030,7 @@
     "types": [
       "water"
     ],
-    "rarity": "rare",
+    "rarity": "uncommon",
     "evolvesFrom": "krabby"
   },
   {
@@ -1040,7 +1040,7 @@
     "types": [
       "electric"
     ],
-    "rarity": "common",
+    "rarity": "uncommon",
     "evolvesFrom": null
   },
   {
@@ -1050,7 +1050,7 @@
     "types": [
       "electric"
     ],
-    "rarity": "rare",
+    "rarity": "uncommon",
     "evolvesFrom": "voltorb"
   },
   {
@@ -1061,7 +1061,7 @@
       "grass",
       "psychic"
     ],
-    "rarity": "rare",
+    "rarity": "uncommon",
     "evolvesFrom": null
   },
   {
@@ -1072,7 +1072,7 @@
       "grass",
       "psychic"
     ],
-    "rarity": "rare",
+    "rarity": "uncommon",
     "evolvesFrom": "exeggcute"
   },
   {
@@ -1082,7 +1082,7 @@
     "types": [
       "ground"
     ],
-    "rarity": "common",
+    "rarity": "uncommon",
     "evolvesFrom": null
   },
   {
@@ -1092,7 +1092,7 @@
     "types": [
       "ground"
     ],
-    "rarity": "rare",
+    "rarity": "uncommon",
     "evolvesFrom": "cubone"
   },
   {
@@ -1132,7 +1132,7 @@
     "types": [
       "poison"
     ],
-    "rarity": "common",
+    "rarity": "uncommon",
     "evolvesFrom": null
   },
   {
@@ -1142,7 +1142,7 @@
     "types": [
       "poison"
     ],
-    "rarity": "rare",
+    "rarity": "uncommon",
     "evolvesFrom": "koffing"
   },
   {
@@ -1153,7 +1153,7 @@
       "ground",
       "rock"
     ],
-    "rarity": "common",
+    "rarity": "uncommon",
     "evolvesFrom": null
   },
   {
@@ -1164,7 +1164,7 @@
       "ground",
       "rock"
     ],
-    "rarity": "rare",
+    "rarity": "uncommon",
     "evolvesFrom": "rhyhorn"
   },
   {
@@ -1174,7 +1174,7 @@
     "types": [
       "normal"
     ],
-    "rarity": "rare",
+    "rarity": "uncommon",
     "evolvesFrom": null
   },
   {
@@ -1194,7 +1194,7 @@
     "types": [
       "normal"
     ],
-    "rarity": "rare",
+    "rarity": "uncommon",
     "evolvesFrom": null
   },
   {
@@ -1204,7 +1204,7 @@
     "types": [
       "water"
     ],
-    "rarity": "common",
+    "rarity": "uncommon",
     "evolvesFrom": null
   },
   {
@@ -1224,7 +1224,7 @@
     "types": [
       "water"
     ],
-    "rarity": "common",
+    "rarity": "uncommon",
     "evolvesFrom": null
   },
   {
@@ -1234,7 +1234,7 @@
     "types": [
       "water"
     ],
-    "rarity": "rare",
+    "rarity": "uncommon",
     "evolvesFrom": "goldeen"
   },
   {
@@ -1244,7 +1244,7 @@
     "types": [
       "water"
     ],
-    "rarity": "common",
+    "rarity": "uncommon",
     "evolvesFrom": null
   },
   {
@@ -1255,7 +1255,7 @@
       "water",
       "psychic"
     ],
-    "rarity": "rare",
+    "rarity": "uncommon",
     "evolvesFrom": "staryu"
   },
   {
@@ -1265,7 +1265,7 @@
     "types": [
       "psychic"
     ],
-    "rarity": "rare",
+    "rarity": "uncommon",
     "evolvesFrom": null
   },
   {
@@ -1287,7 +1287,7 @@
       "ice",
       "psychic"
     ],
-    "rarity": "rare",
+    "rarity": "uncommon",
     "evolvesFrom": null
   },
   {
@@ -1297,7 +1297,7 @@
     "types": [
       "electric"
     ],
-    "rarity": "rare",
+    "rarity": "uncommon",
     "evolvesFrom": null
   },
   {
@@ -1307,7 +1307,7 @@
     "types": [
       "fire"
     ],
-    "rarity": "rare",
+    "rarity": "uncommon",
     "evolvesFrom": null
   },
   {
@@ -1327,7 +1327,7 @@
     "types": [
       "normal"
     ],
-    "rarity": "rare",
+    "rarity": "uncommon",
     "evolvesFrom": null
   },
   {
@@ -1337,7 +1337,7 @@
     "types": [
       "water"
     ],
-    "rarity": "common",
+    "rarity": "uncommon",
     "evolvesFrom": null
   },
   {
@@ -1348,7 +1348,7 @@
       "water",
       "flying"
     ],
-    "rarity": "rare",
+    "rarity": "uncommon",
     "evolvesFrom": null
   },
   {
@@ -1359,7 +1359,7 @@
       "water",
       "ice"
     ],
-    "rarity": "rare",
+    "rarity": "uncommon",
     "evolvesFrom": null
   },
   {
@@ -1369,7 +1369,7 @@
     "types": [
       "normal"
     ],
-    "rarity": "rare",
+    "rarity": "uncommon",
     "evolvesFrom": null
   },
   {
@@ -1379,7 +1379,7 @@
     "types": [
       "normal"
     ],
-    "rarity": "common",
+    "rarity": "uncommon",
     "evolvesFrom": null
   },
   {
@@ -1389,7 +1389,7 @@
     "types": [
       "water"
     ],
-    "rarity": "rare",
+    "rarity": "uncommon",
     "evolvesFrom": "eevee"
   },
   {
@@ -1399,7 +1399,7 @@
     "types": [
       "electric"
     ],
-    "rarity": "rare",
+    "rarity": "uncommon",
     "evolvesFrom": "eevee"
   },
   {
@@ -1409,7 +1409,7 @@
     "types": [
       "fire"
     ],
-    "rarity": "rare",
+    "rarity": "uncommon",
     "evolvesFrom": "eevee"
   },
   {
@@ -1419,7 +1419,7 @@
     "types": [
       "normal"
     ],
-    "rarity": "rare",
+    "rarity": "uncommon",
     "evolvesFrom": null
   },
   {
@@ -1430,7 +1430,7 @@
       "rock",
       "water"
     ],
-    "rarity": "common",
+    "rarity": "uncommon",
     "evolvesFrom": null
   },
   {
@@ -1441,7 +1441,7 @@
       "rock",
       "water"
     ],
-    "rarity": "rare",
+    "rarity": "uncommon",
     "evolvesFrom": null
   },
   {
@@ -1452,7 +1452,7 @@
       "rock",
       "water"
     ],
-    "rarity": "common",
+    "rarity": "uncommon",
     "evolvesFrom": null
   },
   {
@@ -1463,7 +1463,7 @@
       "rock",
       "water"
     ],
-    "rarity": "rare",
+    "rarity": "uncommon",
     "evolvesFrom": null
   },
   {
@@ -1474,7 +1474,7 @@
       "rock",
       "flying"
     ],
-    "rarity": "rare",
+    "rarity": "uncommon",
     "evolvesFrom": null
   },
   {
@@ -1484,7 +1484,7 @@
     "types": [
       "normal"
     ],
-    "rarity": "rare",
+    "rarity": "uncommon",
     "evolvesFrom": null
   },
   {
@@ -1527,7 +1527,7 @@
     "types": [
       "dragon"
     ],
-    "rarity": "common",
+    "rarity": "rare",
     "evolvesFrom": null
   },
   {
@@ -1558,7 +1558,7 @@
     "types": [
       "psychic"
     ],
-    "rarity": "legendary",
+    "rarity": "mythic",
     "evolvesFrom": null
   },
   {

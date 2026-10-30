@@ -281,7 +281,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         int boundedLevel = Math.max(1, Math.min(PokemonProgression.maxLevel(), level));
         this.entityData.set(POKEMON_LEVEL, boundedLevel);
         int needed = PokemonProgression.xpForNextLevel(boundedLevel, this.getSpeciesSlug());
-        this.entityData.set(POKEMON_XP, needed <= 0 ? 0 : Math.max(0, Math.min(needed - 1, experience)));
+        this.entityData.set(POKEMON_XP, needed <= 0 ? 0 : Math.max(0, loadingPokemonData?experience:Math.min(needed - 1, experience)));
         this.refreshPokemonXpThreshold();
         this.refreshPokemonAttributes(loadingPokemonData?0:Math.max(0,boundedLevel-oldLevel));
     }
@@ -292,13 +292,13 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         long pending = Math.min((long) amount, Integer.MAX_VALUE);
         while (pending > 0 && this.getPokemonLevel() < PokemonProgression.maxLevel()) {
             int need = PokemonProgression.xpForNextLevel(this.getPokemonLevel(), this.getSpeciesSlug());
-            int room = need - this.getPokemonExperience();
+            int room = Math.max(0,need - this.getPokemonExperience());
             int add = (int) Math.min(pending, room);
             this.entityData.set(POKEMON_XP, this.getPokemonExperience() + add);
             pending -= add;
             awarded += add;
             if (this.getPokemonExperience() >= need) {
-                this.entityData.set(POKEMON_XP, 0);
+                this.entityData.set(POKEMON_XP, this.getPokemonExperience()-need);
                 this.entityData.set(POKEMON_LEVEL, this.getPokemonLevel() + 1);
             }
         }
