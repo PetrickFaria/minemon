@@ -9,6 +9,7 @@ final class NaturalFollowOwnerGoal extends Goal {
     private final MinemonCreature mob;
     private LivingEntity owner;
     private boolean running;
+    private boolean moving;
     private double speed;
     private int recalculate;
 
@@ -26,12 +27,17 @@ final class NaturalFollowOwnerGoal extends Goal {
                 || current.isInWaterOrBubble() && mob.isInWaterOrBubble();
     }
 
-    @Override public boolean canUse() { return eligible() && mob.distanceToSqr(mob.getOwner()) > 36.0D; }
-    @Override public boolean canContinueToUse() { return eligible() && owner == mob.getOwner() && mob.distanceToSqr(owner) > 9.0D; }
-    @Override public void start() { owner = mob.getOwner(); mob.stopSpontaneousRun(); running = false; speed = 0.8D; recalculate = 0; }
+    @Override public boolean canUse() { return eligible(); }
+    @Override public boolean canContinueToUse() { return eligible() && owner == mob.getOwner(); }
+    @Override public void start() { owner = mob.getOwner(); mob.stopSpontaneousRun(); running = false; moving = mob.distanceToSqr(owner) > 36.0D; speed = 0.8D; recalculate = 0; }
     @Override public boolean requiresUpdateEveryTick() { return true; }
     @Override public void tick() {
         double distance = mob.distanceToSqr(owner);
+        if (moving && distance <= 9.0D) moving = false;
+        else if (!moving && distance > 36.0D) moving = true;
+        if (!moving) {
+            mob.getNavigation().stop(); mob.setFollowingRun(false); running=false; speed=0.8D; return;
+        }
         if (distance > 256.0D) running = true;
         else if (distance < 64.0D) running = false;
         double target = running ? 1.55D : 0.8D;
