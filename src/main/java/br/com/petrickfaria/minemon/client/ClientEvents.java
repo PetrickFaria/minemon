@@ -19,6 +19,7 @@ import net.minecraft.client.gui.screens.MenuScreens;
 public final class ClientEvents {
     @SubscribeEvent
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
+        event.registerEntityRenderer(ModEntities.ELEMENTAL_PROJECTILE.get(),ElementalProjectileRenderer::new);
         for (var type : ModEntities.SPECIES.values()) event.registerEntityRenderer(type.get(), MinemonRenderer::new);
     }
 

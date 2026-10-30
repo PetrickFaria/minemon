@@ -144,7 +144,7 @@ public final class PokemonTreatGameTests {
         String babySpecies=egg.species();
         check(h, babySpecies.equals("charmander")||babySpecies.equals("squirtle"),"Charizard and Blastoise must produce only their initial forms");
         check(h,owner.getUUID().equals(egg.owner()), "Incubating egg must preserve the parents' owner");
-        check(h,egg.remainingTicks()==24_000,"Egg incubation must preserve the configured adult-growth duration");
+        check(h,egg.remainingTicks()==6_000,"New breeding eggs must incubate for exactly 6000 effective ticks");
         List<MinemonCreature> babies=h.getLevel().getEntitiesOfClass(MinemonCreature.class, first.getBoundingBox().inflate(8), MinemonCreature::isBaby);
         check(h,babies.isEmpty(),"Breeding must not spawn a baby Pokémon alongside the egg");
         check(h, first.getAge()==6000&&second.getAge()==6000, "Adult cooldown should default to 6000 ticks");

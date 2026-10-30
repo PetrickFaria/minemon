@@ -54,16 +54,18 @@ public final class BehaviorCycle {
     public int surfaceVisitLimit() { return surfaceVisitLimit; }
 
     public double minimumAltitude() {
+        if ("gastly".equals(speciesSlug)) return stage == 0 ? 1.0D : 2.0D;
         return switch (profile) {
             case FLYER, GROUND_FLIGHT -> stage == 0 ? 3.0D : 6.0D;
             case FLOAT_CYCLE, GROUND_FLOAT_CYCLE -> stage == 0 ? 1.0D : 4.0D;
             case FLOAT_HALF -> SpeciesBehaviorProfiles.nightRestHoverHeight(speciesSlug == null ? "abra" : speciesSlug);
-            case FLOAT_LOW -> "porygon".equals(speciesSlug)?1.0D/3.0D:0.5D;
+            case FLOAT_LOW -> "porygon".equals(speciesSlug)?1.0D/3.0D:1.0D;
             default -> 0.0D;
         };
     }
 
     public double maximumAltitude() {
+        if ("gastly".equals(speciesSlug)) return stage == 0 ? 1.0D : 5.0D;
         return switch (profile) {
             case FLYER, GROUND_FLIGHT -> stage == 0 ? 5.0D : 9.0D;
             case FLOAT_CYCLE, GROUND_FLOAT_CYCLE -> stage == 0 ? 3.0D : 6.0D;
@@ -135,7 +137,7 @@ public final class BehaviorCycle {
     }
 
     private void tickAltitude(Observation observation, int lowDuration, int highDuration) {
-        if (!observation.flightBand()) return;
+        if (!"gastly".equals(speciesSlug) && !observation.flightBand()) return;
         int limit = stage == 0 ? lowDuration : highDuration;
         if (++ticks >= limit) {
             stage = 1 - stage;
@@ -255,6 +257,7 @@ public final class BehaviorCycle {
     }
 
     private int phaseLimit() {
+        if ("gastly".equals(speciesSlug)) return stage == 0 ? 6000 : 3600;
         return switch (phase) {
             case LAND, COOLDOWN -> TICKS_PER_MINUTE * 5;
             case AIR -> stage == 0 ? TICKS_PER_MINUTE * 3 : profile == Profile.GROUND_FLIGHT ? TICKS_PER_MINUTE * 2

@@ -209,7 +209,9 @@ public final class PokeballItem extends Item {
                     if (!level.getWorldBorder().isWithinBounds(feet)
                             || !level.getBlockState(feet).getCollisionShape(level, feet).isEmpty()
                             || level.getBlockState(floor).getCollisionShape(level, floor).isEmpty()
-                            || !level.getFluidState(feet).isEmpty() || !level.getFluidState(feet.above()).isEmpty()
+                                && !level.getFluidState(feet).is(net.minecraft.tags.FluidTags.WATER)
+                            || level.getFluidState(feet).is(net.minecraft.tags.FluidTags.LAVA)
+                            || level.getFluidState(feet.above()).is(net.minecraft.tags.FluidTags.LAVA)
                             || unsafe(level, feet) || unsafe(level, floor) || unsafe(level, feet.above())) continue;
                     double x = feet.getX() + 0.5D, y = feet.getY(), z = feet.getZ() + 0.5D;
                     AABB box = entity.getBoundingBox().move(x - entity.getX(), y - entity.getY(), z - entity.getZ());

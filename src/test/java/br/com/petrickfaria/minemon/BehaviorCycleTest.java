@@ -89,15 +89,15 @@ public final class BehaviorCycleTest {
         }
         for (String slug : List.of("geodude", "porygon")) {
             var cycle = new BehaviorCycle(FLOAT_LOW, slug, new Random(2));
-            assertEquals(slug.equals("porygon")?1.0D/3.0D:.5D, cycle.minimumAltitude(), 0.0D);
+            assertEquals(slug.equals("porygon")?1.0D/3.0D:1.0D, cycle.minimumAltitude(), 0.0D);
             assertEquals(slug.equals("porygon")?1.0D/3.0D:1.0D, cycle.maximumAltitude(), 0.0D);
         }
         var observation = o(true, false, true, false, false, false, false, false);
         var gastly = new BehaviorCycle(FLOAT_CYCLE, "gastly", new Random(5));
-        assertEquals(1.0D, gastly.minimumAltitude(), 0.0D); assertEquals(3.0D, gastly.maximumAltitude(), 0.0D);
+        assertEquals(1.0D, gastly.minimumAltitude(), 0.0D); assertEquals(1.0D, gastly.maximumAltitude(), 0.0D);
         repeat(gastly, 5_999, observation); assertEquals(0, gastly.stage());
         gastly.tick(observation); assertEquals(1, gastly.stage());
-        assertEquals(4.0D, gastly.minimumAltitude(), 0.0D); assertEquals(6.0D, gastly.maximumAltitude(), 0.0D);
+        assertEquals(2.0D, gastly.minimumAltitude(), 0.0D); assertEquals(5.0D, gastly.maximumAltitude(), 0.0D);
         repeat(gastly, 3_600, observation); assertEquals(0, gastly.stage());
     }
 

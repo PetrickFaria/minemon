@@ -25,6 +25,7 @@ public class RefinementGameTests {
   RarityReclassificationChecks.all151EntitiesUseCatalogStatsAndSavedProgress(h);
   RarityReclassificationChecks.reclassificationKeepsOverflowXpUntilNextAward(h);
   RarityReclassificationChecks.oldConfigCannotOverrideCatalogAndUnrelatedSettingsSurvive(h);
+  TwelveAdjustmentChecks.verify(h);
   h.succeed();
  }
  @GameTest(template="test_arena",batch="refinement_water_sleep",timeoutTicks=240)

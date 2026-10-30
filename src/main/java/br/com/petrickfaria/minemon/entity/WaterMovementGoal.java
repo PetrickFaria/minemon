@@ -199,6 +199,7 @@ public final class WaterMovementGoal extends Goal {
  public static double waterRestY(MinemonCreature mob){
   double top=restSurfaceAt(mob,mob.blockPosition());
   if(!Double.isFinite(top))return Double.NaN;
+  if(mob.getSpeciesSlug().equals("lapras"))return top-preferredSurfaceDepth(mob);
   if(SpeciesBehaviorProfiles.restsAtWaterBottom(mob.getSpeciesSlug())){
    double target=preferredBottomY(mob,mob.blockPosition(),top);
    if(Double.isFinite(target))return target;

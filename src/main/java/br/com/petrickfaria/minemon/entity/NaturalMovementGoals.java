@@ -57,7 +57,7 @@ public final class NaturalMovementGoals {
         }
 
         @Override public boolean canUse() {
-            if (!this.mob.wantsNaturalLanding() || (!this.mob.isSleeping()&&!this.mob.isNightResting()&&!this.mob.naturalBehaviorActive()) || this.mob.isOnGround() && !this.mob.isInWaterOrBubble() || this.mob.isPassenger()) return false;
+            if (!this.mob.wantsNaturalLanding() || (!this.mob.commandLanding()&&!this.mob.isSleeping()&&!this.mob.isNightResting()&&!this.mob.naturalBehaviorActive()) || this.mob.isOnGround() && !this.mob.isInWaterOrBubble() || this.mob.isPassenger()) return false;
             if (this.retryDelay > 0) { this.retryDelay--; return false; }
             this.landingPath = findLandingPath();
             if (this.landingPath == null) this.retryDelay = 40;
@@ -65,7 +65,7 @@ public final class NaturalMovementGoals {
         }
 
         @Override public boolean canContinueToUse() {
-            return this.mob.wantsNaturalLanding() && (this.mob.isSleeping()||this.mob.isNightResting()||this.mob.naturalBehaviorActive()) && (!this.mob.isOnGround() || this.mob.isInWaterOrBubble())
+            return this.mob.wantsNaturalLanding() && (this.mob.commandLanding()||this.mob.isSleeping()||this.mob.isNightResting()||this.mob.naturalBehaviorActive()) && (!this.mob.isOnGround() || this.mob.isInWaterOrBubble())
                     && this.pathTicks < 200;
         }
 

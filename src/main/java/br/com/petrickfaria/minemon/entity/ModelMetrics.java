@@ -25,6 +25,6 @@ public final class ModelMetrics {
     }
     public static float height(String slug,float scale){return (float)(metric(slug,"height")*scale);}
     public static double top(String slug,float scale){return metric(slug,"top")*scale;}
-    public static double floatOffset(String slug,float scale){return slug.equals("abra")||slug.equals("porygon")?-metric(slug,"bottom")*scale:0;}
+    public static double floatOffset(String slug,float scale){return slug.equals("abra")||slug.equals("porygon")||slug.equals("geodude")?-metric(slug,"bottom")*scale:0;}
     private ModelMetrics(){}
 }

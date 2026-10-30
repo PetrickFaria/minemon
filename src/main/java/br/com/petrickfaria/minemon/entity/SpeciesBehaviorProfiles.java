@@ -27,10 +27,6 @@ public final class SpeciesBehaviorProfiles {
     private static final Set<String> BOTTOM_PREFERENCE = Set.of(
             "shellder", "cloyster", "krabby", "kingler", "staryu", "starmie",
             "omanyte", "omastar", "kabuto", "kabutops");
-    private static final Set<String> BOTTOM_NIGHT_REST = Set.of(
-            "squirtle", "wartortle", "blastoise", "psyduck", "golduck", "poliwag", "poliwhirl", "poliwrath",
-            "slowpoke", "slowbro", "seel", "dewgong", "krabby", "kingler", "staryu", "starmie", "vaporeon",
-            "omanyte", "omastar", "kabuto", "kabutops", "dratini", "dragonair", "shellder", "cloyster", "gyarados");
     private static final Set<String> LAND_FOR_NIGHT_REST = Set.of(
             "charizard", "scyther", "dragonite", "butterfree", "beedrill", "pidgey", "pidgeotto", "pidgeot",
             "spearow", "fearow", "zubat", "golbat", "venomoth", "aerodactyl", "articuno", "zapdos", "moltres",
@@ -97,7 +93,7 @@ public final class SpeciesBehaviorProfiles {
     }
     public static boolean waterCapable(String slug) { return isAquatic(slug) || isVisitor(slug); }
     public static boolean prefersBottom(String slug) { return BOTTOM_PREFERENCE.contains(slug); }
-    public static boolean restsAtWaterBottom(String slug) { return BOTTOM_NIGHT_REST.contains(slug); }
+    public static boolean restsAtWaterBottom(String slug) { return isVisitor(slug) || slug.equals("gyarados"); }
     public static boolean landsForNightRest(String slug) { return LAND_FOR_NIGHT_REST.contains(slug); }
     public static boolean hoversDuringNightRest(String slug) {
         if (landsForNightRest(slug)) return false;

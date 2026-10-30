@@ -379,7 +379,7 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         });
         if (entity == null) return;
         entity.tickCount = (int) (System.currentTimeMillis() / 50L);
-        entity.setYRot(180.0F + (float) Math.sin(entity.tickCount * .006F) * 4.0F);
+        entity.setYRot(180.0F);
         entity.yRotO = entity.getYRot();
         var def = SpeciesDefinitions.get(species.slug());
         var fit = PreviewBounds.fit(species.slug(), def.scale());

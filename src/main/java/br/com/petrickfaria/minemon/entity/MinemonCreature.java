@@ -59,6 +59,10 @@ import software.bernie.geckolib3.util.GeckoLibUtil;
 
 /** Shared wolf-like companion behavior. This first registered species is the integration fixture. */
 public class MinemonCreature extends TamableAnimal implements IAnimatable {
+    private static final EntityDataAccessor<Boolean> DEFEATED = SynchedEntityData.defineId(MinemonCreature.class, EntityDataSerializers.BOOLEAN);
+    private boolean aiBeforeDefeat;
+    private int successfulMeleeAttacks;
+    private long nextCombatTick;
     private static final EntityDataAccessor<Boolean> SLEEPING = SynchedEntityData.defineId(MinemonCreature.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> ORDERED_SIT = SynchedEntityData.defineId(MinemonCreature.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> NATURAL_FLIGHT = SynchedEntityData.defineId(MinemonCreature.class, EntityDataSerializers.BOOLEAN);
@@ -135,7 +139,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     @Override public void travel(net.minecraft.world.phys.Vec3 input){
         if(!this.level.isClientSide&&!this.isAquaticSpecies()&&!SpeciesBehaviorProfiles.canFly(this.getSpeciesSlug()))
             this.setNoGravity(this.isInWater());
-        if (this.isOrderedToSit()) {
+        if (isDefeated() || this.isOrderedToSit() && !this.commandLanding() || this.commandLanding() && this.isOnGround()) {
             input=net.minecraft.world.phys.Vec3.ZERO;
             this.setSpeed(0); this.setXxa(0); this.setYya(0); this.setZza(0); this.setJumping(false);
         }
@@ -196,6 +200,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
 
     public boolean isSleeping() { return this.entityData.get(SLEEPING); }
     public void setSleeping(boolean sleeping) {
+        if(isDefeated())sleeping=true;
         if (!sleeping) this.aquaticSleepY=Double.NaN;
         this.entityData.set(SLEEPING, sleeping);
         if (sleeping) {
@@ -208,6 +213,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
 
     @Override protected void defineSynchedData() {
         super.defineSynchedData();
+        this.entityData.define(DEFEATED, false);
         this.entityData.define(NIGHT_REST, false);
         this.entityData.define(NATURAL_LANDING, false);
         this.entityData.define(NATURAL_FLIGHT, false);
@@ -225,6 +231,10 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
 
     @Override public void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
+        tag.putBoolean("MinemonDefeated",isDefeated());
+        tag.putBoolean("MinemonAiBeforeDefeat",aiBeforeDefeat);
+        tag.putInt("MinemonMeleeSequence",successfulMeleeAttacks);
+        tag.putInt("MinemonCombatCooldown",(int)Math.max(0,nextCombatTick-level.getGameTime()));
         tag.putInt("MinemonPokemonLevel", this.getPokemonLevel());
         tag.putInt("MinemonPokemonExperience", this.getPokemonExperience());
         tag.putInt("MinemonChanseyCooldownTicks", this.chanseyCooldownTicks);
@@ -245,6 +255,10 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         super.readAdditionalSaveData(tag);
         this.entityData.set(ORDERED_SIT, super.isOrderedToSit());
         this.loadingPokemonData=true;
+        this.entityData.set(DEFEATED,tag.getBoolean("MinemonDefeated"));
+        this.aiBeforeDefeat=tag.getBoolean("MinemonAiBeforeDefeat");
+        this.successfulMeleeAttacks=Math.max(0,Math.min(4,tag.getInt("MinemonMeleeSequence")));
+        this.nextCombatTick=level.getGameTime()+Math.max(0,tag.getInt("MinemonCombatCooldown"));
         this.setRocketSpecial(tag.getBoolean("MinemonRocketSpecial"));
         this.setPokemonProgress(tag.contains("MinemonPokemonLevel") ? tag.getInt("MinemonPokemonLevel") : 1,
                 tag.getInt("MinemonPokemonExperience"));
@@ -267,6 +281,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         this.aquaticSleepY=tag.contains("AquaticSleepAnchorY")?tag.getDouble("AquaticSleepAnchorY"):Double.NaN;
         this.refreshPokemonAttributes(0);
         if(tag.contains("Health"))this.setHealth(Math.min(this.getMaxHealth(),tag.getFloat("Health")));
+        if(isDefeated()){setNoAi(true);setTarget(null);setSleeping(true);}
         this.loadingPokemonData=false;
         this.syncNaturalState();
     }
@@ -286,7 +301,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         this.refreshPokemonAttributes(loadingPokemonData?0:Math.max(0,boundedLevel-oldLevel));
     }
     public int awardPokemonExperience(int amount) {
-        if (amount <= 0 || !this.isTame() || this.level.isClientSide) return 0;
+        if (this.isDefeated() || amount <= 0 || !this.isTame() || this.level.isClientSide) return 0;
         int oldLevel=this.getPokemonLevel();
         int awarded = 0;
         long pending = Math.min((long) amount, Integer.MAX_VALUE);
@@ -329,7 +344,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         this.chanseyScanDelay = 20;
         MinemonCreature target = this.level.getEntitiesOfClass(MinemonCreature.class,
                         this.getBoundingBox().inflate(10.0D), candidate -> candidate != this
-                                && candidate.isAlive() && candidate.isTame()
+                                && candidate.isAlive() && !candidate.isDefeated() && candidate.isTame()
                                 && candidate.getHealth() < candidate.getMaxHealth()
                                 && this.distanceToSqr(candidate) <= 100.0D)
                 .stream().min(java.util.Comparator.comparingDouble(candidate ->
@@ -395,7 +410,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     }
 
     private boolean isBreedingBusy() {
-        return this.isSleeping() || this.isNightResting() || this.isOrderedToSit() || this.getTarget() != null || this.attackAnimationTicks > 0;
+        return this.isDefeated() || this.isSleeping() || this.isNightResting() || this.isOrderedToSit() || this.getTarget() != null || this.attackAnimationTicks > 0;
     }
 
     private static boolean isBreedingPermitted(String species) {
@@ -448,7 +463,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
                 if (level.setBlock(safe, eggBlock.defaultBlockState(), 3)) {
                     var blockEntity = level.getBlockEntity(safe);
                     if (blockEntity instanceof BreedingEggBlockEntity egg) {
-                        egg.initialize(baby.getSpeciesSlug(), baby.getOwnerUUID(), 24_000);
+                        egg.initialize(baby.getSpeciesSlug(), baby.getOwnerUUID(), BreedingEggBlockEntity.INCUBATION_TICKS);
                         baby.discard();
                     } else {
                         level.setBlock(safe, Blocks.AIR.defaultBlockState(), 3);
@@ -480,9 +495,11 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     protected void registerGoals() {
         if (!this.isAquaticSpecies()) this.goalSelector.addGoal(0, new WaterEscapeGoal(this));
         this.goalSelector.addGoal(0,new NightRestGoal(this));
-        this.goalSelector.addGoal(1, new SitWhenOrderedToGoal(this));
+        this.goalSelector.addGoal(1, new SitWhenOrderedToGoal(this) {
+            @Override public boolean canUse(){return (!MinemonCreature.this.commandLanding() || MinemonCreature.this.isOnGround()) && super.canUse();}
+        });
         this.goalSelector.addGoal(1, new BreedGoal(this, 1.0D));
-        this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.2D, true));
+        this.goalSelector.addGoal(2, new ElementalCombatGoal(this));
         this.goalSelector.addGoal(3, new NaturalFollowOwnerGoal(this));
         this.goalSelector.addGoal(6, new NaturalSeparationGoal(this));
         if (SpeciesBehaviorProfiles.canFly(this.getSpeciesSlug())) {
@@ -529,7 +546,8 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
 
     @Override
     public boolean canAttack(LivingEntity target) {
-        if (target == null || target == this || this.isOwnerEntity(target)) return false;
+        if (isDefeated() || target == null || target == this || this.isOwnerEntity(target)) return false;
+        if (this.isTame() && this.distanceToSqr(target)>25.0D) return false;
         // Ordered sitting companions may defend themselves or their owner at close
         // range, but must not start walking after a distant target.
         if (this.isTame() && this.isOrderedToSit() && target.distanceToSqr(this) > 16.0D) return false;
@@ -556,7 +574,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         if (id == null) return false;
         CompoundTag overrides = this.getPersistentData().getCompound(BLACK_LIST_KEY);
         return overrides.contains(id.toString()) ? overrides.getBoolean(id.toString())
-                : target.getType().getCategory() == net.minecraft.world.entity.MobCategory.MONSTER;
+                : MobTargetCategories.defaultSelected(target.getType());
     }
     public Map<String, Boolean> getBlackListOverrides() {
         CompoundTag stored = this.getPersistentData().getCompound(BLACK_LIST_KEY);
@@ -609,6 +627,9 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
                 float amount = Math.min((float)MinemonConfig.TREAT_HEAL_AMOUNT.get(), maximum - this.getHealth());
                 if (amount <= 0.0F) return InteractionResult.sidedSuccess(false);
                 this.setHealth(this.getHealth() + amount);
+                if(isDefeated() && this.getHealth()>=this.getMaxHealth()){
+                    this.entityData.set(DEFEATED,false);this.setNoAi(aiBeforeDefeat);this.setSleeping(false);
+                }
                 consumeTreat(player, held);
                 this.level.broadcastEntityEvent(this, (byte)18);
                 return InteractionResult.sidedSuccess(false);
@@ -636,6 +657,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
 
     @Override
     public boolean hurt(DamageSource source, float amount) {
+        if(isDefeated())return false;
         boolean wokeFromRest=this.isSleeping()||this.isNightResting();
         boolean hurt = super.hurt(source, amount);
         if(hurt&&!this.level.isClientSide){
@@ -659,8 +681,18 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
             var desired=this.isInWater()?this.escapeNavigation:this.dryNavigation;
             if(this.navigation!=desired){this.navigation.stop();this.navigation=desired;}
         }
-        if(!this.level.isClientSide&&!(Boolean.getBoolean("minemon.clientSmokeTest")&&this.getTags().contains("minemon-locomotion-fixture")))this.tickNightRest();
+        if(!this.level.isClientSide&&!(Boolean.getBoolean("minemon.clientSmokeTest")&&this.getTags().contains("minemon-locomotion-fixture"))){if(!isDefeated())this.tickNightRest();}
         super.tick();
+        if(level.isClientSide)tickGastlySmoke();
+        if(isDefeated()){
+            this.getNavigation().stop();this.setTarget(null);this.setJumping(false);
+            this.setSpeed(0);this.setXxa(0);this.setYya(0);this.setZza(0);
+            this.setDeltaMovement(0,0,0);this.fallDistance=0;
+            if(!level.isClientSide && tickCount%12==0)((ServerLevel)level).sendParticles(net.minecraft.core.particles.ParticleTypes.SMOKE,
+                    getX(),getY()+getBbHeight()*.5,getZ(),1,getBbWidth()*.2,getBbHeight()*.15,getBbWidth()*.2,.005);
+            return;
+        }
+        if(this.getTarget()!=null && !canAttack(this.getTarget())){this.setTarget(null);this.getNavigation().stop();}
         if (!this.level.isClientSide) {
             this.tickNaturalCycle();
             this.tickChanseyHealing();
@@ -701,26 +733,6 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
                     this.smokeParticles++;
                 }
             }
-            if (this.getSpeciesSlug().equals("gastly") && !this.isOrderedToSit()
-                    && !this.isDeadOrDying() && this.attackAnimationTicks <= 0) {
-                // Cobblemon ground_idle/ground_walk each emit ghostly_smoke
-                // twice at locator `gas`, with two 10 particles/s emitters.
-                // This one client particle per game tick preserves that rate.
-                double scale = SpeciesDefinitions.get("gastly").scale();
-                double yaw = Math.toRadians(this.getYRot());
-                double locatorForward = 4.0D / 16.0D * scale;
-                double centerX = this.getX() - Math.sin(yaw) * locatorForward;
-                double centerY = this.getY() + 4.0D / 16.0D * scale;
-                double centerZ = this.getZ() + Math.cos(yaw) * locatorForward;
-                double angle = this.getRandom().nextDouble() * Math.PI * 2.0D;
-                double radius = 0.34D * scale;
-                double px = centerX + Math.cos(angle) * radius;
-                double pz = centerZ + Math.sin(angle) * radius;
-                double inwardSpeed = 0.10D * scale;
-                this.level.addParticle(br.com.petrickfaria.minemon.registry.ModParticles.GASTLY_GHOSTLY_SMOKE.get(),
-                        px, centerY, pz, -Math.cos(angle) * inwardSpeed, 0.0D,
-                        -Math.sin(angle) * inwardSpeed);
-            }
             if (this.attackAnimationTicks > 0) this.attackAnimationTicks--;
             if (this.blinkCooldownTicks > 0) this.blinkCooldownTicks--;
             if (this.blinkCooldownTicks == 0) {
@@ -732,6 +744,28 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
             this.tickWildAggression();
             this.tickNightCombat();
         }
+    }
+
+    private void tickGastlySmoke(){
+            if (this.getSpeciesSlug().equals("gastly") && !this.isRemoved() && this.tickCount % 2 == 0) {
+                // Cobblemon ground_idle/ground_walk each emit ghostly_smoke
+                // twice at locator `gas`, with two 10 particles/s emitters.
+                // This one client particle per game tick preserves that rate.
+                double scale = SpeciesDefinitions.get("gastly").scale();
+                double yaw = Math.toRadians(this.getYRot());
+                double locatorForward = 4.0D / 16.0D * scale;
+                double centerX = this.getX() - Math.sin(yaw) * locatorForward;
+                double centerY = this.getY() + 4.0D / 16.0D * scale;
+                double centerZ = this.getZ() + Math.cos(yaw) * locatorForward;
+                double angle = this.getRandom().nextDouble() * Math.PI * 2.0D;
+                double radius = 0.17D * scale;
+                double px = centerX + Math.cos(angle) * radius;
+                double pz = centerZ + Math.sin(angle) * radius;
+                double inwardSpeed = 0.10D * scale;
+                this.level.addParticle(br.com.petrickfaria.minemon.registry.ModParticles.GASTLY_GHOSTLY_SMOKE.get(),
+                        px, centerY, pz, -Math.cos(angle) * inwardSpeed, 0.0D,
+                        -Math.sin(angle) * inwardSpeed);
+            }
     }
 
     /** Independent, persisted world-time counter. Unloaded chunks do not advance it. */
@@ -886,9 +920,37 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
 
     @Override
     public boolean doHurtTarget(net.minecraft.world.entity.Entity target) {
+        if (!(target instanceof LivingEntity living) || !this.canAttack(living) || !combatReady() || projectileReady()) return false;
         boolean hit=super.doHurtTarget(target);
-        if(hit && !this.level.isClientSide) this.level.broadcastEntityEvent(this,(byte)61);
+        if(hit && !this.level.isClientSide){
+            successfulMeleeAttacks++;nextCombatTick=level.getGameTime()+50;
+            this.level.broadcastEntityEvent(this,(byte)61);
+        }
         return hit;
+    }
+    public boolean projectileReady(){return successfulMeleeAttacks>=4;}
+    public boolean combatReady(){return !isDefeated() && !isSleeping() && level.getGameTime()>=nextCombatTick;}
+    public boolean fireElementalProjectile(LivingEntity target){
+        if(level.isClientSide || !projectileReady() || !combatReady() || !canAttack(target)
+                || !target.isAlive() || !getSensing().hasLineOfSight(target))return false;
+        ElementalProjectile shot=new ElementalProjectile(this,target);
+        if(!level.addFreshEntity(shot))return false;
+        successfulMeleeAttacks=0;nextCombatTick=level.getGameTime()+50;
+        level.broadcastEntityEvent(this,(byte)61);return true;
+    }
+    public boolean isDefeated(){return entityData.get(DEFEATED);}
+    @Override public boolean isAlive(){return isDefeated()?!isRemoved():super.isAlive();}
+    @Override public boolean isDeadOrDying(){return !isDefeated() && super.isDeadOrDying();}
+    @Override public void heal(float amount){if(!isDefeated())super.heal(amount);}
+    @Override public void die(DamageSource source){
+        if(!isTame()){super.die(source);return;}
+        if(isDefeated())return;
+        entityData.set(DEFEATED,true);aiBeforeDefeat=isNoAi();setNoAi(true);
+        setHealth(0);setTarget(null);getNavigation().stop();resetLove();
+        attackAnimationTicks=0;stopSpontaneousRun();setFollowingRun(false);
+        setSleeping(true);setDeltaMovement(0,0,0);fallDistance=0;
+        var owner=getOwner();
+        if(owner instanceof ServerPlayer player)player.sendSystemMessage(Component.literal(getName().getString()+" foi derrotado."));
     }
 
     @Override
@@ -917,7 +979,9 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         var definition=SpeciesDefinitions.get(slug);
         String attack=SpeciesAssetIndex.clip(slug,"physical_attack","physical");
         if(attack==null) attack=SpeciesAssetIndex.clip(slug,"attack","attack");
-        if (this.isDeadOrDying()) {
+        if (this.isDefeated()) {
+            clip = SpeciesAssetIndex.clip(slug,"night_sleep","ground_idle");
+        } else if (this.isDeadOrDying()) {
             clip = SpeciesAssetIndex.clip(slug, "faint", "ground_idle");
             loop = false;
         } else if (this.attackAnimationTicks>0 && attack!=null) {
@@ -927,7 +991,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
             String restKey=slug.equals("vaporeon")
                     ? (this.isInWaterOrBubble()?"night_sleep_water":"night_sleep_land") : "night_sleep";
             clip = SpeciesAssetIndex.clip(slug, restKey, "night_sleep");
-        } else if (this.isNightResting() && this.wantsNaturalLanding() && !this.isOnGround()) {
+        } else if ((this.isNightResting() || this.commandLanding()) && this.wantsNaturalLanding() && !this.isOnGround()) {
             // Keep a real air pose while descending. A ground gait during the
             // landing path looks like Spearow/Fearow are walking in mid-air.
             clip = firstClip(slug, "air_idle", "air_fly");
@@ -939,6 +1003,9 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
             String waterIdle = this.isNaturalSurface() ? firstClip(slug,"surface_water_idle","surfacewater_idle","water_surface_idle","water_idle")
                     : firstClip(slug,"water_idle","water_surface_idle","surface_water_idle","surfacewater_idle");
             clip = this.isMoving(event) ? (swim!=null?swim:definition.walk()) : (waterIdle != null ? waterIdle : definition.idle());
+        } else if (slug.equals("geodude") && this.isFlyingSpecies()) {
+            clip = firstClip(slug,"air_idle","ground_idle");
+            if(clip == null) clip=definition.idle();
         } else if (this.isMoving(event)) {
             if (this.isFlyingSpecies()) {
                 String fly = firstClip(slug, "air_fly", "air_glide", "air_idle");
@@ -1011,7 +1078,8 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         this.syncNaturalState();
     }
     public boolean isNightResting(){return this.entityData.get(NIGHT_REST);}
-    public boolean wantsNaturalLanding(){return (SpeciesBehaviorProfiles.landsForNightRest(this.getSpeciesSlug())
+    public boolean commandLanding(){return this.isOrderedToSit() && SpeciesBehaviorProfiles.landsForNightRest(this.getSpeciesSlug());}
+    public boolean wantsNaturalLanding(){return this.commandLanding() || (SpeciesBehaviorProfiles.landsForNightRest(this.getSpeciesSlug())
             ||!SpeciesBehaviorProfiles.hoversDuringNightRest(this.getSpeciesSlug()))&&(this.isSleeping()||this.isNightResting())
             ||this.entityData.get(NATURAL_LANDING); }
     public int getSmokeParticleCountForValidation(){return this.smokeParticles;}

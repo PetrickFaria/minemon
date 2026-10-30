@@ -76,7 +76,7 @@ public final class NaturalBehaviorProfileTest {
                         .collect(java.util.stream.Collectors.toSet()));
         assertEquals(Set.of("squirtle", "wartortle", "blastoise", "psyduck", "golduck", "poliwag", "poliwhirl", "poliwrath",
                         "slowpoke", "slowbro", "seel", "dewgong", "krabby", "kingler", "staryu", "starmie", "vaporeon",
-                        "omanyte", "omastar", "kabuto", "kabutops", "dratini", "dragonair", "shellder", "cloyster", "gyarados"),
+                        "omanyte", "omastar", "kabuto", "kabutops", "dratini", "dragonair", "gyarados"),
                 SpeciesBehaviorProfiles.all().keySet().stream().filter(SpeciesBehaviorProfiles::restsAtWaterBottom)
                         .collect(java.util.stream.Collectors.toSet()));
         assertEquals(Set.of("charizard", "scyther", "dragonite", "butterfree", "beedrill", "pidgey", "pidgeotto", "pidgeot",

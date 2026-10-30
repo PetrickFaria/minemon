@@ -23,7 +23,7 @@ public final class MinemonFlyingCreature extends MinemonCreature {
  private int recoveryNotLandingSamples;
  private int recoveryBelowMinimumSamples;
  private boolean fixedFloater(){
-  return java.util.Set.of("abra","porygon","kakuna","metapod").contains(this.getSpeciesSlug());
+  return java.util.Set.of("abra","porygon","kakuna","metapod","geodude").contains(this.getSpeciesSlug());
  }
  private boolean shouldRecoverNaturalFlight(){
   return !this.fixedFloater()&&!this.level.isClientSide&&this.isFlyingSpecies()&&!this.isSleeping()&&!this.isNightResting()
@@ -39,7 +39,7 @@ public final class MinemonFlyingCreature extends MinemonCreature {
   this.updateLocomotion();
  }
  private void updateLocomotion(){
-  boolean landing=this.wantsNaturalLanding() && (this.isNightResting() || this.isSleeping());
+  boolean landing=this.wantsNaturalLanding() && (this.commandLanding() || this.isNightResting() || this.isSleeping());
   var feet=new BlockPos(this.getX(),this.naturalSurface(),this.getZ());
   boolean dry=WaterMovementGoal.safeLandingBelow(this);
   boolean flying=landing?!dry:this.isFlyingSpecies()&&!this.isInWater();
@@ -99,6 +99,7 @@ public final class MinemonFlyingCreature extends MinemonCreature {
  }
  @Override public void tick(){
   super.tick();
+  if(isDefeated()){this.setNoGravity(true);return;}
   this.updateLocomotion();
   if(!this.isFlyingSpecies() && !this.wantsNaturalLanding()){return;}
   if(!this.level.isClientSide){
@@ -110,7 +111,7 @@ public final class MinemonFlyingCreature extends MinemonCreature {
    if(!this.naturalCycle().landing())this.recoveryNotLandingSamples++;
    if(this.getY()-this.naturalSurface()<this.naturalCycle().minimumAltitude())this.recoveryBelowMinimumSamples++;
   }
-  boolean sleeping=this.isSleeping()||this.isNightResting()||this.naturalCycle().landing();
+  boolean sleeping=this.commandLanding()||this.isSleeping()||this.isNightResting()||this.naturalCycle().landing();
   // Hover safely until a dry landing path is available; follow that path
   // instead of dropping blindly into water, lava, or an obstructed column.
   if(sleeping){

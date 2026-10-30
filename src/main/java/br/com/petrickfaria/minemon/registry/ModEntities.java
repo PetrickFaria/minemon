@@ -10,6 +10,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.*;
 public final class ModEntities {
  public static final DeferredRegister<EntityType<?>> ENTITIES=DeferredRegister.create(ForgeRegistries.ENTITY_TYPES,Minemon.MOD_ID);
+ public static final RegistryObject<EntityType<ElementalProjectile>> ELEMENTAL_PROJECTILE=ENTITIES.register("elemental_projectile",()->EntityType.Builder.<ElementalProjectile>of(ElementalProjectile::new,MobCategory.MISC).sized(.25F,.25F).clientTrackingRange(8).updateInterval(1).build("minemon_gen1:elemental_projectile"));
  public static final Map<String,RegistryObject<EntityType<MinemonCreature>>> SPECIES=register();
  public static final RegistryObject<EntityType<MinemonCreature>> BULBASAUR=SPECIES.get("bulbasaur");
  private static Map<String,RegistryObject<EntityType<MinemonCreature>>> register(){

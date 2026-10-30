@@ -14,7 +14,7 @@ public class RequestedBehaviorAssetsTest {
             assertEquals(slug,expected,cycle.minimumAltitude(),1e-9);
             assertEquals(slug,expected,cycle.maximumAltitude(),1e-9);
         }
-        assertEquals(.5,new BehaviorCycle(SpeciesBehaviorProfiles.profile("geodude"),"geodude").minimumAltitude(),1e-9);
+        assertEquals(1.0,new BehaviorCycle(SpeciesBehaviorProfiles.profile("geodude"),"geodude").minimumAltitude(),1e-9);
     }
     @Test public void everyAwakeRestPreservesSleepBodyAndRemovesSleepEvents() throws Exception {
         Path root=Path.of(System.getProperty("minemon.testResources"));

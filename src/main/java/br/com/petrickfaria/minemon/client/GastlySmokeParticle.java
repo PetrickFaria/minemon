@@ -24,7 +24,7 @@ public final class GastlySmokeParticle extends TextureSheetParticle {
         this.gravity = 0.0F;
         this.friction = 0.96F;
         this.hasPhysics = false;
-        this.setAlpha(1.0F);
+        this.setAlpha(0.75F);
         this.setSpriteFromAge(sprites);
         this.setColor(0xBE / 255.0F, 0x81 / 255.0F, 0xE8 / 255.0F);
         this.updateSourceSize(0.0F);
@@ -54,7 +54,7 @@ public final class GastlySmokeParticle extends TextureSheetParticle {
         int low = (int) position;
         int high = Math.min(nodes.length - 1, low + 1);
         float sample = nodes[low] + (nodes[high] - nodes[low]) * (position - low);
-        this.quadSize = 0.34F * SpeciesDefinitions.get("gastly").scale() * sample;
+        this.quadSize = 0.85F * SpeciesDefinitions.get("gastly").scale() * sample;
     }
 
     private static int lerp(float t, int from, int to) {
