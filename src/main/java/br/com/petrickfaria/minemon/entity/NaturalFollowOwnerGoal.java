@@ -24,7 +24,17 @@ final class NaturalFollowOwnerGoal extends Goal {
                 || current.level != mob.level || mob.isDefeated() || mob.isOrderedToSit() || mob.isSleeping()
                 || mob.isNightResting() || mob.isPassenger() || mob.getTarget() != null) return false;
         return !mob.isAquaticSpecies() || SpeciesBehaviorProfiles.isVisitor(mob.getSpeciesSlug())
-                || current.isInWaterOrBubble();
+                || current.isInWaterOrBubble() || isAtShore();
+    }
+
+    private boolean isAtShore() {
+        if(mob.isInWaterOrBubble())return true;
+        var origin=mob.blockPosition();
+        for(int dx=-2;dx<=2;dx++)for(int dz=-2;dz<=2;dz++)for(int dy=-3;dy<=1;dy++){
+            var cell=origin.offset(dx,dy,dz);
+            if(mob.level.hasChunkAt(cell)&&mob.level.getFluidState(cell).is(net.minecraft.tags.FluidTags.WATER))return true;
+        }
+        return false;
     }
 
     @Override public boolean canUse() { return eligible(); }
