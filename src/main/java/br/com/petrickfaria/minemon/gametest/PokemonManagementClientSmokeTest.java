@@ -18,6 +18,42 @@ public final class PokemonManagementClientSmokeTest {
     private static boolean done;
     private static volatile int entityId = -1;
     private static int phase;
+    private static volatile int dewgongId=-1,gastlyId=-1;
+    private static volatile boolean closedEyesSeen,openEyesSeen,awakeBlinkSeen;
+    private static int auraState,auraLarge,auraSmall;
+    private static void nineFixtures(Minecraft minecraft){
+        minecraft.player.closeContainer();minecraft.setScreen(null);minecraft.player.setYRot(0);minecraft.player.setXRot(10);
+        br.com.petrickfaria.minemon.client.MinemonRenderer.validationObserver=(entity,model)->{
+            if(!entity.getSpeciesSlug().equals("dewgong"))return;
+            var left=model.getAnimationProcessor().getBone("eyelid_left");var right=model.getAnimationProcessor().getBone("eyelid_right");
+            if(left==null||right==null)throw new IllegalStateException("Dewgong eyelids missing");
+            boolean closed=Math.abs(left.getPositionZ())<.001 && Math.abs(right.getPositionZ())<.001;
+            boolean open=Math.abs(left.getPositionZ()+.1)<.001 && Math.abs(right.getPositionZ()+.1)<.001;
+            if(entity.isSleeping()&&closed)closedEyesSeen=true;
+            if(!entity.isSleeping()&&open)openEyesSeen=true;
+            if(!entity.isSleeping()&&openEyesSeen&&closed)awakeBlinkSeen=true;
+        };
+        var ownerId=minecraft.player.getUUID();
+        minecraft.getSingleplayerServer().execute(()->{
+            var owner=minecraft.getSingleplayerServer().getPlayerList().getPlayer(ownerId);var level=(net.minecraft.server.level.ServerLevel)owner.level;
+            level.setDayTime(1000);
+            var dewgong=ModEntities.SPECIES.get("dewgong").get().create(level);dewgong.tame(owner);dewgong.setNoAi(true);dewgong.setNoGravity(true);
+            dewgong.moveTo(owner.getX(),owner.getY(),owner.getZ()+3,180,0);dewgong.setSleeping(true);level.addFreshEntity(dewgong);dewgongId=dewgong.getId();
+            var gastly=ModEntities.SPECIES.get("gastly").get().create(level);gastly.tame(owner);gastly.setNoAi(true);gastly.setNoGravity(true);
+            gastly.moveTo(owner.getX()+1.5,owner.getY()+1,owner.getZ()+3.5,180,0);level.addFreshEntity(gastly);gastlyId=gastly.getId();
+        });
+    }
+    private static void changeAuraState(Minecraft minecraft,int state){
+        minecraft.getSingleplayerServer().execute(()->{
+            var level=minecraft.getSingleplayerServer().overworld();var entity=level.getEntity(gastlyId);
+            if(entity instanceof br.com.petrickfaria.minemon.entity.MinemonCreature gas){
+                if(state==1)gas.setSleeping(true);
+                else if(state==2)gas.setOrderedToSit(true);
+                else if(state==3)gas.die(net.minecraft.world.damagesource.DamageSource.GENERIC);
+            }
+        });
+    }
+
 
     public static void tick(TickEvent.ClientTickEvent event) {
         if (done || event.phase != TickEvent.Phase.END
@@ -174,9 +210,31 @@ public final class PokemonManagementClientSmokeTest {
                 if(!screen.selectedForSmokeTest(zombie) || screen.selectedForSmokeTest(cow))throw new IllegalStateException("Filter changed selections");
                 Files.writeString(Path.of("client-validation-pokemon-management.txt"),
                         "PASS: owned Pokémon status screen, Pokédex header, XP level sync, Seguir/Sentar controls, and registry-backed Black List defaults; all three filter tabs clicked, complete disjoint mob partition, scrolling, preserved selections and unselected Creeper\n");
-                done = true;
-                System.out.println("[POKEMON MANAGEMENT CLIENT] PASS: status, XP sync, follow/sit commands, and dynamic Black List");
-                minecraft.execute(minecraft::stop);
+                nineFixtures(minecraft);phase=8;ticks=0;return;
+            }
+            if(phase==8){
+                if(!closedEyesSeen){if(++ticks>240)throw new IllegalStateException("Rendered sleeping Dewgong did not close both eyes");return;}
+                minecraft.getSingleplayerServer().execute(()->{var e=minecraft.getSingleplayerServer().overworld().getEntity(dewgongId);if(e instanceof br.com.petrickfaria.minemon.entity.MinemonCreature p)p.setSleeping(false);});
+                phase=9;ticks=0;return;
+            }
+            if(phase==9){
+                if(!openEyesSeen||!awakeBlinkSeen){if(++ticks>320)throw new IllegalStateException("Rendered Dewgong did not reopen eyes and blink awake");return;}
+                phase=10;ticks=0;auraState=0;return;
+            }
+            if(phase==10){
+                if(minecraft.level.getEntity(gastlyId)==null){if(++ticks>200)throw new IllegalStateException("Gastly aura fixture was not tracked");return;}
+                ticks++;
+                if(ticks==32){auraLarge=br.com.petrickfaria.minemon.client.GastlySmokeParticle.largeSpawnsForValidation();auraSmall=br.com.petrickfaria.minemon.client.GastlySmokeParticle.smallSpawnsForValidation();}
+                if(ticks==64){
+                    int large=br.com.petrickfaria.minemon.client.GastlySmokeParticle.largeSpawnsForValidation()-auraLarge;
+                    int small=br.com.petrickfaria.minemon.client.GastlySmokeParticle.smallSpawnsForValidation()-auraSmall;
+                    if(large!=10||small!=14)throw new IllegalStateException("Gastly real-client aura rate mismatch in state "+auraState+": large="+large+" small="+small);
+                    auraState++;ticks=0;
+                    if(auraState<4){changeAuraState(minecraft,auraState);return;}
+                    Files.writeString(Path.of("client-validation-pokemon-management.txt"),"PASS NINE VISUAL CONTRACTS: rendered Dewgong eyes closed asleep, open and blinking awake; real Gastly particle providers emitted five large and seven small per16ticks while awake, sleeping, sitting and defeated. Aesthetic comparison with the supplied reference remains manual.\n",java.nio.file.StandardOpenOption.APPEND);
+                    br.com.petrickfaria.minemon.client.MinemonRenderer.validationObserver=null;
+                    done=true;System.out.println("[POKEMON MANAGEMENT CLIENT] PASS: status, filters, rendered Dewgong eyes, and permanent two-size Gastly aura");minecraft.execute(minecraft::stop);
+                }
             }
         } catch (Exception failure) {
             throw new IllegalStateException("Pokémon management client validation failed", failure);
