@@ -128,6 +128,24 @@ public final class MinemonAquaticCreature extends MinemonCreature {
                 return new PathFinder(this.nodeEvaluator, maxVisitedNodes);
             }
 
+            @Override protected void followThePath() {
+                // Native waypoint acceptance uses (width + 1) / 2, whereas
+                // Path's steering point rounds that width down. With fractional
+                // model widths a swimmer can reach the steering point exactly
+                // and still fail acceptance through float rounding. Advance a
+                // genuinely reached node before normal path following resumes.
+                if (this.mob.isInWater() && this.path != null && !this.path.isDone()) {
+                    var point = this.path.getNextEntityPos(this.mob);
+                    if (Math.abs(this.mob.getX()-point.x)<0.1D
+                            && Math.abs(this.mob.getZ()-point.z)<0.1D
+                            && Math.abs(this.mob.getY()-point.y)<0.4D) {
+                        this.path.advance();
+                        if (this.path.isDone()) return;
+                    }
+                }
+                super.followThePath();
+            }
+
             @Override protected net.minecraft.world.phys.Vec3 getTempMobPos() {
                 return MinemonAquaticCreature.this.isInWater()
                         ? MinemonAquaticCreature.this.position() : super.getTempMobPos();

@@ -125,7 +125,11 @@ public final class IndividualBehaviorTests {
  public static void permanentSwimmersMoveUnderwaterAndSurfaceSpeciesFloat(GameTestHelper h){
   // This probe checks ordinary daytime swimming; separate night tests own the sleep transition.
   h.getLevel().setDayTime(1000);
-  arena(h,true);var fish=spawn(h,"magikarp",5,-2,4);fish.setDeltaMovement(-0.12D,0,-0.12D);var lapras=spawn(h,"lapras",8,0,9);var gyarados=spawn(h,"gyarados",11,0,5);
+  arena(h,true);
+  // The model-sized Gyarados needs a deeper basin than the old small-box fixture.
+  for(int x=3;x<=14;x++)for(int z=2;z<=14;z++)for(int y=4;y<=22;y++)
+   h.setBlock(new BlockPos(x,y,z),x==3||x==14||z==2||z==14?Blocks.STONE:y<=18?Blocks.WATER:Blocks.AIR);
+  var fish=spawn(h,"magikarp",5,-2,4);fish.setDeltaMovement(-0.12D,0,-0.12D);var lapras=spawn(h,"lapras",8,0,9);var gyarados=spawn(h,"gyarados",11,0,5);
   Vec3 start=fish.position();double[] farthest={0};
   sample(h,fish,start,farthest,20);
   h.runAfterDelay(240,()->{

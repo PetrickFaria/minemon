@@ -31,7 +31,10 @@ jobs:
       - name: Verify Rocket workstation and villager resources
         run: python3 tools/verify_rocket.py
       - name: Verify Pokémon treat models, textures, and translations
-        run: python3 tools/verify_treats.py
+        run: |
+          python3 -m pip install "Pillow>=10,<12"
+          python3 tools/verify_treats.py
+          python3 tools/verify_requested_behaviors.py
       - name: Verify PokéCoin registration and resources
         run: python3 tools/verify_poke_coin.py
       - name: Verify Pokébola registration and resources
@@ -60,11 +63,11 @@ jobs:
           python3 tools/verify_pidge_wing_visibility.py
       - name: Ensure Gradle Wrapper is executable
         run: chmod +x gradlew
-      - name: Compile and run focused PokéC tests
+      - name: Compile and run all unit tests
         id: compile
         run: |
           ./gradlew --no-daemon clean compileJava compileTestJava
-          ./gradlew --no-daemon test --tests 'br.com.petrickfaria.minemon.pokec.PokecCatalogTest' --tests 'br.com.petrickfaria.minemon.pokec.PokemonBreedingTest' --tests 'br.com.petrickfaria.minemon.pokec.PokemonSoulConversionTest' --tests 'br.com.petrickfaria.minemon.entity.PokemonProgressionTest' --tests 'br.com.petrickfaria.minemon.RequestedBehaviorAssetsTest' --tests 'br.com.petrickfaria.minemon.RefinementRulesTest' --tests 'br.com.petrickfaria.minemon.BehaviorCycleTest' --tests 'br.com.petrickfaria.minemon.NightSleepAssetTest'
+          ./gradlew --no-daemon test
           ./gradlew --no-daemon build -x test
       - name: Run Minecraft server behavior tests
         run: |
@@ -185,6 +188,12 @@ jobs:
           jar_file="$(find build/libs -maxdepth 1 -type f -name 'Minemon-1.19.2-*-all.jar' -print -quit)"
           test -n "$jar_file"
           python3 tools/verify_treats.py "$jar_file"
+          jar tf "$jar_file" | grep -Fx 'data/minemon_gen1/model_metrics.json'
+          jar tf "$jar_file" | grep -Fx 'assets/minemon_gen1/models/item/breeding_egg.json'
+          jar tf "$jar_file" | grep -Fx 'assets/minemon_gen1/textures/block/breeding_egg_shell.png'
+          jar tf "$jar_file" | grep -Fx 'assets/minemon_gen1/textures/block/breeding_egg_marks.png'
+          jar tf "$jar_file" | grep -Fx 'br/com/petrickfaria/minemon/entity/ModelMetrics.class'
+          jar tf "$jar_file" | grep -Fx 'br/com/petrickfaria/minemon/entity/EggAppearance.class'
           jar tf "$jar_file" | grep -Fx 'assets/minemon/models/item/grass_treat.json'
           jar tf "$jar_file" | grep -Fx 'assets/minemon/textures/item/grass_treat.png'
           jar tf "$jar_file" | grep -Fx 'assets/minemon_gen1/textures/pokemon/rattata_rocket.png'

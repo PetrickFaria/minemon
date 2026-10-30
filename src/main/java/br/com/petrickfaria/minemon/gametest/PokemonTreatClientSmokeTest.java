@@ -146,6 +146,25 @@ public final class PokemonTreatClientSmokeTest {
             }
             NonNullList<net.minecraft.world.item.ItemStack> tab=NonNullList.create();
             ModItems.MINEMON_TAB.fillItemList(tab);
+            var eggStack=ModItems.BREEDING_EGG.get().getDefaultInstance();
+            var eggModel=minecraft.getItemRenderer().getModel(eggStack,null,null,0);
+            if(eggModel==minecraft.getModelManager().getMissingModel()
+                    ||tab.stream().noneMatch(s->s.is(eggStack.getItem())))
+                throw new IllegalStateException("Breeding egg inventory model or creative entry missing");
+            var eggQuads=new java.util.ArrayList<net.minecraft.client.renderer.block.model.BakedQuad>();
+            eggQuads.addAll(eggModel.getQuads(null,null,net.minecraft.util.RandomSource.create(0)));
+            for(var side:net.minecraft.core.Direction.values())
+                eggQuads.addAll(eggModel.getQuads(null,side,net.minecraft.util.RandomSource.create(0)));
+            if(eggQuads.stream().noneMatch(q->q.getTintIndex()==0)
+                    ||eggQuads.stream().noneMatch(q->!q.isTinted()))
+                throw new IllegalStateException("Egg must separate elemental marks from untinted white shell");
+            for(String type:java.util.List.of("fire","flying")){
+                eggStack.getOrCreateTagElement("BlockEntityTag").putString("EggElement",type);
+                if(minecraft.getItemColors().getColor(eggStack,0)!=br.com.petrickfaria.minemon.entity.EggAppearance.color(type)
+                        ||minecraft.getItemColors().getColor(eggStack,1)!=0xFFFFFF)
+                    throw new IllegalStateException("Egg saved elemental tint did not reach the client: "+type);
+            }
+            System.out.println("[EGG CLIENT] PASS: baked egg, white shell, elemental marks and saved item tint");
             long soulCount = tab.stream().filter(stack -> stack.getItem() instanceof br.com.petrickfaria.minemon.pokec.SoulItem).count();
             if (soulCount != 18) throw new IllegalStateException("Creative tab must expose all 18 elemental souls, found " + soulCount);
             for (var entry : ModItems.SOULS.entrySet()) {
