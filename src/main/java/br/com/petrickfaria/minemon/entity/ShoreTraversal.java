@@ -6,9 +6,9 @@ import net.minecraft.world.phys.Vec3;
 final class ShoreTraversal {
  static boolean exiting(MinemonCreature mob){
   if(mob.isAquaticSpecies()&&!SpeciesBehaviorProfiles.isVisitor(mob.getSpeciesSlug()))return false;
+  var path=mob.getNavigation().getPath();if(!mob.isInWater()||path==null||path.isDone())return false;
   State state=STATES.get(mob);
   if(mob.isInWater()&&state!=null&&state.bank!=null&&mob.level.getFluidState(state.bank).isEmpty())return true;
-  var path=mob.getNavigation().getPath();if(!mob.isInWater()||path==null||path.isDone())return false;
   var point=path.getNextEntityPos(mob);
   return point.y>=mob.getY()-.2 && !mob.level.getFluidState(new BlockPos(point)).is(FluidTags.WATER);
  }
