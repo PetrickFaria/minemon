@@ -76,8 +76,8 @@ public final class MinemonAquaticCreature extends MinemonCreature {
     }
     private double nearbyWaterSurface(){
         var box=this.getBoundingBox();
-        int minX=net.minecraft.util.Mth.floor(box.minX+.001D),maxX=net.minecraft.util.Mth.floor(box.maxX-.001D);
-        int minZ=net.minecraft.util.Mth.floor(box.minZ+.001D),maxZ=net.minecraft.util.Mth.floor(box.maxZ-.001D);
+        int minX=net.minecraft.util.Mth.floor(box.minX-1.001D),maxX=net.minecraft.util.Mth.floor(box.maxX+1.001D);
+        int minZ=net.minecraft.util.Mth.floor(box.minZ-1.001D),maxZ=net.minecraft.util.Mth.floor(box.maxZ+1.001D);
         int minY=net.minecraft.util.Mth.floor(this.getY())-1;
         int maxY=net.minecraft.util.Mth.ceil(this.getY()+this.getBbHeight())+1;
         double best=Double.NaN,bestScore=Double.POSITIVE_INFINITY;

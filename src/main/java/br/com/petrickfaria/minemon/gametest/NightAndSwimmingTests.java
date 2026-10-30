@@ -90,7 +90,7 @@ public final class NightAndSwimmingTests {
  }
  private static MinemonCreature spawn(GameTestHelper h,String slug,int x,int y,int z){return h.spawn(ModEntities.SPECIES.get(slug).get(),new BlockPos(x,y,z));}
  private static void traceAwakeGyarados(GameTestHelper h,MinemonCreature mob,int elapsed){
-  double top=WaterMovementGoal.restSurfaceAt(mob,mob.blockPosition());
+  double top=mob.waterSurface();
   var path=mob.getNavigation().getPath();
   String next=path==null||path.isDone()?"null":path.getNextNode().toString();
   com.mojang.logging.LogUtils.getLogger().info("GYARADOS TRACE elapsed="+elapsed+" pos="+mob.position()
@@ -171,9 +171,9 @@ public final class NightAndSwimmingTests {
       await(h,()->!gyarados.isSleeping()&&!magikarp.isSleeping()&&!dratini.isSleeping()&&!shellder.isSleeping()&&!vaporeon.isSleeping()&&!cloyster.isSleeping(),()->{
       traceAwakeGyarados(h,gyarados,0);
       h.runAfterDelay(300,()->{
-       double top=WaterMovementGoal.restSurfaceAt(gyarados,gyarados.blockPosition());
+       double top=gyarados.waterSurface();
        double depth=top-(gyarados.getY()+gyarados.getBbHeight()*.5);
-       check(h,Math.abs(depth-1)<.3,"Awake Gyarados must return to body-center depth one block: "+depth
+       check(h,gyarados.isInWater()&&Double.isFinite(top)&&Math.abs(depth-1)<.3,"Awake Gyarados must remain in water at body-center depth one block: "+depth
            +" pos="+gyarados.position()+" inWater="+gyarados.isInWater()+" sleep="+gyarados.isSleeping()
            +" surface="+top+" target="+gyarados.getNavigation().getTargetPos()+" navDone="+gyarados.getNavigation().isDone()
            +" motion="+gyarados.getDeltaMovement()+" phase="+gyarados.naturalCycle().phase()

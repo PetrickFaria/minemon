@@ -41,7 +41,7 @@ final class ShoreTraversal {
  private static final java.util.Map<MinemonCreature,State> STATES=new java.util.WeakHashMap<>();
  private static final class State {BlockPos bank;Vec3 previous;int stalled;final java.util.Map<BlockPos,Integer> blocked=new java.util.HashMap<>();}
   static boolean followWaterline(MinemonCreature mob,net.minecraft.world.entity.LivingEntity owner,double speed){
-  if(!mob.isAquaticSpecies()||mob.isInWater()||!ownerNearWater(owner))return false;
+  if(!mob.isAquaticSpecies()||!mob.isNaturalSurface()||!ownerNearWater(owner))return false;
   double towardX=owner.getX()-mob.getX(),towardZ=owner.getZ()-mob.getZ();
   double ownerDistance=towardX*towardX+towardZ*towardZ;
   var candidates=new java.util.ArrayList<BlockPos>();
@@ -54,7 +54,8 @@ final class ShoreTraversal {
    if(!WaterMovementGoal.waterFits(mob,feet,false))continue;
    double x=feet.getX()+.5D-mob.getX(),z=feet.getZ()+.5D-mob.getZ();
    double distance=x*x+z*z,dot=towardX*x+towardZ*z;
-   if(dot<=0.0D||dot*dot<.8D*ownerDistance*distance)continue;
+   double cross=towardX*z-towardZ*x;
+   if(dot<=0.0D||dot*dot<.8D*ownerDistance*distance||cross*cross>2.25D*ownerDistance)continue;
    double ownerX=owner.getX()-(feet.getX()+.5D),ownerZ=owner.getZ()-(feet.getZ()+.5D);
    if(ownerX*ownerX+ownerZ*ownerZ>=ownerDistance)continue;
    candidates.add(feet);
@@ -66,6 +67,7 @@ final class ShoreTraversal {
   }));
   BlockPos fallback=null;int tried=0;
   for(var feet:candidates){
+   if(clearWaterlineRoute(mob,feet,speed))return true;
    var path=mob.getNavigation().createPath(feet,0);
    if(path!=null&&path.canReach()){mob.getNavigation().moveTo(path,speed);return true;}
    if(fallback==null)fallback=feet;
@@ -79,6 +81,20 @@ final class ShoreTraversal {
    return true;
   }
   return false;
+ }
+ private static boolean clearWaterlineRoute(MinemonCreature mob,BlockPos feet,double speed){
+  double top=WaterMovementGoal.restSurfaceAt(mob,feet);
+  if(!Double.isFinite(top))return false;
+  double y=top-WaterMovementGoal.preferredSurfaceDepth(mob);
+  var start=mob.position();
+  var end=new Vec3(feet.getX()+.5D,y,feet.getZ()+.5D);
+  for(int step=1;step<=16;step++){
+   var point=start.lerp(end,step/16.0D);
+   if(!mob.level.noCollision(mob,mob.getBoundingBox().move(point.subtract(start))))return false;
+  }
+  mob.getNavigation().stop();
+  mob.getMoveControl().setWantedPosition(end.x,end.y,end.z,speed);
+  return true;
  }
  private static boolean ownerNearWater(net.minecraft.world.entity.LivingEntity owner){
   var origin=owner.blockPosition();
@@ -116,7 +132,9 @@ static boolean followBank(MinemonCreature mob,net.minecraft.world.entity.LivingE
    // Keep the landing closely aligned with the owner's direction and make sure it shortens
    // the remaining distance. An angled path around the pool can otherwise
    // select a nearby, reachable bank behind or beside the trainer.
+   double cross=towardOwnerX*bankZ-towardOwnerZ*bankX;
    if(towardOwner<=0.0D||towardOwner*towardOwner<.9D*ownerDistanceSqr*bankDistanceSqr
+       ||cross*cross>2.25D*ownerDistanceSqr
        ||feet.distSqr(owner.blockPosition())>=mob.distanceToSqr(owner))continue;
    if(y<=top+1.05 && y>=top-.5 && !state.blocked.containsKey(feet) && WaterMovementGoal.safeDry(mob,feet))candidates.add(feet);
   }
