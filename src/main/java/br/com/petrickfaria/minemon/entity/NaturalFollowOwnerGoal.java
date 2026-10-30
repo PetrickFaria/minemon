@@ -23,8 +23,7 @@ final class NaturalFollowOwnerGoal extends Goal {
         if (current == null || !current.isAlive() || current.isSpectator()
                 || current.level != mob.level || mob.isDefeated() || mob.isOrderedToSit() || mob.isSleeping()
                 || mob.isNightResting() || mob.isPassenger() || mob.getTarget() != null) return false;
-        return !mob.isAquaticSpecies() || SpeciesBehaviorProfiles.isVisitor(mob.getSpeciesSlug())
-                || current.isInWaterOrBubble() || mob.isInWaterOrBubble() || isAtShore();
+        return true;
     }
 
     private boolean isAtShore() {
