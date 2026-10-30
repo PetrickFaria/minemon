@@ -162,6 +162,8 @@ public final class RocketProfessionGameTests {
         helper.setBlock(farmerWorkstation, Blocks.COMPOSTER);
         Villager farmer = helper.spawn(EntityType.VILLAGER, new BlockPos(4, 1, 8));
         farmer.setVillagerData(farmer.getVillagerData().setProfession(VillagerProfession.FARMER));
+        // A traded farmer retains its profession even before its POI ticket is acquired.
+        farmer.setVillagerXp(1);
         farmer.getBrain().setMemory(MemoryModuleType.JOB_SITE,
                 net.minecraft.core.GlobalPos.of(helper.getLevel().dimension(), helper.absolutePos(farmerWorkstation)));
         Villager nitwit = helper.spawn(EntityType.VILLAGER, new BlockPos(6, 1, 9));

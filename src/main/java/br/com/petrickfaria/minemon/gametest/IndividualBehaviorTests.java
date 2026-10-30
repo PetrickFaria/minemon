@@ -125,7 +125,7 @@ public final class IndividualBehaviorTests {
  public static void permanentSwimmersMoveUnderwaterAndSurfaceSpeciesFloat(GameTestHelper h){
   // This probe checks ordinary daytime swimming; separate night tests own the sleep transition.
   h.getLevel().setDayTime(1000);
-  arena(h,true);var fish=spawn(h,"magikarp",4,-2,3);fish.setDeltaMovement(-0.12D,0,-0.12D);var lapras=spawn(h,"lapras",8,0,9);var gyarados=spawn(h,"gyarados",11,0,5);
+  arena(h,true);var fish=spawn(h,"magikarp",5,-2,4);fish.setDeltaMovement(-0.12D,0,-0.12D);var lapras=spawn(h,"lapras",8,0,9);var gyarados=spawn(h,"gyarados",11,0,5);
   Vec3 start=fish.position();double[] farthest={0};
   sample(h,fish,start,farthest,20);
   h.runAfterDelay(240,()->{
@@ -212,7 +212,7 @@ public final class IndividualBehaviorTests {
   });
   check(h,fish.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.FOLLOW_RANGE)>=100,
       "Navigation must support the full advertised water-search radius");
-  await(h,()->fish.isInWater()&&fish.position().distanceToSqr(start)>8100,()->{
+  await(h,()->fish.isInWater()&&fish.position().distanceToSqr(start)>8100&&fish.getX()>=h.absolutePos(new BlockPos(96,0,0)).getX(),()->{
    check(h,fish.getX()>=h.absolutePos(new BlockPos(96,0,0)).getX(),"Water seeker must physically reach the distant pond"+state(fish));
    h.succeed();
   },2400,"Water search and real navigation must reach a valid pond beyond ninety blocks"+state(fish));

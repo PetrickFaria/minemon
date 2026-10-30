@@ -66,6 +66,10 @@ public final class NightAndSwimmingTests {
  }
  private static void awaitBottom(GameTestHelper h,MinemonCreature shellder,MinemonCreature krabby,
      double originY,int remaining,int elapsed,Runnable next){
+  if(elapsed%100==0)for(var m:List.of(shellder,krabby)){
+   var path=m.getNavigation().getPath();
+   com.mojang.logging.LogUtils.getLogger().info("BOTTOM TRACE elapsed="+elapsed+" species="+m.getSpeciesSlug()+" pos="+m.position()+" velocity="+m.getDeltaMovement()+" sleep="+m.isSleeping()+" night="+m.isNightResting()+" pitch="+m.getXRot()+" input="+m.yya+","+m.zza+" navDone="+m.getNavigation().isDone()+" wanted="+m.getMoveControl().getWantedX()+","+m.getMoveControl().getWantedY()+","+m.getMoveControl().getWantedZ()+" path="+(path==null?"null":path.getNextNodeIndex()+"/"+path.getNodeCount()+" next="+(path.isDone()?"done":path.getNextNode())));
+  }
   if(shellder.isInWater()&&krabby.isInWater()
       &&shellder.getY()-originY<2.5D&&krabby.getY()-originY<4.5D){next.run();return;}
   if(remaining<=0){
@@ -131,7 +135,7 @@ public final class NightAndSwimmingTests {
  @GameTest(template="test_arena",batch="night_aquatic",timeoutTicks=1000)
  public static void aquaticNightRestKeepsSurfaceAndBottomRoutinesSafe(GameTestHelper h){
   arena(h);var level=h.getLevel();
-  for(int x=2;x<=15;x++)for(int z=3;z<=10;z++)for(int y=1;y<=9;y++)h.setBlock(new BlockPos(x,y,z),Blocks.WATER);
+  for(int x=2;x<=15;x++)for(int z=3;z<=10;z++)for(int y=1;y<=14;y++)h.setBlock(new BlockPos(x,y,z),Blocks.WATER);
   level.setDayTime(18000);
   var gyarados=spawn(h,"gyarados",4,3,6);var magikarp=spawn(h,"magikarp",8,4,6);var dratini=spawn(h,"dratini",12,6,6);var shellder=spawn(h,"shellder",5,8,9);var vaporeon=spawn(h,"vaporeon",14,7,6);var cloyster=spawn(h,"cloyster",10,7,9);
   await(h,()->gyarados.isSleeping()&&magikarp.isSleeping()&&dratini.isSleeping()&&shellder.isSleeping()&&vaporeon.isSleeping()&&cloyster.isSleeping(),()->{
@@ -160,6 +164,7 @@ public final class NightAndSwimmingTests {
  }
  @GameTest(template="test_arena",batch="water_bottom",timeoutTicks=900)
  public static void bottomPreferringSpeciesNavigateCloseToTheChangingLakeFloor(GameTestHelper h){
+  h.getLevel().setDayTime(1000);
   arena(h);
   for(int x=2;x<=27;x++)for(int z=2;z<=21;z++){
    int floor=(x>=13&&z>=9&&z<=15)?2:0;
@@ -240,6 +245,9 @@ public final class NightAndSwimmingTests {
  @GameTest(template="test_arena",batch="night_eevee_line",timeoutTicks=2400)
  public static void eeveeLineSleepsWakesRetaliatesReturnsAndWakesAtDawn(GameTestHelper h){
   arena(h);var level=h.getLevel();level.setDayTime(18000);
+  // Combat recovery includes normal roaming during its grace period; seal the arena.
+  for(int x=0;x<32;x++)for(int z=0;z<24;z++)if(x==0||x==31||z==0||z==23)
+   for(int y=1;y<=6;y++)h.setBlock(new BlockPos(x,y,z),Blocks.STONE);
   var sleepers=new ArrayList<MinemonCreature>();
   int[][] positions={{4,3},{10,3},{16,3},{22,3}};
   var slugs=List.of("eevee","vaporeon","jolteon","flareon");
@@ -262,7 +270,7 @@ public final class NightAndSwimmingTests {
   await(h,()->attacker.getHealth()<health,()->{
    attacker.discard();
    await(h,mob::isSleeping,()->runEeveeLineCombat(h,sleepers,index+1,done),240,
-       mob.getSpeciesSlug()+" must return to sleep after combat while it is still night");
+       ()->mob.getSpeciesSlug()+" must return to sleep after combat while it is still night: pos="+mob.position()+" ground="+mob.isOnGround()+" night="+mob.isNightResting()+" target="+mob.getTarget()+" time="+h.getLevel().getDayTime()+" collision="+h.getLevel().noCollision(mob,mob.getBoundingBox()));
   },180,mob.getSpeciesSlug()+" must retaliate with the existing combat AI");
  }
  @GameTest(template="test_arena",batch="water_speed",timeoutTicks=240)
