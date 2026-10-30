@@ -40,8 +40,56 @@ final class ShoreTraversal {
  }
  private static final java.util.Map<MinemonCreature,State> STATES=new java.util.WeakHashMap<>();
  private static final class State {BlockPos bank;Vec3 previous;int stalled;final java.util.Map<BlockPos,Integer> blocked=new java.util.HashMap<>();}
- static boolean followBank(MinemonCreature mob,net.minecraft.world.entity.LivingEntity owner,double speed){
-  if(!mob.isAquaticSpecies()||!mob.isInWater()||owner.isInWaterOrBubble()){STATES.remove(mob);return false;}
+  static boolean followWaterline(MinemonCreature mob,net.minecraft.world.entity.LivingEntity owner,double speed){
+  if(!mob.isAquaticSpecies()||mob.isInWater()||!ownerNearWater(owner))return false;
+  double towardX=owner.getX()-mob.getX(),towardZ=owner.getZ()-mob.getZ();
+  double ownerDistance=towardX*towardX+towardZ*towardZ;
+  var candidates=new java.util.ArrayList<BlockPos>();
+  for(int dx=-12;dx<=12;dx++)for(int dz=-12;dz<=12;dz++){
+   var column=new BlockPos(mob.blockPosition().getX()+dx,mob.getY(),mob.blockPosition().getZ()+dz);
+   if(!mob.level.hasChunkAt(column))continue;
+   double top=WaterMovementGoal.restSurfaceAt(mob,column);if(!Double.isFinite(top))continue;
+   double feetY=top-WaterMovementGoal.preferredSurfaceDepth(mob);
+   var feet=new BlockPos(column.getX(),Math.floor(feetY),column.getZ());
+   if(!WaterMovementGoal.waterFits(mob,feet,false))continue;
+   double x=feet.getX()+.5D-mob.getX(),z=feet.getZ()+.5D-mob.getZ();
+   double distance=x*x+z*z,dot=towardX*x+towardZ*z;
+   if(dot<=0.0D||dot*dot<.8D*ownerDistance*distance)continue;
+   double ownerX=owner.getX()-(feet.getX()+.5D),ownerZ=owner.getZ()-(feet.getZ()+.5D);
+   if(ownerX*ownerX+ownerZ*ownerZ>=ownerDistance)continue;
+   candidates.add(feet);
+  }
+  candidates.sort(java.util.Comparator.comparingDouble(p->{
+   double ox=p.getX()+.5D-owner.getX(),oz=p.getZ()+.5D-owner.getZ();
+   double mx=p.getX()+.5D-mob.getX(),mz=p.getZ()+.5D-mob.getZ();
+   return ox*ox+oz*oz+.1D*(mx*mx+mz*mz);
+  }));
+  BlockPos fallback=null;int tried=0;
+  for(var feet:candidates){
+   var path=mob.getNavigation().createPath(feet,0);
+   if(path!=null&&path.canReach()){mob.getNavigation().moveTo(path,speed);return true;}
+   if(fallback==null)fallback=feet;
+   if(++tried>=12)break;
+  }
+  if(fallback!=null){
+   mob.getNavigation().stop();
+   double top=WaterMovementGoal.restSurfaceAt(mob,fallback);
+   double y=Double.isFinite(top)?top-WaterMovementGoal.preferredSurfaceDepth(mob):fallback.getY();
+   mob.getMoveControl().setWantedPosition(fallback.getX()+.5D,y,fallback.getZ()+.5D,speed);
+   return true;
+  }
+  return false;
+ }
+ private static boolean ownerNearWater(net.minecraft.world.entity.LivingEntity owner){
+  var origin=owner.blockPosition();
+  for(int dx=-1;dx<=1;dx++)for(int dz=-1;dz<=1;dz++)for(int dy=-1;dy<=2;dy++){
+   var cell=origin.offset(dx,dy,dz);
+   if(owner.level.hasChunkAt(cell)&&owner.level.getFluidState(cell).is(net.minecraft.tags.FluidTags.WATER))return true;
+  }
+  return false;
+ }
+static boolean followBank(MinemonCreature mob,net.minecraft.world.entity.LivingEntity owner,double speed){
+  if(!mob.isAquaticSpecies()||!mob.isInWater()||ownerNearWater(owner)){STATES.remove(mob);return false;}
   var state=STATES.computeIfAbsent(mob,m->new State());state.blocked.entrySet().removeIf(e->e.getValue()<mob.tickCount);
   if(state.previous!=null && mob.position().distanceToSqr(state.previous)<.015)state.stalled+=10;else state.stalled=0;state.previous=mob.position();
   if(state.stalled>=40 && state.bank!=null){state.blocked.put(state.bank,mob.tickCount+200);state.bank=null;mob.getNavigation().stop();state.stalled=0;}
