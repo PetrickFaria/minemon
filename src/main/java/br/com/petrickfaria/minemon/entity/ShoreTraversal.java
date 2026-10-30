@@ -37,12 +37,16 @@ final class ShoreTraversal {
    var feet=new BlockPos(column.getX(),y,column.getZ());
    if(y<=top+1.05 && y>=top-.5 && !state.blocked.containsKey(feet) && WaterMovementGoal.safeDry(mob,feet))candidates.add(feet);
   }
-  candidates.sort(java.util.Comparator.comparingDouble(p->p.distSqr(owner.blockPosition())+.5*p.distSqr(mob.blockPosition())));
+  // Reach dry land first. Biasing the search toward the owner can select a
+  // distant bank on the far side of the water, where amphibious paths often
+  // fail to leave a vertical shoreline. Once on land the normal follow goal
+  // can close the remaining distance safely.
+  candidates.sort(java.util.Comparator.comparingDouble(p->p.distSqr(mob.blockPosition())+.15*p.distSqr(owner.blockPosition())));
   int tried=0;
   for(var feet:candidates){
    var path=mob.getNavigation().createPath(feet,0);
    if(path!=null&&path.canReach()){state.bank=feet;mob.getNavigation().moveTo(path,speed);return true;}
-   state.blocked.put(feet,mob.tickCount+200);if(++tried>=3)break;
+   state.blocked.put(feet,mob.tickCount+200);if(++tried>=12)break;
   }
   return false;
  }
