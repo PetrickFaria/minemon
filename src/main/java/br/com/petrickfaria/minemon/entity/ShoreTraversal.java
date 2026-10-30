@@ -5,8 +5,9 @@ import net.minecraft.world.phys.Vec3;
 /** Native shore nodes need vertical clearance before horizontal steering can cross the lip. */
 final class ShoreTraversal {
  static boolean exiting(MinemonCreature mob){
-  if(mob.isAquaticSpecies()&&!SpeciesBehaviorProfiles.isVisitor(mob.getSpeciesSlug()))return false;
   State state=STATES.get(mob);
+  if(mob.isAquaticSpecies()&&!SpeciesBehaviorProfiles.isVisitor(mob.getSpeciesSlug())
+      &&(state==null||state.bank==null))return false;
   if(!mob.isInWater())return false;
   if(state!=null&&state.bank!=null&&mob.level.getFluidState(state.bank).isEmpty())return true;
   var path=mob.getNavigation().getPath();if(path==null||path.isDone())return false;
