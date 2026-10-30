@@ -195,7 +195,7 @@ public final class WaterMovementGoal extends Goal {
   return target;
  }
  public static double waterRestY(MinemonCreature mob){
-  double top=surfaceAt(mob,mob.blockPosition());
+  double top=restSurfaceAt(mob,mob.blockPosition());
   if(!Double.isFinite(top))return Double.NaN;
   if(SpeciesBehaviorProfiles.restsAtWaterBottom(mob.getSpeciesSlug())){
    double target=preferredBottomY(mob,mob.blockPosition(),top);
@@ -273,13 +273,15 @@ public final class WaterMovementGoal extends Goal {
   int depth=(int)Math.ceil(mob.getBbHeight()+0.4D);
   return waterFits(mob,new BlockPos(p.getX(),top-depth,p.getZ()),true);
  }
- public static double surfaceAt(MinemonCreature mob,BlockPos p){
+ public static double surfaceAt(MinemonCreature mob,BlockPos p){return surfaceAt(mob,p,32);}
+ public static double restSurfaceAt(MinemonCreature mob,BlockPos p){return surfaceAt(mob,p,mob.level.getHeight());}
+ private static double surfaceAt(MinemonCreature mob,BlockPos p,int maximumSteps){
   if(!mob.level.hasChunkAt(p))return Double.NaN;
   BlockPos q=p;
   // Surface followers may be fractionally above water after interpolation.
   if(!mob.level.getFluidState(q).is(FluidTags.WATER))q=q.below();
   if(!mob.level.getFluidState(q).is(FluidTags.WATER))return Double.NaN;
-  while(q.getY()<mob.level.getMaxBuildHeight()-1&&mob.level.getFluidState(q.above()).is(FluidTags.WATER))q=q.above();
+  for(int n=0;n<maximumSteps&&q.getY()<mob.level.getMaxBuildHeight()-1&&mob.level.getFluidState(q.above()).is(FluidTags.WATER);n++)q=q.above();
   return q.getY()+mob.level.getFluidState(q).getHeight(mob.level,q);
  }
 }

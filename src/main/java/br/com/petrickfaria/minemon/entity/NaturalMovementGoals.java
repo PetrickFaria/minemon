@@ -74,7 +74,7 @@ public final class NaturalMovementGoals {
 
         private Path findLandingPath() {
             BlockPos origin = this.mob.blockPosition();
-            double waterTop=WaterMovementGoal.surfaceAt(this.mob,origin);
+            double waterTop=WaterMovementGoal.restSurfaceAt(this.mob,origin);
             double searchHeight=Double.isFinite(waterTop)?Math.max(this.mob.getY(),waterTop+2):this.mob.getY();
             // Prefer the closest safe dry surface, and expand only if obstructed.
             for (int radius = 0; radius <= 25; radius++) {

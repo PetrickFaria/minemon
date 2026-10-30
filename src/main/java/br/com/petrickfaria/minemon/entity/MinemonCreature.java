@@ -950,10 +950,11 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     private boolean canSpontaneouslyRun() {
         return this.isOnGround() && !this.isFlyingSpecies() && !SpeciesBehaviorProfiles.isAquatic(this.getSpeciesSlug()) && !this.isSleeping() && !this.isOrderedToSit()
                 && !this.isInWaterOrBubble() && !this.isDeadOrDying() && this.getTarget() == null && this.naturalCycle.walking()
+                && this.goalSelector.getAvailableGoals().stream().noneMatch(goal -> goal.isRunning() && goal.getGoal() instanceof NaturalFollowOwnerGoal)
                 && SpeciesAssetIndex.clip(this.getSpeciesSlug(), "ground_run", "run") != null;
     }
 
-    private void stopSpontaneousRun() {
+    void stopSpontaneousRun() {
         if (this.entityData.get(SPONTANEOUS_RUN)) this.entityData.set(SPONTANEOUS_RUN, false);
         this.spontaneousRunTicks = 0;
         AttributeInstance movement = this.getAttribute(Attributes.MOVEMENT_SPEED);
