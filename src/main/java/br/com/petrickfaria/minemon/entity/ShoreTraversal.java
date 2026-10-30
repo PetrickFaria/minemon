@@ -65,10 +65,10 @@ final class ShoreTraversal {
    double ownerDistanceSqr=towardOwnerX*towardOwnerX+towardOwnerZ*towardOwnerZ;
    double bankDistanceSqr=bankX*bankX+bankZ*bankZ;
    double towardOwner=towardOwnerX*bankX+towardOwnerZ*bankZ;
-   // Keep the landing clearly on the owner's side and make sure it shortens
+   // Keep the landing closely aligned with the owner's direction and make sure it shortens
    // the remaining distance. An angled path around the pool can otherwise
    // select a nearby, reachable bank behind or beside the trainer.
-   if(towardOwner<=0.0D||towardOwner*towardOwner<.5D*ownerDistanceSqr*bankDistanceSqr
+   if(towardOwner<=0.0D||towardOwner*towardOwner<.9D*ownerDistanceSqr*bankDistanceSqr
        ||feet.distSqr(owner.blockPosition())>=mob.distanceToSqr(owner))continue;
    if(y<=top+1.05 && y>=top-.5 && !state.blocked.containsKey(feet) && WaterMovementGoal.safeDry(mob,feet))candidates.add(feet);
   }

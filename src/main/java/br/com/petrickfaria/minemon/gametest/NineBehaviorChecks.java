@@ -28,16 +28,6 @@ final class NineBehaviorChecks {
   if(mob.getTarget() instanceof net.minecraft.world.entity.monster.Slime slime){
    slime.discard();mob.setTarget(null);
   }
-  if(remaining%50==0){
-   var path=mob.getNavigation().getPath();
-   com.mojang.logging.LogUtils.getLogger().info("SHORE TRACE entering="+entering+" remaining="+remaining
-       +" pos="+mob.position()+" water="+mob.isInWater()+" ground="+mob.isOnGround()
-       +" following="+mob.isFollowingOwner()+" target="+mob.getTarget()
-       +" navDone="+mob.getNavigation().isDone()+" navTarget="+mob.getNavigation().getTargetPos()
-       +" next="+(path==null||path.isDone()?"null":path.getNextEntityPos(mob))
-       +" wanted="+mob.getMoveControl().getWantedX()+","+mob.getMoveControl().getWantedY()+","+mob.getMoveControl().getWantedZ()
-       +" pitch="+mob.getXRot()+" motion="+mob.getDeltaMovement());
-  }
   var origin=h.absolutePos(BlockPos.ZERO);var localXAxis=h.absolutePos(new BlockPos(1,0,0));var localZAxis=h.absolutePos(new BlockPos(0,0,1));
   double axisX=localXAxis.getX()-origin.getX(),axisZ=localXAxis.getZ()-origin.getZ();
   double zAxisX=localZAxis.getX()-origin.getX(),zAxisZ=localZAxis.getZ()-origin.getZ();
@@ -45,6 +35,17 @@ final class NineBehaviorChecks {
   double localX=(relativeX*axisX+relativeZ*axisZ)/(axisX*axisX+axisZ*axisZ);
   double localZ=(relativeX*zAxisX+relativeZ*zAxisZ)/(zAxisX*zAxisX+zAxisZ*zAxisZ);
   boolean inLane=localZ>=2&&localZ<=13;
+  if(remaining%50==0){
+   var path=mob.getNavigation().getPath();
+   com.mojang.logging.LogUtils.getLogger().info("SHORE TRACE entering="+entering+" remaining="+remaining
+       +" localX="+localX+" localZ="+localZ+" ownerWet="+owner.isInWaterOrBubble()
+       +" pos="+mob.position()+" water="+mob.isInWater()+" ground="+mob.isOnGround()
+       +" following="+mob.isFollowingOwner()+" target="+mob.getTarget()
+       +" navDone="+mob.getNavigation().isDone()+" navTarget="+mob.getNavigation().getTargetPos()
+       +" next="+(path==null||path.isDone()?"null":path.getNextEntityPos(mob))
+       +" wanted="+mob.getMoveControl().getWantedX()+","+mob.getMoveControl().getWantedY()+","+mob.getMoveControl().getWantedZ()
+       +" pitch="+mob.getXRot()+" motion="+mob.getDeltaMovement());
+  }
   boolean reached=inLane&&(entering?mob.isInWater()&&localX<7.5:!mob.isInWater()&&mob.isOnGround()&&localX>=8.5);
   if(reached){
    if(!entering){var at=h.absolutePos(new BlockPos(2,2,7));owner.moveTo(at.getX()+.5,at.getY(),at.getZ()+.5,0,0);awaitShore(h,mob,owner,index,true,400);}
