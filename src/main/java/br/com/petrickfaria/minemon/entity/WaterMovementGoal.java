@@ -164,14 +164,14 @@ public final class WaterMovementGoal extends Goal {
   // only the path node lets a wide body clip over a bank while the node itself
   // remains in water, so validate collision clearance and the body's water
   // footprint at every point along the path.
-  double previousTop=Double.NaN;
+  double routeTop=Double.NaN;
   for(int i=0;i<path.getNodeCount();i++){
    var node=path.getNode(i);
    BlockPos column=new BlockPos(node.x,node.y,node.z);
    double top=surfaceAt(mob,column);
-   if(!Double.isFinite(top)||!waterRegion(mob,column)
-       ||Double.isFinite(previousTop)&&Math.abs(top-previousTop)>.5D)return false;
-   previousTop=top;
+   if(!Double.isFinite(top)||!waterRegion(mob,column))return false;
+   if(!Double.isFinite(routeTop))routeTop=top;
+   else if(Math.abs(top-routeTop)>.5D)return false;
    double feetY=top-preferredSurfaceDepth(mob);
    var box=mob.getBoundingBox().move(node.x+.5D-mob.getX(),feetY-mob.getY(),node.z+.5D-mob.getZ());
    if(!mob.level.noCollision(mob,box))return false;

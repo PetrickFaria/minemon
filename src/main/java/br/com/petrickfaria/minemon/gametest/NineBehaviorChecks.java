@@ -31,7 +31,7 @@ final class NineBehaviorChecks {
    if(!entering){var at=h.absolutePos(new BlockPos(2,3,7));owner.moveTo(at.getX()+.5,at.getY(),at.getZ()+.5,0,0);awaitShore(h,mob,owner,index,true,400);}
    else{mob.discard();owner.discard();shore(h,index+1);}return;
   }
-  if(remaining<=0){String state=mob.getSpeciesSlug()+" pos="+mob.position()+" localX="+localX+" onGround="+mob.isOnGround()+" owner="+owner.position()+" water="+mob.isInWater()+" horizontalCollision="+mob.horizontalCollision+" path="+mob.getNavigation().getTargetPos()+" next="+(mob.getNavigation().getPath()==null||mob.getNavigation().getPath().isDone()?null:mob.getNavigation().getPath().getNextEntityPos(mob))+" pitch="+mob.getXRot()+" velocity="+mob.getDeltaMovement();mob.discard();owner.discard();h.fail("One-block shoreline traversal did not finish: entering="+entering+" "+state);return;}
+  if(remaining<=0){String state=mob.getSpeciesSlug()+" pos="+mob.position()+" localX="+localX+" onGround="+mob.isOnGround()+" owner="+owner.position()+" tamed="+mob.isTame()+" ownerMatch="+(mob.getOwner()==owner)+" following="+mob.isFollowingOwner()+" ownerWet="+owner.isInWaterOrBubble()+" water="+mob.isInWater()+" horizontalCollision="+mob.horizontalCollision+" path="+mob.getNavigation().getTargetPos()+" next="+(mob.getNavigation().getPath()==null||mob.getNavigation().getPath().isDone()?null:mob.getNavigation().getPath().getNextEntityPos(mob))+" pitch="+mob.getXRot()+" velocity="+mob.getDeltaMovement();mob.discard();owner.discard();h.fail("One-block shoreline traversal did not finish: entering="+entering+" "+state);return;}
   h.runAfterDelay(5,()->awaitShore(h,mob,owner,index,entering,remaining-5));
  }
  static void defeatedFloaters(GameTestHelper h){
