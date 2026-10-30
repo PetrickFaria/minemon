@@ -38,12 +38,16 @@ final class NineBehaviorChecks {
        +" wanted="+mob.getMoveControl().getWantedX()+","+mob.getMoveControl().getWantedY()+","+mob.getMoveControl().getWantedZ()
        +" pitch="+mob.getXRot()+" motion="+mob.getDeltaMovement());
   }
-  var origin=h.absolutePos(BlockPos.ZERO);var localXAxis=h.absolutePos(new BlockPos(1,0,0));
+  var origin=h.absolutePos(BlockPos.ZERO);var localXAxis=h.absolutePos(new BlockPos(1,0,0));var localZAxis=h.absolutePos(new BlockPos(0,0,1));
   double axisX=localXAxis.getX()-origin.getX(),axisZ=localXAxis.getZ()-origin.getZ();
-  double localX=((mob.getX()-origin.getX())*axisX+(mob.getZ()-origin.getZ())*axisZ)/(axisX*axisX+axisZ*axisZ);
-  boolean reached=entering?mob.isInWater()&&localX<7.5:!mob.isInWater()&&mob.isOnGround()&&localX>=8.5;
+  double zAxisX=localZAxis.getX()-origin.getX(),zAxisZ=localZAxis.getZ()-origin.getZ();
+  double relativeX=mob.getX()-origin.getX(),relativeZ=mob.getZ()-origin.getZ();
+  double localX=(relativeX*axisX+relativeZ*axisZ)/(axisX*axisX+axisZ*axisZ);
+  double localZ=(relativeX*zAxisX+relativeZ*zAxisZ)/(zAxisX*zAxisX+zAxisZ*zAxisZ);
+  boolean inLane=localZ>=2&&localZ<=13;
+  boolean reached=inLane&&(entering?mob.isInWater()&&localX<7.5:!mob.isInWater()&&mob.isOnGround()&&localX>=8.5);
   if(reached){
-   if(!entering){var at=h.absolutePos(new BlockPos(2,3,7));owner.moveTo(at.getX()+.5,at.getY(),at.getZ()+.5,0,0);awaitShore(h,mob,owner,index,true,400);}
+   if(!entering){var at=h.absolutePos(new BlockPos(2,2,7));owner.moveTo(at.getX()+.5,at.getY(),at.getZ()+.5,0,0);awaitShore(h,mob,owner,index,true,400);}
    else{mob.discard();owner.discard();shore(h,index+1);}return;
   }
   if(remaining<=0){String state=mob.getSpeciesSlug()+" pos="+mob.position()+" localX="+localX+" onGround="+mob.isOnGround()+" owner="+owner.position()+" tamed="+mob.isTame()+" ownerMatch="+(mob.getOwner()==owner)+" following="+mob.isFollowingOwner()+" target="+(mob.getTarget()==null?"null":mob.getTarget().getType())+" sitting="+mob.isOrderedToSit()+" sleep="+mob.isSleeping()+" nightRest="+mob.isNightResting()+" defeated="+mob.isDefeated()+" passenger="+mob.isPassenger()+" ownerWet="+owner.isInWaterOrBubble()+" water="+mob.isInWater()+" horizontalCollision="+mob.horizontalCollision+" path="+mob.getNavigation().getTargetPos()+" next="+(mob.getNavigation().getPath()==null||mob.getNavigation().getPath().isDone()?null:mob.getNavigation().getPath().getNextEntityPos(mob))+" pitch="+mob.getXRot()+" velocity="+mob.getDeltaMovement();mob.discard();owner.discard();h.fail("One-block shoreline traversal did not finish: entering="+entering+" "+state);return;}
