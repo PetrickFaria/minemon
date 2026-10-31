@@ -119,7 +119,7 @@ final class RocketVillagerClientSmokeTest {
                             + " instead of its original species texture " + expectedTexture);
                 var eyeBones = br.com.petrickfaria.minemon.client.MinemonRenderer.drawnRocketEyeBoneSamples().get(slug);
                 var selectedEyes = br.com.petrickfaria.minemon.client.MinemonRenderer.rocketEyeBoneSamples().get(slug);
-                if (eyeBones == null || selectedEyes == null || selectedEyes.isEmpty() || !eyeBones.containsAll(selectedEyes))
+                if (eyeBones == null || selectedEyes == null || selectedEyes.isEmpty() || eyeBones.isEmpty() || !selectedEyes.containsAll(eyeBones))
                     throw new IllegalStateException(slug + " red-eye overlay did not render each selected eye mesh");
                 if (creature.getSmokeParticleCountForValidation() <= 0)
                     throw new IllegalStateException(slug + " Rocket smoke emitter created no particles");
