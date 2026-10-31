@@ -20,7 +20,11 @@ public final class NaturalMovementGoals {
     static boolean nightWaterSetbackRequired(MinemonCreature mob) {
         if (!mob.isFlyingSpecies() || !mob.isNightResting()
                 || !SpeciesBehaviorProfiles.landsForNightRest(mob.getSpeciesSlug())) return false;
-        return mob.isInWaterOrBubble() || !hasThreeBlockWaterClearance(mob,mob.getBoundingBox());
+        double surface=mob.naturalSurface();
+        BlockPos under=new BlockPos(mob.getX(),Mth.floor(surface-1.0E-6D),mob.getZ());
+        boolean overWater=mob.isInWaterOrBubble()||mob.level.hasChunkAt(under)
+                &&mob.level.getFluidState(under).is(FluidTags.WATER);
+        return overWater || !hasThreeBlockWaterClearance(mob,mob.getBoundingBox());
     }
 
     private static boolean hasThreeBlockWaterClearance(MinemonCreature mob, net.minecraft.world.phys.AABB box) {
@@ -40,6 +44,19 @@ public final class NaturalMovementGoals {
             }
             for (int depth = 1; depth <= 4 && surface - depth >= mob.level.getMinBuildHeight(); depth++)
                 if (mob.level.getFluidState(new BlockPos(x,surface-depth,z)).is(FluidTags.WATER)) return false;
+        }
+        return true;
+    }
+
+    private static boolean hasThreeBlockWaterClearanceAtSurface(MinemonCreature mob,net.minecraft.world.phys.AABB box,double waterTop) {
+        if(!Double.isFinite(waterTop))return true;
+        int waterY=Mth.floor(waterTop-1.0E-6D);
+        int minX=Mth.floor(box.minX-3.0D),maxX=Mth.floor(box.maxX+3.0D);
+        int minZ=Mth.floor(box.minZ-3.0D),maxZ=Mth.floor(box.maxZ+3.0D);
+        for(int x=minX;x<=maxX;x++)for(int z=minZ;z<=maxZ;z++){
+            if(!NightShoreLandingRules.waterIsTooClose(box,x,z,3.0D))continue;
+            BlockPos water=new BlockPos(x,waterY,z);
+            if(mob.level.hasChunkAt(water)&&mob.level.getFluidState(water).is(FluidTags.WATER))return false;
         }
         return true;
     }
@@ -284,7 +301,8 @@ public final class NaturalMovementGoals {
                         feet,landingBox,waterPos,this.mob.level.hasChunkAt(waterPos),height,this.mob.level.getFluidState(waterPos),
                         NightShoreLandingRules.waterIsTooClose(landingBox,waterX,waterZ,3.0D),clearance);
             }
-            if (!loadedBox(landingBox) || !clearance) return null;
+            if (!loadedBox(landingBox) || !clearance
+                    || !hasThreeBlockWaterClearanceAtSurface(this.mob,landingBox,waterTop)) return null;
             double approachY = Math.max(feet.getY() + 2.0D,
                     Math.max(this.mob.getY(), Double.isFinite(waterTop) ? waterTop + 1.0D : this.mob.getY()));
             BlockPos approach = new BlockPos(feet.getX(), Mth.ceil(approachY), feet.getZ());
