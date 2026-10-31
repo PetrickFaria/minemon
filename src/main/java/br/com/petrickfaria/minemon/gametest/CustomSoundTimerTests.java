@@ -111,20 +111,72 @@ public final class CustomSoundTimerTests {
         helper.getLevel().addNewPlayer(player);
 
         creature.setCustomSoundTicksForValidation(1);
-        MinecraftForge.EVENT_BUS.post(new AttackEntityEvent(player, creature));
-        if (creature.customSoundTicksForValidation() != 1 || creature.getHealth() != initialHealth)
-            helper.fail("left-click attack event must not play custom audio, reset its timer, or change damage");
+        int attackTicksBefore = creature.customSoundTicksForValidation();
+        int attackPlaysBefore = creature.customSoundInteractionDispatchesForValidation();
+        var attack = new AttackEntityEvent(player, creature);
+        MinecraftForge.EVENT_BUS.post(attack);
+        int attackTicksAfter = creature.customSoundTicksForValidation();
+        int attackPlaysAfter = creature.customSoundInteractionDispatchesForValidation();
+        com.mojang.logging.LogUtils.getLogger().info("CUSTOM SOUND TRACE phase=attack hand=MAIN_ATTACK eventCanceled="+attack.isCanceled()
+                +",intervalBefore="+attackTicksBefore+",intervalAfter="+attackTicksAfter+",expectedIntervalAfter="+attackTicksBefore
+                +",audioDispatchesBefore="+attackPlaysBefore+",audioDispatchesAfter="+attackPlaysAfter);
+        if (attackTicksAfter != attackTicksBefore || attackPlaysAfter != attackPlaysBefore
+                || creature.getHealth() != initialHealth)
+            helper.fail("LEFT_CLICK_DIAGNOSTIC: expected uncanceled attack, unchanged timer/audio count and health; hand=MAIN_ATTACK"
+                    +",eventCanceled="+attack.isCanceled()+",intervalBefore="+attackTicksBefore+",intervalAfter="+attackTicksAfter
+                    +",expectedIntervalAfter="+attackTicksBefore+",audioDispatchesBefore="+attackPlaysBefore
+                    +",audioDispatchesAfter="+attackPlaysAfter+",healthBefore="+initialHealth+",healthAfter="+creature.getHealth());
 
+        int offhandTicksBefore = creature.customSoundTicksForValidation();
+        int offhandPlaysBefore = creature.customSoundInteractionDispatchesForValidation();
         var offHand = new PlayerInteractEvent.EntityInteract(player, InteractionHand.OFF_HAND, creature);
         MinecraftForge.EVENT_BUS.post(offHand);
-        if (offHand.isCanceled() || creature.customSoundTicksForValidation() != 1)
-            helper.fail("off-hand right-click must not cancel interaction or trigger a duplicate sound");
+        int offhandTicksAfter = creature.customSoundTicksForValidation();
+        int offhandPlaysAfter = creature.customSoundInteractionDispatchesForValidation();
+        com.mojang.logging.LogUtils.getLogger().info("CUSTOM SOUND TRACE phase=right_click hand="+offHand.getHand()
+                +",eventCanceled="+offHand.isCanceled()+",cancellationResult="+offHand.getCancellationResult()
+                +",intervalBefore="+offhandTicksBefore+",intervalAfter="+offhandTicksAfter+",expectedIntervalAfter="+offhandTicksBefore
+                +",audioDispatchesBefore="+offhandPlaysBefore+",audioDispatchesAfter="+offhandPlaysAfter);
+        if (offHand.isCanceled())
+            helper.fail("OFF_HAND_CANCELED_DIAGNOSTIC: right-click event was canceled; hand="+offHand.getHand()
+                    +",eventCanceled="+offHand.isCanceled()+",cancellationResult="+offHand.getCancellationResult()
+                    +",intervalBefore="+offhandTicksBefore+",intervalAfter="+offhandTicksAfter
+                    +",audioDispatchesBefore="+offhandPlaysBefore+",audioDispatchesAfter="+offhandPlaysAfter);
+        if (offhandTicksAfter != offhandTicksBefore || offhandPlaysAfter != offhandPlaysBefore)
+            helper.fail("OFF_HAND_DUPLICATE_DIAGNOSTIC: off-hand must not reset the timer or dispatch audio; hand="+offHand.getHand()
+                    +",eventCanceled="+offHand.isCanceled()+",cancellationResult="+offHand.getCancellationResult()
+                    +",intervalBefore="+offhandTicksBefore+",intervalAfter="+offhandTicksAfter
+                    +",expectedIntervalAfter="+offhandTicksBefore+",audioDispatchesBefore="+offhandPlaysBefore
+                    +",audioDispatchesAfter="+offhandPlaysAfter+",expectedAudioDispatchesAfter="+offhandPlaysBefore);
 
+        int mainhandTicksBefore = creature.customSoundTicksForValidation();
+        int mainhandPlaysBefore = creature.customSoundInteractionDispatchesForValidation();
         var mainHand = new PlayerInteractEvent.EntityInteract(player, InteractionHand.MAIN_HAND, creature);
         MinecraftForge.EVENT_BUS.post(mainHand);
         int resetTicks = creature.customSoundTicksForValidation();
-        if (mainHand.isCanceled() || resetTicks < 3600 || resetTicks > 6000)
-            helper.fail("main-hand right-click must preserve interaction and reset an independent 3600..6000 tick interval");
+        int mainhandPlaysAfter = creature.customSoundInteractionDispatchesForValidation();
+        com.mojang.logging.LogUtils.getLogger().info("CUSTOM SOUND TRACE phase=right_click hand="+mainHand.getHand()
+                +",eventCanceled="+mainHand.isCanceled()+",cancellationResult="+mainHand.getCancellationResult()
+                +",intervalBefore="+mainhandTicksBefore+",intervalAfter="+resetTicks+",expectedInterval=3600..6000"
+                +",audioDispatchesBefore="+mainhandPlaysBefore+",audioDispatchesAfter="+mainhandPlaysAfter);
+        if (mainHand.isCanceled())
+            helper.fail("MAIN_HAND_CANCELED_DIAGNOSTIC: right-click event was canceled; hand="+mainHand.getHand()
+                    +",eventCanceled="+mainHand.isCanceled()+",cancellationResult="+mainHand.getCancellationResult()
+                    +",intervalBefore="+mainhandTicksBefore+",intervalAfter="+resetTicks
+                    +",expectedIntervalAfter=3600..6000,audioDispatchesBefore="+mainhandPlaysBefore
+                    +",audioDispatchesAfter="+mainhandPlaysAfter);
+        if (resetTicks < 3600 || resetTicks > 6000)
+            helper.fail("MAIN_HAND_INTERVAL_DIAGNOSTIC: right-click did not reset the timer into 3600..6000 ticks; hand="+mainHand.getHand()
+                    +",eventCanceled="+mainHand.isCanceled()+",cancellationResult="+mainHand.getCancellationResult()
+                    +",intervalBefore="+mainhandTicksBefore+",intervalAfter="+resetTicks
+                    +",expectedIntervalAfter=3600..6000,audioDispatchesBefore="+mainhandPlaysBefore
+                    +",audioDispatchesAfter="+mainhandPlaysAfter);
+        if (mainhandPlaysAfter != mainhandPlaysBefore + 1)
+            helper.fail("MAIN_HAND_AUDIO_COUNT_DIAGNOSTIC: main-hand interaction must dispatch exactly one sound; hand="+mainHand.getHand()
+                    +",eventCanceled="+mainHand.isCanceled()+",cancellationResult="+mainHand.getCancellationResult()
+                    +",intervalBefore="+mainhandTicksBefore+",intervalAfter="+resetTicks
+                    +",expectedIntervalAfter=3600..6000,audioDispatchesBefore="+mainhandPlaysBefore
+                    +",audioDispatchesAfter="+mainhandPlaysAfter+",expectedAudioDispatchesAfter="+(mainhandPlaysBefore+1));
         if (creature.getHealth() != initialHealth)
             helper.fail("right-clicking to play a sound must not damage the Pokémon");
 

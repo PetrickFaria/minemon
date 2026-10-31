@@ -120,6 +120,8 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     private int spontaneousRunCount;
     private int customSoundTicks;
     private boolean customSoundDayActive;
+    // Test instrumentation: counts interaction-triggered sound packet dispatches per entity.
+    private int customSoundInteractionDispatchesForValidation;
     private final RandomSource customSoundRandom = RandomSource.create();
     // Client-only diagnostic sample used by the automated locomotion smoke test.
     private String selectedAnimationForValidation;
@@ -814,6 +816,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         this.customSoundDayActive = true;
         this.customSoundTicks = this.nextCustomSoundInterval();
         br.com.petrickfaria.minemon.network.MinemonNetwork.playForTracking(this);
+        this.customSoundInteractionDispatchesForValidation++;
     }
 
     /** Returns an independent 3–5 minute interval, inclusive, for this entity. */
@@ -827,6 +830,12 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     }
 
     public int customSoundTicksForValidation() { return this.customSoundTicks; }
+    public int customSoundInteractionDispatchesForValidation() { return this.customSoundInteractionDispatchesForValidation; }
+    public java.util.List<String> runningGoalsForValidation() {
+        return this.goalSelector.getAvailableGoals().stream()
+                .filter(net.minecraft.world.entity.ai.goal.WrappedGoal::isRunning)
+                .map(goal -> goal.getGoal().getClass().getSimpleName()).toList();
+    }
     public void setCustomSoundTicksForValidation(int ticks) {
         this.customSoundTicks = Math.max(0, Math.min(6000, ticks));
         this.customSoundDayActive = ticks > 0;

@@ -125,7 +125,11 @@ minecraft {
             property 'minemon.clientSmokeSpecies', (findProperty('clientSmokeSpecies') ?: '').toString()
         }
         server { args '--nogui' }
-        gameTestServer { property 'forge.enabledGameTestNamespaces', 'minemon_gen1' }
+        gameTestServer {
+            // The normal build runs every Minemon GameTest. Diagnostic jobs may
+            // pass one temporary Forge namespace to isolate a test wrapper.
+            property 'forge.enabledGameTestNamespaces', (findProperty('gameTestNamespaces') ?: 'minemon_gen1').toString()
+        }
     }
 }
 
@@ -157,6 +161,9 @@ dependencies {
 jar {
     exclude 'br/com/petrickfaria/minemon/gametest/**'
     exclude 'data/minemon_gen1/structures/test_arena.nbt'
+    exclude 'data/minemon_diag_eevee/structures/test_arena.nbt'
+    exclude 'data/minemon_diag_sound/structures/test_arena.nbt'
+    exclude 'data/minemon_diag_gastly/structures/test_arena.nbt'
     from('ASSET_LICENSES.md') {
         into 'META-INF'
     }
@@ -181,6 +188,9 @@ tasks.named('jarJar') {
     finalizedBy('reobfJarJar')
     exclude 'br/com/petrickfaria/minemon/gametest/**'
     exclude 'data/minemon_gen1/structures/test_arena.nbt'
+    exclude 'data/minemon_diag_eevee/structures/test_arena.nbt'
+    exclude 'data/minemon_diag_sound/structures/test_arena.nbt'
+    exclude 'data/minemon_diag_gastly/structures/test_arena.nbt'
     from('ASSET_LICENSES.md') {
         into 'META-INF'
     }
