@@ -151,10 +151,12 @@ public final class RocketChallengeManager {
     private static boolean moveToSafeSpawn(ServerLevel level, Villager villager, MinemonCreature challenge, float yaw) {
         // Large species can overlap the villager even when the center is 1.5 blocks away.
         // Search a small ring so the challenge uses the first clear, dry position beside its trainer.
+        double radius = Math.max(3.5D, challenge.getBbWidth() + 1.0D);
         double[][] offsets = {
                 {2.25D, 0.0D}, {-2.25D, 0.0D}, {0.0D, 2.25D}, {0.0D, -2.25D},
                 {2.25D, 2.25D}, {2.25D, -2.25D}, {-2.25D, 2.25D}, {-2.25D, -2.25D},
-                {3.5D, 0.0D}, {-3.5D, 0.0D}, {0.0D, 3.5D}, {0.0D, -3.5D}
+                {3.5D, 0.0D}, {-3.5D, 0.0D}, {0.0D, 3.5D}, {0.0D, -3.5D},
+                {radius, 0.0D}, {-radius, 0.0D}, {0.0D, radius}, {0.0D, -radius}
         };
         double[] heights = {0.05D, 1.05D, 2.05D};
         int fluids = 0, floors = 0, blocks = 0, entities = 0;
