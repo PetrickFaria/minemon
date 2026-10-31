@@ -158,13 +158,15 @@ public final class RocketChallengeManager {
         };
         for (double[] offset : offsets) {
             double x = villager.getX() + offset[0];
-            double y = villager.getY();
+            // Lift slightly above the villager's floor so collision tests do not
+            // treat a touching block face as an intersecting shape.
+            double y = villager.getY() + 0.05D;
             double z = villager.getZ() + offset[1];
             challenge.moveTo(x, y, z, yaw, 0.0F);
             BlockPos pos = challenge.blockPosition();
             if (!level.getFluidState(pos).isEmpty()) continue;
             if (!challenge.isFlyingSpecies() && !level.getBlockState(pos.below()).isSolidRender(level, pos.below())) continue;
-            AABB box = challenge.getBoundingBox();
+            AABB box = challenge.getBoundingBox().deflate(1.0E-4D);
             boolean blockedByBlock = level.getBlockCollisions(challenge, box).iterator().hasNext();
             boolean overlapsEntity = !level.getEntitiesOfClass(Entity.class, box,
                     other -> other != challenge && other.isAlive()).isEmpty();
