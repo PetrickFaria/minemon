@@ -16,7 +16,8 @@ public final class NaturalMovementGoals {
     private NaturalMovementGoals() {}
 
     static boolean nightWaterSetbackRequired(MinemonCreature mob) {
-        if (!mob.isNightResting() || !SpeciesBehaviorProfiles.landsForNightRest(mob.getSpeciesSlug())) return false;
+        if (!mob.isFlyingSpecies() || !mob.isNightResting()
+                || !SpeciesBehaviorProfiles.landsForNightRest(mob.getSpeciesSlug())) return false;
         double surface = mob.naturalSurface();
         BlockPos under = new BlockPos(mob.getX(), Mth.floor(surface - 1.0E-6D), mob.getZ());
         return mob.isInWaterOrBubble() || mob.level.hasChunkAt(under)
@@ -177,7 +178,8 @@ public final class NaturalMovementGoals {
                                     x - this.mob.getX(), surface - this.mob.getY(), z - this.mob.getZ()))) continue;
                     var landingBox = this.mob.getBoundingBox().move(x - this.mob.getX(),
                             surface - this.mob.getY(), z - this.mob.getZ());
-                    if (this.mob.isNightResting() && SpeciesBehaviorProfiles.landsForNightRest(this.mob.getSpeciesSlug())
+                    if (this.mob.isFlyingSpecies() && this.mob.isNightResting()
+                            && SpeciesBehaviorProfiles.landsForNightRest(this.mob.getSpeciesSlug())
                             && !hasThreeBlockWaterClearance(this.mob, landingBox)) continue;
                     // Cross a shoreline above its collision lip before descending.
                     // A diagonal path straight to ground can wedge a wide
