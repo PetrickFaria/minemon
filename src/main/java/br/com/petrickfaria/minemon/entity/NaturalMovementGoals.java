@@ -20,23 +20,19 @@ public final class NaturalMovementGoals {
     static boolean nightWaterSetbackRequired(MinemonCreature mob) {
         if (!mob.isFlyingSpecies() || !mob.isNightResting()
                 || !SpeciesBehaviorProfiles.landsForNightRest(mob.getSpeciesSlug())) return false;
-        double surface = mob.naturalSurface();
-        BlockPos under = new BlockPos(mob.getX(), Mth.floor(surface - 1.0E-6D), mob.getZ());
-        return mob.isInWaterOrBubble() || mob.level.hasChunkAt(under)
-                && mob.level.getFluidState(under).is(FluidTags.WATER);
+        return mob.isInWaterOrBubble() || !hasThreeBlockWaterClearance(mob,mob.getBoundingBox());
     }
 
     private static boolean hasThreeBlockWaterClearance(MinemonCreature mob, net.minecraft.world.phys.AABB box) {
         int minX = Mth.floor(box.minX - 3.0D), maxX = Mth.floor(box.maxX + 3.0D);
         int minZ = Mth.floor(box.minZ - 3.0D), maxZ = Mth.floor(box.maxZ + 3.0D);
-        int minY = Math.max(mob.level.getMinBuildHeight(), Mth.floor(box.minY) - 1);
-        int maxY = Math.min(mob.level.getMaxBuildHeight() - 1, Mth.floor(box.maxY) + 1);
         for (int x = minX; x <= maxX; x++) for (int z = minZ; z <= maxZ; z++) {
             if (!NightShoreLandingRules.waterIsTooClose(box, x, z, 3.0D)) continue;
-            for (int y = minY; y <= maxY; y++) {
-                BlockPos water = new BlockPos(x, y, z);
-                if (mob.level.hasChunkAt(water) && mob.level.getFluidState(water).is(FluidTags.WATER)) return false;
-            }
+            BlockPos column = new BlockPos(x, Mth.floor(box.minY), z);
+            if (!mob.level.hasChunkAt(column)) continue;
+            int surface = mob.level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.WORLD_SURFACE,x,z);
+            for (int depth = 1; depth <= 4 && surface - depth >= mob.level.getMinBuildHeight(); depth++)
+                if (mob.level.getFluidState(new BlockPos(x,surface-depth,z)).is(FluidTags.WATER)) return false;
         }
         return true;
     }
