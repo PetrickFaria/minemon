@@ -91,8 +91,11 @@ public final class NightAndSwimmingTests {
  private static MinemonCreature spawn(GameTestHelper h,String slug,int x,int y,int z){return h.spawn(ModEntities.SPECIES.get(slug).get(),new BlockPos(x,y,z));}
  private static void traceShoreLanding(GameTestHelper h,MinemonCreature mob,int elapsed){
   var path=mob.getNavigation().getPath();
-  com.mojang.logging.LogUtils.getLogger().info("SHORE LAND TRACE elapsed={} pos={} surface={} water={} gravity={} sleep={} night={} navDone={} target={} next={} control={} wanted={} move={}",
-      elapsed,mob.position(),mob.naturalSurface(),mob.isInWaterOrBubble(),mob.isNoGravity(),mob.isSleeping(),mob.isNightResting(),
+  var origin=h.absolutePos(BlockPos.ZERO);var water=h.absolutePos(new BlockPos(16,8,7));
+  int waterHeight=h.getLevel().getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.WORLD_SURFACE,water.getX(),water.getZ());
+  var waterTop=new BlockPos(water.getX(),waterHeight-1,water.getZ());
+  com.mojang.logging.LogUtils.getLogger().info("SHORE LAND TRACE elapsed={} origin={} water={} height={} topFluid={} pos={} surface={} waterInside={} gravity={} sleep={} night={} navDone={} target={} next={} control={} wanted={} move={}",
+      elapsed,origin,water,waterHeight,h.getLevel().getFluidState(waterTop),mob.position(),mob.naturalSurface(),mob.isInWaterOrBubble(),mob.isNoGravity(),mob.isSleeping(),mob.isNightResting(),
       mob.getNavigation().isDone(),mob.getNavigation().getTargetPos(),path==null||path.isDone()?"null":path.getNextNode(),
       mob.getMoveControl().getClass().getSimpleName(),mob.getMoveControl().hasWanted(),mob.getDeltaMovement());
   if(elapsed<450)h.runAfterDelay(50,()->traceShoreLanding(h,mob,elapsed+50));
