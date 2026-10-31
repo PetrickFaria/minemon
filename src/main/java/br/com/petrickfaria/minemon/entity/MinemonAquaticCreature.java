@@ -158,7 +158,9 @@ public final class MinemonAquaticCreature extends MinemonCreature {
             if(Double.isFinite(restY)){
                 var velocity=this.getDeltaMovement();
                 double vy=net.minecraft.util.Mth.clamp(velocity.y*0.5D+(restY-this.getY())*0.05D,-0.09D,0.09D);
-                this.setDeltaMovement(velocity.x*0.5D,vy,velocity.z*0.5D);
+                // Once aquatic rest owns movement, cancel horizontal inertia so
+                // the sleeper holds its selected position instead of drifting.
+                this.setDeltaMovement(0.0D,vy,0.0D);
             }
             return;
         }

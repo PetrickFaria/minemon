@@ -163,7 +163,11 @@ public final class NightAndSwimmingTests {
   for(int x=2;x<=12;x++)for(int z=2;z<=10;z++)for(int y=1;y<=12;y++)h.setBlock(new BlockPos(x,y,z),Blocks.WATER);
   level.setDayTime(1000);
   var poliwhirl=spawn(h,"poliwhirl",4,8,5);var poliwag=spawn(h,"poliwag",7,8,5);var poliwrath=spawn(h,"poliwrath",10,8,5);
-  for(var mob:List.of(poliwhirl,poliwag,poliwrath))mob.chooseNaturalWaterDepth(true);
+  for(var mob:List.of(poliwhirl,poliwag,poliwrath)){
+   var phase=new CompoundTag();mob.addAdditionalSaveData(phase);
+   phase.putString("NaturalBehaviorPhase","SUBMERGED");phase.putInt("NaturalBehaviorStartDelay",0);phase.putInt("NaturalBehaviorTicks",0);
+   mob.readAdditionalSaveData(phase);mob.chooseNaturalWaterDepth(true);
+  }
   double base=Math.min(.8D,poliwhirl.getBbHeight()*.3D);
   check(h,Math.abs(WaterMovementGoal.preferredSurfaceDepth(poliwhirl)-(base+1.0D/3.0D))<1.0E-9D,
       "Awake surface-swimming Poliwhirl receives exactly one-third block of additional depth");
