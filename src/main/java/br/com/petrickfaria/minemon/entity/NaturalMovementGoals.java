@@ -267,7 +267,17 @@ public final class NaturalMovementGoals {
             double surface = feet.getY();
             var landingBox = this.mob.getBoundingBox().move(feet.getX() + 0.5D - this.mob.getX(),
                     surface - this.mob.getY(), feet.getZ() + 0.5D - this.mob.getZ());
-            if (!loadedBox(landingBox) || !hasThreeBlockWaterClearance(this.mob, landingBox)) return null;
+            boolean clearance=hasThreeBlockWaterClearance(this.mob,landingBox);
+            if(this.mob.getSpeciesSlug().equals("pidgeot")
+                    &&feet.getX()==this.mob.blockPosition().getX()-2&&feet.getZ()==this.mob.blockPosition().getZ()-2){
+                int waterX=feet.getX()+2,waterZ=feet.getZ();
+                int height=this.mob.level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.WORLD_SURFACE,waterX,waterZ);
+                var waterPos=new BlockPos(waterX,height-1,waterZ);
+                com.mojang.logging.LogUtils.getLogger().info("SHORE CANDIDATE feet={} box={} waterPos={} loaded={} height={} fluid={} close={} clearance={}",
+                        feet,landingBox,waterPos,this.mob.level.hasChunkAt(waterPos),height,this.mob.level.getFluidState(waterPos),
+                        NightShoreLandingRules.waterIsTooClose(landingBox,waterX,waterZ,3.0D),clearance);
+            }
+            if (!loadedBox(landingBox) || !clearance) return null;
             double approachY = Math.max(feet.getY() + 2.0D,
                     Math.max(this.mob.getY(), Double.isFinite(waterTop) ? waterTop + 1.0D : this.mob.getY()));
             BlockPos approach = new BlockPos(feet.getX(), Mth.ceil(approachY), feet.getZ());
