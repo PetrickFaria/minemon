@@ -20,7 +20,7 @@ public final class PokemonManagementClientSmokeTest {
     private static int phase;
     private static volatile int dewgongId=-1,gastlyId=-1;
     private static volatile boolean closedEyesSeen,openEyesSeen,awakeBlinkSeen;
-    private static int auraState,auraStart;
+    private static int auraState,auraLarge,auraSmall;
     private static void nineFixtures(Minecraft minecraft){
         minecraft.player.closeContainer();minecraft.setScreen(null);minecraft.player.setYRot(0);minecraft.player.setXRot(10);
         br.com.petrickfaria.minemon.client.MinemonRenderer.validationObserver=(entity,model)->{
@@ -229,13 +229,17 @@ public final class PokemonManagementClientSmokeTest {
             if(phase==10){
                 if(minecraft.level.getEntity(gastlyId)==null){if(++ticks>200)throw new IllegalStateException("Gastly aura fixture was not tracked");return;}
                 ticks++;
-                if(ticks==32)auraStart=br.com.petrickfaria.minemon.client.GastlySmokeParticle.spawnCountForValidation();
+                if(ticks==32){
+                    auraLarge=br.com.petrickfaria.minemon.client.GastlySmokeParticle.largeSpawnsForValidation();
+                    auraSmall=br.com.petrickfaria.minemon.client.GastlySmokeParticle.smallSpawnsForValidation();
+                }
                 if(ticks==64){
-                    int emissions=br.com.petrickfaria.minemon.client.GastlySmokeParticle.spawnCountForValidation()-auraStart;
-                    if(emissions!=16)throw new IllegalStateException("Restored Gastly particle rate mismatch in state "+auraState+": emissions="+emissions);
+                    int large=br.com.petrickfaria.minemon.client.GastlySmokeParticle.largeSpawnsForValidation()-auraLarge;
+                    int small=br.com.petrickfaria.minemon.client.GastlySmokeParticle.smallSpawnsForValidation()-auraSmall;
+                    if(large!=10||small!=14)throw new IllegalStateException("Gastly real-client aura rate mismatch in state "+auraState+": large="+large+" small="+small);
                     auraState++;ticks=0;
                     if(auraState<4){changeAuraState(minecraft,auraState);return;}
-                    Files.writeString(Path.of("client-validation-pokemon-management.txt"),"PASS NINE VISUAL CONTRACTS: rendered Dewgong eyes closed asleep, open and blinking awake; restored single-size Gastly smoke emitted 16 particles per32ticks while awake, sleeping, sitting and defeated. Aesthetic comparison with the historical reference remains manual.\n",java.nio.file.StandardOpenOption.APPEND);
+                    Files.writeString(Path.of("client-validation-pokemon-management.txt"),"PASS NINE VISUAL CONTRACTS: rendered Dewgong eyes closed asleep, open and blinking awake; real Gastly particle providers emitted five large and seven small per16ticks while awake, sleeping, sitting and defeated. Aesthetic comparison with the historical reference remains manual.\n",java.nio.file.StandardOpenOption.APPEND);
                     br.com.petrickfaria.minemon.client.MinemonRenderer.validationObserver=null;
                     done=true;System.out.println("[POKEMON MANAGEMENT CLIENT] PASS: status, filters, rendered Dewgong eyes, and restored Gastly smoke");minecraft.execute(minecraft::stop);
                 }
