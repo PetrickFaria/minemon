@@ -293,6 +293,29 @@ public final class NaturalMovementGoals {
             double x = this.approachSite.getX() + 0.5D;
             double y = this.approachSite.getY();
             double z = this.approachSite.getZ() + 0.5D;
+            var offset = new net.minecraft.world.phys.Vec3(x - this.mob.getX(),
+                    y - this.mob.getY(), z - this.mob.getZ());
+            double distance = offset.length();
+            // FlyingMoveControl treats wide bodies as arrived while their center
+            // is still short of a safe shoreline. Finish that final radius with
+            // small collision-resolved steps instead of restarting the search.
+            if (distance <= Math.max(3.0D, this.mob.getBbWidth() * 2.5D)) {
+                if (distance <= 0.25D) {
+                    this.directShoreRoute = false;
+                    this.mob.getNavigation().stop();
+                    return;
+                }
+                var step = offset.scale(Math.min(0.2D, distance) / distance);
+                if (this.mob.level.noCollision(this.mob, this.mob.getBoundingBox().move(step))) {
+                    this.mob.move(net.minecraft.world.entity.MoverType.SELF, step);
+                } else {
+                    this.directShoreRoute = false;
+                    rejectCachedShoreLanding();
+                    this.pathTicks = 200;
+                    this.mob.getNavigation().stop();
+                }
+                return;
+            }
             var targetBox = this.mob.getBoundingBox().move(x - this.mob.getX(), y - this.mob.getY(), z - this.mob.getZ());
             if (!directLineClear(targetBox)) {
                 this.directShoreRoute = false;
