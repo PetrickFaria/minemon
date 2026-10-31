@@ -430,6 +430,12 @@ public final class NightAndSwimmingTests {
  }
  @GameTest(template="test_arena",batch="water_speed_reference",timeoutTicks=60)
  public static void realPlayerTravelMatchesSwimAndQuarterFasterEscape(GameTestHelper h){
+  h.getLevel().setDayTime(1000);
+  await(h,()->!h.getLevel().isNight(),()->runRealPlayerTravelReference(h),20,
+      "Travel reference requires the world to report daytime after setting dayTime=1000; worldTime="
+          +h.getLevel().getDayTime()+" isNight="+h.getLevel().isNight());
+ }
+ private static void runRealPlayerTravelReference(GameTestHelper h){
   arena(h);
   for(int x=1;x<30;x++)for(int z=1;z<23;z++)for(int y=1;y<=6;y++)h.setBlock(new BlockPos(x,y,z),Blocks.WATER);
   var player=new net.minecraftforge.common.util.FakePlayer(h.getLevel(),new com.mojang.authlib.GameProfile(UUID.randomUUID(),"SwimReference"));
@@ -456,7 +462,7 @@ public final class NightAndSwimmingTests {
     }
     measured[i]=(e.getZ()-start)/40.0D;
    }
-   com.mojang.logging.LogUtils.getLogger().info("SWIM REFERENCE blocks/tick player={} goldeen={} vaporeon={} escape={} ratio={}",measured[0],measured[1],measured[2],measured[3],measured[3]/measured[0]);
+   com.mojang.logging.LogUtils.getLogger().info("SWIM REFERENCE blocks/tick player={} goldeen={} vaporeon={} escape={} ratio={} worldTime={} isNight={} goldeenSleeping={} vaporeonSleeping={} escapeSleeping={}",measured[0],measured[1],measured[2],measured[3],measured[3]/measured[0],h.getLevel().getDayTime(),h.getLevel().isNight(),swimmer.isSleeping(),visitor.isSleeping(),escape.isSleeping());
    check(h,measured[0]>.09&&measured[0]<.105,"Player baseline must be ordinary non-sprint swimming");
    check(h,Math.abs(measured[1]/measured[0]-1)<.03&&Math.abs(measured[2]/measured[0]-1)<.03,"Aquatic and visitor controllers must match actual player travel");
    check(h,Math.abs(measured[3]/measured[0]-1.25)<.03,"Escape must physically move 25% faster than actual player travel");

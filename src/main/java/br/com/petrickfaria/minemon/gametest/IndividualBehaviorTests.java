@@ -183,33 +183,34 @@ public final class IndividualBehaviorTests {
  }
  @GameTest(template="test_arena",batch="long_range_water",timeoutTicks=2600)
  public static void aquaticSeekerPhysicallyReachesWaterBeyondNinetyBlocks(GameTestHelper h){
-  // A separate batch and elevated corridor keep the long route independent
-  // of neighboring behavior arenas and their water fixtures.
+  // Put the corridor above the 100-block vertical search radius of water
+  // fixtures left loaded by earlier GameTest batches.
+  int routeY=140;
   for(int x=0;x<=112;x+=16){
-   var chunk=new net.minecraft.world.level.ChunkPos(h.absolutePos(new BlockPos(x,18,2)));
+   var chunk=new net.minecraft.world.level.ChunkPos(h.absolutePos(new BlockPos(x,routeY,2)));
    h.getLevel().setChunkForced(chunk.x,chunk.z,true);
   }
   for(int x=0;x<=105;x++)for(int z=0;z<=4;z++){
-   h.setBlock(new BlockPos(x,18,z),Blocks.STONE);
-   for(int y=19;y<=23;y++)h.setBlock(new BlockPos(x,y,z),Blocks.AIR);
+   h.setBlock(new BlockPos(x,routeY,z),Blocks.STONE);
+   for(int y=routeY+1;y<=routeY+5;y++)h.setBlock(new BlockPos(x,y,z),Blocks.AIR);
   }
   // Keep the pond beyond the test's 90-block proof while leaving a small
   // margin inside the 100-block search radius if land wandering shifts the
   // seeker's block position by one block before its long-range scan begins.
   for(int x=96;x<=100;x++)for(int z=0;z<=4;z++){
-   h.setBlock(new BlockPos(x,15,z),Blocks.STONE);
-   for(int y=16;y<=18;y++)h.setBlock(new BlockPos(x,y,z),Blocks.WATER);
+   h.setBlock(new BlockPos(x,routeY-3,z),Blocks.STONE);
+   for(int y=routeY-2;y<=routeY;y++)h.setBlock(new BlockPos(x,y,z),Blocks.WATER);
   }
-  var fish=h.spawn(ModEntities.SPECIES.get("goldeen").get(),new BlockPos(2,19,2));
+  var fish=h.spawn(ModEntities.SPECIES.get("goldeen").get(),new BlockPos(2,routeY+1,2));
   Vec3 start=fish.position();
   for(int sample=200;sample<=2200;sample+=200)traceLongRoute(h,fish,sample);
   h.runAfterDelay(20,()->{
    for(int x=2;x<96;x++){
-    var floor=h.absolutePos(new BlockPos(x,18,2));
+    var floor=h.absolutePos(new BlockPos(x,routeY,2));
     check(h,h.getLevel().getBlockState(floor).is(Blocks.STONE),"Long-range fixture lost corridor floor at "+floor);
     check(h,h.getLevel().getBlockState(floor.above()).isAir(),"Long-range fixture has an unexpected obstacle at "+floor.above());
    }
-   var target=h.absolutePos(new BlockPos(98,17,2));
+   var target=h.absolutePos(new BlockPos(98,routeY-1,2));
    var path=fish.getNavigation().createPath(target,0);
    com.mojang.logging.LogUtils.getLogger().info("LONG WATER PATH target="+target+" loaded="+h.getLevel().hasChunkAt(target)
        +" region="+WaterMovementGoal.isNavigableWaterRegion(target,p->h.getLevel().getFluidState(p).is(net.minecraft.tags.FluidTags.WATER))
