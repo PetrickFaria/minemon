@@ -18,8 +18,9 @@ public final class NaturalMovementGoals {
     static boolean nightWaterSetbackRequired(MinemonCreature mob) {
         if (!mob.isNightResting() || !SpeciesBehaviorProfiles.landsForNightRest(mob.getSpeciesSlug())) return false;
         double surface = mob.naturalSurface();
-        var box = mob.getBoundingBox().move(0.0D, surface - mob.getY(), 0.0D);
-        return !hasThreeBlockWaterClearance(mob, box);
+        BlockPos under = new BlockPos(mob.getX(), Mth.floor(surface - 1.0E-6D), mob.getZ());
+        return mob.isInWaterOrBubble() || mob.level.hasChunkAt(under)
+                && mob.level.getFluidState(under).is(FluidTags.WATER);
     }
 
     private static boolean hasThreeBlockWaterClearance(MinemonCreature mob, net.minecraft.world.phys.AABB box) {
@@ -148,6 +149,10 @@ public final class NaturalMovementGoals {
                             || !this.mob.level.getBlockState(feet).isAir()
                             || !this.mob.level.noCollision(this.mob, this.mob.getBoundingBox().move(
                                     x - this.mob.getX(), surface - this.mob.getY(), z - this.mob.getZ()))) continue;
+                    var landingBox = this.mob.getBoundingBox().move(x - this.mob.getX(),
+                            surface - this.mob.getY(), z - this.mob.getZ());
+                    if (this.mob.isNightResting() && SpeciesBehaviorProfiles.landsForNightRest(this.mob.getSpeciesSlug())
+                            && !hasThreeBlockWaterClearance(this.mob, landingBox)) continue;
                     // Cross a shoreline above its collision lip before descending.
                     // A diagonal path straight to ground can wedge a wide
                     // flying hitbox against the bank while its center is wet.
@@ -177,8 +182,8 @@ public final class NaturalMovementGoals {
             }
             this.cachedLandingFeet = null;
             int originX = origin.getX(), originZ = origin.getZ(), originY = origin.getY();
-            int lowY = Math.max(this.mob.level.getMinBuildHeight() + 1, originY - SHORE_VERTICAL_RADIUS);
-            int highY = Math.min(this.mob.level.getMaxBuildHeight() - 2, originY + SHORE_VERTICAL_RADIUS - 1);
+            int lowY = Math.max(this.mob.level.getMinBuildHeight() + 1, originY - SHORE_VERTICAL_RADIUS - 1);
+            int highY = Math.min(this.mob.level.getMaxBuildHeight() - 2, originY + SHORE_VERTICAL_RADIUS - 2);
             for (int radius = 0; radius <= SHORE_HORIZONTAL_RADIUS; radius++) {
                 for (int dx = -radius; dx <= radius; dx++) for (int dz = -radius; dz <= radius; dz++) {
                     if (Math.max(Math.abs(dx), Math.abs(dz)) != radius || !NightShoreLandingRules.insideSearchVolume(dx, 0, dz)) continue;
@@ -202,6 +207,7 @@ public final class NaturalMovementGoals {
                         if (!Double.isFinite(top)) continue;
                         double surface = y + top;
                         BlockPos feet = new BlockPos(x, Mth.ceil(surface - 1.0E-6D), z);
+                        if (!NightShoreLandingRules.insideSearchVolume(dx, feet.getY() - originY, dz)) continue;
                         if (!WaterMovementGoal.safeLanding(this.mob, feet)) continue;
                         Path path = createShorePath(feet, waterTop);
                         if (path != null) return path;
