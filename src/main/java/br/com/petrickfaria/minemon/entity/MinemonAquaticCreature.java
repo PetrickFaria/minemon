@@ -68,7 +68,7 @@ public final class MinemonAquaticCreature extends MinemonCreature {
         var column=this.blockPosition();
         if(this.waterCache==null||!column.equals(this.waterCache.column())||this.tickCount-this.waterCache.tick()>10){
             double top=WaterMovementGoal.surfaceAt(this,column);
-            if(!Double.isFinite(top)&&this.getSpeciesSlug().equals("gyarados"))
+            if(!Double.isFinite(top))
                 top=nearbyWaterSurface();
             this.waterCache=new BlockPosCache(column,this.tickCount,top);
         }
