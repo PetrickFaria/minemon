@@ -33,11 +33,14 @@ public final class RocketAppearanceTest {
             var geometry = JsonParser.parseReader(new InputStreamReader(
                     RocketAppearanceTest.class.getResourceAsStream("/" + model.replace("assets/minemon/", "assets/minemon_gen1/")),
                     StandardCharsets.UTF_8)).getAsJsonObject();
-            boolean hasEyeBone = geometry.getAsJsonArray("minecraft:geometry").asList().stream()
-                    .flatMap(entry -> entry.getAsJsonObject().getAsJsonArray("bones").asList().stream())
-                    .map(bone -> bone.getAsJsonObject())
-                    .anyMatch(bone -> RocketVisuals.isEyeCubeBone(bone.get("name").getAsString())
-                            && bone.has("cubes") && !bone.getAsJsonArray("cubes").isEmpty());
+            boolean hasEyeBone = false;
+            for (var geometryEntry : geometry.getAsJsonArray("minecraft:geometry")) {
+                for (var boneEntry : geometryEntry.getAsJsonObject().getAsJsonArray("bones")) {
+                    var bone = boneEntry.getAsJsonObject();
+                    if (RocketVisuals.isEyeCubeBone(bone.get("name").getAsString())
+                            && bone.has("cubes") && !bone.getAsJsonArray("cubes").isEmpty()) hasEyeBone = true;
+                }
+            }
             assertTrue(slug + " needs eye mesh bones for the Rocket-only red overlay", hasEyeBone);
         }
     }
