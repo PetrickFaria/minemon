@@ -136,6 +136,10 @@ public final class NaturalMovementGoals {
 
         @Override public void start() {
             this.pathTicks=0;
+            if(this.mob.getSpeciesSlug().equals("pidgeot"))
+                com.mojang.logging.LogUtils.getLogger().info("SHORE START tick={} direct={} route={} target={} pos={} wants={} night={}",
+                        this.mob.tickCount,this.directShoreRoute,this.shoreRoute,this.approachSite,this.mob.position(),
+                        this.mob.wantsNaturalLanding(),this.mob.isNightResting());
             this.shoreStallTicks=0;
             this.lastShorePosition=this.mob.position();
             // 1.0 is a moderate 1.43× increase over the usual 0.7 landing speed, only for shore escapes.
@@ -146,6 +150,10 @@ public final class NaturalMovementGoals {
         }
         @Override public void tick() {
             this.pathTicks++;
+            if(this.mob.getSpeciesSlug().equals("pidgeot")&&this.mob.tickCount%20==0)
+                com.mojang.logging.LogUtils.getLogger().info("SHORE GOAL TICK tick={} direct={} route={} pathTicks={} wants={} night={} ground={} pos={} target={} navDone={}",
+                        this.mob.tickCount,this.directShoreRoute,this.shoreRoute,this.pathTicks,this.mob.wantsNaturalLanding(),
+                        this.mob.isNightResting(),this.mob.isOnGround(),this.mob.position(),this.approachSite,this.mob.getNavigation().isDone());
             if (this.shoreRoute && !this.directShoreRoute && !this.mob.getNavigation().isDone()) {
                 if (this.lastShorePosition != null && this.mob.position().distanceToSqr(this.lastShorePosition) < 0.0025D)
                     this.shoreStallTicks++;
@@ -190,7 +198,12 @@ public final class NaturalMovementGoals {
                 this.mob.getMoveControl().setWantedPosition(x,y,z,this.shoreRoute?1.0D:.7D);
             }
         }
-        @Override public void stop() { this.mob.getNavigation().stop(); this.landingPath = null; this.retryDelay=20; this.shoreRoute=false; this.directShoreRoute=false; this.shoreStallTicks=0; this.lastShorePosition=null; }
+        @Override public void stop() {
+            if(this.mob.getSpeciesSlug().equals("pidgeot"))
+                com.mojang.logging.LogUtils.getLogger().info("SHORE STOP tick={} pathTicks={} direct={} route={} wants={} night={} ground={} pos={} target={}",
+                        this.mob.tickCount,this.pathTicks,this.directShoreRoute,this.shoreRoute,this.mob.wantsNaturalLanding(),
+                        this.mob.isNightResting(),this.mob.isOnGround(),this.mob.position(),this.approachSite);
+            this.mob.getNavigation().stop(); this.landingPath = null; this.retryDelay=20; this.shoreRoute=false; this.directShoreRoute=false; this.shoreStallTicks=0; this.lastShorePosition=null; }
 
         private Path findLandingPath() {
             if (this.shoreRoute) return findShoreLandingPath();
