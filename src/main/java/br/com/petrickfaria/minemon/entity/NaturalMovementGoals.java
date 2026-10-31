@@ -18,7 +18,7 @@ public final class NaturalMovementGoals {
     private NaturalMovementGoals() {}
 
     static boolean nightWaterSetbackRequired(MinemonCreature mob) {
-        if (!mob.isFlyingSpecies() || !mob.isNightResting()
+        if (!SpeciesBehaviorProfiles.canFly(mob.getSpeciesSlug()) || !mob.isNightResting()
                 || !SpeciesBehaviorProfiles.landsForNightRest(mob.getSpeciesSlug())) return false;
         double surface=mob.naturalSurface();
         BlockPos under=new BlockPos(mob.getX(),Mth.floor(surface-1.0E-6D),mob.getZ());
