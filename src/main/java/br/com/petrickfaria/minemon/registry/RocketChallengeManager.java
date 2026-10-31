@@ -112,17 +112,17 @@ public final class RocketChallengeManager {
 
     /** Creates the pending challenge for the villager's independent Rocket level. */
     public static MinemonCreature spawnChallengePokemon(ServerLevel level, Villager villager, ServerPlayer player) {
-        if (!isRocket(villager) || player == null) return spawnFailure(villager, "profession/player guard");
+        if (!isRocket(villager) || player == null) return null;
         initialize(villager);
         var data = villager.getPersistentData();
-        if (data.getBoolean(UNLOCKED) || data.hasUUID(ACTIVE)) return spawnFailure(villager, "already unlocked/active");
+        if (data.getBoolean(UNLOCKED) || data.hasUUID(ACTIVE)) return null;
 
         int currentLevel = data.getInt(LEVEL);
         String species = speciesForLevel(currentLevel);
         var type = ModEntities.SPECIES.get(species);
-        if (type == null) return spawnFailure(villager, "unregistered species " + species);
+        if (type == null) return null;
         MinemonCreature challenge = type.get().create(level);
-        if (challenge == null) return spawnFailure(villager, "entity factory returned null for " + species);
+        if (challenge == null) return null;
 
         if (!moveToSafeSpawn(level, villager, challenge, player.getYRot())) {
             challenge.discard();
@@ -142,7 +142,7 @@ public final class RocketChallengeManager {
         challenge.setCustomNameVisible(true);
         challenge.setPersistenceRequired();
         challenge.setTarget(player);
-        if (!level.addFreshEntity(challenge)) return spawnFailure(villager, "addFreshEntity rejected " + species);
+        if (!level.addFreshEntity(challenge)) return null;
         data.putUUID(ACTIVE, challenge.getUUID());
         data.putBoolean(VICTORY, false);
         return challenge;
@@ -159,7 +159,6 @@ public final class RocketChallengeManager {
                 {radius, 0.0D}, {-radius, 0.0D}, {0.0D, radius}, {0.0D, -radius}
         };
         double[] heights = {0.05D, 1.05D, 2.05D};
-        int fluids = 0, floors = 0, blocks = 0, entities = 0;
         for (double[] offset : offsets) {
             for (double height : heights) {
                 double x = villager.getX() + offset[0];
@@ -167,20 +166,15 @@ public final class RocketChallengeManager {
                 double z = villager.getZ() + offset[1];
                 challenge.moveTo(x, y, z, yaw, 0.0F);
                 BlockPos pos = challenge.blockPosition();
-                if (!level.getFluidState(pos).isEmpty()) { fluids++; continue; }
-                if (!challenge.isFlyingSpecies() && !hasGroundBelow(level, pos)) { floors++; continue; }
+                if (!level.getFluidState(pos).isEmpty()) continue;
+                if (!challenge.isFlyingSpecies() && !hasGroundBelow(level, pos)) continue;
                 AABB box = challenge.getBoundingBox().deflate(1.0E-4D);
                 boolean blockedByBlock = level.getBlockCollisions(challenge, box).iterator().hasNext();
                 boolean overlapsEntity = !level.getEntitiesOfClass(Entity.class, box,
                         other -> other != challenge && other.isAlive()).isEmpty();
                 if (!blockedByBlock && !overlapsEntity) return true;
-                if (blockedByBlock) blocks++;
-                if (overlapsEntity) entities++;
             }
         }
-        villager.getPersistentData().putString("MinemonRocketSpawnFailure", "no safe candidate: fluid=" + fluids
-                + " floor=" + floors + " blocks=" + blocks + " entities=" + entities
-                + " flying=" + challenge.isFlyingSpecies());
         return false;
     }
 
@@ -190,11 +184,6 @@ public final class RocketChallengeManager {
             if (level.getBlockState(below).isSolidRender(level, below)) return true;
         }
         return false;
-    }
-
-    private static MinemonCreature spawnFailure(Villager villager, String reason) {
-        if (villager != null) villager.getPersistentData().putString("MinemonRocketSpawnFailure", reason);
-        return null;
     }
 
     /** Records exactly one server-confirmed output pickup from the Rocket exchange menu. */
