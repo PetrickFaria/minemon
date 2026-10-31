@@ -8,8 +8,13 @@ public class MinemonRenderer extends GeoEntityRenderer<MinemonCreature> {
  private final MinemonModel minemonModel;
  private String activeFireSpecies;
  private boolean fireOverlayPass;
+ private boolean rocketEyeOverlayPass;
  private String activeBone;
  private static final java.util.Map<String,java.util.Set<String>> drawnFireBones=new java.util.concurrent.ConcurrentHashMap<>();
+ private static final java.util.Map<String,java.util.Set<String>> drawnRocketEyeBones=new java.util.concurrent.ConcurrentHashMap<>();
+ private static final java.util.Map<String,java.util.Set<String>> rocketEyeBoneSamples=new java.util.concurrent.ConcurrentHashMap<>();
+ public static java.util.Map<String,java.util.Set<String>> drawnRocketEyeBoneSamples(){return java.util.Map.copyOf(drawnRocketEyeBones);}
+ public static java.util.Map<String,java.util.Set<String>> rocketEyeBoneSamples(){return java.util.Map.copyOf(rocketEyeBoneSamples);}
  public static java.util.Map<String,java.util.Set<String>> drawnFireBoneSamples(){return java.util.Map.copyOf(drawnFireBones);}
  private static final java.util.Map<String,java.util.Set<Integer>> fireOverlayFrames=new java.util.concurrent.ConcurrentHashMap<>();
  private static final java.util.Map<String,java.util.Set<String>> fireOverlayBones=new java.util.concurrent.ConcurrentHashMap<>();
@@ -86,7 +91,9 @@ public class MinemonRenderer extends GeoEntityRenderer<MinemonCreature> {
  @Override public void renderCube(software.bernie.geckolib3.geo.render.built.GeoCube cube,
       com.mojang.blaze3d.vertex.PoseStack pose,com.mojang.blaze3d.vertex.VertexConsumer buffer,
       int light,int overlay,float red,float green,float blue,float alpha){
-  if(fireOverlayPass&&Boolean.getBoolean("minemon.clientSmokeTest")){
+  if(rocketEyeOverlayPass&&Boolean.getBoolean("minemon.clientSmokeTest")&&java.util.Arrays.stream(cube.quads).anyMatch(java.util.Objects::nonNull))
+   drawnRocketEyeBones.computeIfAbsent(activeFireSpecies,k->java.util.concurrent.ConcurrentHashMap.newKeySet()).add(activeBone);
+  if(fireOverlayPass&&!rocketEyeOverlayPass&&Boolean.getBoolean("minemon.clientSmokeTest")){
    if(light!=15728880)throw new IllegalStateException("Fire cube lost full-bright light: "+activeFireSpecies);
    if(java.util.Arrays.stream(cube.quads).anyMatch(java.util.Objects::nonNull))
     drawnFireBones.computeIfAbsent(activeFireSpecies,k->java.util.concurrent.ConcurrentHashMap.newKeySet()).add(activeBone);
@@ -101,6 +108,15 @@ public class MinemonRenderer extends GeoEntityRenderer<MinemonCreature> {
   @Override public void render(com.mojang.blaze3d.vertex.PoseStack pose,net.minecraft.client.renderer.MultiBufferSource buffers,
        int light,MinemonCreature entity,float limbSwing,float limbSwingAmount,float partialTick,float ageInTicks,float netHeadYaw,float headPitch){
    String slug=entity.getSpeciesSlug();
+   if(entity.isRocketSpecial()){
+    var model=getEntityModel().getModel(getEntityModel().getModelResource(entity));
+    var selected=rocketEyeBoneNames(model);
+    rocketEyeBoneSamples.put(slug,selected);
+    if(selected.isEmpty())throw new IllegalStateException("Rocket species has no mapped eye bones: "+slug);
+    var texture=new net.minecraft.resources.ResourceLocation(br.com.petrickfaria.minemon.Minemon.MOD_ID,"textures/emissive/rocket_eye_red.png");
+    renderRocketEyeBones(model,selected,texture,pose,buffers,entity,partialTick);
+    return;
+   }
    boolean animatedFlames=slug.equals("ponyta")||slug.equals("rapidash");
    boolean starterFlame=slug.equals("charmander")||slug.equals("charmeleon")||slug.equals("charizard");
    boolean moltresFlame=slug.equals("moltres");
@@ -133,6 +149,42 @@ public class MinemonRenderer extends GeoEntityRenderer<MinemonCreature> {
    if(slug.equals("ponyta")||slug.equals("rapidash"))selected.add("tail");
    fireOverlayBones.put(slug,selected);
    renderSelectedBones(model,selected,texture,pose,buffers,entity,partialTick);
+  }
+  private void renderRocketEyeBones(software.bernie.geckolib3.geo.render.built.GeoModel model,java.util.Set<String> selected,
+       net.minecraft.resources.ResourceLocation texture,com.mojang.blaze3d.vertex.PoseStack pose,
+       net.minecraft.client.renderer.MultiBufferSource buffers,MinemonCreature entity,float partialTick){
+   var original=new java.util.IdentityHashMap<software.bernie.geckolib3.geo.render.built.GeoBone,boolean[]>();
+   for(var root:model.topLevelBones)saveVisibility(root,original);
+   boolean previousPass=owner.fireOverlayPass,previousRocketPass=owner.rocketEyeOverlayPass;
+   owner.fireOverlayPass=true;owner.rocketEyeOverlayPass=true;
+   try{
+    for(var root:model.topLevelBones)setExactSelectedVisibility(root,selected);
+    renderCopyModel(getEntityModel(),texture,pose,buffers,15728880,entity,partialTick,1,1,1);
+   }finally{
+    owner.fireOverlayPass=previousPass;owner.rocketEyeOverlayPass=previousRocketPass;
+    original.forEach((bone,visibility)->{bone.setHidden(visibility[0],visibility[1]);bone.setCubesHidden(visibility[2]);});
+   }
+  }
+  private static boolean hasSelectedBone(software.bernie.geckolib3.geo.render.built.GeoBone bone,java.util.Set<String> selected){
+   if(selected.contains(bone.name))return true;
+   for(var child:bone.childBones)if(hasSelectedBone(child,selected))return true;
+   return false;
+  }
+  private static void setExactSelectedVisibility(software.bernie.geckolib3.geo.render.built.GeoBone bone,java.util.Set<String> selected){
+   if(!hasSelectedBone(bone,selected)){bone.setHidden(true,true);return;}
+   boolean draw=selected.contains(bone.name);
+   bone.setHidden(false,false);bone.setCubesHidden(!draw);
+   for(var child:bone.childBones)setExactSelectedVisibility(child,selected);
+  }
+  private static java.util.Set<String> rocketEyeBoneNames(software.bernie.geckolib3.geo.render.built.GeoModel model){
+   var selected=java.util.concurrent.ConcurrentHashMap.<String>newKeySet();
+   for(var root:model.topLevelBones)collectRocketEyeBones(root,selected);
+   return java.util.Set.copyOf(selected);
+  }
+  private static void collectRocketEyeBones(software.bernie.geckolib3.geo.render.built.GeoBone bone,java.util.Set<String> selected){
+   boolean eye=RocketVisuals.isEyeCubeBone(bone.name);
+   if(eye&&!bone.cubes.isEmpty())selected.add(bone.name);
+   for(var child:bone.childBones)collectRocketEyeBones(child,selected);
   }
   private void renderSelectedBones(software.bernie.geckolib3.geo.render.built.GeoModel model,java.util.Set<String> selected,
        net.minecraft.resources.ResourceLocation texture,com.mojang.blaze3d.vertex.PoseStack pose,

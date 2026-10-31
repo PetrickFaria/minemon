@@ -199,6 +199,7 @@ jobs:
           jar tf "$jar_file" | grep -Fx 'assets/minemon/models/item/grass_treat.json'
           jar tf "$jar_file" | grep -Fx 'assets/minemon/textures/item/grass_treat.png'
           jar tf "$jar_file" | grep -Fx 'assets/minemon_gen1/textures/pokemon/rattata_rocket.png'
+          jar tf "$jar_file" | grep -Fx 'assets/minemon_gen1/textures/emissive/rocket_eye_red.png'
           jar tf "$jar_file" | grep -Fx 'br/com/petrickfaria/minemon/menu/RocketTradeMenu.class'
           jar tf "$jar_file" | grep -Fx 'br/com/petrickfaria/minemon/menu/RocketTradeScreen.class'
           jar tf "$jar_file" | grep -Fx 'br/com/petrickfaria/minemon/registry/RocketChallengeManager.class'

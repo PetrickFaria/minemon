@@ -738,24 +738,33 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
             }
         }
         if (this.level.isClientSide) {
-            if (this.isRocketSpecial() && !this.isDeadOrDying() && this.tickCount % 3 == 0) {
-                double spread = Math.max(0.15D, this.getBbWidth() * 0.38D);
-                this.level.addParticle(new net.minecraft.core.particles.DustParticleOptions(
-                                new com.mojang.math.Vector3f(0.19F, 0.025F, 0.27F), 1.0F),
-                        this.getX() + (this.random.nextDouble() - 0.5D) * spread,
-                        this.getY() + this.getBbHeight() * (0.35D + this.random.nextDouble() * 0.45D),
-                        this.getZ() + (this.random.nextDouble() - 0.5D) * spread,
-                        0.0D, 0.025D, 0.0D);
-            }
-            if ((this.getSpeciesSlug().equals("koffing")||this.getSpeciesSlug().equals("weezing"))
-                    && !this.isDeadOrDying() && this.tickCount%5==Math.floorMod(this.getId(),5)) {
-                double radius=this.getBbWidth()*0.35D;
-                for(int i=0;i<2;i++){
-                    double angle=this.random.nextDouble()*Math.PI*2.0D;
-                    double spread=radius*(0.5D+this.random.nextDouble()*0.8D);
+            if (this.isRocketSpecial() && !this.isDeadOrDying() && this.tickCount % 4 == Math.floorMod(this.getId(), 4)) {
+                double radius = Math.max(0.12D, this.getBbWidth() * 0.46D);
+                for (int i = 0; i < 2; i++) {
+                    double angle = this.random.nextDouble() * Math.PI * 2.0D;
+                    double spread = radius * (0.82D + this.random.nextDouble() * 0.36D);
                     this.level.addParticle(net.minecraft.core.particles.ParticleTypes.SMOKE,
-                        this.getX()+Math.cos(angle)*spread,this.getY()+this.getBbHeight()*(0.30D+this.random.nextDouble()*0.42D),
-                        this.getZ()+Math.sin(angle)*spread,0.0D,0.015D+this.random.nextDouble()*0.02D,0.0D);
+                            this.getX() + Math.cos(angle) * spread,
+                            this.getY() + this.getBbHeight() * (0.28D + this.random.nextDouble() * 0.48D),
+                            this.getZ() + Math.sin(angle) * spread,
+                            (this.random.nextDouble() - 0.5D) * 0.008D,
+                            0.012D + this.random.nextDouble() * 0.018D,
+                            (this.random.nextDouble() - 0.5D) * 0.008D);
+                    this.smokeParticles++;
+                }
+            }
+            if ((this.getSpeciesSlug().equals("koffing") || this.getSpeciesSlug().equals("weezing"))
+                    && !this.isRocketSpecial() && !this.isDeadOrDying()
+                    && this.tickCount % 5 == Math.floorMod(this.getId(), 5)) {
+                double radius = this.getBbWidth() * 0.35D;
+                for (int i = 0; i < 2; i++) {
+                    double angle = this.random.nextDouble() * Math.PI * 2.0D;
+                    double spread = radius * (0.5D + this.random.nextDouble() * 0.8D);
+                    this.level.addParticle(net.minecraft.core.particles.ParticleTypes.SMOKE,
+                            this.getX() + Math.cos(angle) * spread,
+                            this.getY() + this.getBbHeight() * (0.30D + this.random.nextDouble() * 0.42D),
+                            this.getZ() + Math.sin(angle) * spread,
+                            0.0D, 0.015D + this.random.nextDouble() * 0.02D, 0.0D);
                     this.smokeParticles++;
                 }
             }

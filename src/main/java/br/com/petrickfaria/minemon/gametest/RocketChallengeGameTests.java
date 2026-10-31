@@ -94,7 +94,7 @@ public final class RocketChallengeGameTests {
         Villager villager = helper.spawn(EntityType.VILLAGER, new BlockPos(6,1,6));
         villager.setVillagerData(villager.getVillagerData().setProfession(ModVillagers.ROCKET.get()));
         ServerPlayer player = player(helper);
-        String[] species = {"zubat", "rattata", "ekans", "koffing", "golbat", "raticate", "arbok", "koffing", "kangaskhan", "mewtwo"};
+        String[] species = {"zubat", "rattata", "ekans", "koffing", "golbat", "raticate", "arbok", "weezing", "kangaskhan", "mewtwo"};
         int[] health = {10, 14, 18, 22, 26, 30, 34, 38, 42, 46};
         int[] damage = {4, 6, 8, 10, 12, 14, 16, 18, 20, 22};
         int[] trades = {5, 15, 25, 35, 45, 55, 65, 75, 85};

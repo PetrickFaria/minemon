@@ -10,6 +10,7 @@ import net.minecraft.world.phys.Vec3;
 /** One navigation owner for seeking water, depth/surface swimming and shore exit. */
 public final class WaterMovementGoal extends Goal {
  public static final int SEARCH_RADIUS=100;
+ public static final double WALL_PREFERENCE_DISTANCE=5.0D;
  private final MinemonCreature mob;
  private int scanIndex,scanYIndex,delay,stalled;
  private Vec3 lastPosition;
@@ -126,11 +127,14 @@ public final class WaterMovementGoal extends Goal {
   }
   // Far choices distribute swimmers through large lakes; local and fixed
   // probes prevent small ponds/corners from depending on lucky random draws.
+  // Aquatic profiles score the full path by clearance from lateral collision
+  // shapes, measuring from the entity AABB. Five blocks is preferred; if the
+  // water is too narrow, the route with the greatest available clearance wins.
+  boolean preferWalls=SpeciesBehaviorProfiles.isAquatic(mob.getSpeciesSlug());
+  var wallShapeCache=new HashMap<BlockPos,List<net.minecraft.world.phys.AABB>>();
+  BlockPos bestDestination=null;double bestClearance=-1.0D;
   for(int n=0;n<48;n++){
    int dx,dz;
-   // Surface swimmers patrol locally instead of selecting a point across an
-   // entire lake. This keeps near-surface species such as Gyarados in shallow
-   // pools and leaves room for the vertical depth correction to do its work.
    if(surface&&n<12){dx=mob.getRandom().nextInt(5)-2;dz=mob.getRandom().nextInt(5)-2;}
    else if(surface&&n<24){int[] direction=SWIM_DIRECTIONS[(n-12)%8];int distance=2+(n-12)/8;dx=direction[0]*distance;dz=direction[1]*distance;}
    else if(n<12){dx=mob.getRandom().nextInt(49)-24;dz=mob.getRandom().nextInt(49)-24;}
@@ -156,11 +160,65 @@ public final class WaterMovementGoal extends Goal {
    }
    if(!clear)continue;
    var path=mob.getNavigation().createPath(p,0);
-   if(path!=null&&path.canReach()
-       &&(!mob.getSpeciesSlug().equals("gyarados")||surfacePathIsWater(path)))return p;
-   blocked.put(p.immutable(),mob.tickCount+200);
+   if(path==null||!path.canReach()||mob.getSpeciesSlug().equals("gyarados")&&!surfacePathIsWater(path)){
+    blocked.put(p.immutable(),mob.tickCount+200);continue;
+   }
+   if(!preferWalls)return p;
+   double clearance=wallClearanceAlongPath(path,wallShapeCache);
+   if(clearance>=WALL_PREFERENCE_DISTANCE)return p;
+   if(clearance>bestClearance){bestClearance=clearance;bestDestination=p;}
   }
-  return null;
+  return bestDestination;
+ }
+ private double wallClearanceAlongPath(net.minecraft.world.level.pathfinder.Path path,Map<BlockPos,List<net.minecraft.world.phys.AABB>> shapeCache){
+  double clearance=Double.POSITIVE_INFINITY;
+  double previousX=mob.getX(),previousY=mob.getY(),previousZ=mob.getZ();
+  for(int i=0;i<path.getNodeCount();i++){
+   var node=path.getNode(i);
+   double endX=node.x+.5D,endY=node.y,endZ=node.z+.5D;
+   double distance=Math.sqrt((endX-previousX)*(endX-previousX)+(endY-previousY)*(endY-previousY)+(endZ-previousZ)*(endZ-previousZ));
+   int samples=Math.max(1,(int)Math.ceil(distance*2.0D));
+   for(int sample=1;sample<=samples;sample++){
+    double t=sample/(double)samples;
+    double x=previousX+(endX-previousX)*t,y=previousY+(endY-previousY)*t,z=previousZ+(endZ-previousZ)*t;
+    var box=mob.getBoundingBox().move(x-mob.getX(),y-mob.getY(),z-mob.getZ());
+    clearance=Math.min(clearance,wallClearanceAt(box,shapeCache));
+   }
+   previousX=endX;previousY=endY;previousZ=endZ;
+  }
+  return Math.min(WALL_PREFERENCE_DISTANCE+1.0D,clearance);
+ }
+ private double wallClearanceAt(net.minecraft.world.phys.AABB body,Map<BlockPos,List<net.minecraft.world.phys.AABB>> shapeCache){
+  int minX=net.minecraft.util.Mth.floor(body.minX-WALL_PREFERENCE_DISTANCE-1.0D);
+  int maxX=net.minecraft.util.Mth.floor(body.maxX+WALL_PREFERENCE_DISTANCE+1.0D);
+  int minY=net.minecraft.util.Mth.floor(body.minY);
+  int maxY=net.minecraft.util.Mth.floor(body.maxY);
+  int minZ=net.minecraft.util.Mth.floor(body.minZ-WALL_PREFERENCE_DISTANCE-1.0D);
+  int maxZ=net.minecraft.util.Mth.floor(body.maxZ+WALL_PREFERENCE_DISTANCE+1.0D);
+  var obstacles=new ArrayList<net.minecraft.world.phys.AABB>();
+  for(int x=minX;x<=maxX;x++)for(int y=minY;y<=maxY;y++)for(int z=minZ;z<=maxZ;z++){
+   BlockPos pos=new BlockPos(x,y,z);
+   var boxes=shapeCache.computeIfAbsent(pos.immutable(),key->{
+    var shape=mob.level.getBlockState(key).getCollisionShape(mob.level,key);
+    if(shape.isEmpty())return List.of();
+    var worldBoxes=new ArrayList<net.minecraft.world.phys.AABB>();
+    for(var local:shape.toAabbs())worldBoxes.add(local.move(key.getX(),key.getY(),key.getZ()));
+    return List.copyOf(worldBoxes);
+   });
+   for(var obstacle:boxes)
+    if(body.maxY>obstacle.minY+1.0E-6D&&body.minY<obstacle.maxY-1.0E-6D)obstacles.add(obstacle);
+  }
+  return horizontalWallClearance(body,obstacles);
+ }
+ public static double horizontalWallClearance(net.minecraft.world.phys.AABB body,Iterable<net.minecraft.world.phys.AABB> obstacles){
+  double nearest=Double.POSITIVE_INFINITY;
+  for(var obstacle:obstacles){
+   if(body.maxY<=obstacle.minY+1.0E-6D||body.minY>=obstacle.maxY-1.0E-6D)continue;
+   double dx=Math.max(0.0D,Math.max(obstacle.minX-body.maxX,body.minX-obstacle.maxX));
+   double dz=Math.max(0.0D,Math.max(obstacle.minZ-body.maxZ,body.minZ-obstacle.maxZ));
+   nearest=Math.min(nearest,Math.sqrt(dx*dx+dz*dz));
+  }
+  return nearest;
  }
  private boolean surfacePathIsWater(net.minecraft.world.level.pathfinder.Path path){
   // Validate the whole route, including the space between path nodes. Wide
@@ -213,9 +271,10 @@ public final class WaterMovementGoal extends Goal {
  }
  private BlockPos nearbyBottomDestination(){
   // Bottom-seeking species should settle locally before choosing a distant
-  // patrol destination. This keeps the requested depth behavior observable
-  // and prevents a large lake from sending them across the entire basin first.
-  for(int radius=0;radius<=4;radius++)for(int d=0;d<(radius==0?1:SWIM_DIRECTIONS.length);d++){
+  // patrol destination. Search farther when needed to find an open route, but
+  // keep the best reachable fallback in narrow channels.
+  BlockPos best=null;double bestClearance=-1.0D;
+  for(int radius=0;radius<=8;radius++)for(int d=0;d<(radius==0?1:SWIM_DIRECTIONS.length);d++){
    int[] direction=SWIM_DIRECTIONS[d];
    int dx=direction[0]*radius,dz=direction[1]*radius;
    int x=mob.blockPosition().getX()+dx,z=mob.blockPosition().getZ()+dz;
@@ -224,8 +283,6 @@ public final class WaterMovementGoal extends Goal {
    if(!Double.isFinite(top))continue;
    double y=preferredBottomY(mob,column,top);
    if(!Double.isFinite(y))continue;
-   // Path nodes use whole block Y coordinates. Round upward so the node keeps
-   // the full collision clearance that preferredBottomY validated.
    BlockPos p=new BlockPos(x,Math.ceil(y),z);
    if(blocked.containsKey(p)||!waterFits(mob,p,true)
        ||requiresNavigableVolume(mob.getSpeciesSlug())&&!waterRegion(mob,p))continue;
@@ -236,10 +293,12 @@ public final class WaterMovementGoal extends Goal {
    }
    if(!clear)continue;
    var path=mob.getNavigation().createPath(p,0);
-   if(path!=null&&path.canReach())return p;
-   blocked.put(p.immutable(),mob.tickCount+200);
+   if(path==null||!path.canReach()){blocked.put(p.immutable(),mob.tickCount+200);continue;}
+   double clearance=SpeciesBehaviorProfiles.isAquatic(mob.getSpeciesSlug())?wallClearanceAlongPath(path,new HashMap<>()):Double.POSITIVE_INFINITY;
+   if(clearance>=WALL_PREFERENCE_DISTANCE)return p;
+   if(clearance>bestClearance){best=p;bestClearance=clearance;}
   }
-  return null;
+  return best;
  }
  private static double preferredBottomY(MinemonCreature mob,BlockPos column,double surface){
   int floorWater=bottomWaterBlock(mob,column,surface);

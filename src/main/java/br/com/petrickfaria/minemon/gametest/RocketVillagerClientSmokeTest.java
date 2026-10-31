@@ -24,6 +24,7 @@ import java.util.UUID;
 
 /** Renders true vanilla villagers in the Rocket profession for every 1.19.2 biome type. */
 final class RocketVillagerClientSmokeTest {
+    private static final List<String> ROCKET_SPECIES = List.of("zubat", "rattata", "ekans", "koffing", "golbat", "raticate", "arbok", "weezing", "kangaskhan", "mewtwo");
     private static final List<VillagerType> TYPES = List.of(VillagerType.PLAINS, VillagerType.DESERT,
             VillagerType.JUNGLE, VillagerType.SAVANNA, VillagerType.SNOW, VillagerType.SWAMP, VillagerType.TAIGA);
     private static boolean opened;
@@ -102,6 +103,33 @@ final class RocketVillagerClientSmokeTest {
                     villager -> villager.getVillagerData().getProfession() == ModVillagers.ROCKET.get());
             if (visible.size() != TYPES.size())
                 throw new IllegalStateException("Expected seven visible Rocket villagers, got " + visible.size());
+            var visibleRocket = minecraft.level.getEntitiesOfClass(br.com.petrickfaria.minemon.entity.MinemonCreature.class,
+                    new net.minecraft.world.phys.AABB(minecraft.player.blockPosition()).inflate(12.0D),
+                    br.com.petrickfaria.minemon.entity.MinemonCreature::isRocketSpecial);
+            if (visibleRocket.size() != ROCKET_SPECIES.size())
+                throw new IllegalStateException("Expected ten visible Rocket challenge Pokémon, got " + visibleRocket.size());
+            var model = new br.com.petrickfaria.minemon.client.MinemonModel();
+            for (String slug : ROCKET_SPECIES) {
+                var creature = visibleRocket.stream().filter(pokemon -> pokemon.getSpeciesSlug().equals(slug)).findFirst()
+                        .orElseThrow(() -> new IllegalStateException("Missing rendered Rocket Pokémon " + slug));
+                String expectedTexture = br.com.petrickfaria.minemon.entity.SpeciesDefinitions.get(slug).texture()
+                        .substring("assets/minemon/".length());
+                if (!model.getTextureResource(creature).getPath().equals(expectedTexture))
+                    throw new IllegalStateException(slug + " Rocket challenge selected " + model.getTextureResource(creature)
+                            + " instead of its original species texture " + expectedTexture);
+                var eyeBones = br.com.petrickfaria.minemon.client.MinemonRenderer.drawnRocketEyeBoneSamples().get(slug);
+                var selectedEyes = br.com.petrickfaria.minemon.client.MinemonRenderer.rocketEyeBoneSamples().get(slug);
+                if (eyeBones == null || selectedEyes == null || selectedEyes.isEmpty() || !eyeBones.containsAll(selectedEyes))
+                    throw new IllegalStateException(slug + " red-eye overlay did not render each selected eye mesh");
+                if (creature.getSmokeParticleCountForValidation() <= 0)
+                    throw new IllegalStateException(slug + " Rocket smoke emitter created no particles");
+            }
+            try (var input = RocketVillagerClientSmokeTest.class.getResourceAsStream(
+                    "/assets/minemon_gen1/textures/emissive/rocket_eye_red.png")) {
+                var pixel = javax.imageio.ImageIO.read(input).getRGB(0, 0);
+                if (((pixel >> 16) & 255) != 255 || ((pixel >> 8) & 255) != 0 || (pixel & 255) != 0 || ((pixel >>> 24) & 255) != 255)
+                    throw new IllegalStateException("Rocket eye overlay is not opaque full red");
+            }
             for (VillagerType type : TYPES) {
                 if (visible.stream().noneMatch(v -> v.getVillagerData().getType() == type))
                     throw new IllegalStateException("Rocket uniform was not retained for villager type " + type);
@@ -110,7 +138,8 @@ final class RocketVillagerClientSmokeTest {
                     "/assets/minemon_gen1/textures/entity/villager/profession/rocket.png",
                     "/assets/minemon_gen1/textures/entity/villager/profession/rocket.png.mcmeta",
                     "/assets/minemon_gen1/textures/entity/zombie_villager/profession/rocket.png",
-                    "/assets/minemon_gen1/textures/pokemon/rattata_rocket.png")) {
+                    "/assets/minemon_gen1/textures/pokemon/rattata_rocket.png",
+                    "/assets/minemon_gen1/textures/emissive/rocket_eye_red.png")) {
                 try (var input = RocketVillagerClientSmokeTest.class.getResourceAsStream(path)) {
                     if (input == null) throw new IllegalStateException("Missing Rocket villager visual resource " + path);
                     if (path.endsWith(".png") && javax.imageio.ImageIO.read(input) == null)
@@ -131,7 +160,7 @@ final class RocketVillagerClientSmokeTest {
                         try {
                             Files.writeString(Path.of("client-validation-rocket.txt"),
                                     "PASS ROCKET CLIENT: real vanilla Rocket villagers rendered for all seven 1.19.2 biome types; "
-                                            + "Rocket and zombie-villager uniform textures, hat metadata, and profession translation loaded.\n");
+                                            + "Rocket challenge textures, red eye meshes, and smoke validated for all ten species; uniforms and profession translation loaded.\n");
                             completed = true;
                             System.out.println("[ROCKET CLIENT] PASS marker written; stopping client");
                             minecraft.execute(minecraft::stop);
@@ -159,6 +188,16 @@ final class RocketVillagerClientSmokeTest {
         player.teleportTo(x + 0.5D, y, z + 11.0D);
         player.setYRot(180.0F);
         player.yRotO = 180.0F;
+        for (int i = 0; i < ROCKET_SPECIES.size(); i++) {
+            String slug = ROCKET_SPECIES.get(i);
+            var type = br.com.petrickfaria.minemon.registry.ModEntities.SPECIES.get(slug);
+            var pokemon = type == null ? null : type.get().create(level);
+            if (pokemon == null) throw new IllegalStateException("Could not create Rocket challenge visual for " + slug);
+            pokemon.setRocketSpecial(true);
+            pokemon.setNoAi(true);
+            pokemon.moveTo(x - 5.0D + i + 0.5D, y, z + 4.0D, 180.0F, 0.0F);
+            if (!level.addFreshEntity(pokemon)) throw new IllegalStateException("Could not add Rocket challenge visual " + slug);
+        }
         for (int i = 0; i < TYPES.size(); i++) {
             Villager villager = EntityType.VILLAGER.create(level);
             if (villager == null) throw new IllegalStateException("Could not create vanilla villager");

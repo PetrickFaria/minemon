@@ -73,6 +73,11 @@ processResources {
         def rocketEyeTarget = new File(destinationRoot, 'assets/minemon_gen1/textures/pokemon/rattata_rocket.png')
         rocketEyeTarget.parentFile.mkdirs()
         rocketEyeTarget.bytes = rocketEyeSource.bytes
+        def rocketRedEyeSource = new File(sourceRoot, 'assets/minemon/textures/emissive/rocket_eye_red.png')
+        if (!rocketRedEyeSource.isFile()) throw new GradleException('Missing Rocket red-eye overlay texture')
+        def rocketRedEyeTarget = new File(destinationRoot, 'assets/minemon_gen1/textures/emissive/rocket_eye_red.png')
+        rocketRedEyeTarget.parentFile.mkdirs()
+        rocketRedEyeTarget.bytes = rocketRedEyeSource.bytes
         ['en_us.json','pt_br.json'].each { name ->
             def source = new File(sourceRoot, "assets/minemon/lang/${name}")
             def target = new File(destinationRoot, "assets/minemon_gen1/lang/${name}")

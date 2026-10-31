@@ -28,4 +28,18 @@ public final class WaterSearchTest {
   water.remove(center.offset(1,1,1));
   assertFalse(WaterMovementGoal.isNavigableWaterRegion(center,water::contains));
  }
+ @Test public void wallClearanceUsesTheEntityBoundsAndIgnoresBlocksBelowTheBody(){
+  var body=new net.minecraft.world.phys.AABB(0,2,0,2,4,2);
+  var wall=new net.minecraft.world.phys.AABB(7,2,0,8,4,2);
+  var floor=new net.minecraft.world.phys.AABB(0,0,0,2,1,2);
+  assertEquals(5.0D,WaterMovementGoal.horizontalWallClearance(body,java.util.List.of(wall,floor)),0.0001D);
+ }
+
+ @Test public void closeVerticalObstaclesDoNotCountAsLateralWalls(){
+  var body=new net.minecraft.world.phys.AABB(0,2,0,1,3,1);
+  var ceiling=new net.minecraft.world.phys.AABB(0,4,0,1,5,1);
+  assertTrue(Double.isInfinite(WaterMovementGoal.horizontalWallClearance(body,java.util.List.of(ceiling))));
+  assertEquals(5.0D,WaterMovementGoal.WALL_PREFERENCE_DISTANCE,0.0D);
+ }
+
 }

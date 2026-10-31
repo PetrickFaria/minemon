@@ -37,7 +37,7 @@ public final class RocketChallengeManager {
 
     private static final String[] SPECIES = {
             "zubat", "rattata", "ekans", "koffing", "golbat",
-            "raticate", "arbok", "koffing", "kangaskhan", "mewtwo"
+            "raticate", "arbok", "weezing", "kangaskhan", "mewtwo"
     };
     private static final int[] HEALTH = {10, 14, 18, 22, 26, 30, 34, 38, 42, 46};
     private static final int[] DAMAGE = {4, 6, 8, 10, 12, 14, 16, 18, 20, 22};
