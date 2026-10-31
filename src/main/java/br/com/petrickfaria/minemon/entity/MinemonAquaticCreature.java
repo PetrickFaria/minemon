@@ -76,7 +76,7 @@ public final class MinemonAquaticCreature extends MinemonCreature {
         // Night rest eases aquatic creatures to their chosen sleep depth before
         // isSleeping becomes true. Once asleep, stop travel before vanilla can
         // integrate residual swimming momentum or controller input into a drift.
-        if(!this.level.isClientSide&&this.isSleeping()){
+        if(!this.level.isClientSide&&this.isSleeping()&&this.isInWaterOrBubble()){
             this.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
             input=net.minecraft.world.phys.Vec3.ZERO;
         }
