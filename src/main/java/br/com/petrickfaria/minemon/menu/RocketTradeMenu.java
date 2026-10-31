@@ -58,6 +58,7 @@ public final class RocketTradeMenu extends AbstractContainerMenu {
                 super.onTake(player, stack);
                 if (!player.level.isClientSide && player instanceof ServerPlayer && isUnlocked()) {
                     consumeTen();
+                        RocketChallengeManager.recordCompletedTrade(villager, (ServerPlayer) player);
                     updateResult();
                     broadcastChanges();
                 }

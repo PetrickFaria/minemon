@@ -39,23 +39,25 @@ public final class RocketChallengeGameTests {
     }
 
     @GameTest(template="test_arena", timeoutTicks=100)
-    public static void challengeRattataHasExpectedStatsAndRewardsExactlyOneCoin(GameTestHelper helper) {
+    public static void firstLevelChallengeAndCompletedTradePersist(GameTestHelper helper) {
         for (int x=0;x<16;x++) for(int z=0;z<16;z++) helper.setBlock(new BlockPos(x,0,z),Blocks.STONE);
         Villager villager = helper.spawn(EntityType.VILLAGER, new BlockPos(6,1,6));
         villager.setVillagerData(villager.getVillagerData().setProfession(ModVillagers.ROCKET.get()));
         ServerPlayer player = player(helper);
-        MinemonCreature rattata = RocketChallengeManager.spawnChallengeRattata(helper.getLevel(), villager, player);
-        if (rattata == null) { helper.fail("Rocket challenge Rattata did not spawn"); return; }
-        check(helper, rattata != null && rattata.isRocketSpecial(), "Rocket villager must create its special Rattata");
-        check(helper, rattata != null && rattata.getTarget() == player, "Special Rattata must target the activating player");
-        check(helper, rattata != null && rattata.getMaxHealth() == 10.0F && rattata.getHealth() == 10.0F,
-                "Special Rattata must use the Common level-one base of ten HP");
-        check(helper, rattata.getAttributeValue(Attributes.ATTACK_DAMAGE) == 4.0D,
-                "Special Rattata must use the Common level-one base of four damage");
-        check(helper, RocketChallengeManager.spawnChallengeRattata(helper.getLevel(), villager, player) == null,
-                "One Rocket villager may not spawn a second active Rattata");
-        rattata.hurt(net.minecraft.world.damagesource.DamageSource.playerAttack(player), 20.0F);
-        check(helper, RocketChallengeManager.isChallengeComplete(villager), "Defeating Rattata must permanently complete the challenge");
+        check(helper, RocketChallengeManager.getLevel(villager) == 1, "New Rocket villager must start at level 1");
+        MinemonCreature challenge = RocketChallengeManager.spawnChallengePokemon(helper.getLevel(), villager, player);
+        if (challenge == null) { helper.fail("Rocket level 1 challenge did not spawn"); return; }
+        check(helper, challenge.isRocketSpecial(), "Rocket villager must mark its challenge as special");
+        check(helper, challenge.getSpeciesSlug().equals("zubat"), "Level 1 must summon Zubat");
+        check(helper, challenge.getTarget() == player, "Special Pokémon must target the activating player");
+        check(helper, challenge.getMaxHealth() == 10.0F && challenge.getHealth() == 10.0F,
+                "Level 1 Zubat must have ten HP");
+        check(helper, challenge.getAttributeValue(Attributes.ATTACK_DAMAGE) == 4.0D,
+                "Level 1 Zubat must deal four internal damage");
+        check(helper, RocketChallengeManager.spawnChallengePokemon(helper.getLevel(), villager, player) == null,
+                "One Rocket villager may not spawn a duplicate active challenge");
+        challenge.hurt(net.minecraft.world.damagesource.DamageSource.playerAttack(player), 100.0F);
+        check(helper, RocketChallengeManager.isChallengeComplete(villager), "Defeating Zubat must unlock level 1 trades");
         long coins = helper.getLevel().getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class, villager.getBoundingBox().inflate(5.0D))
                 .stream().filter(item -> item.getItem().is(ModItems.POKE_COIN.get())).mapToLong(item -> item.getItem().getCount()).sum();
         check(helper, coins == 1, "Challenge defeat must drop exactly one physical PokéCoin; found " + coins);
@@ -69,6 +71,8 @@ public final class RocketChallengeGameTests {
         check(helper, menu.getCarried().is(ModItems.POKE_COIN.get()) && !menu.getSlot(5).hasItem()
                         && menu.getSlot(0).getItem().isEmpty(),
                 "Taking the output consumes ten souls exactly once and delivers the PokéCoin");
+        check(helper, RocketChallengeManager.getTradesThisLevel(villager) == 1,
+                "A completed exchange output pickup must count as one trade");
         player.getInventory().placeItemBackInInventory(menu.getCarried());
         menu.setCarried(ItemStack.EMPTY);
         menu.getSlot(0).set(new ItemStack(ModItems.SOULS.get("fire").get(), 10));
@@ -77,6 +81,53 @@ public final class RocketChallengeGameTests {
                         && targetSoul.soulType() != br.com.petrickfaria.minemon.pokec.SoulType.FIRE,
                 "Selected soul exchange output must differ from the input soul type");
         menu.removed(player);
+        player.discard();
+        helper.succeed();
+    }
+
+    @GameTest(template="test_arena", timeoutTicks=3000)
+    public static void allTenRocketLevelsUseExactSpeciesStatsAndTradeThresholds(GameTestHelper helper) {
+        for (int x=0;x<16;x++) for(int z=0;z<16;z++) helper.setBlock(new BlockPos(x,0,z),Blocks.STONE);
+        Villager villager = helper.spawn(EntityType.VILLAGER, new BlockPos(6,1,6));
+        villager.setVillagerData(villager.getVillagerData().setProfession(ModVillagers.ROCKET.get()));
+        ServerPlayer player = player(helper);
+        String[] species = {"zubat", "rattata", "ekans", "koffing", "golbat", "raticate", "arbok", "koffing", "kangaskhan", "mewtwo"};
+        int[] health = {10, 14, 18, 22, 26, 30, 34, 38, 42, 46};
+        int[] damage = {4, 6, 8, 10, 12, 14, 16, 18, 20, 22};
+        int[] trades = {5, 15, 25, 35, 45, 55, 65, 75, 85};
+
+        for (int level = 1; level <= 10; level++) {
+            check(helper, RocketChallengeManager.getLevel(villager) == level,
+                    "Rocket level should be " + level);
+            MinemonCreature challenge = RocketChallengeManager.spawnChallengePokemon(helper.getLevel(), villager, player);
+            if (challenge == null) { helper.fail("Challenge failed to spawn at Rocket level " + level); return; }
+            check(helper, challenge.getSpeciesSlug().equals(species[level - 1]),
+                    "Rocket level " + level + " must summon " + species[level - 1]);
+            check(helper, challenge.getMaxHealth() == health[level - 1] && challenge.getHealth() == health[level - 1],
+                    "Rocket level " + level + " must have " + health[level - 1] + " HP");
+            check(helper, challenge.getAttributeValue(Attributes.ATTACK_DAMAGE) == damage[level - 1],
+                    "Rocket level " + level + " must deal " + damage[level - 1] + " damage");
+            challenge.hurt(net.minecraft.world.damagesource.DamageSource.playerAttack(player), 100.0F);
+            check(helper, RocketChallengeManager.isChallengeComplete(villager),
+                    "Victory must unlock Rocket level " + level + " trades");
+            if (level == 10) continue;
+
+            for (int trade = 0; trade < trades[level - 1]; trade++)
+                RocketChallengeManager.recordCompletedTrade(villager, player);
+            check(helper, RocketChallengeManager.getLevel(villager) == level + 1,
+                    "Exactly " + trades[level - 1] + " trades must advance Rocket to level " + (level + 1));
+            check(helper, RocketChallengeManager.getTradesThisLevel(villager) == 0,
+                    "Trade count must reset after Rocket reaches level " + (level + 1));
+            check(helper, !RocketChallengeManager.isChallengeComplete(villager),
+                    "Trades must relock after Rocket reaches level " + (level + 1));
+        }
+
+        for (int i = 0; i < 200; i++) RocketChallengeManager.recordCompletedTrade(villager, player);
+        check(helper, RocketChallengeManager.getLevel(villager) == 10,
+                "Rocket level 10 must be capped; no level 11 may be created");
+        check(helper, RocketChallengeManager.isChallengeComplete(villager),
+                "Final Mewtwo victory must keep level 10 trades unlocked");
+        CompoundTagVerifier.checkPersisted(helper, villager);
         player.discard();
         helper.succeed();
     }
