@@ -54,11 +54,32 @@ public final class MinemonAquaticCreature extends MinemonCreature {
         };
     }
 
+    private boolean gyaradosSurfaceFootprintInWater(net.minecraft.world.phys.AABB box){
+        var center=new net.minecraft.core.BlockPos(this.getX(),this.getY(),this.getZ());
+        double surface=WaterMovementGoal.surfaceAt(this,center);
+        if(!Double.isFinite(surface))return false;
+        int waterY=net.minecraft.util.Mth.floor(surface-1.0E-4D);
+        for(int x=net.minecraft.util.Mth.floor(box.minX+0.001D);x<=net.minecraft.util.Mth.floor(box.maxX-0.001D);x++)
+            for(int z=net.minecraft.util.Mth.floor(box.minZ+0.001D);z<=net.minecraft.util.Mth.floor(box.maxZ-0.001D);z++)
+                if(!this.level.getFluidState(new net.minecraft.core.BlockPos(x,waterY,z)).is(net.minecraft.tags.FluidTags.WATER))return false;
+        return true;
+    }
+
     @Override public void travel(net.minecraft.world.phys.Vec3 input){
         // LivingEntity otherwise subtracts 0.005 vertical velocity every water
         // tick. Neutral buoyancy lets the swimming controller reach higher
         // nodes; ordinary land gravity is restored immediately on shore.
         if(!this.level.isClientSide)this.setNoGravity(this.isInWater());
+        if(!this.level.isClientSide&&this.getSpeciesSlug().equals("gyarados")
+                &&this.isNaturalSurface()&&!this.isSleeping()&&!this.isNightResting()
+                &&this.isInWater()){
+            var motion=this.getDeltaMovement();
+            var nextBox=this.getBoundingBox().move(motion.x,0.0D,motion.z);
+            if(!gyaradosSurfaceFootprintInWater(nextBox)){
+                this.setDeltaMovement(0.0D,motion.y,0.0D);
+                input=new net.minecraft.world.phys.Vec3(0.0D,input.y,0.0D);
+            }
+        }
         super.travel(input);
     }
 
