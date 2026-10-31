@@ -27,10 +27,17 @@ public final class NaturalMovementGoals {
         int minX = Mth.floor(box.minX - 3.0D), maxX = Mth.floor(box.maxX + 3.0D);
         int minZ = Mth.floor(box.minZ - 3.0D), maxZ = Mth.floor(box.maxZ + 3.0D);
         for (int x = minX; x <= maxX; x++) for (int z = minZ; z <= maxZ; z++) {
-            if (!NightShoreLandingRules.waterIsTooClose(box, x, z, 3.0D)) continue;
+            boolean close=NightShoreLandingRules.waterIsTooClose(box,x,z,3.0D);
+            if (!close) continue;
             BlockPos column = new BlockPos(x, Mth.floor(box.minY), z);
-            if (!mob.level.hasChunkAt(column)) continue;
+            boolean loaded=mob.level.hasChunkAt(column);
+            if (!loaded) continue;
             int surface = mob.level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.WORLD_SURFACE,x,z);
+            if(mob.getSpeciesSlug().equals("pidgeot")&&x==436&&z==154&&mob.tickCount%100==0){
+                var sample=new BlockPos(x,surface-1,z);
+                com.mojang.logging.LogUtils.getLogger().info("SHORE CLEARANCE TRACE tick={} pos={} box={} close={} loaded={} height={} fluid={}",
+                        mob.tickCount,mob.position(),box,close,loaded,surface,mob.level.getFluidState(sample));
+            }
             for (int depth = 1; depth <= 4 && surface - depth >= mob.level.getMinBuildHeight(); depth++)
                 if (mob.level.getFluidState(new BlockPos(x,surface-depth,z)).is(FluidTags.WATER)) return false;
         }
@@ -293,6 +300,8 @@ public final class NaturalMovementGoals {
                 path = new Path(java.util.List.of(), approach, true);
             }
             this.approachSite = approach;
+            if(this.mob.getSpeciesSlug().equals("pidgeot"))
+                com.mojang.logging.LogUtils.getLogger().info("SHORE SELECT feet={} approach={} waterTop={} direct={} path={}",feet,approach,waterTop,directClear,path.getTarget());
             this.cachedLandingFeet = feet.immutable();
             this.cachedLandingUntil = this.mob.tickCount + 200L;
             return path;
