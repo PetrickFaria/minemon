@@ -80,6 +80,7 @@ public final class NaturalMovementGoals {
         private int hoverMoveDelay;
         private int hoverDirection;
         private boolean shoreRoute;
+        private boolean directShoreRoute;
 
         SleepLanding(MinemonCreature mob) {
             this.mob = mob;
@@ -110,10 +111,17 @@ public final class NaturalMovementGoals {
         @Override public void start() {
             this.pathTicks=0;
             // 1.0 is a moderate 1.43× increase over the usual 0.7 landing speed, only for shore escapes.
-            this.mob.getNavigation().moveTo(this.landingPath, this.shoreRoute ? 1.0D : 0.7D);
+            if (this.directShoreRoute) {
+                this.mob.getNavigation().stop();
+                moveDirectlyToApproach();
+            } else this.mob.getNavigation().moveTo(this.landingPath, this.shoreRoute ? 1.0D : 0.7D);
         }
         @Override public void tick() {
             this.pathTicks++;
+            if (this.directShoreRoute && this.approachSite != null) {
+                moveDirectlyToApproach();
+                return;
+            }
             // Native air paths stop within a width-dependent radius. Complete
             // the final short approach with the same collision-respecting move
             // control before allowing gravity to lower a wide body into water.
@@ -124,7 +132,7 @@ public final class NaturalMovementGoals {
                 this.mob.getMoveControl().setWantedPosition(this.approachSite.getX()+.5,
                         this.approachSite.getY(),this.approachSite.getZ()+.5,this.shoreRoute?1.0D:.7D);
         }
-        @Override public void stop() { this.mob.getNavigation().stop(); this.landingPath = null; this.retryDelay=20; this.shoreRoute=false; }
+        @Override public void stop() { this.mob.getNavigation().stop(); this.landingPath = null; this.retryDelay=20; this.shoreRoute=false; this.directShoreRoute=false; }
 
         private Path findLandingPath() {
             if (this.shoreRoute) return findShoreLandingPath();
@@ -172,6 +180,7 @@ public final class NaturalMovementGoals {
 
         /** Searches a bounded 50×50×50 volume without querying unloaded chunks. */
         private Path findShoreLandingPath() {
+            this.directShoreRoute = false;
             BlockPos origin = this.mob.blockPosition();
             double waterTop = WaterMovementGoal.restSurfaceAt(this.mob, origin);
             if (this.cachedLandingFeet != null && this.mob.tickCount < this.cachedLandingUntil
@@ -229,7 +238,11 @@ public final class NaturalMovementGoals {
                     approach.getY() - this.mob.getY(), feet.getZ() + 0.5D - this.mob.getZ());
             if (!loadedBox(approachBox) || !this.mob.level.noCollision(this.mob, approachBox)) return null;
             Path path = this.mob.getNavigation().createPath(approach, 0);
-            if (path == null || !path.canReach()) return null;
+            if (path == null) return null;
+            if (!path.canReach()) {
+                if (!directLineClear(approachBox)) return null;
+                this.directShoreRoute = true;
+            }
             this.approachSite = approach;
             this.cachedLandingFeet = feet.immutable();
             this.cachedLandingUntil = this.mob.tickCount + 200L;
@@ -242,6 +255,32 @@ public final class NaturalMovementGoals {
             for (int chunkX = minChunkX; chunkX <= maxChunkX; chunkX++)
                 for (int chunkZ = minChunkZ; chunkZ <= maxChunkZ; chunkZ++)
                     if (!this.mob.level.hasChunkAt(new BlockPos(chunkX << 4, Mth.floor(box.minY), chunkZ << 4))) return false;
+            return true;
+        }
+
+        private void moveDirectlyToApproach() {
+            double x = this.approachSite.getX() + 0.5D;
+            double y = this.approachSite.getY();
+            double z = this.approachSite.getZ() + 0.5D;
+            var targetBox = this.mob.getBoundingBox().move(x - this.mob.getX(), y - this.mob.getY(), z - this.mob.getZ());
+            if (!directLineClear(targetBox)) {
+                this.directShoreRoute = false;
+                this.mob.getNavigation().stop();
+                return;
+            }
+            this.mob.getMoveControl().setWantedPosition(x, y, z, 1.0D);
+        }
+
+        /** Fallback for unobstructed air corridors where native pathfinding cannot connect the nodes. */
+        private boolean directLineClear(net.minecraft.world.phys.AABB targetBox) {
+            var start = this.mob.getBoundingBox();
+            double dx = targetBox.minX - start.minX, dy = targetBox.minY - start.minY, dz = targetBox.minZ - start.minZ;
+            int steps = Math.max(1, Mth.ceil(Math.sqrt(dx * dx + dy * dy + dz * dz) * 2.0D));
+            for (int step = 1; step <= steps; step++) {
+                double fraction = step / (double) steps;
+                var probe = start.move(dx * fraction, dy * fraction, dz * fraction);
+                if (!loadedBox(probe) || !this.mob.level.noCollision(this.mob, probe)) return false;
+            }
             return true;
         }
 
