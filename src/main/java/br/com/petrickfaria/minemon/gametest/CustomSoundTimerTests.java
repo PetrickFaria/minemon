@@ -22,7 +22,7 @@ import java.util.UUID;
 @GameTestHolder(Minemon.MOD_ID)
 @PrefixGameTestTemplate(false)
 public final class CustomSoundTimerTests {
-    @GameTest(template = "test_arena", timeoutTicks = 30)
+    @GameTest(template = "test_arena", batch = "custom_sound_schedule", timeoutTicks = 30)
     public static void createsExactly151FoldersFromNationalDex(GameTestHelper helper) {
         try {
             br.com.petrickfaria.minemon.sound.CustomSoundFolders.createAll();
@@ -98,9 +98,28 @@ public final class CustomSoundTimerTests {
         });
     }
 
-    @GameTest(template = "test_arena", timeoutTicks = 30)
+    @GameTest(template = "test_arena", batch = "custom_sound_interaction", timeoutTicks = 30)
     public static void onlyMainHandRightClickTriggersCustomSound(GameTestHelper helper) {
         helper.getLevel().setDayTime(1000);
+        awaitDaylight(helper, 20, () -> runMainHandRightClickTest(helper));
+    }
+
+    private static void awaitDaylight(GameTestHelper helper, int remainingTicks, Runnable ready) {
+        var level = helper.getLevel();
+        if (!level.dimensionType().hasSkyLight() || !level.isNight()) {
+            ready.run();
+            return;
+        }
+        if (remainingTicks <= 0) {
+            helper.fail("MAIN_HAND_DAYLIGHT_DIAGNOSTIC: daylight did not become observable after setting dayTime=1000; "
+                    + "worldTime=" + level.getDayTime() + ",isNight=" + level.isNight()
+                    + ",dimensionHasSkyLight=" + level.dimensionType().hasSkyLight());
+            return;
+        }
+        helper.runAfterDelay(1, () -> awaitDaylight(helper, remainingTicks - 1, ready));
+    }
+
+    private static void runMainHandRightClickTest(GameTestHelper helper) {
         MinemonCreature creature = helper.spawn(ModEntities.BULBASAUR.get(), new BlockPos(5, 1, 5));
         float initialHealth = creature.getHealth();
         ServerPlayer player = new ServerPlayer(helper.getLevel().getServer(), helper.getLevel(),
