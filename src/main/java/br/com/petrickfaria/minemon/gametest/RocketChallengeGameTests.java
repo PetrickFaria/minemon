@@ -40,6 +40,7 @@ public final class RocketChallengeGameTests {
 
     @GameTest(template="test_arena", timeoutTicks=100)
     public static void firstLevelChallengeAndCompletedTradePersist(GameTestHelper helper) {
+        System.setProperty("minemon.debugRocketSpawns", "true");
         for (int x=0;x<16;x++) for(int z=0;z<16;z++) helper.setBlock(new BlockPos(x,0,z),Blocks.STONE);
         Villager villager = helper.spawn(EntityType.VILLAGER, new BlockPos(6,1,6));
         villager.setVillagerData(villager.getVillagerData().setProfession(ModVillagers.ROCKET.get()));
@@ -87,6 +88,7 @@ public final class RocketChallengeGameTests {
 
     @GameTest(template="test_arena", timeoutTicks=3000)
     public static void allTenRocketLevelsUseExactSpeciesStatsAndTradeThresholds(GameTestHelper helper) {
+        System.setProperty("minemon.debugRocketSpawns", "true");
         for (int x=0;x<16;x++) for(int z=0;z<16;z++) helper.setBlock(new BlockPos(x,0,z),Blocks.STONE);
         Villager villager = helper.spawn(EntityType.VILLAGER, new BlockPos(6,1,6));
         villager.setVillagerData(villager.getVillagerData().setProfession(ModVillagers.ROCKET.get()));
