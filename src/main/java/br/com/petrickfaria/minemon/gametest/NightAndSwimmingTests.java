@@ -383,7 +383,11 @@ public final class NightAndSwimmingTests {
   if(elapsed%20L==0L||remaining<=0)
    com.mojang.logging.LogUtils.getLogger().info("NIGHT COMBAT RETURN TRACE elapsed={} {}",elapsed,
        combatSleepSnapshot(h,mob,attacker,restAnchor,combatEndedAt));
-  if(mob.isSleeping()){next.run();return;}
+  if(mob.isSleeping()){
+   com.mojang.logging.LogUtils.getLogger().info("NIGHT COMBAT RETURN PASS elapsed={} {}",elapsed,
+       combatSleepSnapshot(h,mob,attacker,restAnchor,combatEndedAt));
+   next.run();return;
+  }
   if(remaining<=0){
    String state=combatSleepSnapshot(h,mob,attacker,restAnchor,combatEndedAt);
    h.getLevel().setDayTime(1000);

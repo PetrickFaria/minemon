@@ -421,6 +421,11 @@ def aquatic_sleep_clips(data,d):
  if not eye_bones:
   raise ValueError(f'{slug}: generated sleep clip has no closed-eye tracks')
  pose=copy.deepcopy(animations[idle]);pose.update(loop=True,animation_length=4.0)
+ # The movement controller owns the aquatic resting posture; a separate
+ # controller applies the closed-eye tracks. Do not let both clips write eye
+ # bones, or their controller evaluation order can reopen a pupil (Seaking).
+ pose_bones=pose.setdefault('bones',{})
+ for name in eye_bones:pose_bones.pop(name,None)
  animations['animation.'+slug+'.minemon_aquatic_sleep']=pose
  animations['animation.'+slug+'.minemon_aquatic_sleep_eyes']={
   'loop':True,'animation_length':4.0,'bones':eye_bones}
