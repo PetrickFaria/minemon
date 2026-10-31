@@ -123,12 +123,7 @@ public final class RocketChallengeManager {
         MinemonCreature challenge = type.get().create(level);
         if (challenge == null) return null;
 
-        double x = villager.getX() + 1.5D;
-        double y = villager.getY();
-        double z = villager.getZ() + 0.5D;
-        challenge.moveTo(x, y, z, player.getYRot(), 0.0F);
-        BlockPos spawnPos = challenge.blockPosition();
-        if (level.getFluidState(spawnPos).isEmpty() == false || !level.noCollision(challenge)) {
+        if (!moveToSafeSpawn(level, villager, challenge, player.getYRot())) {
             challenge.discard();
             return null; // Keep the challenge pending until a safe spot becomes available.
         }
@@ -150,6 +145,26 @@ public final class RocketChallengeManager {
         data.putUUID(ACTIVE, challenge.getUUID());
         data.putBoolean(VICTORY, false);
         return challenge;
+    }
+
+    private static boolean moveToSafeSpawn(ServerLevel level, Villager villager, MinemonCreature challenge, float yaw) {
+        // Large species can overlap the villager even when the center is 1.5 blocks away.
+        // Search a small ring so the challenge uses the first clear, dry position beside its trainer.
+        double[][] offsets = {
+                {2.25D, 0.0D}, {-2.25D, 0.0D}, {0.0D, 2.25D}, {0.0D, -2.25D},
+                {2.25D, 2.25D}, {2.25D, -2.25D}, {-2.25D, 2.25D}, {-2.25D, -2.25D},
+                {3.5D, 0.0D}, {-3.5D, 0.0D}, {0.0D, 3.5D}, {0.0D, -3.5D}
+        };
+        for (double[] offset : offsets) {
+            double x = villager.getX() + offset[0];
+            double y = villager.getY();
+            double z = villager.getZ() + offset[1];
+            challenge.moveTo(x, y, z, yaw, 0.0F);
+            BlockPos pos = challenge.blockPosition();
+            if (!level.getFluidState(pos).isEmpty() || !level.getBlockState(pos.below()).isSolidRender(level, pos.below())) continue;
+            if (level.noCollision(challenge)) return true;
+        }
+        return false;
     }
 
     /** Records exactly one server-confirmed output pickup from the Rocket exchange menu. */
