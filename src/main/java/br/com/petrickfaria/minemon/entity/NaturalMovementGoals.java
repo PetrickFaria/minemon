@@ -81,6 +81,8 @@ public final class NaturalMovementGoals {
         private int hoverDirection;
         private boolean shoreRoute;
         private boolean directShoreRoute;
+        private int shoreStallTicks;
+        private net.minecraft.world.phys.Vec3 lastShorePosition;
 
         SleepLanding(MinemonCreature mob) {
             this.mob = mob;
@@ -110,6 +112,8 @@ public final class NaturalMovementGoals {
 
         @Override public void start() {
             this.pathTicks=0;
+            this.shoreStallTicks=0;
+            this.lastShorePosition=this.mob.position();
             // 1.0 is a moderate 1.43× increase over the usual 0.7 landing speed, only for shore escapes.
             if (this.directShoreRoute) {
                 this.mob.getNavigation().stop();
@@ -118,6 +122,20 @@ public final class NaturalMovementGoals {
         }
         @Override public void tick() {
             this.pathTicks++;
+            if (this.shoreRoute && !this.directShoreRoute && !this.mob.getNavigation().isDone()) {
+                if (this.lastShorePosition != null && this.mob.position().distanceToSqr(this.lastShorePosition) < 0.0025D)
+                    this.shoreStallTicks++;
+                else this.shoreStallTicks=0;
+                this.lastShorePosition=this.mob.position();
+                if (this.shoreStallTicks >= 20 && this.approachSite != null) {
+                    var target=this.mob.getBoundingBox().move(this.approachSite.getX()+.5D-this.mob.getX(),
+                            this.approachSite.getY()-this.mob.getY(),this.approachSite.getZ()+.5D-this.mob.getZ());
+                    if (directLineClear(target)) {
+                        this.directShoreRoute=true;
+                        this.mob.getNavigation().stop();
+                    }
+                }
+            }
             if (this.directShoreRoute && this.approachSite != null) {
                 moveDirectlyToApproach();
                 return;
@@ -132,7 +150,7 @@ public final class NaturalMovementGoals {
                 this.mob.getMoveControl().setWantedPosition(this.approachSite.getX()+.5,
                         this.approachSite.getY(),this.approachSite.getZ()+.5,this.shoreRoute?1.0D:.7D);
         }
-        @Override public void stop() { this.mob.getNavigation().stop(); this.landingPath = null; this.retryDelay=20; this.shoreRoute=false; this.directShoreRoute=false; }
+        @Override public void stop() { this.mob.getNavigation().stop(); this.landingPath = null; this.retryDelay=20; this.shoreRoute=false; this.directShoreRoute=false; this.shoreStallTicks=0; this.lastShorePosition=null; }
 
         private Path findLandingPath() {
             if (this.shoreRoute) return findShoreLandingPath();
