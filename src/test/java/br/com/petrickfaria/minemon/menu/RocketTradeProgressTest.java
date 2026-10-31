@@ -8,7 +8,8 @@ public final class RocketTradeProgressTest {
     @Test public void tradeProgressTracksCurrentLevelAndCapsAtLevelTen() {
         int levelOneTrades = RocketChallengeManager.requiredTradesForNextLevel(1);
         assertEquals(0.0F, RocketChallengeManager.tradeProgress(1, 0), 0.0F);
-        assertEquals(0.5F, RocketChallengeManager.tradeProgress(1, levelOneTrades / 2), 0.001F);
+        assertEquals((float) (levelOneTrades / 2) / levelOneTrades,
+                RocketChallengeManager.tradeProgress(1, levelOneTrades / 2), 0.001F);
         assertEquals(1.0F, RocketChallengeManager.tradeProgress(1, levelOneTrades), 0.0F);
         assertEquals(1.0F, RocketChallengeManager.tradeProgress(1, levelOneTrades + 20), 0.0F);
 
