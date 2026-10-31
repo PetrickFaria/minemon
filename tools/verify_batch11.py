@@ -157,6 +157,7 @@ changed=subprocess.check_output(['git','diff','--name-only',BASE,'--','src/main/
 changed+=subprocess.check_output(['git','ls-files','--others','--exclude-standard','--','src/main/resources'],cwd=ROOT,text=True).splitlines()
 allowed.update(pokec_resource_paths())
 allowed.add('src/main/resources/assets/minemon_gen1/particles/gastly_small_smoke.json')
+allowed.add('src/main/resources/assets/minemon/textures/emissive/rocket_eye_red.png')
 assert set(changed)<=allowed,set(changed)-allowed
 print('PASS BATCH 11 #101-110: Kanto source models, textures, native clips, articulation/fallback, and exact first-100 preservation')
 

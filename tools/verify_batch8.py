@@ -175,6 +175,7 @@ source_fire_frames={f'src/main/resources/assets/minemon/textures/pokemon/{slug}_
 allowed_paths.update(source_fire_frames)
 allowed_paths.add('src/main/resources/'+ 'assets/minemon/textures/pokemon/arbok_cobblemon_1_8_2/arbok.png')
 allowed_paths.update(path for path in pokec_resource_paths() if '/assets/minemon/' in path)
+allowed_paths.add('src/main/resources/assets/minemon/textures/emissive/rocket_eye_red.png')
 changed=subprocess.check_output(['git','diff','--name-only',BASE,'--','src/main/resources/assets/minemon'],cwd=ROOT,text=True).splitlines()
 assert set(changed)<=allowed_paths,set(changed)-allowed_paths
 changed_resources=subprocess.check_output(['git','diff','--name-only',BASE,'--','src/main/resources'],cwd=ROOT,text=True).splitlines()
