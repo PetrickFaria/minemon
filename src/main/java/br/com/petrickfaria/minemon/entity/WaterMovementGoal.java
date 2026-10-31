@@ -166,7 +166,10 @@ public final class WaterMovementGoal extends Goal {
   // Validate the whole route, including the space between path nodes. Wide
   // surface swimmers can clear each node yet clip a shallow corner while the
   // navigator interpolates toward the following node.
-  double routeTop=Double.NaN,previousX=Double.NaN,previousY=Double.NaN,previousZ=Double.NaN;
+  // Include the horizontal gap from the live entity to the first path node.
+  // Keep Y unset here: after waking at the lake floor, the first surface route
+  // still targets its surface height while the entity is rising vertically.
+  double routeTop=Double.NaN,previousX=mob.getX(),previousY=Double.NaN,previousZ=mob.getZ();
   for(int i=0;i<path.getNodeCount();i++){
    var node=path.getNode(i);
    double endX=node.x+.5D,endY=node.y,endZ=node.z+.5D;
