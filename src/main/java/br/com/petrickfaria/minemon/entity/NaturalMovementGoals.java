@@ -37,11 +37,6 @@ public final class NaturalMovementGoals {
             boolean loaded=mob.level.hasChunkAt(column);
             if (!loaded) continue;
             int surface = mob.level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.WORLD_SURFACE,x,z);
-            if(mob.getSpeciesSlug().equals("pidgeot")&&x==436&&z==154&&mob.tickCount%100==0){
-                var sample=new BlockPos(x,surface-1,z);
-                com.mojang.logging.LogUtils.getLogger().info("SHORE CLEARANCE TRACE tick={} pos={} box={} close={} loaded={} height={} fluid={}",
-                        mob.tickCount,mob.position(),box,close,loaded,surface,mob.level.getFluidState(sample));
-            }
             for (int depth = 1; depth <= 4 && surface - depth >= mob.level.getMinBuildHeight(); depth++)
                 if (mob.level.getFluidState(new BlockPos(x,surface-depth,z)).is(FluidTags.WATER)) return false;
         }
@@ -136,10 +131,7 @@ public final class NaturalMovementGoals {
 
         @Override public void start() {
             this.pathTicks=0;
-            if(this.mob.getSpeciesSlug().equals("pidgeot"))
-                com.mojang.logging.LogUtils.getLogger().info("SHORE START tick={} direct={} route={} target={} pos={} wants={} night={}",
-                        this.mob.tickCount,this.directShoreRoute,this.shoreRoute,this.approachSite,this.mob.position(),
-                        this.mob.wantsNaturalLanding(),this.mob.isNightResting());
+
             this.shoreStallTicks=0;
             this.lastShorePosition=this.mob.position();
             // 1.0 is a moderate 1.43× increase over the usual 0.7 landing speed, only for shore escapes.
@@ -150,10 +142,7 @@ public final class NaturalMovementGoals {
         }
         @Override public void tick() {
             this.pathTicks++;
-            if(this.mob.getSpeciesSlug().equals("pidgeot")&&this.mob.tickCount%20==0)
-                com.mojang.logging.LogUtils.getLogger().info("SHORE GOAL TICK tick={} direct={} route={} pathTicks={} wants={} night={} ground={} pos={} target={} navDone={}",
-                        this.mob.tickCount,this.directShoreRoute,this.shoreRoute,this.pathTicks,this.mob.wantsNaturalLanding(),
-                        this.mob.isNightResting(),this.mob.isOnGround(),this.mob.position(),this.approachSite,this.mob.getNavigation().isDone());
+
             if (this.shoreRoute && !this.directShoreRoute && !this.mob.getNavigation().isDone()) {
                 if (this.lastShorePosition != null && this.mob.position().distanceToSqr(this.lastShorePosition) < 0.0025D)
                     this.shoreStallTicks++;
@@ -199,10 +188,6 @@ public final class NaturalMovementGoals {
             }
         }
         @Override public void stop() {
-            if(this.mob.getSpeciesSlug().equals("pidgeot"))
-                com.mojang.logging.LogUtils.getLogger().info("SHORE STOP tick={} pathTicks={} direct={} route={} wants={} night={} ground={} pos={} target={}",
-                        this.mob.tickCount,this.pathTicks,this.directShoreRoute,this.shoreRoute,this.mob.wantsNaturalLanding(),
-                        this.mob.isNightResting(),this.mob.isOnGround(),this.mob.position(),this.approachSite);
             this.mob.getNavigation().stop(); this.landingPath = null; this.retryDelay=20; this.shoreRoute=false; this.directShoreRoute=false; this.shoreStallTicks=0; this.lastShorePosition=null; }
 
         private Path findLandingPath() {
@@ -305,15 +290,6 @@ public final class NaturalMovementGoals {
             var landingBox = this.mob.getBoundingBox().move(feet.getX() + 0.5D - this.mob.getX(),
                     surface - this.mob.getY(), feet.getZ() + 0.5D - this.mob.getZ());
             boolean clearance=hasThreeBlockWaterClearance(this.mob,landingBox);
-            if(this.mob.getSpeciesSlug().equals("pidgeot")
-                    &&feet.getX()==this.mob.blockPosition().getX()-2&&feet.getZ()==this.mob.blockPosition().getZ()-2){
-                int waterX=feet.getX()+2,waterZ=feet.getZ();
-                int height=this.mob.level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.WORLD_SURFACE,waterX,waterZ);
-                var waterPos=new BlockPos(waterX,height-1,waterZ);
-                com.mojang.logging.LogUtils.getLogger().info("SHORE CANDIDATE feet={} box={} waterPos={} loaded={} height={} fluid={} close={} clearance={}",
-                        feet,landingBox,waterPos,this.mob.level.hasChunkAt(waterPos),height,this.mob.level.getFluidState(waterPos),
-                        NightShoreLandingRules.waterIsTooClose(landingBox,waterX,waterZ,3.0D),clearance);
-            }
             if (!loadedBox(landingBox) || !clearance
                     || !hasThreeBlockWaterClearanceAtSurface(this.mob,landingBox,waterTop)) return null;
             double approachY = Math.max(feet.getY() + 2.0D,
@@ -331,8 +307,6 @@ public final class NaturalMovementGoals {
                 path = new Path(java.util.List.of(), approach, true);
             }
             this.approachSite = approach;
-            if(this.mob.getSpeciesSlug().equals("pidgeot"))
-                com.mojang.logging.LogUtils.getLogger().info("SHORE SELECT feet={} approach={} waterTop={} direct={} path={}",feet,approach,waterTop,directClear,path.getTarget());
             this.cachedLandingFeet = feet.immutable();
             this.cachedLandingUntil = this.mob.tickCount + 200L;
             return path;
@@ -355,6 +329,10 @@ public final class NaturalMovementGoals {
                     y - this.mob.getY(), z - this.mob.getZ());
             double distance = offset.length();
             if (distance <= 0.25D) {
+                if (this.cachedLandingFeet != null && !this.approachSite.equals(this.cachedLandingFeet)) {
+                    this.approachSite = this.cachedLandingFeet.immutable();
+                    return;
+                }
                 this.directShoreRoute = false;
                 this.mob.getNavigation().stop();
                 return;
