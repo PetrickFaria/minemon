@@ -32,8 +32,7 @@ final class ShoreTraversal {
     mob.setDeltaMovement(velocity.x*.55D+dx/distance*steer,velocity.y,velocity.z*.55D+dz/distance*steer);
    }
   }
-  if((mob.horizontalCollision || shore.subtract(mob.position()).horizontalDistanceSqr()<20.25D)
-      &&mob.level.noCollision(mob,mob.getBoundingBox().move(0,.12,0))){
+  if(mob.horizontalCollision || shore.subtract(mob.position()).horizontalDistanceSqr()<20.25D){
    mob.setDeltaMovement(mob.getDeltaMovement().x,Math.max(.42,mob.getDeltaMovement().y),mob.getDeltaMovement().z);
    mob.getJumpControl().jump();
   }
@@ -116,8 +115,7 @@ static boolean followBank(MinemonCreature mob,net.minecraft.world.entity.LivingE
    // route check below selects another bank if this line is obstructed.
    mob.getNavigation().stop();
    double dx=state.bank.getX()+.5D-mob.getX(),dz=state.bank.getZ()+.5D-mob.getZ();
-   if(state.bank.getY()>mob.getY()+.4D&&dx*dx+dz*dz<36.0D
-       &&mob.level.noCollision(mob,mob.getBoundingBox().move(0,.2D,0))){
+   if(state.bank.getY()>mob.getY()+.4D&&dx*dx+dz*dz<36.0D){
     var velocity=mob.getDeltaMovement();
     mob.setDeltaMovement(velocity.x,Math.max(.42D,velocity.y),velocity.z);
     mob.getJumpControl().jump();
