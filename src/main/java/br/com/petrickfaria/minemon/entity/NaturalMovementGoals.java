@@ -24,7 +24,7 @@ public final class NaturalMovementGoals {
         BlockPos under=new BlockPos(mob.getX(),Mth.floor(surface-1.0E-6D),mob.getZ());
         boolean overWater=mob.isInWaterOrBubble()||mob.level.hasChunkAt(under)
                 &&mob.level.getFluidState(under).is(FluidTags.WATER);
-        return overWater || !hasThreeBlockWaterClearance(mob,mob.getBoundingBox());
+        return overWater || mob.isFlyingSpecies() && !hasThreeBlockWaterClearance(mob,mob.getBoundingBox());
     }
 
     private static boolean hasThreeBlockWaterClearance(MinemonCreature mob, net.minecraft.world.phys.AABB box) {
@@ -351,7 +351,11 @@ public final class NaturalMovementGoals {
                     return;
                 }
                 var step = offset.scale(Math.min(0.2D, distance) / distance);
-                if (this.mob.level.noCollision(this.mob, this.mob.getBoundingBox().move(step))) {
+                boolean clear = this.mob.level.noCollision(this.mob, this.mob.getBoundingBox().move(step));
+                if (this.mob.getSpeciesSlug().equals("pidgeot") && this.mob.tickCount % 20 == 0)
+                    com.mojang.logging.LogUtils.getLogger().info("SHORE MOVE tick={} pos={} target={} distance={} step={} clear={}",
+                            this.mob.tickCount,this.mob.position(),this.approachSite,distance,step,clear);
+                if (clear) {
                     this.mob.move(net.minecraft.world.entity.MoverType.SELF, step);
                 } else {
                     this.directShoreRoute = false;
