@@ -1,0 +1,111 @@
+name: Isolated Minemon GameTest Diagnostics
+on:
+  push:
+    branches: [diag-approved-base]
+  workflow_dispatch:
+    inputs:
+      selection:
+        description: Run one diagnostic GameTest or all three separately
+        required: true
+        default: all
+        type: choice
+        options: [all, eevee_sleep, custom_sound, gastly_follow]
+permissions:
+  contents: read
+jobs:
+  eevee-sleep:
+    if: github.event_name != 'workflow_dispatch' || inputs.selection == 'all' || inputs.selection == 'eevee_sleep'
+    name: "GameTest: Eevee ground sleep"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Ensure Gradle Wrapper is executable
+        run: chmod +x gradlew
+      - name: Compile diagnostic GameTests
+        run: ./gradlew --no-daemon compileJava processResources
+      - name: Prepare GameTest world
+        run: |
+          mkdir -p run
+          echo eula=true > run/eula.txt
+          python3 tools/prepare_gametest_world.py
+      - name: Run only the Eevee sleep diagnostic
+        run: timeout 600s ./gradlew --no-daemon runGameTestServer -PgameTestNamespaces=minemon_diag_eevee
+      - name: Upload Eevee sleep logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gametest-diagnostic-eevee-sleep
+          path: |
+            run/logs/
+            build/diagnostics/
+          if-no-files-found: ignore
+          retention-days: 7
+  custom-sound:
+    if: github.event_name != 'workflow_dispatch' || inputs.selection == 'all' || inputs.selection == 'custom_sound'
+    name: "GameTest: main-hand custom sound"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Ensure Gradle Wrapper is executable
+        run: chmod +x gradlew
+      - name: Compile diagnostic GameTests
+        run: ./gradlew --no-daemon compileJava processResources
+      - name: Prepare GameTest world
+        run: |
+          mkdir -p run
+          echo eula=true > run/eula.txt
+          python3 tools/prepare_gametest_world.py
+      - name: Run only the custom sound diagnostic
+        run: timeout 600s ./gradlew --no-daemon runGameTestServer -PgameTestNamespaces=minemon_diag_sound
+      - name: Upload custom sound logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gametest-diagnostic-custom-sound
+          path: |
+            run/logs/
+            build/diagnostics/
+          if-no-files-found: ignore
+          retention-days: 7
+  gastly-follow:
+    if: github.event_name != 'workflow_dispatch' || inputs.selection == 'all' || inputs.selection == 'gastly_follow'
+    name: "GameTest: Gastly follow altitude"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Ensure Gradle Wrapper is executable
+        run: chmod +x gradlew
+      - name: Compile diagnostic GameTests
+        run: ./gradlew --no-daemon compileJava processResources
+      - name: Prepare GameTest world
+        run: |
+          mkdir -p run
+          echo eula=true > run/eula.txt
+          python3 tools/prepare_gametest_world.py
+      - name: Run only the Gastly follow diagnostic
+        run: timeout 600s ./gradlew --no-daemon runGameTestServer -PgameTestNamespaces=minemon_diag_gastly
+      - name: Upload Gastly follow logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gametest-diagnostic-gastly-follow
+          path: |
+            run/logs/
+            build/diagnostics/
+          if-no-files-found: ignore
+          retention-days: 7

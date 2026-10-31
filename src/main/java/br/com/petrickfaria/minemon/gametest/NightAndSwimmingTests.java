@@ -22,8 +22,27 @@ public final class NightAndSwimmingTests {
  }
  private static void await(GameTestHelper h,BooleanSupplier condition,Runnable next,int ticks,java.util.function.Supplier<String> why){
   if(condition.getAsBoolean()){next.run();return;}
-  if(ticks<=0){h.getLevel().setDayTime(1000);h.fail(why.get());return;}
+  if(ticks<=0){String diagnostic=why.get();h.getLevel().setDayTime(1000);h.fail(diagnostic);return;}
   h.runAfterDelay(5,()->await(h,condition,next,ticks-5,why));
+ }
+ private static String eeveeSleepDiagnostic(GameTestHelper h,List<MinemonCreature> sleepers,long startedAt){
+  var level=h.getLevel();long elapsed=level.getGameTime()-startedAt;
+  var pending=sleepers.stream().filter(m->!m.isSleeping()||!m.isOnGround())
+      .map(m->eeveeSleepSnapshot(level,m,elapsed)).toList();
+  return "Ground sleepers did not satisfy both required conditions; pending="+pending
+      +",worldTime="+level.getDayTime()+",elapsedTicks="+elapsed;
+ }
+ private static String eeveeSleepSnapshot(net.minecraft.world.level.Level level,MinemonCreature m,long elapsed){
+  double groundY=NaturalMovementGoals.surfaceBelow(level,m.getX(),m.getY(),m.getZ());
+  var support=m.blockPosition().below();var path=m.getNavigation().getPath();
+  var missed=new ArrayList<String>();if(!m.isSleeping())missed.add("sleeping");if(!m.isOnGround())missed.add("onGround");
+  return m.getSpeciesSlug()+"{missed="+missed+",sleep="+m.isSleeping()+",nightRest="+m.isNightResting()
+      +",pos="+m.position()+",support="+support+":"+level.getBlockState(support).getBlock()
+      +",groundY="+groundY+",heightAboveGround="+(m.getY()-groundY)+",velocityY="+m.getDeltaMovement().y
+      +",navActive="+!m.getNavigation().isDone()+",navTarget="+m.getNavigation().getTargetPos()
+      +",onGround="+m.isOnGround()+",inWater="+m.isInWaterOrBubble()+",worldTime="+level.getDayTime()
+      +",gameTime="+level.getGameTime()+",elapsedTicks="+elapsed+",entityTick="+m.tickCount
+      +",path="+(path==null?"null":path.getNextNodeIndex()+"/"+path.getNodeCount())+"}";
  }
  private static void awaitFlightResume(GameTestHelper h,List<MinemonCreature> mixed,
      Map<MinemonCreature,Integer> clocks,int remaining,List<String> history){
@@ -306,13 +325,19 @@ public final class NightAndSwimmingTests {
   int[][] positions={{4,3},{10,3},{16,3},{22,3}};
   var slugs=List.of("eevee","vaporeon","jolteon","flareon");
   for(int i=0;i<slugs.size();i++)sleepers.add(spawn(h,slugs.get(i),positions[i][0],1,positions[i][1]));
+  long sleepAttemptStartedAt=level.getGameTime();
+  h.onEachTick(()->{
+   long elapsed=level.getGameTime()-sleepAttemptStartedAt;
+   if(elapsed%25L==0L)for(var mob:sleepers)
+    com.mojang.logging.LogUtils.getLogger().info("EEVEE LINE SLEEP TRACE "+eeveeSleepSnapshot(level,mob,elapsed));
+  });
   await(h,()->sleepers.stream().allMatch(m->m.isSleeping()&&m.isOnGround()),()->{
    runEeveeLineCombat(h,sleepers,0,()->{
     level.setDayTime(1000);
     await(h,()->sleepers.stream().noneMatch(MinemonCreature::isSleeping),h::succeed,40,
         "Eevee and its evolutions must resume their normal behavior at dawn");
    });
-  },500,"Eevee, Vaporeon on land, Jolteon, and Flareon must settle into ground sleep");
+  },500,()->eeveeSleepDiagnostic(h,sleepers,sleepAttemptStartedAt));
  }
  private static void runEeveeLineCombat(GameTestHelper h,List<MinemonCreature> sleepers,int index,Runnable done){
   if(index>=sleepers.size()){done.run();return;}

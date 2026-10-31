@@ -83,14 +83,49 @@ final class NineBehaviorChecks {
   for(int i=0;i<species.size();i++){
    var mob=h.spawn(ModEntities.SPECIES.get(species.get(i)).get(),new BlockPos(5,5,1+i));mob.tame(owner);mob.setOrderedToSit(false);mob.naturalCycle().restore("AIR",1000,1);mobs.add(mob);
   }
+  long diagnosticStart=level.getGameTime();long[] followStartedAt=new long[mobs.size()];java.util.Arrays.fill(followStartedAt,-1L);
+  h.onEachTick(()->{
+   long now=level.getGameTime();
+   for(int i=0;i<mobs.size();i++){
+    var mob=mobs.get(i);
+    if(followStartedAt[i]<0L&&mob.isFollowingOwner()){
+     followStartedAt[i]=now;
+     com.mojang.logging.LogUtils.getLogger().info("FOLLOW ALTITUDE START "+followingAltitudeSnapshot(mob,owner,now,now,diagnosticStart));
+    }
+    if(mob.getSpeciesSlug().equals("gastly")&&followStartedAt[i]>=0L&&(now-followStartedAt[i])%20L==0L)
+     com.mojang.logging.LogUtils.getLogger().info("FOLLOW ALTITUDE TRACE "+followingAltitudeSnapshot(mob,owner,now,followStartedAt[i],diagnosticStart));
+   }
+  });
   h.runAfterDelay(220,()->{
-   for(var mob:mobs){
+   for(int i=0;i<mobs.size();i++){
+    var mob=mobs.get(i);
     double altitude=mob.getY()-mob.naturalSurface();
-    if(!mob.isFollowingOwner()||Math.abs(altitude-mob.followAltitude())>.35)h.fail("Following altitude incorrect: "+mob.getSpeciesSlug()+" altitude="+altitude+" expected="+mob.followAltitude()+" following="+mob.isFollowingOwner());
+    if(!mob.isFollowingOwner()||Math.abs(altitude-mob.followAltitude())>.35)
+     h.fail("FOLLOW ALTITUDE ASSERTION FAILED: "
+         +followingAltitudeSnapshot(mob,owner,level.getGameTime(),followStartedAt[i],diagnosticStart));
     mob.setOrderedToSit(true);
    }
    h.runAfterDelay(5,()->{for(var mob:mobs){if(mob.isFollowingOwner())h.fail("Sitting did not stop following altitude state");mob.discard();}owner.discard();h.succeed();});
   });
+ }
+ private static String followingAltitudeSnapshot(MinemonCreature mob,net.minecraft.server.level.ServerPlayer owner,long now,long followStartedAt,long diagnosticStart){
+  double ground=mob.naturalSurface(),altitude=mob.getY()-ground;
+  double goalSurface=br.com.petrickfaria.minemon.entity.NaturalMovementGoals.surfaceBelow(mob.level,
+      owner.getX(),Math.max(owner.getY()+4.0D,mob.getY()),owner.getZ());
+  double dx=mob.getX()-owner.getX(),dz=mob.getZ()-owner.getZ();
+  var path=mob.getNavigation().getPath();
+  return "species="+mob.getSpeciesSlug()+",pos="+mob.position()+",ownerPos="+owner.position()
+      +",groundY="+ground+",currentAltitude="+altitude+",targetAltitude="+mob.followAltitude()
+      +",targetYFromFollowGoal="+(goalSurface+mob.followAltitude())+",goalSurfaceAtOwner="+goalSurface
+      +",velocityY="+mob.getDeltaMovement().y+",following="+mob.isFollowingOwner()
+      +",navigationActive="+!mob.getNavigation().isDone()+",navigationTarget="+mob.getNavigation().getTargetPos()
+      +",path="+(path==null?"null":path.getNextNodeIndex()+"/"+path.getNodeCount()+"/"+(path.isDone()?"done":path.getNextEntityPos(mob)))
+      +",wanted="+mob.getMoveControl().getWantedX()+","+mob.getMoveControl().getWantedY()+","+mob.getMoveControl().getWantedZ()
+      +",cyclePhase="+mob.naturalCycle().phase()+",cycleTicks="+mob.naturalCycle().ticks()
+      +",naturalActive="+mob.naturalBehaviorActive()+",activeGoals="+mob.runningGoalsForValidation()
+      +",elapsedSinceFollow="+(followStartedAt<0L?"not-started":Long.toString(now-followStartedAt))
+      +",elapsedSinceTestStart="+Long.toString(now-diagnosticStart)
+      +",horizontalDistance="+Math.sqrt(dx*dx+dz*dz)+",worldTime="+mob.level.getDayTime()+",gameTime="+now;
  }
 
 }
