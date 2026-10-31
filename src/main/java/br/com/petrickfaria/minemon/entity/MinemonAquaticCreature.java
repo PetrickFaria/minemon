@@ -54,15 +54,18 @@ public final class MinemonAquaticCreature extends MinemonCreature {
         };
     }
 
-    private boolean gyaradosSurfaceFootprintInWater(net.minecraft.world.phys.AABB box){
-        var center=new net.minecraft.core.BlockPos(this.getX(),this.getY(),this.getZ());
+    private int gyaradosSurfaceWaterCells(net.minecraft.world.phys.AABB box){
+        var center=new net.minecraft.core.BlockPos(
+                net.minecraft.util.Mth.floor((box.minX+box.maxX)*0.5D),
+                this.getBlockY(),
+                net.minecraft.util.Mth.floor((box.minZ+box.maxZ)*0.5D));
         double surface=WaterMovementGoal.surfaceAt(this,center);
-        if(!Double.isFinite(surface))return false;
-        int waterY=net.minecraft.util.Mth.floor(surface-1.0E-4D);
+        if(!Double.isFinite(surface))return -1;
+        int waterY=net.minecraft.util.Mth.floor(surface-1.0E-4D),wet=0;
         for(int x=net.minecraft.util.Mth.floor(box.minX+0.001D);x<=net.minecraft.util.Mth.floor(box.maxX-0.001D);x++)
             for(int z=net.minecraft.util.Mth.floor(box.minZ+0.001D);z<=net.minecraft.util.Mth.floor(box.maxZ-0.001D);z++)
-                if(!this.level.getFluidState(new net.minecraft.core.BlockPos(x,waterY,z)).is(net.minecraft.tags.FluidTags.WATER))return false;
-        return true;
+                if(this.level.getFluidState(new net.minecraft.core.BlockPos(x,waterY,z)).is(net.minecraft.tags.FluidTags.WATER))wet++;
+        return wet;
     }
 
     @Override public void travel(net.minecraft.world.phys.Vec3 input){
@@ -74,8 +77,13 @@ public final class MinemonAquaticCreature extends MinemonCreature {
                 &&this.isNaturalSurface()&&!this.isSleeping()&&!this.isNightResting()
                 &&this.isInWater()){
             var motion=this.getDeltaMovement();
-            var nextBox=this.getBoundingBox().move(motion.x,0.0D,motion.z);
-            if(!gyaradosSurfaceFootprintInWater(nextBox)){
+            var currentBox=this.getBoundingBox();
+            var nextBox=currentBox.move(motion.x,0.0D,motion.z);
+            int currentWet=gyaradosSurfaceWaterCells(currentBox);
+            int nextWet=gyaradosSurfaceWaterCells(nextBox);
+            // Permit movement back toward open water when already at an edge,
+            // while preventing momentum from carrying the body farther ashore.
+            if(nextWet<currentWet){
                 this.setDeltaMovement(0.0D,motion.y,0.0D);
                 input=new net.minecraft.world.phys.Vec3(0.0D,input.y,0.0D);
             }
