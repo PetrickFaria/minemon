@@ -354,28 +354,9 @@ public final class NaturalMovementGoals {
             var offset = new net.minecraft.world.phys.Vec3(x - this.mob.getX(),
                     y - this.mob.getY(), z - this.mob.getZ());
             double distance = offset.length();
-            // FlyingMoveControl treats wide bodies as arrived while their center
-            // is still short of a safe shoreline. Finish that final radius with
-            // small collision-resolved steps instead of restarting the search.
-            if (distance <= Math.max(3.0D, this.mob.getBbWidth() * 2.5D)) {
-                if (distance <= 0.25D) {
-                    this.directShoreRoute = false;
-                    this.mob.getNavigation().stop();
-                    return;
-                }
-                var step = offset.scale(Math.min(0.2D, distance) / distance);
-                boolean clear = this.mob.level.noCollision(this.mob, this.mob.getBoundingBox().move(step));
-                if (this.mob.getSpeciesSlug().equals("pidgeot") && this.mob.tickCount % 20 == 0)
-                    com.mojang.logging.LogUtils.getLogger().info("SHORE MOVE tick={} pos={} target={} distance={} step={} clear={}",
-                            this.mob.tickCount,this.mob.position(),this.approachSite,distance,step,clear);
-                if (clear) {
-                    this.mob.move(net.minecraft.world.entity.MoverType.SELF, step);
-                } else {
-                    this.directShoreRoute = false;
-                    rejectCachedShoreLanding();
-                    this.pathTicks = 200;
-                    this.mob.getNavigation().stop();
-                }
+            if (distance <= 0.25D) {
+                this.directShoreRoute = false;
+                this.mob.getNavigation().stop();
                 return;
             }
             var targetBox = this.mob.getBoundingBox().move(x - this.mob.getX(), y - this.mob.getY(), z - this.mob.getZ());
@@ -386,7 +367,17 @@ public final class NaturalMovementGoals {
                 this.mob.getNavigation().stop();
                 return;
             }
-            this.mob.getMoveControl().setWantedPosition(x, y, z, 1.0D);
+            // Flight control slows to a crawl near a landing target. A verified
+            // clear corridor can use short collision-checked steps all the way in.
+            var step = offset.scale(Math.min(0.2D, distance) / distance);
+            if (this.mob.level.noCollision(this.mob, this.mob.getBoundingBox().move(step))) {
+                this.mob.move(net.minecraft.world.entity.MoverType.SELF, step);
+            } else {
+                this.directShoreRoute = false;
+                rejectCachedShoreLanding();
+                this.pathTicks=200;
+                this.mob.getNavigation().stop();
+            }
         }
 
         private void rejectCachedShoreLanding() {
