@@ -179,6 +179,7 @@ allowed.add('src/main/resources/assets/minemon/textures/pokemon/arbok_cobblemon_
 allowed.update({'src/main/resources/assets/minemon_gen1/particles/gastly_ghostly_smoke.json',*(f'src/main/resources/assets/minemon_gen1/textures/particle/gastly_ghostly_smoke_{i}.png' for i in range(6))})
 changed=subprocess.check_output(['git','diff','--name-only',BASE,'--','src/main/resources'],cwd=ROOT,text=True).splitlines()
 allowed.update(pokec_resource_paths())
+allowed.add('src/main/resources/assets/minemon_gen1/particles/gastly_small_smoke.json')
 assert set(changed)<=allowed,set(changed)-allowed
 print('PASS BATCH 10 #091-100: Cobblemon 1.8.2 rigs, textures, native animations/events, fallback, and exact first-90 preservation')
 

@@ -185,6 +185,7 @@ allowed_resources.update(source_fire_frames)
 allowed_resources.add('src/main/resources/assets/minemon/textures/pokemon/arbok_cobblemon_1_8_2/arbok.png')
 allowed_resources.update({'src/main/resources/assets/minemon_gen1/particles/gastly_ghostly_smoke.json',*(f'src/main/resources/assets/minemon_gen1/textures/particle/gastly_ghostly_smoke_{i}.png' for i in range(6))})
 allowed_resources.update(pokec_resource_paths())
+allowed_resources.add('src/main/resources/assets/minemon_gen1/particles/gastly_small_smoke.json')
 assert set(changed)<=allowed_resources,set(changed)-allowed_resources
 print(f'PASS BATCH 9 {start}-{end}: source 1.8.2, rig/texture/clips/events, selected profile joints, and previous 80 resource preservation')
 if args.jar:
