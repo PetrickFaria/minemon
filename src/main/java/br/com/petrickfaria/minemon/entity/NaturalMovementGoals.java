@@ -155,8 +155,20 @@ public final class NaturalMovementGoals {
             if(this.mob.getNavigation().isDone() && this.approachSite!=null
                     && (!WaterMovementGoal.safeLandingBelow(this.mob)
                         || NaturalMovementGoals.nightWaterSetbackRequired(this.mob)))
-                this.mob.getMoveControl().setWantedPosition(this.approachSite.getX()+.5,
-                        this.approachSite.getY(),this.approachSite.getZ()+.5,this.shoreRoute?1.0D:.7D);
+            {
+                double x=this.approachSite.getX()+.5D,y=this.approachSite.getY(),z=this.approachSite.getZ()+.5D;
+                var offset=new net.minecraft.world.phys.Vec3(x-this.mob.getX(),y-this.mob.getY(),z-this.mob.getZ());
+                double distance=offset.length();
+                if(distance<=Math.max(3.0D,this.mob.getBbWidth()*2.5D)){
+                    if(distance<=.25D)return;
+                    var step=offset.scale(Math.min(.2D,distance)/distance);
+                    if(this.mob.level.noCollision(this.mob,this.mob.getBoundingBox().move(step)))
+                        this.mob.move(net.minecraft.world.entity.MoverType.SELF,step);
+                    else {rejectCachedShoreLanding();this.pathTicks=200;this.mob.getNavigation().stop();}
+                    return;
+                }
+                this.mob.getMoveControl().setWantedPosition(x,y,z,this.shoreRoute?1.0D:.7D);
+            }
         }
         @Override public void stop() { this.mob.getNavigation().stop(); this.landingPath = null; this.retryDelay=20; this.shoreRoute=false; this.directShoreRoute=false; this.shoreStallTicks=0; this.lastShorePosition=null; }
 
