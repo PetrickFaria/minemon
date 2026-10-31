@@ -22,12 +22,20 @@ public class NightSleepAssetTest {
    String idle=clips.getOrDefault(idleKey,clips.get("water_idle"));
    var expectedPose=source.getAsJsonObject(idle).getAsJsonObject("bones");
    var actualPose=source.getAsJsonObject(clips.get("aquatic_sleep")).getAsJsonObject("bones");
-   assertEquals(slug+" retains its native water-idle posture and animation",expectedPose,actualPose);
    var night=source.getAsJsonObject(clips.get("night_sleep")).getAsJsonObject("bones");
    var eyes=source.getAsJsonObject(clips.get("aquatic_sleep_eyes")).getAsJsonObject("bones");
    assertFalse(slug+" has closed-eye tracks",eyes.entrySet().isEmpty());
+   var expectedBodyPose=new JsonObject();
+   for(var entry:expectedPose.entrySet()){
+    boolean eyeBone=java.util.Arrays.stream(new String[]{"eye","eyelid","pupil","lid"})
+        .anyMatch(part->entry.getKey().toLowerCase(java.util.Locale.ROOT).contains(part));
+    if(eyeBone)assertFalse(slug+" keeps eye bone in both animation controllers: "+entry.getKey(),actualPose.has(entry.getKey()));
+    else expectedBodyPose.add(entry.getKey(),entry.getValue());
+   }
+   assertEquals(slug+" retains its native water-idle body posture and animation",expectedBodyPose,actualPose);
    for(var entry:eyes.entrySet())
     assertEquals(slug+" uses the species' existing closed-eye tracks",night.get(entry.getKey()),entry.getValue());
+   for(String bone:eyes.keySet())assertFalse(slug+" keeps eye overlay bone in posture controller: "+bone,actualPose.has(bone));
    assertTrue(slug+" eye overlay loops while asleep",source.getAsJsonObject(clips.get("aquatic_sleep_eyes")).get("loop").getAsBoolean());
   }
   for(String visitor:SpeciesBehaviorProfiles.all().keySet().stream().filter(SpeciesBehaviorProfiles::isVisitor).toList())
