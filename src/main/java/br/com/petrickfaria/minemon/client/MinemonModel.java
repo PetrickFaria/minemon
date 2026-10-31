@@ -7,6 +7,8 @@ import net.minecraft.resources.ResourceLocation;
 import software.bernie.geckolib3.model.AnimatedGeoModel;
 
 public class MinemonModel extends AnimatedGeoModel<MinemonCreature> {
+    private static final java.util.Map<MinemonCreature, Boolean> DEWGONG_SLEEPING =
+            java.util.Collections.synchronizedMap(new java.util.WeakHashMap<>());
     @Override
     public ResourceLocation getModelResource(MinemonCreature entity) {
         return location(entity, "models", "geo/" + entity.getSpeciesSlug() + "/" + entity.getSpeciesSlug() + ".geo.json");
@@ -27,14 +29,7 @@ public class MinemonModel extends AnimatedGeoModel<MinemonCreature> {
     @Override
     public void setLivingAnimations(MinemonCreature entity, Integer uniqueID, software.bernie.geckolib3.core.event.predicate.AnimationEvent event) {
         super.setLivingAnimations(entity, uniqueID, event);
-        if(entity.getSpeciesSlug().equals("dewgong")){
-            boolean closed=entity.isSleeping()||entity.isDefeated();
-            boolean was=entity.getPersistentData().getBoolean("DewgongClosedEyes");
-            if(closed||was)for(String side:java.util.List.of("left","right")){
-                var lid=getAnimationProcessor().getBone("eyelid_"+side);if(lid!=null)lid.setPositionZ(closed?0F:-.1F);
-            }
-            entity.getPersistentData().putBoolean("DewgongClosedEyes",closed);
-        }
+        applyDewgongEyeVisibility(entity);
         applyPidgeWingVisibility(entity);
         applyGengarEyeVisibility(entity);
         applyNaturalBodyMotion(entity);
@@ -66,6 +61,26 @@ public class MinemonModel extends AnimatedGeoModel<MinemonCreature> {
             var body=getAnimationProcessor().getBone("body");
             if(body!=null)body.setRotationX(body.getRotationX()+input.headPitch*(float)Math.PI/180.0F);
         }
+    }
+
+    private void applyDewgongEyeVisibility(MinemonCreature entity) {
+        if (!entity.getSpeciesSlug().equals("dewgong")) return;
+        boolean sleeping = entity.isSleeping() || entity.isDefeated();
+        boolean wasSleeping = DEWGONG_SLEEPING.getOrDefault(entity, true);
+        for (String side : java.util.List.of("left", "right")) {
+            var eye = getAnimationProcessor().getBone("eye_" + side);
+            if (eye != null) eye.setHidden(sleeping, false);
+            for (String overlay : java.util.List.of("eye_highlight_", "eye_angry_", "eye_sad_", "eye_happy_", "eye_hurt_")) {
+                var expression = getAnimationProcessor().getBone(overlay + side);
+                if (expression != null) expression.setHidden(sleeping, true);
+            }
+            var lid = getAnimationProcessor().getBone("eyelid_" + side);
+            if (lid != null) {
+                lid.setHidden(false, false);
+                if (sleeping || wasSleeping) lid.setPositionZ(sleeping ? 0.0F : -0.1F);
+            }
+        }
+        DEWGONG_SLEEPING.put(entity, sleeping);
     }
 
     /** Small additive body motion keeps hovering visually distinct from the wing-driven flight clips. */

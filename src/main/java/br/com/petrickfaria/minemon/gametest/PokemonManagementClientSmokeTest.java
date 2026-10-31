@@ -20,18 +20,23 @@ public final class PokemonManagementClientSmokeTest {
     private static int phase;
     private static volatile int dewgongId=-1,gastlyId=-1;
     private static volatile boolean closedEyesSeen,openEyesSeen,awakeBlinkSeen;
-    private static int auraState,auraLarge,auraSmall;
+    private static int auraState,auraStart;
     private static void nineFixtures(Minecraft minecraft){
         minecraft.player.closeContainer();minecraft.setScreen(null);minecraft.player.setYRot(0);minecraft.player.setXRot(10);
         br.com.petrickfaria.minemon.client.MinemonRenderer.validationObserver=(entity,model)->{
             if(!entity.getSpeciesSlug().equals("dewgong"))return;
             var left=model.getAnimationProcessor().getBone("eyelid_left");var right=model.getAnimationProcessor().getBone("eyelid_right");
-            if(left==null||right==null)throw new IllegalStateException("Dewgong eyelids missing");
-            boolean closed=Math.abs(left.getPositionZ())<.001 && Math.abs(right.getPositionZ())<.001;
-            boolean open=Math.abs(left.getPositionZ()+.1)<.001 && Math.abs(right.getPositionZ()+.1)<.001;
+            var leftEye=model.getAnimationProcessor().getBone("eye_left");var rightEye=model.getAnimationProcessor().getBone("eye_right");
+            if(left==null||right==null||leftEye==null||rightEye==null)throw new IllegalStateException("Dewgong eye bones missing");
+            boolean closed=leftEye.isHidden()&&rightEye.isHidden()&&!left.isHidden()&&!right.isHidden()
+                    &&Math.abs(left.getPositionZ())<.001&&Math.abs(right.getPositionZ())<.001;
+            boolean open=!leftEye.isHidden()&&!rightEye.isHidden()&&!left.isHidden()&&!right.isHidden()
+                    &&Math.abs(left.getPositionZ()+.1)<.001&&Math.abs(right.getPositionZ()+.1)<.001;
             if(entity.isSleeping()&&closed)closedEyesSeen=true;
             if(!entity.isSleeping()&&open)openEyesSeen=true;
-            if(!entity.isSleeping()&&openEyesSeen&&closed)awakeBlinkSeen=true;
+            boolean blinkClosed=!leftEye.isHidden()&&!rightEye.isHidden()&&!left.isHidden()&&!right.isHidden()
+                    &&Math.abs(left.getPositionZ())<.001&&Math.abs(right.getPositionZ())<.001;
+            if(!entity.isSleeping()&&openEyesSeen&&blinkClosed)awakeBlinkSeen=true;
         };
         var ownerId=minecraft.player.getUUID();
         minecraft.getSingleplayerServer().execute(()->{
@@ -224,16 +229,15 @@ public final class PokemonManagementClientSmokeTest {
             if(phase==10){
                 if(minecraft.level.getEntity(gastlyId)==null){if(++ticks>200)throw new IllegalStateException("Gastly aura fixture was not tracked");return;}
                 ticks++;
-                if(ticks==32){auraLarge=br.com.petrickfaria.minemon.client.GastlySmokeParticle.largeSpawnsForValidation();auraSmall=br.com.petrickfaria.minemon.client.GastlySmokeParticle.smallSpawnsForValidation();}
+                if(ticks==32)auraStart=br.com.petrickfaria.minemon.client.GastlySmokeParticle.spawnCountForValidation();
                 if(ticks==64){
-                    int large=br.com.petrickfaria.minemon.client.GastlySmokeParticle.largeSpawnsForValidation()-auraLarge;
-                    int small=br.com.petrickfaria.minemon.client.GastlySmokeParticle.smallSpawnsForValidation()-auraSmall;
-                    if(large!=10||small!=14)throw new IllegalStateException("Gastly real-client aura rate mismatch in state "+auraState+": large="+large+" small="+small);
+                    int emissions=br.com.petrickfaria.minemon.client.GastlySmokeParticle.spawnCountForValidation()-auraStart;
+                    if(emissions!=16)throw new IllegalStateException("Restored Gastly particle rate mismatch in state "+auraState+": emissions="+emissions);
                     auraState++;ticks=0;
                     if(auraState<4){changeAuraState(minecraft,auraState);return;}
-                    Files.writeString(Path.of("client-validation-pokemon-management.txt"),"PASS NINE VISUAL CONTRACTS: rendered Dewgong eyes closed asleep, open and blinking awake; real Gastly particle providers emitted five large and seven small per16ticks while awake, sleeping, sitting and defeated. Aesthetic comparison with the supplied reference remains manual.\n",java.nio.file.StandardOpenOption.APPEND);
+                    Files.writeString(Path.of("client-validation-pokemon-management.txt"),"PASS NINE VISUAL CONTRACTS: rendered Dewgong eyes closed asleep, open and blinking awake; restored single-size Gastly smoke emitted 16 particles per32ticks while awake, sleeping, sitting and defeated. Aesthetic comparison with the historical reference remains manual.\n",java.nio.file.StandardOpenOption.APPEND);
                     br.com.petrickfaria.minemon.client.MinemonRenderer.validationObserver=null;
-                    done=true;System.out.println("[POKEMON MANAGEMENT CLIENT] PASS: status, filters, rendered Dewgong eyes, and permanent two-size Gastly aura");minecraft.execute(minecraft::stop);
+                    done=true;System.out.println("[POKEMON MANAGEMENT CLIENT] PASS: status, filters, rendered Dewgong eyes, and restored Gastly smoke");minecraft.execute(minecraft::stop);
                 }
             }
         } catch (Exception failure) {

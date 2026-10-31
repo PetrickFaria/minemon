@@ -13,6 +13,5 @@ public final class ModParticles {
     public static final RegistryObject<SimpleParticleType> GASTLY_GHOSTLY_SMOKE =
             PARTICLE_TYPES.register("gastly_ghostly_smoke", () -> new SimpleParticleType(false));
 
-    public static final RegistryObject<SimpleParticleType> GASTLY_SMALL_SMOKE=PARTICLE_TYPES.register("gastly_small_smoke",()->new SimpleParticleType(false));
     private ModParticles() {}
 }

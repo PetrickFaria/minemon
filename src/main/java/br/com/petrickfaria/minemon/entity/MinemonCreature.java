@@ -773,10 +773,23 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     }
 
     private void tickGastlySmoke(){
-        if(!getSpeciesSlug().equals("gastly") || isRemoved())return;
-        int large=GastlyAura.largeSlot(tickCount),small=GastlyAura.smallSlot(tickCount);
-        if(large>=0)level.addParticle(br.com.petrickfaria.minemon.registry.ModParticles.GASTLY_GHOSTLY_SMOKE.get(),getX(),getY(),getZ(),getId(),large,0);
-        if(small>=0)level.addParticle(br.com.petrickfaria.minemon.registry.ModParticles.GASTLY_SMALL_SMOKE.get(),getX(),getY(),getZ(),getId(),small,0);
+        if (this.getSpeciesSlug().equals("gastly") && !this.isRemoved() && GastlyAura.emitsAt(this.tickCount)) {
+            // Restored from commit 5e76c2f: one compact ghostly_smoke sprite per two game ticks.
+            double scale = SpeciesDefinitions.get("gastly").scale();
+            double yaw = Math.toRadians(this.getYRot());
+            double locatorForward = 4.0D / 16.0D * scale;
+            double centerX = this.getX() - Math.sin(yaw) * locatorForward;
+            double centerY = this.getY() + 4.0D / 16.0D * scale;
+            double centerZ = this.getZ() + Math.cos(yaw) * locatorForward;
+            double angle = this.getRandom().nextDouble() * Math.PI * 2.0D;
+            double radius = 0.17D * scale;
+            double px = centerX + Math.cos(angle) * radius;
+            double pz = centerZ + Math.sin(angle) * radius;
+            double inwardSpeed = 0.02D * scale;
+            this.level.addParticle(br.com.petrickfaria.minemon.registry.ModParticles.GASTLY_GHOSTLY_SMOKE.get(),
+                    px, centerY, pz, -Math.cos(angle) * inwardSpeed, 0.0D,
+                    -Math.sin(angle) * inwardSpeed);
+        }
     }
 
     /** Independent, persisted world-time counter. Unloaded chunks do not advance it. */

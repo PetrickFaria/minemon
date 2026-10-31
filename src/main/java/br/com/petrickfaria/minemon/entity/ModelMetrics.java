@@ -19,7 +19,12 @@ public final class ModelMetrics {
     private static double metric(String slug,String key){return DATA.getAsJsonObject(slug).get(key).getAsDouble();}
     public static double bodyWidth(String slug){var a=DATA.getAsJsonObject(slug).getAsJsonArray("core_bounds");return a.get(3).getAsDouble()-a.get(0).getAsDouble();}
     public static double bodyHeight(String slug){var a=DATA.getAsJsonObject(slug).getAsJsonArray("core_bounds");return a.get(4).getAsDouble()-a.get(1).getAsDouble();}
+    public static double bodyBottom(String slug){return DATA.getAsJsonObject(slug).getAsJsonArray("core_bounds").get(1).getAsDouble();}
     public static double bodyCenterY(String slug){var a=DATA.getAsJsonObject(slug).getAsJsonArray("core_bounds");return (a.get(4).getAsDouble()+a.get(1).getAsDouble())*.5;}
+    public static double anchorForSubmergedFraction(double surfaceY,double bottom,double height,double scale,double fraction){
+        double clamped=Math.max(0.0D,Math.min(1.0D,fraction));
+        return surfaceY-(bottom+height*clamped)*scale;
+    }
     public static float width(String slug,float scale){
         float width=(float)(metric(slug,"width")*scale);
         // Native path acceptance adds 1 in float precision, but steering rounds

@@ -19,6 +19,9 @@ public final class RocketTradeScreen extends AbstractContainerScreen<RocketTrade
         imageWidth = 276; imageHeight = 166;
         inventoryLabelX = 108; inventoryLabelY = 72;
     }
+    static int progressPixels(int level, int completedTrades, int width) {
+        return Math.round(br.com.petrickfaria.minemon.registry.RocketChallengeManager.tradeProgress(level, completedTrades) * width);
+    }
     @Override protected void renderBg(PoseStack pose, float partialTick, int mouseX, int mouseY) {
         com.mojang.blaze3d.systems.RenderSystem.setShaderTexture(0, VILLAGER);
         GuiComponent.blit(pose, leftPos, topPos, 0, 0, imageWidth, imageHeight, 512, 256);
@@ -29,6 +32,11 @@ public final class RocketTradeScreen extends AbstractContainerScreen<RocketTrade
             MinemonGui.slot(pose,leftPos+slot.x-1,topPos+slot.y-1,18,18);
         }
         font.draw(pose,"→",leftPos+218,topPos+40,0xFF404040);
+        int progressX=leftPos+136,progressY=topPos+16;
+        int progressWidth=progressPixels(menu.progressionLevel(),menu.tradesThisLevel(),102);
+        GuiComponent.blit(pose,progressX,progressY,0,186,102,5,512,256);
+        if(progressWidth>0)GuiComponent.blit(pose,progressX,progressY,0,191,progressWidth,5,512,256);
+        font.draw(pose,"Lv. "+menu.progressionLevel(),leftPos+108,topPos+14,0xFF404040);
         for (int row=0;row<ROWS;row++) {
             int index=scroll+row;
             if(index>=menu.offerCount())break;

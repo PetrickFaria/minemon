@@ -35,6 +35,8 @@ public final class RocketTradeMenu extends AbstractContainerMenu {
         @Override public int get() { return selectedIndex; }
         @Override public void set(int value) { selectedIndex = Math.max(0, Math.min(ALPHABETICAL_TYPES.size(), value)); }
     };
+    private final DataSlot levelSync = DataSlot.standalone();
+    private final DataSlot tradesSync = DataSlot.standalone();
 
     public RocketTradeMenu(int id, Inventory inventory, FriendlyByteBuf data) {
         this(id, inventory, inventory.player.level.getEntity(data.readInt()) instanceof Villager found ? found : null);
@@ -68,6 +70,8 @@ public final class RocketTradeMenu extends AbstractContainerMenu {
             addSlot(new Slot(inventory, column + row * 9 + 9, 108 + column * 18, 84 + row * 18));
         for (int column = 0; column < 9; column++) addSlot(new Slot(inventory, column, 108 + column * 18, 142));
         addDataSlot(selectedSync);
+        addDataSlot(levelSync);
+        addDataSlot(tradesSync);
         if (!inventory.player.level.isClientSide) updateResult();
     }
 
@@ -89,6 +93,17 @@ public final class RocketTradeMenu extends AbstractContainerMenu {
     }
     public Villager villager() { return villager; }
     public boolean isUnlocked() { return villager != null && RocketChallengeManager.isChallengeComplete(villager); }
+    public int progressionLevel() { return levelSync.get(); }
+    public int tradesThisLevel() { return tradesSync.get(); }
+    public int tradesRequired() { return RocketChallengeManager.requiredTradesForNextLevel(progressionLevel()); }
+
+    @Override public void broadcastChanges() {
+        if (!playerInventory.player.level.isClientSide && villager != null) {
+            levelSync.set(RocketChallengeManager.getLevel(villager));
+            tradesSync.set(RocketChallengeManager.getTradesThisLevel(villager));
+        }
+        super.broadcastChanges();
+    }
 
     @Override public boolean clickMenuButton(Player player, int button) {
         if (!isUnlocked()) return false;

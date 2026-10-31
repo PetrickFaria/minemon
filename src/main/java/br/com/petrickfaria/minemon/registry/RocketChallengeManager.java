@@ -71,6 +71,13 @@ public final class RocketChallengeManager {
         return level >= 1 && level <= DAMAGE.length ? DAMAGE[level - 1] : 0;
     }
 
+    public static float tradeProgress(int level, int completedTrades) {
+        if (level >= 10) return 1.0F;
+        int required = requiredTradesForNextLevel(level);
+        if (required <= 0) return 0.0F;
+        return Math.max(0, Math.min(required, completedTrades)) / (float) required;
+    }
+
     public static boolean isChallengeComplete(Villager villager) {
         if (!isRocket(villager)) return false;
         initialize(villager);

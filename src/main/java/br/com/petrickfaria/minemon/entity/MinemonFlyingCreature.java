@@ -46,7 +46,7 @@ public final class MinemonFlyingCreature extends MinemonCreature {
  private void updateLocomotion(){
   boolean landing=this.wantsNaturalLanding() && (this.commandLanding() || this.isNightResting() || this.isSleeping());
   var feet=new BlockPos(this.getX(),this.naturalSurface(),this.getZ());
-  boolean dry=WaterMovementGoal.safeLandingBelow(this);
+  boolean dry=WaterMovementGoal.safeLandingBelow(this)&&!NaturalMovementGoals.nightWaterSetbackRequired(this);
   boolean flying=landing?!dry:this.isFlyingSpecies()&&!this.isInWater();
   PathNavigation desired=flying?this.airNavigation:this.isInWater()&&!landing?this.escapeNavigation:this.groundNavigation;
   if(this.navigation!=desired){this.navigation.stop();this.navigation=desired;}
@@ -126,7 +126,7 @@ public final class MinemonFlyingCreature extends MinemonCreature {
   if(this.level.isClientSide){this.fallDistance=0;return;}
   double support=this.naturalSurface();
   net.minecraft.core.BlockPos feet=new net.minecraft.core.BlockPos(this.getX(),support,this.getZ());
-  boolean safe=WaterMovementGoal.safeLandingBelow(this);
+  boolean safe=WaterMovementGoal.safeLandingBelow(this)&&!NaturalMovementGoals.nightWaterSetbackRequired(this);
   // Keep hovering while the column is unsafe, even if the entity touched the
   // bottom of water. The rest goal can then move it toward a dry landing.
   // Gravity starts the gradual descent only inside a collision-safe column.

@@ -15,6 +15,28 @@ import net.minecraft.world.level.pathfinder.Path;
 public final class NaturalMovementGoals {
     private NaturalMovementGoals() {}
 
+    static boolean nightWaterSetbackRequired(MinemonCreature mob) {
+        if (!mob.isNightResting() || !SpeciesBehaviorProfiles.landsForNightRest(mob.getSpeciesSlug())) return false;
+        double surface = mob.naturalSurface();
+        var box = mob.getBoundingBox().move(0.0D, surface - mob.getY(), 0.0D);
+        return !hasThreeBlockWaterClearance(mob, box);
+    }
+
+    private static boolean hasThreeBlockWaterClearance(MinemonCreature mob, net.minecraft.world.phys.AABB box) {
+        int minX = Mth.floor(box.minX - 3.0D), maxX = Mth.floor(box.maxX + 3.0D);
+        int minZ = Mth.floor(box.minZ - 3.0D), maxZ = Mth.floor(box.maxZ + 3.0D);
+        int minY = Math.max(mob.level.getMinBuildHeight(), Mth.floor(box.minY) - 1);
+        int maxY = Math.min(mob.level.getMaxBuildHeight() - 1, Mth.floor(box.maxY) + 1);
+        for (int x = minX; x <= maxX; x++) for (int z = minZ; z <= maxZ; z++) {
+            if (!NightShoreLandingRules.waterIsTooClose(box, x, z, 3.0D)) continue;
+            for (int y = minY; y <= maxY; y++) {
+                BlockPos water = new BlockPos(x, y, z);
+                if (mob.level.hasChunkAt(water) && mob.level.getFluidState(water).is(FluidTags.WATER)) return false;
+            }
+        }
+        return true;
+    }
+
     /** Finds the nearest real support surface beneath an entity, ignoring roofs above it. */
     public static double surfaceBelow(Level level, double x, double feetY, double z) {
         int blockX = Mth.floor(x);
@@ -45,11 +67,18 @@ public final class NaturalMovementGoals {
 
     /** Sleep has priority over patrol, following and combat, but descent still uses a real path. */
     static final class SleepLanding extends Goal {
+        private static final int SHORE_HORIZONTAL_RADIUS = 25;
+        private static final int SHORE_VERTICAL_RADIUS = 25;
         private final MinemonCreature mob;
         private Path landingPath;
         private int retryDelay;
         private int pathTicks;
         private BlockPos approachSite;
+        private BlockPos cachedLandingFeet;
+        private long cachedLandingUntil;
+        private int hoverMoveDelay;
+        private int hoverDirection;
+        private boolean shoreRoute;
 
         SleepLanding(MinemonCreature mob) {
             this.mob = mob;
@@ -58,9 +87,17 @@ public final class NaturalMovementGoals {
 
         @Override public boolean canUse() {
             if (!this.mob.wantsNaturalLanding() || (!this.mob.commandLanding()&&!this.mob.isSleeping()&&!this.mob.isNightResting()&&!this.mob.naturalBehaviorActive()) || this.mob.isOnGround() && !this.mob.isInWaterOrBubble() || this.mob.isPassenger()) return false;
-            if (this.retryDelay > 0) { this.retryDelay--; return false; }
+            if (this.retryDelay > 0) {
+                this.retryDelay--;
+                if (NaturalMovementGoals.nightWaterSetbackRequired(this.mob)) keepFlyingWhileSearching();
+                return false;
+            }
+            this.shoreRoute = NaturalMovementGoals.nightWaterSetbackRequired(this.mob);
             this.landingPath = findLandingPath();
-            if (this.landingPath == null) this.retryDelay = 40;
+            if (this.landingPath == null) {
+                this.retryDelay = 40;
+                if (this.shoreRoute) keepFlyingWhileSearching();
+            }
             return this.landingPath != null;
         }
 
@@ -69,7 +106,11 @@ public final class NaturalMovementGoals {
                     && this.pathTicks < 200;
         }
 
-        @Override public void start() { this.pathTicks=0; this.mob.getNavigation().moveTo(this.landingPath, 0.7D); }
+        @Override public void start() {
+            this.pathTicks=0;
+            // 1.0 is a moderate 1.43× increase over the usual 0.7 landing speed, only for shore escapes.
+            this.mob.getNavigation().moveTo(this.landingPath, this.shoreRoute ? 1.0D : 0.7D);
+        }
         @Override public void tick() {
             this.pathTicks++;
             // Native air paths stop within a width-dependent radius. Complete
@@ -77,13 +118,15 @@ public final class NaturalMovementGoals {
             // control before allowing gravity to lower a wide body into water.
             var feet=new BlockPos(this.mob.getX(),this.mob.naturalSurface(),this.mob.getZ());
             if(this.mob.getNavigation().isDone() && this.approachSite!=null
-                    && !WaterMovementGoal.safeLandingBelow(this.mob))
+                    && (!WaterMovementGoal.safeLandingBelow(this.mob)
+                        || NaturalMovementGoals.nightWaterSetbackRequired(this.mob)))
                 this.mob.getMoveControl().setWantedPosition(this.approachSite.getX()+.5,
-                        this.approachSite.getY(),this.approachSite.getZ()+.5,.7);
+                        this.approachSite.getY(),this.approachSite.getZ()+.5,this.shoreRoute?1.0D:.7D);
         }
-        @Override public void stop() { this.mob.getNavigation().stop(); this.landingPath = null; this.retryDelay=20; }
+        @Override public void stop() { this.mob.getNavigation().stop(); this.landingPath = null; this.retryDelay=20; this.shoreRoute=false; }
 
         private Path findLandingPath() {
+            if (this.shoreRoute) return findShoreLandingPath();
             BlockPos origin = this.mob.blockPosition();
             double waterTop=WaterMovementGoal.restSurfaceAt(this.mob,origin);
             double searchHeight=Double.isFinite(waterTop)?Math.max(this.mob.getY(),waterTop+2):this.mob.getY();
@@ -120,6 +163,99 @@ public final class NaturalMovementGoals {
                 }
             }
             return null;
+        }
+
+        /** Searches a bounded 50×50×50 volume without querying unloaded chunks. */
+        private Path findShoreLandingPath() {
+            BlockPos origin = this.mob.blockPosition();
+            double waterTop = WaterMovementGoal.restSurfaceAt(this.mob, origin);
+            if (this.cachedLandingFeet != null && this.mob.tickCount < this.cachedLandingUntil
+                    && this.mob.level.hasChunkAt(this.cachedLandingFeet)
+                    && WaterMovementGoal.safeLanding(this.mob, this.cachedLandingFeet)) {
+                Path cached = createShorePath(this.cachedLandingFeet, waterTop);
+                if (cached != null) return cached;
+            }
+            this.cachedLandingFeet = null;
+            int originX = origin.getX(), originZ = origin.getZ(), originY = origin.getY();
+            int lowY = Math.max(this.mob.level.getMinBuildHeight() + 1, originY - SHORE_VERTICAL_RADIUS);
+            int highY = Math.min(this.mob.level.getMaxBuildHeight() - 2, originY + SHORE_VERTICAL_RADIUS - 1);
+            for (int radius = 0; radius <= SHORE_HORIZONTAL_RADIUS; radius++) {
+                for (int dx = -radius; dx <= radius; dx++) for (int dz = -radius; dz <= radius; dz++) {
+                    if (Math.max(Math.abs(dx), Math.abs(dz)) != radius || !NightShoreLandingRules.insideSearchVolume(dx, 0, dz)) continue;
+                    int x = originX + dx, z = originZ + dz;
+                    if (!this.mob.level.hasChunkAt(new BlockPos(x, originY, z))) continue;
+                    for (int y = highY; y >= lowY; y--) {
+                        if (!NightShoreLandingRules.insideSearchVolume(dx, y - originY, dz)) continue;
+                        BlockPos support = new BlockPos(x, y, z);
+                        var state = this.mob.level.getBlockState(support);
+                        if (!this.mob.level.getFluidState(support).isEmpty()
+                                || state.is(net.minecraft.world.level.block.Blocks.MAGMA_BLOCK)
+                                || state.is(net.minecraft.world.level.block.Blocks.CACTUS)
+                                || state.is(net.minecraft.world.level.block.Blocks.CAMPFIRE)
+                                || state.is(net.minecraft.world.level.block.Blocks.SOUL_CAMPFIRE)) continue;
+                        var shape = state.getCollisionShape(this.mob.level, support);
+                        if (shape.isEmpty()) continue;
+                        double top = Double.NEGATIVE_INFINITY;
+                        for (var part : shape.toAabbs())
+                            if (0.5D >= part.minX && 0.5D <= part.maxX && 0.5D >= part.minZ && 0.5D <= part.maxZ)
+                                top = Math.max(top, part.maxY);
+                        if (!Double.isFinite(top)) continue;
+                        double surface = y + top;
+                        BlockPos feet = new BlockPos(x, Mth.ceil(surface - 1.0E-6D), z);
+                        if (!WaterMovementGoal.safeLanding(this.mob, feet)) continue;
+                        Path path = createShorePath(feet, waterTop);
+                        if (path != null) return path;
+                    }
+                }
+            }
+            return null;
+        }
+
+        private Path createShorePath(BlockPos feet, double waterTop) {
+            double surface = feet.getY();
+            var landingBox = this.mob.getBoundingBox().move(feet.getX() + 0.5D - this.mob.getX(),
+                    surface - this.mob.getY(), feet.getZ() + 0.5D - this.mob.getZ());
+            if (!loadedBox(landingBox) || !hasThreeBlockWaterClearance(this.mob, landingBox)) return null;
+            double approachY = Math.max(feet.getY() + 2.0D,
+                    Math.max(this.mob.getY(), Double.isFinite(waterTop) ? waterTop + 1.0D : this.mob.getY()));
+            BlockPos approach = new BlockPos(feet.getX(), Mth.ceil(approachY), feet.getZ());
+            var approachBox = this.mob.getBoundingBox().move(feet.getX() + 0.5D - this.mob.getX(),
+                    approach.getY() - this.mob.getY(), feet.getZ() + 0.5D - this.mob.getZ());
+            if (!loadedBox(approachBox) || !this.mob.level.noCollision(this.mob, approachBox)) return null;
+            Path path = this.mob.getNavigation().createPath(approach, 0);
+            if (path == null || !path.canReach()) return null;
+            this.approachSite = approach;
+            this.cachedLandingFeet = feet.immutable();
+            this.cachedLandingUntil = this.mob.tickCount + 200L;
+            return path;
+        }
+
+        private boolean loadedBox(net.minecraft.world.phys.AABB box) {
+            int minChunkX = Mth.floor(box.minX) >> 4, maxChunkX = Mth.floor(box.maxX) >> 4;
+            int minChunkZ = Mth.floor(box.minZ) >> 4, maxChunkZ = Mth.floor(box.maxZ) >> 4;
+            for (int chunkX = minChunkX; chunkX <= maxChunkX; chunkX++)
+                for (int chunkZ = minChunkZ; chunkZ <= maxChunkZ; chunkZ++)
+                    if (!this.mob.level.hasChunkAt(new BlockPos(chunkX << 4, Mth.floor(box.minY), chunkZ << 4))) return false;
+            return true;
+        }
+
+        private void keepFlyingWhileSearching() {
+            if (this.hoverMoveDelay-- > 0 && this.mob.getMoveControl().hasWanted()) return;
+            this.hoverMoveDelay = 20;
+            this.mob.getNavigation().stop();
+            double waterTop = WaterMovementGoal.restSurfaceAt(this.mob, this.mob.blockPosition());
+            double y = Math.max(this.mob.getY(), Double.isFinite(waterTop) ? waterTop + 2.0D : this.mob.getY() + 1.0D);
+            for (int attempt = 0; attempt < 8; attempt++) {
+                double angle = Math.toRadians(this.mob.getYRot()) + (this.hoverDirection++ & 7) * (Math.PI / 4.0D);
+                double x = this.mob.getX() - Math.sin(angle) * 5.0D;
+                double z = this.mob.getZ() + Math.cos(angle) * 5.0D;
+                BlockPos target = new BlockPos(x, y, z);
+                if (!this.mob.level.hasChunkAt(target)) continue;
+                var targetBox = this.mob.getBoundingBox().move(x - this.mob.getX(), y - this.mob.getY(), z - this.mob.getZ());
+                if (!this.mob.level.noCollision(this.mob, targetBox)) continue;
+                this.mob.getMoveControl().setWantedPosition(x, y, z, 0.6D);
+                return;
+            }
         }
     }
 

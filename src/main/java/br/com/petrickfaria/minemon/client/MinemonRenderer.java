@@ -31,7 +31,23 @@ public class MinemonRenderer extends GeoEntityRenderer<MinemonCreature> {
   this.shadowRadius=0.45F*shadowScale;
   float scale=d.scale()*(entity.isBaby()?0.5F:1.0F);
   pose.pushPose();
-  if(!previewRendering)pose.translate(0,entity.isDefeated()?br.com.petrickfaria.minemon.entity.ModelMetrics.defeatedOffset(entity.getSpeciesSlug(),scale):br.com.petrickfaria.minemon.entity.ModelMetrics.floatOffset(entity.getSpeciesSlug(),scale),0);
+  if(!previewRendering){
+   double vertical=entity.isDefeated()?br.com.petrickfaria.minemon.entity.ModelMetrics.defeatedOffset(entity.getSpeciesSlug(),scale)
+       :br.com.petrickfaria.minemon.entity.ModelMetrics.floatOffset(entity.getSpeciesSlug(),scale);
+   if(entity.getSpeciesSlug().equals("gyarados")&&entity.isInWaterOrBubble()&&!entity.isSleeping()
+       &&!entity.isNightResting()&&!entity.isOrderedToSit()&&!entity.isDefeated()){
+    double surface=br.com.petrickfaria.minemon.entity.WaterMovementGoal.restSurfaceAt(entity,entity.blockPosition());
+    if(Double.isFinite(surface)){
+     double target=br.com.petrickfaria.minemon.entity.ModelMetrics.anchorForSubmergedFraction(surface,
+         br.com.petrickfaria.minemon.entity.ModelMetrics.bodyBottom("gyarados"),
+         br.com.petrickfaria.minemon.entity.ModelMetrics.bodyHeight("gyarados"),scale,0.10D);
+     double lift=target-entity.getY();
+     var visualBox=entity.getBoundingBox().move(0.0D,lift,0.0D);
+     if(entity.level.noCollision(entity,visualBox))vertical+=lift;
+    }
+   }
+   pose.translate(0,vertical,0);
+  }
   pose.scale(scale,scale,scale);
   String previousSpecies=activeFireSpecies;activeFireSpecies=entity.getSpeciesSlug();
   try { super.render(entity,yaw,partialTick,pose,buffers,light); }
