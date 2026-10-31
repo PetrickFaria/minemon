@@ -47,7 +47,8 @@ public final class RocketChallengeGameTests {
         ServerPlayer player = player(helper);
         check(helper, RocketChallengeManager.getLevel(villager) == 1, "New Rocket villager must start at level 1");
         MinemonCreature challenge = RocketChallengeManager.spawnChallengePokemon(helper.getLevel(), villager, player);
-        if (challenge == null) { helper.fail("Rocket level 1 challenge did not spawn"); return; }
+        if (challenge == null) { helper.fail("Rocket level 1 challenge did not spawn: "
+                + villager.getPersistentData().getString("MinemonRocketSpawnFailure")); return; }
         check(helper, challenge.isRocketSpecial(), "Rocket villager must mark its challenge as special");
         check(helper, challenge.getSpeciesSlug().equals("zubat"), "Level 1 must summon Zubat");
         check(helper, challenge.getTarget() == player, "Special Pokémon must target the activating player");
@@ -102,7 +103,8 @@ public final class RocketChallengeGameTests {
             check(helper, RocketChallengeManager.getLevel(villager) == level,
                     "Rocket level should be " + level);
             MinemonCreature challenge = RocketChallengeManager.spawnChallengePokemon(helper.getLevel(), villager, player);
-            if (challenge == null) { helper.fail("Challenge failed to spawn at Rocket level " + level); return; }
+            if (challenge == null) { helper.fail("Challenge failed to spawn at Rocket level " + level + ": "
+                    + villager.getPersistentData().getString("MinemonRocketSpawnFailure")); return; }
             check(helper, challenge.getSpeciesSlug().equals(species[level - 1]),
                     "Rocket level " + level + " must summon " + species[level - 1]);
             check(helper, challenge.getMaxHealth() == health[level - 1] && challenge.getHealth() == health[level - 1],

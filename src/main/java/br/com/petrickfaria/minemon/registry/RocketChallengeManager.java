@@ -111,21 +111,21 @@ public final class RocketChallengeManager {
 
     /** Creates the pending challenge for the villager's independent Rocket level. */
     public static MinemonCreature spawnChallengePokemon(ServerLevel level, Villager villager, ServerPlayer player) {
-        if (!isRocket(villager) || player == null) return spawnFailure("profession/player guard");
+        if (!isRocket(villager) || player == null) return spawnFailure(villager, "profession/player guard");
         initialize(villager);
         var data = villager.getPersistentData();
-        if (data.getBoolean(UNLOCKED) || data.hasUUID(ACTIVE)) return spawnFailure("already unlocked/active");
+        if (data.getBoolean(UNLOCKED) || data.hasUUID(ACTIVE)) return spawnFailure(villager, "already unlocked/active");
 
         int currentLevel = data.getInt(LEVEL);
         String species = speciesForLevel(currentLevel);
         var type = ModEntities.SPECIES.get(species);
-        if (type == null) return spawnFailure("unregistered species " + species);
+        if (type == null) return spawnFailure(villager, "unregistered species " + species);
         MinemonCreature challenge = type.get().create(level);
-        if (challenge == null) return spawnFailure("entity factory returned null for " + species);
+        if (challenge == null) return spawnFailure(villager, "entity factory returned null for " + species);
 
         if (!moveToSafeSpawn(level, villager, challenge, player.getYRot())) {
             challenge.discard();
-            return spawnFailure("no safe candidate; species=" + species + " villager=" + villager.blockPosition());
+            return spawnFailure(villager, "no safe candidate; species=" + species + " villager=" + villager.blockPosition());
         }
 
         var maxHealth = challenge.getAttribute(Attributes.MAX_HEALTH);
@@ -141,7 +141,7 @@ public final class RocketChallengeManager {
         challenge.setCustomNameVisible(true);
         challenge.setPersistenceRequired();
         challenge.setTarget(player);
-        if (!level.addFreshEntity(challenge)) return spawnFailure("addFreshEntity rejected " + species);
+        if (!level.addFreshEntity(challenge)) return spawnFailure(villager, "addFreshEntity rejected " + species);
         data.putUUID(ACTIVE, challenge.getUUID());
         data.putBoolean(VICTORY, false);
         return challenge;
@@ -173,7 +173,8 @@ public final class RocketChallengeManager {
         return false;
     }
 
-    private static MinemonCreature spawnFailure(String reason) {
+    private static MinemonCreature spawnFailure(Villager villager, String reason) {
+        if (villager != null) villager.getPersistentData().putString("MinemonRocketSpawnFailure", reason);
         if (Boolean.getBoolean("minemon.debugRocketSpawns")) System.out.println("[ROCKET SPAWN DEBUG] " + reason);
         return null;
     }
