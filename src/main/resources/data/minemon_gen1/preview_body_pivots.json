@@ -8,19 +8,19 @@
     ]
   },
   "ivysaur": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.4002081876551066,
-      0.1071302534350557
+      0.7168718349527738,
+      0.15453932835498657
     ]
   },
   "venusaur": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.78125,
-      0.8821875
+      1.241433087829987,
+      -0.12695143251606011
     ]
   },
   "charmander": {
@@ -32,43 +32,43 @@
     ]
   },
   "charmeleon": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.53125,
-      0.03125
+      0.8746875000000001,
+      0.5516455572343523
     ]
   },
   "charizard": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.71875,
-      0.0
+      1.6724991706624102,
+      1.6875
     ]
   },
   "squirtle": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.46875,
-      0.0
+      0.59375,
+      0.153125
     ]
   },
   "wartortle": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.5032048480729596,
-      -0.16642016732894332
+      0.9083276544378671,
+      0.6033756811215424
     ]
   },
   "blastoise": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      1.4368750000000001,
-      -0.09312500000000001
+      1.8937438396080566,
+      0.1763837579767683
     ]
   },
   "caterpie": {
@@ -80,115 +80,115 @@
     ]
   },
   "metapod": {
-    "bone": "body",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.46877385247287073,
-      -0.13165614774468504
+      0.3956680324886781,
+      0.10651808795713835
     ]
   },
   "butterfree": {
-    "bone": "body",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.625,
-      0.0
+      0.9305416694278674,
+      0.006496652603149189
     ]
   },
   "weedle": {
-    "bone": "body_segment3",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.1875,
-      -0.21875
+      0.31238426193235036,
+      0.22028244080239556
     ]
   },
   "kakuna": {
-    "bone": "body",
+    "bone": "geometry_center",
     "center": [
-      1.3877787807814457e-17,
-      0.49375,
-      -0.015625
+      0.0,
+      0.48224226764350375,
+      -0.017691373037994895
     ]
   },
   "beedrill": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.9375,
-      -0.03125
+      0.7982508284231647,
+      0.016069785940529963
     ]
   },
   "pidgey": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.30806747528838646,
-      -0.0029305779436208934
+      0.3032991786454249,
+      0.10713608962878038
     ]
   },
   "pidgeotto": {
-    "bone": "torso2",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.5278147753431403,
-      -0.1072440595112889
+      0.2858170857209501,
+      -0.07375658183525857
     ]
   },
   "pidgeot": {
-    "bone": "chest",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.9700493296398744,
-      -0.29984462156295366
+      0.732322391058022,
+      0.6418627269095944
     ]
   },
   "rattata": {
-    "bone": "body",
+    "bone": "geometry_center",
     "center": [
-      1.3877787807814457e-17,
-      0.34375,
-      0.031250000000000014
+      0.0,
+      0.3206735336949344,
+      0.3265427084693427
     ]
   },
   "raticate": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.38749999999999996,
-      0.0
+      0.6092776052379975,
+      0.6244896819608254
     ]
   },
   "spearow": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.44503696135462567,
-      -0.04793988121513115
+      0.4420858153984907,
+      0.11536148392230994
     ]
   },
   "fearow": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.9664817371880503,
-      -0.059935595785751195
+      0.6277157886667719,
+      -0.10486161442695541
     ]
   },
   "ekans": {
-    "bone": "coiled_body",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.15625,
-      0.125
+      0.29375,
+      1.578125
     ]
   },
   "arbok": {
-    "bone": "body_upper",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.34922879409409835,
-      0.09177717940374475
+      -1.320202052216389,
+      1.3241250171901153
     ]
   },
   "pikachu": {
@@ -200,1011 +200,1011 @@
     ]
   },
   "raichu": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.4375,
-      0.03125
+      0.749375,
+      1.7346875000000002
     ]
   },
   "sandshrew": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
-      0.0,
-      0.4023734610584434,
-      0.014905352134494787
+      -0.0007375752626226362,
+      0.5738726561834688,
+      0.26257409658119424
     ]
   },
   "sandslash": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.4370252422816315,
-      -0.005426505552091565
+      0.7592816523027089,
+      0.1186608745042913
     ]
   },
   "nidoranf": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.3978765877365274,
-      0.012619614865419876
+      0.5514102894438839,
+      -0.11603594071084608
     ]
   },
   "nidorina": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.5667859617279738,
-      0.18785857849611975
+      0.4988036911985483,
+      -0.05272401477816446
     ]
   },
   "nidoqueen": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.5119588572614091,
-      0.0972973258074237
+      1.0482574799857665,
+      0.21680040155398483
     ]
   },
   "nidoranm": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.5,
-      0.109375
+      0.5757737368408726,
+      -0.1330509862997754
     ]
   },
   "nidorino": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.6875,
-      0.125
+      0.5367542053884787,
+      -0.19256835151320273
     ]
   },
   "nidoking": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.6481250000000001,
-      0.02375000000000005
+      1.2572700214724777,
+      0.696875
     ]
   },
   "clefairy": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.65625,
-      0.015625
+      0.7501975647751684,
+      0.3729728091873816
     ]
   },
   "clefable": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
-      5.551115123125783e-17,
-      0.890625,
-      -0.015625
+      0.0,
+      0.7531322728850018,
+      0.48147299704321916
     ]
   },
   "vulpix": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.46875,
-      0.125
+      0.5559226771470848,
+      0.3056185040196557
     ]
   },
   "ninetales": {
-    "bone": "chest",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.946940306317332,
-      -0.26514911079092895
+      0.9227172545177288,
+      1.60636213198349
     ]
   },
   "jigglypuff": {
-    "bone": "head_scale",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.46875,
-      0.03125
+      0.54625,
+      -0.08124999999999999
     ]
   },
   "wigglytuff": {
-    "bone": "torso1_scale",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.46875,
-      0.0
+      1.0443390487891826,
+      -0.10875000000000001
     ]
   },
   "zubat": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.7097467393249763,
-      -0.01870857167215137
+      0.5176628543571091,
+      0.019422065779949066
     ]
   },
   "golbat": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.65625,
-      0.015937499999999993
+      0.7498437499999999,
+      -0.4071875
     ]
   },
   "oddish": {
-    "bone": "head_ai",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.34375,
-      0.0
+      0.6653587881489311,
+      -0.0693098282280199
     ]
   },
   "gloom": {
-    "bone": "head_ai",
+    "bone": "geometry_center",
     "center": [
-      0.0,
-      0.4525,
-      0.0
+      -0.08082058335560799,
+      0.6184959950693505,
+      0.07463559668287151
     ]
   },
   "vileplume": {
-    "bone": "head_ai",
+    "bone": "geometry_center",
     "center": [
-      0.0,
-      0.640625,
-      0.0
+      0.05836553657521926,
+      0.691875,
+      -0.01053802281927363
     ]
   },
   "paras": {
-    "bone": "body",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.28125,
-      0.21875
+      0.37761459849533624,
+      -0.02105446957554158
     ]
   },
   "parasect": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.46875,
-      0.0625
+      0.6302791983298248,
+      -0.1202512109051056
     ]
   },
   "venonat": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.40625,
-      0.0
+      0.6748402778813298,
+      0.002130022968775458
     ]
   },
   "venomoth": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.25,
-      0.0
+      0.255959796608092,
+      0.28125
     ]
   },
   "diglett": {
-    "bone": "body2",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.53125,
+      0.3690625,
       0.0
     ]
   },
   "dugtrio": {
-    "bone": "body3",
+    "bone": "geometry_center",
     "center": [
-      0.0,
-      0.34375,
-      0.25
+      0.00038273277230987945,
+      0.5559375000000001,
+      -0.024165412988936652
     ]
   },
   "meowth": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.4375,
-      0.0
+      0.7426704961892783,
+      0.2578125
     ]
   },
   "persian": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.90625,
-      0.09375
+      0.8972128221366392,
+      0.7610019039353613
     ]
   },
   "psyduck": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.359375,
-      0.0
+      0.6074008479857103,
+      0.054404443860875784
     ]
   },
   "golduck": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.5625,
-      0.0
+      0.7218131453350989,
+      0.24923117238447234
     ]
   },
   "mankey": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.59375,
-      -0.0006249999999999867
+      0.6252721219425126,
+      0.5546875
     ]
   },
   "primeape": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.828125,
-      0.0
+      0.6717362905084807,
+      0.031012168630734083
     ]
   },
   "growlithe": {
-    "bone": "upper_torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.5625,
-      -0.25
+      0.5356854533433522,
+      -0.09428519170117555
     ]
   },
   "arcanine": {
-    "bone": "upper_torso",
+    "bone": "geometry_center",
     "center": [
-      0.0,
-      0.96875,
-      -0.46875
+      5.551115123125783e-17,
+      1.0430132683653879,
+      -0.4703022318967154
     ]
   },
   "poliwag": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.4375,
-      0.0
+      0.3746875,
+      0.4684375
     ]
   },
   "poliwhirl": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.625,
+      0.6219060290255134,
       -0.00031249999999999334
     ]
   },
   "poliwrath": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      1.09375,
+      0.8888333796636291,
       0.0
     ]
   },
   "abra": {
-    "bone": "chest",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.78125,
-      0.0
+      0.6914930462146002,
+      0.3615776031620137
     ]
   },
   "kadabra": {
-    "bone": "chest",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      1.0625,
-      -0.09375
+      1.0292183707400493,
+      -0.04605508147243004
     ]
   },
   "alakazam": {
-    "bone": "upper_torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      1.625,
-      -0.015625
+      1.315168867777153,
+      -0.179375
     ]
   },
   "machop": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.640625,
-      0.03125
+      0.7073253800054755,
+      0.2028125
     ]
   },
   "machoke": {
-    "bone": "chest",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      1.109375,
-      0.109375
+      0.8645821386957122,
+      -0.00031249999999999334
     ]
   },
   "machamp": {
-    "bone": "chest",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      1.328125,
-      0.015625
+      0.9147546987772972,
+      -0.0234375
     ]
   },
   "bellsprout": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.49952433726146817,
-      -0.01089446784345727
+      0.7559435472010371,
+      -0.17207736701918047
     ]
   },
   "weepinbell": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.7815625,
-      0.0
+      0.6524678702167318,
+      0.1521103616263291
     ]
   },
   "victreebel": {
-    "bone": "body",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.5,
-      -0.015625
+      1.1721875,
+      2.445625
     ]
   },
   "tentacool": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      1.7100943715530812,
-      -0.058788982738654516
+      1.125,
+      -0.027226482738654523
     ]
   },
   "tentacruel": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      2.320076288782177,
-      -0.03125
+      1.4450762887821769,
+      0.0
     ]
   },
   "geodude": {
-    "bone": "head",
+    "bone": "geometry_center",
     "center": [
       0.0,
       0.2496875,
-      0.00031249999999999334
-    ]
-  },
-  "graveler": {
-    "bone": "torso",
-    "center": [
-      0.0078125,
-      0.6953125,
-      0.030312499999999992
-    ]
-  },
-  "golem": {
-    "bone": "torso",
-    "center": [
-      0.0,
-      1.1375,
-      0.0
-    ]
-  },
-  "ponyta": {
-    "bone": "torso",
-    "center": [
-      0.0,
-      0.640625,
-      -0.046875
-    ]
-  },
-  "rapidash": {
-    "bone": "torso",
-    "center": [
-      0.0,
-      0.921875,
-      0.0
-    ]
-  },
-  "slowpoke": {
-    "bone": "torso",
-    "center": [
-      0.0,
-      0.40625,
-      0.0
-    ]
-  },
-  "slowbro": {
-    "bone": "torso",
-    "center": [
-      0.0,
-      0.4720268992606714,
-      0.04999582139730174
-    ]
-  },
-  "magnemite": {
-    "bone": "body",
-    "center": [
-      0.0,
-      0.3125,
-      0.0
-    ]
-  },
-  "magneton": {
-    "bone": "body",
-    "center": [
-      0.0,
-      1.0625,
-      0.0
-    ]
-  },
-  "farfetchd": {
-    "bone": "torso",
-    "center": [
-      0.0,
-      0.375,
-      0.03125
-    ]
-  },
-  "doduo": {
-    "bone": "torso",
-    "center": [
-      0.0,
-      0.71875,
-      0.0
-    ]
-  },
-  "dodrio": {
-    "bone": "torso",
-    "center": [
-      0.0,
-      0.875,
-      0.0
-    ]
-  },
-  "seel": {
-    "bone": "body",
-    "center": [
-      0.0,
-      0.359375,
-      -0.09375
-    ]
-  },
-  "dewgong": {
-    "bone": "chest",
-    "center": [
-      0.0,
-      0.46875,
-      -0.65625
-    ]
-  },
-  "grimer": {
-    "bone": "body2",
-    "center": [
-      0.0,
-      0.34375,
-      -0.03125
-    ]
-  },
-  "muk": {
-    "bone": "body",
-    "center": [
-      0.0,
-      0.12499999999999999,
-      0.0625
-    ]
-  },
-  "shellder": {
-    "bone": "shell_top",
-    "center": [
-      0.0,
-      0.37776463046917813,
-      -0.029850138557026368
-    ]
-  },
-  "cloyster": {
-    "bone": "shell_left",
-    "center": [
-      0.49447719714571253,
-      1.0624998273949022,
-      0.025878373125715504
-    ]
-  },
-  "gastly": {
-    "bone": "torso",
-    "center": [
-      0.0,
-      0.40625,
-      0.030937500000000007
-    ]
-  },
-  "haunter": {
-    "bone": "torso",
-    "center": [
-      5.551115123125783e-17,
-      0.7496875000000001,
-      0.0
-    ]
-  },
-  "gengar": {
-    "bone": "torso",
-    "center": [
-      0.0,
-      1.25,
-      0.265625
-    ]
-  },
-  "onix": {
-    "bone": "head",
-    "center": [
-      0.0,
-      0.65625,
-      -2.5625
-    ]
-  },
-  "drowzee": {
-    "bone": "torso",
-    "center": [
-      0.0,
-      0.5625,
-      -0.03125
-    ]
-  },
-  "hypno": {
-    "bone": "upper_torso",
-    "center": [
-      0.0,
-      1.28125,
-      0.0
-    ]
-  },
-  "krabby": {
-    "bone": "torso",
-    "center": [
-      0.0,
-      0.39948472773589583,
-      0.006325493923229897
-    ]
-  },
-  "kingler": {
-    "bone": "torso",
-    "center": [
-      0.0,
-      0.608139793870983,
-      -0.024994953267215514
-    ]
-  },
-  "voltorb": {
-    "bone": "body",
-    "center": [
-      0.0,
-      0.34375,
-      0.0
-    ]
-  },
-  "electrode": {
-    "bone": "body",
-    "center": [
-      0.0,
-      0.5625,
-      0.0
-    ]
-  },
-  "exeggcute": {
-    "bone": "egg1",
-    "center": [
-      0.0,
-      0.21875,
-      0.0
-    ]
-  },
-  "exeggutor": {
-    "bone": "torso",
-    "center": [
-      0.0,
-      1.875,
-      0.0
-    ]
-  },
-  "cubone": {
-    "bone": "torso",
-    "center": [
-      0.0,
-      0.25,
-      0.0
-    ]
-  },
-  "marowak": {
-    "bone": "torso",
-    "center": [
-      0.0,
-      0.375,
-      0.0
-    ]
-  },
-  "hitmonlee": {
-    "bone": "torso2",
-    "center": [
-      0.0,
-      1.28125,
-      0.0
-    ]
-  },
-  "hitmonchan": {
-    "bone": "torso2",
-    "center": [
-      -0.0012600000000000111,
-      1.21875625,
-      0.0012681250000000088
-    ]
-  },
-  "lickitung": {
-    "bone": "torso",
-    "center": [
-      0.0,
-      0.46863108431536704,
-      -0.002723616960864317
-    ]
-  },
-  "koffing": {
-    "bone": "body_inflate",
-    "center": [
-      0.0,
-      0.5625,
       -0.0006250000000000144
     ]
   },
-  "weezing": {
-    "bone": "main_body_inflate",
+  "graveler": {
+    "bone": "geometry_center",
     "center": [
-      -0.25,
-      0.7184375000000001,
+      0.0,
+      0.5934375000000001,
+      -0.1432878108590377
+    ]
+  },
+  "golem": {
+    "bone": "geometry_center",
+    "center": [
+      0.0,
+      0.7638702367904178,
+      -0.22419067547305488
+    ]
+  },
+  "ponyta": {
+    "bone": "geometry_center",
+    "center": [
+      0.0,
+      0.798978521980498,
+      0.14930880223378207
+    ]
+  },
+  "rapidash": {
+    "bone": "geometry_center",
+    "center": [
+      0.0,
+      1.1167302088781286,
+      0.4720562796719353
+    ]
+  },
+  "slowpoke": {
+    "bone": "geometry_center",
+    "center": [
+      0.0,
+      0.3806556411043583,
+      0.35906250000000006
+    ]
+  },
+  "slowbro": {
+    "bone": "geometry_center",
+    "center": [
+      0.0,
+      0.6406286770953763,
+      0.653251203080732
+    ]
+  },
+  "magnemite": {
+    "bone": "geometry_center",
+    "center": [
+      0.0,
+      0.4221875,
+      -0.08401211654163512
+    ]
+  },
+  "magneton": {
+    "bone": "geometry_center",
+    "center": [
+      0.0,
+      0.7971875,
+      -0.08401211654163512
+    ]
+  },
+  "farfetchd": {
+    "bone": "geometry_center",
+    "center": [
+      0.0,
+      0.6540453762683107,
+      -0.06070894064720714
+    ]
+  },
+  "doduo": {
+    "bone": "geometry_center",
+    "center": [
+      0.0,
+      0.81246875,
+      -0.203125
+    ]
+  },
+  "dodrio": {
+    "bone": "geometry_center",
+    "center": [
+      0.0,
+      1.2187187499999999,
+      -0.015593750000000017
+    ]
+  },
+  "seel": {
+    "bone": "geometry_center",
+    "center": [
+      0.0,
+      0.27,
+      0.050757144814373434
+    ]
+  },
+  "dewgong": {
+    "bone": "geometry_center",
+    "center": [
+      0.0,
+      0.49375,
+      0.8078125
+    ]
+  },
+  "grimer": {
+    "bone": "geometry_center",
+    "center": [
+      0.0,
+      0.6712500000000001,
+      0.1325
+    ]
+  },
+  "muk": {
+    "bone": "geometry_center",
+    "center": [
+      0.0,
+      0.8624786783873977,
+      0.14093750000000005
+    ]
+  },
+  "shellder": {
+    "bone": "geometry_center",
+    "center": [
+      0.0,
+      0.32567332479413047,
+      -0.06682426117444268
+    ]
+  },
+  "cloyster": {
+    "bone": "geometry_center",
+    "center": [
+      0.0,
+      1.043290000520276,
+      -0.07247307097061517
+    ]
+  },
+  "gastly": {
+    "bone": "geometry_center",
+    "center": [
+      0.0,
+      0.339484637452161,
+      -0.548125
+    ]
+  },
+  "haunter": {
+    "bone": "geometry_center",
+    "center": [
+      0.0,
+      0.921875,
+      0.0859375
+    ]
+  },
+  "gengar": {
+    "bone": "geometry_center",
+    "center": [
+      0.0,
+      1.2217823363769686,
+      0.28046875
+    ]
+  },
+  "onix": {
+    "bone": "geometry_center",
+    "center": [
+      0.0,
+      1.3343423009161315,
+      2.8748545732758046
+    ]
+  },
+  "drowzee": {
+    "bone": "geometry_center",
+    "center": [
+      0.0,
+      0.7590187175721818,
+      -0.2109375
+    ]
+  },
+  "hypno": {
+    "bone": "geometry_center",
+    "center": [
+      0.0,
+      1.113692116223899,
+      -0.0970140776186369
+    ]
+  },
+  "krabby": {
+    "bone": "geometry_center",
+    "center": [
+      0.0,
+      0.22301884945329253,
+      -0.020660254841064984
+    ]
+  },
+  "kingler": {
+    "bone": "geometry_center",
+    "center": [
+      0.2824490953932437,
+      0.8241499792180087,
+      -0.020844031450370837
+    ]
+  },
+  "voltorb": {
+    "bone": "geometry_center",
+    "center": [
+      0.0,
+      0.34375,
+      -0.03268640358760244
+    ]
+  },
+  "electrode": {
+    "bone": "geometry_center",
+    "center": [
+      0.0,
+      0.588571930684337,
       -0.0006249999999999867
     ]
   },
-  "rhyhorn": {
-    "bone": "torso",
+  "exeggcute": {
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.71875,
-      0.015088485147593311
+      0.21875,
+      0.06187500000000001
+    ]
+  },
+  "exeggutor": {
+    "bone": "geometry_center",
+    "center": [
+      0.0,
+      2.0782792244747292,
+      0.22476330853340543
+    ]
+  },
+  "cubone": {
+    "bone": "geometry_center",
+    "center": [
+      -0.0078125,
+      0.49581009827588285,
+      0.03325324691688744
+    ]
+  },
+  "marowak": {
+    "bone": "geometry_center",
+    "center": [
+      0.0,
+      0.7114743423416288,
+      0.041743326175840756
+    ]
+  },
+  "hitmonlee": {
+    "bone": "geometry_center",
+    "center": [
+      0.0,
+      0.78125,
+      -0.046875
+    ]
+  },
+  "hitmonchan": {
+    "bone": "geometry_center",
+    "center": [
+      -0.0012600000000000389,
+      1.0194538234455872,
+      -0.06360238063781512
+    ]
+  },
+  "lickitung": {
+    "bone": "geometry_center",
+    "center": [
+      0.0,
+      0.8513992878059575,
+      -0.35825857757153723
+    ]
+  },
+  "koffing": {
+    "bone": "geometry_center",
+    "center": [
+      0.0016778772143742904,
+      0.5684543736226904,
+      0.02044761845516596
+    ]
+  },
+  "weezing": {
+    "bone": "geometry_center",
+    "center": [
+      0.0586171723533111,
+      0.6476480337465195,
+      0.06918692791655509
+    ]
+  },
+  "rhyhorn": {
+    "bone": "geometry_center",
+    "center": [
+      0.0,
+      0.7795825861351431,
+      -0.45226538324470705
     ]
   },
   "rhydon": {
-    "bone": "upper_torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      1.2057032313789042,
-      -0.2683900983375072
+      1.2774056371190825,
+      0.6723503158473945
     ]
   },
   "chansey": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.53125,
-      0.0
+      0.7404025138594941,
+      0.18366281228487058
     ]
   },
   "tangela": {
-    "bone": "body",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.390625,
+      0.3671875,
       0.0
     ]
   },
   "kangaskhan": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      1.1787686368369998,
-      0.09729424734273978
+      1.5513657318913232,
+      0.4684084616250257
     ]
   },
   "horsea": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.5,
-      0.0
+      0.4996875,
+      0.04625000000000001
     ]
   },
   "seadra": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.890625,
-      0.34375
+      0.8278125000000001,
+      0.04107567208823448
     ]
   },
   "goldeen": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.3125,
-      -0.125
+      0.4201854484071704,
+      0.35281250000000003
     ]
   },
   "seaking": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.875,
-      -0.1875
+      0.71875,
+      0.2510151743352437
     ]
   },
   "staryu": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.5190625,
-      0.0253125
+      0.561820250883533,
+      -0.04375000000000001
     ]
   },
   "starmie": {
-    "bone": "body_back",
+    "bone": "geometry_center",
     "center": [
-      1.3877787807814457e-17,
-      0.8528125000000001,
-      0.1315625
+      0.0,
+      0.8284374999999999,
+      -0.10375000000000001
     ]
   },
   "mrmime": {
-    "bone": "chest",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      1.28125,
-      0.03125
+      1.108346749373554,
+      -0.07877805025806356
     ]
   },
   "scyther": {
-    "bone": "thorax",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      1.6906249999999998,
-      -0.00031249999999999334
+      1.1582544725183843,
+      0.8624050311656191
     ]
   },
   "jynx": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.75,
+      0.8753124999999999,
       0.0
     ]
   },
   "electabuzz": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.859375,
-      0.015625
+      0.9811646006765745,
+      0.5421875
     ]
   },
   "magmar": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.7753125000000001,
-      0.15625
+      0.8190625,
+      0.515625
     ]
   },
   "pinsir": {
-    "bone": "torso2",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      1.078125,
-      0.0
+      1.1161552003559607,
+      -0.012587446474877917
     ]
   },
   "tauros": {
-    "bone": "torso3",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      1.0,
-      -0.4375
+      0.8125947795460573,
+      0.3797068140283487
     ]
   },
   "magikarp": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.6860757268448945,
-      -0.16798800744557
+      0.6860757268448946,
+      0.05406250000000001
     ]
   },
   "gyarados": {
-    "bone": "neck5",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      3.0,
-      -0.0625
+      -1.122168181614124,
+      -0.14262072513218338
     ]
   },
   "lapras": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.59375,
-      0.09375
+      0.965879486100746,
+      0.0611737500917896
     ]
   },
   "ditto": {
-    "bone": "torso2",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.21875,
+      0.3125,
       0.0
     ]
   },
   "eevee": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.4375,
-      0.1875
+      0.4755897740279167,
+      0.40039593111073557
     ]
   },
   "vaporeon": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.8153125000000001,
-      0.34375
+      0.7734851356673751,
+      0.9578094746124388
     ]
   },
   "jolteon": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.8125,
-      0.34375
+      0.6015159417018219,
+      0.08582131499803314
     ]
   },
   "flareon": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.7375,
-      0.28125
+      0.5908978964953007,
+      0.7576202777047936
     ]
   },
   "porygon": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.42382754389401495,
-      0.0005607228615036319
+      0.3892847971975356,
+      0.13165366343705315
     ]
   },
   "omanyte": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
-      0.0,
-      0.125,
-      0.0
+      0.0078125,
+      0.3727989760119339,
+      0.14072951586439814
     ]
   },
   "omastar": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.1875,
-      0.0934375
+      0.6642979483191226,
+      0.11632685961932596
     ]
   },
   "kabuto": {
-    "bone": "body",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.1466908589047804,
-      0.025823494447908435
+      0.09072465219940273,
+      0.036676505552091565
     ]
   },
   "kabutops": {
-    "bone": "torso4",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      1.3472300210134782,
-      0.05011210512127874
+      1.1930236280900592,
+      0.16845410840596925
     ]
   },
   "aerodactyl": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      1.025,
-      -0.0625
+      0.8994110450390916,
+      0.46843750000000006
     ]
   },
   "snorlax": {
-    "bone": "belly",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      1.125,
+      1.8125,
       0.0
     ]
   },
   "articuno": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      1.8293685325787714,
-      -0.08507402593540203
+      1.6087997961321179,
+      3.457950752608637
     ]
   },
   "zapdos": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      1.34375,
-      -0.1875
+      1.0620528672549763,
+      -0.421875
     ]
   },
   "moltres": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      1.9949512483628693,
-      -0.12709366556586826
+      0.8781333091464791,
+      0.7560443900809857
     ]
   },
   "dratini": {
-    "bone": "head2",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      1.125,
-      -0.0390625
+      -0.8203125,
+      -0.10562500000000001
     ]
   },
   "dragonair": {
-    "bone": "segment2",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      -0.21875,
-      -0.046875
+      -0.7558942171681529,
+      0.34216671045207914
     ]
   },
   "dragonite": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.96875,
-      -0.078125
+      1.7962500000000001,
+      1.3828125
     ]
   },
   "mewtwo": {
-    "bone": "torso3",
+    "bone": "geometry_center",
     "center": [
-      -2.7755575615628914e-17,
-      1.9325603904091808,
-      0.059335301801580115
+      0.0,
+      1.531159589342145,
+      1.9632780815644377
     ]
   },
   "mew": {
-    "bone": "torso",
+    "bone": "geometry_center",
     "center": [
       0.0,
-      0.34375,
-      0.0
+      0.7615022277697754,
+      1.5421874999999998
     ]
   }
 }

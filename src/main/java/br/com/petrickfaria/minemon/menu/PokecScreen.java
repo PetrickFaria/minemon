@@ -396,6 +396,9 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         pose.pushPose();
         pose.translate(x, y, 120);
         pose.scale(scale, -scale, scale);
+        // PoseStack post-multiplies: these rotations followed by the local-space
+        // pivot compensation render as R * T(-pivot), so each model turns around
+        // its own measured body center instead of orbiting an external point.
         pose.mulPose(Vector3f.XP.rotationDegrees(previewPitch-6));
         pose.mulPose(Vector3f.YP.rotationDegrees(previewYaw));
         pose.translate(-fit.x(), -fit.y(), -fit.z());
