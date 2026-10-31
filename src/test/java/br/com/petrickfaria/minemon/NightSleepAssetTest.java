@@ -10,6 +10,29 @@ public class NightSleepAssetTest {
   var file=root.resolve(d.animation().replace("assets/minemon/","assets/minemon_gen1/"));
   return JsonParser.parseString(Files.readString(file)).getAsJsonObject().getAsJsonObject("animations");
  }
+ @Test public void permanentlyAquaticSleepKeepsWaterIdleTracksAndAppliesClosedEyesSeparately() throws Exception {
+  var expected=java.util.Set.of("tentacool","tentacruel","horsea","seadra","goldeen","seaking","magikarp","shellder","cloyster","gyarados","lapras");
+  assertEquals(expected,SpeciesBehaviorProfiles.aquaticSpecies());
+  for(String slug:expected){
+   var d=SpeciesDefinitions.get(slug);var clips=d.clips();
+   assertNotNull(slug+" aquatic sleeping pose",clips.get("aquatic_sleep"));
+   assertNotNull(slug+" closed-eye overlay",clips.get("aquatic_sleep_eyes"));
+   var source=animations(d);
+   String idleKey=slug.equals("gyarados")?"surface_water_idle":slug.equals("lapras")?"surfacewater_idle":"water_idle";
+   String idle=clips.getOrDefault(idleKey,clips.get("water_idle"));
+   var expectedPose=source.getAsJsonObject(idle).getAsJsonObject("bones");
+   var actualPose=source.getAsJsonObject(clips.get("aquatic_sleep")).getAsJsonObject("bones");
+   assertEquals(slug+" retains its native water-idle posture and animation",expectedPose,actualPose);
+   var night=source.getAsJsonObject(clips.get("night_sleep")).getAsJsonObject("bones");
+   var eyes=source.getAsJsonObject(clips.get("aquatic_sleep_eyes")).getAsJsonObject("bones");
+   assertFalse(slug+" has closed-eye tracks",eyes.entrySet().isEmpty());
+   for(var entry:eyes.entrySet())
+    assertEquals(slug+" uses the species' existing closed-eye tracks",night.get(entry.getKey()),entry.getValue());
+   assertTrue(slug+" eye overlay loops while asleep",source.getAsJsonObject(clips.get("aquatic_sleep_eyes")).get("loop").getAsBoolean());
+  }
+  for(String visitor:SpeciesBehaviorProfiles.all().keySet().stream().filter(SpeciesBehaviorProfiles::isVisitor).toList())
+   assertFalse(visitor+" remains outside aquatic-only sleep animation",SpeciesDefinitions.get(visitor).clips().containsKey("aquatic_sleep"));
+ }
  @Test public void allSpeciesHaveLoopingSleepWithOriginalBlinkBones() throws Exception {
   var root=Path.of(System.getProperty("minemon.testResources"));
   for(var d:SpeciesDefinitions.ALL.values()){

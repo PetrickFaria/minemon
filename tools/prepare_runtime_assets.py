@@ -403,6 +403,28 @@ def awake_rest_clips(data,geo,d):
   for field in ('sound_effects','particle_effects','timeline'):clip.pop(field,None)
   animations['animation.'+slug+'.minemon_awake_rest'+suffix]=clip
 
+def aquatic_sleep_clips(data,d):
+ """Keep the aquatic idle posture and apply only the generated closed-eye tracks."""
+ import copy
+ slug=d['slug']
+ if slug not in ('tentacool','tentacruel','horsea','seadra','goldeen','seaking','magikarp','shellder','cloyster','gyarados','lapras'):
+  return
+ clips=d.get('clips',{});animations=data['animations']
+ idle_key='surface_water_idle' if slug=='gyarados' else 'surfacewater_idle' if slug=='lapras' else 'water_idle'
+ idle=clips.get(idle_key) or clips.get('water_idle')
+ if idle not in animations:
+  raise ValueError(f'{slug}: missing aquatic idle animation for sleeping posture')
+ sleep=animations.get('animation.'+slug+'.minemon_night_sleep',{})
+ sleep_bones=sleep.get('bones',{})
+ eye_bones={name:copy.deepcopy(tracks) for name,tracks in sleep_bones.items()
+            if any(part in name.lower() for part in ('eye','eyelid','pupil','lid'))}
+ if not eye_bones:
+  raise ValueError(f'{slug}: generated sleep clip has no closed-eye tracks')
+ pose=copy.deepcopy(animations[idle]);pose.update(loop=True,animation_length=4.0)
+ animations['animation.'+slug+'.minemon_aquatic_sleep']=pose
+ animations['animation.'+slug+'.minemon_aquatic_sleep_eyes']={
+  'loop':True,'animation_length':4.0,'bones':eye_bones}
+
 def build_runtime_clips(data,geo,d):
  animations=data.setdefault('animations',{});clips=d.get('clips',{})
  walk_name=d.get('walk')
@@ -639,6 +661,7 @@ for p in (root/'assets/minemon_gen1/animations').rglob('*.animation.json'):
    native_air_pose_adaptations(data,geometry,definition)
    night_sleep_clip(data,geometry,definition)
    awake_rest_clips(data,geometry,definition)
+   aquatic_sleep_clips(data,definition)
   prepare_tail_flame(root,definition)
   prepare_moltres_emissive_mask(root,definition)
  # GeckoLib 3.1.40 dereferences this field while parsing every clip, including

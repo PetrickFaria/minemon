@@ -100,9 +100,10 @@ public final class NightAndSwimmingTests {
     double scale=SpeciesDefinitions.get("gyarados").scale()*(mob.isBaby()?0.5D:1.0D);
     double bodyHeight=ModelMetrics.bodyHeight("gyarados")*scale;
     double bodyBottom=ModelMetrics.bodyBottom("gyarados")*scale;
-    double submergedFraction=(surface-(mob.getY()+bodyBottom))/bodyHeight;
-    check(h,mob.isInWater()&&Double.isFinite(surface)&&Math.abs(submergedFraction-0.10D)<0.03D,
-        "Awake Gyarados must place 10% of its measured visible body below the waterline: fraction="+submergedFraction
+    double submergedDepth=surface-(mob.getY()+bodyBottom);
+    check(h,mob.isInWater()&&Double.isFinite(surface)&&Math.abs(submergedDepth-(bodyHeight*0.10D+1.0D))<0.12D,
+        "Awake Gyarados must keep its previous measured-body anchor plus exactly one block of depth: submerged="+submergedDepth
+        +" expected="+(bodyHeight*0.10D+1.0D)
         +" pos="+mob.position()+" surface="+surface+" sleep="+mob.isSleeping());
     check(h,maxDepth[0]-minDepth[0]<=0.45D,"Awake Gyarados surface depth must not oscillate excessively; samples="
         +minDepth[0]+".."+maxDepth[0]);
@@ -113,6 +114,36 @@ public final class NightAndSwimmingTests {
   }
   if(remaining<=0){h.fail("Awake Gyarados did not return to its measured surface anchor; y="+mob.getY()+" target="+target);return;}
   h.runAfterDelay(5,()->awaitAwakeGyaradosSurface(h,mob,remaining-5,start,done));
+ }
+ @GameTest(template="test_arena",batch="night_aquatic_animation",timeoutTicks=900)
+ public static void allElevenPermanentAquaticsRemainStationaryAtTheirExistingSleepDepth(GameTestHelper h){
+  arena(h);var level=h.getLevel();
+  for(int x=1;x<=29;x++)for(int z=1;z<=20;z++)for(int y=1;y<=14;y++)h.setBlock(new BlockPos(x,y,z),Blocks.WATER);
+  level.setDayTime(18000);
+  var slugs=List.of("tentacool","tentacruel","horsea","seadra","goldeen","seaking","magikarp","shellder","cloyster","gyarados","lapras");
+  var swimmers=new ArrayList<MinemonCreature>();
+  for(int i=0;i<slugs.size();i++)swimmers.add(spawn(h,slugs.get(i),2+(i%6)*4,8,3+(i/6)*7));
+  await(h,()->swimmers.stream().allMatch(MinemonCreature::isSleeping),()->{
+   var rests=new HashMap<MinemonCreature,Double>();
+   for(var swimmer:swimmers){
+    double depth=WaterMovementGoal.waterRestY(swimmer);
+    check(h,swimmer.isInWater()&&Double.isFinite(depth)&&Math.abs(swimmer.getY()-depth)<.2D,
+        swimmer.getSpeciesSlug()+" must preserve its established aquatic sleep-depth rule");
+    rests.put(swimmer,depth);
+   }
+   var positions=new HashMap<MinemonCreature,net.minecraft.world.phys.Vec3>();
+   swimmers.forEach(m->positions.put(m,m.position()));
+   h.runAfterDelay(30,()->{
+    for(var swimmer:swimmers){
+     var before=positions.get(swimmer);var after=swimmer.position();
+     check(h,swimmer.isSleeping()&&swimmer.isInWater(),swimmer.getSpeciesSlug()+" remains asleep and submerged");
+     check(h,before.distanceTo(after)<.08D,swimmer.getSpeciesSlug()+" stays stationary during aquatic sleep; moved="+before.distanceTo(after));
+     check(h,Math.abs(WaterMovementGoal.waterRestY(swimmer)-rests.get(swimmer))<.001D,
+         swimmer.getSpeciesSlug()+" keeps the same depth target throughout sleep");
+    }
+    h.succeed();
+   });
+  },500,"All permanently aquatic species must enter stationary water sleep");
  }
  private static void sampleAwakeGyarados(GameTestHelper h,MinemonCreature mob,int remaining,
      double[] minDepth,double[] maxDepth,net.minecraft.world.phys.Vec3 start,double[] farthestSq,Runnable done){
@@ -125,6 +156,28 @@ public final class NightAndSwimmingTests {
   farthestSq[0]=Math.max(farthestSq[0],dx*dx+dz*dz);
   if(remaining<=0){done.run();return;}
   h.runAfterDelay(10,()->sampleAwakeGyarados(h,mob,remaining-1,minDepth,maxDepth,start,farthestSq,done));
+ }
+ @GameTest(template="test_arena",batch="poliwhirl_surface_depth",timeoutTicks=300)
+ public static void poliwhirlGetsOneThirdExtraDepthOnlyDuringAwakeSurfaceSwimming(GameTestHelper h){
+  arena(h);var level=h.getLevel();
+  for(int x=2;x<=12;x++)for(int z=2;z<=10;z++)for(int y=1;y<=12;y++)h.setBlock(new BlockPos(x,y,z),Blocks.WATER);
+  level.setDayTime(1000);
+  var poliwhirl=spawn(h,"poliwhirl",4,8,5);var poliwag=spawn(h,"poliwag",7,8,5);var poliwrath=spawn(h,"poliwrath",10,8,5);
+  for(var mob:List.of(poliwhirl,poliwag,poliwrath))mob.chooseNaturalWaterDepth(true);
+  double base=Math.min(.8D,poliwhirl.getBbHeight()*.3D);
+  check(h,Math.abs(WaterMovementGoal.preferredSurfaceDepth(poliwhirl)-(base+1.0D/3.0D))<1.0E-9D,
+      "Awake surface-swimming Poliwhirl receives exactly one-third block of additional depth");
+  check(h,Math.abs(WaterMovementGoal.preferredSurfaceDepth(poliwag)-Math.min(.8D,poliwag.getBbHeight()*.3D))<1.0E-9D,
+      "Poliwag keeps its existing surface depth");
+  check(h,Math.abs(WaterMovementGoal.preferredSurfaceDepth(poliwrath)-Math.min(.8D,poliwrath.getBbHeight()*.3D))<1.0E-9D,
+      "Poliwrath keeps its existing surface depth");
+  level.setDayTime(18000);
+  h.runAfterDelay(30,()->{
+   check(h,poliwhirl.isNightResting()&&poliwhirl.isInWater(),"Poliwhirl enters its existing aquatic night-rest routine");
+   check(h,Math.abs(WaterMovementGoal.preferredSurfaceDepth(poliwhirl)-base)<1.0E-9D,
+       "The extra third-block offset applies only while awake surface swimming");
+   h.succeed();
+  });
  }
  private static void traceAwakeGyarados(GameTestHelper h,MinemonCreature mob,int elapsed){
   double top=((MinemonAquaticCreature)mob).waterSurface();

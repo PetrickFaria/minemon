@@ -15,7 +15,7 @@ import java.util.*;
 
 /** Additional real-client scenario: production night AI, rendered closed eyes, dawn. */
 final class NightClientSmokeTest {
- private static final List<String> SPECIES=List.of("bulbasaur","victreebel","venusaur","snorlax","charizard","scyther","dragonite","pidgey","pidgeotto","pidgeot","spearow","fearow","articuno","zapdos","moltres","gastly","haunter","gengar","zubat","golbat","koffing","weezing","butterfree","beedrill","venomoth","parasect","kakuna","tangela","poliwag","growlithe","magikarp","gyarados","lapras","dratini","omanyte","eevee","jolteon","flareon","vaporeon_land","vaporeon","abra","porygon","geodude","kadabra","alakazam","shellder","cloyster","mewtwo","mew");
+ private static final List<String> SPECIES=List.of("bulbasaur","victreebel","venusaur","snorlax","charizard","scyther","dragonite","pidgey","pidgeotto","pidgeot","spearow","fearow","articuno","zapdos","moltres","gastly","haunter","gengar","zubat","golbat","koffing","weezing","butterfree","beedrill","venomoth","parasect","kakuna","tangela","poliwag","growlithe","tentacool","tentacruel","horsea","seadra","goldeen","seaking","magikarp","shellder","cloyster","gyarados","lapras","dratini","omanyte","eevee","jolteon","flareon","vaporeon_land","vaporeon","abra","porygon","geodude","kadabra","alakazam","mewtwo","mew");
  private static boolean opened,setup,spawned,waking,gengarWakeEyesObserved,nocturnalMidday;
  private static int ticks,index,samples,activeSamples,sleepTick,depthSettleTicks,depthStableTicks,restSettleTicks,restStableTicks;
  private static volatile UUID entity;
@@ -62,8 +62,12 @@ final class NightClientSmokeTest {
      var definition=SpeciesDefinitions.get(mob.getSpeciesSlug());
      String sleepKey=mob.getSpeciesSlug().equals("vaporeon")
              ? (mob.isInWaterOrBubble()?"night_sleep_water":"night_sleep_land") : "night_sleep";
-     String selectedClip=definition.clips().getOrDefault(sleepKey,definition.clips().get("night_sleep"));
+     boolean aquaticSleep=SpeciesBehaviorProfiles.isAquatic(mob.getSpeciesSlug())&&mob.isInWaterOrBubble();
+     String selectedClip=aquaticSleep?definition.clips().get("aquatic_sleep")
+             :definition.clips().getOrDefault(sleepKey,definition.clips().get("night_sleep"));
      if(!Objects.equals(mob.getSelectedAnimationForValidation(),selectedClip))return;
+     String eyeClip=aquaticSleep?definition.clips().get("aquatic_sleep_eyes"):selectedClip;
+     if(aquaticSleep&&!Objects.equals(mob.getSelectedAquaticSleepEyesForValidation(),eyeClip))return;
     if(sleepTick==0)sleepTick=mob.tickCount;
     if(mob.tickCount-sleepTick<12)return;
      // Read the generated pose, whose eye tracks hold the species' native blink closure.
@@ -72,7 +76,7 @@ final class NightClientSmokeTest {
       var animations=com.google.gson.JsonParser.parseReader(new java.io.InputStreamReader(stream)).getAsJsonObject().getAsJsonObject("animations");
       String blink=d.clips().get("blink");
       {
-       var sleepBones=animations.getAsJsonObject(selectedClip).getAsJsonObject("bones");
+       var sleepBones=animations.getAsJsonObject(eyeClip).getAsJsonObject("bones");
        if(java.util.Set.of("spearow","fearow","articuno","zapdos","moltres").contains(mob.getSpeciesSlug())){
         for(String name:sleepBones.keySet())if(name.startsWith("wing_")||name.equals("wings_open")||name.equals("wings_closed")){
          var wing=model.getAnimationProcessor().getBone(name);if(wing==null)continue;
@@ -82,7 +86,7 @@ final class NightClientSmokeTest {
           throw new IllegalStateException(mob.getSpeciesSlug()+" wing moved during grounded sleep: "+name+" axis="+axis+" delta="+Math.abs(prior[axis]-rotation[axis]));
         }
        }
-       java.util.Set<String> eyeNames=blink!=null&&animations.has(blink)?animations.getAsJsonObject(blink).getAsJsonObject("bones").keySet():sleepBones.keySet().stream().filter(n->n.contains("eye")||n.contains("pupil")).collect(java.util.stream.Collectors.toSet());
+       java.util.Set<String> eyeNames=aquaticSleep?sleepBones.keySet():blink!=null&&animations.has(blink)?animations.getAsJsonObject(blink).getAsJsonObject("bones").keySet():sleepBones.keySet().stream().filter(n->n.contains("eye")||n.contains("pupil")).collect(java.util.stream.Collectors.toSet());
        if(eyeNames.isEmpty())eyeNames=sleepBones.keySet().stream().filter(n->n.contains("eye")||n.contains("pupil")).collect(java.util.stream.Collectors.toSet());
        for(String name:eyeNames){
         var bone=model.getAnimationProcessor().getBone(name);if(bone==null)continue;
@@ -204,7 +208,7 @@ final class NightClientSmokeTest {
    if(waking&&!current.isSleeping()){
     if(current.getSpeciesSlug().equals("gengar")&&!gengarWakeEyesObserved)return;
     if(++index>=SPECIES.size()){
-     Files.writeString(Path.of("client-validation-night.txt"),"PASS NIGHT CLIENT: ordinary species slept at night; all five nocturnal species stayed active at night, slept from midday to dusk, rendered their native closed-eye poses, and woke at dusk.\n",StandardOpenOption.APPEND);
+     Files.writeString(Path.of("client-validation-night.txt"),"PASS NIGHT CLIENT: ordinary species slept at night; all five nocturnal species stayed active at night, slept from midday to dusk, rendered their native closed-eye poses, and woke at dusk. All eleven permanent aquatic species rendered water-idle sleep poses with closed-eye overlays.\n",StandardOpenOption.APPEND);
      mc.stop();return;
     }
     spawned=false;

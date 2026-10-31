@@ -247,13 +247,8 @@ public final class WaterMovementGoal extends Goal {
     var box=mob.getBoundingBox().move(x-mob.getX(),feetY-mob.getY(),z-mob.getZ());
     if(!mob.level.noCollision(mob,box))return false;
     if(mob.getSpeciesSlug().equals("gyarados")){
-     // Gyarados is modeled as an exclusively aquatic surface swimmer. Validate
-     // its measured visible lower 10% at the waterline, not the hitbox center.
-     double scale=SpeciesDefinitions.get("gyarados").scale()*(mob.isBaby()?0.5D:1.0D);
-     double bodyBottom=ModelMetrics.bodyBottom("gyarados")*scale;
-     double bodyHeight=ModelMetrics.bodyHeight("gyarados")*scale;
-     double submergedFraction=(top-(feetY+bodyBottom))/bodyHeight;
-     if(Math.abs(submergedFraction-0.10D)>1.0E-6D)return false;
+     // The surface anchor already includes the measured 10% body reference;
+     // the awake-only one-block offset intentionally places the body lower.
      int waterY=net.minecraft.util.Mth.floor(top-1.0E-4D);
      for(int bx=net.minecraft.util.Mth.floor(box.minX+.001D);bx<=net.minecraft.util.Mth.floor(box.maxX-.001D);bx++)
       for(int bz=net.minecraft.util.Mth.floor(box.minZ+.001D);bz<=net.minecraft.util.Mth.floor(box.maxZ-.001D);bz++)
@@ -381,11 +376,15 @@ public final class WaterMovementGoal extends Goal {
   if(java.util.Set.of("blastoise","poliwrath","dewgong","vaporeon").contains(mob.getSpeciesSlug()))
    return 0.5D + mob.getBbHeight()*0.5D;
   if(mob.getSpeciesSlug().equals("gyarados")){
-   // Keep the server anchor identical to the client renderer's 10%-submerged
-   // measured-body anchor. This is a positioning target, not a hitbox depth.
+   // Preserve the measured-body anchor as the base, then keep the awake model
+   // one block lower. Sleep depth is selected separately by waterRestY().
    double scale=SpeciesDefinitions.get("gyarados").scale()*(mob.isBaby()?0.5D:1.0D);
-   return (ModelMetrics.bodyBottom("gyarados")+ModelMetrics.bodyHeight("gyarados")*0.10D)*scale;
+   return (ModelMetrics.bodyBottom("gyarados")+ModelMetrics.bodyHeight("gyarados")*0.10D)*scale
+       +(mob.isSleeping()||mob.isNightResting()?0.0D:1.0D);
   }
+  if(mob.getSpeciesSlug().equals("poliwhirl")&&mob.isNaturalSurface()
+      &&!mob.isSleeping()&&!mob.isNightResting())
+   return Math.min(0.8D,mob.getBbHeight()*0.3D)+1.0D/3.0D;
   return Math.min(0.8D,mob.getBbHeight()*0.3D);
  }
  public static boolean withinSearchRadius(BlockPos origin,BlockPos candidate){return origin.distSqr(candidate)<=SEARCH_RADIUS*SEARCH_RADIUS;}

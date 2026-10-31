@@ -45,7 +45,7 @@ public class MinemonRenderer extends GeoEntityRenderer<MinemonCreature> {
     if(Double.isFinite(surface)){
      double target=br.com.petrickfaria.minemon.entity.ModelMetrics.anchorForSubmergedFraction(surface,
          br.com.petrickfaria.minemon.entity.ModelMetrics.bodyBottom("gyarados"),
-         br.com.petrickfaria.minemon.entity.ModelMetrics.bodyHeight("gyarados"),scale,0.10D);
+         br.com.petrickfaria.minemon.entity.ModelMetrics.bodyHeight("gyarados"),scale,0.10D)-1.0D;
      double lift=target-entity.getY();
      var visualBox=entity.getBoundingBox().move(0.0D,lift,0.0D);
      if(entity.level.noCollision(entity,visualBox))vertical+=lift;

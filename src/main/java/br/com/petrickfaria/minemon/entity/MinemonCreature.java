@@ -123,6 +123,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     private final RandomSource customSoundRandom = RandomSource.create();
     // Client-only diagnostic sample used by the automated locomotion smoke test.
     private String selectedAnimationForValidation;
+    private String selectedAquaticSleepEyesForValidation;
     private String selectedTailFlameAnimationForValidation;
 
     public MinemonCreature(EntityType<? extends TamableAnimal> type, Level level) {
@@ -996,6 +997,8 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     public void registerControllers(AnimationData data) {
         data.addAnimationController(new AnimationController<>(this, "movement", 4, this::animationPredicate));
         data.addAnimationController(new AnimationController<>(this, "blink", 0, this::blinkPredicate));
+        if(SpeciesBehaviorProfiles.isAquatic(this.getSpeciesSlug()))
+            data.addAnimationController(new AnimationController<>(this, "aquatic_sleep_eyes", 0, this::aquaticSleepEyesPredicate));
         data.addAnimationController(new AnimationController<>(this, "tail_flame", 0, this::tailFlamePredicate));
     }
 
@@ -1016,9 +1019,13 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
             clip=attack;loop=false;
             if(this.playedAttackSequence!=this.attackSequence){controller.markNeedsReload();this.playedAttackSequence=this.attackSequence;}
         } else if (this.isSleeping()) {
-            String restKey=slug.equals("vaporeon")
-                    ? (this.isInWaterOrBubble()?"night_sleep_water":"night_sleep_land") : "night_sleep";
-            clip = SpeciesAssetIndex.clip(slug, restKey, "night_sleep");
+            if(SpeciesBehaviorProfiles.isAquatic(slug)) {
+                clip=SpeciesAssetIndex.clip(slug,"aquatic_sleep","night_sleep");
+            } else {
+                String restKey=slug.equals("vaporeon")
+                        ? (this.isInWaterOrBubble()?"night_sleep_water":"night_sleep_land") : "night_sleep";
+                clip = SpeciesAssetIndex.clip(slug, restKey, "night_sleep");
+            }
         } else if ((this.isNightResting() || this.commandLanding()) && this.wantsNaturalLanding() && !this.isOnGround()) {
             // Keep a real air pose while descending. A ground gait during the
             // landing path looks like Spearow/Fearow are walking in mid-air.
@@ -1158,6 +1165,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     }
 
     public String getSelectedAnimationForValidation() { return this.selectedAnimationForValidation; }
+    public String getSelectedAquaticSleepEyesForValidation() { return this.selectedAquaticSleepEyesForValidation; }
     public int getSpontaneousRunCountForValidation() { return this.spontaneousRunCount; }
 
     public String getSelectedTailFlameAnimationForValidation() { return this.selectedTailFlameAnimationForValidation; }
@@ -1184,6 +1192,18 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
             controller.setAnimation(new AnimationBuilder().addAnimation(blink, false));
             this.blinkPending = false;
         }
+        return PlayState.CONTINUE;
+    }
+
+    private <E extends IAnimatable> PlayState aquaticSleepEyesPredicate(AnimationEvent<E> event) {
+        if(!SpeciesBehaviorProfiles.isAquatic(this.getSpeciesSlug())||!this.isSleeping()) {
+            this.selectedAquaticSleepEyesForValidation=null;
+            return PlayState.STOP;
+        }
+        String clip=SpeciesAssetIndex.clip(this.getSpeciesSlug(),"aquatic_sleep_eyes","aquatic_sleep_eyes");
+        if(clip==null)return PlayState.STOP;
+        event.getController().setAnimation(new AnimationBuilder().addAnimation(clip,true));
+        if(Boolean.getBoolean("minemon.clientSmokeTest"))this.selectedAquaticSleepEyesForValidation=clip;
         return PlayState.CONTINUE;
     }
 

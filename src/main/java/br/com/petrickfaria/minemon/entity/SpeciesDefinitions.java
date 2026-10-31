@@ -17,6 +17,10 @@ public final class SpeciesDefinitions {
     clips.put("awake_rest","animation."+slug+".minemon_awake_rest");
     clips.put("awake_rest_water","animation."+slug+".minemon_awake_rest_water");
     clips.put("night_sleep","animation."+slug+".minemon_night_sleep");
+    if(SpeciesBehaviorProfiles.isAquatic(slug)){
+     clips.put("aquatic_sleep","animation."+slug+".minemon_aquatic_sleep");
+     clips.put("aquatic_sleep_eyes","animation."+slug+".minemon_aquatic_sleep_eyes");
+    }
     if(slug.equals("vaporeon")){
      clips.put("night_sleep_land","animation.vaporeon.minemon_night_sleep_land");
      clips.put("night_sleep_water","animation.vaporeon.minemon_night_sleep_water");

@@ -105,7 +105,7 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
       - name: Validate production nighttime sleep and closed eyes on the real client
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.full_suite }}
+        if: ${{ (github.event_name == 'workflow_dispatch' && inputs.full_suite) || (github.event_name == 'push' && github.ref_name == 'feature/minemon-natural-behaviors') }}
         run: |
           python3 tools/prepare_client_world.py
           timeout --kill-after=30s 900s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeSleep
@@ -125,7 +125,7 @@ jobs:
           timeout --kill-after=30s 600s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokePatrol
           grep -F 'PASS HAUNTER PATROL:' run/client-validation-patrol.txt
       - name: Validate Gyarados near-surface animation on the real client
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.full_suite }}
+        if: ${{ (github.event_name == 'workflow_dispatch' && inputs.full_suite) || (github.event_name == 'push' && github.ref_name == 'feature/minemon-natural-behaviors') }}
         run: |
           python3 tools/prepare_client_world.py
           timeout --kill-after=30s 600s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeWater -PclientSmokeSpecies=gyarados
