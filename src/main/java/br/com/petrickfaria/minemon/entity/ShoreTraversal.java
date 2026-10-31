@@ -22,7 +22,7 @@ final class ShoreTraversal {
   Vec3 shore=state!=null&&state.bank!=null
       ?new Vec3(state.bank.getX()+.5D,state.bank.getY(),state.bank.getZ()+.5D):point;
   double dy=point.y-mob.getY();
-  double top=WaterMovementGoal.restSurfaceAt(mob,mob.blockPosition());
+  double top=mob instanceof MinemonAquaticCreature aquatic?aquatic.waterSurface():WaterMovementGoal.restSurfaceAt(mob,mob.blockPosition());
   if(!Double.isFinite(top)||point.y>top+1.5||dy<-.35)return;
   if(state!=null&&state.bank!=null){
    double dx=shore.x-mob.getX(),dz=shore.z-mob.getZ(),distance=Math.sqrt(dx*dx+dz*dz);
