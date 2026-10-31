@@ -89,6 +89,31 @@ public final class NightAndSwimmingTests {
   }
  }
  private static MinemonCreature spawn(GameTestHelper h,String slug,int x,int y,int z){return h.spawn(ModEntities.SPECIES.get(slug).get(),new BlockPos(x,y,z));}
+ private static void awaitAwakeGyaradosSurface(GameTestHelper h,MinemonCreature mob,int remaining,
+     net.minecraft.world.phys.Vec3 start,Runnable done){
+  double top=WaterMovementGoal.restSurfaceAt(mob,mob.blockPosition());
+  double target=top-WaterMovementGoal.preferredSurfaceDepth(mob);
+  if(Double.isFinite(target)&&Math.abs(mob.getY()-target)<0.25D){
+   double[] minDepth={Double.POSITIVE_INFINITY},maxDepth={Double.NEGATIVE_INFINITY},farthestSq={0.0D};
+   sampleAwakeGyarados(h,mob,30,minDepth,maxDepth,start,farthestSq,()->{
+    double surface=WaterMovementGoal.restSurfaceAt(mob,mob.blockPosition());
+    double scale=SpeciesDefinitions.get("gyarados").scale()*(mob.isBaby()?0.5D:1.0D);
+    double bodyHeight=ModelMetrics.bodyHeight("gyarados")*scale;
+    double bodyBottom=ModelMetrics.bodyBottom("gyarados")*scale;
+    double submergedFraction=(surface-(mob.getY()+bodyBottom))/bodyHeight;
+    check(h,mob.isInWater()&&Double.isFinite(surface)&&Math.abs(submergedFraction-0.10D)<0.03D,
+        "Awake Gyarados must place 10% of its measured visible body below the waterline: fraction="+submergedFraction
+        +" pos="+mob.position()+" surface="+surface+" sleep="+mob.isSleeping());
+    check(h,maxDepth[0]-minDepth[0]<=0.45D,"Awake Gyarados surface depth must not oscillate excessively; samples="
+        +minDepth[0]+".."+maxDepth[0]);
+    check(h,farthestSq[0]>0.25D,"Awake Gyarados must continue horizontal swimming; farthest displacement squared="+farthestSq[0]);
+    done.run();
+   });
+   return;
+  }
+  if(remaining<=0){h.fail("Awake Gyarados did not return to its measured surface anchor; y="+mob.getY()+" target="+target);return;}
+  h.runAfterDelay(5,()->awaitAwakeGyaradosSurface(h,mob,remaining-5,start,done));
+ }
  private static void sampleAwakeGyarados(GameTestHelper h,MinemonCreature mob,int remaining,
      double[] minDepth,double[] maxDepth,net.minecraft.world.phys.Vec3 start,double[] farthestSq,Runnable done){
   double top=WaterMovementGoal.restSurfaceAt(mob,mob.blockPosition());
@@ -184,22 +209,8 @@ public final class NightAndSwimmingTests {
      level.setDayTime(1000);
       await(h,()->!gyarados.isSleeping()&&!magikarp.isSleeping()&&!dratini.isSleeping()&&!shellder.isSleeping()&&!vaporeon.isSleeping()&&!cloyster.isSleeping(),()->{
       traceAwakeGyarados(h,gyarados,0);
-      double[] minDepth={Double.POSITIVE_INFINITY},maxDepth={Double.NEGATIVE_INFINITY},farthestSq={0.0D};
       var wakePosition=gyarados.position();
-      sampleAwakeGyarados(h,gyarados,30,minDepth,maxDepth,wakePosition,farthestSq,()->{
-       double top=WaterMovementGoal.restSurfaceAt(gyarados,gyarados.blockPosition());
-       double scale=SpeciesDefinitions.get("gyarados").scale()*(gyarados.isBaby()?0.5D:1.0D);
-       double bodyHeight=ModelMetrics.bodyHeight("gyarados")*scale;
-       double bodyBottom=ModelMetrics.bodyBottom("gyarados")*scale;
-       double submergedFraction=(top-(gyarados.getY()+bodyBottom))/bodyHeight;
-       check(h,gyarados.isInWater()&&Double.isFinite(top)&&Math.abs(submergedFraction-0.10D)<0.03D,
-           "Awake Gyarados must place 10% of its measured visible body below the waterline: fraction="+submergedFraction
-           +" pos="+gyarados.position()+" surface="+top+" sleep="+gyarados.isSleeping());
-       check(h,maxDepth[0]-minDepth[0]<=0.45D,"Awake Gyarados surface depth must not oscillate excessively; samples="
-           +minDepth[0]+".."+maxDepth[0]);
-       check(h,farthestSq[0]>0.25D,"Awake Gyarados must continue horizontal swimming; farthest displacement squared="+farthestSq[0]);
-       h.succeed();
-      });
+      awaitAwakeGyaradosSurface(h,gyarados,400,wakePosition,h::succeed);
      },40,"Aquatic sleepers must wake at dawn");
     },220,()->"A water visitor must return to sleep after combat while it is still night; sleeping="+dratini.isSleeping()+" night="+dratini.isNightResting()+" target="+dratini.getTarget()+" pos="+dratini.position()+" velocity="+dratini.getDeltaMovement()+" restY="+WaterMovementGoal.waterRestY(dratini)+" time="+h.getLevel().getDayTime());
    },180,()->"The woken water visitor must physically retaliate in water; pos="+dratini.position()+" target="+dratini.getTarget()+" sleep="+dratini.isSleeping()+" attacker="+attacker.position()+" health="+attacker.getHealth());
