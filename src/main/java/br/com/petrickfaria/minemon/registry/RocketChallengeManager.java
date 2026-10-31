@@ -156,28 +156,37 @@ public final class RocketChallengeManager {
                 {2.25D, 2.25D}, {2.25D, -2.25D}, {-2.25D, 2.25D}, {-2.25D, -2.25D},
                 {3.5D, 0.0D}, {-3.5D, 0.0D}, {0.0D, 3.5D}, {0.0D, -3.5D}
         };
+        double[] heights = {0.05D, 1.05D, 2.05D};
         int fluids = 0, floors = 0, blocks = 0, entities = 0;
         for (double[] offset : offsets) {
-            double x = villager.getX() + offset[0];
-            // Lift slightly above the villager's floor so collision tests do not
-            // treat a touching block face as an intersecting shape.
-            double y = villager.getY() + 0.05D;
-            double z = villager.getZ() + offset[1];
-            challenge.moveTo(x, y, z, yaw, 0.0F);
-            BlockPos pos = challenge.blockPosition();
-            if (!level.getFluidState(pos).isEmpty()) { fluids++; continue; }
-            if (!challenge.isFlyingSpecies() && !level.getBlockState(pos.below()).isSolidRender(level, pos.below())) { floors++; continue; }
-            AABB box = challenge.getBoundingBox().deflate(1.0E-4D);
-            boolean blockedByBlock = level.getBlockCollisions(challenge, box).iterator().hasNext();
-            boolean overlapsEntity = !level.getEntitiesOfClass(Entity.class, box,
-                    other -> other != challenge && other.isAlive()).isEmpty();
-            if (!blockedByBlock && !overlapsEntity) return true;
-            if (blockedByBlock) blocks++;
-            if (overlapsEntity) entities++;
+            for (double height : heights) {
+                double x = villager.getX() + offset[0];
+                double y = villager.getY() + height;
+                double z = villager.getZ() + offset[1];
+                challenge.moveTo(x, y, z, yaw, 0.0F);
+                BlockPos pos = challenge.blockPosition();
+                if (!level.getFluidState(pos).isEmpty()) { fluids++; continue; }
+                if (!challenge.isFlyingSpecies() && !hasGroundBelow(level, pos)) { floors++; continue; }
+                AABB box = challenge.getBoundingBox().deflate(1.0E-4D);
+                boolean blockedByBlock = level.getBlockCollisions(challenge, box).iterator().hasNext();
+                boolean overlapsEntity = !level.getEntitiesOfClass(Entity.class, box,
+                        other -> other != challenge && other.isAlive()).isEmpty();
+                if (!blockedByBlock && !overlapsEntity) return true;
+                if (blockedByBlock) blocks++;
+                if (overlapsEntity) entities++;
+            }
         }
         villager.getPersistentData().putString("MinemonRocketSpawnFailure", "no safe candidate: fluid=" + fluids
                 + " floor=" + floors + " blocks=" + blocks + " entities=" + entities
                 + " flying=" + challenge.isFlyingSpecies());
+        return false;
+    }
+
+    private static boolean hasGroundBelow(ServerLevel level, BlockPos pos) {
+        for (int depth = 1; depth <= 3; depth++) {
+            BlockPos below = pos.below(depth);
+            if (level.getBlockState(below).isSolidRender(level, below)) return true;
+        }
         return false;
     }
 
