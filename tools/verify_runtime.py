@@ -85,7 +85,7 @@ def validate_target_scales(definitions):
   if any(not math.isclose(a,e,rel_tol=0.0,abs_tol=1e-6) for a,e in zip(actual,values)):
    raise ValueError('Unexpected scale/collision dimensions for '+slug+': '+str(actual))
  particle=(ROOT/'src/main/java/br/com/petrickfaria/minemon/client/GastlySmokeParticle.java').read_text()
- if 'this.quadSize = (small?br.com.petrickfaria.minemon.entity.GastlyAura.SMALL_SIZE:br.com.petrickfaria.minemon.entity.GastlyAura.LARGE_SIZE) * SpeciesDefinitions.get("gastly").scale() * sample;' not in particle:
+ if 'this.quadSize = 0.85F * SpeciesDefinitions.get("gastly").scale() * sample;' not in particle:
   raise ValueError('Gastly smoke size no longer follows its model scale')
  renderer=(ROOT/'src/main/java/br/com/petrickfaria/minemon/client/MinemonRenderer.java').read_text()
  if 'case "gastly" -> 0.5F;' not in renderer or 'case "electabuzz" -> 1.5F;' not in renderer:
