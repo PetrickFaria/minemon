@@ -39,7 +39,7 @@ final class ShoreTraversal {
   if(mob.horizontalCollision || shore.subtract(mob.position()).horizontalDistanceSqr()<20.25D){
    mob.setDeltaMovement(mob.getDeltaMovement().x,Math.max(.42,mob.getDeltaMovement().y),mob.getDeltaMovement().z);
    mob.getJumpControl().jump();
-   if(debug)com.mojang.logging.LogUtils.getLogger().info("SHORE DEBUG JUMP tick={} motion={} jumping={}",mob.tickCount,mob.getDeltaMovement(),mob.isJumping());
+   if(debug)com.mojang.logging.LogUtils.getLogger().info("SHORE DEBUG JUMP tick={} motion={}",mob.tickCount,mob.getDeltaMovement());
   }
  }
  private static final java.util.Map<MinemonCreature,State> STATES=new java.util.WeakHashMap<>();
@@ -126,7 +126,7 @@ static boolean followBank(MinemonCreature mob,net.minecraft.world.entity.LivingE
     var velocity=mob.getDeltaMovement();
     mob.setDeltaMovement(velocity.x,Math.max(.42D,velocity.y),velocity.z);
     mob.getJumpControl().jump();
-    if(debug)com.mojang.logging.LogUtils.getLogger().info("SHORE DEBUG FOLLOW JUMP tick={} motion={} jumping={}",mob.tickCount,mob.getDeltaMovement(),mob.isJumping());
+    if(debug)com.mojang.logging.LogUtils.getLogger().info("SHORE DEBUG FOLLOW JUMP tick={} motion={}",mob.tickCount,mob.getDeltaMovement());
    }
    mob.getMoveControl().setWantedPosition(state.bank.getX()+.5D,state.bank.getY(),state.bank.getZ()+.5D,speed);
    return true;
