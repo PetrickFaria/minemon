@@ -152,13 +152,22 @@ public final class CustomSoundTimerTests {
         int mainhandTicksBefore = creature.customSoundTicksForValidation();
         int mainhandPlaysBefore = creature.customSoundInteractionDispatchesForValidation();
         var mainHand = new PlayerInteractEvent.EntityInteract(player, InteractionHand.MAIN_HAND, creature);
+        long worldTimeBeforePost = helper.getLevel().getDayTime();
+        boolean daylightBeforePost = creature.isCustomSoundDaytime();
         MinecraftForge.EVENT_BUS.post(mainHand);
         int resetTicks = creature.customSoundTicksForValidation();
         int mainhandPlaysAfter = creature.customSoundInteractionDispatchesForValidation();
         com.mojang.logging.LogUtils.getLogger().info("CUSTOM SOUND TRACE phase=right_click hand="+mainHand.getHand()
                 +",eventCanceled="+mainHand.isCanceled()+",cancellationResult="+mainHand.getCancellationResult()
                 +",intervalBefore="+mainhandTicksBefore+",intervalAfter="+resetTicks+",expectedInterval=3600..6000"
-                +",audioDispatchesBefore="+mainhandPlaysBefore+",audioDispatchesAfter="+mainhandPlaysAfter);
+                +",audioDispatchesBefore="+mainhandPlaysBefore+",audioDispatchesAfter="+mainhandPlaysAfter
+                +",worldTimeBeforePost="+worldTimeBeforePost+",worldTimeAfterPost="+helper.getLevel().getDayTime()
+                +",daylightBeforePost="+daylightBeforePost+",daylightAfterPost="+creature.isCustomSoundDaytime()
+                +",dimensionHasSkyLight="+helper.getLevel().dimensionType().hasSkyLight()
+                +",eventEntityLevelClientSide="+mainHand.getEntity().level.isClientSide
+                +",eventEntitySameLevel="+(mainHand.getEntity().level==helper.getLevel())
+                +",targetType="+mainHand.getTarget().getType()+",targetIsCreature="+(mainHand.getTarget()==creature)
+                +",targetAlive="+creature.isAlive()+",targetRemoved="+creature.isRemoved());
         if (mainHand.isCanceled())
             helper.fail("MAIN_HAND_CANCELED_DIAGNOSTIC: right-click event was canceled; hand="+mainHand.getHand()
                     +",eventCanceled="+mainHand.isCanceled()+",cancellationResult="+mainHand.getCancellationResult()
