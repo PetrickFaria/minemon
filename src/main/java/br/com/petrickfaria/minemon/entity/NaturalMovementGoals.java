@@ -1,6 +1,8 @@
 package br.com.petrickfaria.minemon.entity;
 
 import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.Map;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
@@ -84,6 +86,7 @@ public final class NaturalMovementGoals {
         private boolean directShoreRoute;
         private int shoreStallTicks;
         private net.minecraft.world.phys.Vec3 lastShorePosition;
+        private final Map<BlockPos, Long> rejectedShoreLandings = new HashMap<>();
 
         SleepLanding(MinemonCreature mob) {
             this.mob = mob;
@@ -133,6 +136,10 @@ public final class NaturalMovementGoals {
                             this.approachSite.getY()-this.mob.getY(),this.approachSite.getZ()+.5D-this.mob.getZ());
                     if (directLineClear(target)) {
                         this.directShoreRoute=true;
+                        this.mob.getNavigation().stop();
+                    } else {
+                        rejectCachedShoreLanding();
+                        this.pathTicks=200;
                         this.mob.getNavigation().stop();
                     }
                 }
@@ -210,6 +217,7 @@ public final class NaturalMovementGoals {
                 if (cached != null) return cached;
             }
             this.cachedLandingFeet = null;
+            this.rejectedShoreLandings.entrySet().removeIf(entry -> entry.getValue() < this.mob.tickCount);
             int originX = origin.getX(), originZ = origin.getZ(), originY = origin.getY();
             int lowY = Math.max(this.mob.level.getMinBuildHeight() + 1, originY - SHORE_VERTICAL_RADIUS - 1);
             int highY = Math.min(this.mob.level.getMaxBuildHeight() - 2, originY + SHORE_VERTICAL_RADIUS - 2);
@@ -237,6 +245,7 @@ public final class NaturalMovementGoals {
                         double surface = y + top;
                         BlockPos feet = new BlockPos(x, Mth.ceil(surface - 1.0E-6D), z);
                         if (!NightShoreLandingRules.insideSearchVolume(dx, feet.getY() - originY, dz)) continue;
+                        if (this.rejectedShoreLandings.getOrDefault(feet, 0L) >= this.mob.tickCount) continue;
                         if (!WaterMovementGoal.safeLanding(this.mob, feet)) continue;
                         Path path = createShorePath(feet, waterTop);
                         if (path != null) return path;
@@ -258,10 +267,12 @@ public final class NaturalMovementGoals {
                     approach.getY() - this.mob.getY(), feet.getZ() + 0.5D - this.mob.getZ());
             if (!loadedBox(approachBox) || !this.mob.level.noCollision(this.mob, approachBox)) return null;
             Path path = this.mob.getNavigation().createPath(approach, 0);
-            if (path == null || !path.canReach()) {
-                if (!directLineClear(approachBox)) return null;
-                this.directShoreRoute = true;
-                if (path == null) path = new Path(java.util.List.of(), approach, true);
+            boolean directClear = directLineClear(approachBox);
+            if (directClear) this.directShoreRoute = true;
+            else if (path == null || !path.canReach()) return null;
+            if (path == null) {
+                if (!directClear) return null;
+                path = new Path(java.util.List.of(), approach, true);
             }
             this.approachSite = approach;
             this.cachedLandingFeet = feet.immutable();
@@ -285,10 +296,18 @@ public final class NaturalMovementGoals {
             var targetBox = this.mob.getBoundingBox().move(x - this.mob.getX(), y - this.mob.getY(), z - this.mob.getZ());
             if (!directLineClear(targetBox)) {
                 this.directShoreRoute = false;
+                rejectCachedShoreLanding();
+                this.pathTicks=200;
                 this.mob.getNavigation().stop();
                 return;
             }
             this.mob.getMoveControl().setWantedPosition(x, y, z, 1.0D);
+        }
+
+        private void rejectCachedShoreLanding() {
+            if (this.cachedLandingFeet != null)
+                this.rejectedShoreLandings.put(this.cachedLandingFeet.immutable(), this.mob.tickCount + 200L);
+            this.cachedLandingFeet = null;
         }
 
         /** Fallback for unobstructed air corridors where native pathfinding cannot connect the nodes. */
