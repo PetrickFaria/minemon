@@ -104,8 +104,10 @@ public final class NightAndSwimmingTests {
  @GameTest(template="test_arena",batch="night_landing_water",timeoutTicks=700)
  public static void landRestingFlyerFindsDryGroundBeforeStartingSleepOverWater(GameTestHelper h){
   arena(h);var level=h.getLevel();
-  for(int x=2;x<=12;x++)for(int z=2;z<=12;z++)for(int y=1;y<=8;y++)h.setBlock(new BlockPos(x,y,z),Blocks.WATER);
-  var pidgeot=spawn(h,"pidgeot",7,10,7);level.setDayTime(18000);
+  // Keep a real water column and a three-block-safe dry landing site inside
+  // the loaded test area, so this test measures shore flight rather than chunk loading.
+  for(int z=2;z<=12;z++)for(int y=1;y<=8;y++)h.setBlock(new BlockPos(2,y,z),Blocks.WATER);
+  var pidgeot=spawn(h,"pidgeot",2,10,7);level.setDayTime(18000);
   await(h,()->pidgeot.isSleeping()&&pidgeot.isOnGround(),()->{
    var support=pidgeot.blockPosition().below();
    var supportState=level.getBlockState(support);
