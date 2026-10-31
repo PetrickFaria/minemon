@@ -73,6 +73,13 @@ public final class MinemonAquaticCreature extends MinemonCreature {
         // tick. Neutral buoyancy lets the swimming controller reach higher
         // nodes; ordinary land gravity is restored immediately on shore.
         if(!this.level.isClientSide)this.setNoGravity(this.isInWater());
+        // Night rest eases aquatic creatures to their chosen sleep depth before
+        // isSleeping becomes true. Once asleep, stop travel before vanilla can
+        // integrate residual swimming momentum or controller input into a drift.
+        if(!this.level.isClientSide&&this.isSleeping()){
+            this.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
+            input=net.minecraft.world.phys.Vec3.ZERO;
+        }
         if(!this.level.isClientSide&&this.getSpeciesSlug().equals("gyarados")
                 &&this.isNaturalSurface()&&!this.isSleeping()&&!this.isNightResting()
                 &&this.isInWater()){

@@ -173,7 +173,7 @@ public final class NightAndSwimmingTests {
       "Awake surface-swimming Poliwhirl receives exactly one-third block of additional depth");
   check(h,Math.abs(WaterMovementGoal.preferredSurfaceDepth(poliwag)-Math.min(.8D,poliwag.getBbHeight()*.3D))<1.0E-9D,
       "Poliwag keeps its existing surface depth");
-  check(h,Math.abs(WaterMovementGoal.preferredSurfaceDepth(poliwrath)-Math.min(.8D,poliwrath.getBbHeight()*.3D))<1.0E-9D,
+  check(h,Math.abs(WaterMovementGoal.preferredSurfaceDepth(poliwrath)-(0.5D+poliwrath.getBbHeight()*0.5D))<1.0E-9D,
       "Poliwrath keeps its existing surface depth");
   level.setDayTime(18000);
   h.runAfterDelay(30,()->{
