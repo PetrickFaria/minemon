@@ -32,10 +32,6 @@ public final class RocketTradeScreen extends AbstractContainerScreen<RocketTrade
             MinemonGui.slot(pose,leftPos+slot.x-1,topPos+slot.y-1,18,18);
         }
         font.draw(pose,"→",leftPos+218,topPos+40,0xFF404040);
-        int progressX=leftPos+136,progressY=topPos+16;
-        int progressWidth=progressPixels(menu.progressionLevel(),menu.tradesThisLevel(),102);
-        GuiComponent.blit(pose,progressX,progressY,0,186,102,5,512,256);
-        if(progressWidth>0)GuiComponent.blit(pose,progressX,progressY,0,191,progressWidth,5,512,256);
         font.draw(pose,"Lv. "+menu.progressionLevel(),leftPos+108,topPos+14,0xFF404040);
         for (int row=0;row<ROWS;row++) {
             int index=scroll+row;
@@ -52,6 +48,15 @@ public final class RocketTradeScreen extends AbstractContainerScreen<RocketTrade
         int thumbY=topPos+18+(max==0?0:113*scroll/max);
         GuiComponent.fill(pose,leftPos+95,topPos+18,leftPos+101,topPos+158,0xFF777777);
         MinemonGui.panel(pose,leftPos+95,thumbY,6,27);
+        renderVanillaExperienceBar(pose);
+    }
+    /** Uses the same 1.19.2 vanilla MerchantScreen atlas region and native 102x5 bar. */
+    private void renderVanillaExperienceBar(PoseStack pose) {
+        int x = leftPos + 136;
+        int y = topPos + 16;
+        int filled = progressPixels(menu.progressionLevel(), menu.tradesThisLevel(), 102);
+        GuiComponent.blit(pose, x, y, 0, 186, 102, 5, 512, 256);
+        if (filled > 0) GuiComponent.blit(pose, x, y, 0, 191, filled, 5, 512, 256);
     }
     @Override protected void renderLabels(PoseStack pose, int mouseX, int mouseY) {
         font.draw(pose,"Trocas",5,6,0xFF404040);
