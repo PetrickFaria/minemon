@@ -111,7 +111,7 @@ public final class RocketChallengeManager {
 
     /** Creates the pending challenge for the villager's independent Rocket level. */
     public static MinemonCreature spawnChallengePokemon(ServerLevel level, Villager villager, ServerPlayer player) {
-        if (!isRocket(villager) || player == null || !player.isAlive()) return null;
+        if (!isRocket(villager) || player == null) return null;
         initialize(villager);
         var data = villager.getPersistentData();
         if (data.getBoolean(UNLOCKED) || data.hasUUID(ACTIVE)) return null;
@@ -161,7 +161,8 @@ public final class RocketChallengeManager {
             double z = villager.getZ() + offset[1];
             challenge.moveTo(x, y, z, yaw, 0.0F);
             BlockPos pos = challenge.blockPosition();
-            if (!level.getFluidState(pos).isEmpty() || !level.getBlockState(pos.below()).isSolidRender(level, pos.below())) continue;
+            if (!level.getFluidState(pos).isEmpty()) continue;
+            if (!challenge.isFlyingSpecies() && !level.getBlockState(pos.below()).isSolidRender(level, pos.below())) continue;
             if (level.noCollision(challenge)) return true;
         }
         return false;
