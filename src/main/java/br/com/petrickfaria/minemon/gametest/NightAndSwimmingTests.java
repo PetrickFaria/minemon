@@ -114,8 +114,8 @@ public final class NightAndSwimmingTests {
   arena(h);var level=h.getLevel();
   // Keep a real water column and a three-block-safe dry landing site inside
   // the loaded test area, so this test measures shore flight rather than chunk loading.
-  for(int z=2;z<=12;z++)for(int y=1;y<=8;y++)h.setBlock(new BlockPos(2,y,z),Blocks.WATER);
-  var pidgeot=spawn(h,"pidgeot",2,10,7);level.setDayTime(18000);traceShoreLanding(h,pidgeot,0);
+  for(int z=2;z<=12;z++)for(int y=1;y<=8;y++)h.setBlock(new BlockPos(16,y,z),Blocks.WATER);
+  var pidgeot=spawn(h,"pidgeot",16,10,7);level.setDayTime(18000);traceShoreLanding(h,pidgeot,0);
   await(h,()->pidgeot.isSleeping()&&pidgeot.isOnGround(),()->{
    var support=pidgeot.blockPosition().below();
    var supportState=level.getBlockState(support);
