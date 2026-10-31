@@ -89,6 +89,18 @@ public final class NightAndSwimmingTests {
   }
  }
  private static MinemonCreature spawn(GameTestHelper h,String slug,int x,int y,int z){return h.spawn(ModEntities.SPECIES.get(slug).get(),new BlockPos(x,y,z));}
+ private static void sampleAwakeGyarados(GameTestHelper h,MinemonCreature mob,int remaining,
+     double[] minDepth,double[] maxDepth,net.minecraft.world.phys.Vec3 start,double[] farthestSq,Runnable done){
+  double top=WaterMovementGoal.restSurfaceAt(mob,mob.blockPosition());
+  if(Double.isFinite(top)){
+   double depth=top-mob.getY();
+   minDepth[0]=Math.min(minDepth[0],depth);maxDepth[0]=Math.max(maxDepth[0],depth);
+  }
+  double dx=mob.getX()-start.x,dz=mob.getZ()-start.z;
+  farthestSq[0]=Math.max(farthestSq[0],dx*dx+dz*dz);
+  if(remaining<=0){done.run();return;}
+  h.runAfterDelay(10,()->sampleAwakeGyarados(h,mob,remaining-1,minDepth,maxDepth,start,farthestSq,done));
+ }
  private static void traceAwakeGyarados(GameTestHelper h,MinemonCreature mob,int elapsed){
   double top=((MinemonAquaticCreature)mob).waterSurface();
   var path=mob.getNavigation().getPath();
@@ -172,15 +184,20 @@ public final class NightAndSwimmingTests {
      level.setDayTime(1000);
       await(h,()->!gyarados.isSleeping()&&!magikarp.isSleeping()&&!dratini.isSleeping()&&!shellder.isSleeping()&&!vaporeon.isSleeping()&&!cloyster.isSleeping(),()->{
       traceAwakeGyarados(h,gyarados,0);
-      h.runAfterDelay(300,()->{
-       double top=((MinemonAquaticCreature)gyarados).waterSurface();
-       double depth=top-(gyarados.getY()+gyarados.getBbHeight()*.5);
-       check(h,gyarados.isInWater()&&Double.isFinite(top)&&Math.abs(depth-1)<.3,"Awake Gyarados must remain in water at body-center depth one block: "+depth
-           +" pos="+gyarados.position()+" inWater="+gyarados.isInWater()+" sleep="+gyarados.isSleeping()
-           +" surface="+top+" target="+gyarados.getNavigation().getTargetPos()+" navDone="+gyarados.getNavigation().isDone()
-           +" motion="+gyarados.getDeltaMovement()+" phase="+gyarados.naturalCycle().phase()
-           +" active="+gyarados.naturalBehaviorActive()+" block="+gyarados.blockPosition()
-           +" blockFluid="+level.getFluidState(gyarados.blockPosition())+" time="+level.getDayTime());
+      double[] minDepth={Double.POSITIVE_INFINITY},maxDepth={Double.NEGATIVE_INFINITY},farthestSq={0.0D};
+      var wakePosition=gyarados.position();
+      sampleAwakeGyarados(h,gyarados,30,minDepth,maxDepth,wakePosition,farthestSq,()->{
+       double top=WaterMovementGoal.restSurfaceAt(gyarados,gyarados.blockPosition());
+       double scale=SpeciesDefinitions.get("gyarados").scale()*(gyarados.isBaby()?0.5D:1.0D);
+       double bodyHeight=ModelMetrics.bodyHeight("gyarados")*scale;
+       double bodyBottom=ModelMetrics.bodyBottom("gyarados")*scale;
+       double submergedFraction=(top-(gyarados.getY()+bodyBottom))/bodyHeight;
+       check(h,gyarados.isInWater()&&Double.isFinite(top)&&Math.abs(submergedFraction-0.10D)<0.03D,
+           "Awake Gyarados must place 10% of its measured visible body below the waterline: fraction="+submergedFraction
+           +" pos="+gyarados.position()+" surface="+top+" sleep="+gyarados.isSleeping());
+       check(h,maxDepth[0]-minDepth[0]<=0.45D,"Awake Gyarados surface depth must not oscillate excessively; samples="
+           +minDepth[0]+".."+maxDepth[0]);
+       check(h,farthestSq[0]>0.25D,"Awake Gyarados must continue horizontal swimming; farthest displacement squared="+farthestSq[0]);
        h.succeed();
       });
      },40,"Aquatic sleepers must wake at dawn");

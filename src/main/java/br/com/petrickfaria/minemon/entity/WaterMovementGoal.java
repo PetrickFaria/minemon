@@ -185,10 +185,24 @@ public final class WaterMovementGoal extends Goal {
     if(Math.abs(navY-feetY)>1.0D)return false;
     var box=mob.getBoundingBox().move(x-mob.getX(),feetY-mob.getY(),z-mob.getZ());
     if(!mob.level.noCollision(mob,box))return false;
-    int bodyY=net.minecraft.util.Mth.floor(feetY+mob.getBbHeight()*.5D);
-    for(int bx=net.minecraft.util.Mth.floor(box.minX+.001D);bx<=net.minecraft.util.Mth.floor(box.maxX-.001D);bx++)
-     for(int bz=net.minecraft.util.Mth.floor(box.minZ+.001D);bz<=net.minecraft.util.Mth.floor(box.maxZ-.001D);bz++)
-      if(!mob.level.getFluidState(new BlockPos(bx,bodyY,bz)).is(FluidTags.WATER))return false;
+    if(mob.getSpeciesSlug().equals("gyarados")){
+     // Gyarados is modeled as an exclusively aquatic surface swimmer. Validate
+     // its measured visible lower 10% at the waterline, not the hitbox center.
+     double scale=SpeciesDefinitions.get("gyarados").scale()*(mob.isBaby()?0.5D:1.0D);
+     double bodyBottom=ModelMetrics.bodyBottom("gyarados")*scale;
+     double bodyHeight=ModelMetrics.bodyHeight("gyarados")*scale;
+     double submergedFraction=(top-(feetY+bodyBottom))/bodyHeight;
+     if(Math.abs(submergedFraction-0.10D)>1.0E-6D)return false;
+     int waterY=net.minecraft.util.Mth.floor(top-1.0E-4D);
+     for(int bx=net.minecraft.util.Mth.floor(box.minX+.001D);bx<=net.minecraft.util.Mth.floor(box.maxX-.001D);bx++)
+      for(int bz=net.minecraft.util.Mth.floor(box.minZ+.001D);bz<=net.minecraft.util.Mth.floor(box.maxZ-.001D);bz++)
+       if(!mob.level.getFluidState(new BlockPos(bx,waterY,bz)).is(FluidTags.WATER))return false;
+    }else{
+     int bodyY=net.minecraft.util.Mth.floor(feetY+mob.getBbHeight()*.5D);
+     for(int bx=net.minecraft.util.Mth.floor(box.minX+.001D);bx<=net.minecraft.util.Mth.floor(box.maxX-.001D);bx++)
+      for(int bz=net.minecraft.util.Mth.floor(box.minZ+.001D);bz<=net.minecraft.util.Mth.floor(box.maxZ-.001D);bz++)
+       if(!mob.level.getFluidState(new BlockPos(bx,bodyY,bz)).is(FluidTags.WATER))return false;
+    }
    }
    previousX=endX;previousY=endY;previousZ=endZ;
   }
@@ -304,9 +318,13 @@ public final class WaterMovementGoal extends Goal {
  public static double preferredSurfaceDepth(MinemonCreature mob){
   if(java.util.Set.of("blastoise","poliwrath","dewgong","vaporeon").contains(mob.getSpeciesSlug()))
    return 0.5D + mob.getBbHeight()*0.5D;
-  // The generic surface depth is measured from the feet; Gyarados instead
-  // keeps its body center one block below the surface and its full hitbox wet.
-  return mob.getSpeciesSlug().equals("gyarados")?1.0D+mob.getBbHeight()*0.5D:Math.min(0.8D,mob.getBbHeight()*0.3D);
+  if(mob.getSpeciesSlug().equals("gyarados")){
+   // Keep the server anchor identical to the client renderer's 10%-submerged
+   // measured-body anchor. This is a positioning target, not a hitbox depth.
+   double scale=SpeciesDefinitions.get("gyarados").scale()*(mob.isBaby()?0.5D:1.0D);
+   return (ModelMetrics.bodyBottom("gyarados")+ModelMetrics.bodyHeight("gyarados")*0.10D)*scale;
+  }
+  return Math.min(0.8D,mob.getBbHeight()*0.3D);
  }
  public static boolean withinSearchRadius(BlockPos origin,BlockPos candidate){return origin.distSqr(candidate)<=SEARCH_RADIUS*SEARCH_RADIUS;}
  public static boolean requiresNavigableVolume(String speciesSlug){return SpeciesBehaviorProfiles.waterCapable(speciesSlug);}
