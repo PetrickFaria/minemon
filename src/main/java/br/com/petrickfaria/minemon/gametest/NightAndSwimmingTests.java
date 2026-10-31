@@ -89,6 +89,14 @@ public final class NightAndSwimmingTests {
   }
  }
  private static MinemonCreature spawn(GameTestHelper h,String slug,int x,int y,int z){return h.spawn(ModEntities.SPECIES.get(slug).get(),new BlockPos(x,y,z));}
+ private static void traceShoreLanding(GameTestHelper h,MinemonCreature mob,int elapsed){
+  var path=mob.getNavigation().getPath();
+  com.mojang.logging.LogUtils.getLogger().info("SHORE LAND TRACE elapsed={} pos={} surface={} water={} gravity={} sleep={} night={} navDone={} target={} next={} control={} wanted={} move={}",
+      elapsed,mob.position(),mob.naturalSurface(),mob.isInWaterOrBubble(),mob.isNoGravity(),mob.isSleeping(),mob.isNightResting(),
+      mob.getNavigation().isDone(),mob.getNavigation().getTargetPos(),path==null||path.isDone()?"null":path.getNextNode(),
+      mob.getMoveControl().getClass().getSimpleName(),mob.getMoveControl().hasWanted(),mob.getDeltaMovement());
+  if(elapsed<450)h.runAfterDelay(50,()->traceShoreLanding(h,mob,elapsed+50));
+ }
  private static void traceAwakeGyarados(GameTestHelper h,MinemonCreature mob,int elapsed){
   double top=((MinemonAquaticCreature)mob).waterSurface();
   var path=mob.getNavigation().getPath();
@@ -107,7 +115,7 @@ public final class NightAndSwimmingTests {
   // Keep a real water column and a three-block-safe dry landing site inside
   // the loaded test area, so this test measures shore flight rather than chunk loading.
   for(int z=2;z<=12;z++)for(int y=1;y<=8;y++)h.setBlock(new BlockPos(2,y,z),Blocks.WATER);
-  var pidgeot=spawn(h,"pidgeot",2,10,7);level.setDayTime(18000);
+  var pidgeot=spawn(h,"pidgeot",2,10,7);level.setDayTime(18000);traceShoreLanding(h,pidgeot,0);
   await(h,()->pidgeot.isSleeping()&&pidgeot.isOnGround(),()->{
    var support=pidgeot.blockPosition().below();
    var supportState=level.getBlockState(support);
