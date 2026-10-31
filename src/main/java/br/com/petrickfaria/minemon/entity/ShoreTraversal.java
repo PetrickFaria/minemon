@@ -16,9 +16,7 @@ final class ShoreTraversal {
  }
  static void tick(MinemonCreature mob){
   State state=STATES.get(mob);
-  boolean debug=mob.isTame()&&mob.getSpeciesSlug().equals("blastoise")&&mob.tickCount%20==0;
   boolean isExiting=exiting(mob);
-  if(debug)com.mojang.logging.LogUtils.getLogger().info("SHORE DEBUG PRE tick={} water={} bank={} bankDry={} exiting={} pos={} wanted={}, {}, {} pathDone={} collision={} ground={} motion={}",mob.tickCount,mob.isInWater(),state==null?null:state.bank,state!=null&&state.bank!=null&&mob.level.getFluidState(state.bank).isEmpty(),isExiting,mob.position(),mob.getMoveControl().getWantedX(),mob.getMoveControl().getWantedY(),mob.getMoveControl().getWantedZ(),mob.getNavigation().isDone(),mob.horizontalCollision,mob.isOnGround(),mob.getDeltaMovement());
   if(mob.isDefeated()||mob.isSleeping()||mob.isNightResting()||mob.isOrderedToSit()||!isExiting)return;
   var path=mob.getNavigation().getPath();
   Vec3 point=path!=null&&!path.isDone()?path.getNextEntityPos(mob):new Vec3(state.bank.getX()+.5D,state.bank.getY(),state.bank.getZ()+.5D);
@@ -26,7 +24,6 @@ final class ShoreTraversal {
       ?new Vec3(state.bank.getX()+.5D,state.bank.getY(),state.bank.getZ()+.5D):point;
   double dy=point.y-mob.getY();
   double top=mob instanceof MinemonAquaticCreature aquatic?aquatic.waterSurface():WaterMovementGoal.restSurfaceAt(mob,mob.blockPosition());
-  if(debug)com.mojang.logging.LogUtils.getLogger().info("SHORE DEBUG ACTIVE tick={} point={} top={} dy={} distSq={} clearUp={} motion={}",mob.tickCount,point,top,dy,shore.subtract(mob.position()).horizontalDistanceSqr(),mob.level.noCollision(mob,mob.getBoundingBox().move(0,.12,0)),mob.getDeltaMovement());
   if(!Double.isFinite(top)||point.y>top+1.5||dy<-.35)return;
   if(state!=null&&state.bank!=null){
    double dx=shore.x-mob.getX(),dz=shore.z-mob.getZ(),distance=Math.sqrt(dx*dx+dz*dz);
@@ -39,7 +36,6 @@ final class ShoreTraversal {
   if(mob.horizontalCollision || shore.subtract(mob.position()).horizontalDistanceSqr()<20.25D){
    mob.setDeltaMovement(mob.getDeltaMovement().x,Math.max(.42,mob.getDeltaMovement().y),mob.getDeltaMovement().z);
    mob.getJumpControl().jump();
-   if(debug)com.mojang.logging.LogUtils.getLogger().info("SHORE DEBUG JUMP tick={} motion={}",mob.tickCount,mob.getDeltaMovement());
   }
  }
  private static final java.util.Map<MinemonCreature,State> STATES=new java.util.WeakHashMap<>();
@@ -109,8 +105,16 @@ final class ShoreTraversal {
   return false;
  }
 static boolean followBank(MinemonCreature mob,net.minecraft.world.entity.LivingEntity owner,double speed){
-  if(!mob.isAquaticSpecies()||!mob.isInWater()||ownerNearWater(owner)){STATES.remove(mob);return false;}
-  var state=STATES.computeIfAbsent(mob,m->new State());state.blocked.entrySet().removeIf(e->e.getValue()<mob.tickCount);
+  if(!mob.isAquaticSpecies()||ownerNearWater(owner)){STATES.remove(mob);return false;}
+  var state=STATES.get(mob);
+  if(!mob.isInWater()&&(state==null||state.bank==null)){STATES.remove(mob);return false;}
+  if(state!=null&&state.bank!=null&&!mob.isInWater()&&mob.isOnGround()){
+   double dx=state.bank.getX()+.5D-mob.getX(),dz=state.bank.getZ()+.5D-mob.getZ();
+   double arrivalRadius=.75D+mob.getBbWidth()*.5D;
+   if(dx*dx+dz*dz<=arrivalRadius*arrivalRadius){STATES.remove(mob);return false;}
+  }
+  if(state==null){state=new State();STATES.put(mob,state);}
+  state.blocked.entrySet().removeIf(e->e.getValue()<mob.tickCount);
   if(state.previous!=null && mob.position().distanceToSqr(state.previous)<.015)state.stalled+=10;else state.stalled=0;state.previous=mob.position();
   if(state.stalled>=40 && state.bank!=null){state.blocked.put(state.bank,mob.tickCount+200);state.bank=null;mob.getNavigation().stop();state.stalled=0;}
   if(state.bank!=null){
@@ -120,13 +124,10 @@ static boolean followBank(MinemonCreature mob,net.minecraft.world.entity.LivingE
    // route check below selects another bank if this line is obstructed.
    mob.getNavigation().stop();
    double dx=state.bank.getX()+.5D-mob.getX(),dz=state.bank.getZ()+.5D-mob.getZ();
-   boolean debug=mob.isTame()&&mob.getSpeciesSlug().equals("blastoise")&&mob.tickCount%10==0;
-   if(debug)com.mojang.logging.LogUtils.getLogger().info("SHORE DEBUG FOLLOW tick={} bank={} distSq={} bankY={} mobY={} water={} up={} motion={}",mob.tickCount,state.bank,dx*dx+dz*dz,state.bank.getY(),mob.getY(),mob.isInWater(),mob.level.noCollision(mob,mob.getBoundingBox().move(0,.2D,0)),mob.getDeltaMovement());
    if(state.bank.getY()>mob.getY()+.4D&&dx*dx+dz*dz<36.0D){
     var velocity=mob.getDeltaMovement();
     mob.setDeltaMovement(velocity.x,Math.max(.42D,velocity.y),velocity.z);
     mob.getJumpControl().jump();
-    if(debug)com.mojang.logging.LogUtils.getLogger().info("SHORE DEBUG FOLLOW JUMP tick={} motion={}",mob.tickCount,mob.getDeltaMovement());
    }
    mob.getMoveControl().setWantedPosition(state.bank.getX()+.5D,state.bank.getY(),state.bank.getZ()+.5D,speed);
    return true;
