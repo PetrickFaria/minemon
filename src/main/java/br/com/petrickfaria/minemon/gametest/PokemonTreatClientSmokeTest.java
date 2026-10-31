@@ -129,8 +129,10 @@ public final class PokemonTreatClientSmokeTest {
                     throw new IllegalStateException("PokéC selector closed during focused UI render check");
                 if (screen.catalogSizeForSmokeTest() != 151)
                     throw new IllegalStateException("PokéC UI did not load the complete 151-species list");
-                if (!screen.conversionSlotsBelowListForSmokeTest())
-                    throw new IllegalStateException("PokéC conversion slots must remain below the left Pokédex list");
+                if (!screen.conversionPanelFitsAboveInventoryForSmokeTest())
+                    throw new IllegalStateException("PokéC conversion panel must remain above the player inventory");
+                if (!screen.inventorySlotsForSmokeTest())
+                    throw new IllegalStateException("PokéC must show all 27 main inventory slots and 9 hotbar slots in vanilla order");
                 if (screen.previewScaleForSmokeTest("pikachu") <= screen.previewScaleForSmokeTest("onix"))
                     throw new IllegalStateException("PokéC preview should scale Pikachu larger than giant Onix");
                 if (!screen.clickSpeciesForSmokeTest("mew"))

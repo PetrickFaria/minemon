@@ -269,5 +269,31 @@ public final class PokecGameTests {
         check(souls==result,"closing PokéC safely returns only the souls actually rolled");
         owner.discard();h.succeed();
     }
+
+    @GameTest(template="test_arena",timeoutTicks=200)
+    public static void pokecPlayerInventoryQuickMoveUsesVanillaRangesWithoutDuplication(GameTestHelper h){
+        floor(h);ServerPlayer owner=player(h,h.absolutePos(new BlockPos(7,1,5)));
+        PokecMenu menu=new PokecMenu(22,owner.getInventory(),h.absolutePos(new BlockPos(5,1,5)));
+        owner.containerMenu=menu;
+        check(menu.slots.size()==36,"PokéC must expose the player's existing 36 inventory slots");
+        owner.getInventory().setItem(9,new ItemStack(Blocks.DIRT,7));
+        ItemStack movedToHotbar=menu.quickMoveStack(owner,0);
+        check(movedToHotbar.getCount()==7,"shift-click should return the moved original stack");
+        check(owner.getInventory().getItem(9).isEmpty(),"main-inventory source slot should be emptied");
+        check(owner.getInventory().getItem(0).is(Blocks.DIRT.asItem())&&owner.getInventory().getItem(0).getCount()==7,
+                "main-inventory stack should move to the hotbar");
+        check(owner.getInventory().items.stream().filter(stack->stack.is(Blocks.DIRT.asItem())).mapToInt(ItemStack::getCount).sum()==7,
+                "shift-click must not duplicate the moved stack");
+
+        owner.getInventory().setItem(0,new ItemStack(Blocks.OAK_LOG,4));
+        ItemStack movedToMain=menu.quickMoveStack(owner,27);
+        check(movedToMain.getCount()==4,"hotbar shift-click should return the moved original stack");
+        check(owner.getInventory().getItem(0).isEmpty(),"hotbar source slot should be emptied");
+        check(owner.getInventory().getItem(9).is(Blocks.OAK_LOG.asItem())&&owner.getInventory().getItem(9).getCount()==4,
+                "hotbar stack should move into the main inventory");
+        check(owner.getInventory().items.stream().filter(stack->stack.is(Blocks.OAK_LOG.asItem())).mapToInt(ItemStack::getCount).sum()==4,
+                "reverse shift-click must not duplicate the moved stack");
+        owner.discard();h.succeed();
+    }
     private PokecGameTests(){}
 }
