@@ -131,7 +131,7 @@ static boolean followBank(MinemonCreature mob,net.minecraft.world.entity.LivingE
    mob.getMoveControl().setWantedPosition(state.bank.getX()+.5D,state.bank.getY(),state.bank.getZ()+.5D,speed);
    return true;
   }
-  double top=WaterMovementGoal.restSurfaceAt(mob,mob.blockPosition());if(!Double.isFinite(top))return false;
+  double top=mob instanceof MinemonAquaticCreature aquatic?aquatic.waterSurface():WaterMovementGoal.restSurfaceAt(mob,mob.blockPosition());if(!Double.isFinite(top))return false;
   var candidates=new java.util.ArrayList<BlockPos>();
   for(int dx=-12;dx<=12;dx++)for(int dz=-12;dz<=12;dz++){
    var column=mob.blockPosition().offset(dx,0,dz);if(!mob.level.hasChunkAt(column))continue;
