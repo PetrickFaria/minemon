@@ -23,6 +23,7 @@ import net.minecraftforge.registries.RegistryObject;
 /** Menu anchor and short-lived, server-owned PokéC payment slots. */
 public final class PokecMenu extends AbstractContainerMenu {
     private final BlockPos pos;
+    private final Inventory playerInventory;
     private String selectedSlug = "bulbasaur";
     private int stagedCoins;
     private int stagedSouls;
@@ -37,6 +38,7 @@ public final class PokecMenu extends AbstractContainerMenu {
     public PokecMenu(int id, Inventory inventory, BlockPos pos) {
         super(ModMenus.POKEC.get(), id);
         this.pos = pos;
+        this.playerInventory = inventory;
         for (int row = 0; row < 3; row++) for (int column = 0; column < 9; column++)
             addSlot(new net.minecraft.world.inventory.Slot(inventory, column + row * 9 + 9, 0, 0));
         for (int column = 0; column < 9; column++)
@@ -54,14 +56,13 @@ public final class PokecMenu extends AbstractContainerMenu {
     /** Screen-only coordinates; slot indices and backing Inventory remain vanilla. */
     public void layoutPlayerInventory(int x, int mainY, int hotbarY) {
         for (int row = 0; row < 3; row++) for (int column = 0; column < 9; column++) {
-            var slot = slots.get(row * 9 + column);
-            slot.x = x + column * 18;
-            slot.y = mainY + row * 18;
+            int menuIndex = row * 9 + column;
+            slots.set(menuIndex, new net.minecraft.world.inventory.Slot(playerInventory,
+                    column + row * 9 + 9, x + column * 18, mainY + row * 18));
         }
         for (int column = 0; column < 9; column++) {
-            var slot = slots.get(27 + column);
-            slot.x = x + column * 18;
-            slot.y = hotbarY;
+            slots.set(27 + column, new net.minecraft.world.inventory.Slot(playerInventory,
+                    column, x + column * 18, hotbarY));
         }
     }
     public String selectedSlug() { return selectedSlug; }
