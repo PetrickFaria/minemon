@@ -6,6 +6,7 @@ import br.com.petrickfaria.minemon.menu.RocketTradeMenu;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -111,21 +112,21 @@ public final class RocketChallengeManager {
 
     /** Creates the pending challenge for the villager's independent Rocket level. */
     public static MinemonCreature spawnChallengePokemon(ServerLevel level, Villager villager, ServerPlayer player) {
-        if (!isRocket(villager) || player == null) return spawnFailure(villager, "profession/player guard");
+        if (!isRocket(villager) || player == null) return null;
         initialize(villager);
         var data = villager.getPersistentData();
-        if (data.getBoolean(UNLOCKED) || data.hasUUID(ACTIVE)) return spawnFailure(villager, "already unlocked/active");
+        if (data.getBoolean(UNLOCKED) || data.hasUUID(ACTIVE)) return null;
 
         int currentLevel = data.getInt(LEVEL);
         String species = speciesForLevel(currentLevel);
         var type = ModEntities.SPECIES.get(species);
-        if (type == null) return spawnFailure(villager, "unregistered species " + species);
+        if (type == null) return null;
         MinemonCreature challenge = type.get().create(level);
-        if (challenge == null) return spawnFailure(villager, "entity factory returned null for " + species);
+        if (challenge == null) return null;
 
         if (!moveToSafeSpawn(level, villager, challenge, player.getYRot())) {
             challenge.discard();
-            return spawnFailure(villager, "no safe candidate; species=" + species + " villager=" + villager.blockPosition());
+            return null; // Keep the challenge pending until a safe spot becomes available.
         }
 
         var maxHealth = challenge.getAttribute(Attributes.MAX_HEALTH);
@@ -141,7 +142,7 @@ public final class RocketChallengeManager {
         challenge.setCustomNameVisible(true);
         challenge.setPersistenceRequired();
         challenge.setTarget(player);
-        if (!level.addFreshEntity(challenge)) return spawnFailure(villager, "addFreshEntity rejected " + species);
+        if (!level.addFreshEntity(challenge)) return null;
         data.putUUID(ACTIVE, challenge.getUUID());
         data.putBoolean(VICTORY, false);
         return challenge;
@@ -155,28 +156,21 @@ public final class RocketChallengeManager {
                 {2.25D, 2.25D}, {2.25D, -2.25D}, {-2.25D, 2.25D}, {-2.25D, -2.25D},
                 {3.5D, 0.0D}, {-3.5D, 0.0D}, {0.0D, 3.5D}, {0.0D, -3.5D}
         };
-        int fluid = 0, noFloor = 0, collision = 0;
         for (double[] offset : offsets) {
             double x = villager.getX() + offset[0];
             double y = villager.getY();
             double z = villager.getZ() + offset[1];
             challenge.moveTo(x, y, z, yaw, 0.0F);
             BlockPos pos = challenge.blockPosition();
-            if (!level.getFluidState(pos).isEmpty()) { fluid++; continue; }
-            if (!challenge.isFlyingSpecies() && !level.getBlockState(pos.below()).isSolidRender(level, pos.below())) { noFloor++; continue; }
-            if (level.noCollision(challenge)) return true;
-            collision++;
+            if (!level.getFluidState(pos).isEmpty()) continue;
+            if (!challenge.isFlyingSpecies() && !level.getBlockState(pos.below()).isSolidRender(level, pos.below())) continue;
+            AABB box = challenge.getBoundingBox();
+            boolean blockedByBlock = level.getBlockCollisions(challenge, box).iterator().hasNext();
+            boolean overlapsEntity = !level.getEntitiesOfClass(Entity.class, box,
+                    other -> other != challenge && other.isAlive()).isEmpty();
+            if (!blockedByBlock && !overlapsEntity) return true;
         }
-        if (Boolean.getBoolean("minemon.debugRocketSpawns"))
-            System.out.println("[ROCKET SPAWN DEBUG] candidates rejected fluid=" + fluid + " noFloor=" + noFloor
-                    + " collision=" + collision + " flying=" + challenge.isFlyingSpecies());
         return false;
-    }
-
-    private static MinemonCreature spawnFailure(Villager villager, String reason) {
-        if (villager != null) villager.getPersistentData().putString("MinemonRocketSpawnFailure", reason);
-        if (Boolean.getBoolean("minemon.debugRocketSpawns")) System.out.println("[ROCKET SPAWN DEBUG] " + reason);
-        return null;
     }
 
     /** Records exactly one server-confirmed output pickup from the Rocket exchange menu. */
