@@ -256,10 +256,10 @@ public final class NaturalMovementGoals {
                     approach.getY() - this.mob.getY(), feet.getZ() + 0.5D - this.mob.getZ());
             if (!loadedBox(approachBox) || !this.mob.level.noCollision(this.mob, approachBox)) return null;
             Path path = this.mob.getNavigation().createPath(approach, 0);
-            if (path == null) return null;
-            if (!path.canReach()) {
+            if (path == null || !path.canReach()) {
                 if (!directLineClear(approachBox)) return null;
                 this.directShoreRoute = true;
+                if (path == null) path = new Path(java.util.List.of(), approach, true);
             }
             this.approachSite = approach;
             this.cachedLandingFeet = feet.immutable();
