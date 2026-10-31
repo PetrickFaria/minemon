@@ -31,6 +31,11 @@ processResources {
     // Source art stays under assets/minemon for provenance. The selected species
     // are copied into the independent generation namespace below.
     exclude 'assets/minemon/**'
+    // Isolated GameTest fixtures are copied to the runtime resource tree for
+    // GameTestServer, but kept outside production source assets for auditing.
+    from('src/gametest/resources') {
+        include 'data/minemon_diag_*/structures/test_arena.nbt'
+    }
     doLast {
         def sourceRoot = file('src/main/resources')
         def destinationRoot = destinationDir
