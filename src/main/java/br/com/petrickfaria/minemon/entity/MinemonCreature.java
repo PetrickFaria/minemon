@@ -1122,6 +1122,10 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         this.syncNaturalState();
     }
     public boolean isNightResting(){return this.entityData.get(NIGHT_REST);}
+    public int wakeGraceTicksForValidation(){return this.wakeGraceTicks;}
+    public int nightCombatTicksForValidation(){return this.nightCombatTicks;}
+    public int nightUnreachableTicksForValidation(){return this.nightUnreachableTicks;}
+    public boolean nightRoutineForValidation(){return this.nightRoutine;}
     public boolean commandLanding(){return this.isOrderedToSit() && SpeciesBehaviorProfiles.landsForNightRest(this.getSpeciesSlug());}
     public boolean wantsNaturalLanding(){return this.commandLanding() || (SpeciesBehaviorProfiles.landsForNightRest(this.getSpeciesSlug())
             ||!SpeciesBehaviorProfiles.hoversDuringNightRest(this.getSpeciesSlug()))&&(this.isSleeping()||this.isNightResting())

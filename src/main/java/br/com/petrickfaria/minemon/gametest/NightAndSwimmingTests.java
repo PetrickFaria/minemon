@@ -320,6 +320,9 @@ public final class NightAndSwimmingTests {
  }
  @GameTest(template="test_arena",batch="night_mixed",timeoutTicks=1000)
  public static void realNightLandingHoverWakeRetaliationReturnAndDawn(GameTestHelper h){
+  runRealNightLandingHoverWakeRetaliationReturnAndDawn(h);
+ }
+ static void runRealNightLandingHoverWakeRetaliationReturnAndDawn(GameTestHelper h){
   arena(h);var level=h.getLevel();level.setDayTime(1000);
   // Keep sleeping hoverers clear of the wide grounded sleepers: collision
   // pushing is physical displacement, not autonomous sleep travel.
@@ -355,22 +358,56 @@ public final class NightAndSwimmingTests {
      var attacker=h.spawn(EntityType.COW,new BlockPos(4,1,3));attacker.setNoAi(true);float health=attacker.getHealth();
      check(h,ground.hurt(DamageSource.mobAttack(attacker),1),"Attack must damage sleeping creature");
      check(h,!ground.isSleeping()&&ground.getTarget()==attacker,"Attack must wake and retain aggressor immediately");
+     var restAnchor=ground.position();
      await(h,()->attacker.getHealth()<health,()->{
+      long combatEndedAt=level.getGameTime();
       attacker.discard();
-      await(h,ground::isSleeping,()->{
+      awaitCombatSleep(h,ground,attacker,restAnchor,combatEndedAt,180,()->{
        level.setDayTime(1000);
        await(h,()->!ground.isSleeping()&&mixed.stream().noneMatch(MinemonCreature::isSleeping)&&air.stream().noneMatch(MinemonCreature::isSleeping),()->{
         check(h,ground.getTarget()==null,"Dawn must preserve neutrality");
         mixed.forEach(m->check(h,m.naturalCycle().ticks()>=clocks.get(m),"Dawn must resume saved clock"));
         awaitFlightResume(h,mixed,clocks,200,new ArrayList<>());
        },30,"All night sleepers must wake at dawn");
-      },180,"After combat, a creature must return to sleep while still night");
+      });
      },150,"Woken creature must physically retaliate using melee AI");
     });
    },350,()->"Night must settle ground/mixed creatures on land and air-only creatures in a one-block hover; mixed="
        +mixed.stream().map(m->m.getSpeciesSlug()+"{sleep="+m.isSleeping()+",ground="+m.isOnGround()+",night="+m.isNightResting()+",pos="+m.position()+",nav="+m.getNavigation().getTargetPos()+"}").toList()
        +" air="+air.stream().map(m->m.getSpeciesSlug()+"{sleep="+m.isSleeping()+",ground="+m.isOnGround()+",night="+m.isNightResting()+",pos="+m.position()+"}").toList());
   });
+ }
+ private static void awaitCombatSleep(GameTestHelper h,MinemonCreature mob,net.minecraft.world.entity.LivingEntity attacker,
+     net.minecraft.world.phys.Vec3 restAnchor,long combatEndedAt,int remaining,Runnable next){
+  long elapsed=h.getLevel().getGameTime()-combatEndedAt;
+  if(elapsed%20L==0L||remaining<=0)
+   com.mojang.logging.LogUtils.getLogger().info("NIGHT COMBAT RETURN TRACE elapsed={} {}",elapsed,
+       combatSleepSnapshot(h,mob,attacker,restAnchor,combatEndedAt));
+  if(mob.isSleeping()){next.run();return;}
+  if(remaining<=0){
+   String state=combatSleepSnapshot(h,mob,attacker,restAnchor,combatEndedAt);
+   h.getLevel().setDayTime(1000);
+   h.fail("After combat, a creature must return to sleep while still night; unmet= sleeping; "+state);
+   return;
+  }
+  h.runAfterDelay(5,()->awaitCombatSleep(h,mob,attacker,restAnchor,combatEndedAt,remaining-5,next));
+ }
+ private static String combatSleepSnapshot(GameTestHelper h,MinemonCreature mob,
+     net.minecraft.world.entity.LivingEntity attacker,net.minecraft.world.phys.Vec3 restAnchor,long combatEndedAt){
+  var level=h.getLevel();var target=mob.getTarget();var last=mob.getLastHurtByMob();var path=mob.getNavigation().getPath();
+  double anchorDistance=mob.position().distanceTo(restAnchor);
+  boolean correctSleepWindow=SpeciesBehaviorProfiles.shouldSleep(mob.getSpeciesSlug(),level.getDayTime());
+  return "species="+mob.getSpeciesSlug()+",pos="+mob.position()+",worldTime="+level.getDayTime()
+      +",sleepWindow="+correctSleepWindow+",sleep="+mob.isSleeping()+",nightRest="+mob.isNightResting()
+      +",nightRoutine="+mob.nightRoutineForValidation()+",target="+(target==null?"null":target.getType()+"{alive="+target.isAlive()+",removed="+target.isRemoved()+"}")
+      +",lastHurtBy="+(last==null?"null":last.getType()+"{alive="+last.isAlive()+",removed="+last.isRemoved()+"}")
+      +",attacker="+attacker.getType()+"{alive="+attacker.isAlive()+",removed="+attacker.isRemoved()+"}"
+      +",wakeGrace="+mob.wakeGraceTicksForValidation()+",nightCombatTicks="+mob.nightCombatTicksForValidation()
+      +",nightUnreachableTicks="+mob.nightUnreachableTicksForValidation()+",navActive="+!mob.getNavigation().isDone()
+      +",navTarget="+mob.getNavigation().getTargetPos()+",path="+(path==null?"null":path.getNextNodeIndex()+"/"+path.getNodeCount())
+      +",restAnchor="+restAnchor+",distanceFromRestAnchor="+anchorDistance+",onGround="+mob.isOnGround()
+      +",inWater="+mob.isInWaterOrBubble()+",velocityY="+mob.getDeltaMovement().y
+      +",elapsedSinceCombatEnd="+(level.getGameTime()-combatEndedAt)+",gameTime="+level.getGameTime();
  }
  @GameTest(template="test_arena",batch="night_eevee_line",timeoutTicks=2400)
  public static void eeveeLineSleepsWakesRetaliatesReturnsAndWakesAtDawn(GameTestHelper h){

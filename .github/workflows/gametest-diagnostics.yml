@@ -9,7 +9,7 @@ on:
         required: true
         default: all
         type: choice
-        options: [all, eevee_sleep, custom_sound, gastly_follow]
+        options: [all, eevee_sleep, custom_sound, gastly_follow, night_return]
 permissions:
   contents: read
 jobs:
@@ -104,6 +104,38 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: gametest-diagnostic-gastly-follow
+          path: |
+            run/logs/
+            build/diagnostics/
+          if-no-files-found: ignore
+          retention-days: 7
+  night-combat-return:
+    if: github.event_name != 'workflow_dispatch' || inputs.selection == 'all' || inputs.selection == 'night_return'
+    name: "GameTest: night combat return to sleep"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Ensure Gradle Wrapper is executable
+        run: chmod +x gradlew
+      - name: Compile night return diagnostic
+        run: ./gradlew --no-daemon compileJava processResources
+      - name: Prepare GameTest world
+        run: |
+          mkdir -p run
+          echo eula=true > run/eula.txt
+          python3 tools/prepare_gametest_world.py
+      - name: Run only the night combat return diagnostic
+        run: timeout 600s ./gradlew --no-daemon runGameTestServer -PgameTestNamespaces=minemon_diag_night
+      - name: Upload night return logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gametest-diagnostic-night-combat-return
           path: |
             run/logs/
             build/diagnostics/
