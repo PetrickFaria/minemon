@@ -39,18 +39,19 @@ public final class PokemonProgressionTest {
     }
 
     @Test public void rarityDamageUsesRequestedHeartsAndHalfHeartLevelGrowth() {
-        assertEquals(0.0D, PokemonProgression.damageForRarity("common", 1), 0.0D);
-        assertEquals(1.0D, PokemonProgression.damageForRarity("uncommon", 1), 0.0D);
-        assertEquals(2.0D, PokemonProgression.damageForRarity("rare", 1), 0.0D);
-        assertEquals(3.0D, PokemonProgression.damageForRarity("legendary", 1), 0.0D);
-        assertEquals(4.0D, PokemonProgression.damageForRarity("mythic", 1), 0.0D);
-        assertEquals(9.0D, PokemonProgression.damageForRarity("common", 10), 0.0D);
-        assertEquals(13.0D, PokemonProgression.damageForRarity("mythic", 10), 0.0D);
+        String[] rarities={"common","uncommon","rare","legendary","mythic"};
+        double[][] expectedHp={{0,1,2,3,4},{4,5,6,7,8},{9,10,11,12,13}};
+        int[] levels={1,5,10};
+        for(int row=0;row<levels.length;row++)for(int rank=0;rank<rarities.length;rank++)
+            assertEquals(rarities[rank]+" L"+levels[row],expectedHp[row][rank],
+                    PokemonProgression.damageForRarity(rarities[rank],levels[row]),0.0D);
     }
 
     @Test public void rangedCooldownScalesFromFiveToTwoAndHalfSeconds() {
         assertEquals(100, PokemonProgression.projectileCooldownTicks(1));
         assertEquals(50, PokemonProgression.projectileCooldownTicks(10));
+        assertEquals(78, PokemonProgression.projectileCooldownTicks(5));
+        assertEquals(56, PokemonProgression.projectileCooldownTicks(9));
         assertEquals(100, PokemonProgression.projectileCooldownTicks(0));
         assertEquals(50, PokemonProgression.projectileCooldownTicks(99));
     }

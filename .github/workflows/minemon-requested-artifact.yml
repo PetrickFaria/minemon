@@ -6,8 +6,11 @@ on:
       - "src/main/java/br/com/petrickfaria/minemon/entity/ElementalCombatGoal.java"
       - "src/main/java/br/com/petrickfaria/minemon/entity/ElementalProjectile.java"
       - "src/main/java/br/com/petrickfaria/minemon/entity/MinemonCreature.java"
+      - "src/main/java/br/com/petrickfaria/minemon/client/MinemonRenderer.java"
+      - "src/main/java/br/com/petrickfaria/minemon/entity/WaterMovementGoal.java"
       - "src/main/java/br/com/petrickfaria/minemon/entity/PokemonProgression.java"
       - "src/main/java/br/com/petrickfaria/minemon/menu/PokecScreen.java"
+      - "src/main/java/br/com/petrickfaria/minemon/menu/PokecMenu.java"
       - "src/main/java/br/com/petrickfaria/minemon/menu/RocketTradeMenu.java"
       - "src/main/java/br/com/petrickfaria/minemon/menu/RocketTradeScreen.java"
       - "src/main/java/br/com/petrickfaria/minemon/pokec/PokecSpecies.java"
@@ -16,6 +19,10 @@ on:
       - "src/test/java/br/com/petrickfaria/minemon/entity/PokemonProgressionTest.java"
       - "src/test/java/br/com/petrickfaria/minemon/menu/RocketTradeProgressTest.java"
       - "src/test/java/br/com/petrickfaria/minemon/pokec/PokecCatalogTest.java"
+      - "src/main/java/br/com/petrickfaria/minemon/gametest/PokecGameTests.java"
+      - "src/main/java/br/com/petrickfaria/minemon/gametest/RocketChallengeGameTests.java"
+      - "src/main/java/br/com/petrickfaria/minemon/gametest/PokemonTreatClientSmokeTest.java"
+      - "src/main/java/br/com/petrickfaria/minemon/gametest/NightClientSmokeTest.java"
       - ".github/workflows/minemon-requested-artifact.yml"
   workflow_dispatch:
 permissions:
@@ -38,6 +45,25 @@ jobs:
           --tests br.com.petrickfaria.minemon.entity.PokemonProgressionTest
           --tests br.com.petrickfaria.minemon.menu.RocketTradeProgressTest
           --tests br.com.petrickfaria.minemon.pokec.PokecCatalogTest
+          --tests br.com.petrickfaria.minemon.entity.WaterSearchTest
+      - name: Verify PokéC layout and normal slot rendering in the real client
+        run: |
+          python3 tools/prepare_client_world.py
+          ALSOFT_DRIVERS=null timeout --kill-after=30s 600s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeTreats
+          grep -F '[TREAT CLIENT] PASS:' run/client-validation-treats.txt
+      - name: Verify Gyarados nighttime descent, closed eyes, and dawn return in the real client
+        run: |
+          python3 tools/prepare_client_world.py
+          ALSOFT_DRIVERS=null timeout --kill-after=30s 600s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeSleep -PclientSmokeSpecies=gyarados
+          grep -F 'PASS GYARADOS dawn return' run/client-validation-night.txt
+          grep -F 'PASS NIGHT RENDER gyarados' run/client-validation-night.txt
+          grep -F 'PASS NIGHT CLIENT:' run/client-validation-night.txt
+      - name: Verify Lapras surface sleep and wake in the real client
+        run: |
+          python3 tools/prepare_client_world.py
+          ALSOFT_DRIVERS=null timeout --kill-after=30s 600s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeSleep -PclientSmokeSpecies=lapras
+          grep -F 'PASS NIGHT RENDER lapras' run/client-validation-night.txt
+          grep -F 'PASS NIGHT CLIENT:' run/client-validation-night.txt
       - name: Package the executable Forge mod JAR
         run: ./gradlew --no-daemon build -x test
       - name: Verify JAR metadata and requested classes
@@ -53,6 +79,8 @@ jobs:
           required = {
               'META-INF/mods.toml',
               'br/com/petrickfaria/minemon/entity/ElementalCombatGoal.class',
+              'br/com/petrickfaria/minemon/client/MinemonRenderer.class',
+              'br/com/petrickfaria/minemon/menu/PokecMenu.class',
               'br/com/petrickfaria/minemon/menu/PokecScreen.class',
               'br/com/petrickfaria/minemon/menu/RocketTradeScreen.class',
               'br/com/petrickfaria/minemon/pokec/PokecSpecies.class',
@@ -71,4 +99,15 @@ jobs:
           name: Minemon-1.19.2-final-requested-changes
           path: build/libs/Minemon-1.19.2-*-all.jar
           if-no-files-found: error
+          retention-days: 14
+      - name: Upload focused client validation logs and screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Minemon-requested-client-validation
+          path: |
+            run/client-validation-*.txt
+            run/night-gyarados.png
+            run/night-lapras.png
+          if-no-files-found: ignore
           retention-days: 14

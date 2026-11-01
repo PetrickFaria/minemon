@@ -281,14 +281,11 @@ public final class PokecGameTests {
         check(menu.conversionPreview()!=null&&menu.conversionPreview().base()>=3&&menu.conversionPreview().base()<=13,"PokéC previews the 3–13 base from stage, rarity, level, and type");
         UUID token=PokeballItem.readStored(menu.conversionBall()).token();int minimum=menu.conversionPreview().minimum(),maximum=menu.conversionPreview().maximum();
         check(PokeballItem.isOccupied(menu.conversionBall()),"staging must not consume the Pokémon");
-        check(PokecTransactions.perform(owner,p,"bulbasaur",PokecTransactions.Action.REQUEST_CONVERSION,0xB01L),"first confirmation request should open a short confirmation window");
-        check(PokeballItem.isOccupied(menu.conversionBall()),"requesting confirmation must leave the stored Pokémon intact");
-        check(PokecTransactions.perform(owner,p,"bulbasaur",PokecTransactions.Action.CONFIRM_CONVERSION,0xB02L),"confirmed conversion should complete");
+        check(PokecTransactions.perform(owner,p,"bulbasaur",PokecTransactions.Action.REQUEST_CONVERSION,0xB01L),"clicking Liberar should complete the requested conversion");
         int result=menu.conversionResult();
         check(result>=minimum&&result<=maximum,"nature return must use the configured 75–100 percent integer range");
-        check(menu.conversionOutput().isEmpty(),"conversion must deliver souls directly without keeping a PokéC result slot");
-        check(owner.getInventory().items.stream().filter(stack->ModItems.SOULS.values().stream().anyMatch(item->stack.is(item.get()))).mapToInt(ItemStack::getCount).sum()==result,
-                "confirmed conversion must place its rolled souls directly in the player's inventory");
+        check(!menu.conversionOutput().isEmpty()&&menu.conversionOutput().getCount()==Math.min(result,menu.conversionOutput().getMaxStackSize()),"converted souls must appear in the native PokéC output slot");
+        check(owner.getInventory().items.stream().filter(stack->stack.is(ModItems.POKEBALL.get())).count()==1,"successful conversion returns one empty Pokébola to the inventory");
         check(!PokeballItem.isOccupied(menu.conversionBall()),"confirmed conversion leaves an empty Pokébola");
         check(PokemonBallLedger.get(h.getLevel()).isConsumed(token),"spent token cannot be converted or released a second time");
         check(!PokecTransactions.perform(owner,p,"bulbasaur",PokecTransactions.Action.CONFIRM_CONVERSION,0xB03L),"a second confirm cannot roll or deliver souls again");
@@ -305,9 +302,9 @@ public final class PokecGameTests {
         floor(h);ServerPlayer owner=player(h,h.absolutePos(new BlockPos(7,1,5)));
         PokecMenu menu=new PokecMenu(22,owner.getInventory(),h.absolutePos(new BlockPos(5,1,5)));
         owner.containerMenu=menu;
-        check(menu.slots.size()==38,"PokéC must expose two real payment slots plus the player's existing 36 inventory slots");
+        check(menu.slots.size()==40,"PokéC must expose two payment slots, conversion input/output slots, and the player's 36 inventory slots");
         owner.getInventory().setItem(9,new ItemStack(Blocks.DIRT,7));
-        ItemStack movedToHotbar=menu.quickMoveStack(owner,2);
+        ItemStack movedToHotbar=menu.quickMoveStack(owner,4);
         check(movedToHotbar.getCount()==7,"shift-click should return the moved original stack");
         check(owner.getInventory().getItem(9).isEmpty(),"main-inventory source slot should be emptied");
         check(owner.getInventory().getItem(0).is(Blocks.DIRT.asItem())&&owner.getInventory().getItem(0).getCount()==7,
@@ -316,7 +313,7 @@ public final class PokecGameTests {
                 "shift-click must not duplicate the moved stack");
 
         owner.getInventory().setItem(0,new ItemStack(Blocks.OAK_LOG,4));
-        ItemStack movedToMain=menu.quickMoveStack(owner,29);
+        ItemStack movedToMain=menu.quickMoveStack(owner,31);
         check(movedToMain.getCount()==4,"hotbar shift-click should return the moved original stack");
         check(owner.getInventory().getItem(0).isEmpty(),"hotbar source slot should be emptied");
         check(owner.getInventory().getItem(9).is(Blocks.OAK_LOG.asItem())&&owner.getInventory().getItem(9).getCount()==4,

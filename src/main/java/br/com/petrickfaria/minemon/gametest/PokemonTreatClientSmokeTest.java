@@ -131,6 +131,10 @@ public final class PokemonTreatClientSmokeTest {
                     throw new IllegalStateException("PokéC UI did not load the complete 151-species list");
                 if (!screen.conversionPanelFitsAboveInventoryForSmokeTest())
                     throw new IllegalStateException("PokéC conversion panel must remain above the player inventory");
+                if (!screen.conversionReleaseButtonAlwaysVisibleForSmokeTest())
+                    throw new IllegalStateException("PokéC Liberar button must remain visible when its input slot is empty");
+                if (!screen.conversionSlotsUseVanillaInteractionForSmokeTest())
+                    throw new IllegalStateException("PokéC input/output must use native inventory slots with matching interaction areas");
                 if (!screen.referencePanelsFitForSmokeTest())
                     throw new IllegalStateException("PokéC reference layout panels must remain separated and within the screen");
                 if (!screen.inventorySlotsForSmokeTest())

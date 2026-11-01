@@ -4,6 +4,7 @@ import br.com.petrickfaria.minemon.entity.MinemonCreature;
 import br.com.petrickfaria.minemon.entity.SpeciesDefinitions;
 import br.com.petrickfaria.minemon.network.MinemonNetwork;
 import br.com.petrickfaria.minemon.pokec.*;
+import br.com.petrickfaria.minemon.item.PokeballItem;
 import br.com.petrickfaria.minemon.registry.ModEntities;
 import br.com.petrickfaria.minemon.registry.ModItems;
 import net.minecraft.client.Minecraft;
@@ -26,8 +27,8 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
     private static final int DETAILS_X = 404, DETAILS_Y = 28, DETAILS_W = 150, DETAILS_H = 180;
     private static final int ACTION_X = 560, ACTION_Y = 28, ACTION_W = 152, ACTION_H = 72;
     private static final int RETURN_X = 560, RETURN_Y = 108, RETURN_W = 152, RETURN_H = 100;
-    private static final int RETURN_INPUT_X = 568, RETURN_INPUT_Y = 126, RETURN_OUTPUT_X = 660, RETURN_OUTPUT_Y = 126;
-    private static final int RETURN_RELEASE_X = 609, RETURN_RELEASE_Y = 136, RETURN_RELEASE_W = 44, RETURN_RELEASE_H = 20;
+    private static final int RETURN_INPUT_X = 580, RETURN_INPUT_Y = 143, RETURN_OUTPUT_X = 670, RETURN_OUTPUT_Y = 143;
+    private static final int RETURN_RELEASE_X = 611, RETURN_RELEASE_Y = 142, RETURN_RELEASE_W = 48, RETURN_RELEASE_H = 20;
     private static final int INVENTORY_SLOT_WIDTH = 9 * 18, INVENTORY_LABEL_Y = 7;
     private static final int INVENTORY_MAIN_Y = 22, INVENTORY_HOTBAR_Y = 78;
     private static volatile int syncedCoins;
@@ -52,6 +53,7 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
     private Map<String, MinemonCreature> previews = new HashMap<>();
     private final Map<String, PreviewBounds.Fit> previewFits = new HashMap<>();
     private List<PokecSpecies.Entry> ordered = List.of();
+    private boolean conversionReleaseButtonDrawn;
 
     public PokecScreen(PokecMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
@@ -114,8 +116,22 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
     }
     public boolean conversionPanelFitsAboveInventoryForSmokeTest() {
         return RETURN_Y + RETURN_H <= TOP_HEIGHT && RETURN_INPUT_Y == RETURN_OUTPUT_Y
-                && RETURN_OUTPUT_Y + 36 <= RETURN_Y + RETURN_H && RETURN_Y + 93 <= TOP_HEIGHT
-                && RETURN_INPUT_X + 36 <= RETURN_RELEASE_X && RETURN_RELEASE_X + RETURN_RELEASE_W <= RETURN_OUTPUT_X;
+                && RETURN_OUTPUT_Y + 18 <= RETURN_Y + RETURN_H && RETURN_Y + 93 <= TOP_HEIGHT
+                && RETURN_INPUT_X + 18 <= RETURN_RELEASE_X && RETURN_RELEASE_X + RETURN_RELEASE_W <= RETURN_OUTPUT_X;
+    }
+    public boolean conversionReleaseButtonAlwaysVisibleForSmokeTest() { return conversionReleaseButtonDrawn; }
+    public boolean conversionSlotsUseVanillaInteractionForSmokeTest() {
+        if (Minecraft.getInstance().player == null) return false;
+        ItemStack candidate=new ItemStack(ModItems.POKEBALL.get());
+        var data=new net.minecraft.nbt.CompoundTag();
+        data.putUUID("Owner",Minecraft.getInstance().player.getUUID());
+        data.putUUID("Token",UUID.randomUUID());
+        data.putString("Species","bulbasaur");
+        var pokemonData=new net.minecraft.nbt.CompoundTag();
+        pokemonData.putString("id","minemon_gen1:bulbasaur");
+        data.put("Pokemon",pokemonData);
+        candidate.getOrCreateTag().put("MinemonStoredPokemon",data);
+        return menu.slots.get(2).mayPlace(candidate)&&!menu.slots.get(3).mayPlace(candidate);
     }
     public boolean referencePanelsFitForSmokeTest() {
         return LIST_X + LIST_W < PREVIEW_X && PREVIEW_X + PREVIEW_W < DETAILS_X
@@ -123,19 +139,22 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
                 && Math.max(LIST_Y + LIST_H, PREVIEW_Y + PREVIEW_H) <= TOP_HEIGHT;
     }
     public boolean inventorySlotsForSmokeTest() {
-        if (menu.slots.size() != 38) return false;
+        if (menu.slots.size() != 40) return false;
         if(menu.slots.get(0).getContainerSlot()!=0||menu.slots.get(1).getContainerSlot()!=1
                 ||menu.slots.get(0).x!=Math.round(568*uiScale)||menu.slots.get(0).y!=Math.round(71*uiScale)
-                ||menu.slots.get(1).x!=Math.round(590*uiScale)||menu.slots.get(1).y!=Math.round(73*uiScale))return false;
+                ||menu.slots.get(1).x!=Math.round(590*uiScale)||menu.slots.get(1).y!=Math.round(73*uiScale)
+                ||menu.slots.get(2).getContainerSlot()!=0||menu.slots.get(3).getContainerSlot()!=1
+                ||menu.slots.get(2).x!=Math.round(RETURN_INPUT_X*uiScale)||menu.slots.get(2).y!=Math.round(RETURN_INPUT_Y*uiScale)
+                ||menu.slots.get(3).x!=Math.round(RETURN_OUTPUT_X*uiScale)||menu.slots.get(3).y!=Math.round(RETURN_OUTPUT_Y*uiScale))return false;
         int x = (imageWidth - INVENTORY_SLOT_WIDTH) / 2;
         int mainY = Math.round(TOP_HEIGHT * uiScale) + INVENTORY_MAIN_Y;
         int hotbarY = Math.round(TOP_HEIGHT * uiScale) + INVENTORY_HOTBAR_Y;
         for (int i = 0; i < 36; i++) {
-            var slot = menu.slots.get(i + 2);
+            var slot = menu.slots.get(i + 4);
             int expectedX = x + (i % 9) * 18;
             int expectedY = i < 27 ? mainY + (i / 9) * 18 : hotbarY;
             int expectedInventoryIndex = i < 27 ? i + 9 : i - 27;
-            if (slot.index != i + 2 || slot.getContainerSlot() != expectedInventoryIndex
+            if (slot.index != i + 4 || slot.getContainerSlot() != expectedInventoryIndex
                     || slot.x != expectedX || slot.y != expectedY) return false;
         }
         return hotbarY + 18 <= imageHeight;
@@ -292,8 +311,6 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
 
     private void drawCompactConversion(PoseStack pose) {
         font.draw(pose, "DEVOLVER À NATUREZA", RETURN_X + 8, RETURN_Y + 7, 0xFF202020);
-        drawConversionSlot(pose, RETURN_INPUT_X, RETURN_INPUT_Y, syncedConversionBall, true);
-        drawConversionSlot(pose, RETURN_OUTPUT_X, RETURN_OUTPUT_Y, syncedConversionOutput, false);
         int textX = RETURN_X + 8;
         if (syncedConversionBall.isEmpty() && syncedConversionOutput.isEmpty()) {
             font.draw(pose, fitText("Insira uma Pokébola para liberar", 136), textX, RETURN_Y + 68, 0xFF404040);
@@ -308,9 +325,10 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
             font.draw(pose, "Almas liberadas:", textX, RETURN_Y + 68, 0xFF404040);
             font.draw(pose, syncedConversionResult + " almas", textX, RETURN_Y + 80, 0xFF404040);
         }
-        if (!syncedConversionBall.isEmpty() && syncedConversionResult < 0) {
-            drawButton(pose, RETURN_RELEASE_X, RETURN_RELEASE_Y, RETURN_RELEASE_W, RETURN_RELEASE_H, "Liberar", true, -1, -1);
-        }
+        boolean canConvert = !syncedConversionBall.isEmpty() && syncedConversionOutput.isEmpty() && syncedConversionResult < 0
+                && hasValidConversionInput();
+        drawButton(pose, RETURN_RELEASE_X, RETURN_RELEASE_Y, RETURN_RELEASE_W, RETURN_RELEASE_H, "Liberar", canConvert, -1, -1);
+        conversionReleaseButtonDrawn=true;
     }
 
     private void drawCompactItemSlot(PoseStack pose, int x, int y, net.minecraft.world.item.Item item, int count) {
@@ -348,6 +366,11 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
 
     private String conversionStageLabel(String stage) {
         return switch (stage) { case "INITIAL" -> "Inicial"; case "INTERMEDIATE" -> "Intermediário"; case "FINAL" -> "Final"; default -> "Final"; };
+    }
+    private boolean hasValidConversionInput() {
+        var stored=PokeballItem.readStored(syncedConversionBall);
+        return stored!=null&&Minecraft.getInstance().player!=null
+                &&stored.owner().equals(Minecraft.getInstance().player.getUUID());
     }
 
     private String soulTypeLabel(String type) {
@@ -486,15 +509,9 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         PokecSpecies.Entry species = PokecSpecies.get(selectedSlug);
         if (species != null && syncedUnlocked.contains(species.slug()) && inRect(x,y,MODEL_X,MODEL_Y,MODEL_W,MODEL_H)) { draggingPreview=true; return true; }
         if (species == null) return super.mouseClicked(mouseX, mouseY, button);
-        if (inRect(x, y, RETURN_INPUT_X, RETURN_INPUT_Y, 36, 36)) {
-            MinemonNetwork.performPokecAction(menu.pos(), selectedSlug, syncedConversionBall.isEmpty() ? PokecTransactions.Action.STAGE_POKEBALL : PokecTransactions.Action.RETURN_POKEBALL);
-            return true;
-        }
-        if (!syncedConversionOutput.isEmpty() && inRect(x, y, RETURN_OUTPUT_X, RETURN_OUTPUT_Y, 36, 36)) {
-            MinemonNetwork.performPokecAction(menu.pos(), selectedSlug, PokecTransactions.Action.CLAIM_CONVERSION_OUTPUT);
-            return true;
-        }
-        if (inRect(x, y, RETURN_RELEASE_X, RETURN_RELEASE_Y, RETURN_RELEASE_W, RETURN_RELEASE_H) && !syncedConversionBall.isEmpty() && syncedConversionResult < 0) {
+        if (inRect(x, y, RETURN_RELEASE_X, RETURN_RELEASE_Y, RETURN_RELEASE_W, RETURN_RELEASE_H)) {
+            if (!syncedConversionBall.isEmpty() && syncedConversionOutput.isEmpty() && syncedConversionResult < 0
+                    && hasValidConversionInput())
             MinemonNetwork.performPokecAction(menu.pos(), selectedSlug, PokecTransactions.Action.REQUEST_CONVERSION);
             return true;
         }

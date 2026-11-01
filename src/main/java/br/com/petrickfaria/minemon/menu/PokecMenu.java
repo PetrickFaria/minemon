@@ -27,6 +27,7 @@ public final class PokecMenu extends AbstractContainerMenu {
     private final BlockPos pos;
     private final Inventory playerInventory;
     private final SimpleContainer paymentInventory = new SimpleContainer(2);
+    private final SimpleContainer conversionInventory = new SimpleContainer(2);
     private String selectedSlug = "bulbasaur";
     private int stagedCoins;
     private int stagedSouls;
@@ -48,6 +49,13 @@ public final class PokecMenu extends AbstractContainerMenu {
         addSlot(new net.minecraft.world.inventory.Slot(paymentInventory, 1, 0, 0) {
             @Override public boolean mayPlace(ItemStack stack) { return paymentAccepts(stack); }
         });
+        addSlot(new net.minecraft.world.inventory.Slot(conversionInventory, 0, 0, 0) {
+            @Override public boolean mayPlace(ItemStack stack) { return validConversionBall(stack); }
+            @Override public int getMaxStackSize() { return 1; }
+        });
+        addSlot(new net.minecraft.world.inventory.Slot(conversionInventory, 1, 0, 0) {
+            @Override public boolean mayPlace(ItemStack stack) { return false; }
+        });
         for (int row = 0; row < 3; row++) for (int column = 0; column < 9; column++)
             addSlot(new net.minecraft.world.inventory.Slot(inventory, column + row * 9 + 9, 0, 0));
         for (int column = 0; column < 9; column++)
@@ -58,22 +66,24 @@ public final class PokecMenu extends AbstractContainerMenu {
             conversionBall = PokecPlayerData.conversionBall(serverPlayer);
             conversionOutput = PokecPlayerData.conversionOutput(serverPlayer);
             conversionResult = PokecPlayerData.conversionResult(serverPlayer);
+            conversionInventory.setItem(0, conversionBall.copy());
+            conversionInventory.setItem(1, conversionOutput.copy());
             refreshConversionPreview(serverPlayer);
             restoreLegacyPayment(serverPlayer);
         }
     }
     public BlockPos pos() { return pos; }
-    /** Screen-only coordinates; slot indices and backing Inventory remain vanilla. */
+    /** Screen-only coordinates; slot indices and backing inventories remain vanilla. */
     public void layoutPlayerInventory(int x, int mainY, int hotbarY, float scale) {
         for (int row = 0; row < 3; row++) for (int column = 0; column < 9; column++) {
-            int menuIndex = 2 + row * 9 + column;
+            int menuIndex = 4 + row * 9 + column;
             var slot = new net.minecraft.world.inventory.Slot(playerInventory,
                     column + row * 9 + 9, x + column * 18, mainY + row * 18);
             slot.index = menuIndex;
             slots.set(menuIndex, slot);
         }
         for (int column = 0; column < 9; column++) {
-            int menuIndex = 29 + column;
+            int menuIndex = 31 + column;
             var slot = new net.minecraft.world.inventory.Slot(playerInventory,
                     column, x + column * 18, hotbarY);
             slot.index = menuIndex;
@@ -84,6 +94,13 @@ public final class PokecMenu extends AbstractContainerMenu {
         });
         slots.set(1,new net.minecraft.world.inventory.Slot(paymentInventory,1,Math.round((560+30)*scale),Math.round((28+45)*scale)){
             @Override public boolean mayPlace(ItemStack stack){return paymentAccepts(stack);}
+        });
+        slots.set(2,new net.minecraft.world.inventory.Slot(conversionInventory,0,Math.round(580*scale),Math.round(143*scale)){
+            @Override public boolean mayPlace(ItemStack stack){return validConversionBall(stack);}
+            @Override public int getMaxStackSize(){return 1;}
+        });
+        slots.set(3,new net.minecraft.world.inventory.Slot(conversionInventory,1,Math.round(670*scale),Math.round(143*scale)){
+            @Override public boolean mayPlace(ItemStack stack){return false;}
         });
     }
     public String selectedSlug() { return selectedSlug; }
@@ -129,6 +146,8 @@ public final class PokecMenu extends AbstractContainerMenu {
         conversionBall = ball.copy();
         conversionOutput = output.copy();
         conversionResult = Math.max(-1, result);
+        conversionInventory.setItem(0, conversionBall.copy());
+        conversionInventory.setItem(1, conversionOutput.copy());
         conversionConfirmUntil = -1;
         if (!conversionBall.isEmpty() || conversionResult < 0) refreshConversionPreview(player);
         PokecPlayerData.setConversion(player, conversionBall, conversionOutput, conversionResult);
@@ -140,6 +159,13 @@ public final class PokecMenu extends AbstractContainerMenu {
             return;
         }
         conversionPreview = PokemonSoulConversion.preview(stored.species(), stored.level());
+    }
+    private boolean validConversionBall(ItemStack stack) {
+        if (stack.isEmpty() || stack.getCount() != 1 || !conversionOutput.isEmpty() || conversionResult >= 0) return false;
+        PokeballItem.StoredPokemon stored = PokeballItem.readStored(stack);
+        if (stored == null || !stored.owner().equals(playerInventory.player.getUUID())) return false;
+        return playerInventory.player.level.isClientSide
+                || !PokemonBallLedger.get((net.minecraft.server.level.ServerLevel) playerInventory.player.level).isConsumed(stored.token());
     }
     public boolean beginPurchase(int gameTick) {
         if (gameTick - lastPurchaseTick < 4) return false;
@@ -178,6 +204,8 @@ public final class PokecMenu extends AbstractContainerMenu {
         conversionBall = ItemStack.EMPTY;
         conversionOutput = ItemStack.EMPTY;
         conversionResult = -1;
+        conversionInventory.setItem(0, ItemStack.EMPTY);
+        conversionInventory.setItem(1, ItemStack.EMPTY);
         conversionPreview = null;
         conversionConfirmUntil = -1;
         PokecPlayerData.clearStaged(player);
@@ -196,30 +224,79 @@ public final class PokecMenu extends AbstractContainerMenu {
     }
 
     @Override public void clicked(int slotId,int button,net.minecraft.world.inventory.ClickType clickType,Player player){
+        ItemStack previousOutput = slotId == 3 ? conversionInventory.getItem(1).copy() : ItemStack.EMPTY;
         super.clicked(slotId,button,clickType,player);
         if(slotId>=0&&slotId<2&&player instanceof ServerPlayer serverPlayer)persistEscrow(serverPlayer);
+        if (slotId == 2 && player instanceof ServerPlayer serverPlayer) {
+            conversionBall = conversionInventory.getItem(0).copy();
+            if (conversionBall.isEmpty()) conversionPreview = null;
+            else refreshConversionPreview(serverPlayer);
+            PokecPlayerData.setConversion(serverPlayer, conversionBall, conversionOutput, conversionResult);
+            MinemonNetwork.refreshPokec(serverPlayer);
+        } else if (slotId == 3 && player instanceof ServerPlayer serverPlayer) {
+            ItemStack remainingStack = conversionInventory.getItem(1).copy();
+            int removed = Math.max(0, previousOutput.getCount() - remainingStack.getCount());
+            int remaining = Math.max(0, conversionResult - removed);
+            if (remainingStack.isEmpty() && remaining > 0) {
+                remainingStack = previousOutput.copy();
+                remainingStack.setCount(Math.min(remaining, remainingStack.getMaxStackSize()));
+                conversionInventory.setItem(1, remainingStack.copy());
+            }
+            conversionOutput = remainingStack;
+            conversionResult = remainingStack.isEmpty() ? -1 : remaining;
+            PokecPlayerData.setConversion(serverPlayer, conversionBall, conversionOutput, conversionResult);
+            MinemonNetwork.refreshPokec(serverPlayer);
+        }
     }
 
     @Override public ItemStack quickMoveStack(Player player, int slotIndex) {
-        if (slotIndex < 0 || slotIndex >= 38) return ItemStack.EMPTY;
+        if (slotIndex < 0 || slotIndex >= 40) return ItemStack.EMPTY;
         var menuSlot = slots.get(slotIndex);
         ItemStack stack = menuSlot.getItem();
         if (stack.isEmpty()) return ItemStack.EMPTY;
         ItemStack original = stack.copy();
+        if(slotIndex==3){
+            if(!moveItemStackTo(stack,4,40,false))return ItemStack.EMPTY;
+            int removed=original.getCount()-stack.getCount();
+            int remaining=Math.max(0,conversionResult-removed);
+            if(stack.isEmpty()&&remaining>0){ItemStack next=original.copy();next.setCount(Math.min(remaining,next.getMaxStackSize()));conversionInventory.setItem(1,next);conversionOutput=next.copy();conversionResult=remaining;}
+            else {conversionOutput=conversionInventory.getItem(1).copy();conversionResult=conversionOutput.isEmpty()?-1:remaining;}
+            if(player instanceof ServerPlayer serverPlayer){PokecPlayerData.setConversion(serverPlayer,conversionBall,conversionOutput,conversionResult);MinemonNetwork.refreshPokec(serverPlayer);}
+            if (!stack.isEmpty()) menuSlot.setChanged();
+            return original;
+        }
+        if(slotIndex==2){
+            if(!moveItemStackTo(stack,4,40,false))return ItemStack.EMPTY;
+            if(stack.isEmpty())menuSlot.set(ItemStack.EMPTY);else menuSlot.setChanged();
+            if(player instanceof ServerPlayer serverPlayer){
+                conversionBall=conversionInventory.getItem(0).copy();
+                if(conversionBall.isEmpty())conversionPreview=null;else refreshConversionPreview(serverPlayer);
+                PokecPlayerData.setConversion(serverPlayer,conversionBall,conversionOutput,conversionResult);
+                MinemonNetwork.refreshPokec(serverPlayer);
+            }
+            return original;
+        }
         if(slotIndex<2){
-            if(!moveItemStackTo(stack,2,38,false))return ItemStack.EMPTY;
+            if(!moveItemStackTo(stack,4,40,false))return ItemStack.EMPTY;
             if(stack.isEmpty())menuSlot.set(ItemStack.EMPTY);else menuSlot.setChanged();
             if(player instanceof ServerPlayer serverPlayer)persistEscrow(serverPlayer);
             return original;
         }
-        if(PokeballItem.readStored(stack)!=null){
-            if(player.level.isClientSide)MinemonNetwork.performPokecAction(pos,selectedSlug,PokecTransactions.Action.STAGE_POKEBALL);
-            return ItemStack.EMPTY;
+        if(slotIndex>=4 && PokeballItem.readStored(stack)!=null
+                && moveItemStackTo(stack,2,3,false)) {
+            if(stack.isEmpty())menuSlot.set(ItemStack.EMPTY);else menuSlot.setChanged();
+            if(player instanceof ServerPlayer serverPlayer){
+                conversionBall=conversionInventory.getItem(0).copy();
+                refreshConversionPreview(serverPlayer);
+                PokecPlayerData.setConversion(serverPlayer,conversionBall,conversionOutput,conversionResult);
+                MinemonNetwork.refreshPokec(serverPlayer);
+            }
+            return original;
         }
         int paymentStart=stack.is(ModItems.POKE_COIN.get())||stack.getItem() instanceof SoulItem?0:2;
         boolean moved = paymentStart==0
                 ? moveItemStackTo(stack,0,2,false)
-                : slotIndex<29?moveItemStackTo(stack,29,38,false):moveItemStackTo(stack,2,29,false);
+                : slotIndex<31?moveItemStackTo(stack,31,40,false):moveItemStackTo(stack,4,31,false);
         if (!moved) return ItemStack.EMPTY;
         if (stack.isEmpty()) menuSlot.set(ItemStack.EMPTY);
         else menuSlot.setChanged();

@@ -75,6 +75,8 @@ public final class RocketChallengeGameTests {
                 "Taking the output consumes ten souls exactly once and delivers the PokéCoin");
         check(helper, RocketChallengeManager.getTradesThisLevel(villager) == 1,
                 "A completed exchange output pickup must count as one trade");
+        check(helper, villager.getVillagerXp() == 1 && RocketChallengeManager.getExperience(villager) == 1,
+                "A completed exchange must advance the villager's native XP and the Rocket progress bar must read it");
         player.getInventory().placeItemBackInInventory(menu.getCarried());
         menu.setCarried(ItemStack.EMPTY);
         menu.getSlot(0).set(new ItemStack(ModItems.SOULS.get("fire").get(), 10));
@@ -122,6 +124,8 @@ public final class RocketChallengeGameTests {
                     "Exactly " + trades[level - 1] + " trades must advance Rocket to level " + (level + 1));
             check(helper, RocketChallengeManager.getTradesThisLevel(villager) == 0,
                     "Trade count must reset after Rocket reaches level " + (level + 1));
+            check(helper, RocketChallengeManager.getExperience(villager) == 0,
+                    "Rocket progress bar must begin at zero native XP for level " + (level + 1));
             check(helper, !RocketChallengeManager.isChallengeComplete(villager),
                     "Trades must relock after Rocket reaches level " + (level + 1));
         }

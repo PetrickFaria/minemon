@@ -62,9 +62,11 @@ public class PokecCatalogTest {
 
     @Test public void displayedTypeNamesArePortugueseWithoutChangingInternalIds(){
         assertEquals("grass", PokecSpecies.get("bulbasaur").primaryType());
-        assertEquals("Grama", PokecSpecies.displayType("grass"));
+        assertEquals("Planta", PokecSpecies.displayType("grass"));
         assertEquals("Elétrico", PokecSpecies.displayType("electric"));
         assertEquals("Psíquico", PokecSpecies.displayType("psychic"));
         assertEquals("Aço", PokecSpecies.displayType("steel"));
+        assertEquals("Sombrio", PokecSpecies.displayType("dark"));
+        assertEquals("Fada", PokecSpecies.displayType("fairy"));
     }
 }

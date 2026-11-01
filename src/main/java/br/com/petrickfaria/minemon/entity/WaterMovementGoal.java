@@ -11,6 +11,7 @@ import net.minecraft.world.phys.Vec3;
 public final class WaterMovementGoal extends Goal {
  public static final int SEARCH_RADIUS=100;
  public static final double WALL_PREFERENCE_DISTANCE=5.0D;
+ private static double wallPreferenceDistance(MinemonCreature mob){return mob.getSpeciesSlug().equals("gyarados")?9.0D:WALL_PREFERENCE_DISTANCE;}
  private final MinemonCreature mob;
  private int scanIndex,scanYIndex,delay,stalled;
  private Vec3 lastPosition;
@@ -165,7 +166,7 @@ public final class WaterMovementGoal extends Goal {
    }
    if(!preferWalls)return p;
    double clearance=wallClearanceAlongPath(path,wallShapeCache);
-   if(clearance>=WALL_PREFERENCE_DISTANCE)return p;
+   if(clearance>=wallPreferenceDistance(mob))return p;
    if(clearance>bestClearance){bestClearance=clearance;bestDestination=p;}
   }
   return bestDestination;
@@ -186,15 +187,16 @@ public final class WaterMovementGoal extends Goal {
    }
    previousX=endX;previousY=endY;previousZ=endZ;
   }
-  return Math.min(WALL_PREFERENCE_DISTANCE+1.0D,clearance);
+  return Math.min(wallPreferenceDistance(mob)+1.0D,clearance);
  }
  private double wallClearanceAt(net.minecraft.world.phys.AABB body,Map<BlockPos,List<net.minecraft.world.phys.AABB>> shapeCache){
-  int minX=net.minecraft.util.Mth.floor(body.minX-WALL_PREFERENCE_DISTANCE-1.0D);
-  int maxX=net.minecraft.util.Mth.floor(body.maxX+WALL_PREFERENCE_DISTANCE+1.0D);
+  double preferred=wallPreferenceDistance(mob);
+  int minX=net.minecraft.util.Mth.floor(body.minX-preferred-1.0D);
+  int maxX=net.minecraft.util.Mth.floor(body.maxX+preferred+1.0D);
   int minY=net.minecraft.util.Mth.floor(body.minY);
   int maxY=net.minecraft.util.Mth.floor(body.maxY);
-  int minZ=net.minecraft.util.Mth.floor(body.minZ-WALL_PREFERENCE_DISTANCE-1.0D);
-  int maxZ=net.minecraft.util.Mth.floor(body.maxZ+WALL_PREFERENCE_DISTANCE+1.0D);
+  int minZ=net.minecraft.util.Mth.floor(body.minZ-preferred-1.0D);
+  int maxZ=net.minecraft.util.Mth.floor(body.maxZ+preferred+1.0D);
   var obstacles=new ArrayList<net.minecraft.world.phys.AABB>();
   for(int x=minX;x<=maxX;x++)for(int y=minY;y<=maxY;y++)for(int z=minZ;z<=maxZ;z++){
    BlockPos pos=new BlockPos(x,y,z);
@@ -293,7 +295,7 @@ public final class WaterMovementGoal extends Goal {
    var path=mob.getNavigation().createPath(p,0);
    if(path==null||!path.canReach()){blocked.put(p.immutable(),mob.tickCount+200);continue;}
    double clearance=SpeciesBehaviorProfiles.isAquatic(mob.getSpeciesSlug())?wallClearanceAlongPath(path,new HashMap<>()):Double.POSITIVE_INFINITY;
-   if(clearance>=WALL_PREFERENCE_DISTANCE)return p;
+   if(clearance>=wallPreferenceDistance(mob))return p;
    if(clearance>bestClearance){best=p;bestClearance=clearance;}
   }
   return best;
@@ -303,6 +305,20 @@ public final class WaterMovementGoal extends Goal {
  }
  private static double preferredRestBottomY(MinemonCreature mob,BlockPos column,double surface){
   return preferredBottomY(mob,column,surface,0.015D);
+ }
+ private static double relaxedRestBottomY(MinemonCreature mob,BlockPos column,double surface){
+  int floorWater=bottomWaterBlock(mob,column,surface);
+  if(!safeWaterFloor(mob,column,floorWater))return Double.NaN;
+  BlockPos support=new BlockPos(column.getX(),floorWater-1,column.getZ());
+  var shape=mob.level.getBlockState(support).getCollisionShape(mob.level,support);
+  if(shape.isEmpty())return Double.NaN;
+  double target=floorWater-1+shape.max(net.minecraft.core.Direction.Axis.Y)+0.015D;
+  var box=mob.getBoundingBox().move(column.getX()+0.5D-mob.getX(),target-mob.getY(),column.getZ()+0.5D-mob.getZ());
+  if(!mob.level.noCollision(mob,box))return Double.NaN;
+  for(int x=(int)Math.floor(box.minX+0.001D);x<=Math.floor(box.maxX-0.001D);x++)
+   for(int z=(int)Math.floor(box.minZ+0.001D);z<=Math.floor(box.maxZ-0.001D);z++)
+    if(!mob.level.getFluidState(new BlockPos(x,floorWater,z)).is(FluidTags.WATER))return Double.NaN;
+  return target;
  }
  private static double preferredBottomY(MinemonCreature mob,BlockPos column,double surface,double clearance){
   int floorWater=bottomWaterBlock(mob,column,surface);
@@ -330,7 +346,7 @@ public final class WaterMovementGoal extends Goal {
    if(Double.isFinite(target))return target;
    // Gyarados must reach a safe floor before sleep can freeze its movement.
    // Returning its current Y here falsely reports a surface position as rest.
-   if(mob.getSpeciesSlug().equals("gyarados"))return Double.NaN;
+   if(mob.getSpeciesSlug().equals("gyarados"))return relaxedRestBottomY(mob,mob.blockPosition(),top);
   }
   return Double.isFinite(mob.aquaticSleepY())?mob.aquaticSleepY():mob.getY();
  }
@@ -339,13 +355,14 @@ public final class WaterMovementGoal extends Goal {
   double surface=restSurfaceAt(mob,mob.blockPosition());
   if(!Double.isFinite(surface))return null;
   BlockPos origin=mob.blockPosition();
-  for(int radius=0;radius<=8;radius++)for(int dx=-radius;dx<=radius;dx++)for(int dz=-radius;dz<=radius;dz++){
+  for(int radius=0;radius<=12;radius++)for(int dx=-radius;dx<=radius;dx++)for(int dz=-radius;dz<=radius;dz++){
    if(Math.max(Math.abs(dx),Math.abs(dz))!=radius)continue;
    BlockPos column=origin.offset(dx,0,dz);
    if(!mob.level.hasChunkAt(column))continue;
    double top=restSurfaceAt(mob,column);
    if(!Double.isFinite(top))continue;
    double y=preferredRestBottomY(mob,column,top);
+   if(!Double.isFinite(y))y=relaxedRestBottomY(mob,column,top);
    if(!Double.isFinite(y))continue;
    BlockPos feet=new BlockPos(column.getX(),Math.ceil(y),column.getZ());
    var path=mob.getNavigation().createPath(feet,0);

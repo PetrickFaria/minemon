@@ -30,6 +30,7 @@ public final class RocketChallengeManager {
     private static final String LEVEL = "MinemonRocketLevel";
     private static final String TRADES = "MinemonRocketTradesThisLevel";
     private static final String EXPERIENCE = "MinemonRocketExperience";
+    private static final String EXPERIENCE_BASE = "MinemonRocketExperienceAtLevelStart";
     private static final String UNLOCKED = "MinemonRocketTradesUnlocked";
     private static final String ACTIVE = "MinemonRocketActiveRattata"; // Retained for existing-world UUID compatibility.
     private static final String COOLDOWN = "MinemonRocketRetryAt";
@@ -59,7 +60,7 @@ public final class RocketChallengeManager {
     public static int getExperience(Villager villager) {
         if (!isRocket(villager)) return 0;
         initialize(villager);
-        return Math.max(0, villager.getPersistentData().getInt(EXPERIENCE));
+        return Math.max(0, villager.getVillagerXp() - villager.getPersistentData().getInt(EXPERIENCE_BASE));
     }
 
     public static int requiredTradesForNextLevel(int level) {
@@ -104,13 +105,28 @@ public final class RocketChallengeManager {
     /** One-time migration retains access for villagers that beat the former single Rattata challenge. */
     private static void initialize(Villager villager) {
         var data = villager.getPersistentData();
-        if (data.getBoolean(INITIALIZED)) return;
+        if (data.getBoolean(INITIALIZED)) {
+            migrateExperienceIfNeeded(villager, data);
+            return;
+        }
         boolean completedLegacyChallenge = data.getBoolean("MinemonRocketChallengeComplete");
         data.putInt(LEVEL, 1);
         data.putInt(TRADES, 0);
         data.putInt(EXPERIENCE, 0);
+        data.putInt(EXPERIENCE_BASE, villager.getVillagerXp());
         data.putBoolean(UNLOCKED, completedLegacyChallenge);
         data.putBoolean(INITIALIZED, true);
+    }
+
+    private static void migrateExperienceIfNeeded(Villager villager, net.minecraft.nbt.CompoundTag data) {
+        if (data.contains(EXPERIENCE_BASE)) return;
+        int previousProgress = Math.max(0, data.getInt(EXPERIENCE));
+        int nativeExperience = Math.max(0, villager.getVillagerXp());
+        if (nativeExperience < previousProgress) {
+            nativeExperience = previousProgress;
+            villager.setVillagerXp(nativeExperience);
+        }
+        data.putInt(EXPERIENCE_BASE, nativeExperience - previousProgress);
     }
 
     @SubscribeEvent
@@ -215,7 +231,9 @@ public final class RocketChallengeManager {
         if (!data.getBoolean(UNLOCKED)) return;
         int currentLevel = data.getInt(LEVEL);
         if (currentLevel >= 10) return;
-        data.putInt(EXPERIENCE, Math.max(0, data.getInt(EXPERIENCE)) + 1);
+        // A completed Rocket exchange awards real Villager XP. The UI reads
+        // this native value relative to the XP recorded at the Rocket level start.
+        villager.setVillagerXp(Math.max(0, villager.getVillagerXp()) + 1);
         int trades = data.getInt(TRADES) + 1;
         int needed = requiredTradesForNextLevel(currentLevel);
         if (trades < needed) {
@@ -224,7 +242,8 @@ public final class RocketChallengeManager {
         }
         data.putInt(LEVEL, currentLevel + 1);
         data.putInt(TRADES, 0);
-        data.putInt(EXPERIENCE, 0);
+        data.putInt(EXPERIENCE_BASE, villager.getVillagerXp());
+        data.remove(EXPERIENCE);
         data.putBoolean(UNLOCKED, false);
         data.putBoolean(VICTORY, false);
         data.remove(COOLDOWN);

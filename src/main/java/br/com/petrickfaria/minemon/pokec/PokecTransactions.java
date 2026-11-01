@@ -93,9 +93,10 @@ public final class PokecTransactions {
         ItemStack output = menu.conversionOutput();
         if (output.isEmpty()) return false;
         int remaining = Math.max(0, menu.conversionResult() - output.getCount());
+        ItemStack template = output.copy();
         player.getInventory().placeItemBackInInventory(output);
         if (remaining > 0) {
-            ItemStack next = output.copy();
+            ItemStack next = template;
             next.setCount(Math.min(remaining, next.getMaxStackSize()));
             menu.setConversionState(player, menu.conversionBall(), next, remaining);
         } else {
@@ -220,10 +221,11 @@ public final class PokecTransactions {
         ItemStack output = PokecPlayerData.conversionOutput(player);
         if (!output.isEmpty()) {
             int remaining = Math.max(0, PokecPlayerData.conversionResult(player) - output.getCount());
+            ItemStack template = output.copy();
             player.getInventory().placeItemBackInInventory(output);
             while (remaining > 0) {
-                int count = Math.min(remaining, output.getMaxStackSize());
-                player.getInventory().placeItemBackInInventory(new ItemStack(output.getItem(), count));
+                int count = Math.min(remaining, template.getMaxStackSize());
+                player.getInventory().placeItemBackInInventory(new ItemStack(template.getItem(), count));
                 remaining -= count;
             }
         }

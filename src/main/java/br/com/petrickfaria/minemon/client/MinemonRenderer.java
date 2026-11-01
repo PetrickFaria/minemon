@@ -72,7 +72,9 @@ public class MinemonRenderer extends GeoEntityRenderer<MinemonCreature> {
    // the measured visible top, rather than scaling the hitbox height twice.
    pose.scale(1/scale,1/scale,1/scale);
    double top=br.com.petrickfaria.minemon.entity.ModelMetrics.top(entity.getSpeciesSlug(),scale);
-   pose.translate(0,Math.max(0,top-entity.getBbHeight()),0);
+   // renderNameTag adds the entity hitbox height plus 0.5 blocks internally.
+   // Lower that default gap so the first line sits just above the measured model top.
+   pose.translate(0,Math.max(0,top-entity.getBbHeight()-0.26D),0);
    super.renderNameTag(entity,shownName,pose,buffers,packedLight);
    pose.translate(0,-.22D,0);
    super.renderNameTag(entity,Component.literal("Nível: "+entity.getPokemonLevel()),pose,buffers,packedLight);

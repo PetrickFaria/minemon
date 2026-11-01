@@ -53,14 +53,16 @@ public final class RocketTradeScreen extends AbstractContainerScreen<RocketTrade
     /** Uses the same 1.19.2 vanilla MerchantScreen atlas region and native 102x5 bar. */
     private void renderVanillaExperienceBar(PoseStack pose) {
         int x = leftPos + 136;
-        int y = topPos + 16;
+        int y = topPos + 17;
         int filled = progressPixels(menu.progressionLevel(), menu.progressionExperience(), 102);
         GuiComponent.blit(pose, x, y, 0, 186, 102, 5, 512, 256);
         if (filled > 0) GuiComponent.blit(pose, x, y, 0, 191, filled, 5, 512, 256);
     }
     @Override protected void renderLabels(PoseStack pose, int mouseX, int mouseY) {
         font.draw(pose,"Trocas",5,6,0xFF404040);
-        font.draw(pose,"Aldeão Rocket",108,1,0xFF404040);
+        String title="Aldeão Rocket";
+        font.draw(pose,title,(imageWidth-font.width(title))/2,1,0xFF404040);
+        font.draw(pose,"Lv "+menu.progressionLevel(),108,16,0xFF404040);
         font.draw(pose,playerInventoryTitle,108,72,0xFF404040);
     }
     @Override public boolean mouseClicked(double x,double y,int button) {
