@@ -23,6 +23,7 @@ final class NightClientSmokeTest {
  private static boolean gyaradosNightStarted,gyaradosSawDescent;
  private static double gyaradosDaySurfaceY=Double.NaN,gyaradosSleepY=Double.NaN;
  private static int ticks,index,samples,activeSamples,sleepTick,depthSettleTicks,depthStableTicks,restSettleTicks,restStableTicks;
+ private static final Object SCENARIO_LOCK=new Object();
  private static volatile long scenarioToken;
  private static volatile UUID entity;
  private static final Map<String,float[]> eyes=new HashMap<>();
@@ -138,9 +139,11 @@ final class NightClientSmokeTest {
     var p=level.getServer().getPlayerList().getPlayers().get(0);p.setGameMode(GameType.CREATIVE);p.teleportTo(level,0,102,-5,0,8);
    });return;}
    if(!spawned){
-    long token=++scenarioToken;
+    long token;
+    synchronized(SCENARIO_LOCK){token=++scenarioToken;}
     spawned=true;gengarWakeEyesObserved=false;nocturnalMidday=false;gyaradosNightStarted=false;gyaradosSawDescent=false;gyaradosDaySurfaceY=Double.NaN;gyaradosSleepY=Double.NaN;ticks=0;samples=0;activeSamples=0;sleepTick=0;depthSettleTicks=0;depthStableTicks=0;restSettleTicks=0;restStableTicks=0;waking=false;eyes.clear();restingWings.clear();
     mc.getSingleplayerServer().execute(()->{
+     synchronized(SCENARIO_LOCK){
      if(token!=scenarioToken)return;
      var level=mc.getSingleplayerServer().overworld();if(entity!=null){var old=level.getEntity(entity);if(old!=null)old.discard();}
      String scenario=SPECIES.get(index);String slug=scenario.equals("vaporeon_land")?"vaporeon":scenario;
@@ -169,6 +172,7 @@ final class NightClientSmokeTest {
       case "pidgey","gastly","kakuna"->2.5;case "gyarados","lapras"->8;default->3;
      };
      var player=level.getServer().getPlayerList().getPlayers().get(0);player.teleportTo(level,slug.equals("fearow")?distance:0,101,slug.equals("fearow")?5:5-distance,0,0);
+     }
     });return;
    }
    ticks++;if(ticks>650){
@@ -283,7 +287,9 @@ final class NightClientSmokeTest {
   var server=mc.getSingleplayerServer();
   if(server==null)return;
   server.execute(()->{
-   if(token==scenarioToken)server.overworld().setDayTime(dayTime);
+   synchronized(SCENARIO_LOCK){
+    if(token==scenarioToken)server.overworld().setDayTime(dayTime);
+   }
   });
  }
  private static String controllerSnapshot(MinemonCreature mob){
