@@ -530,8 +530,10 @@ public final class NightAndSwimmingTests {
       mob.getSpeciesSlug()+" must wake and retain its attacker");
   await(h,()->attacker.getHealth()<health,()->{
    attacker.discard();
-   await(h,mob::isSleeping,()->runEeveeLineCombat(h,sleepers,index+1,done),240,
-       ()->mob.getSpeciesSlug()+" must return to sleep after combat while it is still night: pos="+mob.position()+" ground="+mob.isOnGround()+" night="+mob.isNightResting()+" target="+mob.getTarget()+" time="+h.getLevel().getDayTime()+" collision="+h.getLevel().noCollision(mob,mob.getBoundingBox()));
+   long combatEndedAt=h.getLevel().getGameTime();
+   var restAnchor=mob.position();
+   awaitCombatSleep(h,mob,attacker,restAnchor,combatEndedAt,240,
+       ()->runEeveeLineCombat(h,sleepers,index+1,done));
   },180,mob.getSpeciesSlug()+" must retaliate with the existing combat AI");
  }
  @GameTest(template="test_arena",batch="water_speed",timeoutTicks=240)
