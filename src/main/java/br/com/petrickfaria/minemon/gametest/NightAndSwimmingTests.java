@@ -198,10 +198,10 @@ public final class NightAndSwimmingTests {
  private static void awaitGyaradosSurfaceAnchor(GameTestHelper h,MinemonCreature gyarados,int remaining,Runnable done){
   double surface=WaterMovementGoal.restSurfaceAt(gyarados,gyarados.blockPosition());
   double target=surface-WaterMovementGoal.preferredSurfaceDepth(gyarados);
-  if(Double.isFinite(target)&&Math.abs(gyarados.getY()-target)<.25D){
-   double scale=SpeciesDefinitions.get("gyarados").scale()*(gyarados.isBaby()?.5D:1.0D);
-   double submerged=surface-(gyarados.getY()+ModelMetrics.bodyBottom("gyarados")*scale);
-   double expected=ModelMetrics.bodyHeight("gyarados")*scale*.10D+1.0D;
+  double scale=SpeciesDefinitions.get("gyarados").scale()*(gyarados.isBaby()?.5D:1.0D);
+  double submerged=surface-(gyarados.getY()+ModelMetrics.bodyBottom("gyarados")*scale);
+  double expected=ModelMetrics.bodyHeight("gyarados")*scale*.10D+1.0D;
+  if(Double.isFinite(target)&&Math.abs(gyarados.getY()-target)<.25D&&Math.abs(submerged-expected)<.12D){
    check(h,gyarados.isInWater()&&!gyarados.isSleeping()&&Math.abs(submerged-expected)<.12D,
        "Awake Gyarados must return to its exact measured-body surface depth; submerged="+submerged+" expected="+expected+" y="+gyarados.getY()+" target="+target);
    done.run();return;
