@@ -159,7 +159,6 @@ final class NightClientSmokeTest {
      long scenarioTime=slug.equals("gyarados")?1000L:18000L;
      level.setDayTime(scenarioTime);
      if(level.getDayTime()!=scenarioTime)throw new IllegalStateException("Night client scenario clock did not initialize for "+slug+": "+level.getDayTime());
-     Files.writeString(Path.of("client-validation-night.txt"),"START "+slug+" scenarioTime="+level.getDayTime()+" nocturnal="+SpeciesBehaviorProfiles.isNocturnal(slug)+"\\n",StandardOpenOption.APPEND);
      level.addFreshEntity(mob);entity=mob.getUUID();
      double distance=switch(mob.getSpeciesSlug()){
       case "venusaur"->7;case "snorlax","charizard","dragonite"->6;case "fearow"->9;
