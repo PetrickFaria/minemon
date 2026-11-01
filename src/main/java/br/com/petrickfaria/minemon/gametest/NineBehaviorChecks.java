@@ -93,20 +93,19 @@ final class NineBehaviorChecks {
    var mob=h.spawn(ModEntities.SPECIES.get(species.get(i)).get(),new BlockPos(5+2*i,5,2+i));mob.tame(owner);mob.setOrderedToSit(false);mob.naturalCycle().restore("AIR",1000,1);mobs.add(mob);
   }
   long diagnosticStart=level.getGameTime();long[] followStartedAt=new long[mobs.size()];java.util.Arrays.fill(followStartedAt,-1L);
-  var fixture=new FollowingAltitudeFixture(owner,mobs,diagnosticStart,followStartedAt);
-  h.onEachTick(()->{
-   long now=level.getGameTime();
-   for(int i=0;i<mobs.size();i++){
-    var mob=mobs.get(i);
-    if(followStartedAt[i]<0L&&mob.isFollowingOwner()){
-     followStartedAt[i]=now;
-     com.mojang.logging.LogUtils.getLogger().info("FOLLOW ALTITUDE START "+followingAltitudeSnapshot(mob,owner,now,now,diagnosticStart));
-    }
-    if(mob.getSpeciesSlug().equals("gastly")&&followStartedAt[i]>=0L&&(now-followStartedAt[i])%20L==0L)
-     com.mojang.logging.LogUtils.getLogger().info("FOLLOW ALTITUDE TRACE "+followingAltitudeSnapshot(mob,owner,now,followStartedAt[i],diagnosticStart));
+  return new FollowingAltitudeFixture(owner,mobs,diagnosticStart,followStartedAt);
+ }
+ static void traceFollowingAltitudes(FollowingAltitudeFixture fixture){
+  long now=fixture.owner.level.getGameTime();
+  for(int i=0;i<fixture.mobs.size();i++){
+   var mob=fixture.mobs.get(i);
+   if(fixture.followStartedAt[i]<0L&&mob.isFollowingOwner()){
+    fixture.followStartedAt[i]=now;
+    com.mojang.logging.LogUtils.getLogger().info("FOLLOW ALTITUDE START "+followingAltitudeSnapshot(mob,fixture.owner,now,now,fixture.diagnosticStart));
    }
-  });
-  return fixture;
+   if(mob.getSpeciesSlug().equals("gastly")&&fixture.followStartedAt[i]>=0L&&(now-fixture.followStartedAt[i])%20L==0L)
+    com.mojang.logging.LogUtils.getLogger().info("FOLLOW ALTITUDE TRACE "+followingAltitudeSnapshot(mob,fixture.owner,now,fixture.followStartedAt[i],fixture.diagnosticStart));
+  }
  }
  static String checkFollowingAltitudes(GameTestHelper h,FollowingAltitudeFixture fixture){
   for(int i=0;i<fixture.mobs.size();i++){
