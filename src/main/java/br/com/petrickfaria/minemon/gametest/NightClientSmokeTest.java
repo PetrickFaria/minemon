@@ -170,13 +170,19 @@ final class NightClientSmokeTest {
         mc.player.getBoundingBox().inflate(128.0D),m->m.getUUID().equals(entity)).stream().findFirst().orElse(null);
     boolean rendered=false;
     for(var candidate:mc.level.entitiesForRendering())if(candidate.getUUID().equals(entity)){rendered=true;break;}
+    long clientTime=mc.level==null?-1L:mc.level.getDayTime();
+    long serverTime=mc.getSingleplayerServer()==null?-1L:mc.getSingleplayerServer().overworld().getDayTime();
     String state=observed!=null
         ? " sleeping="+observed.isSleeping()+" nightRest="+observed.isNightResting()+" clip="+observed.getSelectedAnimationForValidation()
           +" pos="+observed.position()+" support="+observed.naturalSurface()+" onGround="+observed.isOnGround()
           +" noGravity="+observed.isNoGravity()+" navDone="+observed.getNavigation().isDone()
+          +" target="+(observed.getTarget()==null?"null":observed.getTarget().getType())
+          +" nightRoutine="+observed.nightRoutineForValidation()+" wakeGrace="+observed.wakeGraceTicksForValidation()
+          +" profileNocturnal="+SpeciesBehaviorProfiles.isNocturnal(observed.getSpeciesSlug())
+          +" serverShouldSleep="+SpeciesBehaviorProfiles.shouldSleep(observed.getSpeciesSlug(),serverTime)
           +" rendered="+rendered
         : " entityMissing="+(observed==null);
-    throw new IllegalStateException("Night client timeout: "+SPECIES.get(index)+" samples="+samples+" activeSamples="+activeSamples+" waking="+waking+" midday="+nocturnalMidday+state);
+    throw new IllegalStateException("Night client timeout: "+SPECIES.get(index)+" samples="+samples+" activeSamples="+activeSamples+" waking="+waking+" midday="+nocturnalMidday+" clientTime="+clientTime+" serverTime="+serverTime+state);
    }
    MinemonCreature current=null;for(var e:mc.level.entitiesForRendering())if(e.getUUID().equals(entity)&&e instanceof MinemonCreature m){current=m;break;}
    if(current==null)return;
