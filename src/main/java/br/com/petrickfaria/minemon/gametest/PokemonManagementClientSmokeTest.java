@@ -230,7 +230,9 @@ public final class PokemonManagementClientSmokeTest {
                 phase=10;ticks=0;auraState=0;return;
             }
             if(phase==10){
-                var gastlyEntity=gastlyUuid==null?null:minecraft.level.getEntity(gastlyUuid);
+                var gastlyEntity=gastlyUuid==null?null:minecraft.level.getEntitiesOfClass(
+                        br.com.petrickfaria.minemon.entity.MinemonCreature.class,
+                        minecraft.player.getBoundingBox().inflate(32),m->m.getUUID().equals(gastlyUuid)).stream().findFirst().orElse(null);
                 if(gastlyEntity==null){
                     if(++ticks>200)throw new IllegalStateException("Gastly aura fixture was not tracked by UUID; id="+gastlyId+" uuid="+gastlyUuid
                             +" nearby="+minecraft.level.getEntitiesOfClass(br.com.petrickfaria.minemon.entity.MinemonCreature.class,
