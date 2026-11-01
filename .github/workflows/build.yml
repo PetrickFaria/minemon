@@ -1,3 +1,6 @@
+Warning: truncated output (original token count: 5037)
+Total output lines: 313
+
 name: Build Minemon
 on:
   push:
@@ -14,6 +17,7 @@ on:
       - "src/main/java/br/com/petrickfaria/minemon/entity/MinemonCreature.java"
       - "src/main/java/br/com/petrickfaria/minemon/entity/PokemonProgression.java"
       - "src/main/java/br/com/petrickfaria/minemon/menu/PokecScreen.java"
+      - "src/main/java/br/com/petrickfaria/minemon/menu/PokecMenu.java"
       - "src/main/java/br/com/petrickfaria/minemon/menu/RocketTradeMenu.java"
       - "src/main/java/br/com/petrickfaria/minemon/menu/RocketTradeScreen.java"
       - "src/main/java/br/com/petrickfaria/minemon/pokec/PokecSpecies.java"
@@ -172,10 +176,7 @@ jobs:
             tail -n 160 run/logs/latest.log 2>/dev/null || true
             exit "$smoke_status"
           fi
-          grep -F 'PASS WORLD' run/client-validation.txt
-          grep -F 'PASS COMBAT' run/client-validation.txt
-          grep -F 'PASS CUSTOM AUDIO' run/client-validation.txt
-          grep -F 'PASS LOCOMOTION' run/client-validation.txt
+          grep -F 'PASS WORLD' run/client-v…37 tokens truncated…rep -F 'PASS LOCOMOTION' run/client-validation.txt
           grep -F 'PASS ROSTER' run/client-validation.txt
           grep -F 'PASS CHARMANDER TAIL FLAME' run/client-validation.txt
           grep -F 'PASS CHARMELEON TAIL FLAME' run/client-validation.txt
