@@ -76,12 +76,15 @@ final class NineBehaviorChecks {
  }
  static void followingAltitudes(GameTestHelper h){
   var level=h.getLevel();level.setDayTime(1000);
+  // Keep residual actors out of the follower cohort and avoid overlapping spawn bodies.
+  var arenaBox=new net.minecraft.world.phys.AABB(h.absolutePos(new BlockPos(0,0,0)),h.absolutePos(new BlockPos(32,20,24)));
+  level.getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class,arenaBox).forEach(net.minecraft.world.entity.Entity::discard);
   var owner=new net.minecraft.server.level.ServerPlayer(level.getServer(),level,new com.mojang.authlib.GameProfile(UUID.randomUUID(),"AltitudeTrainer"),null);
   owner.connection=new net.minecraftforge.common.util.FakePlayer(level,new com.mojang.authlib.GameProfile(UUID.randomUUID(),"AltitudeConnection")).connection;
   var at=h.absolutePos(new BlockPos(30,1,5));owner.moveTo(at.getX()+.5,at.getY(),at.getZ()+.5,0,0);level.addNewPlayer(owner);
   var species=List.of("gastly","metapod","kakuna","abra","porygon","geodude","pidgey");var mobs=new ArrayList<MinemonCreature>();
   for(int i=0;i<species.size();i++){
-   var mob=h.spawn(ModEntities.SPECIES.get(species.get(i)).get(),new BlockPos(5,5,1+i));mob.tame(owner);mob.setOrderedToSit(false);mob.naturalCycle().restore("AIR",1000,1);mobs.add(mob);
+   var mob=h.spawn(ModEntities.SPECIES.get(species.get(i)).get(),new BlockPos(4+(i%3)*4,5,2+(i/3)*6));mob.tame(owner);mob.setOrderedToSit(false);mob.naturalCycle().restore("AIR",1000,1);mobs.add(mob);
   }
   long diagnosticStart=level.getGameTime();long[] followStartedAt=new long[mobs.size()];java.util.Arrays.fill(followStartedAt,-1L);
   h.onEachTick(()->{
@@ -96,7 +99,7 @@ final class NineBehaviorChecks {
      com.mojang.logging.LogUtils.getLogger().info("FOLLOW ALTITUDE TRACE "+followingAltitudeSnapshot(mob,owner,now,followStartedAt[i],diagnosticStart));
    }
   });
-  h.runAfterDelay(220,()->{
+  h.runAfterDelay(320,()->{
    for(int i=0;i<mobs.size();i++){
     var mob=mobs.get(i);
     double altitude=mob.getY()-mob.naturalSurface();

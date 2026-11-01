@@ -497,6 +497,9 @@ public final class NightAndSwimmingTests {
  @GameTest(template="test_arena",batch="night_eevee_line",timeoutTicks=2400)
  public static void eeveeLineSleepsWakesRetaliatesReturnsAndWakesAtDawn(GameTestHelper h){
   arena(h);var level=h.getLevel();level.setDayTime(18000);
+  // This test covers combat recovery only; remove actors left by neighboring GameTests.
+  var arenaBox=new net.minecraft.world.phys.AABB(h.absolutePos(new BlockPos(0,0,0)),h.absolutePos(new BlockPos(32,20,24)));
+  level.getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class,arenaBox).forEach(net.minecraft.world.entity.Entity::discard);
   // Combat recovery includes normal roaming during its grace period; seal the arena.
   for(int x=0;x<32;x++)for(int z=0;z<24;z++)if(x==0||x==31||z==0||z==23)
    for(int y=1;y<=6;y++)h.setBlock(new BlockPos(x,y,z),Blocks.STONE);
