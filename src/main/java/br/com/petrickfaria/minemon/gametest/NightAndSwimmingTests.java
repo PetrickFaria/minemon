@@ -83,6 +83,13 @@ public final class NightAndSwimmingTests {
       +"/"+((MinemonFlyingCreature)m).flightRecoveryMovesForValidation()+",samples="
       +((MinemonFlyingCreature)m).flightRecoverySamplesForValidation()+"}";
  }
+ private static void assertRestingOnWaterFloor(GameTestHelper h,MinemonCreature mob){
+  var support=mob.blockPosition().below();
+  var shape=h.getLevel().getBlockState(support).getCollisionShape(h.getLevel(),support);
+  double top=shape.isEmpty()?Double.NaN:support.getY()+shape.max(net.minecraft.core.Direction.Axis.Y);
+  check(h,Double.isFinite(top)&&mob.getY()>=top&&mob.getY()-top<0.05D,
+      mob.getSpeciesSlug()+" water sleep base must rest on the submerged collision surface; baseY="+mob.getY()+" supportTop="+top);
+ }
  private static void awaitBottom(GameTestHelper h,MinemonCreature shellder,MinemonCreature krabby,
      double originY,int remaining,int elapsed,Runnable next){
   if(elapsed%100==0)for(var m:List.of(shellder,krabby)){
@@ -335,6 +342,7 @@ public final class NightAndSwimmingTests {
    check(h,Math.abs(cloyster.getY()-cloysterY)<.2D&&Math.abs(cloyster.getY()-originY-7)<.2D,"Exclusively aquatic Cloyster must preserve its submerged starting depth");
    check(h,Math.abs(magikarp.getY()-fishY)<.2D,"Permanent submerged species must float at a safe, fully wet depth");
    check(h,Math.abs(dratini.getY()-visitorY)<.2D&&dratini.getY()-originY<2.5D,"A water visitor caught in water at night must settle at the bottom");
+   assertRestingOnWaterFloor(h,dratini);assertRestingOnWaterFloor(h,vaporeon);
    check(h,Math.abs(shellder.getY()-shellderY)<.2D&&Math.abs(shellder.getY()-originY-8)<.2D,
        "Exclusively aquatic Shellder must preserve its submerged starting depth");
    // Keep the aggressor north of Dratini, clear of the sleeping Vaporeon body.
@@ -344,6 +352,7 @@ public final class NightAndSwimmingTests {
        "An aquatic night sleeper must wake and retain its attacker");
    await(h,()->attacker.getHealth()<health,()->{
     attacker.discard();await(h,dratini::isSleeping,()->{
+     assertRestingOnWaterFloor(h,dratini);
      level.setDayTime(1000);
       await(h,()->!gyarados.isSleeping()&&!magikarp.isSleeping()&&!dratini.isSleeping()&&!shellder.isSleeping()&&!vaporeon.isSleeping()&&!cloyster.isSleeping(),()->{
       traceAwakeGyarados(h,gyarados,0);

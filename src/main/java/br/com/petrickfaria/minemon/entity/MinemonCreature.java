@@ -874,10 +874,22 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
             }
             boolean hover=SpeciesBehaviorProfiles.hoversDuringNightRest(this.getSpeciesSlug());
             double restHeight=SpeciesBehaviorProfiles.nightRestHoverHeight(this.getSpeciesSlug());
-            double waterSettleTolerance=SpeciesBehaviorProfiles.restsAtWaterBottom(this.getSpeciesSlug())?0.025D:0.18D;
+            double waterSettleTolerance=SpeciesBehaviorProfiles.restsAtWaterBottom(this.getSpeciesSlug())
+                    ?(this.getSpeciesSlug().equals("gyarados")?0.025D:0.05D):0.18D;
             boolean settled=waterRest?Math.abs(this.getY()-WaterMovementGoal.waterRestY(this))<waterSettleTolerance
                 :hover?Math.abs(this.getY()-this.naturalSurface()-restHeight)<0.18D
                 :this.isOnGround()&&WaterMovementGoal.safeDry(this,this.blockPosition());
+            if(settled&&waterRest&&SpeciesBehaviorProfiles.restsAtWaterBottom(this.getSpeciesSlug())){
+                double restY=WaterMovementGoal.waterRestY(this);
+                BlockPos support=this.blockPosition().below();
+                var shape=this.level.getBlockState(support).getCollisionShape(this.level,support);
+                double supportTop=shape.isEmpty()?Double.NaN:support.getY()+shape.max(net.minecraft.core.Direction.Axis.Y);
+                boolean physicalBottom=Double.isFinite(restY)&&Double.isFinite(supportTop)
+                    &&restY>=supportTop&&restY-supportTop<0.05D;
+                var restBox=this.getBoundingBox().move(0.0D,restY-this.getY(),0.0D);
+                settled=physicalBottom&&this.level.noCollision(this,restBox);
+                if(settled){this.setPos(this.getX(),restY,this.getZ());this.setDeltaMovement(0.0D,0.0D,0.0D);}
+            }
             if(settled&&!this.isSleeping())this.setSleeping(true);
         }else{
             this.entityData.set(NIGHT_REST,false);
