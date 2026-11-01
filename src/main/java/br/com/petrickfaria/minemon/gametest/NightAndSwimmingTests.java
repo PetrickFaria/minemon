@@ -377,7 +377,12 @@ public final class NightAndSwimmingTests {
       });
      },150,"Woken creature must physically retaliate using melee AI");
     });
-   },350,()->"Night must settle ground/mixed creatures on land and air-only creatures in a one-block hover; unmet conditions by species: mixed="
+   },350,()->"Night must settle ground/mixed creatures on land and air-only creatures in a one-block hover; ground="
+       +ground.getSpeciesSlug()+"{sleep="+ground.isSleeping()+",ground="+ground.isOnGround()+",night="+ground.isNightResting()
+       +",pos="+ground.position()+",target="+(ground.getTarget()==null?"null":ground.getTarget().getType())
+       +",navActive="+!ground.getNavigation().isDone()+",nav="+ground.getNavigation().getTargetPos()
+       +",floor="+h.getLevel().getBlockState(ground.blockPosition().below()).getBlock()
+       +",collision="+h.getLevel().noCollision(ground,ground.getBoundingBox())+",velocity="+ground.getDeltaMovement()+"}; mixed="
        +mixed.stream().map(m->m.getSpeciesSlug()+"{sleep="+m.isSleeping()+",ground="+m.isOnGround()+",night="+m.isNightResting()+",pos="+m.position()+",nav="+m.getNavigation().getTargetPos()+"}").toList()
        +" air="+air.stream().map(m->{double surface=m.naturalSurface(),altitude=m.getY()-surface,error=altitude-1.0D;
         return m.getSpeciesSlug()+"{sleep="+m.isSleeping()+",ground="+m.isOnGround()+",night="+m.isNightResting()+",pos="+m.position()
