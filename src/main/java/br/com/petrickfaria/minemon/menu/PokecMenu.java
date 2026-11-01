@@ -6,6 +6,7 @@ import br.com.petrickfaria.minemon.pokec.PokecEconomy;
 import br.com.petrickfaria.minemon.pokec.SoulType;
 import br.com.petrickfaria.minemon.pokec.PokemonSoulConversion;
 import br.com.petrickfaria.minemon.item.PokeballItem;
+import br.com.petrickfaria.minemon.item.PokemonBallLedger;
 import br.com.petrickfaria.minemon.registry.ModBlocks;
 import br.com.petrickfaria.minemon.registry.ModItems;
 import br.com.petrickfaria.minemon.network.MinemonNetwork;
