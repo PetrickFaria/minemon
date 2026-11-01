@@ -15,7 +15,10 @@ import java.util.*;
 
 /** Additional real-client scenario: production night AI, rendered closed eyes, dawn. */
 final class NightClientSmokeTest {
- private static final List<String> SPECIES=List.of("bulbasaur","victreebel","venusaur","snorlax","charizard","scyther","dragonite","pidgey","pidgeotto","pidgeot","spearow","fearow","articuno","zapdos","moltres","gastly","haunter","gengar","zubat","golbat","koffing","weezing","butterfree","beedrill","venomoth","parasect","kakuna","tangela","poliwag","growlithe","tentacool","tentacruel","horsea","seadra","goldeen","seaking","magikarp","shellder","cloyster","gyarados","lapras","dratini","omanyte","eevee","jolteon","flareon","vaporeon_land","vaporeon","abra","porygon","geodude","kadabra","alakazam","mewtwo","mew");
+ private static final List<String> ALL_SPECIES=List.of("bulbasaur","victreebel","venusaur","snorlax","charizard","scyther","dragonite","pidgey","pidgeotto","pidgeot","spearow","fearow","articuno","zapdos","moltres","gastly","haunter","gengar","zubat","golbat","koffing","weezing","butterfree","beedrill","venomoth","parasect","kakuna","tangela","poliwag","growlithe","tentacool","tentacruel","horsea","seadra","goldeen","seaking","magikarp","shellder","cloyster","gyarados","lapras","dratini","omanyte","eevee","jolteon","flareon","vaporeon_land","vaporeon","abra","porygon","geodude","kadabra","alakazam","mewtwo","mew");
+ private static final List<String> SPECIES=System.getProperty("minemon.clientSmokeSpecies", "").isBlank()
+     ? ALL_SPECIES : SmokeSpeciesSelection.select(SpeciesDefinitions.ALL.values(),System.getProperty("minemon.clientSmokeSpecies"));
+
  private static boolean opened,setup,spawned,waking,gengarWakeEyesObserved,nocturnalMidday;
  private static int ticks,index,samples,activeSamples,sleepTick,depthSettleTicks,depthStableTicks,restSettleTicks,restStableTicks;
  private static volatile UUID entity;
@@ -100,7 +103,15 @@ final class NightClientSmokeTest {
           var initial=bone.getInitialSnapshot();
           float[] bind=switch(channel){case "position"->new float[]{initial.positionOffsetX,initial.positionOffsetY,initial.positionOffsetZ};case "rotation"->new float[]{initial.rotationValueX,initial.rotationValueY,initial.rotationValueZ};default->new float[]{initial.scaleValueX,initial.scaleValueY,initial.scaleValueZ};};
           float rendered=channel.equals("scale")?actual[axis]/bind[axis]:actual[axis]-bind[axis];
-          if(Math.abs(Math.abs(rendered)-Math.abs(value))>.015F)throw new IllegalStateException(mob.getSpeciesSlug()+" eye closure mismatch "+name+" "+channel+" axis="+axis+" got="+actual[axis]+" expected="+value);
+          if(Math.abs(Math.abs(rendered)-Math.abs(value))>.015F){
+           String diagnostic="eye closure mismatch "+name+" "+channel+" axis="+axis+" got="+actual[axis]+" expected="+value
+               +" bind="+java.util.Arrays.toString(bind)+" tick="+mob.tickCount+" sleepTick="+sleepTick
+               +" resource="+model.getAnimationResource(mob)+" selected="+selectedClip
+               +" loaded="+model.getAnimation(selectedClip,mob)+" controllers="+controllerSnapshot(mob);
+           Files.writeString(Path.of("client-validation-night.txt"),"FAIL "+mob.getSpeciesSlug()+" "+diagnostic+"\n",StandardOpenOption.APPEND);
+           Screenshot.grab(mc.gameDirectory,"night-failure-"+mob.getSpeciesSlug()+".png",mc.getMainRenderTarget(),message->{});
+           throw new IllegalStateException(mob.getSpeciesSlug()+" "+diagnostic);
+          }
          }
          eyes.put(name+channel,actual);
         }
@@ -215,4 +226,19 @@ final class NightClientSmokeTest {
    }
   }catch(Exception e){throw new IllegalStateException("Night client smoke failed",e);}
  }
+ private static String controllerSnapshot(MinemonCreature mob){
+  var result=new StringBuilder();
+  var data=mob.getFactory().getOrCreateAnimationData(mob.getId());
+  for(var entry:data.getAnimationControllers().entrySet()){
+   var c=entry.getValue();var animation=c.getCurrentAnimation();
+   result.append(entry.getKey()).append("{").append(c.getAnimationState()).append(",clip=")
+       .append(animation==null?"null":animation.animationName).append(",eyeTracks=");
+   if(animation!=null)for(var b:animation.boneAnimations)
+    if(b.boneName.equals("eye_left")||b.boneName.equals("eyelid_left"))
+     result.append(b.boneName).append(":").append(b.positionKeyFrames.xKeyFrames.size()).append(";");
+   result.append("}");
+  }
+  return result.toString();
+ }
+
 }
