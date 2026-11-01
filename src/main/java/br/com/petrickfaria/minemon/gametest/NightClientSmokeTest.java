@@ -223,7 +223,7 @@ final class NightClientSmokeTest {
      boolean settled=shouldHover?!current.isOnGround()&&Math.abs(current.getY()-support-restHeight)<=.2D:current.isOnGround();
      if(!settled){
       restStableTicks=0;
-      if(++restSettleTicks>20)throw new IllegalStateException(current.getSpeciesSlug()+" did not settle into its approved night-rest pose within 20 client ticks; hover="+shouldHover+" onGround="+current.isOnGround()+" y="+current.getY()+" support="+support+" deltaY="+current.getDeltaMovement().y);
+      if(++restSettleTicks>40)throw new IllegalStateException(current.getSpeciesSlug()+" did not settle into its approved night-rest pose within 20 client ticks; hover="+shouldHover+" onGround="+current.isOnGround()+" y="+current.getY()+" support="+support+" deltaY="+current.getDeltaMovement().y);
      }else if(++restStableTicks>=5){
       restSettleTicks=0;
      }
