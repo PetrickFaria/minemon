@@ -220,10 +220,15 @@ final class NightClientSmokeTest {
      boolean shouldHover=SpeciesBehaviorProfiles.hoversDuringNightRest(current.getSpeciesSlug());
      double support=current.naturalSurface();
      double restHeight=SpeciesBehaviorProfiles.nightRestHoverHeight(current.getSpeciesSlug());
-     boolean settled=shouldHover?!current.isOnGround()&&Math.abs(current.getY()-support-restHeight)<=.2D:current.isOnGround();
+     // The client-rendered entity's onGround flag can lag its server-authoritative landing.
+     // Check its base against the actual support surface and ensure the aligned box is collision-free.
+     var supportBox=current.getBoundingBox().move(0.0D,support-current.getY(),0.0D);
+     boolean touchingSupport=Double.isFinite(support)&&Math.abs(current.getY()-support)<=.05D
+             &&current.level.noCollision(current,supportBox);
+     boolean settled=shouldHover?!current.isOnGround()&&Math.abs(current.getY()-support-restHeight)<=.2D:touchingSupport;
      if(!settled){
       restStableTicks=0;
-      if(++restSettleTicks>40)throw new IllegalStateException(current.getSpeciesSlug()+" did not settle into its approved night-rest pose within 20 client ticks; hover="+shouldHover+" onGround="+current.isOnGround()+" y="+current.getY()+" support="+support+" deltaY="+current.getDeltaMovement().y);
+      if(++restSettleTicks>20)throw new IllegalStateException(current.getSpeciesSlug()+" did not settle into its approved night-rest pose within 20 client ticks; hover="+shouldHover+" onGround="+current.isOnGround()+" y="+current.getY()+" support="+support+" deltaY="+current.getDeltaMovement().y);
      }else if(++restStableTicks>=5){
       restSettleTicks=0;
      }
