@@ -18,9 +18,6 @@ import net.minecraftforge.gametest.PrefixGameTestTemplate;
 @GameTestHolder(Minemon.MOD_ID)
 @PrefixGameTestTemplate(false)
 public final class NaturalFollowingGameTests {
-    private static void fail(GameTestHelper h,ServerPlayer owner,MinemonCreature mob,String message) {
-        owner.discard(); mob.discard(); h.fail(message);
-    }
     @GameTest(template="test_arena", batch="natural_following", timeoutTicks=650)
     public static void followsWithContinuousMovementThenObeysSit(GameTestHelper h) {
         h.getLevel().setDayTime(1000);
@@ -43,27 +40,60 @@ public final class NaturalFollowingGameTests {
         mob.setTame(true);mob.setOwnerUUID(owner.getUUID());mob.setOrderedToSit(false);
         h.getLevel().addFreshEntity(mob);
         Vec3[] previous={mob.position()},sitting={null};
+        String[] pendingFailure={null};
+        boolean[] completed={false},reported={false};
         NineBehaviorChecks.FollowingAltitudeFixture[] altitudeFixture={null};
         h.runAtTickTime(540,()->{
-            if(altitudeFixture[0]==null){h.fail("Follower altitude phase was not initialized");return;}
-            NineBehaviorChecks.checkFollowingAltitudes(h,altitudeFixture[0]);
+            if(pendingFailure[0]!=null)return;
+            if(altitudeFixture[0]==null){pendingFailure[0]="Follower altitude phase was not initialized";return;}
+            pendingFailure[0]=NineBehaviorChecks.checkFollowingAltitudes(h,altitudeFixture[0]);
         });
         h.runAtTickTime(545,()->{
-            if(altitudeFixture[0]!=null)NineBehaviorChecks.finishFollowingAltitudes(h,altitudeFixture[0]);
+            if(pendingFailure[0]!=null)return;
+            if(altitudeFixture[0]!=null) {
+                pendingFailure[0]=NineBehaviorChecks.finishFollowingAltitudes(h,altitudeFixture[0]);
+                completed[0]=pendingFailure[0]==null;
+            }
         });
         h.onEachTick(()->{
-            if(mob.position().distanceTo(previous[0])>1.5)fail(h,owner,mob,"Following relocated the Pokémon discontinuously");
+            if(!reported[0]&&pendingFailure[0]!=null) {
+                reported[0]=true;
+                owner.discard();mob.discard();
+                if(altitudeFixture[0]!=null) {
+                    altitudeFixture[0].owner.discard();
+                    altitudeFixture[0].mobs.forEach(net.minecraft.world.entity.Entity::discard);
+                }
+                h.fail(pendingFailure[0]);
+                return;
+            }
+            if(completed[0]) {completed[0]=false;h.succeed();return;}
+            if(mob.position().distanceTo(previous[0])>1.5) {
+                pendingFailure[0]="Following relocated the Pokémon discontinuously";
+                previous[0]=mob.position();
+                return;
+            }
             previous[0]=mob.position();
         });
-        h.runAtTickTime(20,()->{if(!mob.isFollowingRun())fail(h,owner,mob,"Distant companion did not enter running state: pos="+mob.position()+" owner="+owner.position()+" water="+mob.isInWater()+" sleep="+mob.isSleeping()+" target="+mob.getTarget());});
+        h.runAtTickTime(20,()->{
+            if(!mob.isFollowingRun())pendingFailure[0]="Distant companion did not enter running state: pos="+mob.position()+" owner="+owner.position()+" water="+mob.isInWater()+" sleep="+mob.isSleeping()+" target="+mob.getTarget();
+        });
         h.runAtTickTime(80,()->{
-            if(mob.getX()<start.getX()+1.5)fail(h,owner,mob,"Companion did not walk toward owner");
+            if(pendingFailure[0]!=null)return;
+            if(mob.getX()<start.getX()+1.5) {pendingFailure[0]="Companion did not walk toward owner";return;}
             mob.setOrderedToSit(true);sitting[0]=mob.position();
         });
         h.runAtTickTime(140,()->{
-            if(mob.position().distanceTo(sitting[0])>.5)fail(h,owner,mob,"Sitting companion abandoned its order: start="+sitting[0]+" end="+mob.position()+" velocity="+mob.getDeltaMovement()+" target="+mob.getTarget());
-            if(mob.isSleeping()||mob.isFollowingRun())fail(h,owner,mob,"Sitting must remain awake without following run");
-            owner.discard();mob.discard();altitudeFixture[0]=NineBehaviorChecks.followingAltitudes(h);
+            if(pendingFailure[0]!=null)return;
+            if(mob.position().distanceTo(sitting[0])>.5) {
+                pendingFailure[0]="Sitting companion abandoned its order: start="+sitting[0]+" end="+mob.position()+" velocity="+mob.getDeltaMovement()+" target="+mob.getTarget();
+                return;
+            }
+            if(mob.isSleeping()||mob.isFollowingRun()) {
+                pendingFailure[0]="Sitting must remain awake without following run";
+                return;
+            }
+            owner.discard();mob.discard();
+            altitudeFixture[0]=NineBehaviorChecks.followingAltitudes(h);
         });
     }
 }
