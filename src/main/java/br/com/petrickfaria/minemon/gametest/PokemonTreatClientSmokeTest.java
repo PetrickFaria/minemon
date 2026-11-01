@@ -131,6 +131,8 @@ public final class PokemonTreatClientSmokeTest {
                     throw new IllegalStateException("PokéC UI did not load the complete 151-species list");
                 if (!screen.conversionPanelFitsAboveInventoryForSmokeTest())
                     throw new IllegalStateException("PokéC conversion panel must remain above the player inventory");
+                if (!screen.referencePanelsFitForSmokeTest())
+                    throw new IllegalStateException("PokéC reference layout panels must remain separated and within the screen");
                 if (!screen.inventorySlotsForSmokeTest())
                     throw new IllegalStateException("PokéC must show all 27 main inventory slots and 9 hotbar slots in vanilla order");
                 if (screen.previewScaleForSmokeTest("pikachu") <= screen.previewScaleForSmokeTest("onix"))

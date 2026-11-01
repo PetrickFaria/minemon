@@ -19,10 +19,16 @@ import java.util.*;
 
 /** Pokédex selector and server-authoritative purchase/unlock panel. */
 public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
-    private static final int LOGICAL_WIDTH = 520, TOP_HEIGHT = 166, INVENTORY_HEIGHT = 100;
-    private static final int LIST_X = 8, LIST_Y = 27, LIST_W = 136, LIST_H = 133, ROW_H = 11;
-    private static final int INVENTORY_SLOT_WIDTH = 9 * 18, INVENTORY_LABEL_Y = 4;
-    private static final int INVENTORY_MAIN_Y = 18, INVENTORY_HOTBAR_Y = 76;
+    private static final int LOGICAL_WIDTH = 720, TOP_HEIGHT = 218, INVENTORY_HEIGHT = 112;
+    private static final int LIST_X = 8, LIST_Y = 52, LIST_W = 160, LIST_H = 151, ROW_H = 12;
+    private static final int PREVIEW_X = 174, PREVIEW_Y = 28, PREVIEW_W = 224, PREVIEW_H = 180;
+    private static final int MODEL_X = 180, MODEL_Y = 56, MODEL_W = 212, MODEL_H = 120;
+    private static final int DETAILS_X = 404, DETAILS_Y = 28, DETAILS_W = 150, DETAILS_H = 180;
+    private static final int ACTION_X = 560, ACTION_Y = 28, ACTION_W = 152, ACTION_H = 72;
+    private static final int RETURN_X = 560, RETURN_Y = 108, RETURN_W = 152, RETURN_H = 100;
+    private static final int RETURN_INPUT_X = 568, RETURN_INPUT_Y = 126, RETURN_OUTPUT_X = 568, RETURN_OUTPUT_Y = 172;
+    private static final int INVENTORY_SLOT_WIDTH = 9 * 18, INVENTORY_LABEL_Y = 7;
+    private static final int INVENTORY_MAIN_Y = 22, INVENTORY_HOTBAR_Y = 78;
     private static volatile int syncedCoins;
     private static volatile boolean syncedFreeAvailable = true;
     // Empty until the server sends the current player's real unlock state.
@@ -90,14 +96,14 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         scrollOffset = Math.min(Math.max(0, ordered.size() - visibleRows()), index);
         int row = index - scrollOffset;
         double x = leftPos + (LIST_X + 24) * uiScale;
-        double y = topPos + (LIST_Y + 13 + row * ROW_H + 2) * uiScale;
+        double y = topPos + (LIST_Y + row * ROW_H + 2) * uiScale;
         return mouseClicked(x, y, 0) && selectedSlug.equals(slug);
     }
     public boolean selectedSpeciesForSmokeTest(String slug) { return selectedSlug.equals(slug); }
     public boolean previewExistsForSmokeTest(String slug) { return previews.containsKey(slug); }
     public boolean speciesUnlockedForSmokeTest(String slug) { return syncedUnlocked.contains(slug); }
     public boolean dragPreviewForSmokeTest(){
-        double x=leftPos+268*uiScale,y=topPos+88*uiScale;
+        double x=leftPos+(MODEL_X+MODEL_W/2.0)*uiScale,y=topPos+(MODEL_Y+MODEL_H/2.0)*uiScale;
         if(!mouseClicked(x,y,0))return false;
         mouseDragged(x+20*uiScale,y+10*uiScale,0,20*uiScale,10*uiScale);
         mouseReleased(x,y,0);
@@ -105,7 +111,15 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         previewYaw=previewPitch=targetPreviewYaw=targetPreviewPitch=0;
         return moved&&!draggingPreview;
     }
-    public boolean conversionPanelFitsAboveInventoryForSmokeTest() { return 98 + 20 < TOP_HEIGHT && 145 + 18 < TOP_HEIGHT; }
+    public boolean conversionPanelFitsAboveInventoryForSmokeTest() {
+        return RETURN_Y + RETURN_H <= TOP_HEIGHT && RETURN_INPUT_Y + 36 <= RETURN_OUTPUT_Y
+                && RETURN_OUTPUT_Y + 36 <= RETURN_Y + RETURN_H && RETURN_Y + 93 <= TOP_HEIGHT;
+    }
+    public boolean referencePanelsFitForSmokeTest() {
+        return LIST_X + LIST_W < PREVIEW_X && PREVIEW_X + PREVIEW_W < DETAILS_X
+                && DETAILS_X + DETAILS_W < RETURN_X && RETURN_X + RETURN_W <= LOGICAL_WIDTH
+                && Math.max(LIST_Y + LIST_H, PREVIEW_Y + PREVIEW_H) <= TOP_HEIGHT;
+    }
     public boolean inventorySlotsForSmokeTest() {
         if (menu.slots.size() != 36) return false;
         int x = (imageWidth - INVENTORY_SLOT_WIDTH) / 2;
@@ -148,75 +162,87 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         pose.translate(leftPos, topPos, 0);
         pose.pushPose();
         pose.scale(uiScale, uiScale, 1);
-        MinemonGui.panel(pose, 0, 0, LOGICAL_WIDTH, TOP_HEIGHT);
-        font.draw(pose, "POKÉC  /  POKÉDEX", 10, 9, 0xFF404040);
-        font.draw(pose, "Saldo: " + syncedCoins + " PokéCoins", 384, 9, 0xFF705028);
-        GuiComponent.fill(pose, 8, 20, LOGICAL_WIDTH - 8, 21, 0xFF9A4545);
+        drawFlatPanel(pose, 0, 0, LOGICAL_WIDTH, TOP_HEIGHT);
+        font.draw(pose, "POKÉDEX", 12, 10, 0xFF202020);
+        font.draw(pose, "Saldo: " + syncedCoins + " PokéCoins", LOGICAL_WIDTH - 12 - font.width("Saldo: " + syncedCoins + " PokéCoins"), 10, 0xFF404040);
+        GuiComponent.fill(pose, 8, 23, LOGICAL_WIDTH - 8, 25, 0xFF202020);
 
-        drawPanel(pose, LIST_X, LIST_Y - 5, LIST_W, LIST_H + 8);
-        drawPanel(pose, 150, 24, 236, TOP_HEIGHT - 28);
-        drawPanel(pose, 390, 24, 122, TOP_HEIGHT - 28);
-        font.draw(pose, "ESPÉCIES   001–151", LIST_X + 5, LIST_Y - 1, 0xFF404040);
+        drawFlatPanel(pose, LIST_X, 28, LIST_W, 180);
+        drawFlatPanel(pose, PREVIEW_X, PREVIEW_Y, PREVIEW_W, PREVIEW_H);
+        drawFlatPanel(pose, DETAILS_X, DETAILS_Y, DETAILS_W, DETAILS_H);
+        drawFlatPanel(pose, ACTION_X, ACTION_Y, ACTION_W, ACTION_H);
+        drawFlatPanel(pose, RETURN_X, RETURN_Y, RETURN_W, RETURN_H);
+        font.draw(pose, "POKÉDEX", LIST_X + 8, 34, 0xFF202020);
+        font.draw(pose, ordered.size() + " Pokémon", LIST_X + 8, 43, 0xFF505050);
+        GuiComponent.fill(pose, LIST_X + 6, 48, LIST_X + LIST_W - 6, 49, 0xFF202020);
         int visible = visibleRows();
         for (int row = 0; row < visible; row++) {
             int index = scrollOffset + row;
             if (index >= ordered.size()) break;
             PokecSpecies.Entry species = ordered.get(index);
-            int y = LIST_Y + 12 + row * ROW_H;
+            int y = LIST_Y + row * ROW_H;
             boolean selected = species.slug().equals(selectedSlug);
             boolean unlocked = syncedUnlocked.contains(species.slug());
-            GuiComponent.fill(pose, LIST_X + 4, y, LIST_X + LIST_W - 4, y + ROW_H - 1,
-                    selected ? 0xFFB3C3CF : (row % 2 == 0 ? 0xFFB7B7B7 : 0xFFAEAEAE));
-            if (selected) GuiComponent.fill(pose, LIST_X + 4, y, LIST_X + 6, y + ROW_H - 1, 0xFF404040);
+            GuiComponent.fill(pose, LIST_X + 6, y, LIST_X + LIST_W - 6, y + ROW_H - 1,
+                    selected ? 0xFFBFCBD3 : (row % 2 == 0 ? 0xFFD1D1D1 : 0xFFC9C9C9));
+            if (selected) GuiComponent.fill(pose, LIST_X + 6, y, LIST_X + 9, y + ROW_H - 1, 0xFF202020);
             int color = unlocked ? 0xFF202020 : 0xFF555555;
-            font.draw(pose, fitText(String.format(Locale.ROOT, "%03d %s", species.number(), species.name()), LIST_W - 20), LIST_X + 9, y + 1, color);
+            font.draw(pose, fitText(String.format(Locale.ROOT, "%03d  %s", species.number(), species.name()), LIST_W - 25), LIST_X + 12, y + 2, color);
         }
         int maxScroll = Math.max(0, ordered.size() - visible);
-        int trackX = LIST_X + LIST_W - 8, trackY = LIST_Y + 13;
-        GuiComponent.fill(pose, trackX, trackY, trackX + 2, trackY + visible * ROW_H, 0xFFC6C6C6);
+        int trackX = LIST_X + LIST_W - 5, trackY = LIST_Y;
+        GuiComponent.fill(pose, trackX, trackY, trackX + 2, trackY + visible * ROW_H, 0xFFAAAAAA);
         int thumbHeight = Math.max(18, (visible * ROW_H * visible) / Math.max(1, ordered.size()));
         int thumbY = trackY + (maxScroll == 0 ? 0 : (visible * ROW_H - thumbHeight) * scrollOffset / maxScroll);
-        GuiComponent.fill(pose, trackX, thumbY, trackX + 2, thumbY + thumbHeight, 0xFF404040);
+        GuiComponent.fill(pose, trackX, thumbY, trackX + 2, thumbY + thumbHeight, 0xFF303030);
         drawSelectedPanel(pose, partialTick, mouseX, mouseY);
         pose.popPose();
 
         int inventoryTop = Math.round(TOP_HEIGHT * uiScale);
-        drawPanel(pose, 0, inventoryTop, imageWidth, INVENTORY_HEIGHT);
-        font.draw(pose, "INVENTÁRIO", 8, inventoryTop + INVENTORY_LABEL_Y, 0xFF404040);
+        drawFlatPanel(pose, 0, inventoryTop, imageWidth, INVENTORY_HEIGHT);
+        font.draw(pose, "INVENTÁRIO DO JOGADOR", 10, inventoryTop + INVENTORY_LABEL_Y, 0xFF303030);
         for (var slot : menu.slots) MinemonGui.slot(pose, slot.x, slot.y, 18, 18);
         pose.popPose();
     }
 
     private int visibleRows() { return Math.max(1, (LIST_H - 17) / ROW_H); }
-    private void drawPanel(PoseStack pose, int x, int y, int w, int h) {
-        MinemonGui.slot(pose, x, y, w, h);
+    private void drawFlatPanel(PoseStack pose, int x, int y, int w, int h) {
+        GuiComponent.fill(pose, x, y, x + w, y + h, 0xFF202020);
+        GuiComponent.fill(pose, x + 2, y + 2, x + w - 2, y + h - 2, 0xFFD0D0D0);
     }
 
     private void drawSelectedPanel(PoseStack pose, float partialTick, int mouseX, int mouseY) {
         PokecSpecies.Entry species = PokecSpecies.get(selectedSlug);
         if (species == null) return;
-        font.draw(pose, String.format(Locale.ROOT, "%03d  %s", species.number(), fitText(species.name(), 145)), 155, 28, 0xFF404040);
-        drawRightAligned(pose, rarityLabel(PokecEconomy.get().rarity(species.slug())), 379, 28, 0xFF404040);
+        font.draw(pose, String.format(Locale.ROOT, "%03d  %s", species.number(), fitText(species.name(), 106)), PREVIEW_X + 9, PREVIEW_Y + 8, 0xFF202020);
+        drawRightAligned(pose, "MODELO 3D", PREVIEW_X + PREVIEW_W - 8, PREVIEW_Y + 8, 0xFF555555);
         boolean unlocked = syncedUnlocked.contains(species.slug());
         if (unlocked) {
-            drawPanel(pose, 152, 44, 232, 88);
-            renderPreview(pose, species, 268, 88, partialTick);
+            drawFlatPanel(pose, MODEL_X, MODEL_Y, MODEL_W, MODEL_H);
+            renderPreview(pose, species, MODEL_X + MODEL_W / 2, MODEL_Y + MODEL_H / 2, partialTick);
         } else {
-            drawPanel(pose, 152, 44, 232, 88);
-            GuiComponent.fill(pose, 154, 46, 382, 130, 0xFFC6C6C6);
-            drawCentered(pose, "?", 268, 61, 0xFF404040);
-            drawCentered(pose, "ESPÉCIE BLOQUEADA", 268, 105, 0xFF404040);
+            drawFlatPanel(pose, MODEL_X, MODEL_Y, MODEL_W, MODEL_H);
+            GuiComponent.fill(pose, MODEL_X + 2, MODEL_Y + 2, MODEL_X + MODEL_W - 2, MODEL_Y + MODEL_H - 2, 0xFFC6C6C6);
+            drawCentered(pose, "?", MODEL_X + MODEL_W / 2.0F, MODEL_Y + 37, 0xFF404040);
+            drawCentered(pose, "ESPÉCIE BLOQUEADA", MODEL_X + MODEL_W / 2.0F, MODEL_Y + 70, 0xFF404040);
         }
-        GuiComponent.fill(pose, 154, 136, 382, 137, 0xFFC6C6C6);
-        font.draw(pose, "DADOS DA ESPÉCIE", 154, 139, 0xFF404040);
+        font.draw(pose, "INFORMAÇÕES DA ESPÉCIE", DETAILS_X + 8, DETAILS_Y + 8, 0xFF202020);
+        GuiComponent.fill(pose, DETAILS_X + 6, DETAILS_Y + 21, DETAILS_X + DETAILS_W - 6, DETAILS_Y + 22, 0xFF404040);
         var definition = SpeciesDefinitions.get(species.slug());
         if (definition != null) {
             int health = (int)Math.ceil(br.com.petrickfaria.minemon.entity.PokemonProgression.healthForRarity(PokecEconomy.get().rarity(species.slug()),1));
-            font.draw(pose, "Vida:", 154, 150, 0xFF404040);
-            drawHealthHearts(pose, health, 193, 148);
-            font.draw(pose, "Dano: " + formatStat(br.com.petrickfaria.minemon.entity.PokemonProgression.damageForRarity(PokecEconomy.get().rarity(species.slug()),1)), 302, 150, 0xFF404040);
-            font.draw(pose, "Raridade: " + rarityLabel(PokecEconomy.get().rarity(species.slug())), 154, 158, 0xFF404040);
-            font.draw(pose, "Estágio: " + evolutionStage(species), 275, 158, 0xFF404040);
+            font.draw(pose, "Vida: " + health, DETAILS_X + 8, DETAILS_Y + 30, 0xFF303030);
+            drawHealthHearts(pose, health, DETAILS_X + 8, DETAILS_Y + 43);
+            GuiComponent.fill(pose, DETAILS_X + 6, DETAILS_Y + 69, DETAILS_X + DETAILS_W - 6, DETAILS_Y + 70, 0xFF777777);
+            font.draw(pose, "Dano: " + formatStat(br.com.petrickfaria.minemon.entity.PokemonProgression.damageForRarity(PokecEconomy.get().rarity(species.slug()),1)), DETAILS_X + 8, DETAILS_Y + 78, 0xFF303030);
+            GuiComponent.fill(pose, DETAILS_X + 6, DETAILS_Y + 96, DETAILS_X + DETAILS_W - 6, DETAILS_Y + 97, 0xFF777777);
+            font.draw(pose, "Estágio", DETAILS_X + 8, DETAILS_Y + 105, 0xFF555555);
+            font.draw(pose, fitText(evolutionStage(species), DETAILS_W - 18), DETAILS_X + 8, DETAILS_Y + 116, 0xFF202020);
+            GuiComponent.fill(pose, DETAILS_X + 6, DETAILS_Y + 129, DETAILS_X + DETAILS_W - 6, DETAILS_Y + 130, 0xFF777777);
+            font.draw(pose, "Raridade", DETAILS_X + 8, DETAILS_Y + 133, 0xFF555555);
+            font.draw(pose, fitText(rarityLabel(PokecEconomy.get().rarity(species.slug())), DETAILS_W - 18), DETAILS_X + 8, DETAILS_Y + 144, 0xFF202020);
+            font.draw(pose, "Tipo", DETAILS_X + 8, DETAILS_Y + 157, 0xFF555555);
+            font.draw(pose, fitText(species.primaryType(), DETAILS_W - 18), DETAILS_X + 8, DETAILS_Y + 168, 0xFF202020);
         }
         drawAcquisitionPanel(pose, species, unlocked, species.isEvolution() && !unlocked, mouseX, mouseY);
         drawCompactConversion(pose);
@@ -224,62 +250,62 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
 
     private void drawAcquisitionPanel(PoseStack pose, PokecSpecies.Entry species, boolean unlocked,
                                       boolean evolution, int mouseX, int mouseY) {
-        int x = 394;
+        int x = ACTION_X + 8;
         if (evolution) {
-            font.draw(pose, "POR EVOLUÇÃO", x, 28, 0xFF705028);
-            font.draw(pose, "Evolua um", x, 42, 0xFF404040);
-            font.draw(pose, "Minemon para liberar.", x, 52, 0xFF404040);
-            font.draw(pose, "Não aceita almas ou moedas.", x, 62, 0xFF404040);
+            font.draw(pose, "CUSTO / AQUISIÇÃO", x, ACTION_Y + 7, 0xFF202020);
+            font.draw(pose, "POR EVOLUÇÃO", x, ACTION_Y + 24, 0xFF705028);
+            font.draw(pose, "Evolua um Minemon para liberar.", x, ACTION_Y + 39, 0xFF404040);
             return;
         }
         if (unlocked) {
             int price = syncedPrices.getOrDefault(species.slug(), PokecEconomy.get().coins(species.slug()));
             boolean free = syncedFreeAvailable;
-            font.draw(pose, "AQUISIÇÃO", x, 28, free ? 0xFF705028 : 0xFF404040);
-            font.draw(pose, "Preço: " + (free ? 0 : price), x, 40, 0xFF404040);
-            drawCompactItemSlot(pose, x, 52, ModItems.POKE_COIN.get(), syncedStagedCoins);
+            font.draw(pose, "CUSTO / AQUISIÇÃO", x, ACTION_Y + 7, 0xFF202020);
+            font.draw(pose, "Preço: " + (free ? 0 : price) + " PokéCoins", x, ACTION_Y + 23, 0xFF404040);
+            drawCompactItemSlot(pose, x, ACTION_Y + 43, ModItems.POKE_COIN.get(), syncedStagedCoins);
             boolean canBuy = free || syncedCoins + syncedStagedCoins >= price;
-            drawButton(pose, 420, 52, 84, 22, "ADQUIRIR", canBuy, mouseX, mouseY);
+            drawButton(pose, ACTION_X + 56, ACTION_Y + 43, 86, 22, "ADQUIRIR", canBuy, mouseX, mouseY);
         } else {
             int required = syncedRequirements.getOrDefault(species.slug(), PokecEconomy.get().souls(species.slug()));
             int deposited = syncedDeposits.getOrDefault(species.slug(), 0);
             var soulType = SoulType.fromSpeciesType(species.primaryType());
             var soulItem = soulType == null ? null : ModItems.SOULS.get(soulType.id());
-            font.draw(pose, "ALMAS " + species.primaryType().toUpperCase(Locale.ROOT), x, 28, 0xFF404040);
-            font.draw(pose, fitText("Precisa: " + required, 112), x, 40, 0xFF404040);
-            font.draw(pose, fitText("Progresso: " + deposited + "/" + required, 112), x, 50, 0xFF404040);
+            font.draw(pose, "CUSTO / LIBERAÇÃO", x, ACTION_Y + 7, 0xFF202020);
+            font.draw(pose, fitText("Almas " + species.primaryType() + ": " + required, ACTION_W - 18), x, ACTION_Y + 23, 0xFF404040);
+            font.draw(pose, fitText("Progresso: " + deposited + "/" + required, ACTION_W - 18), x, ACTION_Y + 33, 0xFF404040);
             if (soulItem != null) {
-                drawCompactItemSlot(pose, x, 61, soulItem.get(), Math.min(64, syncedStagedSouls));
-                drawCompactItemSlot(pose, x + 22, 61, soulItem.get(), Math.max(0, syncedStagedSouls - 64));
+                drawCompactItemSlot(pose, x, ACTION_Y + 45, soulItem.get(), Math.min(64, syncedStagedSouls));
+                drawCompactItemSlot(pose, x + 22, ACTION_Y + 45, soulItem.get(), Math.max(0, syncedStagedSouls - 64));
             }
-            font.draw(pose, fitText("Separadas: " + syncedStagedSouls, 72), x + 46, 67, 0xFF404040);
-            drawButton(pose, 420, 61, 84, 22, "LIBERAR", deposited + syncedStagedSouls >= required, mouseX, mouseY);
+            font.draw(pose, fitText("×" + syncedStagedSouls, 28), x + 46, ACTION_Y + 51, 0xFF404040);
+            drawButton(pose, ACTION_X + 84, ACTION_Y + 44, 58, 22, "LIBERAR", deposited + syncedStagedSouls >= required, mouseX, mouseY);
         }
     }
 
     private void drawCompactConversion(PoseStack pose) {
-        int x = 394;
-        font.draw(pose, "DEVOLVER À NATUREZA", x, 86, 0xFF404040);
-        drawCompactItemSlot(pose, x, 98, syncedConversionBall.isEmpty() ? null : syncedConversionBall.getItem(),
-                syncedConversionBall.isEmpty() ? 0 : syncedConversionBall.getCount());
-        if (syncedConversionBall.isEmpty()) {
-            font.draw(pose, "Insira Pokébola", x + 24, 100, 0xFF404040);
+        font.draw(pose, "DEVOLVER À NATUREZA", RETURN_X + 8, RETURN_Y + 7, 0xFF202020);
+        drawConversionSlot(pose, RETURN_INPUT_X, RETURN_INPUT_Y, syncedConversionBall, true);
+        drawCentered(pose, "↓", RETURN_INPUT_X + 18, RETURN_INPUT_Y + 36, 0xFF202020);
+        drawConversionSlot(pose, RETURN_OUTPUT_X, RETURN_OUTPUT_Y, syncedConversionOutput, false);
+        int textX = RETURN_X + 48;
+        if (syncedConversionBall.isEmpty() && syncedConversionOutput.isEmpty()) {
+            font.draw(pose, "Insira uma", textX, RETURN_Y + 29, 0xFF404040);
+            font.draw(pose, "Pokébola", textX, RETURN_Y + 40, 0xFF404040);
         } else if (!syncedConversionSpecies.isEmpty()) {
             var species = PokecSpecies.get(syncedConversionSpecies);
             String name = species == null ? syncedConversionSpecies : species.name();
-            font.draw(pose, fitText(name, 88), x + 24, 97, 0xFF404040);
-            font.draw(pose, String.format(Locale.ROOT, "#%03d  Nv. %d", species == null ? 0 : species.number(), syncedConversionLevel), x + 24, 106, 0xFF404040);
-            font.draw(pose, fitText(rarityLabel(syncedConversionRarity) + " / " + conversionStageLabel(syncedConversionStage), 88), x + 24, 115, 0xFF404040);
-            font.draw(pose, "Base: " + syncedConversionBase, x, 124, 0xFF404040);
-            font.draw(pose, fitText("Recebe: " + syncedConversionMinimum + "–" + syncedConversionMaximum + " almas", 118), x, 133, 0xFF404040);
+            font.draw(pose, fitText(name, 94), textX, RETURN_Y + 26, 0xFF202020);
+            font.draw(pose, String.format(Locale.ROOT, "#%03d  Nv. %d", species == null ? 0 : species.number(), syncedConversionLevel), textX, RETURN_Y + 37, 0xFF404040);
+            font.draw(pose, fitText(rarityLabel(syncedConversionRarity) + " / " + conversionStageLabel(syncedConversionStage), 94), textX, RETURN_Y + 48, 0xFF404040);
+            font.draw(pose, fitText("Recebe " + syncedConversionMinimum + "–" + syncedConversionMaximum + " almas", 94), textX, RETURN_Y + 59, 0xFF404040);
         } else if (syncedConversionResult >= 0) {
-            font.draw(pose, "Devolução concluída", x + 24, 100, 0xFF404040);
-            font.draw(pose, syncedConversionResult + " almas", x + 24, 110, 0xFF404040);
+            font.draw(pose, "Devolução", textX, RETURN_Y + 29, 0xFF404040);
+            font.draw(pose, syncedConversionResult + " almas", textX, RETURN_Y + 40, 0xFF404040);
         }
         if (!syncedConversionBall.isEmpty() && syncedConversionResult < 0) {
             boolean confirming = syncedConversionConfirming;
-            drawButton(pose, x, 145, 55, 18, confirming ? "CONFIRMAR" : "DEVOLVER", true, -1, -1);
-            if (confirming) drawButton(pose, x + 61, 145, 55, 18, "CANCELAR", true, -1, -1);
+            drawButton(pose, RETURN_X + 50, RETURN_Y + 73, confirming ? 64 : 94, 20, confirming ? "CONFIRMAR" : "DEVOLVER", true, -1, -1);
+            if (confirming) drawButton(pose, RETURN_X + 116, RETURN_Y + 73, 30, 20, "X", true, -1, -1);
         }
     }
 
@@ -302,7 +328,6 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
     }
 
     private void drawConversionSlot(PoseStack pose, int x, int y, ItemStack stack, boolean input) {
-        int accent = stack.isEmpty() ? 0xFFC6C6C6 : 0xFF404040;
         MinemonGui.slot(pose, x, y, 36, 36);
         if (!stack.isEmpty()) Minecraft.getInstance().getItemRenderer().renderAndDecorateItem(stack, x + 10, y + 9);
         else if (input) {
@@ -313,7 +338,7 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
             GuiComponent.fill(pose, x + 11, y + 28, x + 25, y + 30, 0xFFC6C6C6);
             GuiComponent.fill(pose, x + 15, y + 14, x + 21, y + 23, 0xFFC6C6C6);
             GuiComponent.fill(pose, x + 16, y + 16, x + 20, y + 21, 0xFF404040);
-        } else drawCentered(pose, "→", x + 18, y + 13, 0xFFC6C6C6);
+        }
         if (!stack.isEmpty() && stack.getCount() > 1) font.draw(pose, Integer.toString(stack.getCount()), x + 27, y + 25, 0xFF303030);
     }
 
@@ -417,10 +442,10 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         previewPitch += (targetPreviewPitch-previewPitch)*.25F;
         float scale = fit.scale();
         double windowScale = mc.getWindow().getGuiScale();
-        int sx=(int)Math.floor((leftPos+152*uiScale)*windowScale);
-        int sy=(int)Math.floor(mc.getWindow().getHeight()-(topPos+132*uiScale)*windowScale);
+        int sx=(int)Math.floor((leftPos+MODEL_X*uiScale)*windowScale);
+        int sy=(int)Math.floor(mc.getWindow().getHeight()-(topPos+(MODEL_Y+MODEL_H)*uiScale)*windowScale);
         com.mojang.blaze3d.systems.RenderSystem.enableScissor(sx,sy,
-                (int)Math.ceil(232*uiScale*windowScale),(int)Math.ceil(88*uiScale*windowScale));
+                (int)Math.ceil(MODEL_W*uiScale*windowScale),(int)Math.ceil(MODEL_H*uiScale*windowScale));
         pose.pushPose();
         pose.translate(x, y, 120);
         pose.scale(scale, -scale, scale);
@@ -449,42 +474,46 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
     @Override public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (button != 0) return super.mouseClicked(mouseX, mouseY, button);
         int x = (int) ((mouseX - leftPos) / uiScale), y = (int) ((mouseY - topPos) / uiScale);
-        if (x >= LIST_X && x < LIST_X + LIST_W && y >= LIST_Y + 12 && y < LIST_Y + 12 + visibleRows() * ROW_H) {
-            int index = scrollOffset + (y - (LIST_Y + 12)) / ROW_H;
+        if (x >= LIST_X && x < LIST_X + LIST_W && y >= LIST_Y && y < LIST_Y + visibleRows() * ROW_H) {
+            int index = scrollOffset + (y - LIST_Y) / ROW_H;
             if (index >= 0 && index < ordered.size()) selectSpecies(ordered.get(index).slug());
             return true;
         }
         PokecSpecies.Entry species = PokecSpecies.get(selectedSlug);
-        if (species != null && syncedUnlocked.contains(species.slug()) && inRect(x,y,152,44,232,88)) { draggingPreview=true; return true; }
+        if (species != null && syncedUnlocked.contains(species.slug()) && inRect(x,y,MODEL_X,MODEL_Y,MODEL_W,MODEL_H)) { draggingPreview=true; return true; }
         if (species == null) return super.mouseClicked(mouseX, mouseY, button);
-        if (inRect(x, y, 394, 98, 20, 20)) {
+        if (inRect(x, y, RETURN_INPUT_X, RETURN_INPUT_Y, 36, 36)) {
             MinemonNetwork.performPokecAction(menu.pos(), selectedSlug, syncedConversionBall.isEmpty() ? PokecTransactions.Action.STAGE_POKEBALL : PokecTransactions.Action.RETURN_POKEBALL);
             return true;
         }
-        if (inRect(x, y, 394, 145, 55, 18) && !syncedConversionBall.isEmpty() && syncedConversionResult < 0) {
+        if (!syncedConversionOutput.isEmpty() && inRect(x, y, RETURN_OUTPUT_X, RETURN_OUTPUT_Y, 36, 36)) {
+            MinemonNetwork.performPokecAction(menu.pos(), selectedSlug, PokecTransactions.Action.CLAIM_CONVERSION_OUTPUT);
+            return true;
+        }
+        if (inRect(x, y, RETURN_X + 50, RETURN_Y + 73, syncedConversionConfirming ? 64 : 94, 20) && !syncedConversionBall.isEmpty() && syncedConversionResult < 0) {
             MinemonNetwork.performPokecAction(menu.pos(), selectedSlug, syncedConversionConfirming ? PokecTransactions.Action.CONFIRM_CONVERSION : PokecTransactions.Action.REQUEST_CONVERSION);
             return true;
         }
-        if (inRect(x, y, 455, 145, 55, 18) && syncedConversionConfirming) {
+        if (inRect(x, y, RETURN_X + 116, RETURN_Y + 73, 30, 20) && syncedConversionConfirming) {
             MinemonNetwork.performPokecAction(menu.pos(), selectedSlug, PokecTransactions.Action.CANCEL_CONVERSION);
             return true;
         }
         boolean unlocked = syncedUnlocked.contains(species.slug());
         boolean evolution = species.isEvolution() && !unlocked;
-        if (unlocked && !syncedFreeAvailable && inRect(x, y, 394, 52, 20, 20)) {
+        if (unlocked && !syncedFreeAvailable && inRect(x, y, ACTION_X + 8, ACTION_Y + 43, 20, 20)) {
             MinemonNetwork.performPokecAction(menu.pos(), selectedSlug, PokecTransactions.Action.STAGE_COINS);
             return true;
         }
-        if (!unlocked && !evolution && (inRect(x, y, 394, 61, 20, 20) || inRect(x, y, 416, 61, 20, 20))) {
+        if (!unlocked && !evolution && (inRect(x, y, ACTION_X + 8, ACTION_Y + 45, 20, 20) || inRect(x, y, ACTION_X + 30, ACTION_Y + 45, 20, 20))) {
             MinemonNetwork.performPokecAction(menu.pos(), selectedSlug, PokecTransactions.Action.STAGE_SOULS);
             return true;
         }
-        if (unlocked && inRect(x, y, 420, 52, 84, 22)) {
+        if (unlocked && inRect(x, y, ACTION_X + 56, ACTION_Y + 43, 86, 22)) {
             if (syncedFreeAvailable || syncedCoins + syncedStagedCoins >= syncedPrices.getOrDefault(selectedSlug, PokecEconomy.get().coins(selectedSlug)))
                 MinemonNetwork.performPokecAction(menu.pos(), selectedSlug, PokecTransactions.Action.PURCHASE);
             return true;
         }
-        if (!unlocked && !evolution && inRect(x, y, 420, 61, 84, 22)) {
+        if (!unlocked && !evolution && inRect(x, y, ACTION_X + 84, ACTION_Y + 44, 58, 22)) {
             MinemonNetwork.performPokecAction(menu.pos(), selectedSlug, PokecTransactions.Action.CONFIRM_SOULS);
             return true;
         }
@@ -514,7 +543,7 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
     }
     @Override public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
         int x = (int) ((mouseX - leftPos) / uiScale), y = (int) ((mouseY - topPos) / uiScale);
-        if (x >= LIST_X && x < LIST_X + LIST_W && y >= LIST_Y && y < LIST_Y + LIST_H) {
+        if (x >= LIST_X && x < LIST_X + LIST_W && y >= LIST_Y && y < LIST_Y + visibleRows() * ROW_H) {
             int max = Math.max(0, ordered.size() - visibleRows());
             scrollOffset = Math.max(0, Math.min(max, scrollOffset + (delta < 0 ? 3 : -3)));
             return true;
