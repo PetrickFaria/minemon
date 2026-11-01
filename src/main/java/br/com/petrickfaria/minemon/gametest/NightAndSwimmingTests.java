@@ -399,6 +399,13 @@ public final class NightAndSwimmingTests {
  private static String combatSleepSnapshot(GameTestHelper h,MinemonCreature mob,
      net.minecraft.world.entity.LivingEntity attacker,net.minecraft.world.phys.Vec3 restAnchor,long combatEndedAt){
   var level=h.getLevel();var target=mob.getTarget();var last=mob.getLastHurtByMob();var path=mob.getNavigation().getPath();
+  var feet=mob.blockPosition();var floorPos=feet.below();var floor=level.getBlockState(floorPos);
+  var feetFluid=level.getFluidState(feet);var floorFluid=level.getFluidState(floorPos);
+  var centeredBox=mob.getBoundingBox().move(feet.getX()+.5D-mob.getX(),feet.getY()-mob.getY(),feet.getZ()+.5D-mob.getZ());
+  boolean supportCollision=!floor.getCollisionShape(level,floorPos).isEmpty();
+  boolean safeFloor=!floor.is(Blocks.MAGMA_BLOCK)&&!floor.is(Blocks.CACTUS)&&!floor.is(Blocks.CAMPFIRE)&&!floor.is(Blocks.SOUL_CAMPFIRE);
+  boolean centeredNoCollision=level.noCollision(mob,centeredBox);
+  boolean safeDry=feetFluid.isEmpty()&&floorFluid.isEmpty()&&supportCollision&&safeFloor&&centeredNoCollision;
   double anchorDistance=mob.position().distanceTo(restAnchor);
   boolean correctSleepWindow=SpeciesBehaviorProfiles.shouldSleep(mob.getSpeciesSlug(),level.getDayTime());
   return "species="+mob.getSpeciesSlug()+",pos="+mob.position()+",worldTime="+level.getDayTime()
@@ -410,6 +417,9 @@ public final class NightAndSwimmingTests {
       +",nightUnreachableTicks="+mob.nightUnreachableTicksForValidation()+",navActive="+!mob.getNavigation().isDone()
       +",navTarget="+mob.getNavigation().getTargetPos()+",path="+(path==null?"null":path.getNextNodeIndex()+"/"+path.getNodeCount())
       +",restAnchor="+restAnchor+",distanceFromRestAnchor="+anchorDistance+",onGround="+mob.isOnGround()
+      +",currentFeet="+feet+",floor="+floor.getBlock()+"@"+floorPos+",feetFluid="+feetFluid.getType()+",floorFluid="+floorFluid.getType()
+      +",supportCollision="+supportCollision+",safeFloor="+safeFloor+",centeredNoCollision="+centeredNoCollision+",safeDry="+safeDry
+      +",runningGoals="+mob.runningGoalsForValidation()
       +",inWater="+mob.isInWaterOrBubble()+",velocityY="+mob.getDeltaMovement().y
       +",elapsedSinceCombatEnd="+(level.getGameTime()-combatEndedAt)+",gameTime="+level.getGameTime();
  }
