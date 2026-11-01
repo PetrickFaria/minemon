@@ -156,6 +156,7 @@ public final class MinemonFlyingCreature extends MinemonCreature {
     double lift=net.minecraft.util.Mth.clamp((0.6D-altitude)*0.1D,0.02D,0.10D);
     this.setDeltaMovement(this.getDeltaMovement().x,Math.max(this.getDeltaMovement().y,lift),this.getDeltaMovement().z);
    }else if(!this.fixedFloater()&&!combat&&!this.followingObstacle()
+       &&!(this.isFollowingOwner()&&!this.getNavigation().isDone())
        &&(this.naturalBehaviorActive()||this.isFollowingOwner())
        &&(this.isFollowingOwner()?altitude>this.followAltitude()+0.08D
            ||altitude<this.followAltitude()-0.08D:altitude<this.flightMinimum()||altitude>this.flightMaximum())){
