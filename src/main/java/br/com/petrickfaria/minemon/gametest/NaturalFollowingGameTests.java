@@ -43,6 +43,14 @@ public final class NaturalFollowingGameTests {
         mob.setTame(true);mob.setOwnerUUID(owner.getUUID());mob.setOrderedToSit(false);
         h.getLevel().addFreshEntity(mob);
         Vec3[] previous={mob.position()},sitting={null};
+        NineBehaviorChecks.FollowingAltitudeFixture[] altitudeFixture={null};
+        h.runAtTickTime(540,()->{
+            if(altitudeFixture[0]==null){h.fail("Follower altitude phase was not initialized");return;}
+            NineBehaviorChecks.checkFollowingAltitudes(h,altitudeFixture[0]);
+        });
+        h.runAtTickTime(545,()->{
+            if(altitudeFixture[0]!=null)NineBehaviorChecks.finishFollowingAltitudes(h,altitudeFixture[0]);
+        });
         h.onEachTick(()->{
             if(mob.position().distanceTo(previous[0])>1.5)fail(h,owner,mob,"Following relocated the Pokémon discontinuously");
             previous[0]=mob.position();
@@ -55,7 +63,7 @@ public final class NaturalFollowingGameTests {
         h.runAtTickTime(140,()->{
             if(mob.position().distanceTo(sitting[0])>.5)fail(h,owner,mob,"Sitting companion abandoned its order: start="+sitting[0]+" end="+mob.position()+" velocity="+mob.getDeltaMovement()+" target="+mob.getTarget());
             if(mob.isSleeping()||mob.isFollowingRun())fail(h,owner,mob,"Sitting must remain awake without following run");
-            owner.discard();mob.discard();NineBehaviorChecks.followingAltitudes(h);
+            owner.discard();mob.discard();altitudeFixture[0]=NineBehaviorChecks.followingAltitudes(h);
         });
     }
 }
