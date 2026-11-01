@@ -2,6 +2,10 @@ name: Isolated Minemon GameTest Diagnostics
 on:
   push:
     branches: [feature/minemon-natural-behaviors]
+    paths:
+      - "src/main/java/br/com/petrickfaria/minemon/gametest/Diagnostic*.java"
+      - "src/test/java/br/com/petrickfaria/minemon/GastlyCyclePersistenceTest.java"
+      - "src/test/java/br/com/petrickfaria/minemon/entity/CustomSoundSpeciesFoldersTest.java"
   workflow_dispatch:
     inputs:
       selection:

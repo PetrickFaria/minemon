@@ -38,6 +38,23 @@ public final class PokemonProgressionTest {
         assertEquals(1200, PokemonProgression.chanseyCooldownTicks(10));
     }
 
+    @Test public void rarityDamageUsesRequestedHeartsAndHalfHeartLevelGrowth() {
+        assertEquals(0.0D, PokemonProgression.damageForRarity("common", 1), 0.0D);
+        assertEquals(1.0D, PokemonProgression.damageForRarity("uncommon", 1), 0.0D);
+        assertEquals(2.0D, PokemonProgression.damageForRarity("rare", 1), 0.0D);
+        assertEquals(3.0D, PokemonProgression.damageForRarity("legendary", 1), 0.0D);
+        assertEquals(4.0D, PokemonProgression.damageForRarity("mythic", 1), 0.0D);
+        assertEquals(9.0D, PokemonProgression.damageForRarity("common", 10), 0.0D);
+        assertEquals(13.0D, PokemonProgression.damageForRarity("mythic", 10), 0.0D);
+    }
+
+    @Test public void rangedCooldownScalesFromFiveToTwoAndHalfSeconds() {
+        assertEquals(100, PokemonProgression.projectileCooldownTicks(1));
+        assertEquals(50, PokemonProgression.projectileCooldownTicks(10));
+        assertEquals(100, PokemonProgression.projectileCooldownTicks(0));
+        assertEquals(50, PokemonProgression.projectileCooldownTicks(99));
+    }
+
     private static int cost(int level, String rarity) {
         return PokemonProgression.xpForNextLevelForRarity(level, rarity, 5, 10);
     }

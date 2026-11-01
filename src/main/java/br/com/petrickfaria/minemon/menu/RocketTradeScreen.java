@@ -20,7 +20,7 @@ public final class RocketTradeScreen extends AbstractContainerScreen<RocketTrade
         inventoryLabelX = 108; inventoryLabelY = 72;
     }
     static int progressPixels(int level, int completedTrades, int width) {
-        return Math.round(br.com.petrickfaria.minemon.registry.RocketChallengeManager.tradeProgress(level, completedTrades) * width);
+        return Math.round(br.com.petrickfaria.minemon.registry.RocketChallengeManager.experienceProgress(level, completedTrades) * width);
     }
     @Override protected void renderBg(PoseStack pose, float partialTick, int mouseX, int mouseY) {
         com.mojang.blaze3d.systems.RenderSystem.setShaderTexture(0, VILLAGER);
@@ -32,7 +32,7 @@ public final class RocketTradeScreen extends AbstractContainerScreen<RocketTrade
             MinemonGui.slot(pose,leftPos+slot.x-1,topPos+slot.y-1,18,18);
         }
         font.draw(pose,"→",leftPos+218,topPos+40,0xFF404040);
-        font.draw(pose,"Lv. "+menu.progressionLevel(),leftPos+108,topPos+14,0xFF404040);
+        font.draw(pose,"Lv "+menu.progressionLevel(),leftPos+108,topPos+14,0xFF404040);
         for (int row=0;row<ROWS;row++) {
             int index=scroll+row;
             if(index>=menu.offerCount())break;
@@ -54,13 +54,13 @@ public final class RocketTradeScreen extends AbstractContainerScreen<RocketTrade
     private void renderVanillaExperienceBar(PoseStack pose) {
         int x = leftPos + 136;
         int y = topPos + 16;
-        int filled = progressPixels(menu.progressionLevel(), menu.tradesThisLevel(), 102);
+        int filled = progressPixels(menu.progressionLevel(), menu.progressionExperience(), 102);
         GuiComponent.blit(pose, x, y, 0, 186, 102, 5, 512, 256);
         if (filled > 0) GuiComponent.blit(pose, x, y, 0, 191, filled, 5, 512, 256);
     }
     @Override protected void renderLabels(PoseStack pose, int mouseX, int mouseY) {
         font.draw(pose,"Trocas",5,6,0xFF404040);
-        font.draw(pose,title,108,6,0xFF404040);
+        font.draw(pose,"Aldeão Rocket",108,1,0xFF404040);
         font.draw(pose,playerInventoryTitle,108,72,0xFF404040);
     }
     @Override public boolean mouseClicked(double x,double y,int button) {

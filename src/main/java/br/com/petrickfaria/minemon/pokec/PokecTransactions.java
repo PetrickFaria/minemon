@@ -46,8 +46,7 @@ public final class PokecTransactions {
                 case STAGE_POKEBALL -> stagePokeball(player, menu);
                 case RETURN_POKEBALL -> returnPokeball(player, menu);
                 case CLAIM_CONVERSION_OUTPUT -> claimConversionOutput(player, menu);
-                case REQUEST_CONVERSION -> menu.requestConversionConfirmation(player.tickCount);
-                case CONFIRM_CONVERSION -> confirmConversion(player, menu);
+                case REQUEST_CONVERSION, CONFIRM_CONVERSION -> confirmConversion(player, menu);
                 case CANCEL_CONVERSION -> { menu.cancelConversionConfirmation(); yield true; }
                 default -> performExisting(player, menu, slug, action);
             };
@@ -99,8 +98,7 @@ public final class PokecTransactions {
     }
 
     private static boolean confirmConversion(ServerPlayer player, PokecMenu menu) {
-        if (!menu.isConversionConfirming(player.tickCount) || !(player.level instanceof ServerLevel level)
-                || !menu.conversionOutput().isEmpty()) return false;
+        if (!(player.level instanceof ServerLevel level) || !menu.conversionOutput().isEmpty()) return false;
         ItemStack ball = menu.conversionBall();
         if (ball.getCount() != 1) return false;
         PokeballItem.StoredPokemon stored = PokeballItem.readStored(ball);
@@ -114,10 +112,9 @@ public final class PokecTransactions {
         if (!ledger.consume(stored.token())) return false;
         int result = PokemonSoulConversion.roll(preview, level.getRandom()::nextDouble);
         int stackLimit = soulItem.get().getMaxStackSize();
-        for (int remaining = result; remaining > 0; remaining -= Math.min(remaining, stackLimit))
-            player.getInventory().placeItemBackInInventory(new ItemStack(soulItem.get(), Math.min(remaining, stackLimit)));
         player.getInventory().placeItemBackInInventory(PokeballItem.emptyBall(ball));
-        menu.setConversionState(player, ItemStack.EMPTY, ItemStack.EMPTY, result);
+        ItemStack output = result > 0 ? new ItemStack(soulItem.get(), Math.min(result, stackLimit)) : ItemStack.EMPTY;
+        menu.setConversionState(player, ItemStack.EMPTY, output, result);
         return true;
     }
 

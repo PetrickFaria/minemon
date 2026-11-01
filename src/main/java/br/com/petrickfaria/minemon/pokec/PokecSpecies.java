@@ -26,6 +26,16 @@ public final class PokecSpecies {
         }catch(Exception e){throw new IllegalStateException("Unable to load PokéC species data",e);}
     }
     public static Entry get(String slug){return ALL.get(slug);}
+    public static String displayType(String internalType) {
+        return switch (internalType == null ? "" : internalType.toLowerCase(Locale.ROOT)) {
+            case "normal" -> "Normal"; case "fire" -> "Fogo"; case "water" -> "Água";
+            case "grass" -> "Grama"; case "electric" -> "Elétrico"; case "ice" -> "Gelo";
+            case "fighting" -> "Lutador"; case "poison" -> "Venenoso"; case "ground" -> "Terrestre";
+            case "flying" -> "Voador"; case "psychic" -> "Psíquico"; case "bug" -> "Inseto";
+            case "rock" -> "Pedra"; case "ghost" -> "Fantasma"; case "dragon" -> "Dragão";
+            case "dark" -> "Noturno"; case "steel" -> "Aço"; default -> internalType;
+        };
+    }
     public static List<Entry> ordered(){return ALL.values().stream().sorted(Comparator.comparingInt(Entry::number)).toList();}
     private PokecSpecies(){}
 }

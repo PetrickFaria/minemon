@@ -29,6 +29,7 @@ public final class RocketChallengeManager {
     private static final String INITIALIZED = "MinemonRocketProgressionInitialized";
     private static final String LEVEL = "MinemonRocketLevel";
     private static final String TRADES = "MinemonRocketTradesThisLevel";
+    private static final String EXPERIENCE = "MinemonRocketExperience";
     private static final String UNLOCKED = "MinemonRocketTradesUnlocked";
     private static final String ACTIVE = "MinemonRocketActiveRattata"; // Retained for existing-world UUID compatibility.
     private static final String COOLDOWN = "MinemonRocketRetryAt";
@@ -55,6 +56,12 @@ public final class RocketChallengeManager {
         return villager.getPersistentData().getInt(TRADES);
     }
 
+    public static int getExperience(Villager villager) {
+        if (!isRocket(villager)) return 0;
+        initialize(villager);
+        return Math.max(0, villager.getPersistentData().getInt(EXPERIENCE));
+    }
+
     public static int requiredTradesForNextLevel(int level) {
         return level >= 1 && level <= TRADES_TO_NEXT.length ? TRADES_TO_NEXT[level - 1] : 0;
     }
@@ -78,6 +85,12 @@ public final class RocketChallengeManager {
         return Math.max(0, Math.min(required, completedTrades)) / (float) required;
     }
 
+    public static float experienceProgress(int level, int experience) {
+        if (level >= 10) return 1.0F;
+        int required = requiredTradesForNextLevel(level);
+        return required <= 0 ? 0.0F : Math.max(0, Math.min(required, experience)) / (float) required;
+    }
+
     public static boolean isChallengeComplete(Villager villager) {
         if (!isRocket(villager)) return false;
         initialize(villager);
@@ -95,6 +108,7 @@ public final class RocketChallengeManager {
         boolean completedLegacyChallenge = data.getBoolean("MinemonRocketChallengeComplete");
         data.putInt(LEVEL, 1);
         data.putInt(TRADES, 0);
+        data.putInt(EXPERIENCE, 0);
         data.putBoolean(UNLOCKED, completedLegacyChallenge);
         data.putBoolean(INITIALIZED, true);
     }
@@ -201,6 +215,7 @@ public final class RocketChallengeManager {
         if (!data.getBoolean(UNLOCKED)) return;
         int currentLevel = data.getInt(LEVEL);
         if (currentLevel >= 10) return;
+        data.putInt(EXPERIENCE, Math.max(0, data.getInt(EXPERIENCE)) + 1);
         int trades = data.getInt(TRADES) + 1;
         int needed = requiredTradesForNextLevel(currentLevel);
         if (trades < needed) {
@@ -209,6 +224,7 @@ public final class RocketChallengeManager {
         }
         data.putInt(LEVEL, currentLevel + 1);
         data.putInt(TRADES, 0);
+        data.putInt(EXPERIENCE, 0);
         data.putBoolean(UNLOCKED, false);
         data.putBoolean(VICTORY, false);
         data.remove(COOLDOWN);
@@ -252,7 +268,7 @@ public final class RocketChallengeManager {
         }
         NetworkHooks.openScreen(player, new SimpleMenuProvider(
                 (id, inventory, user) -> new RocketTradeMenu(id, inventory, villager),
-                Component.literal("Trocas Rocket — Lv. " + getLevel(villager))),
+                Component.literal("Aldeão Rocket")),
                 buffer -> buffer.writeInt(villager.getId()));
     }
 

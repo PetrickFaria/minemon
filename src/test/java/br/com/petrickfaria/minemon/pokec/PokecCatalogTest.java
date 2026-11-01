@@ -59,4 +59,12 @@ public class PokecCatalogTest {
         assertEquals("eevee",PokecSpecies.get("jolteon").evolvesFrom());
         assertEquals("eevee",PokecSpecies.get("flareon").evolvesFrom());
     }
+
+    @Test public void displayedTypeNamesArePortugueseWithoutChangingInternalIds(){
+        assertEquals("grass", PokecSpecies.get("bulbasaur").primaryType());
+        assertEquals("Grama", PokecSpecies.displayType("grass"));
+        assertEquals("Elétrico", PokecSpecies.displayType("electric"));
+        assertEquals("Psíquico", PokecSpecies.displayType("psychic"));
+        assertEquals("Aço", PokecSpecies.displayType("steel"));
+    }
 }

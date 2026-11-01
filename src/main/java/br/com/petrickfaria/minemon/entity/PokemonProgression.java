@@ -16,8 +16,11 @@ public final class PokemonProgression {
         return base+2.0D*(Math.max(1,level)-1);
     }
     public static double damageForRarity(String rarity,int level) {
-        double base=switch(rarityKey(rarity)){case "uncommon"->6;case "rare"->8;case "legendary"->10;case "mythic"->14;default->4;};
-        return base+Math.max(1,level)-1;
+        double base=switch(rarityKey(rarity)){case "uncommon"->1;case "rare"->2;case "legendary"->3;case "mythic"->4;default->0;};
+        return base+Math.max(1,Math.min(10,level))-1;
+    }
+    public static int projectileCooldownTicks(int level) {
+        return 100-(Math.max(1,Math.min(10,level))-1)*50/9;
     }
     public static int maxLevel() { return MinemonConfig.POKEMON_MAX_LEVEL.get(); }
 

@@ -37,6 +37,7 @@ public final class RocketTradeMenu extends AbstractContainerMenu {
     };
     private final DataSlot levelSync = DataSlot.standalone();
     private final DataSlot tradesSync = DataSlot.standalone();
+    private final DataSlot experienceSync = DataSlot.standalone();
 
     public RocketTradeMenu(int id, Inventory inventory, FriendlyByteBuf data) {
         this(id, inventory, inventory.player.level.getEntity(data.readInt()) instanceof Villager found ? found : null);
@@ -72,6 +73,7 @@ public final class RocketTradeMenu extends AbstractContainerMenu {
         addDataSlot(selectedSync);
         addDataSlot(levelSync);
         addDataSlot(tradesSync);
+        addDataSlot(experienceSync);
         if (!inventory.player.level.isClientSide) updateResult();
     }
 
@@ -95,12 +97,14 @@ public final class RocketTradeMenu extends AbstractContainerMenu {
     public boolean isUnlocked() { return villager != null && RocketChallengeManager.isChallengeComplete(villager); }
     public int progressionLevel() { return levelSync.get(); }
     public int tradesThisLevel() { return tradesSync.get(); }
+    public int progressionExperience() { return experienceSync.get(); }
     public int tradesRequired() { return RocketChallengeManager.requiredTradesForNextLevel(progressionLevel()); }
 
     @Override public void broadcastChanges() {
         if (!playerInventory.player.level.isClientSide && villager != null) {
             levelSync.set(RocketChallengeManager.getLevel(villager));
             tradesSync.set(RocketChallengeManager.getTradesThisLevel(villager));
+            experienceSync.set(RocketChallengeManager.getExperience(villager));
         }
         super.broadcastChanges();
     }

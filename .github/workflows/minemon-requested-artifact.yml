@@ -1,0 +1,74 @@
+name: Minemon Requested Changes Build
+on:
+  push:
+    branches: [feature/minemon-natural-behaviors]
+    paths:
+      - "src/main/java/br/com/petrickfaria/minemon/entity/ElementalCombatGoal.java"
+      - "src/main/java/br/com/petrickfaria/minemon/entity/ElementalProjectile.java"
+      - "src/main/java/br/com/petrickfaria/minemon/entity/MinemonCreature.java"
+      - "src/main/java/br/com/petrickfaria/minemon/entity/PokemonProgression.java"
+      - "src/main/java/br/com/petrickfaria/minemon/menu/PokecScreen.java"
+      - "src/main/java/br/com/petrickfaria/minemon/menu/RocketTradeMenu.java"
+      - "src/main/java/br/com/petrickfaria/minemon/menu/RocketTradeScreen.java"
+      - "src/main/java/br/com/petrickfaria/minemon/pokec/PokecSpecies.java"
+      - "src/main/java/br/com/petrickfaria/minemon/pokec/PokecTransactions.java"
+      - "src/main/java/br/com/petrickfaria/minemon/registry/RocketChallengeManager.java"
+      - "src/test/java/br/com/petrickfaria/minemon/entity/PokemonProgressionTest.java"
+      - "src/test/java/br/com/petrickfaria/minemon/menu/RocketTradeProgressTest.java"
+      - "src/test/java/br/com/petrickfaria/minemon/pokec/PokecCatalogTest.java"
+      - ".github/workflows/minemon-requested-artifact.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build-and-focused-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Ensure Gradle Wrapper is executable
+        run: chmod +x gradlew
+      - name: Compile and run only the requested rule tests
+        run: >-
+          ./gradlew --no-daemon test
+          --tests br.com.petrickfaria.minemon.entity.PokemonProgressionTest
+          --tests br.com.petrickfaria.minemon.menu.RocketTradeProgressTest
+          --tests br.com.petrickfaria.minemon.pokec.PokecCatalogTest
+      - name: Package the executable Forge mod JAR
+        run: ./gradlew --no-daemon build -x test
+      - name: Verify JAR metadata and requested classes
+        shell: bash
+        run: |
+          set -euo pipefail
+          jar_file="$(find build/libs -maxdepth 1 -type f -name 'Minemon-1.19.2-*-all.jar' -print -quit)"
+          test -n "$jar_file"
+          python3 - "$jar_file" <<'PY'
+          import sys, zipfile
+          jar = zipfile.ZipFile(sys.argv[1])
+          names = set(jar.namelist())
+          required = {
+              'META-INF/mods.toml',
+              'br/com/petrickfaria/minemon/entity/ElementalCombatGoal.class',
+              'br/com/petrickfaria/minemon/menu/PokecScreen.class',
+              'br/com/petrickfaria/minemon/menu/RocketTradeScreen.class',
+              'br/com/petrickfaria/minemon/pokec/PokecSpecies.class',
+          }
+          missing = required - names
+          if missing:
+              raise SystemExit('JAR missing: ' + ', '.join(sorted(missing)))
+          metadata = jar.read('META-INF/mods.toml').decode()
+          if 'modId="minemon_gen1"' not in metadata or 'versionRange="[1.19.2,1.20)"' not in metadata:
+              raise SystemExit('JAR Minecraft/Forge metadata check failed')
+          print('JAR integrity and Forge metadata: PASS')
+          PY
+      - name: Upload final JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: Minemon-1.19.2-final-requested-changes
+          path: build/libs/Minemon-1.19.2-*-all.jar
+          if-no-files-found: error
+          retention-days: 14

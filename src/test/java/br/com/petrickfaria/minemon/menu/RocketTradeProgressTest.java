@@ -24,5 +24,8 @@ public final class RocketTradeProgressTest {
         assertEquals(82, RocketTradeScreen.progressPixels(1, 4, 102));
         assertEquals(0, RocketTradeScreen.progressPixels(2, 0, 102));
         assertEquals(102, RocketTradeScreen.progressPixels(10, 0, 102));
+        assertEquals(0.4F, RocketChallengeManager.experienceProgress(1, 2), 0.001F);
+        assertEquals(0.0F, RocketChallengeManager.experienceProgress(2, 0), 0.0F);
+        assertEquals(1.0F, RocketChallengeManager.experienceProgress(10, 0), 0.0F);
     }
 }

@@ -26,7 +26,8 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
     private static final int DETAILS_X = 404, DETAILS_Y = 28, DETAILS_W = 150, DETAILS_H = 180;
     private static final int ACTION_X = 560, ACTION_Y = 28, ACTION_W = 152, ACTION_H = 72;
     private static final int RETURN_X = 560, RETURN_Y = 108, RETURN_W = 152, RETURN_H = 100;
-    private static final int RETURN_INPUT_X = 568, RETURN_INPUT_Y = 126, RETURN_OUTPUT_X = 568, RETURN_OUTPUT_Y = 172;
+    private static final int RETURN_INPUT_X = 568, RETURN_INPUT_Y = 126, RETURN_OUTPUT_X = 660, RETURN_OUTPUT_Y = 126;
+    private static final int RETURN_RELEASE_X = 609, RETURN_RELEASE_Y = 136, RETURN_RELEASE_W = 44, RETURN_RELEASE_H = 20;
     private static final int INVENTORY_SLOT_WIDTH = 9 * 18, INVENTORY_LABEL_Y = 7;
     private static final int INVENTORY_MAIN_Y = 22, INVENTORY_HOTBAR_Y = 78;
     private static volatile int syncedCoins;
@@ -112,8 +113,9 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         return moved&&!draggingPreview;
     }
     public boolean conversionPanelFitsAboveInventoryForSmokeTest() {
-        return RETURN_Y + RETURN_H <= TOP_HEIGHT && RETURN_INPUT_Y + 36 <= RETURN_OUTPUT_Y
-                && RETURN_OUTPUT_Y + 36 <= RETURN_Y + RETURN_H && RETURN_Y + 93 <= TOP_HEIGHT;
+        return RETURN_Y + RETURN_H <= TOP_HEIGHT && RETURN_INPUT_Y == RETURN_OUTPUT_Y
+                && RETURN_OUTPUT_Y + 36 <= RETURN_Y + RETURN_H && RETURN_Y + 93 <= TOP_HEIGHT
+                && RETURN_INPUT_X + 36 <= RETURN_RELEASE_X && RETURN_RELEASE_X + RETURN_RELEASE_W <= RETURN_OUTPUT_X;
     }
     public boolean referencePanelsFitForSmokeTest() {
         return LIST_X + LIST_W < PREVIEW_X && PREVIEW_X + PREVIEW_W < DETAILS_X
@@ -251,7 +253,7 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
             font.draw(pose, "Raridade", DETAILS_X + 8, DETAILS_Y + 133, 0xFF555555);
             font.draw(pose, fitText(rarityLabel(PokecEconomy.get().rarity(species.slug())), DETAILS_W - 18), DETAILS_X + 8, DETAILS_Y + 144, 0xFF202020);
             font.draw(pose, "Tipo", DETAILS_X + 8, DETAILS_Y + 157, 0xFF555555);
-            font.draw(pose, fitText(species.primaryType(), DETAILS_W - 18), DETAILS_X + 8, DETAILS_Y + 168, 0xFF202020);
+            font.draw(pose, fitText(PokecSpecies.displayType(species.primaryType()), DETAILS_W - 18), DETAILS_X + 8, DETAILS_Y + 168, 0xFF202020);
         }
         drawAcquisitionPanel(pose, species, unlocked, species.isEvolution() && !unlocked, mouseX, mouseY);
         drawCompactConversion(pose);
@@ -279,7 +281,7 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
             var soulType = SoulType.fromSpeciesType(species.primaryType());
             var soulItem = soulType == null ? null : ModItems.SOULS.get(soulType.id());
             font.draw(pose, "CUSTO / LIBERAÇÃO", x, ACTION_Y + 7, 0xFF202020);
-            font.draw(pose, fitText("Almas " + species.primaryType() + ": " + required, ACTION_W - 18), x, ACTION_Y + 23, 0xFF404040);
+            font.draw(pose, fitText("Almas " + PokecSpecies.displayType(species.primaryType()) + ": " + required, ACTION_W - 18), x, ACTION_Y + 23, 0xFF404040);
             font.draw(pose, fitText("Progresso: " + deposited + "/" + required, ACTION_W - 18), x, ACTION_Y + 33, 0xFF404040);
             if (soulItem != null) {
             }
@@ -291,27 +293,23 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
     private void drawCompactConversion(PoseStack pose) {
         font.draw(pose, "DEVOLVER À NATUREZA", RETURN_X + 8, RETURN_Y + 7, 0xFF202020);
         drawConversionSlot(pose, RETURN_INPUT_X, RETURN_INPUT_Y, syncedConversionBall, true);
-        drawCentered(pose, "↓", RETURN_INPUT_X + 18, RETURN_INPUT_Y + 36, 0xFF202020);
         drawConversionSlot(pose, RETURN_OUTPUT_X, RETURN_OUTPUT_Y, syncedConversionOutput, false);
-        int textX = RETURN_X + 48;
+        int textX = RETURN_X + 8;
         if (syncedConversionBall.isEmpty() && syncedConversionOutput.isEmpty()) {
-            font.draw(pose, "Insira uma", textX, RETURN_Y + 29, 0xFF404040);
-            font.draw(pose, "Pokébola", textX, RETURN_Y + 40, 0xFF404040);
+            font.draw(pose, fitText("Insira uma Pokébola para liberar", 136), textX, RETURN_Y + 68, 0xFF404040);
         } else if (!syncedConversionSpecies.isEmpty()) {
             var species = PokecSpecies.get(syncedConversionSpecies);
             String name = species == null ? syncedConversionSpecies : species.name();
-            font.draw(pose, fitText(name, 94), textX, RETURN_Y + 26, 0xFF202020);
-            font.draw(pose, String.format(Locale.ROOT, "#%03d  Nv. %d", species == null ? 0 : species.number(), syncedConversionLevel), textX, RETURN_Y + 37, 0xFF404040);
-            font.draw(pose, fitText(rarityLabel(syncedConversionRarity) + " / " + conversionStageLabel(syncedConversionStage), 94), textX, RETURN_Y + 48, 0xFF404040);
-            font.draw(pose, fitText("Recebe " + syncedConversionMinimum + "–" + syncedConversionMaximum + " almas", 94), textX, RETURN_Y + 59, 0xFF404040);
+            font.draw(pose, fitText(name, 136), textX, RETURN_Y + 61, 0xFF202020);
+            font.draw(pose, String.format(Locale.ROOT, "#%03d  Nv. %d", species == null ? 0 : species.number(), syncedConversionLevel), textX, RETURN_Y + 72, 0xFF404040);
+            font.draw(pose, fitText(rarityLabel(syncedConversionRarity) + " / " + conversionStageLabel(syncedConversionStage), 136), textX, RETURN_Y + 83, 0xFF404040);
+            font.draw(pose, fitText("Recebe " + syncedConversionMinimum + "–" + syncedConversionMaximum + " almas", 136), textX, RETURN_Y + 94, 0xFF404040);
         } else if (syncedConversionResult >= 0) {
-            font.draw(pose, "Devolução", textX, RETURN_Y + 29, 0xFF404040);
-            font.draw(pose, syncedConversionResult + " almas", textX, RETURN_Y + 40, 0xFF404040);
+            font.draw(pose, "Almas liberadas:", textX, RETURN_Y + 68, 0xFF404040);
+            font.draw(pose, syncedConversionResult + " almas", textX, RETURN_Y + 80, 0xFF404040);
         }
         if (!syncedConversionBall.isEmpty() && syncedConversionResult < 0) {
-            boolean confirming = syncedConversionConfirming;
-            drawButton(pose, RETURN_X + 50, RETURN_Y + 73, confirming ? 64 : 94, 20, confirming ? "CONFIRMAR" : "DEVOLVER", true, -1, -1);
-            if (confirming) drawButton(pose, RETURN_X + 116, RETURN_Y + 73, 30, 20, "X", true, -1, -1);
+            drawButton(pose, RETURN_RELEASE_X, RETURN_RELEASE_Y, RETURN_RELEASE_W, RETURN_RELEASE_H, "Liberar", true, -1, -1);
         }
     }
 
@@ -496,12 +494,8 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
             MinemonNetwork.performPokecAction(menu.pos(), selectedSlug, PokecTransactions.Action.CLAIM_CONVERSION_OUTPUT);
             return true;
         }
-        if (inRect(x, y, RETURN_X + 50, RETURN_Y + 73, syncedConversionConfirming ? 64 : 94, 20) && !syncedConversionBall.isEmpty() && syncedConversionResult < 0) {
-            MinemonNetwork.performPokecAction(menu.pos(), selectedSlug, syncedConversionConfirming ? PokecTransactions.Action.CONFIRM_CONVERSION : PokecTransactions.Action.REQUEST_CONVERSION);
-            return true;
-        }
-        if (inRect(x, y, RETURN_X + 116, RETURN_Y + 73, 30, 20) && syncedConversionConfirming) {
-            MinemonNetwork.performPokecAction(menu.pos(), selectedSlug, PokecTransactions.Action.CANCEL_CONVERSION);
+        if (inRect(x, y, RETURN_RELEASE_X, RETURN_RELEASE_Y, RETURN_RELEASE_W, RETURN_RELEASE_H) && !syncedConversionBall.isEmpty() && syncedConversionResult < 0) {
+            MinemonNetwork.performPokecAction(menu.pos(), selectedSlug, PokecTransactions.Action.REQUEST_CONVERSION);
             return true;
         }
         boolean unlocked = syncedUnlocked.contains(species.slug());

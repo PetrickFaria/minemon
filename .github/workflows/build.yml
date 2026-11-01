@@ -1,7 +1,27 @@
 name: Build Minemon
 on:
   push:
-    paths-ignore: [".github/workflows/cobblemon-source-audit.yml", ".github/workflows/prepare-cobblemon-batch.yml", "tools/import_cobblemon_182_batch.py", "docs/**"]
+    paths-ignore:
+      - ".github/workflows/cobblemon-source-audit.yml"
+      - ".github/workflows/prepare-cobblemon-batch.yml"
+      - ".github/workflows/build.yml"
+      - ".github/workflows/gametest-diagnostics.yml"
+      - ".github/workflows/minemon-requested-artifact.yml"
+      - "tools/import_cobblemon_182_batch.py"
+      - "docs/**"
+      - "src/main/java/br/com/petrickfaria/minemon/entity/ElementalCombatGoal.java"
+      - "src/main/java/br/com/petrickfaria/minemon/entity/ElementalProjectile.java"
+      - "src/main/java/br/com/petrickfaria/minemon/entity/MinemonCreature.java"
+      - "src/main/java/br/com/petrickfaria/minemon/entity/PokemonProgression.java"
+      - "src/main/java/br/com/petrickfaria/minemon/menu/PokecScreen.java"
+      - "src/main/java/br/com/petrickfaria/minemon/menu/RocketTradeMenu.java"
+      - "src/main/java/br/com/petrickfaria/minemon/menu/RocketTradeScreen.java"
+      - "src/main/java/br/com/petrickfaria/minemon/pokec/PokecSpecies.java"
+      - "src/main/java/br/com/petrickfaria/minemon/pokec/PokecTransactions.java"
+      - "src/main/java/br/com/petrickfaria/minemon/registry/RocketChallengeManager.java"
+      - "src/test/java/br/com/petrickfaria/minemon/entity/PokemonProgressionTest.java"
+      - "src/test/java/br/com/petrickfaria/minemon/menu/RocketTradeProgressTest.java"
+      - "src/test/java/br/com/petrickfaria/minemon/pokec/PokecCatalogTest.java"
   pull_request:
   workflow_dispatch:
     inputs:
