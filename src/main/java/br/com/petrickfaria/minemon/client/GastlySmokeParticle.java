@@ -71,9 +71,8 @@ public final class GastlySmokeParticle extends TextureSheetParticle {
         int low = (int) position;
         int high = Math.min(nodes.length - 1, low + 1);
         float sample = nodes[low] + (nodes[high] - nodes[low]) * (position - low);
-        this.quadSize = (small?br.com.petrickfaria.minemon.entity.GastlyAura.SMALL_SIZE:br.com.petrickfaria.minemon.entity.GastlyAura.LARGE_SIZE)
-                * SpeciesDefinitions.get("gastly").scale() * sample
-                * br.com.petrickfaria.minemon.entity.GastlyAura.sizeVariation(slot);
+        this.quadSize = (small?br.com.petrickfaria.minemon.entity.GastlyAura.SMALL_SIZE:br.com.petrickfaria.minemon.entity.GastlyAura.LARGE_SIZE) * SpeciesDefinitions.get("gastly").scale() * sample;
+        this.quadSize *= br.com.petrickfaria.minemon.entity.GastlyAura.sizeVariation(slot);
     }
 
     private void followBody(){
