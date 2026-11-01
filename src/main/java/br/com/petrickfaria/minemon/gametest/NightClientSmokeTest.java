@@ -156,7 +156,11 @@ final class NightClientSmokeTest {
          ||SpeciesBehaviorProfiles.profile(mob.getSpeciesSlug())==SpeciesBehaviorProfiles.Profile.GROUND_FLOAT_CYCLE){
       var tag=new net.minecraft.nbt.CompoundTag();mob.addAdditionalSaveData(tag);tag.putString("NaturalBehaviorPhase","AIR");mob.readAdditionalSaveData(tag);
      }
-     level.addFreshEntity(mob);entity=mob.getUUID();level.setDayTime(slug.equals("gyarados")?1000:18000);
+     long scenarioTime=slug.equals("gyarados")?1000L:18000L;
+     level.setDayTime(scenarioTime);
+     if(level.getDayTime()!=scenarioTime)throw new IllegalStateException("Night client scenario clock did not initialize for "+slug+": "+level.getDayTime());
+     Files.writeString(Path.of("client-validation-night.txt"),"START "+slug+" scenarioTime="+level.getDayTime()+" nocturnal="+SpeciesBehaviorProfiles.isNocturnal(slug)+"\\n",StandardOpenOption.APPEND);
+     level.addFreshEntity(mob);entity=mob.getUUID();
      double distance=switch(mob.getSpeciesSlug()){
       case "venusaur"->7;case "snorlax","charizard","dragonite"->6;case "fearow"->9;
       case "victreebel","scyther","weezing"->5;case "pidgeotto","haunter","butterfree","beedrill","parasect"->4;
