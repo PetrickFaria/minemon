@@ -166,7 +166,15 @@ public final class PokecMenu extends AbstractContainerMenu {
         for(int i=0;i<paymentInventory.getContainerSize();i++){ItemStack payment=paymentInventory.getItem(i);if(!payment.isEmpty())player.getInventory().placeItemBackInInventory(payment.copy());paymentInventory.setItem(i,ItemStack.EMPTY);}
         stagedCoins=stagedSouls=0;
         if (!conversionBall.isEmpty()) player.getInventory().placeItemBackInInventory(conversionBall.copy());
-        if (!conversionOutput.isEmpty()) player.getInventory().placeItemBackInInventory(conversionOutput.copy());
+        if (!conversionOutput.isEmpty()) {
+            int remaining = Math.max(0, conversionResult - conversionOutput.getCount());
+            player.getInventory().placeItemBackInInventory(conversionOutput.copy());
+            while (remaining > 0) {
+                int count = Math.min(remaining, conversionOutput.getMaxStackSize());
+                player.getInventory().placeItemBackInInventory(new ItemStack(conversionOutput.getItem(), count));
+                remaining -= count;
+            }
+        }
         conversionBall = ItemStack.EMPTY;
         conversionOutput = ItemStack.EMPTY;
         conversionResult = -1;

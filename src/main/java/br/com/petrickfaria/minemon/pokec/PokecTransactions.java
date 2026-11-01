@@ -92,8 +92,15 @@ public final class PokecTransactions {
     private static boolean claimConversionOutput(ServerPlayer player, PokecMenu menu) {
         ItemStack output = menu.conversionOutput();
         if (output.isEmpty()) return false;
+        int remaining = Math.max(0, menu.conversionResult() - output.getCount());
         player.getInventory().placeItemBackInInventory(output);
-        menu.setConversionState(player, menu.conversionBall(), ItemStack.EMPTY, menu.conversionResult());
+        if (remaining > 0) {
+            ItemStack next = output.copy();
+            next.setCount(Math.min(remaining, next.getMaxStackSize()));
+            menu.setConversionState(player, menu.conversionBall(), next, remaining);
+        } else {
+            menu.setConversionState(player, menu.conversionBall(), ItemStack.EMPTY, -1);
+        }
         return true;
     }
 
@@ -211,7 +218,15 @@ public final class PokecTransactions {
         ItemStack ball = PokecPlayerData.conversionBall(player);
         if (!ball.isEmpty()) player.getInventory().placeItemBackInInventory(ball);
         ItemStack output = PokecPlayerData.conversionOutput(player);
-        if (!output.isEmpty()) player.getInventory().placeItemBackInInventory(output);
+        if (!output.isEmpty()) {
+            int remaining = Math.max(0, PokecPlayerData.conversionResult(player) - output.getCount());
+            player.getInventory().placeItemBackInInventory(output);
+            while (remaining > 0) {
+                int count = Math.min(remaining, output.getMaxStackSize());
+                player.getInventory().placeItemBackInInventory(new ItemStack(output.getItem(), count));
+                remaining -= count;
+            }
+        }
         PokecPlayerData.clearStaged(player);
     }
 
