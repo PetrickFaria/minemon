@@ -108,22 +108,24 @@ final class NineBehaviorChecks {
   });
   return fixture;
  }
- static void checkFollowingAltitudes(GameTestHelper h,FollowingAltitudeFixture fixture){
+ static String checkFollowingAltitudes(GameTestHelper h,FollowingAltitudeFixture fixture){
   for(int i=0;i<fixture.mobs.size();i++){
    var mob=fixture.mobs.get(i);
    double altitude=mob.getY()-mob.naturalSurface();
    if(!mob.isFollowingOwner()||Math.abs(altitude-mob.followAltitude())>.35)
-    h.fail("FOLLOW ALTITUDE ASSERTION FAILED: "
-        +followingAltitudeSnapshot(mob,fixture.owner,h.getLevel().getGameTime(),fixture.followStartedAt[i],fixture.diagnosticStart));
+    return "FOLLOW ALTITUDE ASSERTION FAILED: "
+        +followingAltitudeSnapshot(mob,fixture.owner,h.getLevel().getGameTime(),fixture.followStartedAt[i],fixture.diagnosticStart);
    mob.setOrderedToSit(true);
   }
+  return null;
  }
- static void finishFollowingAltitudes(GameTestHelper h,FollowingAltitudeFixture fixture){
+ static String finishFollowingAltitudes(GameTestHelper h,FollowingAltitudeFixture fixture){
   for(var mob:fixture.mobs){
-   if(mob.isFollowingOwner())h.fail("Sitting did not stop following altitude state");
+   if(mob.isFollowingOwner())return "Sitting did not stop following altitude state";
    mob.discard();
   }
-  fixture.owner.discard();h.succeed();
+  fixture.owner.discard();
+  return null;
  }
  private static String followingAltitudeSnapshot(MinemonCreature mob,net.minecraft.server.level.ServerPlayer owner,long now,long followStartedAt,long diagnosticStart){
   double ground=mob.naturalSurface(),altitude=mob.getY()-ground;
