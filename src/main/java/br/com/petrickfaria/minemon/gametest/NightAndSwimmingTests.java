@@ -327,15 +327,15 @@ public final class NightAndSwimmingTests {
   // Ordinary roaming remains enabled during combat recovery. Keep this ground
   // sleeper on the test's prepared floor so its return-to-sleep assertion does
   // not depend on blocks belonging to neighboring GameTest structures.
-  for(int y=1;y<=3;y++)for(int ax=0;ax<=6;ax++)for(int az=0;az<=4;az++)
-   if(ax==0||ax==6||az==0||az==4)h.setBlock(new BlockPos(ax,y,az),Blocks.STONE);
+  for(int y=1;y<=3;y++)for(int ax=0;ax<=6;ax++)for(int az=0;az<=3;az++)
+   if(ax==0||ax==6||az==0||az==3)h.setBlock(new BlockPos(ax,y,az),Blocks.STONE);
   // Keep sleeping hoverers clear of the wide grounded sleepers: collision
   // pushing is physical displacement, not autonomous sleep travel.
   for(int ax=0;ax<32;ax++)for(int az=26;az<44;az++){
    h.setBlock(new BlockPos(ax,0,az),Blocks.STONE);
    for(int ay=1;ay<20;ay++)h.setBlock(new BlockPos(ax,ay,az),Blocks.AIR);
   }
-  var ground=spawn(h,"bulbasaur",3,1,3);
+  var ground=spawn(h,"bulbasaur",3,1,2);
   var mixed=new ArrayList<MinemonCreature>();var air=new ArrayList<MinemonCreature>();
   int x=5;
   // Land-resting flyers include ground/air cycle species and species with an approved night landing pose.
@@ -360,7 +360,7 @@ public final class NightAndSwimmingTests {
     h.runAfterDelay(30,()->{
      mixed.forEach(m->check(h,m.naturalCycle().ticks()==clocks.get(m),"Night must preserve cycle progress: "+m.getSpeciesSlug()));
      air.forEach(m->check(h,m.position().subtract(positions.get(m)).horizontalDistanceSqr()<.001,"Sleeping hover must stop horizontal travel"));
-     var attacker=h.spawn(EntityType.COW,new BlockPos(4,1,3));attacker.setNoAi(true);float health=attacker.getHealth();
+     var attacker=h.spawn(EntityType.COW,new BlockPos(4,1,2));attacker.setNoAi(true);float health=attacker.getHealth();
      check(h,ground.hurt(DamageSource.mobAttack(attacker),1),"Attack must damage sleeping creature");
      check(h,!ground.isSleeping()&&ground.getTarget()==attacker,"Attack must wake and retain aggressor immediately");
      var restAnchor=ground.position();
@@ -377,9 +377,12 @@ public final class NightAndSwimmingTests {
       });
      },150,"Woken creature must physically retaliate using melee AI");
     });
-   },350,()->"Night must settle ground/mixed creatures on land and air-only creatures in a one-block hover; mixed="
+   },350,()->"Night must settle ground/mixed creatures on land and air-only creatures in a one-block hover; unmet conditions by species: mixed="
        +mixed.stream().map(m->m.getSpeciesSlug()+"{sleep="+m.isSleeping()+",ground="+m.isOnGround()+",night="+m.isNightResting()+",pos="+m.position()+",nav="+m.getNavigation().getTargetPos()+"}").toList()
-       +" air="+air.stream().map(m->m.getSpeciesSlug()+"{sleep="+m.isSleeping()+",ground="+m.isOnGround()+",night="+m.isNightResting()+",pos="+m.position()+"}").toList());
+       +" air="+air.stream().map(m->{double surface=m.naturalSurface(),altitude=m.getY()-surface,error=altitude-1.0D;
+        return m.getSpeciesSlug()+"{sleep="+m.isSleeping()+",ground="+m.isOnGround()+",night="+m.isNightResting()+",pos="+m.position()
+          +",surface="+surface+",altitude="+altitude+",targetAltitude=1.0,error="+error+",hoverOk="+(!m.isOnGround()&&Math.abs(error)<.2D)
+          +",nav="+m.getNavigation().getTargetPos()+"}";}).toList());
   });
  }
  private static void awaitCombatSleep(GameTestHelper h,MinemonCreature mob,net.minecraft.world.entity.LivingEntity attacker,
