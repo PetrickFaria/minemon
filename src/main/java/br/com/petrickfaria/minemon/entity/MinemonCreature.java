@@ -874,7 +874,8 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
             }
             boolean hover=SpeciesBehaviorProfiles.hoversDuringNightRest(this.getSpeciesSlug());
             double restHeight=SpeciesBehaviorProfiles.nightRestHoverHeight(this.getSpeciesSlug());
-            boolean settled=waterRest?Math.abs(this.getY()-WaterMovementGoal.waterRestY(this))<0.18D
+            double waterSettleTolerance=SpeciesBehaviorProfiles.restsAtWaterBottom(this.getSpeciesSlug())?0.025D:0.18D;
+            boolean settled=waterRest?Math.abs(this.getY()-WaterMovementGoal.waterRestY(this))<waterSettleTolerance
                 :hover?Math.abs(this.getY()-this.naturalSurface()-restHeight)<0.18D
                 :this.isOnGround()&&WaterMovementGoal.safeDry(this,this.blockPosition());
             if(settled&&!this.isSleeping())this.setSleeping(true);
