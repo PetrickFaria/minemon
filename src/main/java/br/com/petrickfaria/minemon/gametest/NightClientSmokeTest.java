@@ -23,6 +23,7 @@ final class NightClientSmokeTest {
  private static boolean gyaradosNightStarted,gyaradosSawDescent;
  private static double gyaradosDaySurfaceY=Double.NaN,gyaradosSleepY=Double.NaN;
  private static int ticks,index,samples,activeSamples,sleepTick,depthSettleTicks,depthStableTicks,restSettleTicks,restStableTicks;
+ private static volatile long scenarioToken;
  private static volatile UUID entity;
  private static final Map<String,float[]> eyes=new HashMap<>();
  private static final Map<String,float[]> restingWings=new HashMap<>();
@@ -137,8 +138,10 @@ final class NightClientSmokeTest {
     var p=level.getServer().getPlayerList().getPlayers().get(0);p.setGameMode(GameType.CREATIVE);p.teleportTo(level,0,102,-5,0,8);
    });return;}
    if(!spawned){
+    long token=++scenarioToken;
     spawned=true;gengarWakeEyesObserved=false;nocturnalMidday=false;gyaradosNightStarted=false;gyaradosSawDescent=false;gyaradosDaySurfaceY=Double.NaN;gyaradosSleepY=Double.NaN;ticks=0;samples=0;activeSamples=0;sleepTick=0;depthSettleTicks=0;depthStableTicks=0;restSettleTicks=0;restStableTicks=0;waking=false;eyes.clear();restingWings.clear();
     mc.getSingleplayerServer().execute(()->{
+     if(token!=scenarioToken)return;
      var level=mc.getSingleplayerServer().overworld();if(entity!=null){var old=level.getEntity(entity);if(old!=null)old.discard();}
      String scenario=SPECIES.get(index);String slug=scenario.equals("vaporeon_land")?"vaporeon":scenario;
      var mob=ModEntities.SPECIES.get(slug).get().create(level);
@@ -195,7 +198,7 @@ final class NightClientSmokeTest {
      double daytimeTarget=surface-WaterMovementGoal.preferredSurfaceDepth(current);
      if(Double.isFinite(daytimeTarget)&&Math.abs(current.getY()-daytimeTarget)<.3D){
       gyaradosDaySurfaceY=current.getY();gyaradosNightStarted=true;
-      mc.getSingleplayerServer().execute(()->mc.getSingleplayerServer().overworld().setDayTime(18000));
+      setScenarioTime(mc,18000L);
       Files.writeString(Path.of("client-validation-night.txt"),"GYARADOS day surface reached y="+gyaradosDaySurfaceY+"; beginning night descent\n",StandardOpenOption.APPEND);
      }else if(ticks>350){
       throw new IllegalStateException("Gyarados failed to reach its awake surface anchor before night; y="+current.getY()+" target="+daytimeTarget+" surface="+surface);
@@ -251,11 +254,11 @@ final class NightClientSmokeTest {
    if(nocturnal&&!nocturnalMidday&&activeSamples>=25){
     Files.writeString(Path.of("client-validation-night.txt"),"PASS NOCTURNAL ACTIVE "+current.getSpeciesSlug()+" stayed awake at night; rendered active samples="+activeSamples+"\n",StandardOpenOption.APPEND);
     nocturnalMidday=true;samples=0;sleepTick=0;depthSettleTicks=0;depthStableTicks=0;restSettleTicks=0;restStableTicks=0;eyes.clear();restingWings.clear();
-    mc.getSingleplayerServer().execute(()->mc.getSingleplayerServer().overworld().setDayTime(6000));
+    setScenarioTime(mc,6000L);
    }else if(!waking&&samples>=25){
     Screenshot.grab(mc.gameDirectory,(nocturnal?"midday-":"night-")+SPECIES.get(index)+".png",mc.getMainRenderTarget(),message->{});
     Files.writeString(Path.of("client-validation-night.txt"),(nocturnal?"PASS NOCTURNAL MIDDAY ":"PASS NIGHT RENDER ")+SPECIES.get(index)+" sleep clip="+current.getSelectedAnimationForValidation()+" closed-eye tracks="+eyes.keySet()+" samples="+samples+" grounded="+current.isOnGround()+"\n",StandardOpenOption.APPEND);
-    waking=true;mc.getSingleplayerServer().execute(()->mc.getSingleplayerServer().overworld().setDayTime(nocturnal?13000:1000));
+    waking=true;setScenarioTime(mc,nocturnal?13000L:1000L);
    }
    if(waking&&!current.isSleeping()){
     if(current.getSpeciesSlug().equals("gyarados")){
@@ -274,6 +277,14 @@ final class NightClientSmokeTest {
     spawned=false;
    }
   }catch(Exception e){throw new IllegalStateException("Night client smoke failed",e);}
+ }
+ private static void setScenarioTime(Minecraft mc,long dayTime){
+  long token=scenarioToken;
+  var server=mc.getSingleplayerServer();
+  if(server==null)return;
+  server.execute(()->{
+   if(token==scenarioToken)server.overworld().setDayTime(dayTime);
+  });
  }
  private static String controllerSnapshot(MinemonCreature mob){
   var result=new StringBuilder();
