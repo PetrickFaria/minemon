@@ -1,6 +1,3 @@
-Warning: truncated output (original token count: 19103)
-Total output lines: 1241
-
 package br.com.petrickfaria.minemon.entity;
 
 import br.com.petrickfaria.minemon.config.MinemonConfig;
@@ -305,7 +302,620 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         this.aquaticSleepY=tag.contains("AquaticSleepAnchorY")?tag.getDouble("AquaticSleepAnchorY"):Double.NaN;
         this.refreshPokemonAttributes(0);
         if(tag.contains("Health"))this.setHealth(Math.min(this.getMaxHealth(),tag.getFloat("Health")));
-        if(isDefeated()){setNoAi(true);se…9103 tokens truncated…ks++;
+        if(isDefeated()){setNoAi(true);setTarget(null);setSleeping(true);}
+        this.loadingPokemonData=false;
+        this.syncNaturalState();
+    }
+
+    public int getPokemonLevel() { return Math.max(1, this.entityData.get(POKEMON_LEVEL)); }
+    public int getPokemonExperience() { return Math.max(0, this.entityData.get(POKEMON_XP)); }
+    public String getPokemonRarity() { return this.entityData.get(POKEMON_RARITY); }
+    public int getPokemonXpToNextLevel() { return Math.max(0, this.entityData.get(POKEMON_XP_TO_NEXT)); }
+    public void setPokemonLevel(int level) { setPokemonProgress(level, 0); }
+    public void setPokemonProgress(int level, int experience) {
+        int oldLevel=this.getPokemonLevel();
+        int boundedLevel = Math.max(1, Math.min(PokemonProgression.maxLevel(), level));
+        this.entityData.set(POKEMON_LEVEL, boundedLevel);
+        int needed = PokemonProgression.xpForNextLevel(boundedLevel, this.getSpeciesSlug());
+        this.entityData.set(POKEMON_XP, needed <= 0 ? 0 : Math.max(0, loadingPokemonData?experience:Math.min(needed - 1, experience)));
+        this.refreshPokemonXpThreshold();
+        this.refreshPokemonAttributes(loadingPokemonData?0:Math.max(0,boundedLevel-oldLevel));
+    }
+    public int awardPokemonExperience(int amount) {
+        if (this.isDefeated() || amount <= 0 || !this.isTame() || this.level.isClientSide) return 0;
+        int oldLevel=this.getPokemonLevel();
+        int awarded = 0;
+        long pending = Math.min((long) amount, Integer.MAX_VALUE);
+        while (pending > 0 && this.getPokemonLevel() < PokemonProgression.maxLevel()) {
+            int need = PokemonProgression.xpForNextLevel(this.getPokemonLevel(), this.getSpeciesSlug());
+            int room = Math.max(0,need - this.getPokemonExperience());
+            int add = (int) Math.min(pending, room);
+            this.entityData.set(POKEMON_XP, this.getPokemonExperience() + add);
+            pending -= add;
+            awarded += add;
+            if (this.getPokemonExperience() >= need) {
+                this.entityData.set(POKEMON_XP, this.getPokemonExperience()-need);
+                this.entityData.set(POKEMON_LEVEL, this.getPokemonLevel() + 1);
+            }
+        }
+        this.refreshPokemonXpThreshold();
+        this.refreshPokemonAttributes(Math.max(0,this.getPokemonLevel()-oldLevel));
+        return awarded;
+    }
+    private void refreshPokemonAttributes(int gainedLevels) {
+        if(this.level.isClientSide)return;
+        String rarity=br.com.petrickfaria.minemon.pokec.PokecEconomy.get().rarity(this.getSpeciesSlug());
+        this.entityData.set(POKEMON_RARITY,rarity);
+        float health=this.getHealth();
+        this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(PokemonProgression.healthForRarity(rarity,this.getPokemonLevel()));
+        this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(PokemonProgression.damageForRarity(rarity,this.getPokemonLevel()));
+        this.setHealth(Math.min(this.getMaxHealth(),health+2.0F*gainedLevels));
+    }
+    private void refreshPokemonXpThreshold() {
+        if (this.entityData == null) return;
+        this.entityData.set(POKEMON_XP_TO_NEXT,
+                PokemonProgression.xpForNextLevelForRarity(this.getPokemonLevel(), this.getPokemonRarity()));
+    }
+    public int chanseyCooldownTicksForValidation() { return this.chanseyCooldownTicks; }
+    public void tryChanseyHealForValidation() { this.tickChanseyHealing(); }
+    private void tickChanseyHealing() {
+        if (this.level.isClientSide || !"chansey".equals(this.getSpeciesSlug()) || !this.isTame()) return;
+        if (this.chanseyCooldownTicks > 0) { this.chanseyCooldownTicks--; return; }
+        if (this.chanseyScanDelay > 0) { this.chanseyScanDelay--; return; }
+        this.chanseyScanDelay = 20;
+        MinemonCreature target = this.level.getEntitiesOfClass(MinemonCreature.class,
+                        this.getBoundingBox().inflate(10.0D), candidate -> candidate != this
+                                && candidate.isAlive() && !candidate.isDefeated() && candidate.isTame()
+                                && candidate.getHealth() < candidate.getMaxHealth()
+                                && this.distanceToSqr(candidate) <= 100.0D)
+                .stream().min(java.util.Comparator.comparingDouble(candidate ->
+                        candidate.getHealth() / Math.max(1.0F, candidate.getMaxHealth()))).orElse(null);
+        if (target == null) return;
+        var current = target.getEffect(net.minecraft.world.effect.MobEffects.REGENERATION);
+        if (current != null && (current.getAmplifier() > 0 || current.getDuration() >= 200)) return;
+        boolean applied = target.addEffect(new net.minecraft.world.effect.MobEffectInstance(
+                net.minecraft.world.effect.MobEffects.REGENERATION, 200, 0), this);
+        if (!applied) return;
+        this.chanseyCooldownTicks = PokemonProgression.chanseyCooldownTicks(this.getPokemonLevel());
+        if (this.level instanceof ServerLevel serverLevel)
+            serverLevel.sendParticles(net.minecraft.core.particles.ParticleTypes.HEART,
+                    target.getX(), target.getY() + target.getBbHeight() + 0.25D, target.getZ(), 5,
+                    0.25D, 0.2D, 0.25D, 0.0D);
+    }
+    public boolean isRocketSpecial() { return this.entityData.get(ROCKET_SPECIAL); }
+    public void setRocketSpecial(boolean special) { this.entityData.set(ROCKET_SPECIAL, special); }
+    public void setRocketVillager(UUID villager) { this.getPersistentData().putUUID("RocketVillager", villager); }
+
+    /** Capture is blocked while the Pokémon is sleeping, breeding, or engaged in combat. */
+    public boolean canBeStoredInPokeball() {
+        return !this.isDeadOrDying() && !this.isSleeping() && !this.isNightResting()
+                && !this.isInLove() && this.getTarget() == null && this.attackAnimationTicks <= 0
+                && !this.isPassenger();
+    }
+
+    @Override
+    public AgeableMob getBreedOffspring(ServerLevel level, AgeableMob partner) {
+        this.pendingBreedOffspring = null;
+        if (!(partner instanceof MinemonCreature other)
+                || !this.isTame() || !other.isTame()
+                || this.getOwnerUUID() == null || !this.getOwnerUUID().equals(other.getOwnerUUID())
+                || !isBreedingPermitted(this.getSpeciesSlug()) || !isBreedingPermitted(other.getSpeciesSlug())) return null;
+        String initialForm = PokemonBreeding.chooseInitialForm(
+                this.getSpeciesSlug(), other.getSpeciesSlug(), this.getRandom()::nextDouble);
+        var babyType = br.com.petrickfaria.minemon.registry.ModEntities.SPECIES.get(initialForm);
+        if (babyType == null) return null;
+        MinemonCreature child = babyType.get().create(level);
+        if (child != null) {
+            child.setOwnerUUID(this.getOwnerUUID());
+            child.setTame(true);
+            child.setOrderedToSit(false);
+            this.pendingBreedOffspring = child.getUUID();
+        }
+        return child;
+    }
+
+    @Override
+    public boolean canMate(Animal partner) {
+        if (!(partner instanceof MinemonCreature other) || other == this) return false;
+        UUID owner = this.getOwnerUUID();
+        if (owner == null || !owner.equals(other.getOwnerUUID())) return false;
+        if (!this.isTame() || !other.isTame()) return false;
+        if (!isBreedingPermitted(this.getSpeciesSlug()) || !isBreedingPermitted(other.getSpeciesSlug())) return false;
+        if (isBreedingBusy() || other.isBreedingBusy()) return false;
+        if (!hasSafeBabyPosition((ServerLevel)this.level, this) || !hasSafeBabyPosition((ServerLevel)other.level, other)) return false;
+        // Animal.canMate requires identical Java classes; aquatic Minemon use a subclass,
+        // so reproduce its remaining age/love rules without excluding cross-class species.
+        return !this.isBaby() && !other.isBaby()
+                && this.getAge() == 0 && other.getAge() == 0
+                && this.isInLove() && other.isInLove();
+    }
+
+    private boolean isBreedingBusy() {
+        return this.isDefeated() || this.isSleeping() || this.isNightResting() || this.isOrderedToSit() || this.getTarget() != null || this.attackAnimationTicks > 0;
+    }
+
+    private static boolean isBreedingPermitted(String species) {
+        return MinemonConfig.TREAT_BREEDING_ENABLED.get()
+                && !NON_BREEDABLE_SPECIES.contains(species)
+                && !MinemonConfig.TREAT_DISABLED_BREEDING_SPECIES.get().contains(species);
+    }
+
+    private static boolean isUnsafeBabyBlock(Level level, BlockPos pos) {
+        var state = level.getBlockState(pos);
+        return state.is(Blocks.FIRE) || state.is(Blocks.SOUL_FIRE) || state.is(Blocks.LAVA)
+                || state.is(Blocks.MAGMA_BLOCK) || state.is(Blocks.CACTUS) || state.is(Blocks.SWEET_BERRY_BUSH)
+                || state.is(Blocks.WITHER_ROSE) || state.is(Blocks.CAMPFIRE) || state.is(Blocks.SOUL_CAMPFIRE);
+    }
+
+    private static boolean hasSafeBabyPosition(ServerLevel level, MinemonCreature parent) {
+        double width = Math.max(0.2D, parent.getBbWidth() * 0.5D);
+        double height = Math.max(0.2D, parent.getBbHeight() * 0.5D);
+        BlockPos origin = parent.blockPosition();
+        int[][] offsets = {{0,0},{1,0},{-1,0},{0,1},{0,-1},{1,1},{1,-1},{-1,1},{-1,-1}};
+        for (int[] offset : offsets) {
+            for (int dy = 0; dy <= 1; dy++) {
+                BlockPos feet = origin.offset(offset[0], dy, offset[1]);
+                BlockPos floor = feet.below();
+                if (level.getBlockState(floor).getCollisionShape(level, floor).isEmpty()) continue;
+                if (!level.getFluidState(feet).isEmpty() || !level.getFluidState(feet.above()).isEmpty()) continue;
+                if (isUnsafeBabyBlock(level, floor) || isUnsafeBabyBlock(level, feet) || isUnsafeBabyBlock(level, feet.above())) continue;
+                double x = feet.getX() + 0.5D, y = feet.getY(), z = feet.getZ() + 0.5D;
+                AABB box = new AABB(x - width/2, y, z - width/2, x + width/2, y + height, z + width/2);
+                if (level.getWorldBorder().isWithinBounds(box) && level.noCollision(box)) return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public void spawnChildFromBreeding(ServerLevel level, Animal partner) {
+        super.spawnChildFromBreeding(level, partner);
+        UUID offspringId = this.pendingBreedOffspring;
+        this.pendingBreedOffspring = null;
+        if (offspringId == null) return;
+        int cooldown = MinemonConfig.TREAT_BREEDING_COOLDOWN_TICKS.get();
+        this.setAge(cooldown);
+        partner.setAge(cooldown);
+        net.minecraft.world.entity.Entity spawned = level.getEntity(offspringId);
+        if (spawned instanceof MinemonCreature baby) {
+            BlockPos safe = findSafeBabyPosition(level, this, baby);
+            if (safe != null && level.getBlockState(safe).canBeReplaced(level.getFluidState(safe).getType())) {
+                var eggBlock = br.com.petrickfaria.minemon.registry.ModBlocks.BREEDING_EGG.get();
+                if (level.setBlock(safe, eggBlock.defaultBlockState(), 3)) {
+                    var blockEntity = level.getBlockEntity(safe);
+                    if (blockEntity instanceof BreedingEggBlockEntity egg) {
+                        egg.initialize(baby.getSpeciesSlug(), baby.getOwnerUUID(), BreedingEggBlockEntity.INCUBATION_TICKS);
+                        baby.discard();
+                    } else {
+                        level.setBlock(safe, Blocks.AIR.defaultBlockState(), 3);
+                    }
+                }
+            }
+        }
+    }
+
+    private static BlockPos findSafeBabyPosition(ServerLevel level, MinemonCreature parent, MinemonCreature baby) {
+        BlockPos origin = parent.blockPosition();
+        int[][] offsets = {{0,0},{1,0},{-1,0},{0,1},{0,-1},{1,1},{1,-1},{-1,1},{-1,-1}};
+        for (int[] offset : offsets) {
+            for (int dy = 0; dy <= 1; dy++) {
+                BlockPos feet = origin.offset(offset[0], dy, offset[1]);
+                BlockPos floor = feet.below();
+                if (level.getBlockState(floor).getCollisionShape(level, floor).isEmpty()) continue;
+                if (!level.getFluidState(feet).isEmpty() || !level.getFluidState(feet.above()).isEmpty()) continue;
+                if (isUnsafeBabyBlock(level, floor) || isUnsafeBabyBlock(level, feet) || isUnsafeBabyBlock(level, feet.above())) continue;
+                baby.setPos(feet.getX() + 0.5D, feet.getY(), feet.getZ() + 0.5D);
+                AABB box = baby.getBoundingBox();
+                if (level.getWorldBorder().isWithinBounds(box) && level.noCollision(baby, box)) return feet;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    protected void registerGoals() {
+        if (!this.isAquaticSpecies()) this.goalSelector.addGoal(0, new WaterEscapeGoal(this));
+        this.goalSelector.addGoal(0,new NightRestGoal(this));
+        this.goalSelector.addGoal(1, new SitWhenOrderedToGoal(this) {
+            @Override public boolean canUse(){return (!MinemonCreature.this.commandLanding() || MinemonCreature.this.isOnGround()) && super.canUse();}
+        });
+        this.goalSelector.addGoal(1, new BreedGoal(this, 1.0D));
+        this.goalSelector.addGoal(2, new ElementalCombatGoal(this));
+        this.goalSelector.addGoal(3, new NaturalFollowOwnerGoal(this));
+        this.goalSelector.addGoal(6, new NaturalSeparationGoal(this));
+        if (SpeciesBehaviorProfiles.canFly(this.getSpeciesSlug())) {
+            this.goalSelector.addGoal(0, new NaturalMovementGoals.SleepLanding(this));
+            this.goalSelector.addGoal(4, new NaturalMovementGoals.AirPatrol(this));
+            this.goalSelector.addGoal(5, new NaturalMovementGoals.GroundWander(this));
+        } else if (this.isAquaticSpecies()) {
+            this.getNavigation().setCanFloat(true);
+            this.setPathfindingMalus(BlockPathTypes.WATER, 0.0F);
+            this.goalSelector.addGoal(4, new WaterMovementGoal(this));
+            this.goalSelector.addGoal(5, new NaturalMovementGoals.AquaticLandWander(this));
+        } else {
+            this.goalSelector.addGoal(4, new NaturalMovementGoals.GroundWander(this));
+        }
+        this.goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, 8.0F));
+        this.goalSelector.addGoal(7, new RandomLookAroundGoal(this));
+
+        // Wild creatures only acquire a target after being hurt. Tamed creatures also protect
+        // their owner and assist against the owner's current target.
+        this.targetSelector.addGoal(1, new OwnerHurtByTargetGoal(this));
+        this.targetSelector.addGoal(2, new OwnerHurtTargetGoal(this));
+        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, LivingEntity.class, 10, true, false,
+                target -> MinemonCreature.this.isTame() && !MinemonCreature.this.isOrderedToSit()
+                        && target instanceof net.minecraft.world.entity.Mob mob
+                        && MinemonCreature.this.isBlackListTarget(mob)) {
+            @Override protected net.minecraft.world.phys.AABB getTargetSearchArea(double radius){return this.mob.getBoundingBox().inflate(10.0D);}
+        });
+        this.targetSelector.addGoal(4, new HurtByTargetGoal(this) {
+            @Override public boolean canUse() {
+                return (MinemonCreature.this.isTame() || MinemonCreature.this.wildAggressionTicks > 0) && super.canUse();
+            }
+            @Override public boolean canContinueToUse() {
+                return (MinemonCreature.this.isTame() || MinemonCreature.this.wildAggressionTicks > 0) && super.canContinueToUse();
+            }
+        });
+    }
+
+    private static void consumeTreat(Player player, ItemStack stack) {
+        if (!player.getAbilities().instabuild) stack.shrink(1);
+    }
+
+    @Override
+    public boolean isFood(ItemStack stack) {
+        return false;
+    }
+
+    @Override
+    public boolean canAttack(LivingEntity target) {
+        if (isDefeated() || target == null || target == this || this.isOwnerEntity(target)) return false;
+        if (this.isTame() && !CombatGeometry.inRange(this,target,10)) return false;
+        // Ordered sitting companions may defend themselves or their owner at close
+        // range, but must not start walking after a distant target.
+        if (this.isTame() && this.isOrderedToSit() && !CombatGeometry.inRange(this,target,10)) return false;
+        if (target instanceof MinemonCreature other) {
+            if(other.isDefeated())return false;
+            UUID ownerId = this.getOwnerUUID();
+            UUID otherOwnerId = other.getOwnerUUID();
+            if (ownerId != null && ownerId.equals(otherOwnerId)) return false;
+        }
+        return super.canAttack(target);
+    }
+
+    private boolean isOwnerEntity(LivingEntity target) {
+        UUID ownerId = this.getOwnerUUID();
+        return ownerId != null && ownerId.equals(target.getUUID());
+    }
+
+    private static final String BLACK_LIST_KEY = "MinemonBlackList";
+    public boolean isBlackListTarget(net.minecraft.world.entity.Mob target) {
+        if (target == null || target == this || target instanceof MinemonCreature pokemonTarget && pokemonTarget.isDefeated() || target.isInvulnerable() || !target.isAlive()
+                || this.isOwnerEntity(target)) return false;
+        if (target instanceof MinemonCreature pokemon && pokemon.isTame()
+                && this.getOwnerUUID() != null && this.getOwnerUUID().equals(pokemon.getOwnerUUID())) return false;
+        ResourceLocation id = ForgeRegistries.ENTITY_TYPES.getKey(target.getType());
+        if (id == null) return false;
+        CompoundTag overrides = this.getPersistentData().getCompound(BLACK_LIST_KEY);
+        return overrides.contains(id.toString()) ? overrides.getBoolean(id.toString())
+                : MobTargetCategories.defaultSelected(target.getType());
+    }
+    public Map<String, Boolean> getBlackListOverrides() {
+        CompoundTag stored = this.getPersistentData().getCompound(BLACK_LIST_KEY);
+        Map<String, Boolean> result = new TreeMap<>();
+        for (String id : stored.getAllKeys()) result.put(id, stored.getBoolean(id));
+        return result;
+    }
+    public void setBlackListOverride(ResourceLocation type, boolean selected) {
+        CompoundTag stored = this.getPersistentData().getCompound(BLACK_LIST_KEY);
+        stored.putBoolean(type.toString(), selected);
+        this.getPersistentData().put(BLACK_LIST_KEY, stored);
+    }
+
+    @Override
+    public InteractionResult mobInteract(Player player, InteractionHand hand) {
+        ItemStack held = player.getItemInHand(hand);
+        // A capture item in either hand owns the interaction. Failed, occupied, and
+        // foreign-owner attempts must not fall through into the Pokémon screen.
+        for (InteractionHand ballHand : InteractionHand.values()) {
+            ItemStack ball = player.getItemInHand(ballHand);
+            if (!br.com.petrickfaria.minemon.item.PokeballItem.isOccupied(ball)
+                    && ball.getItem() instanceof br.com.petrickfaria.minemon.item.PokeballItem pokeball) {
+                InteractionResult result = pokeball.interactLivingEntity(ball, player, this, ballHand);
+                return result == InteractionResult.PASS || result == InteractionResult.FAIL
+                        ? InteractionResult.CONSUME : result;
+            }
+        }
+        if (held.getItem() instanceof PokemonTreatItem treat) {
+            boolean compatible = PokemonTreatTypes.accepts(this.getSpeciesSlug(), treat.getTreatType().pokemonType());
+            if (this.level.isClientSide) return InteractionResult.sidedSuccess(compatible);
+            if (!compatible || this.getTarget() != null || this.attackAnimationTicks > 0)
+                return InteractionResult.sidedSuccess(false);
+            if (!this.isTame()) {
+                if (!player.getAbilities().instabuild) held.shrink(1);
+                int chance = MinemonConfig.TAME_CHANCE_PERCENT.get();
+                if (this.getRandom().nextInt(100) < chance) {
+                    this.tame(player);
+                    this.setOrderedToSit(true);
+                    this.setTarget(null);
+                    this.getNavigation().stop();
+                    this.level.broadcastEntityEvent(this, (byte) 7);
+                } else {
+                    this.level.broadcastEntityEvent(this, (byte) 6);
+                }
+                return InteractionResult.sidedSuccess(false);
+            }
+            if (!this.isOwnedBy(player)) return InteractionResult.sidedSuccess(false);
+            float maximum = this.getMaxHealth();
+            if (this.getHealth() < maximum) {
+                float amount = Math.min((float)MinemonConfig.TREAT_HEAL_AMOUNT.get(), maximum - this.getHealth());
+                if (amount <= 0.0F) return InteractionResult.sidedSuccess(false);
+                this.setHealth(this.getHealth() + amount);
+                if(isDefeated() && this.getHealth()>=this.getMaxHealth()){
+                    this.entityData.set(DEFEATED,false);this.defeatTargetsCleared=false;this.setNoAi(aiBeforeDefeat);this.setSleeping(false);
+                }
+                consumeTreat(player, held);
+                this.level.broadcastEntityEvent(this, (byte)18);
+                return InteractionResult.sidedSuccess(false);
+            }
+            if (!this.isInLove() && !this.isBaby() && this.getAge() == 0 && !this.isBreedingBusy()
+                    && isBreedingPermitted(this.getSpeciesSlug()) && hasSafeBabyPosition((ServerLevel)this.level, this)) {
+                this.setInLove(player);
+                consumeTreat(player, held);
+                this.level.broadcastEntityEvent(this, (byte)18);
+            }
+            return InteractionResult.sidedSuccess(false);
+        }
+        // TamableAnimal has vanilla bone taming; handle it here without mutation.
+        if (held.is(Items.BONE)) {
+            return InteractionResult.sidedSuccess(this.level.isClientSide);
+        }
+
+        if (this.isTame() && this.isOwnedBy(player) && !this.isFood(held)) {
+            if (!this.level.isClientSide && player instanceof ServerPlayer serverPlayer)
+                br.com.petrickfaria.minemon.menu.PokemonMenus.openInfo(serverPlayer, this);
+            return InteractionResult.sidedSuccess(this.level.isClientSide);
+        }
+        return super.mobInteract(player, hand);
+    }
+
+    @Override
+    public boolean hurt(DamageSource source, float amount) {
+        if(isDefeated())return false;
+        boolean wokeFromRest=this.isSleeping()||this.isNightResting();
+        boolean hurt = super.hurt(source, amount);
+        if(hurt&&!this.level.isClientSide){
+            this.setSleeping(false);this.entityData.set(NIGHT_REST,false);this.wakeGraceTicks=100;this.syncNaturalState();
+        }
+        if (hurt && !this.level.isClientSide && source.getEntity() instanceof LivingEntity attacker
+                && this.canAttack(attacker)) {
+            this.setTarget(attacker);
+            if(wokeFromRest){this.nightCombatTicks=WILD_AGGRESSION_DURATION_TICKS;this.nightUnreachableTicks=0;}
+            if (!this.isTame()) {
+                this.wildAggressionTicks = WILD_AGGRESSION_DURATION_TICKS;
+                this.wildUnreachableTicks = 0;
+            }
+        }
+        return hurt;
+    }
+
+    @Override
+    public void tick() {
+        if(this.escapeNavigation!=null){
+            var desired=this.isInWater()?this.escapeNavigation:this.dryNavigation;
+            if(this.navigation!=desired){this.navigation.stop();this.navigation=desired;}
+        }
+        if(!this.level.isClientSide&&!(Boolean.getBoolean("minemon.clientSmokeTest")&&this.getTags().contains("minemon-locomotion-fixture"))){if(!isDefeated())this.tickNightRest();}
+        super.tick();
+        if(!level.isClientSide && isTame()){rangedCharges.tick(!isDefeated());entityData.set(RANGED_CHARGES,rangedCharges.charges());}
+        if(level.isClientSide)tickGastlySmoke();
+        if(isDefeated()){
+            this.getNavigation().stop();this.setTarget(null);this.setJumping(false);
+            this.setSpeed(0);this.setXxa(0);this.setYya(0);this.setZza(0);
+            if(!level.isClientSide){
+                if(!defeatTargetsCleared){DefeatedTargetProtection.clear(this);defeatTargetsCleared=true;}
+                defeatedRest.tick();
+            }else this.setDeltaMovement(0,0,0);
+            if(!level.isClientSide && tickCount%12==0)((ServerLevel)level).sendParticles(net.minecraft.core.particles.ParticleTypes.SMOKE,
+                    getX(),getY()+getBbHeight()*.5,getZ(),1,getBbWidth()*.2,getBbHeight()*.15,getBbWidth()*.2,.005);
+            return;
+        }
+        if(!level.isClientSide)ShoreTraversal.tick(this);
+        if(this.getTarget()!=null && !canAttack(this.getTarget())){this.setTarget(null);this.getNavigation().stop();}
+        if (!this.level.isClientSide) {
+            this.tickNaturalCycle();
+            this.tickChanseyHealing();
+            this.tickCustomSoundTimer();
+            // Keep the challenge entity in the Rocket workstation's loaded area so an
+            // unloaded chunk cannot look like a vanished Rattata and spawn a duplicate.
+            if (this.isRocketSpecial() && this.getPersistentData().hasUUID("RocketVillager")
+                    && this.level instanceof ServerLevel serverLevel) {
+                var linked = serverLevel.getEntity(this.getPersistentData().getUUID("RocketVillager"));
+                if (linked instanceof net.minecraft.world.entity.npc.Villager villager
+                        && this.distanceToSqr(villager) > 36.0D * 36.0D) {
+                    this.moveTo(villager.getX() + 1.5D, villager.getY(), villager.getZ() + 0.5D,
+                            this.getYRot(), this.getXRot());
+                    this.setTarget(null);
+                    this.getNavigation().stop();
+                }
+            }
+        }
+        if (this.level.isClientSide) {
+            if (this.isRocketSpecial() && !this.isDeadOrDying() && this.tickCount % 4 == Math.floorMod(this.getId(), 4)) {
+                double radius = Math.max(0.12D, this.getBbWidth() * 0.46D);
+                for (int i = 0; i < 2; i++) {
+                    double angle = this.random.nextDouble() * Math.PI * 2.0D;
+                    double spread = radius * (0.82D + this.random.nextDouble() * 0.36D);
+                    this.level.addParticle(net.minecraft.core.particles.ParticleTypes.SMOKE,
+                            this.getX() + Math.cos(angle) * spread,
+                            this.getY() + this.getBbHeight() * (0.28D + this.random.nextDouble() * 0.48D),
+                            this.getZ() + Math.sin(angle) * spread,
+                            (this.random.nextDouble() - 0.5D) * 0.008D,
+                            0.012D + this.random.nextDouble() * 0.018D,
+                            (this.random.nextDouble() - 0.5D) * 0.008D);
+                    this.smokeParticles++;
+                }
+            }
+            if ((this.getSpeciesSlug().equals("koffing") || this.getSpeciesSlug().equals("weezing"))
+                    && !this.isRocketSpecial() && !this.isDeadOrDying()
+                    && this.tickCount % 5 == Math.floorMod(this.getId(), 5)) {
+                double radius = this.getBbWidth() * 0.35D;
+                for (int i = 0; i < 2; i++) {
+                    double angle = this.random.nextDouble() * Math.PI * 2.0D;
+                    double spread = radius * (0.5D + this.random.nextDouble() * 0.8D);
+                    this.level.addParticle(net.minecraft.core.particles.ParticleTypes.SMOKE,
+                            this.getX() + Math.cos(angle) * spread,
+                            this.getY() + this.getBbHeight() * (0.30D + this.random.nextDouble() * 0.42D),
+                            this.getZ() + Math.sin(angle) * spread,
+                            0.0D, 0.015D + this.random.nextDouble() * 0.02D, 0.0D);
+                    this.smokeParticles++;
+                }
+            }
+            if (this.attackAnimationTicks > 0) this.attackAnimationTicks--;
+            if (this.blinkCooldownTicks > 0) this.blinkCooldownTicks--;
+            if (this.blinkCooldownTicks == 0) {
+                this.blinkPending = true;
+                this.blinkCooldownTicks = 80 + this.getRandom().nextInt(120);
+            }
+        } else {
+            if (!this.level.isClientSide) this.tickSpontaneousRun();
+            this.tickWildAggression();
+            this.tickNightCombat();
+        }
+    }
+
+    private void tickGastlySmoke(){
+        if(!getSpeciesSlug().equals("gastly") || isRemoved())return;
+        int large=GastlyAura.largeSlot(tickCount),small=GastlyAura.smallSlot(tickCount);
+        if(large>=0)level.addParticle(br.com.petrickfaria.minemon.registry.ModParticles.GASTLY_GHOSTLY_SMOKE.get(),getX(),getY(),getZ(),getId(),large,0);
+        if(small>=0)level.addParticle(br.com.petrickfaria.minemon.registry.ModParticles.GASTLY_SMALL_SMOKE.get(),getX(),getY(),getZ(),getId(),small,0);
+    }
+
+    /** Independent, persisted world-time counter. Unloaded chunks do not advance it. */
+    private void tickCustomSoundTimer() {
+        if (!this.isAlive() || this.isRemoved()) return;
+        if (!this.isCustomSoundDaytime()) {
+            this.customSoundDayActive = false;
+            this.customSoundTicks = 0;
+            return;
+        }
+        if (!this.customSoundDayActive) {
+            this.customSoundDayActive = true;
+            this.customSoundTicks = 20 + this.getRandom().nextInt(181);
+            return;
+        }
+        if (this.customSoundTicks > 0) this.customSoundTicks--;
+        if (this.customSoundTicks == 0) {
+            br.com.petrickfaria.minemon.network.MinemonNetwork.playForTracking(this);
+            this.customSoundTicks = this.nextCustomSoundInterval();
+        }
+    }
+
+    public void resetCustomSoundTimerAndPlay() {
+        if (!this.isCustomSoundDaytime()) return;
+        this.customSoundDayActive = true;
+        this.customSoundTicks = this.nextCustomSoundInterval();
+        br.com.petrickfaria.minemon.network.MinemonNetwork.playForTracking(this);
+        this.customSoundInteractionDispatchesForValidation++;
+    }
+
+    /** Returns an independent 3–5 minute interval, inclusive, for this entity. */
+    private int nextCustomSoundInterval() {
+        return 3600 + this.customSoundRandom.nextInt(2401);
+    }
+
+    /** Uses this world's daylight state, never the host computer clock. Dimensions without a day/night cycle stay eligible. */
+    public boolean isCustomSoundDaytime() {
+        return !this.level.dimensionType().hasSkyLight() || !this.level.isNight();
+    }
+
+    public int customSoundTicksForValidation() { return this.customSoundTicks; }
+    public int customSoundInteractionDispatchesForValidation() { return this.customSoundInteractionDispatchesForValidation; }
+    public java.util.List<String> runningGoalsForValidation() {
+        return this.goalSelector.getAvailableGoals().stream()
+                .filter(net.minecraft.world.entity.ai.goal.WrappedGoal::isRunning)
+                .map(goal -> goal.getGoal().getClass().getSimpleName()).toList();
+    }
+    public void setCustomSoundTicksForValidation(int ticks) {
+        this.customSoundTicks = Math.max(0, Math.min(6000, ticks));
+        this.customSoundDayActive = ticks > 0;
+    }
+    public boolean customSoundDayActiveForValidation() { return this.customSoundDayActive; }
+
+    private void tickNightRest(){
+        if(this.wakeGraceTicks>0)this.wakeGraceTicks--;
+        LivingEntity target=this.getTarget();
+        if(target!=null&&(!target.isAlive()||target.isRemoved())){
+            this.setTarget(null);
+            // HurtByTargetGoal can otherwise reacquire the discarded attacker
+            // from LivingEntity's remembered damage source on its next tick.
+            if(this.getLastHurtByMob()==target)this.setLastHurtByMob(null);
+            target=null;
+        }
+        boolean night=this.level.dimensionType().hasSkyLight()
+                &&SpeciesBehaviorProfiles.shouldSleep(this.getSpeciesSlug(), this.level.getDayTime());
+        boolean waterRest=SpeciesBehaviorProfiles.waterCapable(this.getSpeciesSlug())&&this.isInWaterOrBubble();
+        boolean restingEnvironment=SpeciesBehaviorProfiles.canFly(this.getSpeciesSlug())||waterRest||!SpeciesBehaviorProfiles.isAquatic(this.getSpeciesSlug())&&!this.isInWaterOrBubble();
+        boolean eligible=restingEnvironment&&!this.isOrderedToSit()&&!this.isNoAi()
+            &&!this.isPassenger()&&!this.isDeadOrDying()
+            &&target==null&&this.wakeGraceTicks==0;
+        if(night&&eligible){
+            if(!this.nightRoutine){
+                this.nightRoutine=true;
+                if(!waterRest||!SpeciesBehaviorProfiles.restsAtWaterBottom(this.getSpeciesSlug()))this.getNavigation().stop();
+                this.stopSpontaneousRun();
+            }
+            this.entityData.set(NIGHT_REST,true);
+            if(waterRest&&!Double.isFinite(this.aquaticSleepY)&&!SpeciesBehaviorProfiles.restsAtWaterBottom(this.getSpeciesSlug())){
+                double surface=WaterMovementGoal.restSurfaceAt(this,this.blockPosition());
+                // Choose once per sleep episode, including migration of older saves.
+                boolean atSurface=Double.isFinite(surface)&&this.getBoundingBox().maxY>=surface-.08D;
+                this.aquaticSleepY=atSurface?Math.min(this.getY(),surface-2):this.getY();
+            }
+            boolean hover=SpeciesBehaviorProfiles.hoversDuringNightRest(this.getSpeciesSlug());
+            double restHeight=SpeciesBehaviorProfiles.nightRestHoverHeight(this.getSpeciesSlug());
+            double waterSettleTolerance=SpeciesBehaviorProfiles.restsAtWaterBottom(this.getSpeciesSlug())
+                    ?(this.getSpeciesSlug().equals("gyarados")?0.025D:0.05D):0.18D;
+            boolean settled=waterRest?Math.abs(this.getY()-WaterMovementGoal.waterRestY(this))<waterSettleTolerance
+                :hover?Math.abs(this.getY()-this.naturalSurface()-restHeight)<0.18D
+                :this.isOnGround()&&WaterMovementGoal.safeDry(this,this.blockPosition());
+            if(settled&&waterRest&&SpeciesBehaviorProfiles.restsAtWaterBottom(this.getSpeciesSlug())){
+                double restY=WaterMovementGoal.waterRestY(this);
+                BlockPos support=this.blockPosition().below();
+                var shape=this.level.getBlockState(support).getCollisionShape(this.level,support);
+                double supportTop=shape.isEmpty()?Double.NaN:support.getY()+shape.max(net.minecraft.core.Direction.Axis.Y);
+                boolean physicalBottom=Double.isFinite(restY)&&Double.isFinite(supportTop)
+                    &&restY>=supportTop&&restY-supportTop<0.05D;
+                var restBox=this.getBoundingBox().move(0.0D,restY-this.getY(),0.0D);
+                settled=physicalBottom&&this.level.noCollision(this,restBox);
+                if(settled){this.setPos(this.getX(),restY,this.getZ());this.setDeltaMovement(0.0D,0.0D,0.0D);}
+            }
+            if(settled&&!this.isSleeping())this.setSleeping(true);
+        }else{
+            this.entityData.set(NIGHT_REST,false);
+            if(this.nightRoutine){this.nightRoutine=false;this.aquaticSleepY=Double.NaN;this.setSleeping(false);this.getNavigation().stop();}
+        }
+        this.syncNaturalState();
+    }
+
+    @Override public void moveRelative(float acceleration,net.minecraft.world.phys.Vec3 input){
+        // Vanilla water travel uses 0.02 acceleration and 0.8 horizontal drag.
+        // SmoothSwimmingMoveControl supplies an attribute-scaled input (<1),
+        // which previously multiplied this down a second time. Match the
+        // player's full forward input (including LivingEntity's 0.98 damping).
+        if(this.isInWater()&&!this.level.isClientSide&&!this.isSleeping()
+                &&this.getMoveControl().hasWanted()&&input.lengthSqr()>1.0E-8){
+            input=input.normalize().scale(0.98D);
+            if(!this.isAquaticSpecies())acceleration*=1.25F;
+        }
+        super.moveRelative(acceleration,input);
+    }
+
+    private void tickNightCombat(){
+        if(this.nightCombatTicks<=0)return;
+        var target=this.getTarget();
+        if(target!=null&&target.isAlive()&&target.distanceToSqr(this)<=WILD_MAX_CHASE_DISTANCE*WILD_MAX_CHASE_DISTANCE){
+            if(this.getNavigation().isDone()&&target.distanceToSqr(this)>16)this.nightUnreachableTicks++;
             else this.nightUnreachableTicks=0;
             if(--this.nightCombatTicks>0&&this.nightUnreachableTicks<WILD_UNREACHABLE_LIMIT_TICKS)return;
         }
