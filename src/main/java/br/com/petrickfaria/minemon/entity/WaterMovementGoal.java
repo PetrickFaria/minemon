@@ -221,6 +221,9 @@ public final class WaterMovementGoal extends Goal {
   return nearest;
  }
  private boolean surfacePathIsWater(net.minecraft.world.level.pathfinder.Path path){
+  return surfacePathIsWater(mob,path);
+ }
+ private static boolean surfacePathIsWater(MinemonCreature mob,net.minecraft.world.level.pathfinder.Path path){
   // Validate the whole route, including the space between path nodes. Wide
   // surface swimmers can clear each node yet clip a shallow corner while the
   // navigator interpolates toward the following node.
@@ -346,7 +349,7 @@ public final class WaterMovementGoal extends Goal {
    if(!Double.isFinite(y))continue;
    BlockPos feet=new BlockPos(column.getX(),Math.ceil(y),column.getZ());
    var path=mob.getNavigation().createPath(feet,0);
-   if(path!=null&&path.canReach()&&(!mob.getSpeciesSlug().equals("gyarados")||surfacePathIsWater(path)))return feet;
+   if(path!=null&&path.canReach()&&(!mob.getSpeciesSlug().equals("gyarados")||surfacePathIsWater(mob,path)))return feet;
   }
   return null;
  }

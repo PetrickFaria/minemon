@@ -2,6 +2,7 @@ package br.com.petrickfaria.minemon.menu;
 
 import br.com.petrickfaria.minemon.pokec.PokecSpecies;
 import br.com.petrickfaria.minemon.pokec.PokecPlayerData;
+import br.com.petrickfaria.minemon.pokec.PokecEconomy;
 import br.com.petrickfaria.minemon.pokec.SoulType;
 import br.com.petrickfaria.minemon.pokec.PokemonSoulConversion;
 import br.com.petrickfaria.minemon.item.PokeballItem;
@@ -17,7 +18,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerLevelAccess;
-import net.minecraft.world.inventory.SimpleContainer;
+import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.registries.RegistryObject;
 
@@ -78,10 +79,12 @@ public final class PokecMenu extends AbstractContainerMenu {
             slot.index = menuIndex;
             slots.set(menuIndex, slot);
         }
-        slots.get(0).x = Math.round((560 + 8) * scale);
-        slots.get(0).y = Math.round((28 + 43) * scale);
-        slots.get(1).x = Math.round((560 + 30) * scale);
-        slots.get(1).y = Math.round((28 + 45) * scale);
+        slots.set(0,new net.minecraft.world.inventory.Slot(paymentInventory,0,Math.round((560+8)*scale),Math.round((28+43)*scale)){
+            @Override public boolean mayPlace(ItemStack stack){return paymentAccepts(stack);}
+        });
+        slots.set(1,new net.minecraft.world.inventory.Slot(paymentInventory,1,Math.round((560+30)*scale),Math.round((28+45)*scale)){
+            @Override public boolean mayPlace(ItemStack stack){return paymentAccepts(stack);}
+        });
     }
     public String selectedSlug() { return selectedSlug; }
     public int stagedCoins() { return paymentCount(ModItems.POKE_COIN.get()); }
