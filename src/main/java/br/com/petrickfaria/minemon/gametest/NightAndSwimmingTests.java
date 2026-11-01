@@ -324,6 +324,11 @@ public final class NightAndSwimmingTests {
  }
  static void runRealNightLandingHoverWakeRetaliationReturnAndDawn(GameTestHelper h){
   arena(h);var level=h.getLevel();level.setDayTime(1000);
+  // Ordinary roaming remains enabled during combat recovery. Keep this ground
+  // sleeper on the test's prepared floor so its return-to-sleep assertion does
+  // not depend on blocks belonging to neighboring GameTest structures.
+  for(int y=1;y<=3;y++)for(int ax=0;ax<=6;ax++)for(int az=0;az<=4;az++)
+   if(ax==0||ax==6||az==0||az==4)h.setBlock(new BlockPos(ax,y,az),Blocks.STONE);
   // Keep sleeping hoverers clear of the wide grounded sleepers: collision
   // pushing is physical displacement, not autonomous sleep travel.
   for(int ax=0;ax<32;ax++)for(int az=26;az<44;az++){
