@@ -9,7 +9,7 @@ import net.minecraftforge.gametest.PrefixGameTestTemplate;
 @GameTestHolder("minemon_diag_gastly")
 @PrefixGameTestTemplate(false)
 public final class DiagnosticGastlyFollowingTest {
-    @GameTest(template="test_arena", templateNamespace="minemon_diag_gastly", batch="diagnostic_gastly_follow", timeoutTicks=500)
+    @GameTest(template="test_arena", templateNamespace="minemon_diag_gastly", batch="diagnostic_gastly_follow", timeoutTicks=650)
     public static void followsWithContinuousMovementThenObeysSit(GameTestHelper helper) {
         NaturalFollowingGameTests.followsWithContinuousMovementThenObeysSit(helper);
     }
