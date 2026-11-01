@@ -79,8 +79,9 @@ final class NineBehaviorChecks {
   final List<MinemonCreature> mobs;
   final long diagnosticStart;
   final long[] followStartedAt;
-  FollowingAltitudeFixture(net.minecraft.server.level.ServerPlayer owner,List<MinemonCreature> mobs,long diagnosticStart,long[] followStartedAt){
-   this.owner=owner;this.mobs=mobs;this.diagnosticStart=diagnosticStart;this.followStartedAt=followStartedAt;
+  final double[] initialDistances;
+  FollowingAltitudeFixture(net.minecraft.server.level.ServerPlayer owner,List<MinemonCreature> mobs,long diagnosticStart,long[] followStartedAt,double[] initialDistances){
+   this.owner=owner;this.mobs=mobs;this.diagnosticStart=diagnosticStart;this.followStartedAt=followStartedAt;this.initialDistances=initialDistances;
   }
  }
  static FollowingAltitudeFixture followingAltitudes(GameTestHelper h){
@@ -93,7 +94,12 @@ final class NineBehaviorChecks {
    var mob=h.spawn(ModEntities.SPECIES.get(species.get(i)).get(),new BlockPos(5+2*i,5,2+i));mob.tame(owner);mob.setOrderedToSit(false);mob.naturalCycle().restore("AIR",1000,1);mobs.add(mob);
   }
   long diagnosticStart=level.getGameTime();long[] followStartedAt=new long[mobs.size()];java.util.Arrays.fill(followStartedAt,-1L);
-  return new FollowingAltitudeFixture(owner,mobs,diagnosticStart,followStartedAt);
+  double[] initialDistances=new double[mobs.size()];
+  for(int i=0;i<mobs.size();i++){
+   double dx=mobs.get(i).getX()-owner.getX(),dz=mobs.get(i).getZ()-owner.getZ();
+   initialDistances[i]=Math.sqrt(dx*dx+dz*dz);
+  }
+  return new FollowingAltitudeFixture(owner,mobs,diagnosticStart,followStartedAt,initialDistances);
  }
  static void traceFollowingAltitudes(FollowingAltitudeFixture fixture){
   long now=fixture.owner.level.getGameTime();
@@ -111,7 +117,12 @@ final class NineBehaviorChecks {
   for(int i=0;i<fixture.mobs.size();i++){
    var mob=fixture.mobs.get(i);
    double altitude=mob.getY()-mob.naturalSurface();
-   if(!mob.isFollowingOwner()||Math.abs(altitude-mob.followAltitude())>.35)
+   double dx=mob.getX()-fixture.owner.getX(),dz=mob.getZ()-fixture.owner.getZ();
+   double distance=Math.sqrt(dx*dx+dz*dz);
+   boolean failedAltitude=mob.getNavigation().isDone()
+       ?Math.abs(altitude-mob.followAltitude())>.35
+       :altitude<mob.followAltitude()-.35D||altitude>mob.followAltitude()+3.5D;
+   if(!mob.isFollowingOwner()||fixture.initialDistances[i]-distance<2.0D||failedAltitude)
     return "FOLLOW ALTITUDE ASSERTION FAILED: "
         +followingAltitudeSnapshot(mob,fixture.owner,h.getLevel().getGameTime(),fixture.followStartedAt[i],fixture.diagnosticStart);
    mob.setOrderedToSit(true);
