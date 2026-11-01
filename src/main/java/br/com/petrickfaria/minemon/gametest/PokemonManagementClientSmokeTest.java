@@ -19,6 +19,7 @@ public final class PokemonManagementClientSmokeTest {
     private static volatile int entityId = -1;
     private static int phase;
     private static volatile int dewgongId=-1,gastlyId=-1;
+    private static volatile UUID gastlyUuid;
     private static volatile boolean closedEyesSeen,openEyesSeen,awakeBlinkSeen;
     private static int auraState,auraLarge,auraSmall;
     private static void nineFixtures(Minecraft minecraft){
@@ -45,12 +46,14 @@ public final class PokemonManagementClientSmokeTest {
             var dewgong=ModEntities.SPECIES.get("dewgong").get().create(level);dewgong.tame(owner);dewgong.setNoAi(true);dewgong.setNoGravity(true);
             dewgong.moveTo(owner.getX(),owner.getY(),owner.getZ()+3,180,0);dewgong.setSleeping(true);level.addFreshEntity(dewgong);dewgongId=dewgong.getId();
             var gastly=ModEntities.SPECIES.get("gastly").get().create(level);gastly.tame(owner);gastly.setNoAi(true);gastly.setNoGravity(true);
-            gastly.moveTo(owner.getX()+1.5,owner.getY()+1,owner.getZ()+3.5,180,0);level.addFreshEntity(gastly);gastlyId=gastly.getId();
+            gastly.moveTo(owner.getX()+1.5,owner.getY()+1,owner.getZ()+3.5,180,0);
+            if(!level.addFreshEntity(gastly))throw new IllegalStateException("Could not add the Gastly smoke fixture to the validation world");
+            gastlyId=gastly.getId();gastlyUuid=gastly.getUUID();
         });
     }
     private static void changeAuraState(Minecraft minecraft,int state){
         minecraft.getSingleplayerServer().execute(()->{
-            var level=minecraft.getSingleplayerServer().overworld();var entity=level.getEntity(gastlyId);
+            var level=minecraft.getSingleplayerServer().overworld();var entity=gastlyUuid==null?level.getEntity(gastlyId):level.getEntity(gastlyUuid);
             if(entity instanceof br.com.petrickfaria.minemon.entity.MinemonCreature gas){
                 if(state==1)gas.setSleeping(true);
                 else if(state==2)gas.setOrderedToSit(true);
@@ -227,8 +230,14 @@ public final class PokemonManagementClientSmokeTest {
                 phase=10;ticks=0;auraState=0;return;
             }
             if(phase==10){
-                var gastlyEntity=minecraft.level.getEntity(gastlyId);
-                if(gastlyEntity==null){if(++ticks>200)throw new IllegalStateException("Gastly aura fixture was not tracked");return;}
+                var gastlyEntity=gastlyUuid==null?null:minecraft.level.getEntity(gastlyUuid);
+                if(gastlyEntity==null){
+                    if(++ticks>200)throw new IllegalStateException("Gastly aura fixture was not tracked by UUID; id="+gastlyId+" uuid="+gastlyUuid
+                            +" nearby="+minecraft.level.getEntitiesOfClass(br.com.petrickfaria.minemon.entity.MinemonCreature.class,
+                                    minecraft.player.getBoundingBox().inflate(32),m->m.getSpeciesSlug().equals("gastly")).stream()
+                                    .map(m->m.getUUID()+"/"+m.getId()+"/"+m.position()).toList());
+                    return;
+                }
                 double dx=gastlyEntity.getX()-minecraft.player.getX(),dz=gastlyEntity.getZ()-minecraft.player.getZ();
                 double dy=gastlyEntity.getY()+gastlyEntity.getBbHeight()*.7D-minecraft.player.getEyeY();
                 minecraft.player.setYRot((float)(Math.toDegrees(Math.atan2(dz,dx))-90));
