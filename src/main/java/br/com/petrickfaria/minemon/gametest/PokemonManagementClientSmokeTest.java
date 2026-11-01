@@ -227,8 +227,15 @@ public final class PokemonManagementClientSmokeTest {
                 phase=10;ticks=0;auraState=0;return;
             }
             if(phase==10){
-                if(minecraft.level.getEntity(gastlyId)==null){if(++ticks>200)throw new IllegalStateException("Gastly aura fixture was not tracked");return;}
+                var gastlyEntity=minecraft.level.getEntity(gastlyId);
+                if(gastlyEntity==null){if(++ticks>200)throw new IllegalStateException("Gastly aura fixture was not tracked");return;}
+                double dx=gastlyEntity.getX()-minecraft.player.getX(),dz=gastlyEntity.getZ()-minecraft.player.getZ();
+                double dy=gastlyEntity.getY()+gastlyEntity.getBbHeight()*.7D-minecraft.player.getEyeY();
+                minecraft.player.setYRot((float)(Math.toDegrees(Math.atan2(dz,dx))-90));
+                minecraft.player.setXRot((float)-Math.toDegrees(Math.atan2(dy,Math.sqrt(dx*dx+dz*dz))));
                 ticks++;
+                if(auraState==0&&ticks==40)
+                    net.minecraft.client.Screenshot.grab(minecraft.gameDirectory,"gastly-smoke-cloud.png",minecraft.getMainRenderTarget(),message->{});
                 if(ticks==32){
                     auraLarge=br.com.petrickfaria.minemon.client.GastlySmokeParticle.largeSpawnsForValidation();
                     auraSmall=br.com.petrickfaria.minemon.client.GastlySmokeParticle.smallSpawnsForValidation();

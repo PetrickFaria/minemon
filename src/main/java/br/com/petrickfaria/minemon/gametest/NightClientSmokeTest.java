@@ -20,6 +20,8 @@ final class NightClientSmokeTest {
      ? ALL_SPECIES : SmokeSpeciesSelection.select(SpeciesDefinitions.ALL.values(),System.getProperty("minemon.clientSmokeSpecies"));
 
  private static boolean opened,setup,spawned,waking,gengarWakeEyesObserved,nocturnalMidday;
+ private static boolean gyaradosNightStarted,gyaradosSawDescent;
+ private static double gyaradosDaySurfaceY=Double.NaN,gyaradosSleepY=Double.NaN;
  private static int ticks,index,samples,activeSamples,sleepTick,depthSettleTicks,depthStableTicks,restSettleTicks,restStableTicks;
  private static volatile UUID entity;
  private static final Map<String,float[]> eyes=new HashMap<>();
@@ -133,7 +135,7 @@ final class NightClientSmokeTest {
     var p=level.getServer().getPlayerList().getPlayers().get(0);p.setGameMode(GameType.CREATIVE);p.teleportTo(level,0,102,-5,0,8);
    });return;}
    if(!spawned){
-    spawned=true;gengarWakeEyesObserved=false;nocturnalMidday=false;ticks=0;samples=0;activeSamples=0;sleepTick=0;depthSettleTicks=0;depthStableTicks=0;restSettleTicks=0;restStableTicks=0;waking=false;eyes.clear();restingWings.clear();
+    spawned=true;gengarWakeEyesObserved=false;nocturnalMidday=false;gyaradosNightStarted=false;gyaradosSawDescent=false;gyaradosDaySurfaceY=Double.NaN;gyaradosSleepY=Double.NaN;ticks=0;samples=0;activeSamples=0;sleepTick=0;depthSettleTicks=0;depthStableTicks=0;restSettleTicks=0;restStableTicks=0;waking=false;eyes.clear();restingWings.clear();
     mc.getSingleplayerServer().execute(()->{
      var level=mc.getSingleplayerServer().overworld();if(entity!=null){var old=level.getEntity(entity);if(old!=null)old.discard();}
      String scenario=SPECIES.get(index);String slug=scenario.equals("vaporeon_land")?"vaporeon":scenario;
@@ -152,7 +154,7 @@ final class NightClientSmokeTest {
          ||SpeciesBehaviorProfiles.profile(mob.getSpeciesSlug())==SpeciesBehaviorProfiles.Profile.GROUND_FLOAT_CYCLE){
       var tag=new net.minecraft.nbt.CompoundTag();mob.addAdditionalSaveData(tag);tag.putString("NaturalBehaviorPhase","AIR");mob.readAdditionalSaveData(tag);
      }
-     level.addFreshEntity(mob);entity=mob.getUUID();level.setDayTime(18000);
+     level.addFreshEntity(mob);entity=mob.getUUID();level.setDayTime(slug.equals("gyarados")?1000:18000);
      double distance=switch(mob.getSpeciesSlug()){
       case "venusaur"->7;case "snorlax","charizard","dragonite"->6;case "fearow"->9;
       case "victreebel","scyther","weezing"->5;case "pidgeotto","haunter","butterfree","beedrill","parasect"->4;
@@ -176,6 +178,29 @@ final class NightClientSmokeTest {
    }
    MinemonCreature current=null;for(var e:mc.level.entitiesForRendering())if(e.getUUID().equals(entity)&&e instanceof MinemonCreature m){current=m;break;}
    if(current==null)return;
+   if(current.getSpeciesSlug().equals("gyarados")){
+    if(!gyaradosNightStarted){
+     double surface=WaterMovementGoal.restSurfaceAt(current,current.blockPosition());
+     double daytimeTarget=surface-WaterMovementGoal.preferredSurfaceDepth(current);
+     if(Double.isFinite(daytimeTarget)&&Math.abs(current.getY()-daytimeTarget)<.3D){
+      gyaradosDaySurfaceY=current.getY();gyaradosNightStarted=true;
+      mc.getSingleplayerServer().execute(()->mc.getSingleplayerServer().overworld().setDayTime(18000));
+      Files.writeString(Path.of("client-validation-night.txt"),"GYARADOS day surface reached y="+gyaradosDaySurfaceY+"; beginning night descent\n",StandardOpenOption.APPEND);
+     }else if(ticks>350){
+      throw new IllegalStateException("Gyarados failed to reach its awake surface anchor before night; y="+current.getY()+" target="+daytimeTarget+" surface="+surface);
+     }
+    }else if(!current.isSleeping()&&current.getY()<gyaradosDaySurfaceY-.8D){
+     gyaradosSawDescent=true;
+    }
+    if(current.isSleeping()){
+     double bottom=WaterMovementGoal.waterRestY(current);
+     if(!gyaradosSawDescent||!Double.isFinite(bottom)||bottom>gyaradosDaySurfaceY-5.0D
+         ||Math.abs(current.getY()-bottom)>.2D){
+      throw new IllegalStateException("Gyarados must render after physically descending to the deep night floor; descended="+gyaradosSawDescent+" dayY="+gyaradosDaySurfaceY+" y="+current.getY()+" target="+bottom);
+     }
+     gyaradosSleepY=current.getY();
+    }
+   }
    boolean waterRest=SpeciesBehaviorProfiles.waterCapable(current.getSpeciesSlug())&&current.isInWaterOrBubble();
    if(current.isSleeping()){
     if(waterRest){
@@ -217,6 +242,14 @@ final class NightClientSmokeTest {
     waking=true;mc.getSingleplayerServer().execute(()->mc.getSingleplayerServer().overworld().setDayTime(nocturnal?13000:1000));
    }
    if(waking&&!current.isSleeping()){
+    if(current.getSpeciesSlug().equals("gyarados")){
+     double surface=WaterMovementGoal.restSurfaceAt(current,current.blockPosition());
+     double daytimeTarget=surface-WaterMovementGoal.preferredSurfaceDepth(current);
+     if(!Double.isFinite(daytimeTarget)||Math.abs(current.getY()-daytimeTarget)>.3D)return;
+     if(current.getY()<gyaradosSleepY+5.0D)
+      throw new IllegalStateException("Gyarados woke but did not return to its prior awake surface depth; sleepY="+gyaradosSleepY+" y="+current.getY()+" target="+daytimeTarget);
+     Files.writeString(Path.of("client-validation-night.txt"),"PASS GYARADOS dawn return y="+current.getY()+" target="+daytimeTarget+"\n",StandardOpenOption.APPEND);
+    }
     if(current.getSpeciesSlug().equals("gengar")&&!gengarWakeEyesObserved)return;
     if(++index>=SPECIES.size()){
      Files.writeString(Path.of("client-validation-night.txt"),"PASS NIGHT CLIENT: ordinary species slept at night; all five nocturnal species stayed active at night, slept from midday to dusk, rendered their native closed-eye poses, and woke at dusk. All eleven permanent aquatic species rendered water-idle sleep poses with closed-eye overlays.\n",StandardOpenOption.APPEND);

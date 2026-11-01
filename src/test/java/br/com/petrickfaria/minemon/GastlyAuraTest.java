@@ -13,4 +13,14 @@ public class GastlyAuraTest {
  @Test public void originalAndEnlargedSizesAndTransparencyArePreserved(){
   assertEquals(2.5F,GastlyAura.LARGE_SIZE/GastlyAura.SMALL_SIZE,.0001F);assertEquals(.75F,GastlyAura.OPACITY,0);
  }
+ @Test public void cloudSlotsSurroundTheHeadWithUnevenDepthHeightAndScale(){
+  var xs=new java.util.HashSet<Float>();var ys=new java.util.HashSet<Float>();var zs=new java.util.HashSet<Float>();
+  var sizes=new java.util.HashSet<Float>();
+  for(int slot=0;slot<12;slot++){
+   xs.add(GastlyAura.cloudX(slot));ys.add(GastlyAura.cloudY(slot));zs.add(GastlyAura.cloudZ(slot));sizes.add(GastlyAura.sizeVariation(slot));
+   assertTrue(GastlyAura.cloudY(slot)>-.5F&&GastlyAura.cloudY(slot)<1.0F);
+   assertTrue(GastlyAura.sizeVariation(slot)>=.82F&&GastlyAura.sizeVariation(slot)<=1.18F);
+  }
+  assertTrue(xs.size()>8);assertTrue(ys.size()>8);assertTrue(zs.size()>8);assertTrue(sizes.size()>6);
+ }
 }

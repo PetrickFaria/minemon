@@ -53,6 +53,9 @@ public final class GastlySmokeParticle extends TextureSheetParticle {
         followBody();
         if (this.removed) return;
         float progress = (float) this.age / (float) this.lifetime;
+        float fadeIn=Math.min(1.0F,progress*5.0F);
+        float fadeOut=Math.min(1.0F,(1.0F-progress)*4.0F);
+        this.setAlpha(br.com.petrickfaria.minemon.entity.GastlyAura.OPACITY*fadeIn*fadeOut);
         this.setSpriteFromAge(this.sprites);
         this.setColor(lerp(progress, 0xBE, 0x7B) / 255.0F,
                 lerp(progress, 0x81, 0x23) / 255.0F,
@@ -68,19 +71,30 @@ public final class GastlySmokeParticle extends TextureSheetParticle {
         int low = (int) position;
         int high = Math.min(nodes.length - 1, low + 1);
         float sample = nodes[low] + (nodes[high] - nodes[low]) * (position - low);
-        this.quadSize = (small?br.com.petrickfaria.minemon.entity.GastlyAura.SMALL_SIZE:br.com.petrickfaria.minemon.entity.GastlyAura.LARGE_SIZE) * SpeciesDefinitions.get("gastly").scale() * sample;
+        this.quadSize = (small?br.com.petrickfaria.minemon.entity.GastlyAura.SMALL_SIZE:br.com.petrickfaria.minemon.entity.GastlyAura.LARGE_SIZE)
+                * SpeciesDefinitions.get("gastly").scale() * sample
+                * br.com.petrickfaria.minemon.entity.GastlyAura.sizeVariation(slot);
     }
 
     private void followBody(){
         if(owner==null)return;
         float scale=SpeciesDefinitions.get("gastly").scale();
-        double angle=slot*2.3999632297+owner.tickCount*.012;
-        double radius=.55*br.com.petrickfaria.minemon.entity.ModelMetrics.bodyWidth("gastly")*scale;
+        double phase=br.com.petrickfaria.minemon.entity.GastlyAura.driftPhase(slot)+owner.tickCount*.004;
+        double radius=br.com.petrickfaria.minemon.entity.ModelMetrics.bodyWidth("gastly")*scale*.48;
         double center=br.com.petrickfaria.minemon.entity.ModelMetrics.bodyCenterY("gastly")*scale;
         if(owner instanceof br.com.petrickfaria.minemon.entity.MinemonCreature pokemon && pokemon.isDefeated())center+=br.com.petrickfaria.minemon.entity.ModelMetrics.defeatedOffset("gastly",scale);
         double height=br.com.petrickfaria.minemon.entity.ModelMetrics.bodyHeight("gastly")*scale;
-        double px=owner.getX()+Math.cos(angle)*radius,pz=owner.getZ()+Math.sin(angle)*radius;
-        double py=owner.getY()+center+((slot%3)-.65)*height*.32;
+        // Irregular positions surround the head, with more volume above and behind it.
+        // Slowly varying offsets keep the cloud alive without hiding the face.
+        double localX=br.com.petrickfaria.minemon.entity.GastlyAura.cloudX(slot)*radius
+                +Math.sin(phase)*radius*.045;
+        double localZ=br.com.petrickfaria.minemon.entity.GastlyAura.cloudZ(slot)*radius
+                +Math.cos(phase*.83)*radius*.05;
+        double yaw=Math.toRadians(owner.getYRot());
+        double px=owner.getX()+localX*Math.cos(yaw)+localZ*Math.sin(yaw);
+        double pz=owner.getZ()-localX*Math.sin(yaw)+localZ*Math.cos(yaw);
+        double py=owner.getY()+center+br.com.petrickfaria.minemon.entity.GastlyAura.cloudY(slot)*height*.34
+                +Math.sin(phase*.71)*height*.018;
         this.xo=this.x;this.yo=this.y;this.zo=this.z;setPos(px,py,pz);
     }
     private static int lerp(float t, int from, int to) {

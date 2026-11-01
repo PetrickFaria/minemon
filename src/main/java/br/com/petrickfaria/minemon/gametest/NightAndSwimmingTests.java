@@ -164,6 +164,49 @@ public final class NightAndSwimmingTests {
    });
   },500,"All permanently aquatic species must enter stationary water sleep");
  }
+ @GameTest(template="test_arena",batch="gyarados_day_night_depth",timeoutTicks=1800)
+ public static void gyaradosDescendsToLakeFloorAtNightAndReturnsToSurfaceAtDawn(GameTestHelper h){
+  arena(h);var level=h.getLevel();
+  for(int x=2;x<=15;x++)for(int z=3;z<=10;z++)for(int y=1;y<=14;y++)h.setBlock(new BlockPos(x,y,z),Blocks.WATER);
+  level.setDayTime(1000);
+  var gyarados=spawn(h,"gyarados",4,8,6);
+  awaitAwakeGyaradosSurface(h,gyarados,250,gyarados.position(),()->{
+   double surface=WaterMovementGoal.restSurfaceAt(gyarados,gyarados.blockPosition());
+   double awakeY=gyarados.getY();
+   double bottom=WaterMovementGoal.waterRestY(gyarados);
+   check(h,Double.isFinite(bottom)&&bottom<awakeY-5.0D,
+       "Gyarados must have a genuinely deep safe-floor target before entering night rest; awakeY="+awakeY+" target="+bottom+" surface="+surface);
+   double[] lowest={awakeY};
+   level.setDayTime(18000);
+   awaitGyaradosFloor(h,gyarados,bottom,awakeY,lowest,250,()->{
+    var sleepingAt=gyarados.position();
+    h.runAfterDelay(30,()->{
+     check(h,gyarados.isSleeping()&&gyarados.isInWater(),"Gyarados stays asleep and submerged on the lake floor");
+     check(h,sleepingAt.distanceTo(gyarados.position())<.08D,
+         "Gyarados stays stationary after reaching its night-rest floor; moved="+sleepingAt.distanceTo(gyarados.position()));
+     double sleepingY=gyarados.getY();
+     level.setDayTime(1000);
+     await(h,()->!gyarados.isSleeping()&&gyarados.getY()>sleepingY+5.0D,()->{
+      check(h,gyarados.getY()>sleepingY+5.0D,
+          "Gyarados must physically rise from the lake floor when dawn wakes it; sleepY="+sleepingY+" wakeY="+gyarados.getY());
+      awaitAwakeGyaradosSurface(h,gyarados,250,gyarados.position(),h::succeed);
+     },100,"Gyarados must wake from bottom rest at dawn");
+    });
+   });
+  });
+ }
+ private static void awaitGyaradosFloor(GameTestHelper h,MinemonCreature gyarados,double target,double awakeY,
+     double[] lowest,int remaining,Runnable done){
+  lowest[0]=Math.min(lowest[0],gyarados.getY());
+  if(gyarados.isSleeping()){
+   check(h,lowest[0]<awakeY-5.0D,"Gyarados must visibly descend from its daytime surface position before sleep; lowestY="+lowest[0]+" awakeY="+awakeY);
+   check(h,Math.abs(gyarados.getY()-target)<.2D&&target<awakeY-5.0D,
+       "Gyarados may sleep only after reaching its safe lake floor; y="+gyarados.getY()+" target="+target);
+   done.run();return;
+  }
+  if(remaining<=0){h.getLevel().setDayTime(1000);h.fail("Gyarados did not descend and sleep on the lake floor; y="+gyarados.getY()+" target="+target+" lowestY="+lowest[0]+" night="+gyarados.isNightResting()+" sleeping="+gyarados.isSleeping()+" velocity="+gyarados.getDeltaMovement());return;}
+  h.runAfterDelay(5,()->awaitGyaradosFloor(h,gyarados,target,awakeY,lowest,remaining-5,done));
+ }
  private static void sampleAwakeGyarados(GameTestHelper h,MinemonCreature mob,int remaining,
      double[] minDepth,double[] maxDepth,net.minecraft.world.phys.Vec3 start,double[] farthestSq,Runnable done){
   double top=WaterMovementGoal.restSurfaceAt(mob,mob.blockPosition());

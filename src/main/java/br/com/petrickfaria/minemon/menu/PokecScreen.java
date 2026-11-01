@@ -129,7 +129,9 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
             var slot = menu.slots.get(i);
             int expectedX = x + (i % 9) * 18;
             int expectedY = i < 27 ? mainY + (i / 9) * 18 : hotbarY;
-            if (slot.x != expectedX || slot.y != expectedY) return false;
+            int expectedInventoryIndex = i < 27 ? i + 9 : i - 27;
+            if (slot.index != i || slot.getContainerSlot() != expectedInventoryIndex
+                    || slot.x != expectedX || slot.y != expectedY) return false;
         }
         return hotbarY + 18 <= imageHeight;
     }

@@ -57,12 +57,14 @@ public final class PokecMenu extends AbstractContainerMenu {
     public void layoutPlayerInventory(int x, int mainY, int hotbarY) {
         for (int row = 0; row < 3; row++) for (int column = 0; column < 9; column++) {
             int menuIndex = row * 9 + column;
-            slots.set(menuIndex, new net.minecraft.world.inventory.Slot(playerInventory,
-                    column + row * 9 + 9, x + column * 18, mainY + row * 18));
+            var slot = slots.get(menuIndex);
+            slot.x = x + column * 18;
+            slot.y = mainY + row * 18;
         }
         for (int column = 0; column < 9; column++) {
-            slots.set(27 + column, new net.minecraft.world.inventory.Slot(playerInventory,
-                    column, x + column * 18, hotbarY));
+            var slot = slots.get(27 + column);
+            slot.x = x + column * 18;
+            slot.y = hotbarY;
         }
     }
     public String selectedSlug() { return selectedSlug; }

@@ -316,6 +316,9 @@ public final class WaterMovementGoal extends Goal {
   if(SpeciesBehaviorProfiles.restsAtWaterBottom(mob.getSpeciesSlug())){
    double target=preferredBottomY(mob,mob.blockPosition(),top);
    if(Double.isFinite(target))return target;
+   // Gyarados must reach a safe floor before sleep can freeze its movement.
+   // Returning its current Y here falsely reports a surface position as rest.
+   if(mob.getSpeciesSlug().equals("gyarados"))return Double.NaN;
   }
   return Double.isFinite(mob.aquaticSleepY())?mob.aquaticSleepY():mob.getY();
  }
