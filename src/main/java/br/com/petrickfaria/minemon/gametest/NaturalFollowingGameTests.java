@@ -67,6 +67,7 @@ public final class NaturalFollowingGameTests {
                 return;
             }
             if(completed[0]) {completed[0]=false;h.succeed();return;}
+            if(altitudeFixture[0]!=null)NineBehaviorChecks.traceFollowingAltitudes(altitudeFixture[0]);
             if(mob.position().distanceTo(previous[0])>1.5) {
                 pendingFailure[0]="Following relocated the Pokémon discontinuously";
                 previous[0]=mob.position();
