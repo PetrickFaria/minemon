@@ -8,6 +8,7 @@ import net.minecraft.util.Mth;
 final class NightRestGoal extends Goal {
  private final MinemonCreature mob;
  private int unsafeLandingSearchDelay;
+ private net.minecraft.core.BlockPos waterSleepDestination;
  NightRestGoal(MinemonCreature mob){this.mob=mob;setFlags(EnumSet.of(Flag.MOVE,Flag.LOOK,Flag.JUMP));}
  @Override public boolean canUse(){
   boolean resting=mob.isSleeping()||mob.isNightResting();
@@ -47,12 +48,31 @@ final class NightRestGoal extends Goal {
   if(hover){mob.setNoGravity(true);mob.fallDistance=0;}
  }
  private void holdWaterRest(){
-  mob.getNavigation().stop();mob.setJumping(false);mob.setSpeed(0);mob.setXxa(0);mob.setYya(0);mob.setZza(0);
+  if(mob.getSpeciesSlug().equals("gyarados")&&!mob.isSleeping()){
+   if(waterSleepDestination==null||mob.getNavigation().isDone())waterSleepDestination=WaterMovementGoal.bottomRestPosition(mob);
+   if(waterSleepDestination!=null){
+    double x=waterSleepDestination.getX()+.5D,z=waterSleepDestination.getZ()+.5D;
+    double dx=x-mob.getX(),dz=z-mob.getZ();
+    if(dx*dx+dz*dz>.20D){
+     if(mob.getNavigation().isDone()){
+      var path=mob.getNavigation().createPath(waterSleepDestination,0);
+      if(path!=null&&path.canReach())mob.getNavigation().moveTo(path,.65D);
+     }
+     if(!mob.getNavigation().isDone())return;
+    }else mob.getNavigation().stop();
+   }
+  }
+  mob.setJumping(false);mob.setSpeed(0);mob.setXxa(0);mob.setYya(0);mob.setZza(0);
   double target=WaterMovementGoal.waterRestY(mob);
+  if(mob.getSpeciesSlug().equals("gyarados")&&!Double.isFinite(target)){
+   var destination=WaterMovementGoal.bottomRestPosition(mob);
+   if(destination!=null)target=WaterMovementGoal.bottomRestY(mob,destination);
+  }
   double vertical=Double.isFinite(target)
       ?net.minecraft.util.Mth.clamp((target-mob.getY())*0.12D,-0.08D,0.08D):0.0D;
   if(Math.abs(vertical)>1.0E-5D
       &&!mob.level.noCollision(mob,mob.getBoundingBox().move(0,vertical,0)))vertical=0.0D;
   mob.setNoGravity(true);mob.fallDistance=0;mob.setDeltaMovement(0,vertical,0);
  }
+ @Override public void stop(){waterSleepDestination=null;unsafeLandingSearchDelay=0;mob.getNavigation().stop();}
 }

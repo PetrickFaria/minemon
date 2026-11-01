@@ -182,6 +182,11 @@ public final class NightAndSwimmingTests {
     var sleepingAt=gyarados.position();
     h.runAfterDelay(30,()->{
      check(h,gyarados.isSleeping()&&gyarados.isInWater(),"Gyarados stays asleep and submerged on the lake floor");
+     var gyaradosSupport=gyarados.blockPosition().below();
+     var supportShape=level.getBlockState(gyaradosSupport).getCollisionShape(level,gyaradosSupport);
+     double supportTop=gyaradosSupport.getY()+supportShape.max(net.minecraft.core.Direction.Axis.Y);
+     check(h,gyarados.getY()>=supportTop&&gyarados.getY()-supportTop<.05D,
+         "Gyarados' physical base rests just above the actual submerged collision surface; baseY="+gyarados.getY()+" supportTop="+supportTop);
      check(h,sleepingAt.distanceTo(gyarados.position())<.08D,
          "Gyarados stays stationary after reaching its night-rest floor; moved="+sleepingAt.distanceTo(gyarados.position()));
      double sleepingY=gyarados.getY();

@@ -142,6 +142,36 @@ public final class PokecGameTests {
     }
 
     @GameTest(template="test_arena",timeoutTicks=200)
+    public static void paymentSlotsUseExactInventorySlotsAndVanillaClicks(GameTestHelper h){
+        floor(h);BlockPos p=h.absolutePos(new BlockPos(5,1,5));terminal(h,p);ServerPlayer buyer=player(h,h.absolutePos(new BlockPos(7,1,5)));
+        PokecMenu menu=new PokecMenu(31,buyer.getInventory(),p);buyer.containerMenu=menu;PokecPlayerData.unlock(buyer,"bulbasaur");PokecPlayerData.setFreePurchaseUsed(buyer);
+        menu.clicked(0,0,net.minecraft.world.inventory.ClickType.PICKUP,buyer);
+        check(menu.stagedCoins()==0&&buyer.containerMenu.getCarried().isEmpty(),"clicking an empty payment slot must never stage or create items");
+        check(menu.slots.get(0).mayPlace(new ItemStack(ModItems.POKE_COIN.get()))
+                &&!menu.slots.get(0).mayPlace(new ItemStack(ModItems.SOULS.get("fire").get())),
+                "payment slots accept only the active operation's compatible currency");
+        for(int inventorySlot=0;inventorySlot<36;inventorySlot++){
+            buyer.getInventory().setItem(inventorySlot,new ItemStack(Blocks.DIRT,inventorySlot+1));
+            int menuSlot=inventorySlot<9?29+inventorySlot:2+inventorySlot-9;
+            check(menu.slots.get(menuSlot).getItem().getCount()==inventorySlot+1,"menu slot must reference exactly inventory slot "+inventorySlot);
+            menu.clicked(menuSlot,0,net.minecraft.world.inventory.ClickType.PICKUP,buyer);
+            check(buyer.containerMenu.getCarried().getCount()==inventorySlot+1,"left click picks the item from its own slot "+inventorySlot);
+            menu.clicked(menuSlot,0,net.minecraft.world.inventory.ClickType.PICKUP,buyer);
+        }
+        buyer.getInventory().setItem(0,new ItemStack(ModItems.POKE_COIN.get(),12));
+        menu.quickMoveStack(buyer,29);
+        check(menu.stagedCoins()==12&&buyer.getInventory().getItem(0).isEmpty(),"shift-click moves the correct hotbar stack into a real payment slot");
+        menu.clicked(0,1,net.minecraft.world.inventory.ClickType.PICKUP,buyer);
+        check(menu.stagedCoins()==6&&buyer.containerMenu.getCarried().getCount()==6,"right-click splits a payment stack in half using vanilla slot behavior");
+        menu.clicked(0,0,net.minecraft.world.inventory.ClickType.PICKUP,buyer);
+        check(menu.stagedCoins()==12&&buyer.containerMenu.getCarried().isEmpty(),"left-click returns the carried half to the payment slot");
+        menu.quickMoveStack(buyer,0);
+        check(menu.stagedCoins()==0&&buyer.getInventory().items.stream().filter(s->s.is(ModItems.POKE_COIN.get())).mapToInt(ItemStack::getCount).sum()==12,
+                "shift-click returns the exact payment stack to inventory");
+        buyer.discard();h.succeed();
+    }
+
+    @GameTest(template="test_arena",timeoutTicks=200)
     public static void lockedEvolutionRejectsEveryPokecDeposit(GameTestHelper h){
         floor(h);BlockPos p=h.absolutePos(new BlockPos(5,1,5));terminal(h,p);ServerPlayer buyer=player(h,h.absolutePos(new BlockPos(7,1,5)));
         PokecMenu menu=new PokecMenu(12,buyer.getInventory(),p);buyer.containerMenu=menu;
@@ -275,9 +305,9 @@ public final class PokecGameTests {
         floor(h);ServerPlayer owner=player(h,h.absolutePos(new BlockPos(7,1,5)));
         PokecMenu menu=new PokecMenu(22,owner.getInventory(),h.absolutePos(new BlockPos(5,1,5)));
         owner.containerMenu=menu;
-        check(menu.slots.size()==36,"PokéC must expose the player's existing 36 inventory slots");
+        check(menu.slots.size()==38,"PokéC must expose two real payment slots plus the player's existing 36 inventory slots");
         owner.getInventory().setItem(9,new ItemStack(Blocks.DIRT,7));
-        ItemStack movedToHotbar=menu.quickMoveStack(owner,0);
+        ItemStack movedToHotbar=menu.quickMoveStack(owner,2);
         check(movedToHotbar.getCount()==7,"shift-click should return the moved original stack");
         check(owner.getInventory().getItem(9).isEmpty(),"main-inventory source slot should be emptied");
         check(owner.getInventory().getItem(0).is(Blocks.DIRT.asItem())&&owner.getInventory().getItem(0).getCount()==7,
@@ -286,7 +316,7 @@ public final class PokecGameTests {
                 "shift-click must not duplicate the moved stack");
 
         owner.getInventory().setItem(0,new ItemStack(Blocks.OAK_LOG,4));
-        ItemStack movedToMain=menu.quickMoveStack(owner,27);
+        ItemStack movedToMain=menu.quickMoveStack(owner,29);
         check(movedToMain.getCount()==4,"hotbar shift-click should return the moved original stack");
         check(owner.getInventory().getItem(0).isEmpty(),"hotbar source slot should be emptied");
         check(owner.getInventory().getItem(9).is(Blocks.OAK_LOG.asItem())&&owner.getInventory().getItem(9).getCount()==4,

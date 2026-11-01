@@ -67,12 +67,14 @@ final class NightClientSmokeTest {
      var definition=SpeciesDefinitions.get(mob.getSpeciesSlug());
      String sleepKey=mob.getSpeciesSlug().equals("vaporeon")
              ? (mob.isInWaterOrBubble()?"night_sleep_water":"night_sleep_land") : "night_sleep";
-     boolean aquaticSleep=SpeciesBehaviorProfiles.isAquatic(mob.getSpeciesSlug())&&mob.isInWaterOrBubble();
+     boolean aquaticSleep=SpeciesBehaviorProfiles.isAquatic(mob.getSpeciesSlug())&&mob.isInWaterOrBubble()
+             &&!mob.getSpeciesSlug().equals("lapras")&&!mob.getSpeciesSlug().equals("gyarados");
+     boolean aquaticEyeOverlay=SpeciesBehaviorProfiles.isAquatic(mob.getSpeciesSlug())&&mob.isInWaterOrBubble();
      String selectedClip=aquaticSleep?definition.clips().get("aquatic_sleep")
              :definition.clips().getOrDefault(sleepKey,definition.clips().get("night_sleep"));
      if(!Objects.equals(mob.getSelectedAnimationForValidation(),selectedClip))return;
-     String eyeClip=aquaticSleep?definition.clips().get("aquatic_sleep_eyes"):selectedClip;
-     if(aquaticSleep&&!Objects.equals(mob.getSelectedAquaticSleepEyesForValidation(),eyeClip))return;
+     String eyeClip=aquaticEyeOverlay?definition.clips().get("aquatic_sleep_eyes"):selectedClip;
+     if(aquaticEyeOverlay&&!Objects.equals(mob.getSelectedAquaticSleepEyesForValidation(),eyeClip))return;
     if(sleepTick==0)sleepTick=mob.tickCount;
     if(mob.tickCount-sleepTick<12)return;
      // Read the generated pose, whose eye tracks hold the species' native blink closure.
@@ -91,7 +93,7 @@ final class NightClientSmokeTest {
           throw new IllegalStateException(mob.getSpeciesSlug()+" wing moved during grounded sleep: "+name+" axis="+axis+" delta="+Math.abs(prior[axis]-rotation[axis]));
         }
        }
-       java.util.Set<String> eyeNames=aquaticSleep?sleepBones.keySet():blink!=null&&animations.has(blink)?animations.getAsJsonObject(blink).getAsJsonObject("bones").keySet():sleepBones.keySet().stream().filter(n->n.contains("eye")||n.contains("pupil")).collect(java.util.stream.Collectors.toSet());
+       java.util.Set<String> eyeNames=aquaticEyeOverlay?sleepBones.keySet():blink!=null&&animations.has(blink)?animations.getAsJsonObject(blink).getAsJsonObject("bones").keySet():sleepBones.keySet().stream().filter(n->n.contains("eye")||n.contains("pupil")).collect(java.util.stream.Collectors.toSet());
        if(eyeNames.isEmpty())eyeNames=sleepBones.keySet().stream().filter(n->n.contains("eye")||n.contains("pupil")).collect(java.util.stream.Collectors.toSet());
        for(String name:eyeNames){
         var bone=model.getAnimationProcessor().getBone(name);if(bone==null)continue;

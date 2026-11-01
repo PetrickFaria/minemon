@@ -861,7 +861,9 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
             &&target==null&&this.wakeGraceTicks==0;
         if(night&&eligible){
             if(!this.nightRoutine){
-                this.nightRoutine=true;this.getNavigation().stop();this.stopSpontaneousRun();
+                this.nightRoutine=true;
+                if(!waterRest||!SpeciesBehaviorProfiles.restsAtWaterBottom(this.getSpeciesSlug()))this.getNavigation().stop();
+                this.stopSpontaneousRun();
             }
             this.entityData.set(NIGHT_REST,true);
             if(waterRest&&!Double.isFinite(this.aquaticSleepY)&&!SpeciesBehaviorProfiles.restsAtWaterBottom(this.getSpeciesSlug())){
@@ -1029,7 +1031,8 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
             if(this.playedAttackSequence!=this.attackSequence){controller.markNeedsReload();this.playedAttackSequence=this.attackSequence;}
         } else if (this.isSleeping()) {
             if(SpeciesBehaviorProfiles.isAquatic(slug)) {
-                clip=SpeciesAssetIndex.clip(slug,"aquatic_sleep","night_sleep");
+                clip=(slug.equals("lapras")||slug.equals("gyarados"))?SpeciesAssetIndex.clip(slug,"night_sleep","night_sleep")
+                        :SpeciesAssetIndex.clip(slug,"aquatic_sleep","night_sleep");
             } else {
                 String restKey=slug.equals("vaporeon")
                         ? (this.isInWaterOrBubble()?"night_sleep_water":"night_sleep_land") : "night_sleep";

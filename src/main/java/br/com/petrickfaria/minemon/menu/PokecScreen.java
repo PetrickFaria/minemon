@@ -121,16 +121,19 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
                 && Math.max(LIST_Y + LIST_H, PREVIEW_Y + PREVIEW_H) <= TOP_HEIGHT;
     }
     public boolean inventorySlotsForSmokeTest() {
-        if (menu.slots.size() != 36) return false;
+        if (menu.slots.size() != 38) return false;
+        if(menu.slots.get(0).getContainerSlot()!=0||menu.slots.get(1).getContainerSlot()!=1
+                ||menu.slots.get(0).x!=Math.round(568*uiScale)||menu.slots.get(0).y!=Math.round(71*uiScale)
+                ||menu.slots.get(1).x!=Math.round(590*uiScale)||menu.slots.get(1).y!=Math.round(73*uiScale))return false;
         int x = (imageWidth - INVENTORY_SLOT_WIDTH) / 2;
         int mainY = Math.round(TOP_HEIGHT * uiScale) + INVENTORY_MAIN_Y;
         int hotbarY = Math.round(TOP_HEIGHT * uiScale) + INVENTORY_HOTBAR_Y;
         for (int i = 0; i < 36; i++) {
-            var slot = menu.slots.get(i);
+            var slot = menu.slots.get(i + 2);
             int expectedX = x + (i % 9) * 18;
             int expectedY = i < 27 ? mainY + (i / 9) * 18 : hotbarY;
             int expectedInventoryIndex = i < 27 ? i + 9 : i - 27;
-            if (slot.index != i || slot.getContainerSlot() != expectedInventoryIndex
+            if (slot.index != i + 2 || slot.getContainerSlot() != expectedInventoryIndex
                     || slot.x != expectedX || slot.y != expectedY) return false;
         }
         return hotbarY + 18 <= imageHeight;
@@ -149,7 +152,7 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         super.init();
         int inventoryX = (imageWidth - INVENTORY_SLOT_WIDTH) / 2;
         int inventoryTop = Math.round(TOP_HEIGHT * uiScale);
-        menu.layoutPlayerInventory(inventoryX, inventoryTop + INVENTORY_MAIN_Y, inventoryTop + INVENTORY_HOTBAR_Y);
+        menu.layoutPlayerInventory(inventoryX, inventoryTop + INVENTORY_MAIN_Y, inventoryTop + INVENTORY_HOTBAR_Y, uiScale);
         ordered = PokecSpecies.ordered();
         selectedSlug = PokecSpecies.get(syncedSelectedSlug) == null ? "bulbasaur" : syncedSelectedSlug;
         MinemonNetwork.requestPokecState(menu.pos());
@@ -203,7 +206,11 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         int inventoryTop = Math.round(TOP_HEIGHT * uiScale);
         drawFlatPanel(pose, 0, inventoryTop, imageWidth, INVENTORY_HEIGHT);
         font.draw(pose, "INVENTÁRIO DO JOGADOR", 10, inventoryTop + INVENTORY_LABEL_Y, 0xFF303030);
-        for (var slot : menu.slots) MinemonGui.slot(pose, slot.x, slot.y, 18, 18);
+        pose.pushPose(); pose.scale(uiScale,uiScale,1);
+        MinemonGui.slot(pose, 568, 71, 18, 18);
+        MinemonGui.slot(pose, 590, 73, 18, 18);
+        pose.popPose();
+        for (int i=2;i<menu.slots.size();i++) { var slot=menu.slots.get(i); MinemonGui.slot(pose, slot.x, slot.y, 18, 18); }
         pose.popPose();
     }
 
@@ -264,7 +271,6 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
             boolean free = syncedFreeAvailable;
             font.draw(pose, "CUSTO / AQUISIÇÃO", x, ACTION_Y + 7, 0xFF202020);
             font.draw(pose, "Preço: " + (free ? 0 : price) + " PokéCoins", x, ACTION_Y + 23, 0xFF404040);
-            drawCompactItemSlot(pose, x, ACTION_Y + 43, ModItems.POKE_COIN.get(), syncedStagedCoins);
             boolean canBuy = free || syncedCoins + syncedStagedCoins >= price;
             drawButton(pose, ACTION_X + 56, ACTION_Y + 43, 86, 22, "ADQUIRIR", canBuy, mouseX, mouseY);
         } else {
@@ -276,8 +282,6 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
             font.draw(pose, fitText("Almas " + species.primaryType() + ": " + required, ACTION_W - 18), x, ACTION_Y + 23, 0xFF404040);
             font.draw(pose, fitText("Progresso: " + deposited + "/" + required, ACTION_W - 18), x, ACTION_Y + 33, 0xFF404040);
             if (soulItem != null) {
-                drawCompactItemSlot(pose, x, ACTION_Y + 45, soulItem.get(), Math.min(64, syncedStagedSouls));
-                drawCompactItemSlot(pose, x + 22, ACTION_Y + 45, soulItem.get(), Math.max(0, syncedStagedSouls - 64));
             }
             font.draw(pose, fitText("×" + syncedStagedSouls, 28), x + 46, ACTION_Y + 51, 0xFF404040);
             drawButton(pose, ACTION_X + 84, ACTION_Y + 44, 58, 22, "LIBERAR", deposited + syncedStagedSouls >= required, mouseX, mouseY);
@@ -502,14 +506,9 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         }
         boolean unlocked = syncedUnlocked.contains(species.slug());
         boolean evolution = species.isEvolution() && !unlocked;
-        if (unlocked && !syncedFreeAvailable && inRect(x, y, ACTION_X + 8, ACTION_Y + 43, 20, 20)) {
-            MinemonNetwork.performPokecAction(menu.pos(), selectedSlug, PokecTransactions.Action.STAGE_COINS);
-            return true;
-        }
-        if (!unlocked && !evolution && (inRect(x, y, ACTION_X + 8, ACTION_Y + 45, 20, 20) || inRect(x, y, ACTION_X + 30, ACTION_Y + 45, 20, 20))) {
-            MinemonNetwork.performPokecAction(menu.pos(), selectedSlug, PokecTransactions.Action.STAGE_SOULS);
-            return true;
-        }
+        if ((unlocked && inRect(x,y,ACTION_X+8,ACTION_Y+43,20,20))
+                || (!unlocked&&!evolution&&(inRect(x,y,ACTION_X+8,ACTION_Y+45,20,20)||inRect(x,y,ACTION_X+30,ACTION_Y+45,20,20))))
+            return super.mouseClicked(mouseX,mouseY,button);
         if (unlocked && inRect(x, y, ACTION_X + 56, ACTION_Y + 43, 86, 22)) {
             if (syncedFreeAvailable || syncedCoins + syncedStagedCoins >= syncedPrices.getOrDefault(selectedSlug, PokecEconomy.get().coins(selectedSlug)))
                 MinemonNetwork.performPokecAction(menu.pos(), selectedSlug, PokecTransactions.Action.PURCHASE);

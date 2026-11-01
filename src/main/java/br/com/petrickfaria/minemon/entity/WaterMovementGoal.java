@@ -296,12 +296,21 @@ public final class WaterMovementGoal extends Goal {
   return best;
  }
  private static double preferredBottomY(MinemonCreature mob,BlockPos column,double surface){
+  return preferredBottomY(mob,column,surface,0.30D);
+ }
+ private static double preferredRestBottomY(MinemonCreature mob,BlockPos column,double surface){
+  return preferredBottomY(mob,column,surface,0.015D);
+ }
+ private static double preferredBottomY(MinemonCreature mob,BlockPos column,double surface,double clearance){
   int floorWater=bottomWaterBlock(mob,column,surface);
   if(!safeWaterFloor(mob,column,floorWater))return Double.NaN;
   if(surface-floorWater<=mob.getBbHeight()+0.45D)return Double.NaN;
-  // Keep a useful collision margin above the floor. A nearly zero clearance
-  // can place the navigation node inside the support block after interpolation.
-  double target=floorWater+0.30D;
+  // Sleepers rest at the actual collision top; awake swimmers retain their
+  // established clearance above the bed.
+  BlockPos support=new BlockPos(column.getX(),floorWater-1,column.getZ());
+  var shape=mob.level.getBlockState(support).getCollisionShape(mob.level,support);
+  double top=shape.isEmpty()?0.0D:shape.max(net.minecraft.core.Direction.Axis.Y);
+  double target=floorWater-1+top+clearance;
   var box=mob.getBoundingBox().move(column.getX()+0.5D-mob.getX(),target-mob.getY(),column.getZ()+0.5D-mob.getZ());
   if(!mob.level.noCollision(mob,box))return Double.NaN;
   for(int x=(int)Math.floor(box.minX+0.001D);x<=Math.floor(box.maxX-0.001D);x++)
@@ -314,13 +323,36 @@ public final class WaterMovementGoal extends Goal {
   if(!Double.isFinite(top))return Double.NaN;
   if(mob.getSpeciesSlug().equals("lapras"))return top-preferredSurfaceDepth(mob);
   if(SpeciesBehaviorProfiles.restsAtWaterBottom(mob.getSpeciesSlug())){
-   double target=preferredBottomY(mob,mob.blockPosition(),top);
+   double target=preferredRestBottomY(mob,mob.blockPosition(),top);
    if(Double.isFinite(target))return target;
    // Gyarados must reach a safe floor before sleep can freeze its movement.
    // Returning its current Y here falsely reports a surface position as rest.
    if(mob.getSpeciesSlug().equals("gyarados"))return Double.NaN;
   }
   return Double.isFinite(mob.aquaticSleepY())?mob.aquaticSleepY():mob.getY();
+ }
+ /** Finds a reachable, collision-safe bottom position for a Gyarados night rest. */
+ public static BlockPos bottomRestPosition(MinemonCreature mob){
+  double surface=restSurfaceAt(mob,mob.blockPosition());
+  if(!Double.isFinite(surface))return null;
+  BlockPos origin=mob.blockPosition();
+  for(int radius=0;radius<=8;radius++)for(int dx=-radius;dx<=radius;dx++)for(int dz=-radius;dz<=radius;dz++){
+   if(Math.max(Math.abs(dx),Math.abs(dz))!=radius)continue;
+   BlockPos column=origin.offset(dx,0,dz);
+   if(!mob.level.hasChunkAt(column))continue;
+   double top=restSurfaceAt(mob,column);
+   if(!Double.isFinite(top))continue;
+   double y=preferredRestBottomY(mob,column,top);
+   if(!Double.isFinite(y))continue;
+   BlockPos feet=new BlockPos(column.getX(),Math.ceil(y),column.getZ());
+   var path=mob.getNavigation().createPath(feet,0);
+   if(path!=null&&path.canReach()&&(!mob.getSpeciesSlug().equals("gyarados")||surfacePathIsWater(path)))return feet;
+  }
+  return null;
+ }
+ public static double bottomRestY(MinemonCreature mob,BlockPos column){
+  double surface=restSurfaceAt(mob,column);
+  return Double.isFinite(surface)?preferredRestBottomY(mob,column,surface):Double.NaN;
  }
  private static boolean safeWaterFloor(MinemonCreature mob,BlockPos column,int floorWater){
   int min=mob.level.getMinBuildHeight();if(floorWater<=min)return false;
