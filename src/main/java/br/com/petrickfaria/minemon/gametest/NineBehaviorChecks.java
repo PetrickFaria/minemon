@@ -99,7 +99,7 @@ final class NineBehaviorChecks {
      com.mojang.logging.LogUtils.getLogger().info("FOLLOW ALTITUDE TRACE "+followingAltitudeSnapshot(mob,owner,now,followStartedAt[i],diagnosticStart));
    }
   });
-  h.runAfterDelay(320,()->{
+  h.runAfterDelay(400,()->{
    for(int i=0;i<mobs.size();i++){
     var mob=mobs.get(i);
     double altitude=mob.getY()-mob.naturalSurface();

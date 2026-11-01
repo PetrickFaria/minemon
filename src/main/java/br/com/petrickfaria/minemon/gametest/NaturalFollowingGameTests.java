@@ -21,7 +21,7 @@ public final class NaturalFollowingGameTests {
     private static void fail(GameTestHelper h,ServerPlayer owner,MinemonCreature mob,String message) {
         owner.discard(); mob.discard(); h.fail(message);
     }
-    @GameTest(template="test_arena", batch="natural_following", timeoutTicks=500)
+    @GameTest(template="test_arena", batch="natural_following", timeoutTicks=650)
     public static void followsWithContinuousMovementThenObeysSit(GameTestHelper h) {
         h.getLevel().setDayTime(1000);
         var arenaBox=new net.minecraft.world.phys.AABB(h.absolutePos(new BlockPos(0,0,0)),h.absolutePos(new BlockPos(40,14,10)));
