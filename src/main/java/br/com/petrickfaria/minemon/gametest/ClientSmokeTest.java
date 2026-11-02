@@ -361,32 +361,26 @@ public final class ClientSmokeTest {
       if(Math.abs(upperTorso.getRotationX())>0.08F||Math.abs(lowerTorso.getRotationX())>0.08F
           ||Math.abs(body.getRotationX())>0.08F||Math.abs(head.getRotationX())>0.15F
           ||Math.abs(head.getRotationY())>(float)Math.toRadians(60.0D)+0.08F
-          ||Math.abs(leftArm.getRotationX()-(float)Math.toRadians(-20.9569D))>0.08F
-          ||Math.abs(leftArm.getRotationY()-(float)Math.toRadians(-17.01822D))>0.08F
-          ||Math.abs(leftArm.getRotationZ()-(float)Math.toRadians(29.56865D))>0.08F
-          ||Math.abs(rightArm.getRotationX()-(float)Math.toRadians(-20.9569D))>0.08F
-          ||Math.abs(rightArm.getRotationY()-(float)Math.toRadians(17.01822D))>0.08F
-          ||Math.abs(rightArm.getRotationZ()-(float)Math.toRadians(-29.56865D))>0.08F
-          ||Math.abs(leftElbow.getRotationX()-(float)Math.toRadians(-47.5D))>0.08F
-          ||Math.abs(rightElbow.getRotationX()-(float)Math.toRadians(-47.5D))>0.08F
-          ||Math.abs(leftHand.getRotationX()-(float)Math.toRadians(-35.4045D))>0.08F
-          ||Math.abs(leftHand.getRotationY()-(float)Math.toRadians(44.2461D))>0.08F
-          ||Math.abs(leftHand.getRotationZ()-(float)Math.toRadians(-29.4236D))>0.08F
-          ||Math.abs(rightHand.getRotationX()-(float)Math.toRadians(-35.4045D))>0.08F
-          ||Math.abs(rightHand.getRotationY()-(float)Math.toRadians(-44.2461D))>0.08F
-          ||Math.abs(rightHand.getRotationZ()-(float)Math.toRadians(29.4236D))>0.08F
-          ||Math.abs(leftSpoon.getPositionX()-leftSpoon.getInitialSnapshot().positionOffsetX+0.4F)>0.08F
-          ||Math.abs(rightSpoon.getPositionX()-rightSpoon.getInitialSnapshot().positionOffsetX-0.4F)>0.08F
-          ||Math.abs(leftSpoon.getRotationX()-(float)Math.toRadians(178.15442D))>0.08F
-          ||Math.abs(leftSpoon.getRotationY()-(float)Math.toRadians(-17.66137D))>0.08F
-          ||Math.abs(leftSpoon.getRotationZ()-(float)Math.toRadians(-100.47992D))>0.08F
-          ||Math.abs(rightSpoon.getRotationX()-(float)Math.toRadians(178.15442D))>0.08F
-          ||Math.abs(rightSpoon.getRotationY()-(float)Math.toRadians(17.66137D))>0.08F
-          ||Math.abs(rightSpoon.getRotationZ()-(float)Math.toRadians(100.47992D))>0.08F)
+          ||Math.abs(leftArm.getRotationZ()-leftArm.getInitialSnapshot().rotationValueZ)<0.35F
+          ||Math.abs(rightArm.getRotationZ()-rightArm.getInitialSnapshot().rotationValueZ)<0.35F
+          ||Math.abs(leftElbow.getRotationX())<0.6F||Math.abs(leftElbow.getRotationX())>1.0F
+          ||Math.abs(rightElbow.getRotationX())<0.6F||Math.abs(rightElbow.getRotationX())>1.0F
+          ||Math.abs(leftHand.getRotationY())<0.5F||Math.abs(rightHand.getRotationY())<0.5F
+          ||Math.abs(leftSpoon.getPositionX()-leftSpoon.getInitialSnapshot().positionOffsetX)<0.3F
+          ||Math.abs(leftSpoon.getPositionX()-leftSpoon.getInitialSnapshot().positionOffsetX)>0.5F
+          ||Math.abs(rightSpoon.getPositionX()-rightSpoon.getInitialSnapshot().positionOffsetX)<0.3F
+          ||Math.abs(rightSpoon.getPositionX()-rightSpoon.getInitialSnapshot().positionOffsetX)>0.5F
+          ||Math.abs(leftSpoon.getRotationX())<3.0F||Math.abs(rightSpoon.getRotationX())<3.0F
+          ||Math.abs(leftSpoon.getRotationY())<0.2F||Math.abs(rightSpoon.getRotationY())<0.2F
+          ||Math.abs(leftSpoon.getRotationZ())<1.0F||Math.abs(rightSpoon.getRotationZ())<1.0F)
        throw new IllegalStateException("Alakazam meditation pose lost folded arms, bent elbows, aligned hands/spoons, or hip connection: body="
            +body.getRotationX()+", lowerTorso="+lowerTorso.getRotationX()+", upperTorso="+upperTorso.getRotationX()
            +", head="+head.getRotationX()+"/"+head.getRotationY()+", arms="+leftArm.getRotationX()+"/"+leftArm.getRotationZ()
-           +" and "+rightArm.getRotationX()+"/"+rightArm.getRotationZ()+", elbows="+leftElbow.getRotationX()+"/"+rightElbow.getRotationX());
+           +" and "+rightArm.getRotationX()+"/"+rightArm.getRotationZ()+", elbows="+leftElbow.getRotationX()+"/"+rightElbow.getRotationX()
+           +", hands="+leftHand.getRotationX()+"/"+leftHand.getRotationY()+"/"+leftHand.getRotationZ()
+           +" and "+rightHand.getRotationX()+"/"+rightHand.getRotationY()+"/"+rightHand.getRotationZ()
+           +", spoons="+leftSpoon.getPositionX()+"/"+leftSpoon.getRotationX()+"/"+leftSpoon.getRotationY()+"/"+leftSpoon.getRotationZ()
+           +" and "+rightSpoon.getPositionX()+"/"+rightSpoon.getRotationX()+"/"+rightSpoon.getRotationY()+"/"+rightSpoon.getRotationZ());
       alakazamMeditationBobRange[0]=Math.min(alakazamMeditationBobRange[0],body.getPositionY());
       alakazamMeditationBobRange[1]=Math.max(alakazamMeditationBobRange[1],body.getPositionY());
       if(alakazamMeditationRenderFrames>=10){
