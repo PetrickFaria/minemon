@@ -25,6 +25,11 @@ final class NightRestGoal extends Goal {
  @Override public void stop(){mob.getNavigation().stop();gyaradosBottomTarget=null;gyaradosBottomSearchDelay=0;shellBottomTarget=null;shellBottomSearchDelay=0;}
  @Override public void tick(){
   if(mob.isInWaterOrBubble()&&SpeciesBehaviorProfiles.waterCapable(mob.getSpeciesSlug())){
+   if(mob.isSleeping()&&java.util.Set.of("seadra","tentacool","tentacruel","magikarp","goldeen","seaking").contains(mob.getSpeciesSlug())){
+    // Clear the residual swimming pitch while the renderer separately holds
+    // each model's body and trunk bones at their authored upright pose.
+    mob.setXRot(0.0F);mob.xRotO=0.0F;
+   }
    if(mob.getSpeciesSlug().equals("gyarados")&&!mob.isSleeping()){
     if(guideGyaradosToBottom())return;
    }
