@@ -102,14 +102,15 @@ jobs:
           med=d['animation.alakazam.meditate']['bones']
           sleep=d['animation.alakazam.sleep']['bones']
           walk=d['animation.alakazam.ground_walk']['bones']
-          awake=d['animation.alakazam.ground_idle']['bones']
-          sleep_legs={'hips','left_upper_leg','left_lower_leg','foot_left','right_upper_leg','right_lower_leg','foot_right'}
+          sleep_body={'hips','upper_torso','lower_torso','left_upper_leg','left_lower_leg','foot_left','toe_back_left','toe_inner_left','toe_outer_left','right_upper_leg','right_lower_leg','foot_right','toe_back_right','toe_inner_right','toe_outer_right'}
           walk_arms={'left_shoulder','left_upper_arm','left_lower_arm','hand_left','finger_index_left','finger_index_left2','finger_index_left3','finger_pinky_left','finger_pinky_left2','finger_pinky_left3','thumb_left','thumb_left2','spoon_left','spoon_left2','right_shoulder','right_upper_arm','right_lower_arm','hand_right','finger_index_right','finger_index_right2','finger_index_right3','finger_pinky_right','finger_pinky_right2','finger_pinky_right3','thumb_right','thumb_right2','spoon_right','spoon_right2'}
-          expected=sleep_legs|walk_arms|{'head'}
+          walk_face={'head','jaw','left_mustache','left_mustache2','left_mustache3','left_mustache4','left_mustache5','right_mustache','right_mustache2','right_mustache3','right_mustache4','right_mustache5'}
+          expected=sleep_body|walk_arms|walk_face
           assert set(med)==expected, (set(med)-expected,expected-set(med))
-          for bone in sleep_legs: assert med[bone] == sleep[bone], bone
+          for bone in sleep_body: assert med[bone] == sleep[bone], bone
           for bone in walk_arms: assert med[bone] == walk[bone], bone
-          assert med['head']==awake['head'] and med['head']!=sleep['head'], 'awake head pose'
+          for bone in walk_face: assert med[bone] == walk[bone], bone
+          assert med['head']!=sleep['head'], 'awake head pose'
           PY
           unzip -p "$jar_file" br/com/petrickfaria/minemon/entity/MinemonCreature.class | strings | grep -F 'naturalPhaseForRender'
           grep -F 'PASS ALAKAZAM CLIENT POSE:' run/client-validation.txt

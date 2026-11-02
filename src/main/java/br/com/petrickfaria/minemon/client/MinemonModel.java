@@ -40,6 +40,8 @@ public class MinemonModel extends AnimatedGeoModel<MinemonCreature> {
         boolean headLook=slug.equals("spearow")||slug.equals("fearow")||slug.equals("abra")
             ||slug.equals("kadabra")||slug.equals("alakazam")||slug.equals("bellsprout")
             ||slug.equals("geodude")||slug.equals("golem")||slug.equals("slowpoke")||slug.equals("slowbro")||slug.equals("mewtwo")||slug.equals("mew");
+        boolean alakazamFloating=slug.equals("alakazam")
+            &&entity.naturalPhaseForRender()==br.com.petrickfaria.minemon.entity.BehaviorCycle.Phase.AIR;
         boolean bodyPitch=slug.equals("mewtwo")||slug.equals("mew");
         if((!headLook&&!bodyPitch)||!getModelResource(entity).getPath().contains("_cobblemon_1_8_2/"))return;
         // Source posers declare q.look on a real head bone. Mew uses the native
@@ -56,8 +58,15 @@ public class MinemonModel extends AnimatedGeoModel<MinemonCreature> {
             float maxYaw=slug.equals("mew")?20.0F:(slug.equals("geodude")?15.0F:60.0F);
             if(slug.equals("fearow"))
                 head.setRotationX(head.getRotationX()+net.minecraft.util.Mth.clamp(input.headPitch,-10.0F,10.0F)*(float)Math.PI/180.0F);
+            else if(alakazamFloating)
+                // Keep the ground-walk head track over the sleeping torso pose;
+                // the old q.look assignment replaced that track with a neutral
+                // angle and made the head pitch down with the folded torso.
+                head.setRotationX(head.getRotationX()+net.minecraft.util.Mth.clamp(input.headPitch,minPitch,maxPitch)*(float)Math.PI/180.0F);
             else head.setRotationX((basePitch+net.minecraft.util.Mth.clamp(input.headPitch,minPitch,maxPitch))*(float)Math.PI/180.0F);
-            head.setRotationY(net.minecraft.util.Mth.clamp(input.netHeadYaw,minYaw,maxYaw)*(float)Math.PI/180.0F);
+            if(alakazamFloating)
+                head.setRotationY(head.getRotationY()+net.minecraft.util.Mth.clamp(input.netHeadYaw,minYaw,maxYaw)*(float)Math.PI/180.0F);
+            else head.setRotationY(net.minecraft.util.Mth.clamp(input.netHeadYaw,minYaw,maxYaw)*(float)Math.PI/180.0F);
         }
         if(bodyPitch) {
             var body=getAnimationProcessor().getBone("body");
