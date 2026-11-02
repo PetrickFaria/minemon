@@ -62,7 +62,7 @@ final class NightClientSmokeTest {
     };
     MinemonRenderer.validationObserver=(mob,model)->{
      if(entity==null||!mob.getUUID().equals(entity))return;
-     if((SpeciesBehaviorProfiles.usesSwimmingSleepAnimation(mob.getSpeciesSlug())||mob.getSpeciesSlug().equals("seel"))&&!mob.isSleeping(){
+     if((SpeciesBehaviorProfiles.usesSwimmingSleepAnimation(mob.getSpeciesSlug())||mob.getSpeciesSlug().equals("seel"))&&!mob.isSleeping()){
       for(String side:List.of("left","right")){
        for(String name:List.of("eye_"+side,side+"_eye",side+"eye")){
         var eye=model.getAnimationProcessor().getBone(name);
@@ -319,6 +319,13 @@ final class NightClientSmokeTest {
        throw new IllegalStateException(current.getSpeciesSlug()+" must settle at its safe species-specific water depth; target="+target+" y="+current.getY()+" error="+error);
      }else{
       if(++depthStableTicks>=5)depthSettleTicks=0;
+      if(depthStableTicks>=3&&SpeciesBehaviorProfiles.sleepsAtWaterBottom(current.getSpeciesSlug())){
+       double support=WaterMovementGoal.waterBottomSupportY(current,current.blockPosition());
+       if(!Double.isFinite(support)||Math.abs(current.getY()-support-0.015D)>.08D)
+        throw new IllegalStateException(current.getSpeciesSlug()+" did not settle its collision box on the submerged support: y="+current.getY()+" support="+support);
+       if(!current.level.noCollision(current,current.getBoundingBox()))
+        throw new IllegalStateException(current.getSpeciesSlug()+" intersects a solid block while resting at the submerged floor");
+      }
      }
     }else{
      depthSettleTicks=0;depthStableTicks=0;
