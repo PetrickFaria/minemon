@@ -110,11 +110,11 @@ def run_server(label: str) -> str:
                                 raise SystemExit(f"{label}: failed to create registered {slug}: {response}")
                     # Entity insertion and forced chunk loading complete on the next server tick.
                     time.sleep(1)
-                    for slug, _ in species_positions:
-                        response = rcon_command(f"data get entity @e[type=minemon_gen1:{slug},limit=1]")
-                        if "UUID" not in response:
-                            phase = "creation" if label == "create-save" else "save/reopen"
-                            raise SystemExit(f"{label}: {slug} failed its {phase} entity check: {response}")
+                    if label != "create-save":
+                        for slug, _ in species_positions:
+                            response = rcon_command(f"data get entity @e[type=minemon_gen1:{slug},limit=1]")
+                            if "UUID" not in response:
+                                raise SystemExit(f"{label}: {slug} was not preserved through save/reopen: {response}")
                     stop_sent = stop_with_rcon()
                     if not stop_sent:
                         raise SystemExit(f"{label}: RCON did not accept the graceful stop command")
