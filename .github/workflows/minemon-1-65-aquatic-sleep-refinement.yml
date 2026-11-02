@@ -61,3 +61,4 @@ jobs:
           path: build/libs/Minemon-1.19.2-1.65.jar
           if-no-files-found: error
           retention-days: 14
+

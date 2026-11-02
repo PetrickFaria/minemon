@@ -1035,11 +1035,9 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
             // These species have native sleep clips in the imported rigs. Keep
             // their authored closed-eye/rest poses instead of substituting swim.
             if(slug.equals("shellder")||slug.equals("cloyster")) {
-                clip=firstClip(slug,"sleep","water_sleep","night_sleep","ground_sleep");
-            } else if(Set.of("seadra","tentacool","tentacruel").contains(slug)) {
-                clip=firstClip(slug,"water_sleep","water_idle","water_swim","surface_water_swim","surfacewater_swim","water_surface_swim");
-            } else if(Set.of("magikarp","goldeen","seaking").contains(slug)) {
-                clip=firstClip(slug,"water_sleep","water_swim","surface_water_swim","surfacewater_swim","water_surface_swim","water_idle");
+                clip="animation."+slug+".sleep";
+            } else if(Set.of("seadra","tentacool","tentacruel","magikarp","goldeen","seaking").contains(slug)) {
+                clip="animation."+slug+".water_sleep";
             } else {
                 // Unmentioned aquatic species retain the approved 1.64 clip.
                 clip=firstClip(slug,"water_swim","surface_water_swim","surfacewater_swim","water_surface_swim");

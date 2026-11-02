@@ -32,7 +32,6 @@ public class MinemonModel extends AnimatedGeoModel<MinemonCreature> {
         applyPidgeWingVisibility(entity);
         applyGengarEyeVisibility(entity);
         applyNaturalBodyMotion(entity);
-        applyAquaticSleepFallbackMotion(entity);
         applyAquaticSleepPosture(entity);
         if(entity.isSleeping()||entity.isOrderedToSit())return;
         String slug=entity.getSpeciesSlug();
@@ -157,26 +156,6 @@ public class MinemonModel extends AnimatedGeoModel<MinemonCreature> {
         bone.setRotationX(initial.rotationValueX);
         bone.setRotationY(initial.rotationValueY);
         bone.setRotationZ(initial.rotationValueZ);
-    }
-
-    /** Shellder and Cloyster have no imported water-swim clip; keep their shell rigs gently moving. */
-    private void applyAquaticSleepFallbackMotion(MinemonCreature entity) {
-        if(!entity.isSleeping())return;
-        String slug=entity.getSpeciesSlug();
-        if(!slug.equals("shellder")&&!slug.equals("cloyster"))return;
-        double phase=(entity.tickCount+entity.getId()*0.37D)*0.14D;
-        float sway=(float)Math.sin(phase)*0.035F;
-        var body=getAnimationProcessor().getBone("body");
-        if(body!=null)body.setRotationZ(body.getRotationZ()+sway);
-        if(slug.equals("shellder")){
-            var shell=getAnimationProcessor().getBone("topshell");
-            if(shell!=null)shell.setRotationZ(shell.getRotationZ()-sway*1.5F);
-        }else{
-            var left=getAnimationProcessor().getBone("leftshell");
-            var right=getAnimationProcessor().getBone("rightshell");
-            if(left!=null)left.setRotationZ(left.getRotationZ()+sway);
-            if(right!=null)right.setRotationZ(right.getRotationZ()-sway);
-        }
     }
 
     /** Small additive body motion keeps hovering visually distinct from the wing-driven flight clips. */

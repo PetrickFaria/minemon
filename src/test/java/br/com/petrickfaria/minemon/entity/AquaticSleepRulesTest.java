@@ -27,4 +27,16 @@ public final class AquaticSleepRulesTest {
         assertFalse(SpeciesBehaviorProfiles.usesSwimmingSleepAnimation("lapras"));
         assertFalse(SpeciesBehaviorProfiles.usesSwimmingSleepAnimation("krabby"));
     }
+
+    @Test public void shellFloorSleepIsExclusiveAndPreservesGyaradosLaprasAndOtherBottomSwimmers() {
+        assertEquals(SpeciesBehaviorProfiles.Profile.AQUATIC_BOTTOM, SpeciesBehaviorProfiles.profile("shellder"));
+        assertEquals(SpeciesBehaviorProfiles.Profile.AQUATIC_BOTTOM, SpeciesBehaviorProfiles.profile("cloyster"));
+        assertTrue(SpeciesBehaviorProfiles.restsAtWaterBottom("gyarados"));
+        assertFalse(SpeciesBehaviorProfiles.restsAtWaterBottom("lapras"));
+        assertFalse(SpeciesBehaviorProfiles.restsAtWaterBottom("krabby"));
+        assertFalse(SpeciesBehaviorProfiles.restsAtWaterBottom("shellder"));
+        assertFalse(SpeciesBehaviorProfiles.restsAtWaterBottom("cloyster"));
+        assertTrue(SpeciesBehaviorProfiles.locksPositionDuringWaterSleep("shellder"));
+        assertTrue(SpeciesBehaviorProfiles.locksPositionDuringWaterSleep("cloyster"));
+    }
 }

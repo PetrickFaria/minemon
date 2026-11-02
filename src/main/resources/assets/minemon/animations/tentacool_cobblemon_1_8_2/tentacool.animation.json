@@ -499,11 +499,11 @@
         "body": {
           "position": [
             0,
-            "-0.15*(math.sin(query.anim_time*90*1-60)*4+1)",
+            0,
             0
           ],
           "rotation": [
-            5,
+            0,
             0,
             0
           ]
@@ -615,7 +615,12 @@
         },
         "torso": {
           "rotation": [
-            "14+0.5*math.sin(query.anim_time*90*1-40)*4+1",
+            0,
+            0,
+            0
+          ],
+          "position": [
+            0,
             0,
             0
           ]

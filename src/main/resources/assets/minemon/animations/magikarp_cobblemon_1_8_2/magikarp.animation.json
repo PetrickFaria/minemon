@@ -5615,13 +5615,6 @@
             "math.cos(query.anim_time*90*2*1-66)*4"
           ]
         },
-        "lower_lip": {
-          "position": [
-            0,
-            "0.25+math.sin(query.anim_time*90*2+33)*0.1",
-            0
-          ]
-        },
         "pupil_closed_left": {
           "position": [
             0.1,
@@ -5650,86 +5643,11 @@
             0
           ]
         },
-        "tail": {
-          "rotation": [
-            -5,
-            "0+math.cos(query.anim_time*90*2-30)*0.5",
-            0
-          ]
-        },
-        "tail2": {
-          "rotation": [
-            -5,
-            "0+math.cos(query.anim_time*90*2-60)*2",
-            0
-          ]
-        },
         "tail3": {
           "rotation": [
             -2.5,
-            "0+math.sin(query.anim_time*90*2-90)*5",
+            "math.sin(query.anim_time*90*2-90)*5",
             0
-          ]
-        },
-        "torso": {
-          "position": [
-            0,
-            "0+math.sin(query.anim_time*90*2+33)*0.2",
-            0
-          ],
-          "rotation": [
-            "12.5+math.cos(query.anim_time*90*2)*0.5",
-            "math.cos(query.anim_time*90*2/2-30)*2",
-            "math.sin(query.anim_time*90*2)*0.2"
-          ]
-        },
-        "upper_lip": {
-          "position": [
-            0,
-            "-0.25-math.sin(query.anim_time*90*2+33)*0.1",
-            0
-          ]
-        },
-        "whisker_left": {
-          "rotation": [
-            -60.60019,
-            10.74573,
-            "65.7069-math.cos(query.anim_time*90*2/2-60)*1"
-          ]
-        },
-        "whisker_left2": {
-          "rotation": [
-            -5.45565,
-            "-11.9264-math.cos(query.anim_time*90*2/2-120)*5",
-            12.72585
-          ]
-        },
-        "whisker_left3": {
-          "rotation": [
-            -0.3534,
-            "-12.1058-math.cos(query.anim_time*90*2/2-180)*8",
-            -20.1339
-          ]
-        },
-        "whisker_right": {
-          "rotation": [
-            -60.60019,
-            -10.7457,
-            "-65.7069-math.cos(query.anim_time*90*2/2-60)*1"
-          ]
-        },
-        "whisker_right2": {
-          "rotation": [
-            -5.45565,
-            "11.9264-math.cos(query.anim_time*90*2/2-120)*5",
-            -12.7258
-          ]
-        },
-        "whisker_right3": {
-          "rotation": [
-            -0.3534,
-            "12.1058-math.cos(query.anim_time*90*2/2-180)*8",
-            20.1339
           ]
         }
       },

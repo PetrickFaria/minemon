@@ -119,11 +119,9 @@ final class NightClientSmokeTest {
      if(swimSleep){
       String slug=mob.getSpeciesSlug();
       if(slug.equals("shellder")||slug.equals("cloyster"))
-       selectedClip=firstClip(slug,"sleep","water_sleep","night_sleep","ground_sleep");
-      else if(Set.of("seadra","tentacool","tentacruel").contains(slug))
-       selectedClip=firstClip(slug,"water_sleep","water_idle","water_swim","surface_water_swim","surfacewater_swim","water_surface_swim");
-      else if(Set.of("magikarp","goldeen","seaking").contains(slug))
-       selectedClip=firstClip(slug,"water_sleep","water_swim","surface_water_swim","surfacewater_swim","water_surface_swim","water_idle");
+       selectedClip="animation."+slug+".sleep";
+      else if(Set.of("seadra","tentacool","tentacruel","magikarp","goldeen","seaking").contains(slug))
+       selectedClip="animation."+slug+".water_sleep";
       else selectedClip=firstClip(slug,"water_swim","surface_water_swim","surfacewater_swim","water_surface_swim");
      }else selectedClip=definition.clips().getOrDefault(sleepKey,definition.clips().get("night_sleep"));
      if(swimSleep&&selectedClip==null)selectedClip=SpeciesAssetIndex.clip(mob.getSpeciesSlug(),"water_idle",definition.idle());
@@ -231,7 +229,7 @@ final class NightClientSmokeTest {
       level.setBlockAndUpdate(new BlockPos(x,y,z),Blocks.AIR.defaultBlockState());
      if(aquatic)for(int x=-6;x<=6;x++)for(int z=0;z<=10;z++)for(int y=101;y<=110;y++)
       level.setBlockAndUpdate(new BlockPos(x,y,z),Blocks.WATER.defaultBlockState());
-     double spawnY=aquatic?(slug.equals("magikarp")?110.0D:104.0D):air?107.0D:101.0D;
+     double spawnY=aquatic?(slug.equals("magikarp")?110.0D:(slug.equals("shellder")||slug.equals("cloyster")?108.0D:104.0D)):air?107.0D:101.0D;
      mob.moveTo(0,spawnY,5,180,0);
      if(SpeciesBehaviorProfiles.profile(mob.getSpeciesSlug())==SpeciesBehaviorProfiles.Profile.GROUND_FLIGHT
          ||SpeciesBehaviorProfiles.profile(mob.getSpeciesSlug())==SpeciesBehaviorProfiles.Profile.GROUND_FLOAT_CYCLE){
