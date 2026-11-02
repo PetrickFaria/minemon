@@ -35,7 +35,7 @@ jobs:
               *) echo "Out-of-scope file in 1.69 diff: $path"; exit 1 ;;
             esac
           done < /tmp/minemon-1.69-files.txt
-          if rg --pcre2 -n -i 'rcon\.password=(?!\{RCON_PASSWORD\}|\$\{\{)[^$\s]{8,}|(gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,})' $(cat /tmp/minemon-1.69-files.txt); then
+          if grep -Pni 'rcon\.password=(?!\{RCON_PASSWORD\}|\$\{\{)[^$\s]{8,}|(gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,})' $(cat /tmp/minemon-1.69-files.txt); then
             echo 'Possible embedded credential found in changed files.'
             exit 1
           fi
@@ -73,7 +73,7 @@ jobs:
           client_status=$?
           set -e
           if [ "$client_status" -ne 0 ]; then
-            rg -n -C 3 "Minemon client validation failed|Alakazam client hover|folded arms|hip connection|Exception|ERROR" run/alakazam-client-smoke.log | tail -n 100 || true
+            grep -En -C 3 "Minemon client validation failed|Alakazam client hover|folded arms|hip connection|Exception|ERROR" run/alakazam-client-smoke.log | tail -n 100 || true
             for crash in run/crash-reports/*-client.txt; do [ -f "$crash" ] && sed -n '1,100p' "$crash"; done
             exit "$client_status"
           fi

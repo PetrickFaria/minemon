@@ -45,6 +45,7 @@ public final class ClientSmokeTest {
  private static final java.util.Map<String,java.util.List<String>> modelBones=new java.util.HashMap<>();
  private static final java.util.Map<String,float[]> motionRanges=new java.util.HashMap<>();
  private static int alakazamMeditationRenderFrames;
+ private static int alakazamMeditationFirstAirTick=-1;
  private static final float[] alakazamMeditationBobRange={Float.MAX_VALUE,-Float.MAX_VALUE};
  private static final double[] alakazamMeditationHeightRange={Double.MAX_VALUE,-Double.MAX_VALUE};
  private static final double[] alakazamMeditationXRange={Double.MAX_VALUE,-Double.MAX_VALUE};
@@ -319,6 +320,10 @@ public final class ClientSmokeTest {
      String currentClip=entity.getSelectedAnimationForValidation();
      if(Boolean.getBoolean("minemon.clientSmokeAlakazamPose")&&slug.equals("alakazam")
          &&entity.naturalPhaseForRender()==BehaviorCycle.Phase.AIR){
+      if(alakazamMeditationFirstAirTick<0)alakazamMeditationFirstAirTick=entity.tickCount;
+      // The movement controller blends for four ticks when AIR selects the
+      // meditation clip. Assert the completed pose after that transition.
+      if(entity.tickCount-alakazamMeditationFirstAirTick>=8){
       if(!"animation.alakazam.meditate".equals(currentClip))
        throw new IllegalStateException("Alakazam natural hover did not select its meditation pose: "+currentClip);
       var processor=model.getAnimationProcessor();
@@ -394,6 +399,7 @@ public final class ClientSmokeTest {
        alakazamMeditationZRange[1]=Math.max(alakazamMeditationZRange[1],pos.z);
       }
       alakazamMeditationRenderFrames++;
+      }
      }
      lastRenderedEntityTick.put(slug,entity.tickCount);
      if(currentClip!=null&&!currentClip.equals(lastRenderedClip.put(slug,currentClip)))
