@@ -19,7 +19,17 @@ jobs:
           python-version: '3.12'
       - uses: gradle/actions/setup-gradle@v4
       - name: Compile Java 17 source and focused tests
-        run: ./gradlew --no-daemon clean compileJava compileTestJava
+        run: |
+          set -o pipefail
+          ./gradlew --no-daemon clean compileJava compileTestJava 2>&1 | tee compile-diagnostics.log
+      - name: Preserve compile diagnostics if a step fails
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Minemon-1.67-compile-diagnostics
+          path: compile-diagnostics.log
+          if-no-files-found: warn
+          retention-days: 7
       - name: Run focused psychic cycle and profile tests
         run: ./gradlew --no-daemon test --tests br.com.petrickfaria.minemon.BehaviorCycleTest --tests br.com.petrickfaria.minemon.NaturalBehaviorProfileTest
       - name: Create, save, and reopen a clean world

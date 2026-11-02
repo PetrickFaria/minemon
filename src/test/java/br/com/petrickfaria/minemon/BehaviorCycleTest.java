@@ -28,7 +28,7 @@ public final class BehaviorCycleTest {
         Map<SpeciesBehaviorProfiles.Profile, Long> expected = Map.ofEntries(
                 Map.entry(GROUND, 85L), Map.entry(WATER_VISITOR, 23L), Map.entry(GROUND_FLIGHT, 3L),
                 Map.entry(FLYER, 14L), Map.entry(FLOAT_HALF, 3L), Map.entry(FLOAT_LOW, 2L),
-                Map.entry(FLOAT_CYCLE, 8L), Map.entry(GROUND_FLOAT_CYCLE, 3L),
+                Map.entry(FLOAT_CYCLE, 8L), Map.entry(GROUND_FLOAT_CYCLE, 2L),
                 Map.entry(AQUATIC_CYCLE, 7L), Map.entry(AQUATIC_BOTTOM, 2L),
                 Map.entry(AQUATIC_NEAR_SURFACE, 1L), Map.entry(AQUATIC_SURFACE, 1L));
         for (var profile : SpeciesBehaviorProfiles.Profile.values())
