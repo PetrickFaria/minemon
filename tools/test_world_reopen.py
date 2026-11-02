@@ -109,12 +109,18 @@ def run_server(label: str) -> str:
                             )
                             if "Summoned new" not in response:
                                 raise SystemExit(f"{label}: failed to create registered {slug}: {response}")
-                    # RCON acknowledgement precedes entity insertion and chunk reload.
-                    time.sleep(3)
                     for slug, _ in species_positions:
                         response = rcon_command(f"data get entity @e[type=minemon_gen1:{slug},limit=1]")
                         if "UUID" not in response:
                             raise SystemExit(f"{label}: {slug} was not registered in the loaded test chunk: {response}")
+                        print(f"[{label}] VERIFIED ENTITY: {response}", flush=True)
+                    # Keep the test chunk loaded long enough for several server ticks
+                    # before flushing it, then verify again on each later open.
+                    time.sleep(3)
+                    for slug, _ in species_positions:
+                        response = rcon_command(f"data get entity @e[type=minemon_gen1:{slug},limit=1]")
+                        if "UUID" not in response:
+                            raise SystemExit(f"{label}: {slug} disappeared from the forced chunk: {response}")
                     rcon_command("save-all flush")
                     stop_sent = stop_with_rcon()
                     if not stop_sent:
