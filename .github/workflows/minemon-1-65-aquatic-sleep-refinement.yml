@@ -35,13 +35,14 @@ jobs:
       - name: Reopen the same saved client world
         run: |
           test -f run/saves/minemon-validation/level.dat
-          ALSOFT_DRIVERS=null timeout --kill-after=30s 900s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeSleep
-          grep -F 'PASS NIGHT CLIENT:' run/client-validation-night.txt
+          rm -f run/client-world-reopen-pass.txt
+          ALSOFT_DRIVERS=null timeout --kill-after=30s 180s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeReopen
+          grep -F 'PASS CLIENT WORLD REOPEN' run/client-world-reopen-pass.txt
       - name: Reopen the same saved client world a second time
         run: |
           test -f run/saves/minemon-validation/level.dat
-          ALSOFT_DRIVERS=null timeout --kill-after=30s 900s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeSleep
-          grep -F 'PASS NIGHT CLIENT:' run/client-validation-night.txt
+          ALSOFT_DRIVERS=null timeout --kill-after=30s 180s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeReopen
+          test "$(grep -c 'PASS CLIENT WORLD REOPEN' run/client-world-reopen-pass.txt)" -eq 2
       - name: Build the distributable mod JAR
         run: ./gradlew --no-daemon build -x test
       - name: Verify version and requested behavior classes in the JAR
