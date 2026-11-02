@@ -238,9 +238,7 @@ final class NightClientSmokeTest {
      var level=mc.getSingleplayerServer().overworld();if(entity!=null){var old=level.getEntity(entity);if(old!=null)old.discard();}
      String scenario=SPECIES.get(index);
      boolean landVaporeon=scenario.equals("vaporeon_land");
-     String slug=landVaporeon?"vaporeon":scenario;
-     for(String suffix:List.of("_irregular","_shallow","_obstacle"))
-      if(slug.endsWith(suffix)){slug=slug.substring(0,slug.length()-suffix.length());break;}
+     String slug=landVaporeon?"vaporeon":scenario.replaceFirst("_(irregular|shallow|obstacle)$","");
      var mob=ModEntities.SPECIES.get(slug).get().create(level);
      boolean aquatic=SpeciesBehaviorProfiles.waterCapable(mob.getSpeciesSlug())&&!landVaporeon;
      boolean air=SpeciesBehaviorProfiles.canFly(mob.getSpeciesSlug());
