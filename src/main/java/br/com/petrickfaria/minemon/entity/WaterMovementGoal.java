@@ -301,9 +301,11 @@ public final class WaterMovementGoal extends Goal {
   int floorWater=bottomWaterBlock(mob,column,surface);
   if(!safeWaterFloor(mob,column,floorWater))return Double.NaN;
   if(surface-floorWater<=mob.getBbHeight()+0.45D)return Double.NaN;
-  // Keep a useful collision margin above the floor. A nearly zero clearance
-  // can place the navigation node inside the support block after interpolation.
-  double target=floorWater+0.30D;
+  // Anchor the entity box just above the actual collision-shape top, including
+  // slabs and uneven terrain, instead of leaving the old 0.30-block air gap.
+  double supportTop=waterFloorTopY(mob,column,floorWater);
+  if(!Double.isFinite(supportTop))return Double.NaN;
+  double target=supportTop+0.015D;
   var box=mob.getBoundingBox().move(column.getX()+0.5D-mob.getX(),target-mob.getY(),column.getZ()+0.5D-mob.getZ());
   if(!mob.level.noCollision(mob,box))return Double.NaN;
   for(int x=(int)Math.floor(box.minX+0.001D);x<=Math.floor(box.maxX-0.001D);x++)
@@ -311,18 +313,20 @@ public final class WaterMovementGoal extends Goal {
     if(!mob.level.getFluidState(new BlockPos(x,floorWater,z)).is(FluidTags.WATER))return Double.NaN;
   return target;
  }
+ private static double waterFloorTopY(MinemonCreature mob,BlockPos column,int floorWater){
+  BlockPos floor=new BlockPos(column.getX(),floorWater-1,column.getZ());
+  var shape=mob.level.getBlockState(floor).getCollisionShape(mob.level,floor);
+  return shape.isEmpty()?Double.NaN:floor.getY()+shape.bounds().maxY;
+ }
  public static double waterRestY(MinemonCreature mob){
   double top=restSurfaceAt(mob,mob.blockPosition());
   if(!Double.isFinite(top))return Double.NaN;
   if(mob.getSpeciesSlug().equals("lapras"))return top-preferredSurfaceDepth(mob);
-  if(mob.getSpeciesSlug().equals("shellder")||mob.getSpeciesSlug().equals("cloyster")){
-   double target=bottomRestYAt(mob,mob.blockPosition());
-   return Double.isFinite(target)?target:mob.getY();
-  }
-  if(SpeciesBehaviorProfiles.restsAtWaterBottom(mob.getSpeciesSlug())){
+  if(SpeciesBehaviorProfiles.sleepsAtWaterBottom(mob.getSpeciesSlug())){
    double target=preferredBottomY(mob,mob.blockPosition(),top);
    if(Double.isFinite(target))return target;
    if(mob.getSpeciesSlug().equals("gyarados"))return deepestSafeWaterRestY(mob,top);
+   return Double.isFinite(mob.aquaticSleepY())?mob.aquaticSleepY():mob.getY();
   }
   return Double.isFinite(mob.aquaticSleepY())?mob.aquaticSleepY():mob.getY();
  }
@@ -339,7 +343,9 @@ public final class WaterMovementGoal extends Goal {
  public static double gyaradosDaytimeTarget(double originalSurfaceY){return originalSurfaceY-2.0D;}
  private static double deepestSafeWaterRestY(MinemonCreature mob,double surface){
   int floorWater=bottomWaterBlock(mob,mob.blockPosition(),surface);
-  double shallowest=floorWater+0.30D;
+  double supportTop=waterFloorTopY(mob,mob.blockPosition(),floorWater);
+  if(!Double.isFinite(supportTop))return Double.NaN;
+  double shallowest=supportTop+0.015D;
   for(double y=shallowest;y<surface;y+=0.25D)if(safeWaterRestAt(mob,y))return y;
   return Double.NaN;
  }
@@ -347,6 +353,13 @@ public final class WaterMovementGoal extends Goal {
  static double bottomRestYAt(MinemonCreature mob,BlockPos column){
   double surface=restSurfaceAt(mob,column);
   return Double.isFinite(surface)?preferredBottomY(mob,column,surface):Double.NaN;
+ }
+ /** Top of the local safe collision shape below a water column. */
+ public static double waterBottomSupportY(MinemonCreature mob,BlockPos column){
+  double surface=restSurfaceAt(mob,column);
+  if(!Double.isFinite(surface))return Double.NaN;
+  int floorWater=bottomWaterBlock(mob,column,surface);
+  return safeWaterFloor(mob,column,floorWater)?waterFloorTopY(mob,column,floorWater):Double.NaN;
  }
  /** Finds a reachable local floor target for a species-specific night descent. */
  static BlockPos bottomRestDestination(MinemonCreature mob){return new WaterMovementGoal(mob).nearbyBottomDestination();}
