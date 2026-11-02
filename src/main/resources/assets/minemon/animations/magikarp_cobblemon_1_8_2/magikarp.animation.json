@@ -1983,9 +1983,9 @@
             "0.4167": {
               "lerp_mode": "catmullrom",
               "post": [
-                2e-05,
+                0.00002,
                 32.5,
-                1e-05
+                0.00001
               ]
             },
             "0.4583": {
@@ -5692,44 +5692,44 @@
         },
         "whisker_left": {
           "rotation": [
-            -60.60019,
-            10.74573,
-            "65.7069-math.cos(query.anim_time*90*2/2-60)*1"
+            -46.1535,
+            -5.341,
+            "61.8897-math.cos(query.anim_time*90*3/2-60)*1"
           ]
         },
         "whisker_left2": {
           "rotation": [
-            -5.45565,
-            "-11.9264-math.cos(query.anim_time*90*2/2-120)*5",
-            12.72585
+            -7.05443,
+            "-21.5974-math.cos(query.anim_time*90*3/2-120)*5",
+            16.5458
           ]
         },
         "whisker_left3": {
           "rotation": [
-            -0.3534,
-            "-12.1058-math.cos(query.anim_time*90*2/2-180)*8",
-            -20.1339
+            1.9122,
+            "-2.1152-math.cos(query.anim_time*90*3/2-180)*8",
+            -25.0722
           ]
         },
         "whisker_right": {
           "rotation": [
-            -60.60019,
-            -10.7457,
-            "-65.7069-math.cos(query.anim_time*90*2/2-60)*1"
+            -46.1535,
+            5.34104,
+            "-61.8897-math.cos(query.anim_time*90*3/2-60)*1"
           ]
         },
         "whisker_right2": {
           "rotation": [
-            -5.45565,
-            "11.9264-math.cos(query.anim_time*90*2/2-120)*5",
-            -12.7258
+            -7.05443,
+            "21.5974-math.cos(query.anim_time*90*3/2-120)*5",
+            -16.5458
           ]
         },
         "whisker_right3": {
           "rotation": [
-            -0.3534,
-            "12.1058-math.cos(query.anim_time*90*2/2-180)*8",
-            20.1339
+            1.9122,
+            "2.1152-math.cos(query.anim_time*90*3/2-180)*8",
+            25.07224
           ]
         }
       },
