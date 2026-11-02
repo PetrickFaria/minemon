@@ -141,14 +141,9 @@ public class MinemonModel extends AnimatedGeoModel<MinemonCreature> {
         }
         if(slug.equals("tentacool")||slug.equals("tentacruel"))return;
         java.util.List<String> still=new java.util.ArrayList<>(java.util.List.of(
-                "head","mouth","upper_lip","lower_lip","horn","eyes","eye_left","eye_right",
-                "iris_left","iris_right","pupil_left","pupil_right","pupil_happy_left","pupil_happy_right",
-                "eyelid_left","eyelid_right","eyelid_half_left","eyelid_half_right",
-                "eyelid_three_quarters_left","eyelid_three_quarters_right",
-                "eyelid_full_left","eyelid_full_right","half_eyelid_left","half_eyelid_right",
-                "quarter_eyelid_left","quarter_eyelid_right","torso_end","whiskers","whisker_left","whisker_left2",
-                "whisker_left3","whisker_right","whisker_right2","whisker_right3",
-                "expressions","eye_blink_left","eye_blink_right","eye_hurt_left","eye_hurt_right"));
+                "head","mouth","upper_lip","lower_lip","horn","torso_end",
+                "whiskers","whisker_left","whisker_left2","whisker_left3",
+                "whisker_right","whisker_right2","whisker_right3"));
         for(String bone:still)freezeBone(bone);
     }
 
