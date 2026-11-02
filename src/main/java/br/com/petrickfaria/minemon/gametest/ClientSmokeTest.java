@@ -355,13 +355,15 @@ public final class ClientSmokeTest {
            +", head="+head.getRotationX()+"/"+head.getRotationY()+", arms="+leftArm.getRotationZ()+"/"+rightArm.getRotationZ());
       alakazamMeditationBobRange[0]=Math.min(alakazamMeditationBobRange[0],body.getPositionY());
       alakazamMeditationBobRange[1]=Math.max(alakazamMeditationBobRange[1],body.getPositionY());
-      double height=entity.getY()-entity.naturalSurface();var pos=entity.position();
-      alakazamMeditationHeightRange[0]=Math.min(alakazamMeditationHeightRange[0],height);
-      alakazamMeditationHeightRange[1]=Math.max(alakazamMeditationHeightRange[1],height);
-      alakazamMeditationXRange[0]=Math.min(alakazamMeditationXRange[0],pos.x);
-      alakazamMeditationXRange[1]=Math.max(alakazamMeditationXRange[1],pos.x);
-      alakazamMeditationZRange[0]=Math.min(alakazamMeditationZRange[0],pos.z);
-      alakazamMeditationZRange[1]=Math.max(alakazamMeditationZRange[1],pos.z);
+      if(alakazamMeditationRenderFrames>=10){
+       double height=entity.getY()-entity.naturalSurface();var pos=entity.position();
+       alakazamMeditationHeightRange[0]=Math.min(alakazamMeditationHeightRange[0],height);
+       alakazamMeditationHeightRange[1]=Math.max(alakazamMeditationHeightRange[1],height);
+       alakazamMeditationXRange[0]=Math.min(alakazamMeditationXRange[0],pos.x);
+       alakazamMeditationXRange[1]=Math.max(alakazamMeditationXRange[1],pos.x);
+       alakazamMeditationZRange[0]=Math.min(alakazamMeditationZRange[0],pos.z);
+       alakazamMeditationZRange[1]=Math.max(alakazamMeditationZRange[1],pos.z);
+      }
       alakazamMeditationRenderFrames++;
      }
      lastRenderedEntityTick.put(slug,entity.tickCount);
@@ -627,7 +629,8 @@ public final class ClientSmokeTest {
      var saved=new net.minecraft.nbt.CompoundTag();next.addAdditionalSaveData(saved);saved.putString("NaturalBehaviorPhase","AIR");next.readAdditionalSaveData(saved);
     }
     double waterY=fixtureSurface(slug)?101.0D-WaterMovementGoal.preferredSurfaceDepth(next):101.0D-next.getBbHeight()-0.35D;
-    next.moveTo(0,aquatic?waterY:101.0D,4,180,0);next.addTag("minemon-locomotion-fixture");next.setNoAi(false);next.goalSelector.removeAllGoals();next.targetSelector.removeAllGoals();setValidationPhase(next,0);level.addFreshEntity(next);testEntity=next.getUUID();
+    double spawnY=slug.equals("alakazam")&&Boolean.getBoolean("minemon.clientSmokeAlakazamPose")?102.0D:101.0D;
+    next.moveTo(0,aquatic?waterY:spawnY,4,180,0);next.addTag("minemon-locomotion-fixture");next.setNoAi(false);next.goalSelector.removeAllGoals();next.targetSelector.removeAllGoals();setValidationPhase(next,0);level.addFreshEntity(next);testEntity=next.getUUID();
     });
    }
    if(worldTicks>=SPECIES_START_TICK && worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW)
