@@ -55,6 +55,14 @@ public final class MinemonFlyingCreature extends MinemonCreature {
  }
  @Override protected PathNavigation createNavigation(Level level){FlyingPathNavigation n=new FlyingPathNavigation(this,level);n.setCanOpenDoors(false);n.setCanFloat(true);n.setCanPassDoors(true);return n;}
  @Override public void travel(net.minecraft.world.phys.Vec3 input){
+  if(!this.level.isClientSide&&this.isAlakazamAutonomousRoutinePhase()){
+   this.getNavigation().stop();
+   this.getMoveControl().setWantedPosition(this.getX(),this.getY(),this.getZ(),0.0D);
+   this.setNoGravity(true);this.setSpeed(0.0F);this.setXxa(0.0F);this.setYya(0.0F);this.setZza(0.0F);
+   this.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
+   super.travel(net.minecraft.world.phys.Vec3.ZERO);
+   return;
+  }
   if(!this.fixedFloater()&&this.isFlyingSpecies()&&!this.level.isClientSide&&!this.wantsNaturalLanding()
       &&!this.isSleeping()&&!this.isNightResting()&&!this.isOrderedToSit()&&!this.isDefeated()){
    double support=this.naturalSurface();
@@ -107,6 +115,10 @@ public final class MinemonFlyingCreature extends MinemonCreature {
   super.tick();
   if(isDefeated()){this.setNoGravity(true);return;}
   this.updateLocomotion();
+  if(!this.level.isClientSide&&this.isAlakazamAutonomousRoutinePhase()){
+   this.holdAlakazamAtNaturalHeight();
+   return;
+  }
   if(!this.isFlyingSpecies() && !this.wantsNaturalLanding()){return;}
   if(!this.level.isClientSide){
    this.recoveryTickSamples++;
@@ -183,6 +195,21 @@ public final class MinemonFlyingCreature extends MinemonCreature {
 
   }
   this.fallDistance=0;
+ }
+ private void holdAlakazamAtNaturalHeight(){
+  this.getNavigation().stop();
+  this.getMoveControl().setWantedPosition(this.getX(),this.getY(),this.getZ(),0.0D);
+  this.setNoGravity(true);this.setJumping(false);this.setSpeed(0.0F);
+  this.setXxa(0.0F);this.setYya(0.0F);this.setZza(0.0F);
+  double targetY=this.naturalSurface()+1.0D;
+  double error=targetY-this.getY();
+  double step=Math.abs(error)<0.01D?error:net.minecraft.util.Mth.clamp(error*0.25D,-0.08D,0.08D);
+  if(Math.abs(step)>1.0E-6D){
+   var movement=new net.minecraft.world.phys.Vec3(0.0D,step,0.0D);
+   if(this.level.noCollision(this,this.getBoundingBox().move(movement)))
+    this.move(net.minecraft.world.entity.MoverType.SELF,movement);
+  }
+  this.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);this.fallDistance=0.0F;
  }
  public int flightRecoveryAttemptsForValidation(){return this.flightRecoveryAttempts;}
  public int flightRecoveryMovesForValidation(){return this.flightRecoveryMoves;}

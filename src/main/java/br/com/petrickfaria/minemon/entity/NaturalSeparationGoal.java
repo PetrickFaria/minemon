@@ -19,7 +19,8 @@ final class NaturalSeparationGoal extends Goal {
  }
 
  @Override public boolean canUse(){
-  if(mob.tickCount<nextCheck||!mob.naturalBehaviorActive()||mob.getTarget()!=null)return false;
+  if(mob.tickCount<nextCheck||!mob.naturalBehaviorActive()||mob.getTarget()!=null
+      ||"alakazam".equals(mob.getSpeciesSlug())&&mob.naturalCycle().phase()==BehaviorCycle.Phase.AIR)return false;
   neighbor=mob.level.getEntitiesOfClass(MinemonCreature.class,mob.getBoundingBox().inflate(4.0D),
       e->e!=mob&&e.isAlive()).stream().filter(e->mob.distanceToSqr(e)<preferredDistance(e)*preferredDistance(e))
       .min(java.util.Comparator.comparingDouble(mob::distanceToSqr)).orElse(null);

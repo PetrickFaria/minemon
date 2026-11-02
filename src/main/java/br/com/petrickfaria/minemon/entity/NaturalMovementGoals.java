@@ -460,7 +460,7 @@ public final class NaturalMovementGoals {
             boolean fixedHeight=profile==SpeciesBehaviorProfiles.Profile.FLOAT_HALF
                     ||profile==SpeciesBehaviorProfiles.Profile.FLOAT_LOW;
             return this.mob.isFlyingSpecies()&&!fixedHeight&&!this.mob.wantsNaturalLanding()
-                    &&this.mob.naturalBehaviorActive();
+                    &&this.mob.naturalBehaviorActive()&&!this.mob.isAlakazamAutonomousRoutinePhase();
         }
 
         private boolean chooseDestination() {

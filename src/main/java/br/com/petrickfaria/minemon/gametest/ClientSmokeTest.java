@@ -247,7 +247,9 @@ public final class ClientSmokeTest {
   if(Boolean.getBoolean("minemon.clientSmokePokemonManagement")){PokemonManagementClientSmokeTest.tick(event);return;}
   if(Boolean.getBoolean("minemon.clientSmokeTreats")){PokemonTreatClientSmokeTest.tick(event);return;}
   if(Boolean.getBoolean("minemon.clientSmokeRocketProfession")){RocketVillagerClientSmokeTest.tick(event);return;}
+  if(Boolean.getBoolean("minemon.clientSmokeReopen")&&Boolean.getBoolean("minemon.clientSmokePsychic")){PsychicBehaviorClientSmokeTest.reopenTick(event);return;}
   if(Boolean.getBoolean("minemon.clientSmokeReopen")){NightClientSmokeTest.reopenTick(event);return;}
+  if(Boolean.getBoolean("minemon.clientSmokePsychic")){PsychicBehaviorClientSmokeTest.tick(event);return;}
   if(Boolean.getBoolean("minemon.clientSmokeSleep")){NightClientSmokeTest.tick(event);return;}
   if(Boolean.getBoolean("minemon.clientSmokePatrol")){HaunterPatrolClientSmokeTest.tick(event);return;}
   Minecraft mc=Minecraft.getInstance();

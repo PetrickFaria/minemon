@@ -76,6 +76,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     private static final EntityDataAccessor<Boolean> NATURAL_SURFACE = SynchedEntityData.defineId(MinemonCreature.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> NATURAL_LANDING = SynchedEntityData.defineId(MinemonCreature.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> NIGHT_REST = SynchedEntityData.defineId(MinemonCreature.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> ALAKAZAM_MEDITATION = SynchedEntityData.defineId(MinemonCreature.class, EntityDataSerializers.BOOLEAN);
     private net.minecraft.world.entity.ai.navigation.PathNavigation dryNavigation;
     private net.minecraft.world.entity.ai.navigation.PathNavigation escapeNavigation;
     private int nightCombatTicks,nightUnreachableTicks;
@@ -233,6 +234,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         this.entityData.define(NIGHT_REST, false);
         this.entityData.define(NATURAL_LANDING, false);
         this.entityData.define(NATURAL_FLIGHT, false);
+        this.entityData.define(ALAKAZAM_MEDITATION, false);
         this.entityData.define(NATURAL_SURFACE, SpeciesBehaviorProfiles.profile(this.getSpeciesSlug())==SpeciesBehaviorProfiles.Profile.AQUATIC_SURFACE);
         this.entityData.define(SLEEPING, false);
         this.entityData.define(ORDERED_SIT, false);
@@ -1055,6 +1057,8 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
             String restKey=slug.equals("vaporeon")
                     ? (this.isInWaterOrBubble()?"night_sleep_water":"night_sleep_land") : "night_sleep";
             clip = SpeciesAssetIndex.clip(slug, restKey, "night_sleep");
+        } else if (slug.equals("alakazam") && this.isAlakazamMeditating()) {
+            clip=SpeciesAssetIndex.clip(slug,"meditate_float","animation.alakazam.meditate_float");
         } else if ((this.isNightResting() || this.commandLanding()) && this.wantsNaturalLanding() && !this.isOnGround()) {
             // Keep a real air pose while descending. A ground gait during the
             // landing path looks like Spearow/Fearow are walking in mid-air.
@@ -1135,6 +1139,11 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     @Override public boolean canBreatheUnderwater() { return this.isAquaticSpecies() || super.canBreatheUnderwater(); }
 
     public BehaviorCycle naturalCycle(){return this.naturalCycle;}
+    public boolean isAlakazamMeditating(){return this.entityData.get(ALAKAZAM_MEDITATION);}
+    public boolean isAlakazamAutonomousRoutinePhase(){
+        if(!"alakazam".equals(this.getSpeciesSlug())||this.isFollowingOwner()||!this.naturalBehaviorActive())return false;
+        return this.naturalCycle.phase()==BehaviorCycle.Phase.TAKEOFF||this.naturalCycle.phase()==BehaviorCycle.Phase.AIR;
+    }
     public boolean isNaturalSurface(){return this.entityData.get(NATURAL_SURFACE);}
     public void chooseNaturalWaterDepth(boolean surface){
         if(SpeciesBehaviorProfiles.isVisitor(this.getSpeciesSlug()))
@@ -1165,6 +1174,8 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     private void syncNaturalState(){
         this.entityData.set(NATURAL_LANDING,this.naturalCycle.landing());
         this.entityData.set(NATURAL_FLIGHT, this.naturalCycle.flying() && !this.isNightResting());
+        this.entityData.set(ALAKAZAM_MEDITATION,"alakazam".equals(this.getSpeciesSlug())
+                &&this.naturalCycle.phase()==BehaviorCycle.Phase.AIR&&this.isAlakazamAutonomousRoutinePhase());
         this.entityData.set(NATURAL_SURFACE,SpeciesBehaviorProfiles.profile(this.getSpeciesSlug())==SpeciesBehaviorProfiles.Profile.AQUATIC_SURFACE
             ||SpeciesBehaviorProfiles.profile(this.getSpeciesSlug())==SpeciesBehaviorProfiles.Profile.AQUATIC_NEAR_SURFACE
             ||SpeciesBehaviorProfiles.isVisitor(this.getSpeciesSlug())&&(this.naturalCycle.phase()==BehaviorCycle.Phase.SURFACE||this.naturalCycle.phase()==BehaviorCycle.Phase.EXIT_WATER)

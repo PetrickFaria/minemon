@@ -35,14 +35,14 @@ public final class SpeciesBehaviorProfiles {
     private static final Set<String> TWO_VISIT_SURFACE = Set.of("staryu", "starmie");
 
     static {
-        assign(Profile.GROUND, "bulbasaur,ivysaur,venusaur,charmander,charmeleon,caterpie,weedle,rattata,raticate,ekans,arbok,pikachu,raichu,sandshrew,sandslash,nidoranf,nidorina,nidoqueen,nidoranm,nidorino,nidoking,clefairy,clefable,vulpix,ninetales,jigglypuff,wigglytuff,oddish,gloom,vileplume,paras,parasect,venonat,diglett,dugtrio,meowth,persian,mankey,primeape,growlithe,arcanine,machop,machoke,machamp,bellsprout,weepinbell,victreebel,graveler,golem,ponyta,rapidash,farfetchd,doduo,dodrio,grimer,muk,onix,drowzee,hypno,voltorb,electrode,exeggcute,exeggutor,cubone,marowak,hitmonlee,hitmonchan,lickitung,rhyhorn,rhydon,chansey,tangela,kangaskhan,mrmime,jynx,electabuzz,magmar,pinsir,tauros,ditto,eevee,jolteon,flareon,snorlax");
+        assign(Profile.GROUND, "bulbasaur,ivysaur,venusaur,charmander,charmeleon,caterpie,weedle,rattata,raticate,ekans,arbok,pikachu,raichu,sandshrew,sandslash,nidoranf,nidorina,nidoqueen,nidoranm,nidorino,nidoking,clefairy,clefable,vulpix,ninetales,jigglypuff,wigglytuff,oddish,gloom,vileplume,paras,parasect,venonat,diglett,dugtrio,meowth,persian,mankey,primeape,growlithe,arcanine,machop,machoke,machamp,bellsprout,weepinbell,victreebel,graveler,golem,ponyta,rapidash,farfetchd,doduo,dodrio,grimer,muk,onix,drowzee,hypno,voltorb,electrode,exeggcute,exeggutor,cubone,marowak,hitmonlee,hitmonchan,lickitung,rhyhorn,rhydon,chansey,tangela,kangaskhan,mrmime,jynx,electabuzz,magmar,pinsir,tauros,ditto,eevee,jolteon,flareon,snorlax,kadabra");
         assign(Profile.WATER_VISITOR, "squirtle,wartortle,blastoise,psyduck,golduck,poliwag,poliwhirl,poliwrath,slowpoke,slowbro,seel,dewgong,krabby,kingler,staryu,starmie,vaporeon,omanyte,omastar,kabuto,kabutops,dratini,dragonair");
         assign(Profile.GROUND_FLIGHT, "charizard,scyther,dragonite");
         assign(Profile.FLYER, "butterfree,beedrill,pidgey,pidgeotto,pidgeot,spearow,fearow,zubat,golbat,venomoth,aerodactyl,articuno,zapdos,moltres");
         assign(Profile.FLOAT_HALF, "metapod,kakuna,abra");
         assign(Profile.FLOAT_LOW, "geodude,porygon");
         assign(Profile.FLOAT_CYCLE, "magnemite,magneton,gastly,haunter,koffing,weezing,mewtwo,mew");
-        assign(Profile.GROUND_FLOAT_CYCLE, "kadabra,alakazam,gengar");
+        assign(Profile.GROUND_FLOAT_CYCLE, "alakazam,gengar");
         assign(Profile.AQUATIC_CYCLE, "tentacool,tentacruel,horsea,seadra,goldeen,seaking,magikarp");
         assign(Profile.AQUATIC_BOTTOM, "shellder,cloyster");
         assign(Profile.AQUATIC_NEAR_SURFACE, "gyarados");

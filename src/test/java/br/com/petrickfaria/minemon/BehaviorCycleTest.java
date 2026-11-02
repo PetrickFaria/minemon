@@ -26,7 +26,7 @@ public final class BehaviorCycleTest {
     @Test public void all151SpeciesHaveOneApprovedRoutineCategory() {
         assertEquals(SpeciesDefinitions.ALL.keySet(), SpeciesBehaviorProfiles.all().keySet());
         Map<SpeciesBehaviorProfiles.Profile, Long> expected = Map.ofEntries(
-                Map.entry(GROUND, 84L), Map.entry(WATER_VISITOR, 23L), Map.entry(GROUND_FLIGHT, 3L),
+                Map.entry(GROUND, 85L), Map.entry(WATER_VISITOR, 23L), Map.entry(GROUND_FLIGHT, 3L),
                 Map.entry(FLYER, 14L), Map.entry(FLOAT_HALF, 3L), Map.entry(FLOAT_LOW, 2L),
                 Map.entry(FLOAT_CYCLE, 8L), Map.entry(GROUND_FLOAT_CYCLE, 3L),
                 Map.entry(AQUATIC_CYCLE, 7L), Map.entry(AQUATIC_BOTTOM, 2L),
@@ -117,15 +117,33 @@ public final class BehaviorCycleTest {
         }
     }
 
-    @Test public void kadabraAlakazamAndGengarHaveTheirApprovedLandFloatCycles() {
+    @Test public void kadabraStaysGroundedAlakazamUsesThreeMinuteWalkAndThirtySecondHoverAndGengarIsUnchanged() {
         var ground = o(true, true, false, false, false, false, true, false);
         var band = o(true, false, true, false, false, false, false, false);
-        for (String slug : List.of("kadabra", "alakazam")) {
-            var cycle = new BehaviorCycle(GROUND_FLOAT_CYCLE, slug, new Random(8));
-            repeat(cycle, 6_000, ground); assertEquals(TAKEOFF, cycle.phase());
-            cycle.tick(band); repeat(cycle, 3_600, band); assertEquals(LANDING, cycle.phase());
-            cycle.tick(ground); assertEquals(LAND, cycle.phase());
-        }
+        var kadabra = new BehaviorCycle(GROUND, "kadabra", new Random(8));
+        assertEquals(LAND, kadabra.phase());
+        repeat(kadabra, 12_000, ground);
+        assertEquals(LAND, kadabra.phase());
+        assertFalse(kadabra.flying());
+
+        var alakazam = new BehaviorCycle(GROUND_FLOAT_CYCLE, "alakazam", new Random(8));
+        assertEquals(1.0D, alakazam.minimumAltitude(), 0.0D);
+        assertEquals(1.0D, alakazam.maximumAltitude(), 0.0D);
+        repeat(alakazam, 3_599, ground); assertEquals(LAND, alakazam.phase());
+        alakazam.tick(ground); assertEquals(TAKEOFF, alakazam.phase());
+        alakazam.tick(band); assertEquals(AIR, alakazam.phase());
+        repeat(alakazam, 599, band); assertEquals(AIR, alakazam.phase());
+        assertEquals(599, alakazam.ticks());
+        repeat(alakazam, 50, o(false, false, false, false, false, false, false, false));
+        assertEquals("combat and interruptions pause the hover clock", 599, alakazam.ticks());
+        alakazam.tick(band); assertEquals(LANDING, alakazam.phase());
+        alakazam.tick(ground); assertEquals(LAND, alakazam.phase());
+
+        var legacyKadabraSave = new BehaviorCycle(GROUND, "kadabra", new Random(10));
+        legacyKadabraSave.restore("AIR", 1_000, 0);
+        assertEquals("old airborne saves normalize to ground", LAND, legacyKadabraSave.phase());
+        assertFalse(legacyKadabraSave.flying());
+
         var gengar = new BehaviorCycle(GROUND_FLOAT_CYCLE, "gengar", new Random(9));
         repeat(gengar, 6_000, ground); gengar.tick(band);
         repeat(gengar, 3_600, band); assertEquals(1, gengar.stage());

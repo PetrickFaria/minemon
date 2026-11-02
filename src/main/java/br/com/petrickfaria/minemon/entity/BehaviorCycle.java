@@ -54,6 +54,7 @@ public final class BehaviorCycle {
     public int surfaceVisitLimit() { return surfaceVisitLimit; }
 
     public double minimumAltitude() {
+        if ("alakazam".equals(speciesSlug)) return 1.0D;
         if ("gastly".equals(speciesSlug)) return stage == 0 ? 1.0D : 2.0D;
         return switch (profile) {
             case FLYER, GROUND_FLIGHT -> stage == 0 ? 3.0D : 6.0D;
@@ -65,6 +66,7 @@ public final class BehaviorCycle {
     }
 
     public double maximumAltitude() {
+        if ("alakazam".equals(speciesSlug)) return 1.0D;
         if ("gastly".equals(speciesSlug)) return stage == 0 ? 1.0D : 5.0D;
         return switch (profile) {
             case FLYER, GROUND_FLIGHT -> stage == 0 ? 5.0D : 9.0D;
@@ -166,11 +168,12 @@ public final class BehaviorCycle {
     private void tickGroundFloat(Observation o) {
         switch (phase) {
             case LAND -> {
-                if (o.ground() && ++ticks >= TICKS_PER_MINUTE * 5) { stage = 0; enter(Phase.TAKEOFF); }
+                int landDuration = "alakazam".equals(speciesSlug) ? TICKS_PER_MINUTE * 3 : TICKS_PER_MINUTE * 5;
+                if (o.ground() && ++ticks >= landDuration) { stage = 0; enter(Phase.TAKEOFF); }
             }
             case TAKEOFF -> { if (o.flightBand()) enter(Phase.AIR); }
             case AIR -> {
-                int limit = stage == 0 ? TICKS_PER_MINUTE * 3
+                int limit = "alakazam".equals(speciesSlug) ? TICKS_PER_MINUTE / 2 : stage == 0 ? TICKS_PER_MINUTE * 3
                         : "gengar".equals(speciesSlug) ? TICKS_PER_MINUTE * 2 : 0;
                 if (limit > 0 && o.flightBand() && ++ticks >= limit) {
                     if (stage == 0 && "gengar".equals(speciesSlug)) { stage = 1; ticks = 0; }
@@ -240,6 +243,10 @@ public final class BehaviorCycle {
         ticks = limit <= 0 ? Math.max(0, elapsed) : Math.max(0, Math.min(limit - 1, elapsed));
         if (profile == Profile.GROUND_FLIGHT || profile == Profile.GROUND_FLOAT_CYCLE) {
             if (phase != Phase.LAND && phase != Phase.TAKEOFF && phase != Phase.AIR && phase != Phase.LANDING) enter(Phase.LAND);
+        } else if (profile == Profile.GROUND && phase != Phase.LAND) {
+            // Kadabra's pre-1.67 saves may contain an airborne phase from its
+            // former shared cycle. Normalize it safely to the new ground-only routine.
+            enter(Phase.LAND);
         } else if (profile == Profile.WATER_VISITOR
                 && phase != Phase.SEEK_WATER && phase != Phase.SUBMERGED && phase != Phase.SURFACE
                 && phase != Phase.EXIT_WATER && phase != Phase.COOLDOWN) enter(Phase.COOLDOWN);
@@ -258,6 +265,11 @@ public final class BehaviorCycle {
 
     private int phaseLimit() {
         if ("gastly".equals(speciesSlug)) return stage == 0 ? 6000 : 3600;
+        if ("alakazam".equals(speciesSlug)) return switch (phase) {
+            case LAND -> TICKS_PER_MINUTE * 3;
+            case AIR -> TICKS_PER_MINUTE / 2;
+            default -> 0;
+        };
         return switch (phase) {
             case LAND, COOLDOWN -> TICKS_PER_MINUTE * 5;
             case AIR -> stage == 0 ? TICKS_PER_MINUTE * 3 : profile == Profile.GROUND_FLIGHT ? TICKS_PER_MINUTE * 2

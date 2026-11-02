@@ -1,0 +1,64 @@
+name: Minemon 1.67 Psychic Behaviors
+on:
+  push:
+    branches: [feature/minemon-1.67-psychic-behaviors]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build-and-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Compile Java 17 source and focused tests
+        run: ./gradlew --no-daemon clean compileJava compileTestJava
+      - name: Run focused psychic cycle and profile tests
+        run: ./gradlew --no-daemon test --tests br.com.petrickfaria.minemon.BehaviorCycleTest --tests br.com.petrickfaria.minemon.NaturalBehaviorProfileTest
+      - name: Create, save, and reopen a clean world
+        run: python3 tools/test_world_reopen.py
+      - name: Prepare a saved client world with the psychic behavior fixtures
+        run: python3 tools/prepare_client_world.py
+      - name: Verify Kadabra and Alakazam movement and rendered animations in Minecraft client
+        run: |
+          ALSOFT_DRIVERS=null timeout --kill-after=30s 900s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokePsychic
+          grep -F 'PASS PSYCHIC CLIENT:' run/psychic-client-validation.txt
+      - name: Reopen the same saved client world the first time
+        run: |
+          test -f run/saves/minemon-validation/level.dat
+          rm -f run/psychic-world-reopen-pass.txt
+          ALSOFT_DRIVERS=null timeout --kill-after=30s 180s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeReopen -PclientSmokePsychic
+          grep -F 'PASS PSYCHIC WORLD REOPEN' run/psychic-world-reopen-pass.txt
+      - name: Reopen the same saved client world a second time
+        run: |
+          test -f run/saves/minemon-validation/level.dat
+          ALSOFT_DRIVERS=null timeout --kill-after=30s 180s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeReopen -PclientSmokePsychic
+          test "$(grep -c 'PASS PSYCHIC WORLD REOPEN' run/psychic-world-reopen-pass.txt)" -eq 2
+      - name: Build the distributable mod JAR
+        run: ./gradlew --no-daemon build -x test
+      - name: Verify version and psychic behavior assets in the JAR
+        shell: bash
+        run: |
+          set -euo pipefail
+          jar_file='build/libs/Minemon-1.19.2-1.67.jar'
+          test -f "$jar_file"
+          jar tf "$jar_file" | grep -Fx 'br/com/petrickfaria/minemon/entity/BehaviorCycle.class'
+          jar tf "$jar_file" | grep -Fx 'br/com/petrickfaria/minemon/entity/MinemonFlyingCreature.class'
+          jar tf "$jar_file" | grep -Fx 'br/com/petrickfaria/minemon/gametest/PsychicBehaviorClientSmokeTest.class'
+          jar tf "$jar_file" | grep -Fx 'assets/minemon_gen1/animations/alakazam_cobblemon_1_8_2/alakazam.animation.json'
+          unzip -p "$jar_file" assets/minemon_gen1/animations/alakazam_cobblemon_1_8_2/alakazam.animation.json | grep -F 'animation.alakazam.meditate_float'
+          unzip -p "$jar_file" META-INF/mods.toml | grep -F 'version="1.67"'
+          unzip -t "$jar_file"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Minemon-1.19.2-1.67
+          path: build/libs/Minemon-1.19.2-1.67.jar
+          if-no-files-found: error
+          retention-days: 14

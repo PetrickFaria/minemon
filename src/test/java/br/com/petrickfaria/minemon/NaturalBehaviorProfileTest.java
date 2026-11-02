@@ -21,7 +21,7 @@ public final class NaturalBehaviorProfileTest {
         assertEquals(151, SpeciesDefinitions.ALL.size());
         assertEquals(SpeciesDefinitions.ALL.keySet(), SpeciesBehaviorProfiles.all().keySet());
         assertProfile(SpeciesBehaviorProfiles.Profile.GROUND,
-                "bulbasaur,ivysaur,venusaur,charmander,charmeleon,caterpie,weedle,rattata,raticate,ekans,arbok,pikachu,raichu,sandshrew,sandslash,nidoranf,nidorina,nidoqueen,nidoranm,nidorino,nidoking,clefairy,clefable,vulpix,ninetales,jigglypuff,wigglytuff,oddish,gloom,vileplume,paras,parasect,venonat,diglett,dugtrio,meowth,persian,mankey,primeape,growlithe,arcanine,machop,machoke,machamp,bellsprout,weepinbell,victreebel,graveler,golem,ponyta,rapidash,farfetchd,doduo,dodrio,grimer,muk,onix,drowzee,hypno,voltorb,electrode,exeggcute,exeggutor,cubone,marowak,hitmonlee,hitmonchan,lickitung,rhyhorn,rhydon,chansey,tangela,kangaskhan,mrmime,jynx,electabuzz,magmar,pinsir,tauros,ditto,eevee,jolteon,flareon,snorlax");
+                "bulbasaur,ivysaur,venusaur,charmander,charmeleon,caterpie,weedle,rattata,raticate,ekans,arbok,pikachu,raichu,sandshrew,sandslash,nidoranf,nidorina,nidoqueen,nidoranm,nidorino,nidoking,clefairy,clefable,vulpix,ninetales,jigglypuff,wigglytuff,oddish,gloom,vileplume,paras,parasect,venonat,diglett,dugtrio,meowth,persian,mankey,primeape,growlithe,arcanine,machop,machoke,machamp,bellsprout,weepinbell,victreebel,graveler,golem,ponyta,rapidash,farfetchd,doduo,dodrio,grimer,muk,onix,drowzee,hypno,voltorb,electrode,exeggcute,exeggutor,cubone,marowak,hitmonlee,hitmonchan,lickitung,rhyhorn,rhydon,chansey,tangela,kangaskhan,mrmime,jynx,electabuzz,magmar,pinsir,tauros,ditto,eevee,jolteon,flareon,snorlax,kadabra");
         assertProfile(SpeciesBehaviorProfiles.Profile.WATER_VISITOR,
                 "squirtle,wartortle,blastoise,psyduck,golduck,poliwag,poliwhirl,poliwrath,slowpoke,slowbro,seel,dewgong,krabby,kingler,staryu,starmie,vaporeon,omanyte,omastar,kabuto,kabutops,dratini,dragonair");
         assertProfile(SpeciesBehaviorProfiles.Profile.GROUND_FLIGHT, "charizard,scyther,dragonite");
@@ -31,7 +31,7 @@ public final class NaturalBehaviorProfileTest {
         assertProfile(SpeciesBehaviorProfiles.Profile.FLOAT_LOW, "geodude,porygon");
         assertProfile(SpeciesBehaviorProfiles.Profile.FLOAT_CYCLE,
                 "magnemite,magneton,gastly,haunter,koffing,weezing,mewtwo,mew");
-        assertProfile(SpeciesBehaviorProfiles.Profile.GROUND_FLOAT_CYCLE, "kadabra,alakazam,gengar");
+        assertProfile(SpeciesBehaviorProfiles.Profile.GROUND_FLOAT_CYCLE, "alakazam,gengar");
         assertProfile(SpeciesBehaviorProfiles.Profile.AQUATIC_CYCLE,
                 "tentacool,tentacruel,horsea,seadra,goldeen,seaking,magikarp");
         assertProfile(SpeciesBehaviorProfiles.Profile.AQUATIC_BOTTOM, "shellder,cloyster");
@@ -40,14 +40,15 @@ public final class NaturalBehaviorProfileTest {
         Set<String> land = SpeciesBehaviorProfiles.all().entrySet().stream()
                 .filter(e -> e.getValue() == SpeciesBehaviorProfiles.Profile.GROUND)
                 .map(java.util.Map.Entry::getKey).collect(java.util.stream.Collectors.toSet());
-        assertEquals(84, land.size());
+        assertEquals(85, land.size());
         for (String slug : Set.of("charizard", "scyther", "dragonite"))
             assertEquals(SpeciesBehaviorProfiles.Profile.GROUND_FLIGHT, SpeciesBehaviorProfiles.profile(slug));
         for (String slug : Set.of("pidgey", "pidgeotto", "pidgeot", "spearow", "fearow", "aerodactyl"))
             assertEquals(SpeciesBehaviorProfiles.Profile.FLYER, SpeciesBehaviorProfiles.profile(slug));
         for (String slug : Set.of("gastly", "haunter", "magnemite", "magneton", "koffing", "weezing", "mewtwo", "mew"))
             assertEquals(SpeciesBehaviorProfiles.Profile.FLOAT_CYCLE, SpeciesBehaviorProfiles.profile(slug));
-        for (String slug : Set.of("kadabra", "alakazam", "gengar"))
+        assertEquals(SpeciesBehaviorProfiles.Profile.GROUND, SpeciesBehaviorProfiles.profile("kadabra"));
+        for (String slug : Set.of("alakazam", "gengar"))
             assertEquals(SpeciesBehaviorProfiles.Profile.GROUND_FLOAT_CYCLE, SpeciesBehaviorProfiles.profile(slug));
     }
 
@@ -112,8 +113,10 @@ public final class NaturalBehaviorProfileTest {
         }
         assertTrue(SpeciesBehaviorProfiles.canFly("mewtwo"));
         assertTrue(SpeciesBehaviorProfiles.isAirborne("mewtwo"));
-        assertTrue(SpeciesBehaviorProfiles.canFly("kadabra"));
+        assertFalse(SpeciesBehaviorProfiles.canFly("kadabra"));
         assertFalse(SpeciesBehaviorProfiles.isAirborne("kadabra"));
+        assertFalse(SpeciesBehaviorProfiles.isFloating("kadabra"));
+        assertTrue(SpeciesBehaviorProfiles.landsForNightRest("kadabra"));
         assertTrue(SpeciesBehaviorProfiles.canFly("charizard"));
         assertFalse(SpeciesBehaviorProfiles.isAirborne("charizard"));
         assertTrue(SpeciesBehaviorProfiles.isVisitor("vaporeon"));
