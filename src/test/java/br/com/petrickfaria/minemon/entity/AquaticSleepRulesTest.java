@@ -33,7 +33,8 @@ public final class AquaticSleepRulesTest {
         assertEquals(SpeciesBehaviorProfiles.Profile.AQUATIC_BOTTOM, SpeciesBehaviorProfiles.profile("cloyster"));
         assertTrue(SpeciesBehaviorProfiles.restsAtWaterBottom("gyarados"));
         assertFalse(SpeciesBehaviorProfiles.restsAtWaterBottom("lapras"));
-        assertFalse(SpeciesBehaviorProfiles.restsAtWaterBottom("krabby"));
+        assertTrue(SpeciesBehaviorProfiles.restsAtWaterBottom("krabby"));
+        assertFalse(SpeciesBehaviorProfiles.restsAtWaterBottom("omanyte"));
         assertFalse(SpeciesBehaviorProfiles.restsAtWaterBottom("shellder"));
         assertFalse(SpeciesBehaviorProfiles.restsAtWaterBottom("cloyster"));
         assertTrue(SpeciesBehaviorProfiles.locksPositionDuringWaterSleep("shellder"));
