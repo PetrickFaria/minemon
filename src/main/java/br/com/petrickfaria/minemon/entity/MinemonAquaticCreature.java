@@ -1,4 +1,182 @@
-YªçŠx-®éÜj×¢ëiºÚ+Š§j[h‘éÜ¢éíç7N‹Z–‹­¦ëeŠw¬ÕÁ…­…”‰È¹½´¹Á•ÑÉ¥­™…É¥„¹µ¥¹•µ½¸¹•¹Ñ¥Ñäì()¥µÁ½ÉÐ¹•Ð¹µ¥¹•É…™Ð¹Ý½É±¹•¹Ñ¥Ñä¹¹Ñ¥ÑåQåÁ”ì)¥µÁ½ÉÐ¹•Ð¹µ¥¹•É…™Ð¹Ý½É±¹•¹Ñ¥Ñä¹Q…µ…‰±•¹¥µ…°ì)¥µÁ½ÉÐ¹•Ð¹µ¥¹•É…™Ð¹Ý½É±¹•¹Ñ¥Ñä¹…¤¹½¹ÑÉ½°¹Mµ½½Ñ¡MÝ¥µµ¥¹5½Ù•½¹ÑÉ½°ì)¥µÁ½ÉÐ¹•Ð¹µ¥¹•É…™Ð¹Ý½É±¹•¹Ñ¥Ñä¹…¤¹½¹ÑÉ½°¹5½Ù•½¹ÑÉ½°ì)¥µÁ½ÉÐ¹•Ð¹µ¥¹•É…™Ð¹Ý½É±¹•¹Ñ¥Ñä¹…¤¹¹…Ù¥…Ñ¥½¸¹É½Õ¹‘A…Ñ¡9…Ù¥…Ñ¥½¸ì)¥µÁ½ÉÐ¹•Ð¹µ¥¹•É…™Ð¹Ý½É±¹±•Ù•°¹Á…Ñ¡™¥¹‘•È¹µÁ¡¥‰¥½ÕÍ9½‘•Ù…±Õ…Ñ½Èì)¥µÁ½ÉÐ¹•Ð¹µ¥¹•É…™Ð¹Ý½É±¹±•Ù•°¹Á…Ñ¡™¥¹‘•È¹A…Ñ¡¥¹‘•Èì)¥µÁ½ÉÐ¹•Ð¹µ¥¹•É…™Ð¹Ý½É±¹•¹Ñ¥Ñä¹…¤¹¹…Ù¥…Ñ¥½¸¹A…Ñ¡9…Ù¥…Ñ¥½¸ì)¥µÁ½ÉÐ¹•Ð¹µ¥¹•É…™Ð¹Ý½É±¹±•Ù•°¹1•Ù•°ì((¼¨¨]…Ñ•È…¹Í¡½É”¹…Ù¥…Ñ¥½¸Ý¥Ñ¡½ÕÐ™¥Í µÍÑå±”‘Éäµ±…¹‘…µ…”¸€¨¼)ÁÕ‰±¥Œ™¥¹…°±…ÍÌ5¥¹•µ½¹ÅÕ…Ñ¥É•…ÑÕÉ”•áÑ•¹‘Ì5¥¹•µ½¹É•…ÑÕÉ”ì(€€€ÁÕ‰±¥Œ5¥¹•µ½¹ÅÕ…Ñ¥É•…ÑÕÉ”¡¹Ñ¥ÑåQåÁ”ðü•áÑ•¹‘ÌQ…µ…‰±•¹¥µ…°øÑåÁ”°1•Ù•°±•Ù•°¤ì(€€€€€€€ÍÕÁ•È¡ÑåÁ”°±•Ù•°¤ì(€€€€€€€Ñ¡¥Ì¹±½½­½¹ÑÉ½°€ô¹•Ü¹•Ð¹µ¥¹•É…™Ð¹Ý½É±¹•¹Ñ¥Ñä¹…¤¹½¹ÑÉ½°¹1½½­½¹ÑÉ½°¡Ñ¡¥Ì¤ì(€€€=Ù•ÉÉ¥‘”ÁÕ‰±¥ŒÙ½¥Ñ¥¬ ¥ì(€€€€€€€€€€€€€€€™±½…ÐÍÝ¥µµ¥¹A¥Ñ õ5¥¹•µ½¹ÅÕ…Ñ¥É•…ÑÕÉ”¹Ñ¡¥Ì¹•ÑaI½Ð ¤íÍÕÁ•È¹Ñ¥¬ ¤ì(€€€€€€€€€€€€€€€¥˜¡MÁ•¥•Í	•¡…Ù¥½ÉAÉ½™¥±•Ì¹¥ÍY¥Í¥Ñ½È¡•ÑMÁ•¥•ÍM±Õœ ¤¤€˜˜5¥¹•µ½¹ÅÕ…Ñ¥É•…ÑÕÉ”¹Ñ¡¥Ì¹¥Í%¹]…Ñ•È ¤€˜˜€…•Ñ9…Ù¥…Ñ¥½¸ ¤¹¥Í½¹” ¤¥5¥¹•µ½¹ÅÕ…Ñ¥É•…ÑÕÉ”¹Ñ¡¥Ì¹Í•ÑaI½Ð¡ÍÝ¥µµ¥¹A¥Ñ ¤ì(€€€€€€€€€€€ô(€€€€€€€€€€€=Ù•ÉÉ¥‘”ÁÉ½Ñ•Ñ•‰½½±•…¸É•Í•ÑaI½Ñ=¹Q¥¬ ¤ì(€€€€€€€€€€€€€€€€¼¼1½½­½¹ÑÉ½°Ñ¥­Ì…™Ñ•È5½Ù•½¹ÑÉ½°¸%ÑÌ±…¹‘•™…Õ±ÐÉ•Í•ÑÌ(€€€€€€€€€€€€€€€€¼¼Á¥Ñ Ñ¼é•É¼•Ù•ÉäÑ¥¬°ÁÉ•Ù•¹Ñ¥¹œÍµ½½Ñ ÍÝ¥µµ¥¹œ™É½´(€€€€€€€€€€€€€€€€¼¼…ÕµÕ±…Ñ¥¹œÑ¡”¥¹±¥¹…Ñ¥½¸¹••‘•Ñ¼…Í•¹½È‘•Í•¹¸(€€€€€€€€€€€€€€€É•ÑÕÉ¸€…5¥¹•µ½¹ÅÕ…Ñ¥É•…ÑÕÉ”¹Ñ¡¥Ì¹¥Í%¹]…Ñ•È ¤(€€€€€€€€€€€€€€€€€€€€€€€ñð5¥¹•µ½¹ÅÕ…Ñ¥É•…ÑÕÉ”¹Ñ¡¥Ì¹•Ñ9…Ù¥…Ñ¥½¸ ¤¹¥Í½¹” ¤ì(€€€€€€€€€€€ô(€€€€€€€ôì(€€€€€€€Ñ¡¥Ì¹µ½Ù•½¹ÑÉ½°€ô¹•ÜMµ½½Ñ¡MÝ¥µµ¥¹5½Ù•½¹ÑÉ½°¡Ñ¡¥Ì°€àÔ°€ÄÀ°€À¸Å°€À¸Õ°™…±Í”¤ì(€€€€€€€€€€€ÁÉ¥Ù…Ñ”™¥¹…°5½Ù•½¹ÑÉ½°±…¹€ô¹•Ü5½Ù•½¹ÑÉ½°¡5¥¹•µ½¹ÅÕ…Ñ¥É•…ÑÕÉ”¹Ñ¡¥Ì¤ì((€€€€€€€€€€€=Ù•ÉÉ¥‘”ÁÕ‰±¥ŒÙ½¥Í•Ñ]…¹Ñ•‘A½Í¥Ñ¥½¸¡‘½Õ‰±”à°‘½Õ‰±”ä°‘½Õ‰±”è°‘½Õ‰±”ÍÁ••¤ì(€€€€€€€€€€€€€€€ÍÕÁ•È¹Í•Ñ]…¹Ñ•‘A½Í¥Ñ¥½¸¡à°ä°è°ÍÁ••¤ì(€€€€€€€€€€€€€€€Ñ¡¥Ì¹±…¹¹Í•Ñ]…¹Ñ•‘A½Í¥Ñ¥½¸¡à°ä°è°ÍÁ••¤ì(€€€€€€€€€€€ô((€€€€€€€€€€€=Ù•ÉÉ¥‘”ÁÕ‰±¥Œ‰½½±•…¸¡…Í]…¹Ñ• ¤ì(€€€€€€€€€€€€€€€É•ÑÕÉ¸5¥¹•µ½¹ÅÕ…Ñ¥É•…ÑÕÉ”¹Ñ¡¥Ì¹¥Í%¹]…Ñ•È ¤€üÍÕÁ•È¹¡…Í]…¹Ñ• ¤€èÑ¡¥Ì¹±…¹¹¡…Í]…¹Ñ• ¤ì(€€€€€€€€€€€ô((€€€€€€€€€€€=Ù•ÉÉ¥‘”ÁÕ‰±¥ŒÙ½¥ÍÑÉ…™”¡™±½…Ð™½ÉÝ…É°™±½…ÐÍ¥‘•Ý…åÌ¤ì(€€€€€€€€€€€€€€€ÍÕÁ•È¹ÍÑÉ…™”¡™½ÉÝ…É°Í¥‘•Ý…åÌ¤ì(€€€€€€€€€€€€€€€Ñ¡¥Ì¹±…¹¹ÍÑÉ…™”¡™½ÉÝ…É°Í¥‘•Ý…åÌ¤ì(€€€€€€€€€€€ô((€€€€€€€€€€€=Ù•ÉÉ¥‘”ÁÕ‰±¥ŒÙ½¥Ñ¥¬ ¤ì(€€€€€€€€€€€€€€€€¼¼MÝ¥µµ¥¹œ½¹ÑÉ½°…±½¹”‘½•Ì¹½ÐÁ•É™½É´½É‘¥¹…Éä±…¹©ÕµÁÌ¸(€€€€€€€€€€€€€€€€¼¼UÍ”5¥¹•É…™ÐÌ±…¹½¹ÑÉ½±±•È½¸Í¡½É•Ì½ÍÑ•ÁÌ…¹Íµ½½Ñ (€€€€€€€€€€€€€€€€¼¼Ñ¡É•”µ‘¥µ•¹Í¥½¹…°ÍÑ••É¥¹œ…™Ñ•È•¹Ñ•É¥¹œÑ¡”Ý…Ñ•È¸(€€€€€€€€€€€€€€€¥˜€¡5¥¹•µ½¹ÅÕ…Ñ¥É•…ÑÕÉ”¹Ñ¡¥Ì¹¥Í%¹]…Ñ•È ¤¤ÍÕÁ•È¹Ñ¥¬ ¤ì(€€€€€€€€€€€€€€€•±Í”Ñ¡¥Ì¹±…¹¹Ñ¥¬ ¤ì(€€€€€€€€€€€ô(€€€€€€€ôì(€€€ô((€€€ÁÉ¥Ù…Ñ”¥¹Ðå…É…‘½ÍMÕÉ™…•]…Ñ•É•±±Ì¡¹•Ð¹µ¥¹•É…™Ð¹Ý½É±¹Á¡åÌ¹	‰½à¥ì(€€€€€€€Ù…È•¹Ñ•Èõ¹•Ü¹•Ð¹µ¥¹•É…™Ð¹½É”¹	±½­A½Ì (€€€€€€€€€€€€€€€¹•Ð¹µ¥¹•É…™Ð¹ÕÑ¥°¹5Ñ ¹™±½½È ¡‰½à¹µ¥¹`­‰½à¹µ…á`¤¨À¸Õ¤°(€€€€€€€€€€€€€€€Ñ¡¥Ì¹•Ñ	±½­d ¤°(€€€€€€€€€€€€€€€¹•Ð¹µ¥¹•É…™Ð¹ÕÑ¥°¹5Ñ ¹™±½½È ¡‰½à¹µ¥¹h­‰½à¹µ…áh¤¨À¸Õ¤¤ì(€€€€€€€‘½Õ‰±”ÍÕÉ™…”õ]…Ñ•É5½Ù•µ•¹Ñ½…°¹ÍÕÉ™…•Ð¡Ñ¡¥Ì±•¹Ñ•È¤ì(€€€€€€€¥˜ …½Õ‰±”¹¥Í¥¹¥Ñ”¡ÍÕÉ™…”¤¥É•ÑÕÉ¸€´Äì(€€€€€€€¥¹ÐÝ…Ñ•Édõ¹•Ð¹µ¥¹•É…™Ð¹ÕÑ¥°¹5Ñ ¹™±½½È¡ÍÕÉ™…”´Ä¸Á´Ñ¤±Ý•ÐôÀì(€€€€€€€™½È¡¥¹Ðàõ¹•Ð¹µ¥¹•É…™Ð¹ÕÑ¥°¹5Ñ ¹™±½½È¡‰½à¹µ¥¹`¬À¸ÀÀÅ¤íàðõ¹•Ð¹µ¥¹•É…™Ð¹ÕÑ¥°¹5Ñ ¹™±½½È¡‰½à¹µ…á`´À¸ÀÀÅ¤íà¬¬¤(€€€€€€€€€€€™½È¡¥¹Ðèõ¹•Ð¹µ¥¹•É…™Ð¹ÕÑ¥°¹5Ñ ¹™±½½È¡‰½à¹µ¥¹h¬À¸ÀÀÅ¤íèðõ¹•Ð¹µ¥¹•É…™Ð¹ÕÑ¥°¹5Ñ ¹™±½½È¡‰½à¹µ…áh´À¸ÀÀÅ¤íè¬¬¤(€€€€€€€€€€€€€€€¥˜¡Ñ¡¥Ì¹±•Ù•°¹•Ñ±Õ¥‘MÑ…Ñ”¡¹•Ü¹•Ð¹µ¥¹•É…™Ð¹½É”¹	±½­A½Ì¡à±Ý…Ñ•Éd±è¤¤¹¥Ì¡¹•Ð¹µ¥¹•É…™Ð¹Ñ…Ì¹±Õ¥‘Q…Ì¹]QH¤¥Ý•Ð¬¬ì(€€€€€€€É•ÑÕÉ¸Ý•Ðì(€€€ô((€€€=Ù•ÉÉ¥‘”ÁÕ‰±¥ŒÙ½¥ÑÉ…Ù•°¡¹•Ð¹µ¥¹•É…™Ð¹Ý½É±¹Á¡åÌ¹Y•ŒÌ¥¹ÁÕÐ¥ì(€€€€€€€€¼¼1¥Ù¥¹¹Ñ¥Ñä½Ñ¡•ÉÝ¥Í”ÍÕ‰ÑÉ…ÑÌ€À¸ÀÀÔÙ•ÉÑ¥…°Ù•±½¥Ñä•Ù•ÉäÝ…Ñ•È(€€€€€€€€¼¼Ñ¥¬¸9•ÕÑÉ…°‰Õ½å…¹ä±•ÑÌÑ¡”ÍÝ¥µµ¥¹œ½¹ÑÉ½±±•ÈÉ•… ¡¥¡•È(€€€€€€€€¼¼¹½‘•Ìì½É‘¥¹…Éä±…¹É…Ù¥Ñä¥ÌÉ•ÍÑ½É•¥µµ•‘¥…Ñ•±ä½¸Í¡½É”¸(€€€€€€€¥˜ …Ñ¡¥Ì¹±•Ù•°¹¥Í±¥•¹ÑM¥‘”¥Ñ¡¥Ì¹Í•Ñ9½É…Ù¥Ñä¡Ñ¡¥Ì¹¥Í%¹]…Ñ•È ¤¤ì(€€€€€€€¥˜ …Ñ¡¥Ì¹±•Ù•°¹¥Í±¥•¹ÑM¥‘”˜™Ñ¡¥Ì¹¥ÍM±••Á¥¹œ ¤˜™Ñ¡¥Ì¹¥Í%¹]…Ñ•É=É	Õ‰‰±” ¤(€€€€€€€€€€€€€€€€˜™MÁ•¥•Í	•¡…Ù¥½ÉAÉ½™¥±•Ì¹ÕÍ•ÍMÝ¥µµ¥¹M±••Á¹¥µ…Ñ¥½¸¡Ñ¡¥Ì¹•ÑMÁ•¥•ÍM±Õœ ¤¤¥ì(€€€€€€€€€€€€¼¼MÑ½Àµ½Ù•µ•¹Ð‰•™½É”1¥Ù¥¹¹Ñ¥Ñä…ÁÁ±¥•ÌÝ…Ñ•ÈÑÉ…Ù•°¸±•…É¥¹œ(€€€€€€€€€€€€¼¼Ù•±½¥Ñä…™Ñ•ÈÑ¥¬¥ÌÑ½¼±…Ñ”½¸Ñ¡”ÑÉ…¹Í¥Ñ¥½¸¥¹Ñ¼Í±••À…¹(€€€€€€€€€€€€¼¼…¸±•…Ù”½¹”É•Í¥‘Õ…°Ù•ÉÑ¥…°ÍÑ•À¥¸Ñ¡”Í…Ù•É•ÍÐÁ½Í”¸(€€€€€€€€€€€Ñ¡¥Ì¹Í•Ñ9½É…Ù¥Ñä¡ÑÉÕ”¤íÑ¡¥Ì¹™…±±¥ÍÑ…¹”ôÀì(€€€€€€€€€€€Ñ¡¥Ì¹Í•Ñ•±Ñ…5½Ù•µ•¹Ð¡¹•Ð¹µ¥¹•É…™Ð¹Ý½É±¹Á¡åÌ¹Y•ŒÌ¹iI<¤ì(€€€€€€€€€€€É•ÑÕÉ¸ì(€€€€€€€ô(€€€€€€€¥˜ …Ñ¡¥Ì¹±•Ù•°¹¥Í±¥•¹ÑM¥‘”˜™Ñ¡¥Ì¹•ÑMÁ•¥•ÍM±Õœ ¤¹•ÅÕ…±Ì ‰å…É…‘½Ìˆ¤(€€€€€€€€€€€€€€€€˜™Ñ¡¥Ì¹¥Í9…ÑÕÉ…±MÕÉ™…” ¤˜˜…Ñ¡¥Ì¹¥ÍM±••Á¥¹œ ¤˜˜…Ñ¡¥Ì¹¥Í9¥¡ÑI•ÍÑ¥¹œ ¤(€€€€€€€€€€€€€€€€˜™Ñ¡¥Ì¹¥Í%¹]…Ñ•È ¤¥ì(€€€€€€€€€€€Ù…Èµ½Ñ¥½¸õÑ¡¥Ì¹•Ñ•±Ñ…5½Ù•µ•¹Ð ¤ì(€€€€€€€€€€€Ù…ÈÕÉÉ•¹Ñ	½àõÑ¡¥Ì¹•Ñ	½Õ¹‘¥¹	½à ¤ì(€€€€€€€€€€€Ù…È¹•áÑ	½àõÕÉÉ•¹Ñ	½à¹µ½Ù”¡µ½Ñ¥½¸¹à°À¸Á±µ½Ñ¥½¸¹è¤ì(€€€€€€€€€€€¥¹ÐÕÉÉ•¹Ñ]•Ðõå…É…‘½ÍMÕÉ™…•]…Ñ•É•±±Ì¡ÕÉÉ•¹Ñ	½à¤ì(€€€€€€€€€€€¥¹Ð¹•áÑ]•Ðõå…É…‘½ÍMÕÉ™…•]…Ñ•É•±±Ì¡¹•áÑ	½à¤ì(€€€€€€€€€€€€¼¼A•Éµ¥Ðµ½Ù•µ•¹Ð‰…¬Ñ½Ý…É½Á•¸Ý…Ñ•ÈÝ¡•¸…±É•…‘ä…Ð…¸•‘”°(€€€€€€€€€€€€¼¼Ý¡¥±”ÁÉ•Ù•¹Ñ¥¹œµ½µ•¹ÑÕ´™É½´…ÉÉå¥¹œÑ¡”‰½‘ä™…ÉÑ¡•È…Í¡½É”¸(€€€€€€€€€€€¥˜¡¹•áÑ]•ÐñÕÉÉ•¹Ñ]•Ð¥ì(€€€€€€€€€€€€€€€Ñ¡¥Ì¹Í•Ñ•±Ñ…5½Ù•µ•¹Ð À¸Á±µ½Ñ¥½¸¹ä°À¸Á¤ì(€€€€€€€€€€€€€€€¥¹ÁÕÐõ¹•Ü¹•Ð¹µ¥¹•É…™Ð¹Ý½É±¹Á¡åÌ¹Y•ŒÌ À¸Á±¥¹ÁÕÐ¹ä°À¸Á¤ì(€€€€€€€€€€€ô(€€€€€€€ô(€€€€€€€ÍÕÁ•È¹ÑÉ…Ù•°¡¥¹ÁÕÐ¤ì(€€€ô((€€€ÁÉ¥Ù…Ñ”	±½­A½Í…¡”Ý…Ñ•É…¡”ì(€€€ÁÉ¥Ù…Ñ”É•½É	±½­A½Í…¡”¡¹•Ð¹µ¥¹•É…™Ð¹½É”¹	±½­A½Ì½±Õµ¸±¥¹ÐÑ¥¬±‘½Õ‰±”Ñ½À¥íô(€€€ÁÕ‰±¥Œ‘½Õ‰±”Ý…Ñ•ÉMÕÉ™…” ¥ì(€€€€€€€Ù…È½±Õµ¸õÑ¡¥Ì¹‰±½­A½Í¥Ñ¥½¸ ¤ì(€€€€€€€¥˜¡Ñ¡¥Ì¹Ý…Ñ•É…¡”ôõ¹Õ±±ñð…½±Õµ¸¹•ÅÕ…±Ì¡Ñ¡¥Ì¹Ý…Ñ•É…¡”¹½±Õµ¸ ¤¥ññÑ¡¥Ì¹Ñ¥­½Õ¹ÐµÑ¡¥Ì¹Ý…Ñ•É…¡”¹Ñ¥¬ ¤øÄÀ¥ì(€€€€€€€€€€€‘½Õ‰±”Ñ½Àõ]…Ñ•É5½Ù•µ•¹Ñ½…°¹ÍÕÉ™…—]üÞÚ$z{-®éÜj×city.z*0.5D);
+package br.com.petrickfaria.minemon.entity;
+
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.TamableAnimal;
+import net.minecraft.world.entity.ai.control.SmoothSwimmingMoveControl;
+import net.minecraft.world.entity.ai.control.MoveControl;
+import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
+import net.minecraft.world.level.pathfinder.AmphibiousNodeEvaluator;
+import net.minecraft.world.level.pathfinder.PathFinder;
+import net.minecraft.world.entity.ai.navigation.PathNavigation;
+import net.minecraft.world.level.Level;
+
+/** Water and shore navigation without fish-style dry-land damage. */
+public final class MinemonAquaticCreature extends MinemonCreature {
+    public MinemonAquaticCreature(EntityType<? extends TamableAnimal> type, Level level) {
+        super(type, level);
+        this.lookControl = new net.minecraft.world.entity.ai.control.LookControl(this) {
+    @Override public void tick(){
+                float swimmingPitch=MinemonAquaticCreature.this.getXRot();super.tick();
+                if(SpeciesBehaviorProfiles.isVisitor(getSpeciesSlug()) && MinemonAquaticCreature.this.isInWater() && !getNavigation().isDone())MinemonAquaticCreature.this.setXRot(swimmingPitch);
+            }
+            @Override protected boolean resetXRotOnTick() {
+                // LookControl ticks after MoveControl. Its land default resets
+                // pitch to zero every tick, preventing smooth swimming from
+                // accumulating the inclination needed to ascend or descend.
+                return !MinemonAquaticCreature.this.isInWater()
+                        || MinemonAquaticCreature.this.getNavigation().isDone();
+            }
+        };
+        this.moveControl = new SmoothSwimmingMoveControl(this, 85, 10, 0.1F, 0.5F, false) {
+            private final MoveControl land = new MoveControl(MinemonAquaticCreature.this);
+
+            @Override public void setWantedPosition(double x, double y, double z, double speed) {
+                super.setWantedPosition(x, y, z, speed);
+                this.land.setWantedPosition(x, y, z, speed);
+            }
+
+            @Override public boolean hasWanted() {
+                return MinemonAquaticCreature.this.isInWater() ? super.hasWanted() : this.land.hasWanted();
+            }
+
+            @Override public void strafe(float forward, float sideways) {
+                super.strafe(forward, sideways);
+                this.land.strafe(forward, sideways);
+            }
+
+            @Override public void tick() {
+                // Swimming control alone does not perform ordinary land jumps.
+                // Use Minecraft's land controller on shores/steps and smooth
+                // three-dimensional steering after entering the water.
+                if (MinemonAquaticCreature.this.isInWater()) super.tick();
+                else this.land.tick();
+            }
+        };
+    }
+
+    private int gyaradosSurfaceWaterCells(net.minecraft.world.phys.AABB box){
+        var center=new net.minecraft.core.BlockPos(
+                net.minecraft.util.Mth.floor((box.minX+box.maxX)*0.5D),
+                this.getBlockY(),
+                net.minecraft.util.Mth.floor((box.minZ+box.maxZ)*0.5D));
+        double surface=WaterMovementGoal.surfaceAt(this,center);
+        if(!Double.isFinite(surface))return -1;
+        int waterY=net.minecraft.util.Mth.floor(surface-1.0E-4D),wet=0;
+        for(int x=net.minecraft.util.Mth.floor(box.minX+0.001D);x<=net.minecraft.util.Mth.floor(box.maxX-0.001D);x++)
+            for(int z=net.minecraft.util.Mth.floor(box.minZ+0.001D);z<=net.minecraft.util.Mth.floor(box.maxZ-0.001D);z++)
+                if(this.level.getFluidState(new net.minecraft.core.BlockPos(x,waterY,z)).is(net.minecraft.tags.FluidTags.WATER))wet++;
+        return wet;
+    }
+
+    @Override public void travel(net.minecraft.world.phys.Vec3 input){
+        // LivingEntity otherwise subtracts 0.005 vertical velocity every water
+        // tick. Neutral buoyancy lets the swimming controller reach higher
+        // nodes; ordinary land gravity is restored immediately on shore.
+        if(!this.level.isClientSide)this.setNoGravity(this.isInWater());
+        if(!this.level.isClientSide&&this.isSleeping()&&this.isInWaterOrBubble()
+                &&SpeciesBehaviorProfiles.usesSwimmingSleepAnimation(this.getSpeciesSlug())){
+            // Stop movement before LivingEntity applies water travel. Clearing
+            // velocity after tick is too late on the transition into sleep and
+            // can leave one residual vertical step in the saved rest pose.
+            this.setNoGravity(true);this.fallDistance=0;
+            this.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
+            return;
+        }
+        if(!this.level.isClientSide&&this.getSpeciesSlug().equals("gyarados")
+                &&this.isNaturalSurface()&&!this.isSleeping()&&!this.isNightResting()
+                &&this.isInWater()){
+            var motion=this.getDeltaMovement();
+            var currentBox=this.getBoundingBox();
+            var nextBox=currentBox.move(motion.x,0.0D,motion.z);
+            int currentWet=gyaradosSurfaceWaterCells(currentBox);
+            int nextWet=gyaradosSurfaceWaterCells(nextBox);
+            // Permit movement back toward open water when already at an edge,
+            // while preventing momentum from carrying the body farther ashore.
+            if(nextWet<currentWet){
+                this.setDeltaMovement(0.0D,motion.y,0.0D);
+                input=new net.minecraft.world.phys.Vec3(0.0D,input.y,0.0D);
+            }
+        }
+        super.travel(input);
+    }
+
+    private BlockPosCache waterCache;
+    private record BlockPosCache(net.minecraft.core.BlockPos column,int tick,double top){}
+    public double waterSurface(){
+        var column=this.blockPosition();
+        if(this.waterCache==null||!column.equals(this.waterCache.column())||this.tickCount-this.waterCache.tick()>10){
+            double top=WaterMovementGoal.surfaceAt(this,column);
+            if(!Double.isFinite(top))
+                top=nearbyWaterSurface();
+            this.waterCache=new BlockPosCache(column,this.tickCount,top);
+        }
+        return this.waterCache.top();
+    }
+    private double nearbyWaterSurface(){
+        var box=this.getBoundingBox();
+        int minX=net.minecraft.util.Mth.floor(box.minX-1.001D),maxX=net.minecraft.util.Mth.floor(box.maxX+1.001D);
+        int minZ=net.minecraft.util.Mth.floor(box.minZ-1.001D),maxZ=net.minecraft.util.Mth.floor(box.maxZ+1.001D);
+        int minY=net.minecraft.util.Mth.floor(this.getY())-1;
+        int maxY=net.minecraft.util.Mth.ceil(this.getY()+this.getBbHeight())+1;
+        double best=Double.NaN,bestScore=Double.POSITIVE_INFINITY;
+        double bodyCenter=this.getY()+this.getBbHeight()*.5D;
+        for(int x=minX;x<=maxX;x++)for(int z=minZ;z<=maxZ;z++){
+            double dx=x+.5D-this.getX(),dz=z+.5D-this.getZ();
+            double horizontal=dx*dx+dz*dz;
+            for(int y=minY;y<=maxY;y++){
+                double top=WaterMovementGoal.surfaceAt(this,new net.minecraft.core.BlockPos(x,y,z));
+                if(!Double.isFinite(top))continue;
+                double score=horizontal+.25D*Math.abs(top-(bodyCenter+1.0D));
+                if(score<bestScore){bestScore=score;best=top;}
+            }
+        }
+        return best;
+    }
+    @Override public void tick(){
+        super.tick();
+        if(this.isDefeated()||this.level.isClientSide)return;
+        if(this.isSleeping()&&this.isInWaterOrBubble()
+                &&SpeciesBehaviorProfiles.usesSwimmingSleepAnimation(this.getSpeciesSlug())){
+            // Freeze only server-side translation. GeckoLib still advances the
+            // selected swim animation on clients while the sleeper stays put.
+            this.getNavigation().stop();
+            this.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
+            this.setNoGravity(true);this.fallDistance=0;
+            return;
+        }
+        // A completed surface route can leave SmoothSwimmingMoveControl holding
+        // its last horizontal waypoint. Clear it even if the body has just
+        // crossed the waterline and the current column has no measurable top.
+        if(this.getSpeciesSlug().equals("gyarados")&&this.isNaturalSurface()
+                &&!this.isSleeping()&&!this.isNightResting()&&this.getNavigation().isDone()){
+            double holdY=this.getY();
+            if(this.isInWater()){
+                double localTop=this.waterSurface();
+                if(Double.isFinite(localTop))
+                    holdY=localTop-WaterMovementGoal.preferredSurfaceDepth(this);
+            }
+            this.getMoveControl().setWantedPosition(this.getX(),holdY,this.getZ(),0.5D);
+            // The completed route no longer owns horizontal motion. Damp its
+            // residual momentum so inertia cannot carry Gyarados over a bank
+            // after the controller has already cleared the stale waypoint.
+            var motion=this.getDeltaMovement();
+            this.setDeltaMovement(motion.x*0.2D,motion.y,motion.z*0.2D);
+        }
+        if(!this.isInWater()||(!this.naturalBehaviorActive()&&!this.isSleeping()&&!this.isNightResting()))return;
+        double top=this.waterSurface();
+        if(!Double.isFinite(top))return;
+        if(this.isSleeping()||this.isNightResting()){
+            // Night rest has its own species-specific depth. Ease toward it
+            // before the settled check marks the creature asleep, then keep
+            // holding that depth for the duration of sleep. In particular,
+            // visitors that entered the water during their land cooldown are
+            // marked EXIT_WATER (a surface phase), but must remain asleep at
+            // the safe bottom until dawn rather than being pulled upward.
+            double restY=WaterMovementGoal.waterRestY(this);
+            if(Double.isFinite(restY)){
+                var velocity=this.getDeltaMovement();
+                double vy=net.minecraft.util.Mth.clamp(velocity.y*0.5D+(restY-this.getY())*0.05D,-0.09D,0.09D);
+                this.setDeltaMovement(velocity.x*0.5D,vy,velocity.z*0.5D);
             }
             return;
         }
