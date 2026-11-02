@@ -151,12 +151,12 @@ final class PsychicBehaviorClientSmokeTest {
             if(upperLeft==null||upperRight==null||kneeLeft==null||kneeRight==null||footLeft==null||footRight==null
                     ||torso==null||head==null||spoonLeft==null||spoonRight==null||eyeLeft==null||eyeRight==null)
                 throw new IllegalStateException("Alakazam meditation rig is missing a required body, limb, spoon, or eye bone");
-            if(Math.abs(upperLeft.getRotationX()-(float)Math.toRadians(70.0D))>.12F
-                    ||Math.abs(upperRight.getRotationX()-(float)Math.toRadians(70.0D))>.12F
-                    ||Math.abs(kneeLeft.getRotationX()-(float)Math.toRadians(100.0D))>.12F
-                    ||Math.abs(kneeRight.getRotationX()-(float)Math.toRadians(100.0D))>.12F
-                    ||Math.abs(footLeft.getRotationX()-(float)Math.toRadians(-80.0D))>.12F
-                    ||Math.abs(footRight.getRotationX()-(float)Math.toRadians(-80.0D))>.12F)
+            if(Math.abs(upperLeft.getRotationX()+(float)Math.toRadians(70.0D))>.12F
+                    ||Math.abs(upperRight.getRotationX()+(float)Math.toRadians(70.0D))>.12F
+                    ||Math.abs(kneeLeft.getRotationX()+(float)Math.toRadians(100.0D))>.12F
+                    ||Math.abs(kneeRight.getRotationX()+(float)Math.toRadians(100.0D))>.12F
+                    ||Math.abs(footLeft.getRotationX()-(float)Math.toRadians(80.0D))>.12F
+                    ||Math.abs(footRight.getRotationX()-(float)Math.toRadians(80.0D))>.12F)
                 throw new IllegalStateException("Alakazam's rendered meditation leg pose did not apply the forward-folded thigh, knee, and foot rotations: upper="+upperLeft.getRotationX()+","+upperRight.getRotationX()+" knee="+kneeLeft.getRotationX()+","+kneeRight.getRotationX()+" feet="+footLeft.getRotationX()+","+footRight.getRotationX());
             if(eyeLeft.isHidden()||eyeRight.isHidden()||Math.abs(head.getRotationX())>.18F
                     ||torso.getRotationX()<.20F||torso.getRotationX()>.42F
