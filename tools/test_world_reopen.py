@@ -99,14 +99,18 @@ def run_server(label: str) -> str:
                 if not ready and "Done (" in combined:
                     ready = True
                     rcon_command("forceload add 0 0")
-                    for slug, x in (("kadabra", 0), ("alakazam", 3)):
-                        if label == "create-save":
+                    species_positions = (("kadabra", 0), ("alakazam", 3))
+                    if label == "create-save":
+                        for slug, x in species_positions:
                             response = rcon_command(
                                 f"summon minemon_gen1:{slug} {x} 5 0 "
                                 "{PersistenceRequired:1b}"
                             )
                             if "Summoned new" not in response:
                                 raise SystemExit(f"{label}: failed to create registered {slug}: {response}")
+                    # Entity insertion and forced chunk loading complete on the next server tick.
+                    time.sleep(1)
+                    for slug, _ in species_positions:
                         response = rcon_command(f"data get entity @e[type=minemon_gen1:{slug},limit=1]")
                         if "UUID" not in response:
                             phase = "creation" if label == "create-save" else "save/reopen"
