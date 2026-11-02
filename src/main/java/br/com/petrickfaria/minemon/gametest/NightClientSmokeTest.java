@@ -177,7 +177,8 @@ final class NightClientSmokeTest {
       level.setBlockAndUpdate(new BlockPos(x,y,z),Blocks.AIR.defaultBlockState());
      if(aquatic)for(int x=-6;x<=6;x++)for(int z=0;z<=10;z++)for(int y=101;y<=110;y++)
       level.setBlockAndUpdate(new BlockPos(x,y,z),Blocks.WATER.defaultBlockState());
-     mob.moveTo(0,aquatic?104:air?107:101,5,180,0);
+     double spawnY=aquatic?(slug.equals("magikarp")?110.0D:104.0D):air?107.0D:101.0D;
+     mob.moveTo(0,spawnY,5,180,0);
      if(SpeciesBehaviorProfiles.profile(mob.getSpeciesSlug())==SpeciesBehaviorProfiles.Profile.GROUND_FLIGHT
          ||SpeciesBehaviorProfiles.profile(mob.getSpeciesSlug())==SpeciesBehaviorProfiles.Profile.GROUND_FLOAT_CYCLE){
       var tag=new net.minecraft.nbt.CompoundTag();mob.addAdditionalSaveData(tag);tag.putString("NaturalBehaviorPhase","AIR");mob.readAdditionalSaveData(tag);
@@ -217,9 +218,11 @@ final class NightClientSmokeTest {
      if(SpeciesBehaviorProfiles.usesSwimmingSleepAnimation(current.getSpeciesSlug())
          &&WaterMovementGoal.restSurfaceAt(current,current.blockPosition())-current.getY()<1.8D)
       throw new IllegalStateException(current.getSpeciesSlug()+" slept closer than two blocks to the water surface");
-     if(SpeciesBehaviorProfiles.usesSwimmingSleepAnimation(current.getSpeciesSlug())
-         &&Math.abs(current.getY()-104.0D)>.25D)
-      throw new IllegalStateException(current.getSpeciesSlug()+" did not preserve its already-sufficient sleep depth: y="+current.getY());
+     if(SpeciesBehaviorProfiles.usesSwimmingSleepAnimation(current.getSpeciesSlug())){
+      double expectedY=current.getSpeciesSlug().equals("magikarp")?109.0D:104.0D;
+      if(Math.abs(current.getY()-expectedY)>.25D)
+       throw new IllegalStateException(current.getSpeciesSlug()+" chose the wrong sleep anchor: y="+current.getY()+" expected="+expectedY);
+     }
      if(!Double.isFinite(target)||error>.2D){
       depthStableTicks=0;
       if(++depthSettleTicks>20)
