@@ -23,6 +23,7 @@ final class NightClientSmokeTest {
  private static final Map<String,float[]> restingWings=new HashMap<>();
  private static final Map<String,float[]> swimMotion=new HashMap<>();
  private static net.minecraft.world.phys.Vec3 lastSleepingPosition;
+ private static int sleepingPositionSettleTick=-1;
  static void tick(TickEvent.ClientTickEvent event){
   var mc=Minecraft.getInstance();
   try{
@@ -221,9 +222,14 @@ final class NightClientSmokeTest {
    if(current==null)return;
    boolean waterRest=SpeciesBehaviorProfiles.waterCapable(current.getSpeciesSlug())&&current.isInWaterOrBubble();
    if(current.isSleeping()){
-    if(lastSleepingPosition!=null&&lastSleepingPosition.distanceToSqr(current.position())>1.0E-8D)
-     throw new IllegalStateException(current.getSpeciesSlug()+" moved physically while sleeping: "+lastSleepingPosition+" -> "+current.position());
-    lastSleepingPosition=current.position();
+    // The client can still interpolate the final pre-sleep movement packet
+    // after the server has already locked the entity in place. Let that packet
+    // settle, then require the rendered entity position to stay unchanged.
+    if(lastSleepingPosition==null){lastSleepingPosition=current.position();sleepingPositionSettleTick=current.tickCount;}
+    else if(current.tickCount-sleepingPositionSettleTick<5)lastSleepingPosition=current.position();
+    else if(lastSleepingPosition.distanceToSqr(current.position())>1.0E-8D)
+     throw new IllegalStateException(current.getSpeciesSlug()+" moved physically while sleeping after network settle: "+lastSleepingPosition+" -> "+current.position());
+    else lastSleepingPosition=current.position();
     if(waterRest){
      double target=WaterMovementGoal.waterRestY(current);
      double error=Math.abs(current.getY()-target);
@@ -256,7 +262,7 @@ final class NightClientSmokeTest {
      }
     }
    }else{
-    lastSleepingPosition=null;restSettleTicks=0;restStableTicks=0;
+    lastSleepingPosition=null;sleepingPositionSettleTick=-1;restSettleTicks=0;restStableTicks=0;
    }
    double dx=current.getX()-mc.player.getX(),dz=current.getZ()-mc.player.getZ(),dy=current.getY()+current.getBbHeight()*.65-mc.player.getEyeY();
    mc.player.setYRot((float)(Math.toDegrees(Math.atan2(dz,dx))-90));mc.player.setXRot((float)-Math.toDegrees(Math.atan2(dy,Math.sqrt(dx*dx+dz*dz))));
