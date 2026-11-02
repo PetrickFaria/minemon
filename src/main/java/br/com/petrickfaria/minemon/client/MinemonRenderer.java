@@ -49,6 +49,12 @@ public class MinemonRenderer extends GeoEntityRenderer<MinemonCreature> {
      if(entity.level.noCollision(entity,visualBox))vertical+=lift;
     }
    }
+   if(entity.isSleeping()&&entity.isInWaterOrBubble()
+       &&br.com.petrickfaria.minemon.entity.SpeciesBehaviorProfiles.sleepsAtWaterBottom(entity.getSpeciesSlug())){
+    double support=br.com.petrickfaria.minemon.entity.WaterMovementGoal.waterBottomSupportY(entity,entity.blockPosition());
+    if(Double.isFinite(support)&&Math.abs(entity.getY()-(support+0.015D))<=0.08D)
+     vertical+=br.com.petrickfaria.minemon.entity.ModelMetrics.waterFloorContactOffset(entity.getSpeciesSlug(),scale);
+   }
    pose.translate(0,vertical,0);
   }
   pose.scale(scale,scale,scale);
