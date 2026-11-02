@@ -87,7 +87,7 @@ public class MinemonModel extends AnimatedGeoModel<MinemonCreature> {
     /** Uses each imported aquatic rig's existing eyelid/closed-eye bones. */
     private void applyAquaticSleepEyeVisibility(MinemonCreature entity) {
         String slug=entity.getSpeciesSlug();
-        if(!br.com.petrickfaria.minemon.entity.SpeciesBehaviorProfiles.usesSwimmingSleepAnimation(slug))return;
+        if(!br.com.petrickfaria.minemon.entity.SpeciesBehaviorProfiles.usesSwimmingSleepAnimation(slug)&&!slug.equals("seel"))return;
         boolean sleeping=entity.isSleeping();
         boolean foundRig=false;
         for(String side:java.util.List.of("left","right")){
@@ -141,9 +141,7 @@ public class MinemonModel extends AnimatedGeoModel<MinemonCreature> {
         }
         if(slug.equals("tentacool")||slug.equals("tentacruel"))return;
         java.util.List<String> still=new java.util.ArrayList<>(java.util.List.of(
-                "head","mouth","upper_lip","lower_lip","horn","torso_end",
-                "whiskers","whisker_left","whisker_left2","whisker_left3",
-                "whisker_right","whisker_right2","whisker_right3"));
+                "head","mouth","upper_lip","lower_lip","horn","torso_end"));
         for(String bone:still)freezeBone(bone);
     }
 
