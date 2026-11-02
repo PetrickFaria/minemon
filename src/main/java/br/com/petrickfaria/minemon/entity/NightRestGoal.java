@@ -120,6 +120,12 @@ final class NightRestGoal extends Goal {
    mob.setNoGravity(true);mob.fallDistance=0;mob.setDeltaMovement(0,0,0);return;
   }
   double target=WaterMovementGoal.waterRestY(mob);
+  if(mob.isSleeping()&&SpeciesBehaviorProfiles.sleepsAtWaterBottom(mob.getSpeciesSlug())
+      &&Double.isFinite(target)&&Math.abs(target-mob.getY())<=0.2D
+      &&mob.level.noCollision(mob,mob.getBoundingBox().move(0,target-mob.getY(),0))){
+   mob.setPos(mob.getX(),target,mob.getZ());
+   mob.setNoGravity(true);mob.fallDistance=0;mob.setDeltaMovement(0,0,0);return;
+  }
   double vertical=Double.isFinite(target)
       ?net.minecraft.util.Mth.clamp((target-mob.getY())*0.12D,-0.08D,0.08D):0.0D;
   if(Math.abs(vertical)>1.0E-5D
