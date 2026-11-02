@@ -87,7 +87,8 @@ final class NightClientSmokeTest {
       if(!Double.isFinite(top)||top-mob.getY()<2.9D)
        throw new IllegalStateException(mob.getSpeciesSlug()+" slept less than three blocks below the visible water surface: y="+mob.getY()+" surface="+top);
      }
-     if(mob.getSpeciesSlug().equals("gyarados")&&mob.isSleeping()){
+     if(mob.getSpeciesSlug().equals("gyarados")&&mob.isSleeping()
+         &&sleepingPositionSettleTick>=0&&mob.tickCount-sleepingPositionSettleTick>=5){
       double top=WaterMovementGoal.restSurfaceAt(mob,mob.blockPosition());
       double bottom=WaterMovementGoal.waterRestY(mob);
       if(!Double.isFinite(top)||Math.abs(mob.getY()-bottom)>.25D||top-mob.getY()<5.0D)
