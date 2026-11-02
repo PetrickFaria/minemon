@@ -100,7 +100,7 @@ final class NightRestGoal extends Goal {
   var target=shellBottomTarget;
   double dx=target.getX()+.5D-mob.getX(),dz=target.getZ()+.5D-mob.getZ();
   double restY=WaterMovementGoal.bottomRestYAt(mob,target);
-  if(dx*dx+dz*dz<1.0D&&Double.isFinite(restY)&&Math.abs(mob.getY()-restY)<1.0D){
+  if(dx*dx+dz*dz<2.25D&&Double.isFinite(restY)&&Math.abs(mob.getY()-restY)<1.0D){
    mob.getNavigation().stop();
    mob.setPos(target.getX()+.5D,restY,target.getZ()+.5D);
    mob.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
