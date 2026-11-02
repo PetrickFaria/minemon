@@ -13,11 +13,13 @@ import time
 
 ROOT = Path(__file__).resolve().parents[1]
 RUN = ROOT / "run"
-WORLD = RUN / "minemon-1-64-reopen"
+WORLD = RUN / "minemon-1-67-reopen"
 
 
 RCON_PORT = 25575
-RCON_PASSWORD = "minemon-reopen-test"
+RCON_PASSWORD = os.environ.get("MINEMON_TEST_RCON_PASSWORD")
+if not RCON_PASSWORD:
+    raise SystemExit("MINEMON_TEST_RCON_PASSWORD must be supplied through the environment")
 
 
 def read_exact(sock: socket.socket, length: int) -> bytes:
@@ -56,6 +58,18 @@ def stop_with_rcon() -> bool:
     return False
 
 
+def rcon_command(command: str) -> str:
+    with socket.create_connection(("127.0.0.1", RCON_PORT), timeout=3) as sock:
+        sock.settimeout(3)
+        auth_id, auth_type, _ = rcon_packet(sock, 11, 3, RCON_PASSWORD)
+        if auth_id != 11 or auth_type != 2:
+            raise RuntimeError("RCON authentication failed")
+        command_id, _, response = rcon_packet(sock, 12, 2, command)
+        if command_id != 12:
+            raise RuntimeError(f"RCON rejected command: {command}")
+        return response
+
+
 def run_server(label: str) -> str:
     master, slave = pty.openpty()
     process = subprocess.Popen(
@@ -84,6 +98,20 @@ def run_server(label: str) -> str:
                 combined = "".join(output)
                 if not ready and "Done (" in combined:
                     ready = True
+                    rcon_command("forceload add 0 0")
+                    for slug, x in (("kadabra", 0), ("alakazam", 3)):
+                        tag = f"minemon_1_67_{slug}"
+                        if label == "create-save":
+                            response = rcon_command(
+                                f"summon minemon_gen1:{slug} {x} 5 0 "
+                                f"{{PersistenceRequired:1b,Tags:[\"{tag}\"]}}"
+                            )
+                            if "Summoned new" not in response:
+                                raise SystemExit(f"{label}: failed to create registered {slug}: {response}")
+                        response = rcon_command(f"data get entity @e[tag={tag},limit=1]")
+                        if "UUID" not in response:
+                            phase = "creation" if label == "create-save" else "save/reopen"
+                            raise SystemExit(f"{label}: {slug} failed its {phase} entity check: {response}")
                     stop_sent = stop_with_rcon()
                     if not stop_sent:
                         raise SystemExit(f"{label}: RCON did not accept the graceful stop command")
@@ -105,6 +133,8 @@ def run_server(label: str) -> str:
         raise SystemExit(f"{label}: server did not finish opening the world; inspect preceding log output")
     if not stop_sent or not stopped:
         raise SystemExit(f"{label}: graceful save/stop was not observed")
+    if "Saving chunks for level" not in combined:
+        raise SystemExit(f"{label}: server shutdown did not report saving world chunks")
     if process.returncode != 0:
         raise SystemExit(f"{label}: runServer exited with code {process.returncode}")
     return combined
@@ -112,7 +142,7 @@ def run_server(label: str) -> str:
 RUN.mkdir(exist_ok=True)
 (RUN / "eula.txt").write_text("eula=true\n", encoding="utf-8")
 (RUN / "server.properties").write_text(
-    "level-name=minemon-1-64-reopen\n"
+    "level-name=minemon-1-67-reopen\n"
     "level-type=minecraft:flat\n"
     "level-seed=163\n"
     "generate-structures=false\n"
@@ -131,9 +161,14 @@ first = run_server("create-save")
 level_dat = WORLD / "level.dat"
 if not level_dat.is_file():
     raise SystemExit("create-save: level.dat was not written")
-second = run_server("reopen-save")
+second = run_server("reopen-save-first-time")
 if "Preparing level" not in second and "Preparing spawn area" not in second:
-    raise SystemExit("reopen-save: server log did not confirm loading the saved world")
+    raise SystemExit("reopen-save-first-time: server log did not confirm loading the saved world")
 if not level_dat.is_file():
-    raise SystemExit("reopen-save: level.dat disappeared")
-print("PASS WORLD REOPEN: new Forge world created, saved, and opened again.")
+    raise SystemExit("reopen-save-first-time: level.dat disappeared")
+third = run_server("reopen-save-second-time")
+if "Preparing level" not in third and "Preparing spawn area" not in third:
+    raise SystemExit("reopen-save-second-time: server log did not confirm loading the saved world")
+if not level_dat.is_file():
+    raise SystemExit("reopen-save-second-time: level.dat disappeared")
+print("PASS WORLD REOPEN: new Forge world created, saved, and reopened twice.")

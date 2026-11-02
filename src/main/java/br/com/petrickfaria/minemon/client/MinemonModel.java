@@ -180,6 +180,7 @@ public class MinemonModel extends AnimatedGeoModel<MinemonCreature> {
     /** Small additive body motion keeps hovering visually distinct from the wing-driven flight clips. */
     private void applyNaturalBodyMotion(MinemonCreature entity) {
         if(entity.isOrderedToSit()||entity.isDefeated())return;
+        if(entity.getSpeciesSlug().equals("alakazam")&&entity.naturalCycle().phase()==br.com.petrickfaria.minemon.entity.BehaviorCycle.Phase.AIR)return;
         String slug=entity.getSpeciesSlug();
         boolean hoveringRest=entity.isSleeping()
                 &&br.com.petrickfaria.minemon.entity.SpeciesBehaviorProfiles.hoversDuringNightRest(slug);

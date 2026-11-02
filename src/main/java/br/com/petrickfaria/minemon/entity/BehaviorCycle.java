@@ -57,7 +57,8 @@ public final class BehaviorCycle {
         if ("gastly".equals(speciesSlug)) return stage == 0 ? 1.0D : 2.0D;
         return switch (profile) {
             case FLYER, GROUND_FLIGHT -> stage == 0 ? 3.0D : 6.0D;
-            case FLOAT_CYCLE, GROUND_FLOAT_CYCLE -> stage == 0 ? 1.0D : 4.0D;
+            case FLOAT_CYCLE -> stage == 0 ? 1.0D : 4.0D;
+            case GROUND_FLOAT_CYCLE -> "alakazam".equals(speciesSlug) ? 1.0D : stage == 0 ? 1.0D : 4.0D;
             case FLOAT_HALF -> SpeciesBehaviorProfiles.nightRestHoverHeight(speciesSlug == null ? "abra" : speciesSlug);
             case FLOAT_LOW -> "porygon".equals(speciesSlug)?1.0D/3.0D:1.0D;
             default -> 0.0D;
@@ -68,7 +69,8 @@ public final class BehaviorCycle {
         if ("gastly".equals(speciesSlug)) return stage == 0 ? 1.0D : 5.0D;
         return switch (profile) {
             case FLYER, GROUND_FLIGHT -> stage == 0 ? 5.0D : 9.0D;
-            case FLOAT_CYCLE, GROUND_FLOAT_CYCLE -> stage == 0 ? 3.0D : 6.0D;
+            case FLOAT_CYCLE -> stage == 0 ? 3.0D : 6.0D;
+            case GROUND_FLOAT_CYCLE -> "alakazam".equals(speciesSlug) ? 1.0D : stage == 0 ? 3.0D : 6.0D;
             case FLOAT_HALF -> SpeciesBehaviorProfiles.nightRestHoverHeight(speciesSlug == null ? "abra" : speciesSlug);
             case FLOAT_LOW -> "porygon".equals(speciesSlug)?1.0D/3.0D:1.0D;
             default -> 0.0D;
@@ -166,11 +168,12 @@ public final class BehaviorCycle {
     private void tickGroundFloat(Observation o) {
         switch (phase) {
             case LAND -> {
-                if (o.ground() && ++ticks >= TICKS_PER_MINUTE * 5) { stage = 0; enter(Phase.TAKEOFF); }
+                if (o.ground() && ++ticks >= ("alakazam".equals(speciesSlug) ? TICKS_PER_MINUTE * 3 : TICKS_PER_MINUTE * 5)) { stage = 0; enter(Phase.TAKEOFF); }
             }
             case TAKEOFF -> { if (o.flightBand()) enter(Phase.AIR); }
             case AIR -> {
-                int limit = stage == 0 ? TICKS_PER_MINUTE * 3
+                int limit = "alakazam".equals(speciesSlug) ? TICKS_PER_MINUTE / 2
+                        : stage == 0 ? TICKS_PER_MINUTE * 3
                         : "gengar".equals(speciesSlug) ? TICKS_PER_MINUTE * 2 : 0;
                 if (limit > 0 && o.flightBand() && ++ticks >= limit) {
                     if (stage == 0 && "gengar".equals(speciesSlug)) { stage = 1; ticks = 0; }
@@ -238,7 +241,9 @@ public final class BehaviorCycle {
         stage = Math.max(0, Math.min(1, altitudeStage));
         int limit = phaseLimit();
         ticks = limit <= 0 ? Math.max(0, elapsed) : Math.max(0, Math.min(limit - 1, elapsed));
-        if (profile == Profile.GROUND_FLIGHT || profile == Profile.GROUND_FLOAT_CYCLE) {
+        if ("kadabra".equals(speciesSlug)) {
+            if (phase != Phase.LAND) enter(Phase.LAND);
+        } else if (profile == Profile.GROUND_FLIGHT || profile == Profile.GROUND_FLOAT_CYCLE) {
             if (phase != Phase.LAND && phase != Phase.TAKEOFF && phase != Phase.AIR && phase != Phase.LANDING) enter(Phase.LAND);
         } else if (profile == Profile.WATER_VISITOR
                 && phase != Phase.SEEK_WATER && phase != Phase.SUBMERGED && phase != Phase.SURFACE
@@ -259,8 +264,8 @@ public final class BehaviorCycle {
     private int phaseLimit() {
         if ("gastly".equals(speciesSlug)) return stage == 0 ? 6000 : 3600;
         return switch (phase) {
-            case LAND, COOLDOWN -> TICKS_PER_MINUTE * 5;
-            case AIR -> stage == 0 ? TICKS_PER_MINUTE * 3 : profile == Profile.GROUND_FLIGHT ? TICKS_PER_MINUTE * 2
+            case LAND, COOLDOWN -> "alakazam".equals(speciesSlug) ? TICKS_PER_MINUTE * 3 : TICKS_PER_MINUTE * 5;
+            case AIR -> "alakazam".equals(speciesSlug) ? TICKS_PER_MINUTE / 2 : stage == 0 ? TICKS_PER_MINUTE * 3 : profile == Profile.GROUND_FLIGHT ? TICKS_PER_MINUTE * 2
                     : profile == Profile.GROUND_FLOAT_CYCLE && "gengar".equals(speciesSlug) ? TICKS_PER_MINUTE * 2 : TICKS_PER_MINUTE * 3;
             case SUBMERGED -> TICKS_PER_MINUTE * 5;
             case SURFACE -> profile == Profile.AQUATIC_CYCLE ? 600 : TICKS_PER_MINUTE * 5;

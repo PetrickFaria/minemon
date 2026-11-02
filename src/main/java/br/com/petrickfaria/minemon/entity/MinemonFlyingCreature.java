@@ -47,7 +47,11 @@ public final class MinemonFlyingCreature extends MinemonCreature {
   boolean landing=this.wantsNaturalLanding() && (this.commandLanding() || this.isNightResting() || this.isSleeping());
   var feet=new BlockPos(this.getX(),this.naturalSurface(),this.getZ());
   boolean dry=WaterMovementGoal.safeLandingBelow(this)&&!NaturalMovementGoals.nightWaterSetbackRequired(this);
-  boolean flying=landing?!dry:this.isFlyingSpecies()&&!this.isInWater();
+  boolean alakazamCycle=this.getSpeciesSlug().equals("alakazam")
+      &&(this.naturalCycle().phase()==BehaviorCycle.Phase.TAKEOFF||this.naturalCycle().phase()==BehaviorCycle.Phase.AIR
+      ||this.naturalCycle().phase()==BehaviorCycle.Phase.LANDING)&&this.naturalBehaviorActive();
+  boolean alakazamGround=this.getSpeciesSlug().equals("alakazam")&&this.naturalCycle().phase()==BehaviorCycle.Phase.LAND;
+  boolean flying=alakazamCycle||(landing?!dry:this.isFlyingSpecies()&&!this.isInWater()&&!alakazamGround);
   PathNavigation desired=flying?this.airNavigation:this.isInWater()&&!landing?this.escapeNavigation:this.groundNavigation;
   if(this.navigation!=desired){this.navigation.stop();this.navigation=desired;}
   this.moveControl=flying?this.airControl:this.groundControl;
@@ -55,6 +59,22 @@ public final class MinemonFlyingCreature extends MinemonCreature {
  }
  @Override protected PathNavigation createNavigation(Level level){FlyingPathNavigation n=new FlyingPathNavigation(this,level);n.setCanOpenDoors(false);n.setCanFloat(true);n.setCanPassDoors(true);return n;}
  @Override public void travel(net.minecraft.world.phys.Vec3 input){
+  boolean alakazamCycle=this.getSpeciesSlug().equals("alakazam")&&this.naturalBehaviorActive()
+      &&(this.naturalCycle().phase()==BehaviorCycle.Phase.TAKEOFF||this.naturalCycle().phase()==BehaviorCycle.Phase.AIR
+      ||this.naturalCycle().phase()==BehaviorCycle.Phase.LANDING);
+  if(alakazamCycle){
+   this.getNavigation().stop();this.setNoGravity(true);this.setDeltaMovement(0.0D,0.0D,0.0D);
+   input=net.minecraft.world.phys.Vec3.ZERO;
+   super.travel(input);
+   double floor=this.naturalSurface();
+   double target=this.naturalCycle().phase()==BehaviorCycle.Phase.LANDING?floor:floor+1.0D;
+   double difference=target-this.getY();
+   double step=net.minecraft.util.Mth.clamp(difference,-0.08D,0.08D);
+   if(Math.abs(difference)<0.005D)step=0.0D;
+   if(step!=0.0D)this.move(net.minecraft.world.entity.MoverType.SELF,new net.minecraft.world.phys.Vec3(0.0D,step,0.0D));
+   this.setDeltaMovement(0.0D,0.0D,0.0D);this.fallDistance=0.0F;
+   return;
+  }
   if(!this.fixedFloater()&&this.isFlyingSpecies()&&!this.level.isClientSide&&!this.wantsNaturalLanding()
       &&!this.isSleeping()&&!this.isNightResting()&&!this.isOrderedToSit()&&!this.isDefeated()){
    double support=this.naturalSurface();
@@ -117,6 +137,10 @@ public final class MinemonFlyingCreature extends MinemonCreature {
    if(!this.naturalCycle().landing())this.recoveryNotLandingSamples++;
    if(this.getY()-this.naturalSurface()<this.flightMinimum())this.recoveryBelowMinimumSamples++;
   }
+  boolean alakazamCycle=this.getSpeciesSlug().equals("alakazam")&&this.naturalBehaviorActive()
+      &&(this.naturalCycle().phase()==BehaviorCycle.Phase.TAKEOFF||this.naturalCycle().phase()==BehaviorCycle.Phase.AIR
+      ||this.naturalCycle().phase()==BehaviorCycle.Phase.LANDING);
+  if(alakazamCycle){this.setNoGravity(true);this.fallDistance=0;return;}
   boolean sleeping=this.commandLanding()||this.isSleeping()||this.isNightResting()||this.naturalCycle().landing();
   // Hover safely until a dry landing path is available; follow that path
   // instead of dropping blindly into water, lava, or an obstructed column.

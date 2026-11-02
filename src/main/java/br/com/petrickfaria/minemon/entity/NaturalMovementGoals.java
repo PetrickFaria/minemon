@@ -456,6 +456,7 @@ public final class NaturalMovementGoals {
         }
 
         private boolean eligible() {
+            if (this.mob.getSpeciesSlug().equals("alakazam")) return false;
             var profile=SpeciesBehaviorProfiles.profile(this.mob.getSpeciesSlug());
             boolean fixedHeight=profile==SpeciesBehaviorProfiles.Profile.FLOAT_HALF
                     ||profile==SpeciesBehaviorProfiles.Profile.FLOAT_LOW;
@@ -499,7 +500,8 @@ public final class NaturalMovementGoals {
     static final class GroundWander extends RandomStrollGoal {
         private final MinemonCreature mob;
         GroundWander(MinemonCreature mob){super(mob,0.8D,1);this.mob=mob;}
-        private boolean eligible(){return !this.mob.isFlyingSpecies()&&!this.mob.isInWaterOrBubble()
+        private boolean eligible(){return (!this.mob.isFlyingSpecies()||this.mob.getSpeciesSlug().equals("alakazam")
+                &&this.mob.naturalCycle().phase()==BehaviorCycle.Phase.LAND)&&!this.mob.isInWaterOrBubble()
                 &&this.mob.naturalBehaviorActive()&&this.mob.naturalCycle().walking();}
         @Override public boolean canUse(){return eligible()&&super.canUse();}
         @Override public boolean canContinueToUse(){return eligible()&&super.canContinueToUse();}

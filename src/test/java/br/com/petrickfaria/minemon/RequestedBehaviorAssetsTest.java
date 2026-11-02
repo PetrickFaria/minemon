@@ -34,6 +34,22 @@ public class RequestedBehaviorAssetsTest {
             }
         }
     }
+    @Test public void alakazamMeditationKeepsAwakeUpperBodyAndUsesOnlySleepLegPose() throws Exception {
+        var definition=SpeciesDefinitions.get("alakazam");
+        var root=Path.of(System.getProperty("minemon.testResources"));
+        var animations=JsonParser.parseString(Files.readString(root.resolve(definition.animation().replace("assets/minemon/","assets/minemon_gen1/"))))
+                .getAsJsonObject().getAsJsonObject("animations");
+        var meditation=animations.getAsJsonObject("animation.alakazam.meditate").getAsJsonObject("bones");
+        var sleep=animations.getAsJsonObject("animation.alakazam.sleep").getAsJsonObject("bones");
+        assertNotNull(meditation);
+        for(String bone:java.util.List.of("head","body","upper_torso","lower_torso","left_upper_arm","left_lower_arm","hand_left","spoon_left"))
+            assertTrue("awake pose bone "+bone,meditation.has(bone));
+        for(String bone:java.util.List.of("hips","left_upper_leg","left_lower_leg","foot_left","right_upper_leg","right_lower_leg","foot_right"))
+            assertEquals("reuse sleep leg pose "+bone,sleep.get(bone),meditation.get(bone));
+        assertTrue(SpeciesDefinitions.get("alakazam").clips().containsKey("meditate"));
+        assertFalse(SpeciesDefinitions.get("kadabra").clips().containsKey("meditate"));
+    }
+
     @Test public void previewBoundsCoverAllSpeciesAndTreatsHaveEighteenTypes() throws Exception {
         var root=Path.of(System.getProperty("minemon.testResources"));
         var bounds=JsonParser.parseString(Files.readString(root.resolve("data/minemon_gen1/preview_bounds.json"))).getAsJsonObject();

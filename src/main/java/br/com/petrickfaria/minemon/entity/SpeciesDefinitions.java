@@ -13,6 +13,7 @@ public final class SpeciesDefinitions {
    for(JsonElement element:JsonParser.parseReader(new InputStreamReader(in,StandardCharsets.UTF_8)).getAsJsonArray()) {
     JsonObject o=element.getAsJsonObject();Map<String,String> clips=new HashMap<>();o.getAsJsonObject("clips").entrySet().forEach(e->clips.put(e.getKey(),e.getValue().getAsString()));
     String slug=str(o,"slug");
+    if(slug.equals("alakazam"))clips.put("meditate","animation.alakazam.meditate");
     CompatibleLocomotion.apply(slug,clips);
     clips.put("awake_rest","animation."+slug+".minemon_awake_rest");
     clips.put("awake_rest_water","animation."+slug+".minemon_awake_rest_water");

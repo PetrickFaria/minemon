@@ -1055,6 +1055,8 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
             String restKey=slug.equals("vaporeon")
                     ? (this.isInWaterOrBubble()?"night_sleep_water":"night_sleep_land") : "night_sleep";
             clip = SpeciesAssetIndex.clip(slug, restKey, "night_sleep");
+        } else if (slug.equals("alakazam") && this.naturalCycle().phase()==BehaviorCycle.Phase.AIR) {
+            clip=SpeciesAssetIndex.clip(slug,"meditate","ground_idle");
         } else if ((this.isNightResting() || this.commandLanding()) && this.wantsNaturalLanding() && !this.isOnGround()) {
             // Keep a real air pose while descending. A ground gait during the
             // landing path looks like Spearow/Fearow are walking in mid-air.

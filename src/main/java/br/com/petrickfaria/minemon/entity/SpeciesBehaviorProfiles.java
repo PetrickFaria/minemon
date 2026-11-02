@@ -42,7 +42,8 @@ public final class SpeciesBehaviorProfiles {
         assign(Profile.FLOAT_HALF, "metapod,kakuna,abra");
         assign(Profile.FLOAT_LOW, "geodude,porygon");
         assign(Profile.FLOAT_CYCLE, "magnemite,magneton,gastly,haunter,koffing,weezing,mewtwo,mew");
-        assign(Profile.GROUND_FLOAT_CYCLE, "kadabra,alakazam,gengar");
+        assign(Profile.GROUND, "kadabra");
+        assign(Profile.GROUND_FLOAT_CYCLE, "alakazam,gengar");
         assign(Profile.AQUATIC_CYCLE, "tentacool,tentacruel,horsea,seadra,goldeen,seaking,magikarp");
         assign(Profile.AQUATIC_BOTTOM, "shellder,cloyster");
         assign(Profile.AQUATIC_NEAR_SURFACE, "gyarados");
