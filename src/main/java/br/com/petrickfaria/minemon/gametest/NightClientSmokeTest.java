@@ -242,6 +242,8 @@ final class NightClientSmokeTest {
      for(int x=-6;x<=6;x++)for(int z=0;z<=10;z++)for(int y=99;y<=116;y++)
       level.setBlockAndUpdate(new BlockPos(x,y,z),Blocks.AIR.defaultBlockState());
      if(scenario.equals("seel_irregular")){
+      for(int x=-6;x<=6;x++)for(int z=0;z<=10;z++)
+       level.setBlockAndUpdate(new BlockPos(x,100,z),Blocks.STONE.defaultBlockState());
       for(int x=-2;x<=2;x++)for(int z=2;z<=8;z++)if((x+z)%2==0){
        level.setBlockAndUpdate(new BlockPos(x,99,z),Blocks.STONE.defaultBlockState());
        level.setBlockAndUpdate(new BlockPos(x,100,z),Blocks.WATER.defaultBlockState());
