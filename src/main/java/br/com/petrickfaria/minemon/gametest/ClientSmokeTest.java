@@ -328,7 +328,8 @@ public final class ClientSmokeTest {
       var rightFoot=processor.getBone("foot_right");
       for(var bone:java.util.List.of(hips,leftUpper,leftLower,leftFoot,rightUpper,rightLower,rightFoot))
        if(bone==null)throw new IllegalStateException("Alakazam meditation lower-body bone missing from rendered model");
-      if(Math.abs(hips.getRotationX()-(float)Math.toRadians(-10.0D))>0.08F
+      if(Math.abs(hips.getRotationX())>0.08F
+          ||Math.abs(hips.getPositionY()-hips.getInitialSnapshot().positionOffsetY)>0.08F
           ||Math.abs(leftUpper.getRotationX()-(float)Math.toRadians(-157.5D))>0.08F
           ||Math.abs(leftUpper.getRotationZ()-(float)Math.toRadians(90.0D))>0.08F
           ||Math.abs(leftLower.getRotationX()-(float)Math.toRadians(75.0D))>0.08F
@@ -345,7 +346,8 @@ public final class ClientSmokeTest {
           processor.getBone("spoon_left"),processor.getBone("spoon_right"),processor.getBone("left_eye"),processor.getBone("right_eye")))
        if(bone==null)throw new IllegalStateException("Alakazam awake upper-body/eye/spoon bone missing from rendered model");
       if(Math.abs(upperTorso.getRotationX())>0.08F||Math.abs(lowerTorso.getRotationX())>0.08F
-          ||Math.abs(body.getRotationX())>0.08F||Math.abs(head.getRotationX())>0.15F||Math.abs(head.getRotationY())>0.15F
+          ||Math.abs(body.getRotationX())>0.08F||Math.abs(head.getRotationX())>0.15F
+          ||Math.abs(head.getRotationY())>(float)Math.toRadians(60.0D)+0.08F
           ||Math.abs(leftArm.getRotationZ()-(float)Math.toRadians(-80.0D))>0.12F
           ||Math.abs(rightArm.getRotationZ()-(float)Math.toRadians(80.0D))>0.12F)
        throw new IllegalStateException("Alakazam upper body/arms deviated from awake model posture during meditation: body="

@@ -78,7 +78,8 @@ public class MinemonModel extends AnimatedGeoModel<MinemonCreature> {
                 || entity.naturalPhaseForRender() != br.com.petrickfaria.minemon.entity.BehaviorCycle.Phase.AIR
                 || entity.isSleeping() || entity.isOrderedToSit()) return;
 
-        setMeditationBone("hips", 0.0F, -12.65F, 0.0F, -10.0F, 0.0F, 0.0F);
+        // Keep the hip parent at its awake bind transform: changing it also
+        // translates/rotates the torso and head because they descend from hips.
         setMeditationBone("left_upper_leg", 0.0F, -12.5F, -1.0F, -157.5F, 0.0F, 90.0F);
         setMeditationBone("left_lower_leg", 0.0F, 0.0F, 0.0F, 75.0F, 0.0F, 0.0F);
         setMeditationBone("foot_left", 0.0F, 0.0F, 0.0F, 67.5F, 0.0F, 0.0F);
