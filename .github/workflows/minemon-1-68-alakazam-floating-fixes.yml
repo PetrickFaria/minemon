@@ -58,6 +58,10 @@ jobs:
           ALSOFT_DRIVERS=null timeout --kill-after=30s 900s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeAir -PclientSmokeAlakazamPose -PclientSmokeSpecies=alakazam
           grep -F 'PASS ALAKAZAM CLIENT POSE:' run/client-validation.txt
           test -f run/screenshots/alakazam-meditation.png
+          for reopen in 1 2; do
+            ALSOFT_DRIVERS=null timeout --kill-after=30s 600s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeReopen
+          done
+          test "$(grep -cF 'PASS CLIENT WORLD REOPEN: Alakazam present after reload' run/client-world-reopen-pass.txt)" -eq 2
       - name: Build distributable JAR and verify requested contents
         run: ./gradlew --no-daemon build -x test
       - name: Validate exact JAR name, version, pose, and flight state sync
@@ -79,7 +83,8 @@ jobs:
           PY
           unzip -p "$jar_file" br/com/petrickfaria/minemon/entity/MinemonCreature.class | strings | grep -F 'naturalPhaseForRender'
           grep -F 'PASS ALAKAZAM CLIENT POSE:' run/client-validation.txt
-          grep -F 'PASS WORLD REOPEN:' run/world-reopen-pass.txt
+          grep -F 'PASS SERVER WORLD SAVE:' run/world-reopen-pass.txt
+          test "$(grep -cF 'PASS CLIENT WORLD REOPEN: Alakazam present after reload' run/client-world-reopen-pass.txt)" -eq 2
       - uses: actions/upload-artifact@v4
         with:
           name: Minemon-1.19.2-1.68
@@ -88,5 +93,6 @@ jobs:
             run/client-validation.txt
             run/screenshots/alakazam-meditation.png
             run/world-reopen-pass.txt
+            run/client-world-reopen-pass.txt
           if-no-files-found: error
           retention-days: 14

@@ -99,28 +99,6 @@ def run_server(label: str) -> str:
                 if not ready and "Done (" in combined:
                     ready = True
                     rcon_command("forceload add 0 0")
-                    species_positions = (("alakazam", 0),)
-                    if label == "create-save":
-                        rcon_command("fill -8 199 -8 8 199 8 minecraft:stone")
-                        for slug, x in species_positions:
-                            response = rcon_command(
-                                f"summon minemon_gen1:{slug} {x} 200 0 "
-                                "{PersistenceRequired:1b,NoAI:1b}"
-                            )
-                            if "Summoned new" not in response:
-                                raise SystemExit(f"{label}: failed to create registered {slug}: {response}")
-                    for slug, _ in species_positions:
-                        response = rcon_command(f"data get entity @e[type=minemon_gen1:{slug},limit=1]")
-                        if "UUID" not in response:
-                            raise SystemExit(f"{label}: {slug} was not registered in the loaded test chunk: {response}")
-                        print(f"[{label}] VERIFIED ENTITY: {response}", flush=True)
-                    # Keep the test chunk loaded long enough for several server ticks
-                    # before flushing it, then verify again on each later open.
-                    time.sleep(3)
-                    for slug, _ in species_positions:
-                        response = rcon_command(f"data get entity @e[type=minemon_gen1:{slug},limit=1]")
-                        if "UUID" not in response:
-                            raise SystemExit(f"{label}: {slug} disappeared from the forced chunk: {response}")
                     rcon_command("save-all flush")
                     stop_sent = stop_with_rcon()
                     if not stop_sent:
@@ -180,8 +158,8 @@ if "Preparing level" not in third and "Preparing spawn area" not in third:
     raise SystemExit("reopen-save-second-time: server log did not confirm loading the saved world")
 if not level_dat.is_file():
     raise SystemExit("reopen-save-second-time: level.dat disappeared")
-print("PASS WORLD REOPEN: new Forge world with Alakazam created, saved, and reopened twice.")
+print("PASS SERVER WORLD SAVE: new Forge world created, flushed, and reopened twice; entity persistence is checked in the client test.")
 (RUN / "world-reopen-pass.txt").write_text(
-    "PASS WORLD REOPEN: Alakazam was registered, saved, and present after both world reopens.\n",
+    "PASS SERVER WORLD SAVE: new Forge world created, flushed, and reopened twice.\n",
     encoding="utf-8",
 )

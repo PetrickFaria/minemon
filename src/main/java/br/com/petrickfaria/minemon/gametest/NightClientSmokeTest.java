@@ -38,7 +38,11 @@ final class NightClientSmokeTest {
     return;
    }
    if(opened&&mc.level!=null&&mc.player!=null&&mc.getSingleplayerServer()!=null&&mc.screen==null&&++ticks>=60){
-    Files.writeString(Path.of("client-world-reopen-pass.txt"),"PASS CLIENT WORLD REOPEN\n",StandardOpenOption.CREATE,StandardOpenOption.APPEND);
+    var persistedAlakazam=mc.level.getEntitiesOfClass(MinemonCreature.class,
+        mc.player.getBoundingBox().inflate(64.0D),mob->mob.getSpeciesSlug().equals("alakazam"));
+    if(persistedAlakazam.isEmpty())throw new IllegalStateException("Alakazam was not present after reopening the saved client world");
+    Files.writeString(Path.of("client-world-reopen-pass.txt"),"PASS CLIENT WORLD REOPEN: Alakazam present after reload; entities="
+        +persistedAlakazam.size()+"\n",StandardOpenOption.CREATE,StandardOpenOption.APPEND);
     mc.stop();
    }
   }catch(Exception e){throw new IllegalStateException("Saved client world reopen failed",e);}
