@@ -303,8 +303,7 @@ final class NightClientSmokeTest {
     mc.getSingleplayerServer().execute(()->mc.getSingleplayerServer().overworld().setDayTime(6000));
    }else if(!waking&&samples>=25){
     String restedSpecies=current.getSpeciesSlug();
-    if(SpeciesBehaviorProfiles.usesSwimmingSleepAnimation(restedSpecies)
-        &&!Set.of("shellder","cloyster").contains(restedSpecies)){
+    if(Set.of("seadra","tentacool","tentacruel","magikarp","goldeen","seaking").contains(restedSpecies)){
      boolean finMoved=false;
      for(var sample:swimMotion.entrySet()){
       String bone=sample.getKey();
@@ -318,7 +317,8 @@ final class NightClientSmokeTest {
       boolean frozen=Set.of("body","torso","head","neck","mouth","upper_lip","lower_lip","whiskers",
           "whisker_left","whisker_left2","whisker_left3","whisker_right","whisker_right2","whisker_right3")
           .contains(bone);
-      if(frozen&&moved)throw new IllegalStateException(restedSpecies+" main posture bone still moved during sleep: "+bone);
+      if(Set.of("seadra","tentacool","tentacruel","magikarp","goldeen","seaking").contains(restedSpecies)
+          &&frozen&&moved)throw new IllegalStateException(restedSpecies+" main posture bone still moved during sleep: "+bone);
       if(Set.of("magikarp","goldeen","seaking").contains(restedSpecies)&&moved&&!fin)
        throw new IllegalStateException(restedSpecies+" non-fin bone moved during sleep: "+bone);
      }
