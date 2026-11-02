@@ -663,7 +663,8 @@ public final class ClientSmokeTest {
      boolean bodyMoved=motionRanges.entrySet().stream().filter(e->e.getKey().startsWith(slug+":")).anyMatch(e->{for(int axis=0;axis<6;axis++)if(e.getValue()[axis+6]-e.getValue()[axis]>0.0001)return true;return false;});
      var definition=SpeciesDefinitions.get(slug);
      boolean staticFallback=definition!=null&&"static".equals(definition.movementFallback());
-     if(!walkedSpecies.contains(slug)||(!staticFallback&&!bodyMoved))throw new IllegalStateException("No rendered movement for "+slug+"; displacement="+walkedSpecies.contains(slug)+" bodyChanged="+bodyMoved+" staticFallback="+staticFallback);
+     boolean stationaryAlakazamPose=slug.equals("alakazam")&&Boolean.getBoolean("minemon.clientSmokeAlakazamPose");
+     if((!walkedSpecies.contains(slug)&&!stationaryAlakazamPose)||(!staticFallback&&!bodyMoved))throw new IllegalStateException("No rendered movement for "+slug+"; displacement="+walkedSpecies.contains(slug)+" bodyChanged="+bodyMoved+" staticFallback="+staticFallback);
     }
     if(Boolean.getBoolean("minemon.clientSmokeAlakazamPose")){
      double bob=alakazamMeditationBobRange[1]-alakazamMeditationBobRange[0];
