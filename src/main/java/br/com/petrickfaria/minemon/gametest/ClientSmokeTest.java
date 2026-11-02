@@ -44,6 +44,11 @@ public final class ClientSmokeTest {
  private static volatile int combatHits;
  private static final java.util.Map<String,java.util.List<String>> modelBones=new java.util.HashMap<>();
  private static final java.util.Map<String,float[]> motionRanges=new java.util.HashMap<>();
+ private static int alakazamMeditationRenderFrames;
+ private static final float[] alakazamMeditationBobRange={Float.MAX_VALUE,-Float.MAX_VALUE};
+ private static final double[] alakazamMeditationHeightRange={Double.MAX_VALUE,-Double.MAX_VALUE};
+ private static final double[] alakazamMeditationXRange={Double.MAX_VALUE,-Double.MAX_VALUE};
+ private static final double[] alakazamMeditationZRange={Double.MAX_VALUE,-Double.MAX_VALUE};
  private static final java.util.Map<String,float[]> fireStarterArmRanges=new java.util.HashMap<>();
  private static boolean fearowNativeAirPoseObserved;
  private static final java.util.Map<String,float[]> sourceLookRanges=new java.util.HashMap<>();
@@ -300,7 +305,8 @@ public final class ClientSmokeTest {
        entity.setXRot((float)Math.sin(entity.tickCount*0.17F)*12.0F);
        entity.yHeadRot=entity.getYRot()+(float)Math.sin(entity.tickCount*0.13F)*25.0F;
       }
-      if(java.util.Set.of("abra","kadabra","alakazam","bellsprout","geodude","golem","slowpoke","slowbro","mewtwo","mew").contains(entity.getSpeciesSlug())) {
+      if(java.util.Set.of("abra","kadabra","alakazam","bellsprout","geodude","golem","slowpoke","slowbro","mewtwo","mew").contains(entity.getSpeciesSlug())
+          &&!(entity.getSpeciesSlug().equals("alakazam")&&Boolean.getBoolean("minemon.clientSmokeAlakazamPose"))) {
        // Exercise source q.look('head') / q.look('head_ai') adaptations.
        entity.setXRot((float)Math.sin(entity.tickCount*0.17F)*12.0F);
        entity.yHeadRot=entity.getYRot()+(float)Math.sin(entity.tickCount*0.13F)*25.0F;
@@ -311,6 +317,49 @@ public final class ClientSmokeTest {
      if(mc.getResourceManager().getResource(model.getTextureResource(entity)).isEmpty())throw new IllegalStateException("Missing rendered texture "+entity.getSpeciesSlug());
      String slug=entity.getSpeciesSlug();renderedSpecies.add(slug);
      String currentClip=entity.getSelectedAnimationForValidation();
+     if(Boolean.getBoolean("minemon.clientSmokeAlakazamPose")&&slug.equals("alakazam")
+         &&entity.naturalPhaseForRender()==BehaviorCycle.Phase.AIR){
+      if(!"animation.alakazam.meditate".equals(currentClip))
+       throw new IllegalStateException("Alakazam natural hover did not select its meditation pose: "+currentClip);
+      var processor=model.getAnimationProcessor();
+      var hips=processor.getBone("hips");var leftUpper=processor.getBone("left_upper_leg");
+      var leftLower=processor.getBone("left_lower_leg");var leftFoot=processor.getBone("foot_left");
+      var rightUpper=processor.getBone("right_upper_leg");var rightLower=processor.getBone("right_lower_leg");
+      var rightFoot=processor.getBone("foot_right");
+      for(var bone:java.util.List.of(hips,leftUpper,leftLower,leftFoot,rightUpper,rightLower,rightFoot))
+       if(bone==null)throw new IllegalStateException("Alakazam meditation lower-body bone missing from rendered model");
+      if(Math.abs(hips.getRotationX()-(float)Math.toRadians(-10.0D))>0.08F
+          ||Math.abs(leftUpper.getRotationX()-(float)Math.toRadians(-157.5D))>0.08F
+          ||Math.abs(leftUpper.getRotationZ()-(float)Math.toRadians(90.0D))>0.08F
+          ||Math.abs(leftLower.getRotationX()-(float)Math.toRadians(75.0D))>0.08F
+          ||Math.abs(leftFoot.getRotationX()-(float)Math.toRadians(67.5D))>0.08F
+          ||Math.abs(rightUpper.getRotationX()-(float)Math.toRadians(-142.5D))>0.08F
+          ||Math.abs(rightUpper.getRotationZ()-(float)Math.toRadians(-90.0D))>0.08F
+          ||Math.abs(rightLower.getRotationX()-(float)Math.toRadians(65.0D))>0.08F
+          ||Math.abs(rightFoot.getRotationX()-(float)Math.toRadians(45.35848D))>0.08F)
+       throw new IllegalStateException("Alakazam's folded sleep-reference leg pose was not applied to the rendered bones");
+      var body=processor.getBone("body");var upperTorso=processor.getBone("upper_torso");
+      var lowerTorso=processor.getBone("lower_torso");var head=processor.getBone("head");
+      var leftArm=processor.getBone("left_upper_arm");var rightArm=processor.getBone("right_upper_arm");
+      for(var bone:java.util.List.of(body,upperTorso,lowerTorso,head,leftArm,rightArm,
+          processor.getBone("spoon_left"),processor.getBone("spoon_right"),processor.getBone("left_eye"),processor.getBone("right_eye")))
+       if(bone==null)throw new IllegalStateException("Alakazam awake upper-body/eye/spoon bone missing from rendered model");
+      if(Math.abs(upperTorso.getRotationX())>0.08F||Math.abs(lowerTorso.getRotationX())>0.08F
+          ||Math.abs(body.getRotationX())>0.08F||Math.abs(head.getRotationX())>0.15F||Math.abs(head.getRotationY())>0.15F
+          ||Math.abs(leftArm.getRotationZ()-(float)Math.toRadians(-80.0D))>0.12F
+          ||Math.abs(rightArm.getRotationZ()-(float)Math.toRadians(80.0D))>0.12F)
+       throw new IllegalStateException("Alakazam upper body/arms deviated from awake model posture during meditation");
+      alakazamMeditationBobRange[0]=Math.min(alakazamMeditationBobRange[0],body.getPositionY());
+      alakazamMeditationBobRange[1]=Math.max(alakazamMeditationBobRange[1],body.getPositionY());
+      double height=entity.getY()-entity.naturalSurface();var pos=entity.position();
+      alakazamMeditationHeightRange[0]=Math.min(alakazamMeditationHeightRange[0],height);
+      alakazamMeditationHeightRange[1]=Math.max(alakazamMeditationHeightRange[1],height);
+      alakazamMeditationXRange[0]=Math.min(alakazamMeditationXRange[0],pos.x);
+      alakazamMeditationXRange[1]=Math.max(alakazamMeditationXRange[1],pos.x);
+      alakazamMeditationZRange[0]=Math.min(alakazamMeditationZRange[0],pos.z);
+      alakazamMeditationZRange[1]=Math.max(alakazamMeditationZRange[1],pos.z);
+      alakazamMeditationRenderFrames++;
+     }
      lastRenderedEntityTick.put(slug,entity.tickCount);
      if(currentClip!=null&&!currentClip.equals(lastRenderedClip.put(slug,currentClip)))
       clipChangedTick.put(slug,entity.tickCount);
@@ -608,6 +657,19 @@ public final class ClientSmokeTest {
      var definition=SpeciesDefinitions.get(slug);
      boolean staticFallback=definition!=null&&"static".equals(definition.movementFallback());
      if(!walkedSpecies.contains(slug)||(!staticFallback&&!bodyMoved))throw new IllegalStateException("No rendered movement for "+slug+"; displacement="+walkedSpecies.contains(slug)+" bodyChanged="+bodyMoved+" staticFallback="+staticFallback);
+    }
+    if(Boolean.getBoolean("minemon.clientSmokeAlakazamPose")){
+     double bob=alakazamMeditationBobRange[1]-alakazamMeditationBobRange[0];
+     double height=alakazamMeditationHeightRange[1]-alakazamMeditationHeightRange[0];
+     double horizontal=Math.hypot(alakazamMeditationXRange[1]-alakazamMeditationXRange[0],
+         alakazamMeditationZRange[1]-alakazamMeditationZRange[0]);
+     if(alakazamMeditationRenderFrames<10||bob<0.45F||alakazamMeditationHeightRange[0]<0.90D
+         ||alakazamMeditationHeightRange[1]>1.10D||height>0.04D||horizontal>0.02D)
+      throw new IllegalStateException("Alakazam client hover verification failed: frames="+alakazamMeditationRenderFrames
+          +" modelBob="+bob+" physicalHeight="+java.util.Arrays.toString(alakazamMeditationHeightRange)
+          +" horizontalDrift="+horizontal);
+     Files.writeString(Path.of("client-validation.txt"),"PASS ALAKAZAM CLIENT POSE: rendered folded sleep-reference legs with awake upper body, eyes and spoons; model-space vertical bob="+bob+"; physical hover height="+java.util.Arrays.toString(alakazamMeditationHeightRange)+"; horizontal drift="+horizontal+"; render frames="+alakazamMeditationRenderFrames+".\n",StandardOpenOption.APPEND);
+     Screenshot.grab(mc.gameDirectory,"alakazam-meditation.png",mc.getMainRenderTarget(),message->{});
     }
     for(String slug:java.util.List.of("charmander","charmeleon","charizard")) {
      if(!species.contains(slug))continue;

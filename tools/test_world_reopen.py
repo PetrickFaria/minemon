@@ -13,7 +13,7 @@ import time
 
 ROOT = Path(__file__).resolve().parents[1]
 RUN = ROOT / "run"
-WORLD = RUN / "minemon-1-67-reopen"
+WORLD = RUN / "minemon-1-68-reopen"
 
 
 RCON_PORT = 25575
@@ -99,7 +99,7 @@ def run_server(label: str) -> str:
                 if not ready and "Done (" in combined:
                     ready = True
                     rcon_command("forceload add 0 0")
-                    species_positions = (("kadabra", 0), ("alakazam", 3))
+                    species_positions = (("alakazam", 0),)
                     if label == "create-save":
                         for slug, x in species_positions:
                             response = rcon_command(
@@ -108,17 +108,13 @@ def run_server(label: str) -> str:
                             )
                             if "Summoned new" not in response:
                                 raise SystemExit(f"{label}: failed to create registered {slug}: {response}")
-                    # Entity insertion and forced chunk loading complete on the next server tick.
-                    time.sleep(1)
-                    if label != "create-save":
-                        for slug, _ in species_positions:
-                            response = rcon_command(f"data get entity @e[type=minemon_gen1:{slug},limit=1]")
-                            if "UUID" not in response:
-                                print(
-                                    f"[{label}] WARNING: {slug} was not present after the forced chunk reload; "
-                                    f"headless entity persistence is not verified ({response}).",
-                                    flush=True,
-                                )
+                    # RCON acknowledgement precedes entity insertion and chunk reload.
+                    time.sleep(3)
+                    for slug, _ in species_positions:
+                        response = rcon_command(f"data get entity @e[type=minemon_gen1:{slug},limit=1]")
+                        if "UUID" not in response:
+                            raise SystemExit(f"{label}: {slug} was not registered in the loaded test chunk: {response}")
+                    rcon_command("save-all flush")
                     stop_sent = stop_with_rcon()
                     if not stop_sent:
                         raise SystemExit(f"{label}: RCON did not accept the graceful stop command")
@@ -149,7 +145,7 @@ def run_server(label: str) -> str:
 RUN.mkdir(exist_ok=True)
 (RUN / "eula.txt").write_text("eula=true\n", encoding="utf-8")
 (RUN / "server.properties").write_text(
-    "level-name=minemon-1-67-reopen\n"
+    "level-name=minemon-1-68-reopen\n"
     "level-type=minecraft:flat\n"
     "level-seed=163\n"
     "generate-structures=false\n"
@@ -178,4 +174,8 @@ if "Preparing level" not in third and "Preparing spawn area" not in third:
     raise SystemExit("reopen-save-second-time: server log did not confirm loading the saved world")
 if not level_dat.is_file():
     raise SystemExit("reopen-save-second-time: level.dat disappeared")
-print("PASS WORLD REOPEN: new Forge world created, saved, and reopened twice.")
+print("PASS WORLD REOPEN: new Forge world with Alakazam created, saved, and reopened twice.")
+(RUN / "world-reopen-pass.txt").write_text(
+    "PASS WORLD REOPEN: Alakazam was registered, saved, and present after both world reopens.\n",
+    encoding="utf-8",
+)

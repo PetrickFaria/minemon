@@ -73,6 +73,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     private static final EntityDataAccessor<Boolean> SLEEPING = SynchedEntityData.defineId(MinemonCreature.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> ORDERED_SIT = SynchedEntityData.defineId(MinemonCreature.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> NATURAL_FLIGHT = SynchedEntityData.defineId(MinemonCreature.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Integer> NATURAL_PHASE = SynchedEntityData.defineId(MinemonCreature.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> NATURAL_SURFACE = SynchedEntityData.defineId(MinemonCreature.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> NATURAL_LANDING = SynchedEntityData.defineId(MinemonCreature.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> NIGHT_REST = SynchedEntityData.defineId(MinemonCreature.class, EntityDataSerializers.BOOLEAN);
@@ -233,6 +234,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         this.entityData.define(NIGHT_REST, false);
         this.entityData.define(NATURAL_LANDING, false);
         this.entityData.define(NATURAL_FLIGHT, false);
+        this.entityData.define(NATURAL_PHASE, -1);
         this.entityData.define(NATURAL_SURFACE, SpeciesBehaviorProfiles.profile(this.getSpeciesSlug())==SpeciesBehaviorProfiles.Profile.AQUATIC_SURFACE);
         this.entityData.define(SLEEPING, false);
         this.entityData.define(ORDERED_SIT, false);
@@ -1055,7 +1057,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
             String restKey=slug.equals("vaporeon")
                     ? (this.isInWaterOrBubble()?"night_sleep_water":"night_sleep_land") : "night_sleep";
             clip = SpeciesAssetIndex.clip(slug, restKey, "night_sleep");
-        } else if (slug.equals("alakazam") && this.naturalCycle().phase()==BehaviorCycle.Phase.AIR) {
+        } else if (slug.equals("alakazam") && this.naturalPhaseForRender()==BehaviorCycle.Phase.AIR) {
             clip=SpeciesAssetIndex.clip(slug,"meditate","ground_idle");
         } else if ((this.isNightResting() || this.commandLanding()) && this.wantsNaturalLanding() && !this.isOnGround()) {
             // Keep a real air pose while descending. A ground gait during the
@@ -1137,6 +1139,14 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     @Override public boolean canBreatheUnderwater() { return this.isAquaticSpecies() || super.canBreatheUnderwater(); }
 
     public BehaviorCycle naturalCycle(){return this.naturalCycle;}
+    /** Server-authored phase for Alakazam's client render; all other species use their local cycle state. */
+    public BehaviorCycle.Phase naturalPhaseForRender(){
+        if(this.getSpeciesSlug().equals("alakazam")&&this.level.isClientSide){
+            int ordinal=this.entityData.get(NATURAL_PHASE);
+            if(ordinal>=0&&ordinal<BehaviorCycle.Phase.values().length)return BehaviorCycle.Phase.values()[ordinal];
+        }
+        return this.naturalCycle.phase();
+    }
     public boolean isNaturalSurface(){return this.entityData.get(NATURAL_SURFACE);}
     public void chooseNaturalWaterDepth(boolean surface){
         if(SpeciesBehaviorProfiles.isVisitor(this.getSpeciesSlug()))
@@ -1167,6 +1177,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     private void syncNaturalState(){
         this.entityData.set(NATURAL_LANDING,this.naturalCycle.landing());
         this.entityData.set(NATURAL_FLIGHT, this.naturalCycle.flying() && !this.isNightResting());
+        this.entityData.set(NATURAL_PHASE,this.getSpeciesSlug().equals("alakazam")?this.naturalCycle.phase().ordinal():-1);
         this.entityData.set(NATURAL_SURFACE,SpeciesBehaviorProfiles.profile(this.getSpeciesSlug())==SpeciesBehaviorProfiles.Profile.AQUATIC_SURFACE
             ||SpeciesBehaviorProfiles.profile(this.getSpeciesSlug())==SpeciesBehaviorProfiles.Profile.AQUATIC_NEAR_SURFACE
             ||SpeciesBehaviorProfiles.isVisitor(this.getSpeciesSlug())&&(this.naturalCycle.phase()==BehaviorCycle.Phase.SURFACE||this.naturalCycle.phase()==BehaviorCycle.Phase.EXIT_WATER)

@@ -180,8 +180,9 @@ public class MinemonModel extends AnimatedGeoModel<MinemonCreature> {
     /** Small additive body motion keeps hovering visually distinct from the wing-driven flight clips. */
     private void applyNaturalBodyMotion(MinemonCreature entity) {
         if(entity.isOrderedToSit()||entity.isDefeated())return;
-        if(entity.getSpeciesSlug().equals("alakazam")&&entity.naturalCycle().phase()==br.com.petrickfaria.minemon.entity.BehaviorCycle.Phase.AIR)return;
         String slug=entity.getSpeciesSlug();
+        boolean alakazamHover=slug.equals("alakazam")
+                &&entity.naturalPhaseForRender()==br.com.petrickfaria.minemon.entity.BehaviorCycle.Phase.AIR;
         boolean hoveringRest=entity.isSleeping()
                 &&br.com.petrickfaria.minemon.entity.SpeciesBehaviorProfiles.hoversDuringNightRest(slug);
         boolean floating=br.com.petrickfaria.minemon.entity.SpeciesBehaviorProfiles.isFloating(slug)
@@ -192,7 +193,14 @@ public class MinemonModel extends AnimatedGeoModel<MinemonCreature> {
         if(body==null)return;
         double time=entity.tickCount+entity.getId()*0.37D;
         float bob, pitch, roll;
-        if(floating){
+        if(alakazamHover){
+            // Keep the approved fixed hover height in world physics. This tiny
+            // model-space bob matches Abra's subtle float without moving the
+            // entity or rotating the meditation pose.
+            bob=(float)Math.sin(time*0.105D)*0.34F;
+            pitch=0.0F;
+            roll=0.0F;
+        }else if(floating){
             bob=(float)Math.sin(time*0.105D)*0.34F;
             pitch=(float)Math.sin(time*0.071D)*0.018F;
             roll=(float)Math.cos(time*0.083D)*0.022F;

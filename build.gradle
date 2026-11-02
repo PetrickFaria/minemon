@@ -118,6 +118,7 @@ minecraft {
             property 'minemon.clientSmokeSleep', project.hasProperty('clientSmokeSleep').toString()
             property 'minemon.clientSmokeReopen', project.hasProperty('clientSmokeReopen').toString()
             property 'minemon.clientSmokeAir', project.hasProperty('clientSmokeAir').toString()
+            property 'minemon.clientSmokeAlakazamPose', project.hasProperty('clientSmokeAlakazamPose').toString()
             property 'minemon.clientSmokeWater', project.hasProperty('clientSmokeWater').toString()
             property 'minemon.clientSmokeAudio', project.hasProperty('clientSmokeAudio').toString()
             property 'minemon.clientSmokeRocketProfession', project.hasProperty('clientSmokeRocketProfession').toString()
@@ -179,7 +180,7 @@ jar.finalizedBy('reobfJar')
 // ForgeGradle produces the executable Jar-in-Jar artifact as a separate task.
 // Include it in assemble so build outputs the JLayer-bearing production JAR.
 tasks.named('jarJar') {
-    archiveFileName = 'Minemon-1.19.2-1.67.jar'
+    archiveFileName = 'Minemon-1.19.2-1.68.jar'
     finalizedBy('reobfJarJar')
     exclude 'br/com/petrickfaria/minemon/gametest/**'
     exclude 'data/minemon_gen1/structures/test_arena.nbt'

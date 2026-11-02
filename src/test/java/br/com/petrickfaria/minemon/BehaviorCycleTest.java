@@ -132,6 +132,19 @@ public final class BehaviorCycleTest {
         alakazam.tick(band);assertEquals(LANDING,alakazam.phase());
         alakazam.tick(ground);assertEquals(LAND,alakazam.phase());
 
+        // Exercise two complete natural cycles. Landing resets the 3-minute
+        // ground timer and starts the normal walking gait again each time.
+        for(int cycle=0;cycle<2;cycle++) {
+            assertEquals("cycle "+cycle,LAND,alakazam.phase());
+            assertTrue("landing restarts walking",alakazam.walking());
+            repeat(alakazam,3_599,ground);assertEquals("cycle "+cycle,LAND,alakazam.phase());
+            alakazam.tick(ground);assertEquals("cycle "+cycle,TAKEOFF,alakazam.phase());
+            alakazam.tick(band);assertEquals("cycle "+cycle,AIR,alakazam.phase());
+            repeat(alakazam,599,band);assertEquals("cycle "+cycle,AIR,alakazam.phase());
+            alakazam.tick(band);assertEquals("cycle "+cycle,LANDING,alakazam.phase());
+            alakazam.tick(ground);assertEquals("cycle "+cycle,LAND,alakazam.phase());
+        }
+
         var gengar = new BehaviorCycle(GROUND_FLOAT_CYCLE, "gengar", new Random(9));
         repeat(gengar, 6_000, ground); gengar.tick(band);
         repeat(gengar, 3_600, band); assertEquals(1, gengar.stage());

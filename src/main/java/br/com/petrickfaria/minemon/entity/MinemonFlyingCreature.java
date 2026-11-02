@@ -141,6 +141,13 @@ public final class MinemonFlyingCreature extends MinemonCreature {
       &&(this.naturalCycle().phase()==BehaviorCycle.Phase.TAKEOFF||this.naturalCycle().phase()==BehaviorCycle.Phase.AIR
       ||this.naturalCycle().phase()==BehaviorCycle.Phase.LANDING);
   if(alakazamCycle){this.setNoGravity(true);this.fallDistance=0;return;}
+  if(this.getSpeciesSlug().equals("alakazam")&&this.naturalCycle().phase()==BehaviorCycle.Phase.LAND
+      &&this.naturalBehaviorActive()){
+   // The generic flyer tick below reasserts no-gravity after locomotion has
+   // selected the ground controller. Keep the landed natural-cycle phase
+   // grounded so GroundWander can run and the next three-minute timer starts.
+   this.setNoGravity(false);this.fallDistance=0;return;
+  }
   boolean sleeping=this.commandLanding()||this.isSleeping()||this.isNightResting()||this.naturalCycle().landing();
   // Hover safely until a dry landing path is available; follow that path
   // instead of dropping blindly into water, lava, or an obstructed column.

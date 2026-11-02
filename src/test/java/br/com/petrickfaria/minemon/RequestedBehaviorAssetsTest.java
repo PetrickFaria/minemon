@@ -42,9 +42,9 @@ public class RequestedBehaviorAssetsTest {
         var meditation=animations.getAsJsonObject("animation.alakazam.meditate").getAsJsonObject("bones");
         var sleep=animations.getAsJsonObject("animation.alakazam.sleep").getAsJsonObject("bones");
         assertNotNull(meditation);
-        for(String bone:java.util.List.of("head","body","upper_torso","lower_torso","left_upper_arm","left_lower_arm","hand_left","spoon_left"))
-            assertTrue("awake pose bone "+bone,meditation.has(bone));
-        for(String bone:java.util.List.of("hips","left_upper_leg","left_lower_leg","foot_left","right_upper_leg","right_lower_leg","foot_right"))
+        var sleepPoseBones=java.util.List.of("hips","left_upper_leg","left_lower_leg","foot_left","right_upper_leg","right_lower_leg","foot_right");
+        assertEquals("meditation animates only the lower-body sleep pose",new java.util.HashSet<>(sleepPoseBones),meditation.keySet());
+        for(String bone:sleepPoseBones)
             assertEquals("reuse sleep leg pose "+bone,sleep.get(bone),meditation.get(bone));
         assertTrue(SpeciesDefinitions.get("alakazam").clips().containsKey("meditate"));
         assertFalse(SpeciesDefinitions.get("kadabra").clips().containsKey("meditate"));
