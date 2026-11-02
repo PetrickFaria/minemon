@@ -866,10 +866,20 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
             }
             boolean hover=SpeciesBehaviorProfiles.hoversDuringNightRest(this.getSpeciesSlug());
             double restHeight=SpeciesBehaviorProfiles.nightRestHoverHeight(this.getSpeciesSlug());
-            boolean settled=waterRest?Math.abs(this.getY()-WaterMovementGoal.waterRestY(this))<0.18D
+            double waterRestY=waterRest?WaterMovementGoal.waterRestY(this):Double.NaN;
+            boolean settled=waterRest?Math.abs(this.getY()-waterRestY)<0.18D
                 :hover?Math.abs(this.getY()-this.naturalSurface()-restHeight)<0.18D
                 :this.isOnGround()&&WaterMovementGoal.safeDry(this,this.blockPosition());
-            if(settled&&!this.isSleeping())this.setSleeping(true);
+            if(settled&&!this.isSleeping()){
+                if(waterRest&&SpeciesBehaviorProfiles.usesSwimmingSleepAnimation(this.getSpeciesSlug())
+                        &&Double.isFinite(waterRestY)){
+                    // Enter sleep exactly at the chosen safe anchor, so the
+                    // two-block minimum is not lost to the final eased swim step.
+                    this.setPos(this.getX(),waterRestY,this.getZ());
+                    this.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
+                }
+                this.setSleeping(true);
+            }
         }else{
             this.entityData.set(NIGHT_REST,false);
             if(this.nightRoutine){this.nightRoutine=false;this.aquaticSleepY=Double.NaN;this.setSleeping(false);this.getNavigation().stop();}

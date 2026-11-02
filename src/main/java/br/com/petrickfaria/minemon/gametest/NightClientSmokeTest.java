@@ -234,7 +234,7 @@ final class NightClientSmokeTest {
      double target=WaterMovementGoal.waterRestY(current);
      double error=Math.abs(current.getY()-target);
      if(SpeciesBehaviorProfiles.usesSwimmingSleepAnimation(current.getSpeciesSlug())
-         &&WaterMovementGoal.restSurfaceAt(current,current.blockPosition())-current.getY()<1.8D)
+         &&WaterMovementGoal.restSurfaceAt(current,current.blockPosition())-current.getY()<1.99D)
       throw new IllegalStateException(current.getSpeciesSlug()+" slept closer than two blocks to the water surface");
      if(SpeciesBehaviorProfiles.usesSwimmingSleepAnimation(current.getSpeciesSlug())){
       double expectedY=current.getSpeciesSlug().equals("magikarp")?109.0D:104.0D;
