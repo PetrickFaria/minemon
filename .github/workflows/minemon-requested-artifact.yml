@@ -1,1 +1,69 @@
-cat: .github/workflows/minemon-requested-artifact.yml: No such file or directory
+name: Minemon JAR Build and Publish
+on:
+  push:
+    branches:
+      - feature/minemon-natural-behaviors
+    paths:
+      - "src/main/java/br/com/petrickfaria/minemon/**"
+      - "gradle/**"
+      - "gradlew"
+      - "build.gradle"
+      - "settings.gradle"
+      - ".github/workflows/minemon-requested-artifact.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build-and-publish-jar:
+    name: Build and publish Forge JAR
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout latest branch source
+        uses: actions/checkout@v4
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+      - name: Make Gradle wrapper executable
+        run: chmod +x gradlew
+      - name: Compile and package without running tests
+        run: ./gradlew --no-daemon build -x test
+      - name: Verify JAR contents and Forge metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          jar_file="$(find build/libs -maxdepth 1 -type f -name 'Minemon-1.19.2-*-all.jar' -print -quit)"
+          test -n "$jar_file"
+          python3 - "$jar_file" <<'PY'
+          import sys, zipfile
+          jar = zipfile.ZipFile(sys.argv[1])
+          names = set(jar.namelist())
+          required = {
+              "META-INF/mods.toml",
+              "br/com/petrickfaria/minemon/entity/ElementalCombatGoal.class",
+              "br/com/petrickfaria/minemon/client/MinemonRenderer.class",
+              "br/com/petrickfaria/minemon/menu/PokecMenu.class",
+              "br/com/petrickfaria/minemon/menu/PokecScreen.class",
+              "br/com/petrickfaria/minemon/menu/RocketTradeScreen.class",
+              "br/com/petrickfaria/minemon/pokec/PokecSpecies.class",
+          }
+          missing = required - names
+          if missing:
+              raise SystemExit("JAR missing: " + ", ".join(sorted(missing)))
+          metadata = jar.read("META-INF/mods.toml").decode()
+          if 'modId="minemon_gen1"' not in metadata or 'versionRange="[1.19.2,1.20)"' not in metadata:
+              raise SystemExit("JAR Minecraft/Forge metadata check failed")
+          print("JAR integrity and Forge metadata: PASS")
+          print(f"JAR file: {sys.argv[1]}")
+          print(f"JAR size: {__import__('os').path.getsize(sys.argv[1])} bytes")
+          PY
+      - name: Publish installable mod JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: Minemon-1.19.2-final
+          path: build/libs/Minemon-1.19.2-*-all.jar
+          if-no-files-found: error
+          retention-days: 14
