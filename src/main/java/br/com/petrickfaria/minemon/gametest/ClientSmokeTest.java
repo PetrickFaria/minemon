@@ -362,8 +362,8 @@ public final class ClientSmokeTest {
           ||Math.abs(body.getRotationX())>0.08F
           ||Math.abs(head.getRotationX()-(float)Math.toRadians(2.5D))>0.12F
           ||Math.abs(head.getRotationY())>(float)Math.toRadians(60.0D)+0.08F
-          ||Math.abs(leftArm.getRotationX()-leftArm.getInitialSnapshot().rotationValueX-(float)Math.toRadians(-15.2329D))>0.16F
-          ||Math.abs(rightArm.getRotationX()-rightArm.getInitialSnapshot().rotationValueX-(float)Math.toRadians(-15.2329D))>0.16F
+          ||Math.abs(Math.abs(leftArm.getRotationX()-leftArm.getInitialSnapshot().rotationValueX)-(float)Math.toRadians(15.2329D))>0.16F
+          ||Math.abs(Math.abs(rightArm.getRotationX()-rightArm.getInitialSnapshot().rotationValueX)-(float)Math.toRadians(15.2329D))>0.16F
           ||Math.abs(Math.abs(leftArm.getRotationZ()-leftArm.getInitialSnapshot().rotationValueZ)-(float)Math.toRadians(72.576D))>0.20F
           ||Math.abs(Math.abs(rightArm.getRotationZ()-rightArm.getInitialSnapshot().rotationValueZ)-(float)Math.toRadians(72.576D))>0.20F
           ||Math.abs(Math.abs(leftElbow.getRotationX())-(float)Math.toRadians(42.5D))>0.16F
