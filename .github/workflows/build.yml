@@ -1,6 +1,7 @@
 name: Build Minemon
 on:
   push:
+    branches-ignore: ["feature/minemon-1.63-aquatic-sleep"]
     paths-ignore: [".github/workflows/cobblemon-source-audit.yml", ".github/workflows/prepare-cobblemon-batch.yml", "tools/import_cobblemon_182_batch.py", "docs/**"]
   pull_request:
   workflow_dispatch:

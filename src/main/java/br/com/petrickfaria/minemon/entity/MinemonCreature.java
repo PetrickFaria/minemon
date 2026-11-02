@@ -854,11 +854,15 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
                 this.nightRoutine=true;this.getNavigation().stop();this.stopSpontaneousRun();
             }
             this.entityData.set(NIGHT_REST,true);
-            if(waterRest&&!Double.isFinite(this.aquaticSleepY)&&!SpeciesBehaviorProfiles.restsAtWaterBottom(this.getSpeciesSlug())){
+            if(waterRest&&SpeciesBehaviorProfiles.usesSwimmingSleepAnimation(this.getSpeciesSlug())
+                    &&!Double.isFinite(this.aquaticSleepY)){
                 double surface=WaterMovementGoal.restSurfaceAt(this,this.blockPosition());
-                // Choose once per sleep episode, including migration of older saves.
-                boolean atSurface=Double.isFinite(surface)&&this.getBoundingBox().maxY>=surface-.08D;
-                this.aquaticSleepY=atSurface?Math.min(this.getY(),surface-2):this.getY();
+                // Keep the existing anchor when already two or more blocks
+                // below the surface; only move a shallow sleeper down when the
+                // full collision box can fit in water at that depth.
+                double target=WaterMovementGoal.shallowAquaticSleepY(this.getY(),surface);
+                this.aquaticSleepY=target<this.getY()&&WaterMovementGoal.safeWaterRestAt(this,target)
+                        ?target:this.getY();
             }
             boolean hover=SpeciesBehaviorProfiles.hoversDuringNightRest(this.getSpeciesSlug());
             double restHeight=SpeciesBehaviorProfiles.nightRestHoverHeight(this.getSpeciesSlug());
@@ -1015,6 +1019,13 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         } else if (this.attackAnimationTicks>0 && attack!=null) {
             clip=attack;loop=false;
             if(this.playedAttackSequence!=this.attackSequence){controller.markNeedsReload();this.playedAttackSequence=this.attackSequence;}
+        } else if (this.isSleeping() && SpeciesBehaviorProfiles.usesSwimmingSleepAnimation(slug)
+                && this.isInWaterOrBubble()) {
+            // Keep the normal aquatic locomotion clip running while the server
+            // holds the entity still. This preserves fins/body animation and
+            // avoids replacing it with the terrestrial sleep pose.
+            clip = firstClip(slug,"water_swim","surface_water_swim","surfacewater_swim","water_surface_swim");
+            if(clip==null)clip=SpeciesAssetIndex.clip(slug,"water_idle",definition.idle());
         } else if (this.isSleeping()) {
             String restKey=slug.equals("vaporeon")
                     ? (this.isInWaterOrBubble()?"night_sleep_water":"night_sleep_land") : "night_sleep";

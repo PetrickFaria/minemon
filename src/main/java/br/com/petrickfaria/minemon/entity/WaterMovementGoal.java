@@ -324,6 +324,21 @@ public final class WaterMovementGoal extends Goal {
   }
   return Double.isFinite(mob.aquaticSleepY())?mob.aquaticSleepY():mob.getY();
  }
+ static double shallowAquaticSleepY(double currentY,double surfaceY){
+  return Double.isFinite(surfaceY)?Math.min(currentY,surfaceY-2.0D):currentY;
+ }
+ static boolean safeWaterRestAt(MinemonCreature mob,double y){
+  var box=mob.getBoundingBox().move(0.0D,y-mob.getY(),0.0D);
+  if(!mob.level.noCollision(mob,box))return false;
+  double surface=restSurfaceAt(mob,mob.blockPosition());
+  if(!Double.isFinite(surface))return false;
+  int targetWater=(int)Math.floor(y),surfaceWater=(int)Math.floor(surface-1.0E-4D);
+  for(int x=(int)Math.floor(box.minX+0.001D);x<=Math.floor(box.maxX-0.001D);x++)
+   for(int z=(int)Math.floor(box.minZ+0.001D);z<=Math.floor(box.maxZ-0.001D);z++)
+    if(!mob.level.getFluidState(new BlockPos(x,targetWater,z)).is(FluidTags.WATER)
+        ||!mob.level.getFluidState(new BlockPos(x,surfaceWater,z)).is(FluidTags.WATER))return false;
+  return true;
+ }
  private static boolean safeWaterFloor(MinemonCreature mob,BlockPos column,int floorWater){
   int min=mob.level.getMinBuildHeight();if(floorWater<=min)return false;
   BlockPos floor=new BlockPos(column.getX(),floorWater-1,column.getZ());

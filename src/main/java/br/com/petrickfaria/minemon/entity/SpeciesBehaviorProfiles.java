@@ -91,6 +91,10 @@ public final class SpeciesBehaviorProfiles {
             default -> false;
         };
     }
+    /** Permanently aquatic species that swim in place while sleeping. */
+    public static boolean usesSwimmingSleepAnimation(String slug) {
+        return isAquatic(slug) && !slug.equals("gyarados") && !slug.equals("lapras");
+    }
     public static boolean waterCapable(String slug) { return isAquatic(slug) || isVisitor(slug); }
     public static boolean prefersBottom(String slug) { return BOTTOM_PREFERENCE.contains(slug); }
     public static boolean restsAtWaterBottom(String slug) { return isVisitor(slug) || slug.equals("gyarados"); }

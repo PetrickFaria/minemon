@@ -126,6 +126,15 @@ public final class MinemonAquaticCreature extends MinemonCreature {
     @Override public void tick(){
         super.tick();
         if(this.isDefeated()||this.level.isClientSide)return;
+        if(this.isSleeping()&&this.isInWaterOrBubble()
+                &&SpeciesBehaviorProfiles.usesSwimmingSleepAnimation(this.getSpeciesSlug())){
+            // Freeze only server-side translation. GeckoLib still advances the
+            // selected swim animation on clients while the sleeper stays put.
+            this.getNavigation().stop();
+            this.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
+            this.setNoGravity(true);this.fallDistance=0;
+            return;
+        }
         // A completed surface route can leave SmoothSwimmingMoveControl holding
         // its last horizontal waypoint. Clear it even if the body has just
         // crossed the waterline and the current column has no measurable top.

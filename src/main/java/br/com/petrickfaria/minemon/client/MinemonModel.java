@@ -28,9 +28,11 @@ public class MinemonModel extends AnimatedGeoModel<MinemonCreature> {
     public void setLivingAnimations(MinemonCreature entity, Integer uniqueID, software.bernie.geckolib3.core.event.predicate.AnimationEvent event) {
         super.setLivingAnimations(entity, uniqueID, event);
         applyDewgongEyeVisibility(entity);
+        applyAquaticSleepEyeVisibility(entity);
         applyPidgeWingVisibility(entity);
         applyGengarEyeVisibility(entity);
         applyNaturalBodyMotion(entity);
+        applyAquaticSleepFallbackMotion(entity);
         if(entity.isSleeping()||entity.isOrderedToSit())return;
         String slug=entity.getSpeciesSlug();
         boolean headLook=slug.equals("spearow")||slug.equals("fearow")||slug.equals("abra")
@@ -79,6 +81,62 @@ public class MinemonModel extends AnimatedGeoModel<MinemonCreature> {
             }
         }
         DEWGONG_SLEEPING.put(entity, sleeping);
+    }
+
+    /** Uses each imported aquatic rig's existing eyelid/closed-eye bones. */
+    private void applyAquaticSleepEyeVisibility(MinemonCreature entity) {
+        String slug=entity.getSpeciesSlug();
+        if(!br.com.petrickfaria.minemon.entity.SpeciesBehaviorProfiles.usesSwimmingSleepAnimation(slug))return;
+        boolean sleeping=entity.isSleeping();
+        boolean foundRig=false;
+        for(String side:java.util.List.of("left","right")){
+            for(String name:java.util.List.of("eye_"+side,side+"_eye",side+"eye")){
+                var bone=getAnimationProcessor().getBone(name);
+                if(bone!=null){bone.setHidden(sleeping,false);foundRig=true;}
+            }
+            for(String name:java.util.List.of("pupil_"+side,"eye_highlight_"+side,"eye_angry_"+side,
+                    "eye_sad_"+side,"eye_happy_"+side,"eye_hurt_"+side)){
+                var bone=getAnimationProcessor().getBone(name);
+                if(bone!=null)bone.setHidden(sleeping,sleeping);
+            }
+            for(String name:java.util.List.of("eyelid_"+side,"closed_eyelid_"+side,
+                    side+"_eye_closed", "eye_"+side+"_closed",side+"eyelid")){
+                var bone=getAnimationProcessor().getBone(name);
+                if(bone!=null){bone.setHidden(!sleeping,!sleeping);foundRig=true;}
+            }
+        }
+        // Goldeen's source rig groups both painted eyes on one bone and has no
+        // separate eyelid meshes. Flattening that plate produces its closed
+        // resting eye line while keeping the source texture untouched.
+        var eyes=getAnimationProcessor().getBone("eyes");
+        if(eyes!=null&&(!foundRig||slug.equals("seaking"))){
+            var initial=eyes.getInitialSnapshot();
+            eyes.setScaleY(initial.scaleValueY*(sleeping?0.08F:1.0F));
+        }
+        var singleEye=getAnimationProcessor().getBone("eye");
+        var closedEye=getAnimationProcessor().getBone("eye_closed");
+        if(singleEye!=null)singleEye.setHidden(sleeping,false);
+        if(closedEye!=null)closedEye.setHidden(!sleeping,!sleeping);
+    }
+
+    /** Shellder and Cloyster have no imported water-swim clip; keep their shell rigs gently moving. */
+    private void applyAquaticSleepFallbackMotion(MinemonCreature entity) {
+        if(!entity.isSleeping())return;
+        String slug=entity.getSpeciesSlug();
+        if(!slug.equals("shellder")&&!slug.equals("cloyster"))return;
+        double phase=(entity.tickCount+entity.getId()*0.37D)*0.14D;
+        float sway=(float)Math.sin(phase)*0.035F;
+        var body=getAnimationProcessor().getBone("body");
+        if(body!=null)body.setRotationZ(body.getRotationZ()+sway);
+        if(slug.equals("shellder")){
+            var shell=getAnimationProcessor().getBone("topshell");
+            if(shell!=null)shell.setRotationZ(shell.getRotationZ()-sway*1.5F);
+        }else{
+            var left=getAnimationProcessor().getBone("leftshell");
+            var right=getAnimationProcessor().getBone("rightshell");
+            if(left!=null)left.setRotationZ(left.getRotationZ()+sway);
+            if(right!=null)right.setRotationZ(right.getRotationZ()-sway);
+        }
     }
 
     /** Small additive body motion keeps hovering visually distinct from the wing-driven flight clips. */

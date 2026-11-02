@@ -48,6 +48,11 @@ final class NightRestGoal extends Goal {
  }
  private void holdWaterRest(){
   mob.getNavigation().stop();mob.setJumping(false);mob.setSpeed(0);mob.setXxa(0);mob.setYya(0);mob.setZza(0);
+  if(mob.isSleeping()&&SpeciesBehaviorProfiles.usesSwimmingSleepAnimation(mob.getSpeciesSlug())){
+   // Once the rest position is reached, keep the entity at that exact point.
+   // The client animation controller continues independently of this motion.
+   mob.setNoGravity(true);mob.fallDistance=0;mob.setDeltaMovement(0,0,0);return;
+  }
   double target=WaterMovementGoal.waterRestY(mob);
   double vertical=Double.isFinite(target)
       ?net.minecraft.util.Mth.clamp((target-mob.getY())*0.12D,-0.08D,0.08D):0.0D;
