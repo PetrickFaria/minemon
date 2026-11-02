@@ -213,7 +213,7 @@ final class NightClientSmokeTest {
      double distance=switch(mob.getSpeciesSlug()){
       case "venusaur"->7;case "snorlax","charizard","dragonite"->6;case "fearow"->9;
       case "victreebel","scyther","weezing"->5;case "pidgeotto","haunter","butterfree","beedrill","parasect"->4;
-      case "pidgey","gastly","kakuna"->2.5;case "gyarados","lapras"->8;default->3;
+      case "pidgey","gastly","kakuna"->2.5;case "lapras"->8;case "gyarados"->4;default->3;
      };
      var player=level.getServer().getPlayerList().getPlayers().get(0);player.teleportTo(level,slug.equals("fearow")?distance:0,101,slug.equals("fearow")?5:5-distance,0,0);
     });return;
