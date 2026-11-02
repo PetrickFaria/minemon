@@ -116,6 +116,7 @@ minecraft {
             property 'minemon.clientSmokeTest', project.hasProperty('clientSmokeTest').toString()
             property 'minemon.clientSmokePatrol', project.hasProperty('clientSmokePatrol').toString()
             property 'minemon.clientSmokeSleep', project.hasProperty('clientSmokeSleep').toString()
+            property 'minemon.clientSmokeReopen', project.hasProperty('clientSmokeReopen').toString()
             property 'minemon.clientSmokeAir', project.hasProperty('clientSmokeAir').toString()
             property 'minemon.clientSmokeWater', project.hasProperty('clientSmokeWater').toString()
             property 'minemon.clientSmokeAudio', project.hasProperty('clientSmokeAudio').toString()
