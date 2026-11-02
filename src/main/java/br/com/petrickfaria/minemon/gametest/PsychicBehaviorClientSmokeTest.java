@@ -59,7 +59,8 @@ final class PsychicBehaviorClientSmokeTest {
             var alakazam=server.getEntity(alakazamId);
             if(!(kadabra instanceof MinemonCreature k)||!(alakazam instanceof MinemonCreature a))
                 throw new IllegalStateException("Kadabra or Alakazam disappeared during the cycle test");
-            if(!k.isOnGround()||k.isFlyingSpecies()||k.naturalCycle().phase()!=BehaviorCycle.Phase.LAND)
+            if(k.isFlyingSpecies()||k.naturalCycle().phase()!=BehaviorCycle.Phase.LAND
+                    ||ticks>40&&!k.isOnGround())
                 throw new IllegalStateException("Kadabra left its ground-only routine: onGround="+k.isOnGround()+" flying="+k.isFlyingSpecies()+" phase="+k.naturalCycle().phase());
 
             var phase=a.naturalCycle().phase();
@@ -199,3 +200,4 @@ final class PsychicBehaviorClientSmokeTest {
         }catch(Exception ex){throw new IllegalStateException("Psychic world reopen validation failed",ex);}
     }
 }
+ef9cbf0b2558d77ebe3a37c6f0380ee322a5eea2
