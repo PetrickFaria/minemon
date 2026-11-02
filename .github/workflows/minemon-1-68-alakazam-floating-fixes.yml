@@ -55,7 +55,11 @@ jobs:
       - name: Verify natural hover pose and bob in the Minecraft client
         run: |
           python3 tools/prepare_client_world.py
-          ALSOFT_DRIVERS=null timeout --kill-after=30s 900s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeAir -PclientSmokeAlakazamPose -PclientSmokeSpecies=alakazam
+          set +e
+          ALSOFT_DRIVERS=null timeout --kill-after=30s 900s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeAir -PclientSmokeAlakazamPose -PclientSmokeSpecies=alakazam > run/alakazam-client-smoke.log 2>&1
+          client_status=$?
+          set -e
+          if [ "$client_status" -ne 0 ]; then tail -n 120 run/alakazam-client-smoke.log; exit "$client_status"; fi
           grep -F 'PASS ALAKAZAM CLIENT POSE:' run/client-validation.txt
           test -f run/screenshots/alakazam-meditation.png
           for reopen in 1 2; do
