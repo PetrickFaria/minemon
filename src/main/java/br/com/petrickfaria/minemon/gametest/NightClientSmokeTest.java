@@ -24,6 +24,25 @@ final class NightClientSmokeTest {
  private static final Map<String,float[]> swimMotion=new HashMap<>();
  private static net.minecraft.world.phys.Vec3 lastSleepingPosition;
  private static int sleepingPositionSettleTick=-1;
+ static void reopenTick(TickEvent.ClientTickEvent event){
+  if(event.phase!=TickEvent.Phase.END)return;
+  var mc=Minecraft.getInstance();
+  try{
+   if(!opened&&mc.screen instanceof TitleScreen){
+    opened=true;
+    Object flows=Minecraft.class.getMethod("createWorldOpenFlows").invoke(mc);
+    for(var method:flows.getClass().getMethods())if(method.getName().equals("loadLevel")){
+     if(method.getParameterCount()==2&&method.getParameterTypes()[1]==String.class){method.invoke(flows,mc.screen,"minemon-validation");break;}
+     if(method.getParameterCount()==1&&method.getParameterTypes()[0]==String.class){method.invoke(flows,"minemon-validation");break;}
+    }
+    return;
+   }
+   if(opened&&mc.level!=null&&mc.player!=null&&mc.getSingleplayerServer()!=null&&mc.screen==null&&++ticks>=60){
+    Files.writeString(Path.of("client-world-reopen-pass.txt"),"PASS CLIENT WORLD REOPEN\n",StandardOpenOption.CREATE,StandardOpenOption.APPEND);
+    mc.stop();
+   }
+  }catch(Exception e){throw new IllegalStateException("Saved client world reopen failed",e);}
+ }
  static void tick(TickEvent.ClientTickEvent event){
   var mc=Minecraft.getInstance();
   try{
