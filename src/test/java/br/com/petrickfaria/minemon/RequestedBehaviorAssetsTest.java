@@ -34,18 +34,25 @@ public class RequestedBehaviorAssetsTest {
             }
         }
     }
-    @Test public void alakazamMeditationUsesCompleteSleepReferencePoseWithoutChangingSleepClip() throws Exception {
+    @Test public void alakazamMeditationUsesSleepLegsWalkingArmsAndAwakeHeadWithoutChangingSourceClips() throws Exception {
         var definition=SpeciesDefinitions.get("alakazam");
         var root=Path.of(System.getProperty("minemon.testResources"));
         var animations=JsonParser.parseString(Files.readString(root.resolve(definition.animation().replace("assets/minemon/","assets/minemon_gen1/"))))
                 .getAsJsonObject().getAsJsonObject("animations");
         var meditation=animations.getAsJsonObject("animation.alakazam.meditate").getAsJsonObject("bones");
         var sleep=animations.getAsJsonObject("animation.alakazam.sleep").getAsJsonObject("bones");
+        var walk=animations.getAsJsonObject("animation.alakazam.ground_walk").getAsJsonObject("bones");
+        var awake=animations.getAsJsonObject("animation.alakazam.ground_idle").getAsJsonObject("bones");
         assertNotNull(meditation);
-        var sleepPoseBones=java.util.List.of("hips","left_upper_leg","left_lower_leg","foot_left","right_upper_leg","right_lower_leg","foot_right",
-                "left_upper_arm","left_lower_arm","hand_left","spoon_left","right_upper_arm","right_lower_arm","hand_right","spoon_right");
-        for(String bone:sleepPoseBones)
-            assertEquals("reuse sleep-reference pose "+bone,sleep.get(bone),meditation.get(bone));
+        var sleepPoseBones=java.util.List.of("hips","left_upper_leg","left_lower_leg","foot_left","right_upper_leg","right_lower_leg","foot_right");
+        for(String bone:sleepPoseBones) assertEquals("reuse sleep-reference lower-body pose "+bone,sleep.get(bone),meditation.get(bone));
+        var walkingArmBones=java.util.List.of("left_shoulder","left_upper_arm","left_lower_arm","hand_left",
+                "finger_index_left","finger_index_left2","finger_index_left3","finger_pinky_left","finger_pinky_left2","finger_pinky_left3","thumb_left","thumb_left2","spoon_left","spoon_left2",
+                "right_shoulder","right_upper_arm","right_lower_arm","hand_right",
+                "finger_index_right","finger_index_right2","finger_index_right3","finger_pinky_right","finger_pinky_right2","finger_pinky_right3","thumb_right","thumb_right2","spoon_right","spoon_right2");
+        for(String bone:walkingArmBones) assertEquals("match ground-walk arm pose "+bone,walk.get(bone),meditation.get(bone));
+        assertEquals("awake head pose",awake.get("head"),meditation.get("head"));
+        assertTrue("sleep pose must not be copied onto the head",!sleep.get("head").equals(meditation.get("head")));
         assertTrue(SpeciesDefinitions.get("alakazam").clips().containsKey("meditate"));
         assertFalse(SpeciesDefinitions.get("kadabra").clips().containsKey("meditate"));
     }
