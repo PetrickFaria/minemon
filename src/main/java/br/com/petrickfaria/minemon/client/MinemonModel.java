@@ -99,6 +99,13 @@ public class MinemonModel extends AnimatedGeoModel<MinemonCreature> {
                 var bone=getAnimationProcessor().getBone(name);
                 if(bone!=null)bone.setHidden(sleeping,sleeping);
             }
+            // Cobblemon Goldeen nests its open eye and three eyelid meshes below
+            // eye_left/eye_right. Hide the open eye cube and select the full lid.
+            for(String name:java.util.List.of("eyelid_full_"+side,"eyelid_half_"+side,
+                    "eyelid_three_quarters_"+side)){
+                var lid=getAnimationProcessor().getBone(name);
+                if(lid!=null)lid.setHidden(!sleeping||!name.startsWith("eyelid_full_"),false);
+            }
             for(String name:java.util.List.of("eyelid_"+side,"closed_eyelid_"+side,
                     side+"_eye_closed", "eye_"+side+"_closed",side+"eyelid")){
                 var bone=getAnimationProcessor().getBone(name);

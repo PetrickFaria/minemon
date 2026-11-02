@@ -48,7 +48,8 @@ final class NightClientSmokeTest {
         var eye=model.getAnimationProcessor().getBone(name);
         if(eye!=null&&eye.isHidden())throw new IllegalStateException(mob.getSpeciesSlug()+" eye stayed hidden after waking: "+name);
        }
-       for(String name:List.of("eyelid_"+side,"closed_eyelid_"+side,side+"_eye_closed","eye_"+side+"_closed",side+"eyelid")){
+       for(String name:List.of("eyelid_"+side,"closed_eyelid_"+side,side+"_eye_closed","eye_"+side+"_closed",side+"eyelid",
+           "eyelid_full_"+side,"eyelid_half_"+side,"eyelid_three_quarters_"+side)){
         var lid=model.getAnimationProcessor().getBone(name);
         if(lid!=null&&!lid.isHidden())throw new IllegalStateException(mob.getSpeciesSlug()+" closed eyelid stayed visible after waking: "+name);
        }
@@ -122,9 +123,20 @@ final class NightClientSmokeTest {
           var lid=model.getAnimationProcessor().getBone(name);
           if(lid!=null){closedFound=true;if(lid.isHidden())throw new IllegalStateException(mob.getSpeciesSlug()+" closed eyelid is hidden: "+name);}
          }
+         var fullLid=model.getAnimationProcessor().getBone("eyelid_full_"+side);
+         if(fullLid!=null){closedFound=true;if(fullLid.isHidden())throw new IllegalStateException(mob.getSpeciesSlug()+" full eyelid is hidden: "+side);}
+         for(String name:List.of("eyelid_half_"+side,"eyelid_three_quarters_"+side)){
+          var partial=model.getAnimationProcessor().getBone(name);
+          if(partial!=null&& !partial.isHidden())throw new IllegalStateException(mob.getSpeciesSlug()+" partial eyelid stayed visible during sleep: "+name);
+         }
         }
         var eyes=model.getAnimationProcessor().getBone("eyes");
-        if(eyes!=null){eyeFound=true;closedFound=true;if(eyes.getScaleY()>eyes.getInitialSnapshot().scaleValueY*.1F)throw new IllegalStateException("Goldeen eye plate was not flattened for sleep");}
+        if(eyes!=null){
+         eyeFound=true;
+         // Goldeen's alternate rig uses eyes as an empty parent for individual
+         // open-eye and eyelid bones; Seaking's eye cubes live directly on it.
+         if(!closedFound){closedFound=true;if(eyes.getScaleY()>eyes.getInitialSnapshot().scaleValueY*.1F)throw new IllegalStateException("Aquatic eye plate was not flattened for sleep");}
+        }
         if(!eyeFound||!closedFound)throw new IllegalStateException(mob.getSpeciesSlug()+" has no verified closed-eye swim pose");
        }
        java.util.Set<String> eyeNames=swimSleep?java.util.Set.of():blink!=null&&animations.has(blink)?animations.getAsJsonObject(blink).getAsJsonObject("bones").keySet():sleepBones.keySet().stream().filter(n->n.contains("eye")||n.contains("pupil")).collect(java.util.stream.Collectors.toSet());
