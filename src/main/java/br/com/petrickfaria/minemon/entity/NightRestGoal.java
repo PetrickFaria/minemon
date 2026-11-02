@@ -66,8 +66,13 @@ final class NightRestGoal extends Goal {
   // GroundPathNavigation nodes use integer feet coordinates while the safe
   // bed anchor is 0.30 above the water block; allow that node offset, then
   // let the rest controller ease to the exact collision-safe anchor.
-  if(dx*dx+dz*dz<.36D&&Double.isFinite(restY)&&Math.abs(mob.getY()-restY)<1.0D){
-   mob.getNavigation().stop();gyaradosBottomTarget=null;return false;
+  if(dx*dx+dz*dz<.36D&&Double.isFinite(restY)&&Math.abs(mob.getY()-restY)<1.0D
+      &&WaterMovementGoal.safeWaterRestAt(mob,restY)){
+   // Path navigation reaches an integer water node; finish the final sub-block
+   // offset at the validated floor anchor before the sleep pose is selected.
+   mob.getNavigation().stop();mob.setPos(mob.getX(),restY,mob.getZ());
+   mob.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
+   gyaradosBottomTarget=null;return false;
   }
   if(!mob.getNavigation().isDone())return true;
   var path=mob.getNavigation().createPath(target,0);
