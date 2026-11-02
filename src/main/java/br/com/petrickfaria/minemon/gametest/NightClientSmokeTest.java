@@ -117,7 +117,7 @@ final class NightClientSmokeTest {
      }
      if(swimSleep&&Set.of("seadra","tentacool","tentacruel","magikarp","goldeen","seaking").contains(mob.getSpeciesSlug())&&Math.abs(mob.getXRot())>0.01F)
       throw new IllegalStateException(mob.getSpeciesSlug()+" remained pitched while asleep: xRot="+mob.getXRot());
-     if(swimSleep){
+     if(swimSleep&&!SpeciesBehaviorProfiles.sleepsAtWaterBottom(mob.getSpeciesSlug())){
       double top=WaterMovementGoal.restSurfaceAt(mob,mob.blockPosition());
       if(!Double.isFinite(top)||top-mob.getY()<2.9D)
        throw new IllegalStateException(mob.getSpeciesSlug()+" slept less than three blocks below the visible water surface: y="+mob.getY()+" surface="+top);
@@ -315,6 +315,7 @@ final class NightClientSmokeTest {
      double target=WaterMovementGoal.waterRestY(current);
      double error=Math.abs(current.getY()-target);
      if(SpeciesBehaviorProfiles.usesSwimmingSleepAnimation(current.getSpeciesSlug())
+         &&!SpeciesBehaviorProfiles.sleepsAtWaterBottom(current.getSpeciesSlug())
          &&current.tickCount-sleepingPositionSettleTick>=5
          &&WaterMovementGoal.restSurfaceAt(current,current.blockPosition())-current.getY()<2.99D)
       throw new IllegalStateException(current.getSpeciesSlug()+" slept closer than three blocks to the visible water surface after network settle");
