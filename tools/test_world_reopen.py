@@ -6,12 +6,54 @@ import os
 import pty
 import select
 import signal
+import socket
+import struct
 import subprocess
 import time
 
 ROOT = Path(__file__).resolve().parents[1]
 RUN = ROOT / "run"
 WORLD = RUN / "minemon-1-63-reopen"
+
+
+RCON_PORT = 25575
+RCON_PASSWORD = "minemon-reopen-test"
+
+
+def read_exact(sock: socket.socket, length: int) -> bytes:
+    data = bytearray()
+    while len(data) < length:
+        chunk = sock.recv(length - len(data))
+        if not chunk:
+            raise ConnectionError("RCON connection closed")
+        data.extend(chunk)
+    return bytes(data)
+
+
+def rcon_packet(sock: socket.socket, request_id: int, packet_type: int, payload: str) -> tuple[int, int, str]:
+    body = struct.pack("<ii", request_id, packet_type) + payload.encode("utf-8") + b"\0\0"
+    sock.sendall(struct.pack("<i", len(body)) + body)
+    length = struct.unpack("<i", read_exact(sock, 4))[0]
+    packet = read_exact(sock, length)
+    response_id, response_type = struct.unpack("<ii", packet[:8])
+    return response_id, response_type, packet[8:-2].decode("utf-8", errors="replace")
+
+
+def stop_with_rcon() -> bool:
+    deadline = time.monotonic() + 30
+    while time.monotonic() < deadline:
+        try:
+            with socket.create_connection(("127.0.0.1", RCON_PORT), timeout=2) as sock:
+                sock.settimeout(3)
+                auth_id, auth_type, _ = rcon_packet(sock, 11, 3, RCON_PASSWORD)
+                if auth_id != 11 or auth_type != 2:
+                    time.sleep(0.5)
+                    continue
+                command_id, _, _ = rcon_packet(sock, 12, 2, "stop")
+                return command_id == 12
+        except (OSError, ConnectionError, struct.error):
+            time.sleep(0.5)
+    return False
 
 
 def run_server(label: str) -> str:
@@ -25,6 +67,7 @@ def run_server(label: str) -> str:
     deadline = time.monotonic() + 360
     ready = False
     stopped = False
+    stop_sent = False
     while time.monotonic() < deadline:
         readable, _, _ = select.select([master], [], [], 1)
         if readable:
@@ -41,7 +84,9 @@ def run_server(label: str) -> str:
                 combined = "".join(output)
                 if not ready and "Done (" in combined:
                     ready = True
-                    os.write(master, b"stop\n")
+                    stop_sent = stop_with_rcon()
+                    if not stop_sent:
+                        raise SystemExit(f"{label}: RCON did not accept the graceful stop command")
                 if ready and "Stopping server" in combined:
                     stopped = True
         if process.poll() is not None:
@@ -53,13 +98,13 @@ def run_server(label: str) -> str:
         except subprocess.TimeoutExpired:
             process.kill()
             process.wait(timeout=10)
-        raise SystemExit(f"{label}: server failed to stop cleanly after receiving stop")
+        raise SystemExit(f"{label}: server failed to stop cleanly after RCON stop")
     os.close(master)
     combined = "".join(output)
     if not ready:
         raise SystemExit(f"{label}: server did not finish opening the world; inspect preceding log output")
-    if not stopped:
-        raise SystemExit(f"{label}: server opened, but its graceful save/stop was not observed")
+    if not stop_sent or not stopped:
+        raise SystemExit(f"{label}: graceful save/stop was not observed")
     if process.returncode != 0:
         raise SystemExit(f"{label}: runServer exited with code {process.returncode}")
     return combined
@@ -73,7 +118,10 @@ RUN.mkdir(exist_ok=True)
     "generate-structures=false\n"
     "spawn-animals=false\n"
     "spawn-monsters=false\n"
-    "online-mode=false\n",
+    "online-mode=false\n"
+    "enable-rcon=true\n"
+    f"rcon.port={RCON_PORT}\n"
+    f"rcon.password={RCON_PASSWORD}\n",
     encoding="utf-8",
 )
 if WORLD.exists():
