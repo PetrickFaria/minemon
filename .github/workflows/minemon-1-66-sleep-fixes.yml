@@ -30,6 +30,11 @@ jobs:
         run: |
           ALSOFT_DRIVERS=null timeout --kill-after=30s 900s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeSleep
           grep -F 'PASS NIGHT CLIENT:' run/client-validation-night.txt
+          grep -F 'PASS NIGHT RENDER magikarp' run/client-validation-night.txt
+          grep -F 'PASS NIGHT RENDER seel' run/client-validation-night.txt
+          grep -F 'PASS NIGHT RENDER seel_irregular' run/client-validation-night.txt
+          grep -F 'PASS NIGHT RENDER shellder_shallow' run/client-validation-night.txt
+          grep -F 'PASS NIGHT RENDER cloyster_obstacle' run/client-validation-night.txt
           grep -F 'PASS NIGHT RENDER gyarados' run/client-validation-night.txt
           grep -F 'PASS NIGHT RENDER lapras' run/client-validation-night.txt
       - name: Reopen the same saved client world
