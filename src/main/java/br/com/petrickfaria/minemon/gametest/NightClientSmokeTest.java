@@ -15,7 +15,7 @@ import java.util.*;
 
 /** Additional real-client scenario: production night AI, rendered closed eyes, dawn. */
 final class NightClientSmokeTest {
- private static final List<String> SPECIES=List.of("tentacool","tentacruel","horsea","seadra","goldeen","seaking","magikarp","shellder","cloyster","gyarados","lapras");
+ private static final List<String> SPECIES=List.of("tentacool","tentacruel","horsea","seadra","goldeen","seaking","magikarp","shellder","cloyster","seel","seel_irregular","shellder_shallow","cloyster_obstacle","gyarados","lapras");
  private static boolean opened,setup,spawned,waking,gengarWakeEyesObserved,nocturnalMidday;
  private static int ticks,index,samples,activeSamples,sleepTick,depthSettleTicks,depthStableTicks,restSettleTicks,restStableTicks;
  private static volatile UUID entity;
@@ -62,7 +62,7 @@ final class NightClientSmokeTest {
     };
     MinemonRenderer.validationObserver=(mob,model)->{
      if(entity==null||!mob.getUUID().equals(entity))return;
-     if(SpeciesBehaviorProfiles.usesSwimmingSleepAnimation(mob.getSpeciesSlug())&&!mob.isSleeping()){
+     if((SpeciesBehaviorProfiles.usesSwimmingSleepAnimation(mob.getSpeciesSlug())||mob.getSpeciesSlug().equals("seel"))&&!mob.isSleeping(){
       for(String side:List.of("left","right")){
        for(String name:List.of("eye_"+side,side+"_eye",side+"eye")){
         var eye=model.getAnimationProcessor().getBone(name);
@@ -89,6 +89,14 @@ final class NightClientSmokeTest {
         throw new IllegalStateException("Gengar must visibly select both full closed lids only during sleep");
       }
       if(waking&&!mob.isSleeping())gengarWakeEyesObserved=true;
+     }
+     if(mob.getSpeciesSlug().equals("seel")&&mob.isSleeping()){
+      for(String side:List.of("left","right")){
+       var eye=model.getAnimationProcessor().getBone("eye_"+side);
+       var lid=model.getAnimationProcessor().getBone("eyelid_"+side);
+       if(eye==null||lid==null||!eye.isHidden()||lid.isHidden())
+        throw new IllegalStateException("Seel must render its original closed eyelids during sleep: "+side);
+      }
      }
      boolean nocturnal=SpeciesBehaviorProfiles.isNocturnal(mob.getSpeciesSlug());
      if(nocturnal&&!nocturnalMidday){
@@ -220,17 +228,32 @@ final class NightClientSmokeTest {
     spawned=true;gengarWakeEyesObserved=false;nocturnalMidday=false;ticks=0;samples=0;activeSamples=0;sleepTick=0;depthSettleTicks=0;depthStableTicks=0;restSettleTicks=0;restStableTicks=0;waking=false;eyes.clear();restingWings.clear();swimMotion.clear();lastSleepingPosition=null;
     mc.getSingleplayerServer().execute(()->{
      var level=mc.getSingleplayerServer().overworld();if(entity!=null){var old=level.getEntity(entity);if(old!=null)old.discard();}
-     String scenario=SPECIES.get(index);String slug=scenario.equals("vaporeon_land")?"vaporeon":scenario;
+     String scenario=SPECIES.get(index);
+     boolean landVaporeon=scenario.equals("vaporeon_land");
+     String slug=landVaporeon?"vaporeon":scenario;
+     for(String suffix:List.of("_irregular","_shallow","_obstacle"))
+      if(slug.endsWith(suffix)){slug=slug.substring(0,slug.length()-suffix.length());break;}
      var mob=ModEntities.SPECIES.get(slug).get().create(level);
-     boolean aquatic=SpeciesBehaviorProfiles.waterCapable(mob.getSpeciesSlug())&&!scenario.equals("vaporeon_land");
+     boolean aquatic=SpeciesBehaviorProfiles.waterCapable(mob.getSpeciesSlug())&&!landVaporeon;
      boolean air=SpeciesBehaviorProfiles.canFly(mob.getSpeciesSlug());
      // Each species receives a clean environment. The previous Vaporeon
      // scenario's basin otherwise remains and changes a land species' support
      // height and resting environment.
-     for(int x=-6;x<=6;x++)for(int z=0;z<=10;z++)for(int y=101;y<=110;y++)
+     for(int x=-6;x<=6;x++)for(int z=0;z<=10;z++)for(int y=99;y<=116;y++)
       level.setBlockAndUpdate(new BlockPos(x,y,z),Blocks.AIR.defaultBlockState());
-     if(aquatic)for(int x=-6;x<=6;x++)for(int z=0;z<=10;z++)for(int y=101;y<=110;y++)
+     if(scenario.equals("seel_irregular")){
+      for(int x=-2;x<=2;x++)for(int z=2;z<=8;z++)if((x+z)%2==0){
+       level.setBlockAndUpdate(new BlockPos(x,99,z),Blocks.STONE.defaultBlockState());
+       level.setBlockAndUpdate(new BlockPos(x,100,z),Blocks.WATER.defaultBlockState());
+      }
+     }else for(int x=-6;x<=6;x++)for(int z=0;z<=10;z++)
+      level.setBlockAndUpdate(new BlockPos(x,100,z),Blocks.STONE.defaultBlockState());
+     int waterTop=scenario.equals("shellder_shallow")?103:110;
+     if(aquatic)for(int x=-6;x<=6;x++)for(int z=0;z<=10;z++)for(int y=101;y<=waterTop;y++)
       level.setBlockAndUpdate(new BlockPos(x,y,z),Blocks.WATER.defaultBlockState());
+     if(scenario.equals("cloyster_obstacle"))
+      for(int x=-1;x<=1;x++)for(int y=101;y<=104;y++)
+       level.setBlockAndUpdate(new BlockPos(x,y,4),Blocks.STONE.defaultBlockState());
      double spawnY=aquatic?(slug.equals("magikarp")?110.0D:104.0D):air?107.0D:101.0D;
      mob.moveTo(0,spawnY,5,180,0);
      if(SpeciesBehaviorProfiles.profile(mob.getSpeciesSlug())==SpeciesBehaviorProfiles.Profile.GROUND_FLIGHT
@@ -333,13 +356,20 @@ final class NightClientSmokeTest {
               ||bone.startsWith("lefttail")||bone.startsWith("righttail")||bone.startsWith("dorsal_fin")
           :bone.contains("tentacle")||bone.startsWith("flap")||bone.startsWith("fin");
       if(fin&&moved)finMoved=true;
-      boolean frozen=Set.of("body","torso","torso_end","head","neck","mouth","upper_lip","lower_lip","whiskers",
-          "whisker_left","whisker_left2","whisker_left3","whisker_right","whisker_right2","whisker_right3")
-          .contains(bone);
+      boolean frozen=Set.of("body","torso","torso_end","head","neck","mouth","upper_lip","lower_lip").contains(bone);
       if(Set.of("seadra","tentacool","tentacruel","magikarp","goldeen","seaking").contains(restedSpecies)
           &&frozen&&moved)throw new IllegalStateException(restedSpecies+" main posture bone still moved during sleep: "+bone);
-      if(Set.of("magikarp","goldeen","seaking").contains(restedSpecies)&&moved&&!fin)
+      boolean naturalMagikarpWhisker=restedSpecies.equals("magikarp")&&bone.startsWith("whisker");
+      if(Set.of("magikarp","goldeen","seaking").contains(restedSpecies)&&moved&&!fin&&!naturalMagikarpWhisker)
        throw new IllegalStateException(restedSpecies+" non-fin bone moved during sleep: "+bone);
+     }
+     if(restedSpecies.equals("magikarp")){
+      for(String side:List.of("left","right")){
+       var whisker=model.getAnimationProcessor().getBone("whisker_"+side);
+       if(whisker==null||Math.abs(whisker.getRotationX()-whisker.getInitialSnapshot().rotationValueX)<.35F
+          ||Math.abs(whisker.getRotationZ()-whisker.getInitialSnapshot().rotationValueZ)<.35F)
+        throw new IllegalStateException("Magikarp whisker returned to its flat bind pose during sleep: "+side);
+      }
      }
      if(!finMoved)throw new IllegalStateException(restedSpecies+" had no moving fin or tentacle during sleep");
     }
