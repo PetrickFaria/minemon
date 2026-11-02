@@ -1,0 +1,123 @@
+name: Minemon 1.69 Alakazam pose fixes
+on:
+  push:
+    branches: [feature/minemon-1.69-alakazam-pose-fixes]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build-test-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Verify branch scope against approved 1.68 base
+        shell: bash
+        run: |
+          set -euo pipefail
+          base=48fec7de785cbc4cc44e5eabe7adaac0e7ee79aa
+          git merge-base --is-ancestor "$base" HEAD
+          test "$(git merge-base "$base" HEAD)" = "$base"
+          git diff --name-only "$base" HEAD > /tmp/minemon-1.69-files.txt
+          cat /tmp/minemon-1.69-files.txt
+          while IFS= read -r path; do
+            case "$path" in
+              .github/workflows/minemon-1-69-alakazam-pose-fixes.yml|build.gradle|gradle.properties|src/main/java/br/com/petrickfaria/minemon/client/MinemonModel.java|src/main/java/br/com/petrickfaria/minemon/gametest/ClientSmokeTest.java|src/main/resources/assets/minemon/animations/alakazam_cobblemon_1_8_2/alakazam.animation.json|src/test/java/br/com/petrickfaria/minemon/RequestedBehaviorAssetsTest.java) ;;
+              *) echo "Out-of-scope file in 1.69 diff: $path"; exit 1 ;;
+            esac
+          done < /tmp/minemon-1.69-files.txt
+          if rg --pcre2 -n -i 'rcon\.password=(?!\{RCON_PASSWORD\}|\$\{\{)[^$\s]{8,}|(gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,})' $(cat /tmp/minemon-1.69-files.txt); then
+            echo 'Possible embedded credential found in changed files.'
+            exit 1
+          fi
+      - name: Compile Java 17 source and focused tests
+        run: ./gradlew --no-daemon clean compileJava compileTestJava
+      - name: Test Alakazam timing, two full cycles, and meditation asset
+        run: ./gradlew --no-daemon test --tests br.com.petrickfaria.minemon.BehaviorCycleTest --tests br.com.petrickfaria.minemon.NaturalBehaviorProfileTest --tests br.com.petrickfaria.minemon.RequestedBehaviorAssetsTest
+      - name: Confirm Alakazam sleep and other animation clips are unchanged
+        env:
+          BASE_COMMIT: 48fec7de785cbc4cc44e5eabe7adaac0e7ee79aa
+        run: |
+          python3 - <<'PY'
+          import json, os, subprocess
+          path='src/main/resources/assets/minemon/animations/alakazam_cobblemon_1_8_2/alakazam.animation.json'
+          before=json.loads(subprocess.check_output(['git','show',f"{os.environ['BASE_COMMIT']}:{path}"]))['animations']
+          after=json.load(open(path))['animations']
+          for clip in before:
+              if clip != 'animation.alakazam.meditate': assert before[clip] == after[clip], clip
+          print('PASS: only animation.alakazam.meditate changed; sleep and all other clips match 1.68.')
+          PY
+      - name: Create, save, and reopen Alakazam world twice
+        env:
+          MINEMON_TEST_RCON_PASSWORD: ${{ secrets.MINEMON_TEST_RCON_PASSWORD }}
+        run: |
+          if [ -z "$MINEMON_TEST_RCON_PASSWORD" ]; then
+            MINEMON_TEST_RCON_PASSWORD="$(python3 -c 'import secrets; print(secrets.token_urlsafe(32))')"
+          fi
+          export MINEMON_TEST_RCON_PASSWORD
+          python3 tools/test_world_reopen.py
+      - name: Verify natural hover pose and bob in the Minecraft client
+        run: |
+          python3 tools/prepare_client_world.py
+          set +e
+          ALSOFT_DRIVERS=null timeout --kill-after=30s 900s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeAir -PclientSmokeAlakazamPose -PclientSmokeSpecies=alakazam > run/alakazam-client-smoke.log 2>&1
+          client_status=$?
+          set -e
+          if [ "$client_status" -ne 0 ]; then
+            rg -n -C 3 "Minemon client validation failed|Alakazam client hover|folded arms|hip connection|Exception|ERROR" run/alakazam-client-smoke.log | tail -n 100 || true
+            for crash in run/crash-reports/*-client.txt; do [ -f "$crash" ] && sed -n '1,100p' "$crash"; done
+            exit "$client_status"
+          fi
+          grep -F 'PASS ALAKAZAM CLIENT POSE:' run/client-validation.txt
+          test -f run/screenshots/alakazam-meditation.png
+          for reopen in 1 2; do
+            ALSOFT_DRIVERS=null timeout --kill-after=30s 600s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeReopen
+          done
+          test "$(grep -cF 'PASS CLIENT WORLD REOPEN: Alakazam present after reload' run/client-world-reopen-pass.txt)" -eq 2
+      - name: Build distributable JAR and verify requested contents
+        run: ./gradlew --no-daemon build -x test
+      - name: Validate exact JAR name, version, pose, and flight state sync
+        shell: bash
+        run: |
+          set -euo pipefail
+          jar_file='build/libs/Minemon-1.19.2-1.69.jar'
+          test -f "$jar_file"
+          unzip -t "$jar_file"
+          jar tf "$jar_file" | grep -Fx 'br/com/petrickfaria/minemon/entity/BehaviorCycle.class'
+          jar tf "$jar_file" | grep -Fx 'br/com/petrickfaria/minemon/client/MinemonModel.class'
+          unzip -p "$jar_file" META-INF/mods.toml | grep -F 'version="1.69"'
+          unzip -p "$jar_file" assets/minemon_gen1/animations/alakazam_cobblemon_1_8_2/alakazam.animation.json > /tmp/alakazam-1.69-animation.json
+          python3 - <<'PY'
+          import json
+          d=json.load(open('/tmp/alakazam-1.69-animation.json'))['animations']
+          med=d['animation.alakazam.meditate']['bones']
+          sleep=d['animation.alakazam.sleep']['bones']
+          expected={'hips','left_upper_leg','left_lower_leg','foot_left','right_upper_leg','right_lower_leg','foot_right','left_upper_arm','left_lower_arm','hand_left','spoon_left','right_upper_arm','right_lower_arm','hand_right','spoon_right'}
+          assert expected <= set(med), set(med)
+          for bone in expected: assert med[bone] == sleep[bone], bone
+          assert set(med)==expected, set(med)
+          PY
+          unzip -p "$jar_file" br/com/petrickfaria/minemon/entity/MinemonCreature.class | strings | grep -F 'naturalPhaseForRender'
+          grep -F 'PASS ALAKAZAM CLIENT POSE:' run/client-validation.txt
+          grep -F 'PASS SERVER WORLD SAVE:' run/world-reopen-pass.txt
+          test "$(grep -cF 'PASS CLIENT WORLD REOPEN: Alakazam present after reload' run/client-world-reopen-pass.txt)" -eq 2
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Minemon-1.19.2-1.69
+          path: |
+            build/libs/Minemon-1.19.2-1.69.jar
+            run/client-validation.txt
+            run/screenshots/alakazam-meditation.png
+            run/world-reopen-pass.txt
+            run/client-world-reopen-pass.txt
+          if-no-files-found: error
+          retention-days: 14

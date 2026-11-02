@@ -66,21 +66,20 @@ public class MinemonModel extends AnimatedGeoModel<MinemonCreature> {
     }
 
     /**
-     * The imported Alakazam animation clip is selected during natural hover, but
-     * GeckoLib 3 does not apply its static Bedrock vectors to these lower-body
-     * bones in the live model. Apply the sleep-reference leg transforms after
-     * animation evaluation so the pose is present in the rendered hierarchy.
-     * This is limited to Alakazam's natural AIR phase and leaves its sleep clip
-     * and awake ground pose untouched.
+     * GeckoLib 3 does not apply the imported meditation clip's static Bedrock
+     * vectors to the Alakazam hip and leg bones in the live model. Reapply the
+     * complete lower-body sleep-reference pose after animation evaluation.
+     * The hips and upper legs must share the clip's downward offset: the legs
+     * are children of the body while the torso is a child of the hips, so
+     * resetting only the hips to their bind position separates both regions.
+     * This is limited to natural AIR and leaves sleep and ground poses alone.
      */
     private void applyAlakazamMeditationPose(MinemonCreature entity) {
         if (!entity.getSpeciesSlug().equals("alakazam")
                 || entity.naturalPhaseForRender() != br.com.petrickfaria.minemon.entity.BehaviorCycle.Phase.AIR
                 || entity.isSleeping() || entity.isOrderedToSit()) return;
 
-        // Keep the hip parent at its awake bind transform: changing it also
-        // translates/rotates the torso and head because they descend from hips.
-        setMeditationBone("hips", 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
+        setMeditationBone("hips", 0.0F, -12.65F, 0.0F, -10.0F, 0.0F, 0.0F);
         setMeditationBone("left_upper_leg", 0.0F, -12.5F, -1.0F, -157.5F, 0.0F, 90.0F);
         setMeditationBone("left_lower_leg", 0.0F, 0.0F, 0.0F, 75.0F, 0.0F, 0.0F);
         setMeditationBone("foot_left", 0.0F, 0.0F, 0.0F, 67.5F, 0.0F, 0.0F);

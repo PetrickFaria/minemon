@@ -34,7 +34,7 @@ public class RequestedBehaviorAssetsTest {
             }
         }
     }
-    @Test public void alakazamMeditationKeepsAwakeUpperBodyAndUsesOnlySleepLegPose() throws Exception {
+    @Test public void alakazamMeditationUsesCompleteSleepReferencePoseWithoutChangingSleepClip() throws Exception {
         var definition=SpeciesDefinitions.get("alakazam");
         var root=Path.of(System.getProperty("minemon.testResources"));
         var animations=JsonParser.parseString(Files.readString(root.resolve(definition.animation().replace("assets/minemon/","assets/minemon_gen1/"))))
@@ -42,10 +42,10 @@ public class RequestedBehaviorAssetsTest {
         var meditation=animations.getAsJsonObject("animation.alakazam.meditate").getAsJsonObject("bones");
         var sleep=animations.getAsJsonObject("animation.alakazam.sleep").getAsJsonObject("bones");
         assertNotNull(meditation);
-        var sleepPoseBones=java.util.List.of("hips","left_upper_leg","left_lower_leg","foot_left","right_upper_leg","right_lower_leg","foot_right");
-        assertEquals("meditation animates only the lower-body sleep pose",new java.util.HashSet<>(sleepPoseBones),meditation.keySet());
+        var sleepPoseBones=java.util.List.of("hips","left_upper_leg","left_lower_leg","foot_left","right_upper_leg","right_lower_leg","foot_right",
+                "left_upper_arm","left_lower_arm","hand_left","spoon_left","right_upper_arm","right_lower_arm","hand_right","spoon_right");
         for(String bone:sleepPoseBones)
-            assertEquals("reuse sleep leg pose "+bone,sleep.get(bone),meditation.get(bone));
+            assertEquals("reuse sleep-reference pose "+bone,sleep.get(bone),meditation.get(bone));
         assertTrue(SpeciesDefinitions.get("alakazam").clips().containsKey("meditate"));
         assertFalse(SpeciesDefinitions.get("kadabra").clips().containsKey("meditate"));
     }
