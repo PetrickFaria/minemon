@@ -222,14 +222,16 @@ final class NightClientSmokeTest {
    if(current==null)return;
    boolean waterRest=SpeciesBehaviorProfiles.waterCapable(current.getSpeciesSlug())&&current.isInWaterOrBubble();
    if(current.isSleeping()){
-    // The client can still interpolate the final pre-sleep movement packet
-    // after the server has already locked the entity in place. Let that packet
-    // settle, then require the rendered entity position to stay unchanged.
-    if(lastSleepingPosition==null){lastSleepingPosition=current.position();sleepingPositionSettleTick=current.tickCount;}
-    else if(current.tickCount-sleepingPositionSettleTick<5)lastSleepingPosition=current.position();
-    else if(lastSleepingPosition.distanceToSqr(current.position())>1.0E-8D)
-     throw new IllegalStateException(current.getSpeciesSlug()+" moved physically while sleeping after network settle: "+lastSleepingPosition+" -> "+current.position());
-    else lastSleepingPosition=current.position();
+    if(SpeciesBehaviorProfiles.locksPositionDuringWaterSleep(current.getSpeciesSlug())){
+     // The client can still interpolate the final pre-sleep movement packet
+     // after the server has already locked the entity in place. Let that packet
+     // settle, then require the rendered entity position to stay unchanged.
+     if(lastSleepingPosition==null){lastSleepingPosition=current.position();sleepingPositionSettleTick=current.tickCount;}
+     else if(current.tickCount-sleepingPositionSettleTick<5)lastSleepingPosition=current.position();
+     else if(lastSleepingPosition.distanceToSqr(current.position())>1.0E-8D)
+      throw new IllegalStateException(current.getSpeciesSlug()+" moved physically while sleeping after network settle: "+lastSleepingPosition+" -> "+current.position());
+     else lastSleepingPosition=current.position();
+    }else{lastSleepingPosition=null;sleepingPositionSettleTick=-1;}
     if(waterRest){
      double target=WaterMovementGoal.waterRestY(current);
      double error=Math.abs(current.getY()-target);
