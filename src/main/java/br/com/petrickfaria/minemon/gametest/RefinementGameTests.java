@@ -44,8 +44,8 @@ public class RefinementGameTests {
   h.runAfterDelay(180,()->{
    double top=WaterMovementGoal.restSurfaceAt(surface,surface.blockPosition());
    if(!deep.isSleeping()||Math.abs(deep.getY()-start)>.15)h.fail("Submerged sleeper changed depth");
-   if(!surface.isSleeping()||Math.abs(surface.getY()-(top-3))>.2)h.fail("Surface sleeper did not settle three blocks below the visible water surface");
-   if(!depth2.isSleeping()||Math.abs(depth2.getY()-(top-3))>.2)h.fail("Two-block sleeper did not descend one more block");
+   if(!surface.isSleeping()||top-surface.getY()<3.0D||Math.abs(surface.getY()-(top-3.2D))>.2)h.fail("Surface sleeper did not settle at least three blocks below the visible water surface");
+   if(!depth2.isSleeping()||top-depth2.getY()<3.0D||Math.abs(depth2.getY()-(top-3.2D))>.2)h.fail("Two-block sleeper did not descend to the new minimum depth");
    if(!depth3.isSleeping()||depth3.getY()>start3+.15D)h.fail("Three-block sleeper must not rise");
    if(!depth4.isSleeping()||depth4.getY()>start4+.15D)h.fail("Four-block sleeper must not rise");
    if(!depth5.isSleeping()||depth5.getY()>start5+.15D)h.fail("Five-block sleeper must not rise");

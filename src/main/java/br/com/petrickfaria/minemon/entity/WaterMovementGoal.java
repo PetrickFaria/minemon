@@ -342,7 +342,9 @@ public final class WaterMovementGoal extends Goal {
  /** Finds a reachable local floor target for Gyarados' night descent. */
  static BlockPos bottomRestDestination(MinemonCreature mob){return new WaterMovementGoal(mob).nearbyBottomDestination();}
  static double shallowAquaticSleepY(double currentY,double surfaceY){
-  return Double.isFinite(surfaceY)?Math.min(currentY,surfaceY-3.0D):currentY;
+  // Leave a small settling margin so interpolation and fractional fluid-surface
+  // heights cannot leave the rendered body less than three blocks submerged.
+  return Double.isFinite(surfaceY)?Math.min(currentY,surfaceY-3.2D):currentY;
  }
  static boolean safeWaterRestAt(MinemonCreature mob,double y){
   var box=mob.getBoundingBox().move(0.0D,y-mob.getY(),0.0D);

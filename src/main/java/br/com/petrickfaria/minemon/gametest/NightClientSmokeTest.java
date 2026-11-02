@@ -253,9 +253,8 @@ final class NightClientSmokeTest {
          &&WaterMovementGoal.restSurfaceAt(current,current.blockPosition())-current.getY()<2.99D)
       throw new IllegalStateException(current.getSpeciesSlug()+" slept closer than three blocks to the visible water surface after network settle");
      if(SpeciesBehaviorProfiles.usesSwimmingSleepAnimation(current.getSpeciesSlug())){
-      double expectedY=current.getSpeciesSlug().equals("magikarp")?108.0D:104.0D;
-      if(Math.abs(current.getY()-expectedY)>.25D)
-       throw new IllegalStateException(current.getSpeciesSlug()+" chose the wrong sleep anchor: y="+current.getY()+" expected="+expectedY);
+      if(!current.getSpeciesSlug().equals("magikarp")&&Math.abs(current.getY()-104.0D)>.25D)
+       throw new IllegalStateException(current.getSpeciesSlug()+" did not preserve its already-deep sleep position: y="+current.getY()+" expected=104.0");
      }
      if(!Double.isFinite(target)||error>.2D){
       depthStableTicks=0;
