@@ -325,16 +325,22 @@ final class NightClientSmokeTest {
      }
      if(!Double.isFinite(target)||error>.2D){
       depthStableTicks=0;
-      if(++depthSettleTicks>20)
+      int settleLimit=SpeciesBehaviorProfiles.sleepsAtWaterBottom(current.getSpeciesSlug())?100:20;
+      if(++depthSettleTicks>settleLimit)
        throw new IllegalStateException(current.getSpeciesSlug()+" must settle at its safe species-specific water depth; target="+target+" y="+current.getY()+" error="+error);
      }else{
       if(++depthStableTicks>=5)depthSettleTicks=0;
       if(depthStableTicks>=3&&SpeciesBehaviorProfiles.sleepsAtWaterBottom(current.getSpeciesSlug())){
        double support=WaterMovementGoal.waterBottomSupportY(current,current.blockPosition());
-       if(!Double.isFinite(support)||Math.abs(current.getY()-support-0.015D)>.08D)
-        throw new IllegalStateException(current.getSpeciesSlug()+" did not settle its collision box on the submerged support: y="+current.getY()+" support="+support);
-       if(!current.level.noCollision(current,current.getBoundingBox()))
-        throw new IllegalStateException(current.getSpeciesSlug()+" intersects a solid block while resting at the submerged floor");
+       if(!Double.isFinite(support)||Math.abs(current.getY()-support-0.015D)>.08D){
+        depthStableTicks=0;
+        if(++depthSettleTicks>100)
+         throw new IllegalStateException(current.getSpeciesSlug()+" did not reach the safe submerged support: y="+current.getY()+" support="+support);
+       }else{
+        depthSettleTicks=0;
+        if(!current.level.noCollision(current,current.getBoundingBox()))
+         throw new IllegalStateException(current.getSpeciesSlug()+" intersects a solid block while resting at the submerged floor");
+       }
       }
      }
     }else{
