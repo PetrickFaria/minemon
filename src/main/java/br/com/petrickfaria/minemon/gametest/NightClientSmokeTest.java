@@ -300,7 +300,8 @@ final class NightClientSmokeTest {
    if(current==null)return;
    boolean waterRest=SpeciesBehaviorProfiles.waterCapable(current.getSpeciesSlug())&&current.isInWaterOrBubble();
    if(current.isSleeping()){
-    if(SpeciesBehaviorProfiles.locksPositionDuringWaterSleep(current.getSpeciesSlug())\n       ||SpeciesBehaviorProfiles.sleepsAtWaterBottom(current.getSpeciesSlug())){
+    if(SpeciesBehaviorProfiles.locksPositionDuringWaterSleep(current.getSpeciesSlug())
+       ||SpeciesBehaviorProfiles.sleepsAtWaterBottom(current.getSpeciesSlug())){
      // The client can still interpolate the final pre-sleep movement packet
      // after the server has already locked the entity in place. Let that packet
      // settle, then require the rendered entity position to stay unchanged.
