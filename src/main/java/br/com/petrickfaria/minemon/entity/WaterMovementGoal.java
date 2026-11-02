@@ -283,12 +283,19 @@ public final class WaterMovementGoal extends Goal {
    BlockPos p=new BlockPos(x,Math.ceil(y),z);
    if(blocked.containsKey(p)||!waterFits(mob,p,true)
        ||requiresNavigableVolume(mob.getSpeciesSlug())&&!waterRegion(mob,p))continue;
-   boolean clear=true;
-   for(int step=1;step<=4;step++){
-    Vec3 point=mob.position().lerp(Vec3.atCenterOf(p),step/4.0D);
-    if(!mob.level.noCollision(mob,mob.getBoundingBox().move(point.subtract(mob.position())))){clear=false;break;}
+   // Shell-line sleepers can route around an obstacle. This straight-line
+   // probe rejects a reachable floor point when the entity starts above a
+   // column; createPath below validates the actual collision-safe route.
+   // Keep the direct-path restriction unchanged for Gyarados and other species.
+   boolean shellLine="shellder".equals(mob.getSpeciesSlug())||"cloyster".equals(mob.getSpeciesSlug());
+   if(!shellLine){
+    boolean clear=true;
+    for(int step=1;step<=4;step++){
+     Vec3 point=mob.position().lerp(Vec3.atCenterOf(p),step/4.0D);
+     if(!mob.level.noCollision(mob,mob.getBoundingBox().move(point.subtract(mob.position())))){clear=false;break;}
+    }
+    if(!clear)continue;
    }
-   if(!clear)continue;
    var path=mob.getNavigation().createPath(p,0);
    if(path==null||!path.canReach()){blocked.put(p.immutable(),mob.tickCount+200);continue;}
    double clearance=SpeciesBehaviorProfiles.isAquatic(mob.getSpeciesSlug())?wallClearanceAlongPath(path,new HashMap<>()):Double.POSITIVE_INFINITY;
