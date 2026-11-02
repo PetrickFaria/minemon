@@ -1,0 +1,57 @@
+name: Minemon 1.64 Aquatic Adjustments
+on:
+  push:
+    branches: [feature/minemon-1.64-aquatic-adjustments]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build-and-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Compile Java 17 source and focused tests
+        run: ./gradlew --no-daemon clean compileJava compileTestJava
+      - name: Run aquatic sleep and Gyarados surface unit tests
+        run: ./gradlew --no-daemon test --tests br.com.petrickfaria.minemon.entity.AquaticSleepRulesTest --tests br.com.petrickfaria.minemon.GyaradosSurfaceTest
+      - name: Create, save, and reopen a clean world
+        run: python3 tools/test_world_reopen.py
+      - name: Prepare the saved world for the focused real-client aquatic sleep checks
+        run: python3 tools/prepare_client_world.py
+      - name: Validate aquatic sleep, closed eyes, movement lock, Gyarados descent and return, and Lapras preservation
+        run: |
+          ALSOFT_DRIVERS=null timeout --kill-after=30s 900s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeSleep
+          grep -F 'PASS NIGHT CLIENT:' run/client-validation-night.txt
+          grep -F 'PASS NIGHT RENDER gyarados' run/client-validation-night.txt
+          grep -F 'PASS NIGHT RENDER lapras' run/client-validation-night.txt
+      - name: Reopen the same saved client world
+        run: |
+          test -f run/saves/minemon-validation/level.dat
+          ALSOFT_DRIVERS=null timeout --kill-after=30s 900s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeSleep
+          grep -F 'PASS NIGHT CLIENT:' run/client-validation-night.txt
+      - name: Build the distributable mod JAR
+        run: ./gradlew --no-daemon build -x test
+      - name: Verify version and requested behavior classes in the JAR
+        shell: bash
+        run: |
+          set -euo pipefail
+          jar_file='build/libs/Minemon-1.19.2-1.64.jar'
+          test -f "$jar_file"
+          jar tf "$jar_file" | grep -Fx 'br/com/petrickfaria/minemon/entity/MinemonAquaticCreature.class'
+          jar tf "$jar_file" | grep -Fx 'br/com/petrickfaria/minemon/entity/NightRestGoal.class'
+          jar tf "$jar_file" | grep -Fx 'br/com/petrickfaria/minemon/client/MinemonModel.class'
+          unzip -p "$jar_file" META-INF/mods.toml | grep -F 'version="1.64"'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Minemon-1.19.2-1.64
+          path: build/libs/Minemon-1.19.2-1.64.jar
+          if-no-files-found: error
+          retention-days: 14

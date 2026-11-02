@@ -7,13 +7,14 @@ import static org.junit.Assert.assertTrue;
 
 /** Focused rules for the requested aquatic sleep behavior. */
 public final class AquaticSleepRulesTest {
-    @Test public void shallowSleeperMovesOnlyAsFarAsNeededToReachTwoBlocks() {
-        assertEquals(98.0D, WaterMovementGoal.shallowAquaticSleepY(99.0D, 100.0D), 0.0D);
+    @Test public void shallowSleeperMovesOnlyAsFarAsNeededToReachThreeBlocks() {
+        assertEquals(97.0D, WaterMovementGoal.shallowAquaticSleepY(99.0D, 100.0D), 0.0D);
+        assertEquals(97.0D, WaterMovementGoal.shallowAquaticSleepY(98.0D, 100.0D), 0.0D);
+        assertEquals(97.0D, WaterMovementGoal.shallowAquaticSleepY(97.0D, 100.0D), 0.0D);
     }
 
     @Test public void alreadySubmergedSleeperKeepsItsCurrentDepth() {
-        assertEquals(98.0D, WaterMovementGoal.shallowAquaticSleepY(98.0D, 100.0D), 0.0D);
-        assertEquals(97.0D, WaterMovementGoal.shallowAquaticSleepY(97.0D, 100.0D), 0.0D);
+        assertEquals(96.0D, WaterMovementGoal.shallowAquaticSleepY(96.0D, 100.0D), 0.0D);
         assertEquals(95.0D, WaterMovementGoal.shallowAquaticSleepY(95.0D, 100.0D), 0.0D);
     }
 

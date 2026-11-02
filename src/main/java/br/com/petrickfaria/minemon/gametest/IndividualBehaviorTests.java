@@ -120,7 +120,7 @@ public final class IndividualBehaviorTests {
   },350,"Visitor must find, enter and submerge in reachable water"+state(turtle));
  }
  private static boolean underwater(MinemonCreature m){return m.level.getFluidState(new BlockPos(m.getX(),m.getY()+m.getBbHeight()+.1D,m.getZ())).is(net.minecraft.tags.FluidTags.WATER);}
- private static boolean atSurface(MinemonCreature m){return m instanceof MinemonAquaticCreature a&&Math.abs(m.getY()-(a.waterSurface()-WaterMovementGoal.preferredSurfaceDepth(m)))<.3D;}
+ private static boolean atSurface(MinemonCreature m){return m instanceof MinemonAquaticCreature a&&Math.abs(m.getY()-WaterMovementGoal.surfaceSwimY(m,a.waterSurface()))<.3D;}
  @GameTest(template="test_arena",batch="daytime_swimming",timeoutTicks=320)
  public static void permanentSwimmersMoveUnderwaterAndSurfaceSpeciesFloat(GameTestHelper h){
   // This probe checks ordinary daytime swimming; separate night tests own the sleep transition.
@@ -143,7 +143,7 @@ public final class IndividualBehaviorTests {
        +" velocity="+fish.getDeltaMovement()+state(fish));
    check(h,farthest[0]>.5D,"Permanent swimmer must travel at least 0.5 blocks during the observation window; maxDistanceSquared="+farthest[0]
        +" start="+start[0]+" current="+fish.position()+" target="+fish.getNavigation().getTargetPos()+" velocity="+fish.getDeltaMovement());
-   for(var m:java.util.List.of(lapras,gyarados))check(h,m.isInWater()&&atSurface(m),"Surface species must keep their model-sized surface position"+state(m));
+   for(var m:java.util.List.of(lapras,gyarados))check(h,m.isInWater()&&atSurface(m),"Surface-profile species must keep their approved local depth"+state(m));
    h.succeed();
   });
  }

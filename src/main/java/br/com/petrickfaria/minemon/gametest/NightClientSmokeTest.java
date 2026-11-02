@@ -80,6 +80,19 @@ final class NightClientSmokeTest {
      if(!mob.isSleeping())return;
      var definition=SpeciesDefinitions.get(mob.getSpeciesSlug());
      boolean swimSleep=SpeciesBehaviorProfiles.usesSwimmingSleepAnimation(mob.getSpeciesSlug())&&mob.isInWaterOrBubble();
+     if(swimSleep&&Math.abs(mob.getXRot())>0.01F)
+      throw new IllegalStateException(mob.getSpeciesSlug()+" remained pitched while asleep: xRot="+mob.getXRot());
+     if(swimSleep){
+      double top=WaterMovementGoal.restSurfaceAt(mob,mob.blockPosition());
+      if(!Double.isFinite(top)||top-mob.getY()<2.9D)
+       throw new IllegalStateException(mob.getSpeciesSlug()+" slept less than three blocks below the visible water surface: y="+mob.getY()+" surface="+top);
+     }
+     if(mob.getSpeciesSlug().equals("gyarados")&&mob.isSleeping()){
+      double top=WaterMovementGoal.restSurfaceAt(mob,mob.blockPosition());
+      double bottom=WaterMovementGoal.waterRestY(mob);
+      if(!Double.isFinite(top)||Math.abs(mob.getY()-bottom)>.25D||top-mob.getY()<5.0D)
+       throw new IllegalStateException("Gyarados did not sleep at the submerged floor target: y="+mob.getY()+" bottom="+bottom+" surface="+top);
+     }
      String sleepKey=mob.getSpeciesSlug().equals("vaporeon")
              ? (mob.isInWaterOrBubble()?"night_sleep_water":"night_sleep_land") : "night_sleep";
      String selectedClip=swimSleep
@@ -285,7 +298,7 @@ final class NightClientSmokeTest {
    if(waking&&!current.isSleeping()){
     if(current.getSpeciesSlug().equals("gyarados")){
      double surface=WaterMovementGoal.restSurfaceAt(current,current.blockPosition());
-     double target=surface-WaterMovementGoal.preferredSurfaceDepth(current);
+     double target=WaterMovementGoal.surfaceSwimY(current,surface);
      if(Double.isFinite(target)&&Math.abs(current.getY()-target)>.3D){
       if(++restSettleTicks>250)throw new IllegalStateException("Gyarados did not return to its daytime surface target");
       return;

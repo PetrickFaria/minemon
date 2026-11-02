@@ -35,17 +35,25 @@ public class RefinementGameTests {
   h.getLevel().setDayTime(18000);
   var deep=h.spawn(ModEntities.SPECIES.get("magikarp").get(),new BlockPos(4,4,5));
   var surface=h.spawn(ModEntities.SPECIES.get("magikarp").get(),new BlockPos(11,8,10));
+  var depth2=h.spawn(ModEntities.SPECIES.get("magikarp").get(),new BlockPos(3,7,3));
+  var depth3=h.spawn(ModEntities.SPECIES.get("magikarp").get(),new BlockPos(5,6,3));
+  var depth4=h.spawn(ModEntities.SPECIES.get("magikarp").get(),new BlockPos(7,5,3));
+  var depth5=h.spawn(ModEntities.SPECIES.get("magikarp").get(),new BlockPos(9,4,3));
   var lapras=h.spawn(ModEntities.SPECIES.get("lapras").get(),new BlockPos(8,8,3));
-  double start=deep.getY();
-  h.runAfterDelay(120,()->{
+  double start=deep.getY(),start3=depth3.getY(),start4=depth4.getY(),start5=depth5.getY();
+  h.runAfterDelay(180,()->{
    double top=WaterMovementGoal.restSurfaceAt(surface,surface.blockPosition());
    if(!deep.isSleeping()||Math.abs(deep.getY()-start)>.15)h.fail("Submerged sleeper changed depth");
-   if(!surface.isSleeping()||Math.abs(surface.getY()-(top-2))>.2)h.fail("Surface sleeper did not settle two blocks below surface");
+   if(!surface.isSleeping()||Math.abs(surface.getY()-(top-3))>.2)h.fail("Surface sleeper did not settle three blocks below the visible water surface");
+   if(!depth2.isSleeping()||Math.abs(depth2.getY()-(top-3))>.2)h.fail("Two-block sleeper did not descend one more block");
+   if(!depth3.isSleeping()||depth3.getY()>start3+.15D)h.fail("Three-block sleeper must not rise");
+   if(!depth4.isSleeping()||depth4.getY()>start4+.15D)h.fail("Four-block sleeper must not rise");
+   if(!depth5.isSleeping()||depth5.getY()>start5+.15D)h.fail("Five-block sleeper must not rise");
    double laprasY=WaterMovementGoal.restSurfaceAt(lapras,lapras.blockPosition())-WaterMovementGoal.preferredSurfaceDepth(lapras);
    if(!lapras.isSleeping()||Math.abs(lapras.getY()-laprasY)>.2)h.fail("Lapras must sleep at the surface");
    var saved=surface.saveWithoutId(new CompoundTag());var copy=ModEntities.SPECIES.get("magikarp").get().create(h.getLevel());copy.load(saved);
    if(Math.abs(copy.aquaticSleepY()-surface.aquaticSleepY())>.001)h.fail("Sleep depth anchor did not persist");
-   deep.discard();surface.discard();lapras.discard();h.getLevel().setDayTime(1000);NineBehaviorChecks.shore(h);
+   deep.discard();surface.discard();depth2.discard();depth3.discard();depth4.discard();depth5.discard();lapras.discard();h.getLevel().setDayTime(1000);NineBehaviorChecks.shore(h);
   });
  }
  @GameTest(template="test_arena",batch="refinement_egg",timeoutTicks=40)

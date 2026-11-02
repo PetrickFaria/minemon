@@ -92,18 +92,17 @@ public final class NightAndSwimmingTests {
  private static void awaitAwakeGyaradosSurface(GameTestHelper h,MinemonCreature mob,int remaining,
      net.minecraft.world.phys.Vec3 start,Runnable done){
   double top=WaterMovementGoal.restSurfaceAt(mob,mob.blockPosition());
-  double target=top-WaterMovementGoal.preferredSurfaceDepth(mob);
+  double target=WaterMovementGoal.surfaceSwimY(mob,top);
   if(Double.isFinite(target)&&Math.abs(mob.getY()-target)<0.25D){
    double[] minDepth={Double.POSITIVE_INFINITY},maxDepth={Double.NEGATIVE_INFINITY},farthestSq={0.0D};
    sampleAwakeGyarados(h,mob,30,minDepth,maxDepth,start,farthestSq,()->{
     double surface=WaterMovementGoal.restSurfaceAt(mob,mob.blockPosition());
-    double scale=SpeciesDefinitions.get("gyarados").scale()*(mob.isBaby()?0.5D:1.0D);
-    double bodyHeight=ModelMetrics.bodyHeight("gyarados")*scale;
-    double bodyBottom=ModelMetrics.bodyBottom("gyarados")*scale;
-    double submergedFraction=(surface-(mob.getY()+bodyBottom))/bodyHeight;
-    check(h,mob.isInWater()&&Double.isFinite(surface)&&Math.abs(submergedFraction-0.10D)<0.03D,
-        "Awake Gyarados must place 10% of its measured visible body below the waterline: fraction="+submergedFraction
-        +" pos="+mob.position()+" surface="+surface+" sleep="+mob.isSleeping());
+    double originalAnchor=ModelMetrics.anchorForSubmergedFraction(surface,ModelMetrics.bodyBottom("gyarados"),
+        ModelMetrics.bodyHeight("gyarados"),SpeciesDefinitions.get("gyarados").scale()*(mob.isBaby()?0.5D:1.0D),0.10D);
+    check(h,mob.isInWater()&&Double.isFinite(surface)&&Math.abs((originalAnchor-mob.getY())-2.0D)<0.18D,
+        "Awake Gyarados must swim exactly two blocks below its approved 1.63 anchor: old="+originalAnchor
+        +" actual="+mob.getY()+" surface="+surface+" sleep="+mob.isSleeping());
+    check(h,h.getLevel().noCollision(mob,mob.getBoundingBox()),"Gyarados daytime offset must preserve collision safety");
     check(h,maxDepth[0]-minDepth[0]<=0.45D,"Awake Gyarados surface depth must not oscillate excessively; samples="
         +minDepth[0]+".."+maxDepth[0]);
     check(h,farthestSq[0]>0.25D,"Awake Gyarados must continue horizontal swimming; farthest displacement squared="+farthestSq[0]);

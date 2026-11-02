@@ -147,7 +147,7 @@ public final class WaterMovementGoal extends Goal {
    double top=surfaceAt(mob,column);
    if(!Double.isFinite(top))continue;
    double bottomY=bottomPreferred&&!surface?preferredBottomY(mob,column,top):Double.NaN;
-   double y=Double.isFinite(bottomY)?bottomY:surface?top-preferredSurfaceDepth(mob)
+   double y=Double.isFinite(bottomY)?bottomY:surface?surfaceSwimY(mob,top)
        :n>=24?top-Math.max(2.0D,mob.getBbHeight()+0.3D)
        :Math.min(top-mob.getBbHeight()-0.3D,mob.getY()+mob.getRandom().nextInt(5)-2);
    BlockPos p=new BlockPos(x,bottomPreferred&&Double.isFinite(bottomY)?Math.ceil(y):y,z);
@@ -242,18 +242,15 @@ public final class WaterMovementGoal extends Goal {
     if(!Double.isFinite(top)||!waterRegion(mob,column))return false;
     if(!Double.isFinite(routeTop))routeTop=top;
     else if(Math.abs(top-routeTop)>.5D)return false;
-    double feetY=top-preferredSurfaceDepth(mob);
+   double feetY=surfaceSwimY(mob,top);
     if(Math.abs(navY-feetY)>1.0D)return false;
     var box=mob.getBoundingBox().move(x-mob.getX(),feetY-mob.getY(),z-mob.getZ());
     if(!mob.level.noCollision(mob,box))return false;
     if(mob.getSpeciesSlug().equals("gyarados")){
-     // Gyarados is modeled as an exclusively aquatic surface swimmer. Validate
-     // its measured visible lower 10% at the waterline, not the hitbox center.
-     double scale=SpeciesDefinitions.get("gyarados").scale()*(mob.isBaby()?0.5D:1.0D);
-     double bodyBottom=ModelMetrics.bodyBottom("gyarados")*scale;
-     double bodyHeight=ModelMetrics.bodyHeight("gyarados")*scale;
-     double submergedFraction=(top-(feetY+bodyBottom))/bodyHeight;
-     if(Math.abs(submergedFraction-0.10D)>1.0E-6D)return false;
+     // The daytime target is intentionally two blocks below the former
+     // model-sized surface anchor. Keep that physical depth in the route
+     // validator; do not force the large model back up to the waterline.
+     if(Math.abs(feetY-surfaceSwimY(mob,top))>1.0E-6D)return false;
      int waterY=net.minecraft.util.Mth.floor(top-1.0E-4D);
      for(int bx=net.minecraft.util.Mth.floor(box.minX+.001D);bx<=net.minecraft.util.Mth.floor(box.maxX-.001D);bx++)
       for(int bz=net.minecraft.util.Mth.floor(box.minZ+.001D);bz<=net.minecraft.util.Mth.floor(box.maxZ-.001D);bz++)
@@ -321,11 +318,31 @@ public final class WaterMovementGoal extends Goal {
   if(SpeciesBehaviorProfiles.restsAtWaterBottom(mob.getSpeciesSlug())){
    double target=preferredBottomY(mob,mob.blockPosition(),top);
    if(Double.isFinite(target))return target;
+   if(mob.getSpeciesSlug().equals("gyarados"))return deepestSafeWaterRestY(mob,top);
   }
   return Double.isFinite(mob.aquaticSleepY())?mob.aquaticSleepY():mob.getY();
  }
+ /** Gyarados keeps its original measured anchor, shifted down exactly two blocks when safe. */
+ public static double surfaceSwimY(MinemonCreature mob,double surface){
+  double oldAnchor=surface-preferredSurfaceDepth(mob);
+  if(!mob.getSpeciesSlug().equals("gyarados"))return oldAnchor;
+  double desired=gyaradosDaytimeTarget(oldAnchor);
+  // In shallow water, use the deepest collision-free wet point available.
+  for(double y=desired;y<=oldAnchor+1.0E-6D;y+=0.25D)
+   if(safeWaterRestAt(mob,y))return Math.min(y,oldAnchor);
+  return oldAnchor;
+ }
+ public static double gyaradosDaytimeTarget(double originalSurfaceY){return originalSurfaceY-2.0D;}
+ private static double deepestSafeWaterRestY(MinemonCreature mob,double surface){
+  int floorWater=bottomWaterBlock(mob,mob.blockPosition(),surface);
+  double shallowest=floorWater+0.30D;
+  for(double y=shallowest;y<surface;y+=0.25D)if(safeWaterRestAt(mob,y))return y;
+  return Double.NaN;
+ }
+ /** Finds a reachable local floor target for Gyarados' night descent. */
+ static BlockPos bottomRestDestination(MinemonCreature mob){return new WaterMovementGoal(mob).nearbyBottomDestination();}
  static double shallowAquaticSleepY(double currentY,double surfaceY){
-  return Double.isFinite(surfaceY)?Math.min(currentY,surfaceY-2.0D):currentY;
+  return Double.isFinite(surfaceY)?Math.min(currentY,surfaceY-3.0D):currentY;
  }
  static boolean safeWaterRestAt(MinemonCreature mob,double y){
   var box=mob.getBoundingBox().move(0.0D,y-mob.getY(),0.0D);
@@ -380,7 +397,7 @@ public final class WaterMovementGoal extends Goal {
  static boolean waterFits(MinemonCreature mob,BlockPos p,boolean deep){
   if(!mob.level.getFluidState(p).is(FluidTags.WATER))return false;
   double top=surfaceAt(mob,p);if(!Double.isFinite(top))return false;
-  double y=deep?p.getY():top-preferredSurfaceDepth(mob);
+  double y=deep?p.getY():surfaceSwimY(mob,top);
   var box=mob.getBoundingBox().move(p.getX()+0.5D-mob.getX(),y-mob.getY(),p.getZ()+0.5D-mob.getZ());
   if(!mob.level.noCollision(mob,box))return false;
   if(deep&&y+mob.getBbHeight()+0.15D>=top)return false;
@@ -396,8 +413,8 @@ public final class WaterMovementGoal extends Goal {
   if(java.util.Set.of("blastoise","poliwrath","dewgong","vaporeon").contains(mob.getSpeciesSlug()))
    return 0.5D + mob.getBbHeight()*0.5D;
   if(mob.getSpeciesSlug().equals("gyarados")){
-   // Keep the server anchor identical to the client renderer's 10%-submerged
-   // measured-body anchor. This is a positioning target, not a hitbox depth.
+   // This remains the approved 1.63 anchor. surfaceSwimY applies the separate
+   // daytime two-block offset, keeping the depth change measurable and exact.
    double scale=SpeciesDefinitions.get("gyarados").scale()*(mob.isBaby()?0.5D:1.0D);
    return (ModelMetrics.bodyBottom("gyarados")+ModelMetrics.bodyHeight("gyarados")*0.10D)*scale;
   }
@@ -413,6 +430,7 @@ public final class WaterMovementGoal extends Goal {
   double top=surfaceAt(mob,center);
   if(!Double.isFinite(top))return false;
   int verticalCenter=SpeciesBehaviorProfiles.prefersBottom(mob.getSpeciesSlug())
+      ||SpeciesBehaviorProfiles.restsAtWaterBottom(mob.getSpeciesSlug())
       ?Math.max(center.getY(),bottomWaterBlock(mob,center,top)+1)
       :Math.min(center.getY(),(int)Math.ceil(top)-2);
   BlockPos volume=new BlockPos(center.getX(),verticalCenter,center.getZ());

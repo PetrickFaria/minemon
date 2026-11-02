@@ -13,7 +13,7 @@ import time
 
 ROOT = Path(__file__).resolve().parents[1]
 RUN = ROOT / "run"
-WORLD = RUN / "minemon-1-63-reopen"
+WORLD = RUN / "minemon-1-64-reopen"
 
 
 RCON_PORT = 25575
@@ -112,7 +112,7 @@ def run_server(label: str) -> str:
 RUN.mkdir(exist_ok=True)
 (RUN / "eula.txt").write_text("eula=true\n", encoding="utf-8")
 (RUN / "server.properties").write_text(
-    "level-name=minemon-1-63-reopen\n"
+    "level-name=minemon-1-64-reopen\n"
     "level-type=minecraft:flat\n"
     "level-seed=163\n"
     "generate-structures=false\n"

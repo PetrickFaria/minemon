@@ -1165,7 +1165,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         boolean band=flying&&altitude>=this.naturalCycle.minimumAltitude()&&altitude<=this.naturalCycle.maximumAltitude();
         boolean submerged=wet&&this.level.getFluidState(new net.minecraft.core.BlockPos(this.getX(),this.getY()+this.getBbHeight()+0.1D,this.getZ())).is(net.minecraft.tags.FluidTags.WATER);
         double waterTop=wet&&this instanceof MinemonAquaticCreature water?water.waterSurface():this.getY();
-        boolean surface=wet&&Math.abs(this.getY()-(waterTop-WaterMovementGoal.preferredSurfaceDepth(this)))<0.3D;
+        boolean surface=wet&&Math.abs(this.getY()-WaterMovementGoal.surfaceSwimY(this,waterTop))<0.3D;
         boolean canDive=wet&&(this.naturalCycle.phase()==BehaviorCycle.Phase.SEEK_WATER
                 ||this.naturalCycle.phase()==BehaviorCycle.Phase.SUBMERGED
                 ||this.naturalCycle.phase()==BehaviorCycle.Phase.SURFACE)

@@ -134,6 +134,12 @@ public final class MinemonAquaticCreature extends MinemonCreature {
     }
     @Override public void tick(){
         super.tick();
+        // SmoothSwimmingMoveControl pitches the whole entity while following
+        // vertical waypoints. Swimming sleepers keep their animated fins, but
+        // must not retain that locomotion pitch in the resting pose.
+        if(this.isSleeping()&&SpeciesBehaviorProfiles.usesSwimmingSleepAnimation(this.getSpeciesSlug())){
+            this.setXRot(0.0F);this.xRotO=0.0F;
+        }
         if(this.isDefeated()||this.level.isClientSide)return;
         if(this.isSleeping()&&this.isInWaterOrBubble()
                 &&SpeciesBehaviorProfiles.usesSwimmingSleepAnimation(this.getSpeciesSlug())){
@@ -184,7 +190,7 @@ public final class MinemonAquaticCreature extends MinemonCreature {
         // navigation target across a waterfall can refer to water many blocks
         // higher and must not pull Gyarados away from its local surface.
         boolean surface=this.isNaturalSurface();
-        double target=surface?top-WaterMovementGoal.preferredSurfaceDepth(this):top-this.getBbHeight()-0.3D;
+        double target=surface?WaterMovementGoal.surfaceSwimY(this,top):top-this.getBbHeight()-0.3D;
         // Surface and submerged correction share the swimming controller; do not
         // add another navigation goal or override horizontal pursuit.
         if(!ShoreTraversal.exiting(this)&&(surface||this.getY()>target)){
