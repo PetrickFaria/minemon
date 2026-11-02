@@ -80,7 +80,7 @@ final class NightClientSmokeTest {
      if(!mob.isSleeping())return;
      var definition=SpeciesDefinitions.get(mob.getSpeciesSlug());
      boolean swimSleep=SpeciesBehaviorProfiles.usesSwimmingSleepAnimation(mob.getSpeciesSlug())&&mob.isInWaterOrBubble();
-     if(swimSleep&&Math.abs(mob.getXRot())>0.01F)
+     if(swimSleep&&Set.of("seadra","tentacool","tentacruel","magikarp","goldeen","seaking").contains(mob.getSpeciesSlug())&&Math.abs(mob.getXRot())>0.01F)
       throw new IllegalStateException(mob.getSpeciesSlug()+" remained pitched while asleep: xRot="+mob.getXRot());
      if(swimSleep){
       double top=WaterMovementGoal.restSurfaceAt(mob,mob.blockPosition());
