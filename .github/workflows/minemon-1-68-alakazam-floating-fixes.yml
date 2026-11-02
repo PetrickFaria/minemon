@@ -59,7 +59,11 @@ jobs:
           ALSOFT_DRIVERS=null timeout --kill-after=30s 900s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeAir -PclientSmokeAlakazamPose -PclientSmokeSpecies=alakazam > run/alakazam-client-smoke.log 2>&1
           client_status=$?
           set -e
-          if [ "$client_status" -ne 0 ]; then tail -n 120 run/alakazam-client-smoke.log; exit "$client_status"; fi
+          if [ "$client_status" -ne 0 ]; then
+            rg -n -C 3 "Minemon client validation failed|Alakazam client hover|folded sleep-reference|awake model posture|Exception|ERROR" run/alakazam-client-smoke.log | tail -n 100 || true
+            for crash in run/crash-reports/*-client.txt; do [ -f "$crash" ] && sed -n '1,100p' "$crash"; done
+            exit "$client_status"
+          fi
           grep -F 'PASS ALAKAZAM CLIENT POSE:' run/client-validation.txt
           test -f run/screenshots/alakazam-meditation.png
           for reopen in 1 2; do
