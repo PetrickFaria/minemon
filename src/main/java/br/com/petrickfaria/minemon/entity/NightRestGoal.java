@@ -33,7 +33,7 @@ final class NightRestGoal extends Goal {
    if(mob.getSpeciesSlug().equals("gyarados")&&!mob.isSleeping()){
     if(guideGyaradosToBottom())return;
    }
-   if(mob.getSpeciesSlug().equals("shellder")||mob.getSpeciesSlug().equals("cloyster")){
+   if((mob.getSpeciesSlug().equals("shellder")||mob.getSpeciesSlug().equals("cloyster"))&&!mob.isSleeping()){
     if(guideShellLineToBottom())return;
    }
    holdWaterRest();return;
