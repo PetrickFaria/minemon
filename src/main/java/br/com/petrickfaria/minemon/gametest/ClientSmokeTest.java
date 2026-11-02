@@ -930,7 +930,8 @@ public final class ClientSmokeTest {
    }
    for(var entry:ARTICULATION_PROFILES.entrySet()) {
     String slug=entry.getKey();
-    if(!ARTICULATION_VALIDATION_SPECIES.contains(slug)||!species.contains(slug))continue;
+    if(!ARTICULATION_VALIDATION_SPECIES.contains(slug)||!species.contains(slug)
+       ||slug.equals("alakazam")&&Boolean.getBoolean("minemon.clientSmokeAlakazamPose"))continue;
     var definition=SpeciesDefinitions.get(slug);
     if(definition==null)throw new IllegalStateException("Missing test profile species "+slug);
     String fallback=definition.movementFallback();
