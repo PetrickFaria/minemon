@@ -146,7 +146,7 @@ public class MinemonModel extends AnimatedGeoModel<MinemonCreature> {
                 "eyelid_left","eyelid_right","eyelid_half_left","eyelid_half_right",
                 "eyelid_three_quarters_left","eyelid_three_quarters_right",
                 "eyelid_full_left","eyelid_full_right","half_eyelid_left","half_eyelid_right",
-                "quarter_eyelid_left","quarter_eyelid_right","whiskers","whisker_left","whisker_left2",
+                "quarter_eyelid_left","quarter_eyelid_right","torso_end","whiskers","whisker_left","whisker_left2",
                 "whisker_left3","whisker_right","whisker_right2","whisker_right3",
                 "expressions","eye_blink_left","eye_blink_right","eye_hurt_left","eye_hurt_right"));
         for(String bone:still)freezeBone(bone);

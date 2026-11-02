@@ -314,7 +314,7 @@ final class NightClientSmokeTest {
               ||bone.startsWith("lefttail")||bone.startsWith("righttail")||bone.startsWith("dorsal_fin")
           :bone.contains("tentacle")||bone.startsWith("flap")||bone.startsWith("fin");
       if(fin&&moved)finMoved=true;
-      boolean frozen=Set.of("body","torso","head","neck","mouth","upper_lip","lower_lip","whiskers",
+      boolean frozen=Set.of("body","torso","torso_end","head","neck","mouth","upper_lip","lower_lip","whiskers",
           "whisker_left","whisker_left2","whisker_left3","whisker_right","whisker_right2","whisker_right3")
           .contains(bone);
       if(Set.of("seadra","tentacool","tentacruel","magikarp","goldeen","seaking").contains(restedSpecies)
