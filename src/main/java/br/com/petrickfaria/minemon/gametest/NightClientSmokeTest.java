@@ -233,7 +233,7 @@ final class NightClientSmokeTest {
         ? " sleeping="+observed.isSleeping()+" nightRest="+observed.isNightResting()+" clip="+observed.getSelectedAnimationForValidation()
           +" pos="+observed.position()+" support="+observed.naturalSurface()+" onGround="+observed.isOnGround()
           +" noGravity="+observed.isNoGravity()+" navDone="+observed.getNavigation().isDone()
-          +" rendered="+rendered
+          +" restY="+WaterMovementGoal.waterRestY(observed)+" rendered="+rendered
         : " entityMissing="+(observed==null)+serverState;
     throw new IllegalStateException("Night client timeout: "+SPECIES.get(index)+" samples="+samples+" activeSamples="+activeSamples+" midday="+nocturnalMidday+state);
    }
