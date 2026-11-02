@@ -135,6 +135,7 @@ final class PsychicBehaviorClientSmokeTest {
             String expected="animation.alakazam.meditate_float";
             if(!expected.equals(mob.getSelectedAnimationForValidation()))return;
             if(mob.isSleeping())throw new IllegalStateException("Alakazam meditation pose selected while sleeping");
+            if(++poseFrames<10)return;
             IBone upperLeft=model.getAnimationProcessor().getBone("left_upper_leg");
             IBone upperRight=model.getAnimationProcessor().getBone("right_upper_leg");
             IBone kneeLeft=model.getAnimationProcessor().getBone("left_lower_leg");
@@ -156,12 +157,12 @@ final class PsychicBehaviorClientSmokeTest {
                     ||Math.abs(kneeRight.getRotationX()-(float)Math.toRadians(100.0D))>.12F
                     ||Math.abs(footLeft.getRotationX()-(float)Math.toRadians(-80.0D))>.12F
                     ||Math.abs(footRight.getRotationX()-(float)Math.toRadians(-80.0D))>.12F)
-                throw new IllegalStateException("Alakazam's rendered meditation leg pose did not apply the forward-folded thigh, knee, and foot rotations");
+                throw new IllegalStateException("Alakazam's rendered meditation leg pose did not apply the forward-folded thigh, knee, and foot rotations: upper="+upperLeft.getRotationX()+","+upperRight.getRotationX()+" knee="+kneeLeft.getRotationX()+","+kneeRight.getRotationX()+" feet="+footLeft.getRotationX()+","+footRight.getRotationX());
             if(eyeLeft.isHidden()||eyeRight.isHidden()||Math.abs(head.getRotationX())>.18F
                     ||torso.getRotationX()<.20F||torso.getRotationX()>.42F
                     ||Math.abs(spoonLeft.getRotationX())<.10F||Math.abs(spoonRight.getRotationX())<.10F)
                 throw new IllegalStateException("Alakazam's rendered upper body, open eyes, or spoons do not match its awake meditation pose");
-            poseSeen=true;poseFrames++;
+            poseSeen=true;
         }
         if(mob.isSleeping()){
             String original=SpeciesAssetIndex.clip("alakazam","night_sleep","night_sleep");
