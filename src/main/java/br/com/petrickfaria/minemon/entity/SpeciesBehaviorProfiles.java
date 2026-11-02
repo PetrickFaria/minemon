@@ -102,6 +102,10 @@ public final class SpeciesBehaviorProfiles {
     public static boolean waterCapable(String slug) { return isAquatic(slug) || isVisitor(slug); }
     public static boolean prefersBottom(String slug) { return BOTTOM_PREFERENCE.contains(slug); }
     public static boolean restsAtWaterBottom(String slug) { return isVisitor(slug) || slug.equals("gyarados"); }
+    /** Species whose approved water-rest pose places them at the submerged support. */
+    public static boolean sleepsAtWaterBottom(String slug) {
+        return restsAtWaterBottom(slug) || slug.equals("shellder") || slug.equals("cloyster");
+    }
     public static boolean landsForNightRest(String slug) { return LAND_FOR_NIGHT_REST.contains(slug); }
     public static boolean hoversDuringNightRest(String slug) {
         if (landsForNightRest(slug)) return false;
