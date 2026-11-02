@@ -31,7 +31,7 @@ jobs:
           cat /tmp/minemon-1.68-files.txt
           while IFS= read -r path; do
             case "$path" in
-              .github/workflows/build.yml|.github/workflows/minemon-1-68-alakazam-floating-fixes.yml|build.gradle|gradle.properties|tools/test_world_reopen.py|src/main/java/br/com/petrickfaria/minemon/client/MinemonModel.java|src/main/java/br/com/petrickfaria/minemon/entity/MinemonCreature.java|src/main/java/br/com/petrickfaria/minemon/entity/MinemonFlyingCreature.java|src/main/java/br/com/petrickfaria/minemon/gametest/ClientSmokeTest.java|src/main/resources/assets/minemon/animations/alakazam_cobblemon_1_8_2/alakazam.animation.json|src/test/java/br/com/petrickfaria/minemon/BehaviorCycleTest.java|src/test/java/br/com/petrickfaria/minemon/RequestedBehaviorAssetsTest.java) ;;
+              .github/workflows/build.yml|.github/workflows/minemon-1-68-alakazam-floating-fixes.yml|build.gradle|gradle.properties|tools/test_world_reopen.py|src/main/java/br/com/petrickfaria/minemon/client/MinemonModel.java|src/main/java/br/com/petrickfaria/minemon/entity/MinemonCreature.java|src/main/java/br/com/petrickfaria/minemon/entity/MinemonFlyingCreature.java|src/main/java/br/com/petrickfaria/minemon/gametest/ClientSmokeTest.java|src/main/java/br/com/petrickfaria/minemon/gametest/NightClientSmokeTest.java|src/main/resources/assets/minemon/animations/alakazam_cobblemon_1_8_2/alakazam.animation.json|src/test/java/br/com/petrickfaria/minemon/BehaviorCycleTest.java|src/test/java/br/com/petrickfaria/minemon/RequestedBehaviorAssetsTest.java) ;;
               *) echo "Out-of-scope file in 1.68 diff: $path"; exit 1 ;;
             esac
           done < /tmp/minemon-1.68-files.txt
