@@ -100,15 +100,14 @@ def run_server(label: str) -> str:
                     ready = True
                     rcon_command("forceload add 0 0")
                     for slug, x in (("kadabra", 0), ("alakazam", 3)):
-                        tag = f"minemon_1_67_{slug}"
                         if label == "create-save":
                             response = rcon_command(
                                 f"summon minemon_gen1:{slug} {x} 5 0 "
-                                f"{{PersistenceRequired:1b,Tags:[\"{tag}\"]}}"
+                                "{PersistenceRequired:1b}"
                             )
                             if "Summoned new" not in response:
                                 raise SystemExit(f"{label}: failed to create registered {slug}: {response}")
-                        response = rcon_command(f"data get entity @e[tag={tag},limit=1]")
+                        response = rcon_command(f"data get entity @e[type=minemon_gen1:{slug},limit=1]")
                         if "UUID" not in response:
                             phase = "creation" if label == "create-save" else "save/reopen"
                             raise SystemExit(f"{label}: {slug} failed its {phase} entity check: {response}")
