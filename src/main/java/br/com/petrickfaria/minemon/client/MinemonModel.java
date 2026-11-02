@@ -286,3 +286,4 @@ public class MinemonModel extends AnimatedGeoModel<MinemonCreature> {
     private ResourceLocation location(MinemonCreature entity, String category, String fallback) {
         return new ResourceLocation(Minemon.MOD_ID, SpeciesAssetIndex.resource(entity.getSpeciesSlug(), category, fallback));
     }
+}
