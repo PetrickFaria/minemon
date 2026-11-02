@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 """Create, save, and reopen one clean Forge world without running unrelated tests."""
 from pathlib import Path
-from queue import Queue, Empty
-from threading import Thread
+import errno
+import os
+import pty
+import select
+import signal
 import subprocess
 import time
 
@@ -12,60 +15,54 @@ WORLD = RUN / "minemon-1-63-reopen"
 
 
 def run_server(label: str) -> str:
+    master, slave = pty.openpty()
     process = subprocess.Popen(
         ["./gradlew", "--no-daemon", "runServer"], cwd=ROOT,
-        stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-        text=True, bufsize=1,
+        stdin=slave, stdout=slave, stderr=slave, start_new_session=True,
     )
-    lines: Queue[str | None] = Queue()
-
-    def read_output() -> None:
-        assert process.stdout is not None
-        for line in process.stdout:
-            lines.put(line)
-        lines.put(None)
-
-    Thread(target=read_output, daemon=True).start()
+    os.close(slave)
     output: list[str] = []
     deadline = time.monotonic() + 360
     ready = False
+    stopped = False
     while time.monotonic() < deadline:
+        readable, _, _ = select.select([master], [], [], 1)
+        if readable:
+            try:
+                chunk = os.read(master, 65536).decode("utf-8", errors="replace")
+            except OSError as error:
+                if error.errno == errno.EIO:
+                    chunk = ""
+                else:
+                    raise
+            if chunk:
+                output.append(chunk)
+                print(f"[{label}] {chunk}", end="", flush=True)
+                combined = "".join(output)
+                if not ready and "Done (" in combined:
+                    ready = True
+                    os.write(master, b"stop\n")
+                if ready and "Stopping server" in combined:
+                    stopped = True
+        if process.poll() is not None:
+            break
+    if process.poll() is None:
+        os.killpg(process.pid, signal.SIGINT)
         try:
-            line = lines.get(timeout=1)
-        except Empty:
-            if process.poll() is not None:
-                break
-            continue
-        if line is None:
-            break
-        output.append(line)
-        print(f"[{label}] {line}", end="", flush=True)
-        if "Done (" in line:
-            ready = True
-            assert process.stdin is not None
-            process.stdin.write("stop\n")
-            process.stdin.flush()
-            break
+            process.wait(timeout=30)
+        except subprocess.TimeoutExpired:
+            process.kill()
+            process.wait(timeout=10)
+        raise SystemExit(f"{label}: server failed to stop cleanly after receiving stop")
+    os.close(master)
+    combined = "".join(output)
     if not ready:
-        process.terminate()
-        try:
-            process.wait(timeout=20)
-        except subprocess.TimeoutExpired:
-            process.kill()
         raise SystemExit(f"{label}: server did not finish opening the world; inspect preceding log output")
-    try:
-        process.wait(timeout=90)
-    except subprocess.TimeoutExpired:
-        process.terminate()
-        try:
-            process.wait(timeout=20)
-        except subprocess.TimeoutExpired:
-            process.kill()
-        raise SystemExit(f"{label}: server did not save and stop cleanly")
+    if not stopped:
+        raise SystemExit(f"{label}: server opened, but its graceful save/stop was not observed")
     if process.returncode != 0:
         raise SystemExit(f"{label}: runServer exited with code {process.returncode}")
-    return "".join(output)
-
+    return combined
 
 RUN.mkdir(exist_ok=True)
 (RUN / "eula.txt").write_text("eula=true\n", encoding="utf-8")
