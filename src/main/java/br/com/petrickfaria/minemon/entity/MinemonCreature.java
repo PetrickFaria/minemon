@@ -860,9 +860,9 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
                 // Keep the existing anchor when already two or more blocks
                 // below the surface; only move a shallow sleeper down when the
                 // full collision box can fit in water at that depth.
-                double target=WaterMovementGoal.shallowAquaticSleepY(this.getY(),surface);
-                this.aquaticSleepY=target<this.getY()&&WaterMovementGoal.safeWaterRestAt(this,target)
-                        ?target:this.getY();
+                double sleepAnchor=WaterMovementGoal.shallowAquaticSleepY(this.getY(),surface);
+                this.aquaticSleepY=sleepAnchor<this.getY()&&WaterMovementGoal.safeWaterRestAt(this,sleepAnchor)
+                        ?sleepAnchor:this.getY();
             }
             boolean hover=SpeciesBehaviorProfiles.hoversDuringNightRest(this.getSpeciesSlug());
             double restHeight=SpeciesBehaviorProfiles.nightRestHoverHeight(this.getSpeciesSlug());
