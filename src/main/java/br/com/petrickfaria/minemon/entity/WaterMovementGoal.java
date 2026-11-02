@@ -315,6 +315,10 @@ public final class WaterMovementGoal extends Goal {
   double top=restSurfaceAt(mob,mob.blockPosition());
   if(!Double.isFinite(top))return Double.NaN;
   if(mob.getSpeciesSlug().equals("lapras"))return top-preferredSurfaceDepth(mob);
+  if(mob.getSpeciesSlug().equals("shellder")||mob.getSpeciesSlug().equals("cloyster")){
+   double target=bottomRestYAt(mob,mob.blockPosition());
+   return Double.isFinite(target)?target:mob.getY();
+  }
   if(SpeciesBehaviorProfiles.restsAtWaterBottom(mob.getSpeciesSlug())){
    double target=preferredBottomY(mob,mob.blockPosition(),top);
    if(Double.isFinite(target))return target;
@@ -339,7 +343,12 @@ public final class WaterMovementGoal extends Goal {
   for(double y=shallowest;y<surface;y+=0.25D)if(safeWaterRestAt(mob,y))return y;
   return Double.NaN;
  }
- /** Finds a reachable local floor target for Gyarados' night descent. */
+ /** Safe bottom anchor for the two Shellder-line sleepers at one water column. */
+ static double bottomRestYAt(MinemonCreature mob,BlockPos column){
+  double surface=restSurfaceAt(mob,column);
+  return Double.isFinite(surface)?preferredBottomY(mob,column,surface):Double.NaN;
+ }
+ /** Finds a reachable local floor target for a species-specific night descent. */
  static BlockPos bottomRestDestination(MinemonCreature mob){return new WaterMovementGoal(mob).nearbyBottomDestination();}
  static double shallowAquaticSleepY(double currentY,double surfaceY){
   // Leave a small settling margin so interpolation and fractional fluid-surface

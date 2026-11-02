@@ -96,9 +96,17 @@ final class NightClientSmokeTest {
      }
      String sleepKey=mob.getSpeciesSlug().equals("vaporeon")
              ? (mob.isInWaterOrBubble()?"night_sleep_water":"night_sleep_land") : "night_sleep";
-     String selectedClip=swimSleep
-             ? firstClip(mob.getSpeciesSlug(),"water_swim","surface_water_swim","surfacewater_swim","water_surface_swim")
-             : definition.clips().getOrDefault(sleepKey,definition.clips().get("night_sleep"));
+     String selectedClip;
+     if(swimSleep){
+      String slug=mob.getSpeciesSlug();
+      if(slug.equals("shellder")||slug.equals("cloyster"))
+       selectedClip=firstClip(slug,"sleep","water_sleep","night_sleep","ground_sleep");
+      else if(Set.of("seadra","tentacool","tentacruel").contains(slug))
+       selectedClip=firstClip(slug,"water_sleep","water_idle","water_swim","surface_water_swim","surfacewater_swim","water_surface_swim");
+      else if(Set.of("magikarp","goldeen","seaking").contains(slug))
+       selectedClip=firstClip(slug,"water_sleep","water_swim","surface_water_swim","surfacewater_swim","water_surface_swim","water_idle");
+      else selectedClip=firstClip(slug,"water_swim","surface_water_swim","surfacewater_swim","water_surface_swim");
+     }else selectedClip=definition.clips().getOrDefault(sleepKey,definition.clips().get("night_sleep"));
      if(swimSleep&&selectedClip==null)selectedClip=SpeciesAssetIndex.clip(mob.getSpeciesSlug(),"water_idle",definition.idle());
      if(!Objects.equals(mob.getSelectedAnimationForValidation(),selectedClip))return;
     if(sleepTick==0)sleepTick=mob.tickCount;
@@ -260,7 +268,7 @@ final class NightClientSmokeTest {
          &&WaterMovementGoal.restSurfaceAt(current,current.blockPosition())-current.getY()<2.99D)
       throw new IllegalStateException(current.getSpeciesSlug()+" slept closer than three blocks to the visible water surface after network settle");
      if(SpeciesBehaviorProfiles.usesSwimmingSleepAnimation(current.getSpeciesSlug())){
-      if(!current.getSpeciesSlug().equals("magikarp")&&Math.abs(current.getY()-104.0D)>.25D)
+      if(!Set.of("magikarp","shellder","cloyster").contains(current.getSpeciesSlug())&&Math.abs(current.getY()-104.0D)>.25D)
        throw new IllegalStateException(current.getSpeciesSlug()+" did not preserve its already-deep sleep position: y="+current.getY()+" expected=104.0");
      }
      if(!Double.isFinite(target)||error>.2D){
@@ -294,9 +302,28 @@ final class NightClientSmokeTest {
     nocturnalMidday=true;samples=0;sleepTick=0;depthSettleTicks=0;depthStableTicks=0;restSettleTicks=0;restStableTicks=0;eyes.clear();restingWings.clear();
     mc.getSingleplayerServer().execute(()->mc.getSingleplayerServer().overworld().setDayTime(6000));
    }else if(!waking&&samples>=25){
-    if(SpeciesBehaviorProfiles.usesSwimmingSleepAnimation(current.getSpeciesSlug())
-        &&swimMotion.values().stream().noneMatch(range->range[1]-range[0]>.005F||range[3]-range[2]>.005F||range[5]-range[4]>.005F))
-     throw new IllegalStateException(current.getSpeciesSlug()+" swim animation did not move any body or fin bone during sleep");
+    String restedSpecies=current.getSpeciesSlug();
+    if(SpeciesBehaviorProfiles.usesSwimmingSleepAnimation(restedSpecies)
+        &&!Set.of("shellder","cloyster").contains(restedSpecies)){
+     boolean finMoved=false;
+     for(var sample:swimMotion.entrySet()){
+      String bone=sample.getKey();
+      float[] range=sample.getValue();
+      boolean moved=range[1]-range[0]>.005F||range[3]-range[2]>.005F||range[5]-range[4]>.005F;
+      boolean fin=Set.of("seadra","magikarp","goldeen","seaking").contains(restedSpecies)
+          ?bone.startsWith("fin_")||bone.startsWith("fin")||bone.startsWith("tail")
+              ||bone.startsWith("lefttail")||bone.startsWith("righttail")||bone.startsWith("dorsal_fin")
+          :bone.contains("tentacle")||bone.startsWith("flap")||bone.startsWith("fin");
+      if(fin&&moved)finMoved=true;
+      boolean frozen=Set.of("body","torso","head","neck","mouth","upper_lip","lower_lip","whiskers",
+          "whisker_left","whisker_left2","whisker_left3","whisker_right","whisker_right2","whisker_right3")
+          .contains(bone);
+      if(frozen&&moved)throw new IllegalStateException(restedSpecies+" main posture bone still moved during sleep: "+bone);
+      if(Set.of("magikarp","goldeen","seaking").contains(restedSpecies)&&moved&&!fin)
+       throw new IllegalStateException(restedSpecies+" non-fin bone moved during sleep: "+bone);
+     }
+     if(!finMoved)throw new IllegalStateException(restedSpecies+" had no moving fin or tentacle during sleep");
+    }
     Screenshot.grab(mc.gameDirectory,(nocturnal?"midday-":"night-")+SPECIES.get(index)+".png",mc.getMainRenderTarget(),message->{});
     Files.writeString(Path.of("client-validation-night.txt"),(nocturnal?"PASS NOCTURNAL MIDDAY ":"PASS NIGHT RENDER ")+SPECIES.get(index)+" sleep clip="+current.getSelectedAnimationForValidation()+" closed-eye tracks="+eyes.keySet()+" samples="+samples+" grounded="+current.isOnGround()+"\n",StandardOpenOption.APPEND);
     waking=true;mc.getSingleplayerServer().execute(()->mc.getSingleplayerServer().overworld().setDayTime(nocturnal?13000:1000));

@@ -10,6 +10,8 @@ final class NightRestGoal extends Goal {
  private int unsafeLandingSearchDelay;
  private net.minecraft.core.BlockPos gyaradosBottomTarget;
  private int gyaradosBottomSearchDelay;
+ private net.minecraft.core.BlockPos shellBottomTarget;
+ private int shellBottomSearchDelay;
  NightRestGoal(MinemonCreature mob){this.mob=mob;setFlags(EnumSet.of(Flag.MOVE,Flag.LOOK,Flag.JUMP));}
  @Override public boolean canUse(){
   boolean resting=mob.isSleeping()||mob.isNightResting();
@@ -19,12 +21,15 @@ final class NightRestGoal extends Goal {
   return resting&&(waterRest||mob.isOnGround() && !mob.isInWaterOrBubble()||!mob.wantsNaturalLanding());
  }
  @Override public boolean canContinueToUse(){return canUse()&&mob.getTarget()==null;}
- @Override public void start(){mob.getNavigation().stop();mob.getMoveControl().setWantedPosition(mob.getX(),mob.getY(),mob.getZ(),0);gyaradosBottomTarget=null;gyaradosBottomSearchDelay=0;}
- @Override public void stop(){mob.getNavigation().stop();gyaradosBottomTarget=null;gyaradosBottomSearchDelay=0;}
+ @Override public void start(){mob.getNavigation().stop();mob.getMoveControl().setWantedPosition(mob.getX(),mob.getY(),mob.getZ(),0);gyaradosBottomTarget=null;gyaradosBottomSearchDelay=0;shellBottomTarget=null;shellBottomSearchDelay=0;}
+ @Override public void stop(){mob.getNavigation().stop();gyaradosBottomTarget=null;gyaradosBottomSearchDelay=0;shellBottomTarget=null;shellBottomSearchDelay=0;}
  @Override public void tick(){
   if(mob.isInWaterOrBubble()&&SpeciesBehaviorProfiles.waterCapable(mob.getSpeciesSlug())){
    if(mob.getSpeciesSlug().equals("gyarados")&&!mob.isSleeping()){
     if(guideGyaradosToBottom())return;
+   }
+   if((mob.getSpeciesSlug().equals("shellder")||mob.getSpeciesSlug().equals("cloyster"))&&!mob.isSleeping()){
+    if(guideShellLineToBottom())return;
    }
    holdWaterRest();return;
   }
@@ -77,6 +82,29 @@ final class NightRestGoal extends Goal {
   var path=mob.getNavigation().createPath(target,0);
   if(path!=null&&path.canReach())mob.getNavigation().moveTo(path,.65D);
   else gyaradosBottomTarget=null;
+  return true;
+ }
+ /** Shellder and Cloyster descend to a reachable safe floor point before sleeping. */
+ private boolean guideShellLineToBottom(){
+  if(shellBottomTarget==null){
+   if(shellBottomSearchDelay>0){shellBottomSearchDelay--;return true;}
+   shellBottomSearchDelay=20;
+   shellBottomTarget=WaterMovementGoal.bottomRestDestination(mob);
+   if(shellBottomTarget==null)return true;
+  }
+  var target=shellBottomTarget;
+  double dx=target.getX()+.5D-mob.getX(),dz=target.getZ()+.5D-mob.getZ();
+  double restY=WaterMovementGoal.bottomRestYAt(mob,target);
+  if(dx*dx+dz*dz<1.0D&&Double.isFinite(restY)&&Math.abs(mob.getY()-restY)<1.0D){
+   mob.getNavigation().stop();
+   mob.setPos(target.getX()+.5D,restY,target.getZ()+.5D);
+   mob.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
+   shellBottomTarget=null;return false;
+  }
+  if(!mob.getNavigation().isDone())return true;
+  var path=mob.getNavigation().createPath(target,0);
+  if(path!=null&&path.canReach())mob.getNavigation().moveTo(path,.55D);
+  else shellBottomTarget=null;
   return true;
  }
  private void holdWaterRest(){

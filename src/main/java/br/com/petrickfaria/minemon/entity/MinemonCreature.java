@@ -45,6 +45,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import java.util.UUID;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import net.minecraft.resources.ResourceLocation;
 import software.bernie.geckolib3.core.IAnimatable;
@@ -1031,10 +1032,18 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
             if(this.playedAttackSequence!=this.attackSequence){controller.markNeedsReload();this.playedAttackSequence=this.attackSequence;}
         } else if (this.isSleeping() && SpeciesBehaviorProfiles.usesSwimmingSleepAnimation(slug)
                 && this.isInWaterOrBubble()) {
-            // Keep the normal aquatic locomotion clip running while the server
-            // holds the entity still. This preserves fins/body animation and
-            // avoids replacing it with the terrestrial sleep pose.
-            clip = firstClip(slug,"water_swim","surface_water_swim","surfacewater_swim","water_surface_swim");
+            // These species have native sleep clips in the imported rigs. Keep
+            // their authored closed-eye/rest poses instead of substituting swim.
+            if(slug.equals("shellder")||slug.equals("cloyster")) {
+                clip=firstClip(slug,"sleep","water_sleep","night_sleep","ground_sleep");
+            } else if(Set.of("seadra","tentacool","tentacruel").contains(slug)) {
+                clip=firstClip(slug,"water_sleep","water_idle","water_swim","surface_water_swim","surfacewater_swim","water_surface_swim");
+            } else if(Set.of("magikarp","goldeen","seaking").contains(slug)) {
+                clip=firstClip(slug,"water_sleep","water_swim","surface_water_swim","surfacewater_swim","water_surface_swim","water_idle");
+            } else {
+                // Unmentioned aquatic species retain the approved 1.64 clip.
+                clip=firstClip(slug,"water_swim","surface_water_swim","surfacewater_swim","water_surface_swim");
+            }
             if(clip==null)clip=SpeciesAssetIndex.clip(slug,"water_idle",definition.idle());
         } else if (this.isSleeping()) {
             String restKey=slug.equals("vaporeon")

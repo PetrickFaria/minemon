@@ -178,7 +178,7 @@ jar.finalizedBy('reobfJar')
 // ForgeGradle produces the executable Jar-in-Jar artifact as a separate task.
 // Include it in assemble so build outputs the JLayer-bearing production JAR.
 tasks.named('jarJar') {
-    archiveFileName = 'Minemon-1.19.2-1.64.jar'
+    archiveFileName = 'Minemon-1.19.2-1.65.jar'
     finalizedBy('reobfJarJar')
     exclude 'br/com/petrickfaria/minemon/gametest/**'
     exclude 'data/minemon_gen1/structures/test_arena.nbt'

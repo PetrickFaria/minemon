@@ -33,6 +33,7 @@ public class MinemonModel extends AnimatedGeoModel<MinemonCreature> {
         applyGengarEyeVisibility(entity);
         applyNaturalBodyMotion(entity);
         applyAquaticSleepFallbackMotion(entity);
+        applyAquaticSleepPosture(entity);
         if(entity.isSleeping()||entity.isOrderedToSit())return;
         String slug=entity.getSpeciesSlug();
         boolean headLook=slug.equals("spearow")||slug.equals("fearow")||slug.equals("abra")
@@ -124,6 +125,43 @@ public class MinemonModel extends AnimatedGeoModel<MinemonCreature> {
         var closedEye=getAnimationProcessor().getBone("eye_closed");
         if(singleEye!=null)singleEye.setHidden(sleeping,false);
         if(closedEye!=null)closedEye.setHidden(!sleeping,!sleeping);
+    }
+
+    /** Freeze only the requested aquatic sleepers' main posture after GeckoLib applies their native clips. */
+    private void applyAquaticSleepPosture(MinemonCreature entity) {
+        if(!entity.isSleeping())return;
+        String slug=entity.getSpeciesSlug();
+        if(!java.util.Set.of("seadra","tentacool","tentacruel","magikarp","goldeen","seaking").contains(slug))return;
+        freezeBone("body");
+        freezeBone("torso");
+        if(slug.equals("seadra")){
+            freezeBone("neck");
+            freezeBone("head");
+            return;
+        }
+        if(slug.equals("tentacool")||slug.equals("tentacruel"))return;
+        java.util.List<String> still=new java.util.ArrayList<>(java.util.List.of(
+                "head","mouth","upper_lip","lower_lip","horn","eyes","eye_left","eye_right",
+                "iris_left","iris_right","pupil_left","pupil_right","pupil_happy_left","pupil_happy_right",
+                "eyelid_left","eyelid_right","eyelid_half_left","eyelid_half_right",
+                "eyelid_three_quarters_left","eyelid_three_quarters_right",
+                "eyelid_full_left","eyelid_full_right","half_eyelid_left","half_eyelid_right",
+                "quarter_eyelid_left","quarter_eyelid_right","whiskers","whisker_left","whisker_left2",
+                "whisker_left3","whisker_right","whisker_right2","whisker_right3",
+                "expressions","eye_blink_left","eye_blink_right","eye_hurt_left","eye_hurt_right"));
+        for(String bone:still)freezeBone(bone);
+    }
+
+    private void freezeBone(String name) {
+        var bone=getAnimationProcessor().getBone(name);
+        if(bone==null)return;
+        var initial=bone.getInitialSnapshot();
+        bone.setPositionX(initial.positionOffsetX);
+        bone.setPositionY(initial.positionOffsetY);
+        bone.setPositionZ(initial.positionOffsetZ);
+        bone.setRotationX(initial.rotationValueX);
+        bone.setRotationY(initial.rotationValueY);
+        bone.setRotationZ(initial.rotationValueZ);
     }
 
     /** Shellder and Cloyster have no imported water-swim clip; keep their shell rigs gently moving. */
