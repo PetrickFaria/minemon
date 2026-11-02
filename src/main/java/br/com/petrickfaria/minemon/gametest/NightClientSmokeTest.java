@@ -107,6 +107,14 @@ final class NightClientSmokeTest {
      if(!mob.isSleeping())return;
      var definition=SpeciesDefinitions.get(mob.getSpeciesSlug());
      boolean swimSleep=SpeciesBehaviorProfiles.usesSwimmingSleepAnimation(mob.getSpeciesSlug())&&mob.isInWaterOrBubble();
+     if(mob.getSpeciesSlug().equals("magikarp")&&swimSleep){
+      for(String side:List.of("left","right")){
+       var whisker=model.getAnimationProcessor().getBone("whisker_"+side);
+       if(whisker==null||Math.abs(whisker.getRotationX()-whisker.getInitialSnapshot().rotationValueX)<.35F
+          ||Math.abs(whisker.getRotationZ()-whisker.getInitialSnapshot().rotationValueZ)<.35F)
+        throw new IllegalStateException("Magikarp whisker returned to its flat bind pose during sleep: "+side);
+      }
+     }
      if(swimSleep&&Set.of("seadra","tentacool","tentacruel","magikarp","goldeen","seaking").contains(mob.getSpeciesSlug())&&Math.abs(mob.getXRot())>0.01F)
       throw new IllegalStateException(mob.getSpeciesSlug()+" remained pitched while asleep: xRot="+mob.getXRot());
      if(swimSleep){
@@ -371,14 +379,6 @@ final class NightClientSmokeTest {
       boolean naturalMagikarpWhisker=restedSpecies.equals("magikarp")&&bone.startsWith("whisker");
       if(Set.of("magikarp","goldeen","seaking").contains(restedSpecies)&&moved&&!fin&&!naturalMagikarpWhisker)
        throw new IllegalStateException(restedSpecies+" non-fin bone moved during sleep: "+bone);
-     }
-     if(restedSpecies.equals("magikarp")){
-      for(String side:List.of("left","right")){
-       var whisker=model.getAnimationProcessor().getBone("whisker_"+side);
-       if(whisker==null||Math.abs(whisker.getRotationX()-whisker.getInitialSnapshot().rotationValueX)<.35F
-          ||Math.abs(whisker.getRotationZ()-whisker.getInitialSnapshot().rotationValueZ)<.35F)
-        throw new IllegalStateException("Magikarp whisker returned to its flat bind pose during sleep: "+side);
-      }
      }
      if(!finMoved)throw new IllegalStateException(restedSpecies+" had no moving fin or tentacle during sleep");
     }
