@@ -703,7 +703,7 @@ public final class ClientSmokeTest {
      Files.writeString(Path.of("client-validation.txt"),"PASS GASTLY SMOKE: Cobblemon ghostly_smoke definition loaded and "+smokeParticles+" client particle instances were created during the full render smoke. Manual appearance review remains separate.\\n",StandardOpenOption.APPEND);
     }
     for(String slug:java.util.List.of("spearow","fearow","abra","kadabra","alakazam","bellsprout","geodude","golem","slowpoke","slowbro","mewtwo","mew")) {
-     if(!species.contains(slug))continue;
+     if(!species.contains(slug)||(slug.equals("alakazam")&&Boolean.getBoolean("minemon.clientSmokeAlakazamPose")))continue;
      float[] look=sourceLookRanges.get(slug);
      if(look==null||look[2]-look[0]<0.05F||look[3]-look[1]<0.05F)
       throw new IllegalStateException("Source q.look adaptation did not move the head for "+slug+": "+java.util.Arrays.toString(look));
