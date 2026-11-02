@@ -101,10 +101,11 @@ def run_server(label: str) -> str:
                     rcon_command("forceload add 0 0")
                     species_positions = (("alakazam", 0),)
                     if label == "create-save":
+                        rcon_command("fill -8 199 -8 8 199 8 minecraft:stone")
                         for slug, x in species_positions:
                             response = rcon_command(
-                                f"summon minemon_gen1:{slug} {x} 5 0 "
-                                "{PersistenceRequired:1b}"
+                                f"summon minemon_gen1:{slug} {x} 200 0 "
+                                "{PersistenceRequired:1b,NoAI:1b}"
                             )
                             if "Summoned new" not in response:
                                 raise SystemExit(f"{label}: failed to create registered {slug}: {response}")
@@ -146,7 +147,6 @@ RUN.mkdir(exist_ok=True)
 (RUN / "eula.txt").write_text("eula=true\n", encoding="utf-8")
 (RUN / "server.properties").write_text(
     "level-name=minemon-1-68-reopen\n"
-    "level-type=minecraft:flat\n"
     "level-seed=163\n"
     "generate-structures=false\n"
     "spawn-animals=false\n"

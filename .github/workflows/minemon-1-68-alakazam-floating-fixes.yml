@@ -25,7 +25,8 @@ jobs:
         run: |
           set -euo pipefail
           base=afe5f7db7b24c49e3eb37c6f68984ce2c99bb2bc
-          test "$(git rev-parse HEAD^)" = "$base"
+          git merge-base --is-ancestor "$base" HEAD
+          test "$(git merge-base "$base" HEAD)" = "$base"
           git diff --name-only "$base" HEAD > /tmp/minemon-1.68-files.txt
           cat /tmp/minemon-1.68-files.txt
           while IFS= read -r path; do
@@ -86,5 +87,6 @@ jobs:
             build/libs/Minemon-1.19.2-1.68.jar
             run/client-validation.txt
             run/screenshots/alakazam-meditation.png
+            run/world-reopen-pass.txt
           if-no-files-found: error
           retention-days: 14
