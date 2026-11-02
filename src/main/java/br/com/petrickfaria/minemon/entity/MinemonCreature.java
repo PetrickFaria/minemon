@@ -871,7 +871,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
                 :hover?Math.abs(this.getY()-this.naturalSurface()-restHeight)<0.18D
                 :this.isOnGround()&&WaterMovementGoal.safeDry(this,this.blockPosition());
             if(settled&&!this.isSleeping()){
-                if(waterRest&&SpeciesBehaviorProfiles.usesSwimmingSleepAnimation(this.getSpeciesSlug())
+                if(waterRest&&SpeciesBehaviorProfiles.locksPositionDuringWaterSleep(this.getSpeciesSlug())
                         &&Double.isFinite(waterRestY)){
                     // Enter sleep exactly at the chosen safe anchor, so the
                     // two-block minimum is not lost to the final eased swim step.

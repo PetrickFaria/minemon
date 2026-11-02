@@ -19,6 +19,9 @@ public final class AquaticSleepRulesTest {
 
     @Test public void surfaceRuleExcludesGyaradosLaprasAndWaterVisitors() {
         assertTrue(SpeciesBehaviorProfiles.usesSwimmingSleepAnimation("magikarp"));
+        assertTrue(SpeciesBehaviorProfiles.locksPositionDuringWaterSleep("gyarados"));
+        assertFalse(SpeciesBehaviorProfiles.locksPositionDuringWaterSleep("lapras"));
+        assertFalse(SpeciesBehaviorProfiles.locksPositionDuringWaterSleep("krabby"));
         assertFalse(SpeciesBehaviorProfiles.usesSwimmingSleepAnimation("gyarados"));
         assertFalse(SpeciesBehaviorProfiles.usesSwimmingSleepAnimation("lapras"));
         assertFalse(SpeciesBehaviorProfiles.usesSwimmingSleepAnimation("krabby"));

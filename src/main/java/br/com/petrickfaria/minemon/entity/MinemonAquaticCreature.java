@@ -74,7 +74,7 @@ public final class MinemonAquaticCreature extends MinemonCreature {
         // nodes; ordinary land gravity is restored immediately on shore.
         if(!this.level.isClientSide)this.setNoGravity(this.isInWater());
         if(!this.level.isClientSide&&this.isSleeping()&&this.isInWaterOrBubble()
-                &&SpeciesBehaviorProfiles.usesSwimmingSleepAnimation(this.getSpeciesSlug())){
+                &&SpeciesBehaviorProfiles.locksPositionDuringWaterSleep(this.getSpeciesSlug())){
             // Stop movement before LivingEntity applies water travel. Clearing
             // velocity after tick is too late on the transition into sleep and
             // can leave one residual vertical step in the saved rest pose.
