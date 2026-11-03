@@ -91,6 +91,9 @@ public class MinemonModel extends AnimatedGeoModel<MinemonCreature> {
         setMeditationBone("hips", 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
         setMeditationBone("upper_torso", 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
         setMeditationBone("lower_torso", 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
+        // Keep the head's awake ground-walk pitch even when GeckoLib's
+        // post-controller q.look adaptation supplies a neutral base angle.
+        setMeditationBone("head", 0.0F, 0.0F, -1.0F, -32.5F, 0.0F, 0.0F);
         setMeditationBone("left_upper_leg", 0.0F, 0.0F, 0.0F, 65.0F, 0.0F, 0.0F);
         setMeditationBone("left_lower_leg", 0.0F, 0.0F, 0.0F, -65.0F, 0.0F, 0.0F);
         setMeditationBone("foot_left", 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F);

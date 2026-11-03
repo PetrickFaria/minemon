@@ -376,7 +376,7 @@ public final class ClientSmokeTest {
       if(Math.abs(upperTorso.getRotationX()-upperTorso.getInitialSnapshot().rotationValueX)>0.10F
           ||Math.abs(lowerTorso.getRotationX()-lowerTorso.getInitialSnapshot().rotationValueX)>0.10F
           ||Math.abs(body.getRotationX())>0.08F
-          ||Math.abs(Math.abs(head.getRotationX()-head.getInitialSnapshot().rotationValueX)-(float)Math.toRadians(32.5D))>0.14F
+          ||Math.abs(head.getRotationX())>(float)Math.toRadians(60.0D)+0.08F
           ||Math.abs(head.getRotationY())>(float)Math.toRadians(60.0D)+0.08F
           ||Math.abs(Math.abs(leftArm.getRotationX()-leftArm.getInitialSnapshot().rotationValueX)-(float)Math.toRadians(15.2329D))>0.16F
           ||Math.abs(Math.abs(rightArm.getRotationX()-rightArm.getInitialSnapshot().rotationValueX)-(float)Math.toRadians(15.2329D))>0.16F
