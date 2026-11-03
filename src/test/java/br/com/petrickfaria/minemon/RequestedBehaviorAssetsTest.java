@@ -81,4 +81,28 @@ public class RequestedBehaviorAssetsTest {
         }
         assertEquals(18,br.com.petrickfaria.minemon.item.PokemonTreatType.values().length);
     }
+
+    @Test public void ghostLineUsesAuthoredMouthsAndGroundGaitWithNaturalBlinkRanges() throws Exception {
+        Path root=Path.of(System.getProperty("minemon.testResources"));
+        var gengar=SpeciesDefinitions.get("gengar");
+        var animations=JsonParser.parseString(Files.readString(root.resolve(gengar.animation().replace("assets/minemon/","assets/minemon_gen1/"))))
+                .getAsJsonObject().getAsJsonObject("animations");
+        var walk=animations.getAsJsonObject("animation.gengar.ground_walk").getAsJsonObject("bones");
+        assertTrue(walk.has("leg_left"));
+        assertTrue(walk.has("leg_right"));
+        var geo=JsonParser.parseString(Files.readString(root.resolve(gengar.model().replace("assets/minemon/","assets/minemon_gen1/"))))
+                .getAsJsonObject().getAsJsonArray("minecraft:geometry").get(0).getAsJsonObject().getAsJsonArray("bones");
+        var names=new java.util.HashSet<String>();
+        for(JsonElement bone:geo)names.add(bone.getAsJsonObject().get("name").getAsString());
+        assertTrue("authored teeth expression is present",names.contains("mouth_closed"));
+        assertTrue("authored open-mouth expression is present",names.contains("mouth_open"));
+        for(String slug:java.util.List.of("haunter","gengar")) {
+            var random=net.minecraft.util.RandomSource.create(173L);
+            for(int i=0;i<1000;i++) {
+                int interval=MinemonCreature.blinkIntervalTicksFor(slug,random);
+                assertTrue(slug+" blink interval below 5 seconds: "+interval,interval>=100);
+                assertTrue(slug+" blink interval above 15 seconds: "+interval,interval<=300);
+            }
+        }
+    }
 }

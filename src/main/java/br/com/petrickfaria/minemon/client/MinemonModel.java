@@ -31,6 +31,8 @@ public class MinemonModel extends AnimatedGeoModel<MinemonCreature> {
         applyAquaticSleepEyeVisibility(entity);
         applyPidgeWingVisibility(entity);
         applyGengarEyeVisibility(entity);
+        applyGengarMouthExpression(entity);
+        applyHaunterIdleLag(entity);
         applyNaturalBodyMotion(entity);
         applyAquaticSleepFallbackMotion(entity);
         applyAquaticSleepPosture(entity);
@@ -186,6 +188,41 @@ public class MinemonModel extends AnimatedGeoModel<MinemonCreature> {
         }
     }
 
+    /** Haunter's existing body sway leads the hands by exactly twenty ticks (one second). */
+    private void applyHaunterIdleLag(MinemonCreature entity) {
+        if(!entity.getSpeciesSlug().equals("haunter") || entity.isSleeping()
+                || entity.isOrderedToSit() || entity.isDeadOrDying()
+                || entity.isAttackAnimationActive()
+                || entity.getDeltaMovement().horizontalDistanceSqr()>0.0025D)return;
+        double ticks=entity.tickCount+entity.getId()*0.37D;
+        float bodySway=(float)Math.sin(ticks*0.075D)*0.045F;
+        var torso=getAnimationProcessor().getBone("torso");
+        if(torso!=null)torso.setRotationX(torso.getRotationX()+bodySway);
+        float delayed=(float)Math.sin((ticks-20.0D)*0.075D)*0.055F;
+        for(String hand:java.util.List.of("hand_left1","hand_right1")) {
+            var bone=getAnimationProcessor().getBone(hand);
+            if(bone!=null)bone.setRotationZ(bone.getRotationZ()+delayed);
+        }
+    }
+
+    /** Selects the two authored mouth meshes only; the source texture and cry clip stay intact. */
+    private void applyGengarMouthExpression(MinemonCreature entity) {
+        if(!entity.getSpeciesSlug().equals("gengar"))return;
+        boolean animate=!entity.isSleeping()&&!entity.isOrderedToSit()
+                &&!entity.isDeadOrDying()&&!entity.isAttackAnimationActive();
+        boolean open=animate&&Math.floorMod(entity.tickCount+entity.getId()*53,240)>=120;
+        var closed=getAnimationProcessor().getBone("mouth_closed");
+        var ajar=getAnimationProcessor().getBone("mouth_ajar");
+        var openBone=getAnimationProcessor().getBone("mouth_open");
+        if(closed!=null)closed.setHidden(open,false);
+        if(ajar!=null)ajar.setHidden(true,true);
+        if(openBone!=null)openBone.setHidden(!open,false);
+        for(String name:java.util.List.of("O_mouth","sad_mouth_closed","sad_mouth_ajar","sad_mouth_open")) {
+            var alternate=getAnimationProcessor().getBone(name);
+            if(alternate!=null)alternate.setHidden(true,true);
+        }
+    }
+
     /** Small additive body motion keeps hovering visually distinct from the wing-driven flight clips. */
     private void applyNaturalBodyMotion(MinemonCreature entity) {
         if(entity.isOrderedToSit()||entity.isDefeated())return;
@@ -194,15 +231,20 @@ public class MinemonModel extends AnimatedGeoModel<MinemonCreature> {
                 &&entity.naturalPhaseForRender()==br.com.petrickfaria.minemon.entity.BehaviorCycle.Phase.AIR;
         boolean hoveringRest=entity.isSleeping()
                 &&br.com.petrickfaria.minemon.entity.SpeciesBehaviorProfiles.hoversDuringNightRest(slug);
+        boolean gengarSleep=slug.equals("gengar")&&entity.isSleeping();
         boolean floating=br.com.petrickfaria.minemon.entity.SpeciesBehaviorProfiles.isFloating(slug)
                 &&(entity.isFlyingSpecies()||hoveringRest);
         boolean flying=!floating&&entity.isFlyingSpecies()&&!entity.wantsNaturalLanding();
-        if(!floating&&!flying||entity.isSleeping()&&!hoveringRest)return;
+        if(!floating&&!flying&&!gengarSleep||entity.isSleeping()&&!hoveringRest&&!gengarSleep)return;
         var body=getAnimationProcessor().getBone("body");
         if(body==null)return;
         double time=entity.tickCount+entity.getId()*0.37D;
         float bob, pitch, roll;
-        if(alakazamHover){
+        if(gengarSleep){
+            bob=(float)Math.sin(time*0.11D)*0.70F;
+            pitch=0.0F;
+            roll=0.0F;
+        }else if(alakazamHover){
             // Keep the approved fixed hover height in world physics. This tiny
             // model-space bob matches Abra's subtle float without moving the
             // entity or rotating the meditation pose.

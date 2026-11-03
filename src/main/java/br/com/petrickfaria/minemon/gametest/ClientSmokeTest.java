@@ -258,6 +258,7 @@ public final class ClientSmokeTest {
   private static final java.util.Map<String,java.util.Set<String>> tailFlameClips=new java.util.HashMap<>();
  @SubscribeEvent public static void tick(TickEvent.ClientTickEvent event) {
   if(!Boolean.getBoolean("minemon.clientSmokeTest")||event.phase!=TickEvent.Phase.END)return;
+  if(Boolean.getBoolean("minemon.clientSmokeGhostLine")){GhostLineClientSmokeTest.tick(event);return;}
   if(Boolean.getBoolean("minemon.clientSmokePokemonManagement")){PokemonManagementClientSmokeTest.tick(event);return;}
   if(Boolean.getBoolean("minemon.clientSmokeTreats")){PokemonTreatClientSmokeTest.tick(event);return;}
   if(Boolean.getBoolean("minemon.clientSmokeRocketProfession")){RocketVillagerClientSmokeTest.tick(event);return;}
@@ -268,7 +269,7 @@ public final class ClientSmokeTest {
   try {
    if(pendingAlakazamPoseScreenshot!=null){
     String view=pendingAlakazamPoseScreenshot;pendingAlakazamPoseScreenshot=null;
-    Screenshot.grab(mc.gameDirectory,"alakazam-1.72-"+view+".png",mc.getMainRenderTarget(),
+    Screenshot.grab(mc.gameDirectory,"alakazam-1.73-"+view+".png",mc.getMainRenderTarget(),
         message->System.out.println("[CLIENT SMOKE] screenshot "+view+": "+message));
    }
    if(!opened && mc.screen instanceof TitleScreen && titleTicks==0)

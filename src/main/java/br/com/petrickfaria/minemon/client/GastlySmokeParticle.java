@@ -75,7 +75,9 @@ public final class GastlySmokeParticle extends TextureSheetParticle {
         if(owner==null)return;
         float scale=SpeciesDefinitions.get("gastly").scale();
         double angle=slot*2.3999632297+owner.tickCount*.012;
-        double radius=.55*br.com.petrickfaria.minemon.entity.ModelMetrics.bodyWidth("gastly")*scale;
+        // Keep the entire camera-facing smoke quad outside the projected core silhouette.
+        // Normal particle depth testing then preserves the body while retaining the aura ring.
+        double radius=.75*br.com.petrickfaria.minemon.entity.ModelMetrics.bodyWidth("gastly")*scale;
         double center=br.com.petrickfaria.minemon.entity.ModelMetrics.bodyCenterY("gastly")*scale;
         if(owner instanceof br.com.petrickfaria.minemon.entity.MinemonCreature pokemon && pokemon.isDefeated())center+=br.com.petrickfaria.minemon.entity.ModelMetrics.defeatedOffset("gastly",scale);
         double height=br.com.petrickfaria.minemon.entity.ModelMetrics.bodyHeight("gastly")*scale;

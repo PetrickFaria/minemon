@@ -109,6 +109,8 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     private int wildUnreachableTicks;
     private int blinkCooldownTicks;
     private boolean blinkPending;
+    private int blinkEventsForValidation;
+    private int lastBlinkIntervalForValidation;
     private int attackAnimationTicks;
     private int chanseyCooldownTicks;
     private int chanseyScanDelay;
@@ -144,7 +146,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
             this.dryNavigation=this.navigation;this.escapeNavigation=new EscapeNavigation(this,level);
         }
 
-        this.blinkCooldownTicks = 80 + this.getRandom().nextInt(120);
+        this.blinkCooldownTicks = blinkIntervalTicksFor(this.getSpeciesSlug(),this.getRandom());
     }
 
     @Override public void travel(net.minecraft.world.phys.Vec3 input){
@@ -215,6 +217,13 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     }
 
     public boolean isSleeping() { return this.entityData.get(SLEEPING); }
+    public boolean isAttackAnimationActive() { return this.attackAnimationTicks > 0; }
+    public int blinkEventsForValidation() { return blinkEventsForValidation; }
+    public int lastBlinkIntervalForValidation() { return lastBlinkIntervalForValidation; }
+    public static int blinkIntervalTicksFor(String slug, RandomSource random) {
+        return Set.of("haunter","gengar").contains(slug)
+                ? 100 + random.nextInt(201) : 80 + random.nextInt(120);
+    }
     public void setSleeping(boolean sleeping) {
         if(isDefeated())sleeping=true;
         if (!sleeping) this.aquaticSleepY=Double.NaN;
@@ -775,7 +784,9 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
             if (this.blinkCooldownTicks > 0) this.blinkCooldownTicks--;
             if (this.blinkCooldownTicks == 0) {
                 this.blinkPending = true;
-                this.blinkCooldownTicks = 80 + this.getRandom().nextInt(120);
+                this.blinkEventsForValidation++;
+                this.blinkCooldownTicks = blinkIntervalTicksFor(this.getSpeciesSlug(),this.getRandom());
+                this.lastBlinkIntervalForValidation = this.blinkCooldownTicks;
             }
         } else {
             if (!this.level.isClientSide) this.tickSpontaneousRun();
@@ -1065,6 +1076,9 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
             clip = firstClip(slug, "air_idle", "air_fly");
         } else if (this.isOrderedToSit()) {
             clip = SpeciesAssetIndex.clip(slug, slug.equals("vaporeon") && this.isInWaterOrBubble() ? "awake_rest_water" : "awake_rest", "night_sleep");
+        } else if (slug.equals("gengar") && this.isOnGround()) {
+            clip=this.isMoving(event)?firstClip(slug,"ground_walk","ground_idle")
+                    :firstClip(slug,"ground_idle","air_idle");
         } else if (this.isAquaticSpecies() && this.isInWater()) {
             String swim = this.isNaturalSurface() ? firstClip(slug,"surface_water_swim","surfacewater_swim","water_surface_swim","water_swim")
                     : firstClip(slug,"water_swim","water_surface_swim","surface_water_swim","surfacewater_swim");

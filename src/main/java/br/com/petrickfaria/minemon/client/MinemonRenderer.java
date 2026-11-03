@@ -62,6 +62,8 @@ public class MinemonRenderer extends GeoEntityRenderer<MinemonCreature> {
     if(Double.isFinite(support)&&Math.abs(entity.getY()-(support+0.015D))<=0.08D)
      vertical+=br.com.petrickfaria.minemon.entity.ModelMetrics.waterFloorContactOffset(entity.getSpeciesSlug(),scale);
    }
+   if(entity.getSpeciesSlug().equals("gengar")&&entity.isSleeping()&&!entity.isDefeated())
+    vertical-=br.com.petrickfaria.minemon.entity.ModelMetrics.bodyHeight("gengar")*scale*0.50D;
    pose.translate(0,vertical+alakazamHoverVisualYOffset(entity),0);
   }
   pose.scale(scale,scale,scale);
