@@ -27,7 +27,6 @@ public class MinemonModel extends AnimatedGeoModel<MinemonCreature> {
     @Override
     public void setLivingAnimations(MinemonCreature entity, Integer uniqueID, software.bernie.geckolib3.core.event.predicate.AnimationEvent event) {
         super.setLivingAnimations(entity, uniqueID, event);
-        applyAlakazamMeditationPose(entity);
         applyDewgongEyeVisibility(entity);
         applyAquaticSleepEyeVisibility(entity);
         applyPidgeWingVisibility(entity);
@@ -72,46 +71,6 @@ public class MinemonModel extends AnimatedGeoModel<MinemonCreature> {
             var body=getAnimationProcessor().getBone("body");
             if(body!=null)body.setRotationX(body.getRotationX()+input.headPitch*(float)Math.PI/180.0F);
         }
-    }
-
-    /**
-     * Keep the awake Alakazam upright while it floats. The previous sleep
-     * offsets lowered hips and thighs by nearly their full segment length and
-     * the opposing 90 degree roll rotations splayed the legs away from the
-     * pelvis. Restore the rig's bind pivots, bend the thighs forward and fold
-     * the shins back underneath them. Arms, hands, head, and spoons continue to
-     * come from the awake meditation animation, and sleep/ground poses remain
-     * untouched.
-     */
-    private void applyAlakazamMeditationPose(MinemonCreature entity) {
-        if (!entity.getSpeciesSlug().equals("alakazam")
-                || entity.naturalPhaseForRender() != br.com.petrickfaria.minemon.entity.BehaviorCycle.Phase.AIR
-                || entity.isSleeping() || entity.isOrderedToSit()) return;
-
-        setMeditationBone("hips", 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
-        setMeditationBone("upper_torso", 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
-        setMeditationBone("lower_torso", 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
-        // Keep the head's awake ground-walk pitch even when GeckoLib's
-        // post-controller q.look adaptation supplies a neutral base angle.
-        setMeditationBone("head", 0.0F, 0.0F, -1.0F, -32.5F, 0.0F, 0.0F);
-        setMeditationBone("left_upper_leg", 0.0F, 0.0F, 0.0F, 65.0F, 0.0F, 0.0F);
-        setMeditationBone("left_lower_leg", 0.0F, 0.0F, 0.0F, -65.0F, 0.0F, 0.0F);
-        setMeditationBone("foot_left", 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
-        setMeditationBone("right_upper_leg", 0.0F, 0.0F, 0.0F, 65.0F, 0.0F, 0.0F);
-        setMeditationBone("right_lower_leg", 0.0F, 0.0F, 0.0F, -65.0F, 0.0F, 0.0F);
-        setMeditationBone("foot_right", 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
-    }
-
-    private void setMeditationBone(String name, float x, float y, float z, float pitch, float yaw, float roll) {
-        var bone = getAnimationProcessor().getBone(name);
-        if (bone == null) return;
-        var initial = bone.getInitialSnapshot();
-        bone.setPositionX(initial.positionOffsetX + x);
-        bone.setPositionY(initial.positionOffsetY + y);
-        bone.setPositionZ(initial.positionOffsetZ + z);
-        bone.setRotationX((float) Math.toRadians(pitch));
-        bone.setRotationY((float) Math.toRadians(yaw));
-        bone.setRotationZ((float) Math.toRadians(roll));
     }
 
     private void applyDewgongEyeVisibility(MinemonCreature entity) {
