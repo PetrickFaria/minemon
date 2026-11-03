@@ -42,7 +42,7 @@ public final class WildEncounterManager {
     private static volatile boolean configLoaded;
 
     public static synchronized void loadConfig(ServerLevel level) {
-        Path file = level.getServer().getServerDirectory().resolve("config/minemon/wild-spawn.properties");
+        Path file = level.getServer().getServerDirectory().toPath().resolve("config/minemon/wild-spawn.properties");
         var values = new java.util.LinkedHashMap<String, Double>(rarityChances);
         try {
             Files.createDirectories(file.getParent());
@@ -165,11 +165,11 @@ public final class WildEncounterManager {
         if (level.getFluidState(pos.below()).is(net.minecraft.tags.FluidTags.LAVA)) return false;
         String slug = species.slug();
         if (slug.equals("geodude") || slug.equals("graveler") || slug.equals("golem"))
-            return level.getBlockState(pos.below()).isSolid();
+            return level.getBlockState(pos.below()).isSolidRender(level, pos.below());
         if (slug.equals("oddish") || slug.equals("gloom") || slug.equals("vileplume"))
             return level.getBlockState(pos.below()).is(Blocks.GRASS_BLOCK) || level.getBlockState(pos.below()).is(Blocks.FERN);
         if (slug.equals("gastly") || slug.equals("haunter") || slug.equals("gengar")) return level.getMaxLocalRawBrightness(pos) <= 7;
-        return level.getBlockState(pos.below()).isSolid();
+        return level.getBlockState(pos.below()).isSolidRender(level, pos.below());
     }
 
     private static int spawnLevel(PokecSpecies.Entry species, net.minecraft.util.RandomSource random) {
@@ -277,7 +277,7 @@ public final class WildEncounterManager {
     }
 
     public static void restoreCaptureAfterStorageFailure(MinemonCreature pokemon, ServerPlayer player) {
-        pokemon.setTame(false, true);
+        pokemon.setTame(false);
         pokemon.setOwnerUUID(null);
         pokemon.getPersistentData().putBoolean(MARKER, true);
         pokemon.getPersistentData().putUUID(OWNER, player.getUUID());
