@@ -307,7 +307,7 @@ public final class ClientSmokeTest {
      if(entity.getSpeciesSlug().equals("alakazam")&&Boolean.getBoolean("minemon.clientSmokeAlakazamPose")
          &&entity.naturalPhaseForRender()==BehaviorCycle.Phase.AIR){
       int airFrame=alakazamMeditationFirstAirTick<0?0:entity.tickCount-alakazamMeditationFirstAirTick;
-      float viewYaw=airFrame>=60?180.0F:airFrame>=36?90.0F:0.0F;
+      float viewYaw=airFrame>=60?0.0F:airFrame>=36?90.0F:180.0F;
       entity.setYRot(viewYaw);entity.yBodyRot=viewYaw;entity.yHeadRot=viewYaw;
      }
      if(entity.getSpeciesSlug().equals("arbok")&&mc.player!=null){
