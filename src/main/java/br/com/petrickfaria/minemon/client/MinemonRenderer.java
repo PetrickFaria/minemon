@@ -5,6 +5,13 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import software.bernie.geckolib3.renderers.geo.GeoEntityRenderer;
 public class MinemonRenderer extends GeoEntityRenderer<MinemonCreature> {
+ public static final double ALAKAZAM_HOVER_VISUAL_Y_OFFSET=-0.375D;
+ public static double alakazamHoverVisualYOffset(MinemonCreature entity){
+  return entity.getSpeciesSlug().equals("alakazam")
+      &&!entity.isSleeping()&&!entity.isOrderedToSit()&&!entity.isDefeated()
+      &&entity.naturalPhaseForRender()==br.com.petrickfaria.minemon.entity.BehaviorCycle.Phase.AIR
+      ?ALAKAZAM_HOVER_VISUAL_Y_OFFSET:0.0D;
+ }
  private final MinemonModel minemonModel;
  private String activeFireSpecies;
  private boolean fireOverlayPass;
@@ -55,7 +62,7 @@ public class MinemonRenderer extends GeoEntityRenderer<MinemonCreature> {
     if(Double.isFinite(support)&&Math.abs(entity.getY()-(support+0.015D))<=0.08D)
      vertical+=br.com.petrickfaria.minemon.entity.ModelMetrics.waterFloorContactOffset(entity.getSpeciesSlug(),scale);
    }
-   pose.translate(0,vertical,0);
+   pose.translate(0,vertical+alakazamHoverVisualYOffset(entity),0);
   }
   pose.scale(scale,scale,scale);
   String previousSpecies=activeFireSpecies;activeFireSpecies=entity.getSpeciesSlug();

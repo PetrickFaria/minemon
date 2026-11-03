@@ -54,6 +54,7 @@ public final class ClientSmokeTest {
  private static final float[] alakazamMeditationBobRange={Float.MAX_VALUE,-Float.MAX_VALUE};
  private static final double[] alakazamMeditationHeightRange={Double.MAX_VALUE,-Double.MAX_VALUE};
  private static boolean alakazamAirHorizontalAnchorSet;
+ private static boolean alakazamVisualOffsetClearedAfterAir;
  private static double alakazamAirHorizontalAnchorX;
  private static double alakazamAirHorizontalAnchorZ;
  private static double alakazamMaxAirHorizontalDrift;
@@ -267,7 +268,7 @@ public final class ClientSmokeTest {
   try {
    if(pendingAlakazamPoseScreenshot!=null){
     String view=pendingAlakazamPoseScreenshot;pendingAlakazamPoseScreenshot=null;
-    Screenshot.grab(mc.gameDirectory,"alakazam-1.71-"+view+".png",mc.getMainRenderTarget(),
+    Screenshot.grab(mc.gameDirectory,"alakazam-1.72-"+view+".png",mc.getMainRenderTarget(),
         message->System.out.println("[CLIENT SMOKE] screenshot "+view+": "+message));
    }
    if(!opened && mc.screen instanceof TitleScreen && titleTicks==0)
@@ -339,6 +340,14 @@ public final class ClientSmokeTest {
      String currentClip=entity.getSelectedAnimationForValidation();
      if(Boolean.getBoolean("minemon.clientSmokeAlakazamPose")&&slug.equals("alakazam")){
       var naturalPhase=entity.naturalPhaseForRender();
+      double visualOffset=MinemonRenderer.alakazamHoverVisualYOffset(entity);
+      if(naturalPhase==BehaviorCycle.Phase.AIR&&Math.abs(visualOffset+0.375D)>1.0E-9D)
+       throw new IllegalStateException("Alakazam visual Y offset is not -0.375 during AIR: "+visualOffset);
+      if(naturalPhase!=BehaviorCycle.Phase.AIR&&alakazamMeditationFirstAirTick>=0){
+       if(Math.abs(visualOffset)>1.0E-9D)
+        throw new IllegalStateException("Alakazam visual Y offset persisted after AIR: "+visualOffset+" phase="+naturalPhase);
+       alakazamVisualOffsetClearedAfterAir=true;
+      }
       if(alakazamLastNaturalPhase==BehaviorCycle.Phase.LANDING&&naturalPhase==BehaviorCycle.Phase.LAND)
        alakazamCompletedNaturalCycles++;
       if(naturalPhase==BehaviorCycle.Phase.AIR&&alakazamLastNaturalPhase!=BehaviorCycle.Phase.AIR)
@@ -730,7 +739,9 @@ public final class ClientSmokeTest {
       throw new IllegalStateException("Missing real Alakazam hover screenshots: "+alakazamPoseScreenshots);
      if(alakazamCompletedNaturalCycles<2)
       throw new IllegalStateException("Alakazam did not complete two natural walk-hover-land cycles in fast client validation; completed="+alakazamCompletedNaturalCycles);
-     Files.writeString(Path.of("client-validation.txt"),"PASS ALAKAZAM CLIENT POSE/CYCLE: ground_idle head/torso/arms/hands/spoons with original sleep leg tracks; no manual pose override; three real AIR screenshots (front, side, back); completed natural cycles="+alakazamCompletedNaturalCycles+"; model-space vertical bob="+bob+"; physical hover height="+java.util.Arrays.toString(alakazamMeditationHeightRange)+"; horizontal drift="+horizontal+"; render frames="+alakazamMeditationRenderFrames+".\n",StandardOpenOption.APPEND);
+     if(!alakazamVisualOffsetClearedAfterAir)
+      throw new IllegalStateException("Alakazam render-only visual offset was not cleared after landing.");
+     Files.writeString(Path.of("client-validation.txt"),"PASS ALAKAZAM CLIENT POSE/CYCLE: approved 1.71 pose tracks preserved; render-only global vertical offset=-0.375 blocks during AIR and cleared after landing; three real AIR screenshots (front, side, back); completed natural cycles="+alakazamCompletedNaturalCycles+"; model-space vertical bob="+bob+"; physical hover height="+java.util.Arrays.toString(alakazamMeditationHeightRange)+"; horizontal drift="+horizontal+"; render frames="+alakazamMeditationRenderFrames+".\n",StandardOpenOption.APPEND);
     }
     for(String slug:java.util.List.of("charmander","charmeleon","charizard")) {
      if(!species.contains(slug))continue;
