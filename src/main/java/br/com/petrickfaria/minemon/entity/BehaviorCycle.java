@@ -53,6 +53,18 @@ public final class BehaviorCycle {
     public int surfaceVisits() { return surfaceVisits; }
     public int surfaceVisitLimit() { return surfaceVisitLimit; }
 
+    /** Collision-checked vertical step used by Alakazam's production landing. */
+    public static double naturalLandingStep(Phase phase, double difference, boolean onGround) {
+        double step = Math.max(-0.08D, Math.min(0.08D, difference));
+        // Do not stop just above the collision surface: a small downward move
+        // lets Minecraft establish onGround so the cycle can resume walking.
+        if (Math.abs(difference) < 0.005D) {
+            if (phase == Phase.LANDING && !onGround) step = difference <= 0.0D ? -0.01D : difference;
+            else step = 0.0D;
+        }
+        return step;
+    }
+
     public double minimumAltitude() {
         if ("gastly".equals(speciesSlug)) return stage == 0 ? 1.0D : 2.0D;
         return switch (profile) {

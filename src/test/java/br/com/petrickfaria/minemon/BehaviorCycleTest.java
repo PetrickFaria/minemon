@@ -3,7 +3,6 @@ package br.com.petrickfaria.minemon;
 import br.com.petrickfaria.minemon.entity.BehaviorCycle;
 import br.com.petrickfaria.minemon.entity.SpeciesBehaviorProfiles;
 import br.com.petrickfaria.minemon.entity.SpeciesDefinitions;
-import br.com.petrickfaria.minemon.entity.MinemonFlyingCreature;
 import net.minecraft.nbt.CompoundTag;
 import org.junit.Test;
 
@@ -17,12 +16,12 @@ import static org.junit.Assert.*;
 
 public final class BehaviorCycleTest {
     @Test public void alakazamLandingKeepsCollisionCheckedContactStepInsideOldDeadBand() {
-        assertEquals(0.002D, MinemonFlyingCreature.groundFloatCycleStep(LANDING, 0.002D, false), 0.0D);
-        assertEquals(-0.01D, MinemonFlyingCreature.groundFloatCycleStep(LANDING, -0.002D, false), 0.0D);
-        assertEquals(-0.01D, MinemonFlyingCreature.groundFloatCycleStep(LANDING, 0.0D, false), 0.0D);
-        assertEquals(0.0D, MinemonFlyingCreature.groundFloatCycleStep(LANDING, 0.002D, true), 0.0D);
-        assertEquals(0.0D, MinemonFlyingCreature.groundFloatCycleStep(AIR, 0.002D, false), 0.0D);
-        assertEquals(-0.08D, MinemonFlyingCreature.groundFloatCycleStep(LANDING, -0.2D, false), 0.0D);
+        assertEquals(0.002D, BehaviorCycle.naturalLandingStep(LANDING, 0.002D, false), 0.0D);
+        assertEquals(-0.01D, BehaviorCycle.naturalLandingStep(LANDING, -0.002D, false), 0.0D);
+        assertEquals(-0.01D, BehaviorCycle.naturalLandingStep(LANDING, 0.0D, false), 0.0D);
+        assertEquals(0.0D, BehaviorCycle.naturalLandingStep(LANDING, 0.002D, true), 0.0D);
+        assertEquals(0.0D, BehaviorCycle.naturalLandingStep(AIR, 0.002D, false), 0.0D);
+        assertEquals(-0.08D, BehaviorCycle.naturalLandingStep(LANDING, -0.2D, false), 0.0D);
     }
 
     private static BehaviorCycle.Observation o(boolean active, boolean ground, boolean band, boolean wet,
