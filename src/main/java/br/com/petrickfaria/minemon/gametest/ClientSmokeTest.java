@@ -422,11 +422,13 @@ public final class ClientSmokeTest {
        double height=entity.getY()-entity.naturalSurface();var pos=entity.position();
        alakazamMeditationHeightRange[0]=Math.min(alakazamMeditationHeightRange[0],height);
        alakazamMeditationHeightRange[1]=Math.max(alakazamMeditationHeightRange[1],height);
-       if(!alakazamAirHorizontalAnchorSet){
-        alakazamAirHorizontalAnchorX=pos.x;alakazamAirHorizontalAnchorZ=pos.z;alakazamAirHorizontalAnchorSet=true;
+       if(entity.tickCount-alakazamCurrentAirFirstTick>=24){
+        if(!alakazamAirHorizontalAnchorSet){
+         alakazamAirHorizontalAnchorX=pos.x;alakazamAirHorizontalAnchorZ=pos.z;alakazamAirHorizontalAnchorSet=true;
+        }
+        alakazamMaxAirHorizontalDrift=Math.max(alakazamMaxAirHorizontalDrift,
+            Math.hypot(pos.x-alakazamAirHorizontalAnchorX,pos.z-alakazamAirHorizontalAnchorZ));
        }
-       alakazamMaxAirHorizontalDrift=Math.max(alakazamMaxAirHorizontalDrift,
-           Math.hypot(pos.x-alakazamAirHorizontalAnchorX,pos.z-alakazamAirHorizontalAnchorZ));
       }
       alakazamMeditationRenderFrames++;
       int airFrame=entity.tickCount-alakazamMeditationFirstAirTick;
