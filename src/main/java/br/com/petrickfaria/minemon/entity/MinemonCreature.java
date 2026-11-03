@@ -615,6 +615,18 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     @Override
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
         ItemStack held = player.getItemInHand(hand);
+        if (br.com.petrickfaria.minemon.pokec.WildEncounterManager.isEncounter(this)) {
+            if (!br.com.petrickfaria.minemon.pokec.WildEncounterManager.isDowned(this))
+                return InteractionResult.sidedSuccess(this.level.isClientSide);
+            if (!(player instanceof ServerPlayer serverPlayer)) return InteractionResult.sidedSuccess(this.level.isClientSide);
+            if (held.getItem() instanceof PokemonTreatItem) {
+                if (this.level.isClientSide) return InteractionResult.sidedSuccess(true);
+                return InteractionResult.sidedSuccess(br.com.petrickfaria.minemon.pokec.WildEncounterManager.offerTreat(this, serverPlayer, hand));
+            }
+            if (player.isCrouching() && held.isEmpty() && !this.level.isClientSide)
+                return InteractionResult.sidedSuccess(br.com.petrickfaria.minemon.pokec.WildEncounterManager.loot(this, serverPlayer));
+            return InteractionResult.sidedSuccess(this.level.isClientSide);
+        }
         // A capture item in either hand owns the interaction. Failed, occupied, and
         // foreign-owner attempts must not fall through into the Pokémon screen.
         for (InteractionHand ballHand : InteractionHand.values()) {
@@ -711,6 +723,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
 
     @Override
     public void tick() {
+        br.com.petrickfaria.minemon.pokec.WildEncounterManager.tickEncounter(this);
         if(this.escapeNavigation!=null){
             var desired=this.isInWater()?this.escapeNavigation:this.dryNavigation;
             if(this.navigation!=desired){this.navigation.stop();this.navigation=desired;}

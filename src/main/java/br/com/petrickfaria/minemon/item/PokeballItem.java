@@ -116,6 +116,39 @@ public final class PokeballItem extends Item {
         if (player.level.isClientSide) return InteractionResult.sidedSuccess(true);
         if (!(player instanceof ServerPlayer serverPlayer) || !(player.level instanceof ServerLevel))
             return InteractionResult.FAIL;
+        if (mob instanceof MinemonCreature wild && br.com.petrickfaria.minemon.pokec.WildEncounterManager.isEncounter(wild)) {
+            if (!br.com.petrickfaria.minemon.pokec.WildEncounterManager.isDowned(wild)
+                    || !serverPlayer.getUUID().equals(br.com.petrickfaria.minemon.pokec.WildEncounterManager.owner(wild)))
+                return InteractionResult.FAIL;
+            if (stack.getCount() > 1 && serverPlayer.getInventory().getFreeSlot() < 0) return InteractionResult.FAIL;
+            var outcome = br.com.petrickfaria.minemon.pokec.WildEncounterManager.attemptCapture(wild, serverPlayer);
+            if (outcome == br.com.petrickfaria.minemon.pokec.WildEncounterManager.CaptureResult.INVALID)
+                return InteractionResult.FAIL;
+            ItemStack remaining = stack.copy(); remaining.shrink(1);
+            if (outcome == br.com.petrickfaria.minemon.pokec.WildEncounterManager.CaptureResult.CAPTURED) {
+                ItemStack occupied = stack.copy(); occupied.setCount(1);
+                try { store(occupied, wild, serverPlayer); }
+                catch (RuntimeException invalidEntity) {
+                    // Store before discarding; if serialization fails, restore the encounter.
+                    br.com.petrickfaria.minemon.pokec.WildEncounterManager.restoreCaptureAfterStorageFailure(wild, serverPlayer);
+                    return InteractionResult.FAIL;
+                }
+                if (readStoredEntity(occupied) == null) {
+                    br.com.petrickfaria.minemon.pokec.WildEncounterManager.restoreCaptureAfterStorageFailure(wild, serverPlayer);
+                    return InteractionResult.FAIL;
+                }
+                br.com.petrickfaria.minemon.pokec.WildEncounterManager.finishCapture(wild, serverPlayer);
+                if (stack.getCount() == 1) player.setItemInHand(hand, occupied);
+                else { stack.shrink(1); serverPlayer.getInventory().add(occupied); }
+                wild.discard();
+                return InteractionResult.CONSUME;
+            }
+            if (stack.getCount() == 1) player.setItemInHand(hand, remaining);
+            else stack.shrink(1);
+            if (outcome == br.com.petrickfaria.minemon.pokec.WildEncounterManager.CaptureResult.EXPIRED)
+                return InteractionResult.CONSUME;
+            return InteractionResult.CONSUME;
+        }
         if (mob instanceof MinemonCreature creature && creature.isTame() && !creature.isOwnedBy(player))
             return InteractionResult.FAIL;
         if (!masterBall && (!(mob instanceof MinemonCreature creature)

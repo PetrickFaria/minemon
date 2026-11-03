@@ -23,10 +23,12 @@ import java.util.UUID;
 
 /** Server authority for player-bound wild encounters. Encounter metadata lives on the Pokémon entity. */
 public final class WildEncounterManager {
+    public enum CaptureResult { INVALID, FAILED, EXPIRED, CAPTURED }
     private static final String MARKER = "MinemonWildEncounter";
     private static final String OWNER = "MinemonEncounterOwner";
     private static final String STATE = "MinemonEncounterState";
     private static final String DOWNED_AT = "MinemonEncounterDownedAt";
+    private static final String LAST_IN_RANGE = "MinemonEncounterLastInRange";
     private static final String REWARDED = "MinemonEncounterRewarded";
     private static final String LAST_CHECK = "MinemonWildSpawnCheck";
     private static final long CHECK_INTERVAL = 20L * 30L;
@@ -36,7 +38,10 @@ public final class WildEncounterManager {
     private static volatile java.util.Map<String, Double> rarityChances = java.util.Map.of(
             "common", .10D, "uncommon", .045D, "rare", .015D, "legendary", .003D, "mythic", .001D);
 
-    public static void loadConfig(ServerLevel level) {
+    private static volatile java.util.Map<String, Double> speciesChances = java.util.Map.of();
+    private static volatile boolean configLoaded;
+
+    public static synchronized void loadConfig(ServerLevel level) {
         Path file = level.getServer().getServerDirectory().resolve("config/minemon/wild-spawn.properties");
         var values = new java.util.LinkedHashMap<String, Double>(rarityChances);
         try {
@@ -65,12 +70,11 @@ public final class WildEncounterManager {
             for (String key : RARITIES) values.put(key, rarity.getOrDefault(key, values.get(key)));
             rarityChances = java.util.Map.copyOf(values);
             speciesChances = java.util.Map.copyOf(species);
+            configLoaded = true;
         } catch (IOException error) {
             throw new IllegalStateException("Unable to load wild-spawn config " + file, error);
         }
     }
-    private static volatile java.util.Map<String, Double> speciesChances = java.util.Map.of();
-
     public static boolean isEncounter(MinemonCreature pokemon) { return pokemon.getPersistentData().getBoolean(MARKER); }
     public static boolean isDowned(MinemonCreature pokemon) {
         return isEncounter(pokemon) && "downed".equals(pokemon.getPersistentData().getString(STATE));
@@ -82,7 +86,7 @@ public final class WildEncounterManager {
 
     public static void tickPlayer(ServerPlayer player) {
         if (!(player.level instanceof ServerLevel level)) return;
-        if (speciesChances.isEmpty()) loadConfig(level);
+        if (!configLoaded) loadConfig(level);
         long now = level.getGameTime();
         AABB area = new AABB(player.blockPosition()).inflate(75, 15, 75);
         List<MinemonCreature> encounters = level.getEntitiesOfClass(MinemonCreature.class, area,
@@ -117,7 +121,7 @@ public final class WildEncounterManager {
             double chance = speciesChances.getOrDefault(species.slug(), rarityChances.getOrDefault(
                     PokecEconomy.resolveRarity(species.rarity(), "common"), .05D));
             if (player.getRandom().nextDouble() >= chance * .35D) continue;
-            BlockPos pos = samplePosition(player, level);
+            BlockPos pos = samplePosition(player, level, species);
             if (pos == null || !environmentAllows(species, level, pos)) continue;
             Entity created = ModEntities.SPECIES.get(species.slug()).get().create(level);
             if (!(created instanceof MinemonCreature pokemon)) { if (created != null) created.discard(); continue; }
@@ -126,12 +130,14 @@ public final class WildEncounterManager {
             var data = pokemon.getPersistentData();
             data.putBoolean(MARKER, true); data.putUUID(OWNER, player.getUUID()); data.putString(STATE, "active");
             data.putLong(LAST_CHECK, now);
+            data.putLong(LAST_IN_RANGE, now);
             if (!level.addFreshEntity(pokemon)) pokemon.discard();
             return;
         }
     }
 
-    private static BlockPos samplePosition(ServerPlayer player, ServerLevel level) {
+    private static BlockPos samplePosition(ServerPlayer player, ServerLevel level, PokecSpecies.Entry species) {
+        boolean aquatic = SpeciesBehaviorProfiles.waterCapable(species.slug());
         for (int n = 0; n < 12; n++) {
             int x = player.blockPosition().getX() + player.getRandom().nextInt(151) - 75;
             int z = player.blockPosition().getZ() + player.getRandom().nextInt(151) - 75;
@@ -141,7 +147,8 @@ public final class WildEncounterManager {
             if (!level.getBlockState(pos).getCollisionShape(level, pos).isEmpty()) continue;
             if (level.getBlockState(pos).is(Blocks.LAVA) || level.getBlockState(pos).is(Blocks.FIRE)
                     || level.getBlockState(pos).is(Blocks.SOUL_FIRE)) continue;
-            if (level.getMaxLocalRawBrightness(pos) < 0 || !level.getFluidState(pos).isEmpty()) continue;
+            if (aquatic ? !level.getFluidState(pos).is(net.minecraft.tags.FluidTags.WATER)
+                    : !level.getFluidState(pos).isEmpty()) continue;
             return pos;
         }
         return null;
@@ -216,6 +223,84 @@ public final class WildEncounterManager {
                     pokemon.getX(), pokemon.getY(), pokemon.getZ(), new net.minecraft.world.item.ItemStack(item.get(), amount)));
         }
         pokemon.discard();
+    }
+
+    /** Encounter lifecycle is driven by the loaded entity, so no chunks are force-loaded. */
+    public static void tickEncounter(MinemonCreature pokemon) {
+        if (pokemon.level.isClientSide || !isEncounter(pokemon) || !(pokemon.level instanceof ServerLevel level)) return;
+        var data = pokemon.getPersistentData();
+        long now = level.getGameTime();
+        UUID owner = owner(pokemon);
+        ServerPlayer player = owner == null ? null : level.getServer().getPlayerList().getPlayer(owner);
+        if (isDowned(pokemon)) {
+            if (now - data.getLong(DOWNED_AT) >= EXPIRY) rewardAndDiscard(level, pokemon, 25);
+            return;
+        }
+        boolean inRange = player != null && player.level == level
+                && Math.abs(player.getX() - pokemon.getX()) <= 75.0D
+                && Math.abs(player.getZ() - pokemon.getZ()) <= 75.0D
+                && Math.abs(player.getY() - pokemon.getY()) <= 15.0D;
+        if (inRange) data.putLong(LAST_IN_RANGE, now);
+        else if (now - data.getLong(LAST_IN_RANGE) >= EXPIRY) pokemon.discard();
+    }
+
+    /** Called only by the server when the owner uses an empty ball on their downed encounter. */
+    public static CaptureResult attemptCapture(MinemonCreature pokemon, ServerPlayer player) {
+        if (!isDowned(pokemon) || !player.getUUID().equals(owner(pokemon))
+                || player.distanceToSqr(pokemon) > 36.0D) return CaptureResult.INVALID;
+        var data = pokemon.getPersistentData();
+        int attempts = Math.max(0, data.getInt("MinemonWildCaptureAttempts"));
+        if (attempts >= WildCaptureRules.MAX_ATTEMPTS) return CaptureResult.INVALID;
+        int next = attempts + 1;
+        data.putInt("MinemonWildCaptureAttempts", next);
+        double chance = WildCaptureRules.chance(pokemon.getPokemonRarity(), data.getInt("MinemonWildTreats"));
+        if (player.getRandom().nextDouble() < chance) {
+            double captureXp = TrainerProgression.pokemonXp(pokemon.getSpeciesSlug(), pokemon.getPokemonLevel()) * .25D;
+            player.awardStat(net.minecraft.stats.Stats.ITEM_USED.get(br.com.petrickfaria.minemon.registry.ModItems.POKEBALL.get()));
+            pokemon.tame(player);
+            pokemon.setEncounterDowned(false);
+            pokemon.setHealth(pokemon.getMaxHealth());
+            data.remove(MARKER); data.remove(OWNER); data.remove(STATE); data.remove(DOWNED_AT); data.remove(REWARDED);
+            return CaptureResult.CAPTURED;
+        }
+        if (next >= WildCaptureRules.MAX_ATTEMPTS) {
+            rewardAndDiscard((ServerLevel) pokemon.level, pokemon, 50);
+            return CaptureResult.EXPIRED;
+        }
+        return CaptureResult.FAILED;
+    }
+
+    public static void finishCapture(MinemonCreature pokemon, ServerPlayer player) {
+        PokecPlayerData.addTrainerXp(player, TrainerProgression.pokemonXp(pokemon.getSpeciesSlug(), pokemon.getPokemonLevel()) * .25D);
+        var data = pokemon.getPersistentData();
+        data.remove("MinemonWildCaptureAttempts"); data.remove("MinemonWildTreats");
+    }
+
+    public static void restoreCaptureAfterStorageFailure(MinemonCreature pokemon, ServerPlayer player) {
+        pokemon.setTame(false, true);
+        pokemon.setOwnerUUID(null);
+        pokemon.getPersistentData().putBoolean(MARKER, true);
+        pokemon.getPersistentData().putUUID(OWNER, player.getUUID());
+        pokemon.getPersistentData().putString(STATE, "downed");
+        pokemon.setEncounterDowned(true);
+    }
+
+    public static boolean offerTreat(MinemonCreature pokemon, ServerPlayer player, net.minecraft.world.InteractionHand hand) {
+        if (!isDowned(pokemon) || !player.getUUID().equals(owner(pokemon)) || player.distanceToSqr(pokemon) > 36.0D) return false;
+        var stack = player.getItemInHand(hand);
+        if (!(stack.getItem() instanceof br.com.petrickfaria.minemon.item.PokemonTreatItem) || stack.isEmpty()) return false;
+        var data = pokemon.getPersistentData();
+        int count = Math.max(0, data.getInt("MinemonWildTreats"));
+        if (count >= WildCaptureRules.MAX_TREATS) return false;
+        data.putInt("MinemonWildTreats", count + 1);
+        if (!player.getAbilities().instabuild) stack.shrink(1);
+        return true;
+    }
+
+    public static boolean loot(MinemonCreature pokemon, ServerPlayer player) {
+        if (!isDowned(pokemon) || !player.getUUID().equals(owner(pokemon)) || player.distanceToSqr(pokemon) > 36.0D) return false;
+        rewardAndDiscard((ServerLevel) pokemon.level, pokemon, 75);
+        return true;
     }
 
     private WildEncounterManager() { }
