@@ -95,21 +95,26 @@ TREAT_RESOURCES = frozenset(
 )
 
 
-# Exact source blob approved by Minemon 1.71 commit 00a3bb54338036885b02e58dcf83c42b26020041.
-# The generic batch baseline predates this deliberate Alakazam pose work. Keep the
-# exception byte-specific so later Alakazam edits still fail the historical audit.
-ALAKAZAM_ANIMATION_PATH = "assets/minemon/animations/alakazam_cobblemon_1_8_2/alakazam.animation.json"
-ALAKAZAM_ANIMATION_BLOB_SHA = "b170a8296d7b5ed065c6d699294649e2f5401752"
+# Exact previously reviewed source blobs. The legacy batch baseline predates these
+# approved changes; byte-specific entries keep future edits subject to the audit.
+APPROVED_PRIOR_ASSET_BLOBS = {
+    # Minemon 1.71 pose approved in commit 00a3bb54338036885b02e58dcf83c42b26020041.
+    "assets/minemon/animations/alakazam_cobblemon_1_8_2/alakazam.animation.json": "b170a8296d7b5ed065c6d699294649e2f5401752",
+    # Move Seaking eye cubes to their own bone for aquatic sleep, commit bd2cde6f0ded91c9d0cd8a89f6547e3a052e4ae9.
+    "assets/minemon/geo/seaking/seaking_female.geo.json": "c7ffc76315a32345e52b9daee4c3d266143306c2",
+    "assets/minemon/geo/seaking/seaking_male.geo.json": "0382d06a1e0d5d5384dc81d2fab2b614d062f297",
+}
 
 
 def is_approved_prior_asset_delta(path, content):
     """Accept only the reviewed Arbok texture and exact approved Alakazam animation blobs."""
     if path == ARBOK_TEXTURE_PATH:
         return hashlib.sha256(content).hexdigest() == ARBOK_TEXTURE_SHA256
-    if path == ALAKAZAM_ANIMATION_PATH:
-        blob_header = b"blob " + str(len(content)).encode("ascii") + bytes([0])
-        return hashlib.sha1(blob_header + content).hexdigest() == ALAKAZAM_ANIMATION_BLOB_SHA
-    return False
+    expected_blob = APPROVED_PRIOR_ASSET_BLOBS.get(path)
+    if expected_blob is None:
+        return False
+    blob_header = b"blob " + str(len(content)).encode("ascii") + bytes([0])
+    return hashlib.sha1(blob_header + content).hexdigest() == expected_blob
 
 
 def pokec_resource_paths():

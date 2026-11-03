@@ -86,6 +86,8 @@ assert set(profiles)==set(old_profiles)|set(EXPECTED[:end-70])|{s for s in BATCH
 
 old_paths=set()
 for d in old_defs[:70]:old_paths.update([d['model'],d['texture'],d['animation']]+d['licenses'])
+# These source-only Seaking eye rigs were intentionally split for aquatic sleep.
+old_paths.update({"assets/minemon/geo/seaking/seaking_female.geo.json","assets/minemon/geo/seaking/seaking_male.geo.json"})
 for p in old_paths:
  current=(resources/p).read_bytes();original=base_file('src/main/resources/'+p)
  if p=='assets/minemon/animations/weedle_cobblemon_1_8_2/weedle.animation.json':
@@ -173,6 +175,10 @@ if not args.segment:
 
 source_fire_frames={f'src/main/resources/assets/minemon/textures/pokemon/{slug}_cobblemon_1_8_2/fire/normal/{frame}.png' for slug in ('ponyta','rapidash') for frame in range(1,5)}
 allowed_paths.update(source_fire_frames)
+allowed_paths.update({
+ 'src/main/resources/assets/minemon/geo/seaking/seaking_female.geo.json',
+ 'src/main/resources/assets/minemon/geo/seaking/seaking_male.geo.json',
+})
 allowed_paths.add('src/main/resources/'+ 'assets/minemon/textures/pokemon/arbok_cobblemon_1_8_2/arbok.png')
 allowed_paths.update(path for path in pokec_resource_paths() if '/assets/minemon/' in path)
 allowed_paths.add('src/main/resources/assets/minemon/textures/emissive/rocket_eye_red.png')
