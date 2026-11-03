@@ -14,6 +14,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
+import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -26,6 +28,16 @@ public final class PokecEvents {
     @SubscribeEvent public static void wildEncounters(TickEvent.PlayerTickEvent event) {
         if (event.phase == TickEvent.Phase.END && event.player instanceof net.minecraft.server.level.ServerPlayer player)
             WildEncounterManager.tickPlayer(player);
+    }
+    @SubscribeEvent public static void trackActivePokemon(EntityJoinLevelEvent event) {
+        if (!event.getEntity().level.isClientSide && event.getEntity() instanceof MinemonCreature) ActivePokemonData.register(event.getEntity());
+    }
+    @SubscribeEvent public static void untrackRemovedPokemon(EntityLeaveLevelEvent event) {
+        if (event.getEntity().level.isClientSide || !(event.getEntity() instanceof MinemonCreature)) return;
+        var reason = event.getEntity().getRemovalReason();
+        if (reason == net.minecraft.world.entity.Entity.RemovalReason.DISCARDED
+                || reason == net.minecraft.world.entity.Entity.RemovalReason.KILLED)
+            ActivePokemonData.unregister(event.getEntity());
     }
     @SubscribeEvent public static void companionExperience(LivingDeathEvent event) {
         if (event.getEntity().level.isClientSide || !(event.getSource().getEntity() instanceof MinemonCreature attacker)

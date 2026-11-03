@@ -3,7 +3,7 @@ package br.com.petrickfaria.minemon.client;
 import br.com.petrickfaria.minemon.Minemon;
 import br.com.petrickfaria.minemon.pokec.TrainerProgression;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
@@ -26,16 +26,15 @@ public final class TrainerHud {
         if (!event.getOverlay().id().equals(VanillaGuiOverlay.EXPERIENCE_BAR.id())) return;
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.player == null || minecraft.options.hideGui) return;
-        GuiGraphics gui = event.getGuiGraphics();
         int width = minecraft.getWindow().getGuiScaledWidth();
         int height = minecraft.getWindow().getGuiScaledHeight();
         int x = width / 2 - 91, y = height - 48;
         double needed = TrainerProgression.xpToNext(level);
         float progress = Double.isInfinite(needed) ? 1.0F : (float)Math.min(1.0D, xp / needed);
-        gui.fill(x, y, x + 182, y + 5, 0xC0000000);
-        gui.fill(x + 1, y + 1, x + 1 + Math.round(180 * progress), y + 4, 0xFF38D8D2);
+        GuiComponent.fill(event.getPoseStack(), x, y, x + 182, y + 5, 0xC0000000);
+        GuiComponent.fill(event.getPoseStack(), x + 1, y + 1, x + 1 + Math.round(180 * progress), y + 4, 0xFF38D8D2);
         String label = "Treinador Pokémon Lv. " + level;
-        gui.drawString(minecraft.font, label, width / 2 - minecraft.font.width(label) / 2, y - 10, 0xFFFFFFFF, true);
+        minecraft.font.draw(event.getPoseStack(), label, width / 2.0F - minecraft.font.width(label) / 2.0F, y - 10.0F, 0xFFFFFFFF);
     }
 
     private TrainerHud() { }

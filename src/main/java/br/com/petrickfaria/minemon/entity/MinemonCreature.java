@@ -648,6 +648,8 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
                 int chance = MinemonConfig.TAME_CHANCE_PERCENT.get();
                 if (this.getRandom().nextInt(100) < chance) {
                     this.tame(player);
+                    if (player instanceof ServerPlayer owner)
+                        br.com.petrickfaria.minemon.pokec.ActivePokemonData.register(this);
                     this.setOrderedToSit(true);
                     this.setTarget(null);
                     this.getNavigation().stop();
@@ -696,8 +698,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         if(isDefeated())return false;
         if (br.com.petrickfaria.minemon.pokec.WildEncounterManager.isEncounter(this)) {
             if (br.com.petrickfaria.minemon.pokec.WildEncounterManager.isDowned(this)) return false;
-            if (!(source.getEntity() instanceof MinemonCreature attacker)
-                    || !br.com.petrickfaria.minemon.pokec.WildEncounterManager.canDefeat(this, attacker)) return false;
+            if (!br.com.petrickfaria.minemon.pokec.WildEncounterManager.canDamage(this, source)) return false;
             // When every defeated slot is occupied, attacks can reduce an encounter
             // to one health point, but the entity cannot die or grant a reward.
             if (this.getHealth() - amount <= 0.0F
@@ -1029,8 +1030,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     @Override public void heal(float amount){if(!isDefeated())super.heal(amount);}
     @Override public void die(DamageSource source){
         if (br.com.petrickfaria.minemon.pokec.WildEncounterManager.isEncounter(this)) {
-            if (source.getEntity() instanceof MinemonCreature attacker
-                    && br.com.petrickfaria.minemon.pokec.WildEncounterManager.enterDowned(this, attacker)) return;
+            if (br.com.petrickfaria.minemon.pokec.WildEncounterManager.enterDowned(this, source)) return;
             setHealth(1.0F); return;
         }
         if(!isTame()){super.die(source);return;}

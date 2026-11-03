@@ -64,9 +64,23 @@ public class MinemonRenderer extends GeoEntityRenderer<MinemonCreature> {
   if(validationObserver!=null)validationObserver.accept(entity,this.minemonModel);
  }
 
- @Override public boolean shouldShowName(MinemonCreature entity){return entity.isTame();}
+ @Override public boolean shouldShowName(MinemonCreature entity){return entity.isTame()
+     ||br.com.petrickfaria.minemon.pokec.WildEncounterManager.isDowned(entity);}
  @Override protected void renderNameTag(MinemonCreature entity,Component name,com.mojang.blaze3d.vertex.PoseStack pose,
       net.minecraft.client.renderer.MultiBufferSource buffers,int packedLight){
+  if(br.com.petrickfaria.minemon.pokec.WildEncounterManager.isDowned(entity)){
+   float wildScale=SpeciesDefinitions.get(entity.getSpeciesSlug()).scale()*(entity.isBaby()?.5F:1);
+   pose.pushPose();
+   try{
+    pose.scale(1/wildScale,1/wildScale,1/wildScale);
+    double top=br.com.petrickfaria.minemon.entity.ModelMetrics.top(entity.getSpeciesSlug(),wildScale);
+    pose.translate(0,Math.max(0,top-entity.getBbHeight()),0);
+    super.renderNameTag(entity,Component.literal("CAPTURAR: Pokébola"),pose,buffers,packedLight);
+    pose.translate(0,-.22D,0);
+    super.renderNameTag(entity,Component.literal("SAQUEAR: agachar + clique"),pose,buffers,packedLight);
+   }finally{pose.popPose();}
+   return;
+  }
   if(!entity.isTame()){super.renderNameTag(entity,name,pose,buffers,packedLight);return;}
   Component shownName=entity.hasCustomName()?entity.getCustomName():entity.getName();
   float scale=SpeciesDefinitions.get(entity.getSpeciesSlug()).scale()*(entity.isBaby()?.5F:1);

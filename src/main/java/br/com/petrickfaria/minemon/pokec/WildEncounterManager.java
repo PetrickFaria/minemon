@@ -171,6 +171,18 @@ public final class WildEncounterManager {
         return WildEncounterData.get((ServerLevel) wild.level).count(owner, "downed") < MAX_DOWNED;
     }
 
+    public static MinemonCreature pokemonAttacker(net.minecraft.world.damagesource.DamageSource source) {
+        if (source.getEntity() instanceof MinemonCreature pokemon) return pokemon;
+        if (source.getEntity() instanceof br.com.petrickfaria.minemon.entity.ElementalProjectile projectile
+                && projectile.getOwner() instanceof MinemonCreature pokemon) return pokemon;
+        return null;
+    }
+
+    public static boolean canDamage(MinemonCreature wild, net.minecraft.world.damagesource.DamageSource source) {
+        MinemonCreature attacker = pokemonAttacker(source);
+        return attacker != null && canDefeat(wild, attacker);
+    }
+
     public static boolean hasDefeatedCapacity(MinemonCreature wild) {
         UUID owner = owner(wild);
         if (owner == null || !(wild.level instanceof ServerLevel level)) return false;
@@ -178,7 +190,8 @@ public final class WildEncounterManager {
         return player != null && WildEncounterData.get(level).count(owner, "downed") < MAX_DOWNED;
     }
 
-    public static boolean enterDowned(MinemonCreature wild, MinemonCreature attacker) {
+    public static boolean enterDowned(MinemonCreature wild, net.minecraft.world.damagesource.DamageSource source) {
+        MinemonCreature attacker = pokemonAttacker(source);
         if (!canDefeat(wild, attacker)) return false;
         var data = wild.getPersistentData();
         data.putString(STATE, "downed"); data.putLong(DOWNED_AT, wild.level.getGameTime());
