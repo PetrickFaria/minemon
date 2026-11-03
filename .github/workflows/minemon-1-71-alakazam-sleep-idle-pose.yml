@@ -54,7 +54,7 @@ jobs:
           after=json.load(open(path))['animations']
           for clip in before:
               if clip != 'animation.alakazam.meditate': assert before[clip] == after[clip], clip
-          print('PASS: 1.69 base retained the approved sleep and all non-meditation clips; 1.71 pose changes are model-only.')
+          print('PASS: 1.70 clips retained except meditation, which now uses ground_idle upper-body tracks and sleep leg tracks.')
           PY
       - name: Create, save, and reopen Alakazam world twice
         env:
@@ -111,7 +111,7 @@ jobs:
           for bone in sleep_legs: assert med[bone] == sleep[bone], bone
           for bone in idle_upper: assert med[bone] == idle[bone], bone
           assert 'body' not in med, 'hover bob must remain independent of pose tracks'
-                    PY
+          PY
           unzip -p "$jar_file" br/com/petrickfaria/minemon/entity/MinemonCreature.class | strings | grep -F 'naturalPhaseForRender'
           grep -F 'PASS ALAKAZAM CLIENT POSE/CYCLE:' run/client-validation.txt
           grep -F 'PASS SERVER WORLD SAVE:' run/world-reopen-pass.txt
