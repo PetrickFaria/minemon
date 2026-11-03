@@ -682,6 +682,16 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     @Override
     public boolean hurt(DamageSource source, float amount) {
         if(isDefeated())return false;
+        if (br.com.petrickfaria.minemon.pokec.WildEncounterManager.isEncounter(this)) {
+            if (br.com.petrickfaria.minemon.pokec.WildEncounterManager.isDowned(this)) return false;
+            if (!(source.getEntity() instanceof MinemonCreature attacker)
+                    || !br.com.petrickfaria.minemon.pokec.WildEncounterManager.canDefeat(this, attacker)) return false;
+            // When every defeated slot is occupied, attacks can reduce an encounter
+            // to one health point, but the entity cannot die or grant a reward.
+            if (this.getHealth() - amount <= 0.0F
+                    && !br.com.petrickfaria.minemon.pokec.WildEncounterManager.hasDefeatedCapacity(this))
+                amount = Math.max(0.0F, this.getHealth() - 1.0F);
+        }
         boolean wokeFromRest=this.isSleeping()||this.isNightResting();
         boolean hurt = super.hurt(source, amount);
         if(hurt&&!this.level.isClientSide){
@@ -987,6 +997,17 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         level.broadcastEntityEvent(this,(byte)61);return true;
     }
     public boolean isDefeated(){return entityData.get(DEFEATED);}
+    /** Called only by the wild encounter manager; domestic defeat remains unchanged. */
+    public void setEncounterDowned(boolean downed) {
+        if (downed) {
+            entityData.set(DEFEATED, true); aiBeforeDefeat = isNoAi(); setNoAi(true);
+            setHealth(1.0F); setTarget(null); getNavigation().stop(); resetLove();
+            attackAnimationTicks=0; stopSpontaneousRun(); setFollowingRun(false); setFollowingOwner(false);
+            setSleeping(true); setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO); fallDistance=0;
+        } else {
+            entityData.set(DEFEATED, false); setNoAi(aiBeforeDefeat); setSleeping(false);
+        }
+    }
     @Override public boolean isAttackable(){return !isDefeated() && super.isAttackable();}
     @Override public boolean canBeSeenAsEnemy(){return !isDefeated() && super.canBeSeenAsEnemy();}
     @Override public boolean isPushable(){return !isDefeated() && super.isPushable();}
@@ -994,6 +1015,11 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     @Override public boolean isDeadOrDying(){return !isDefeated() && super.isDeadOrDying();}
     @Override public void heal(float amount){if(!isDefeated())super.heal(amount);}
     @Override public void die(DamageSource source){
+        if (br.com.petrickfaria.minemon.pokec.WildEncounterManager.isEncounter(this)) {
+            if (source.getEntity() instanceof MinemonCreature attacker
+                    && br.com.petrickfaria.minemon.pokec.WildEncounterManager.enterDowned(this, attacker)) return;
+            setHealth(1.0F); return;
+        }
         if(!isTame()){super.die(source);return;}
         if(isDefeated())return;
         entityData.set(DEFEATED,true);aiBeforeDefeat=isNoAi();setNoAi(true);

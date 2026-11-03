@@ -118,6 +118,8 @@ public final class PokecTransactions {
             player.getInventory().placeItemBackInInventory(new ItemStack(soulItem.get(), Math.min(remaining, stackLimit)));
         player.getInventory().placeItemBackInInventory(PokeballItem.emptyBall(ball));
         menu.setConversionState(player, ItemStack.EMPTY, ItemStack.EMPTY, result);
+        // The token is consumed and the conversion transaction is now committed.
+        PokecPlayerData.addTrainerXp(player, TrainerProgression.pokemonXp(stored.species(), stored.level()) * 0.50D);
         return true;
     }
 

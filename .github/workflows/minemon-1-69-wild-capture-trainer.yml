@@ -1,0 +1,31 @@
+name: Minemon 1.69 work in progress
+on:
+  push:
+    branches: [feature/minemon-1.69-wild-capture-trainer]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Verify 1.68 base ancestry and credentials
+        run: |
+          set -euo pipefail
+          base=48fec7de785cbc4cc44e5eabe7adaac0e7ee79aa
+          git merge-base --is-ancestor "$base" HEAD
+          test "$(git merge-base "$base" HEAD)" = "$base"
+          if rg -n -i '(gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,})' --glob '!gradlew*' .; then
+            echo 'Possible embedded credential found.'
+            exit 1
+          fi
+      - name: Compile and run focused unit tests on Java 17
+        run: ./gradlew --no-daemon clean compileJava compileTestJava test --tests 'br.com.petrickfaria.minemon.pokec.*Test'

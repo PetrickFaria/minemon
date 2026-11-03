@@ -23,6 +23,14 @@ public final class PokecPlayerData {
     }
     public static int coins(ServerPlayer p){return Math.max(0,data(p).getInt("coins"));}
     public static void setCoins(ServerPlayer p,int amount){data(p).putInt("coins",Math.max(0,amount));}
+    public static int trainerLevel(ServerPlayer p){return Math.max(1,Math.min(TrainerProgression.MAX_LEVEL,data(p).getInt("trainerLevel") == 0 ? 1 : data(p).getInt("trainerLevel")));}
+    public static double trainerXp(ServerPlayer p){double value=data(p).getDouble("trainerXp");return Double.isFinite(value)?Math.max(0.0D,value):0.0D;}
+    public static TrainerProgression.Progress addTrainerXp(ServerPlayer p,double amount){
+        CompoundTag d=data(p);
+        TrainerProgression.Progress next=TrainerProgression.add(new TrainerProgression.Progress(trainerLevel(p),trainerXp(p)),amount);
+        d.putInt("trainerLevel",next.level());d.putDouble("trainerXp",next.xpTowardNext());
+        return next;
+    }
     public static boolean isUnlocked(ServerPlayer p,String slug){return data(p).getCompound("unlocked").getBoolean(slug);}
     public static void unlock(ServerPlayer p,String slug){if(PokecSpecies.get(slug)!=null)data(p).getCompound("unlocked").putBoolean(slug,true);}
     public static Set<String> unlocked(ServerPlayer p){CompoundTag tag=data(p).getCompound("unlocked");Set<String> out=new HashSet<>();for(String s:PokecSpecies.ALL.keySet())if(tag.getBoolean(s))out.add(s);return out;}

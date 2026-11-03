@@ -13,12 +13,20 @@ import br.com.petrickfaria.minemon.registry.ModItems;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 @Mod.EventBusSubscriber(modid=Minemon.MOD_ID)
 public final class PokecEvents {
-    @SubscribeEvent public static void serverStarting(ServerStartingEvent event){PokecEconomy.load();}
+    @SubscribeEvent public static void serverStarting(ServerStartingEvent event){
+        PokecEconomy.load();
+        if (event.getServer().overworld() != null) WildEncounterManager.loadConfig(event.getServer().overworld());
+    }
+    @SubscribeEvent public static void wildEncounters(TickEvent.PlayerTickEvent event) {
+        if (event.phase == TickEvent.Phase.END && event.player instanceof net.minecraft.server.level.ServerPlayer player)
+            WildEncounterManager.tickPlayer(player);
+    }
     @SubscribeEvent public static void companionExperience(LivingDeathEvent event) {
         if (event.getEntity().level.isClientSide || !(event.getSource().getEntity() instanceof MinemonCreature attacker)
                 || !attacker.isTame() || !(event.getEntity() instanceof net.minecraft.world.entity.Mob defeated)) return;
