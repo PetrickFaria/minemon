@@ -107,7 +107,7 @@ def is_approved_prior_asset_delta(path, content):
     if path == ARBOK_TEXTURE_PATH:
         return hashlib.sha256(content).hexdigest() == ARBOK_TEXTURE_SHA256
     if path == ALAKAZAM_ANIMATION_PATH:
-        blob_header = f"blob {len(content)}\\0".encode("ascii")
+        blob_header = b"blob " + str(len(content)).encode("ascii") + bytes([0])
         return hashlib.sha1(blob_header + content).hexdigest() == ALAKAZAM_ANIMATION_BLOB_SHA
     return False
 
