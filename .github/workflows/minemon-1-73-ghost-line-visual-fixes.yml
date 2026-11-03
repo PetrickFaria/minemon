@@ -57,6 +57,15 @@ jobs:
           assert before == after, 'Alakazam animations changed from approved 1.71 pose'
           print('PASS: all Alakazam animation clips and approved pose channels remain unchanged from 1.71.')
           PY
+      - name: Create, save, and reopen Alakazam world twice
+        env:
+          MINEMON_TEST_RCON_PASSWORD: ${{ secrets.MINEMON_TEST_RCON_PASSWORD }}
+        run: |
+          if [ -z "$MINEMON_TEST_RCON_PASSWORD" ]; then
+            MINEMON_TEST_RCON_PASSWORD="$(python3 -c 'import secrets; print(secrets.token_urlsafe(32))')"
+          fi
+          export MINEMON_TEST_RCON_PASSWORD
+          python3 tools/test_world_reopen.py
       - name: Verify Ghost line visuals, blink intervals, and real-client screenshots
         run: |
           python3 tools/prepare_client_world.py
@@ -73,15 +82,6 @@ jobs:
           for shot in gastly-front haunter-front-a haunter-front-b gengar-walk gengar-mouth-open gengar-mouth-teeth gengar-sleep-half-sunk-a gengar-sleep-half-sunk-b; do
             test -f "run/screenshots/ghost-line-1.73-$shot.png"
           done
-      - name: Create, save, and reopen Alakazam world twice
-        env:
-          MINEMON_TEST_RCON_PASSWORD: ${{ secrets.MINEMON_TEST_RCON_PASSWORD }}
-        run: |
-          if [ -z "$MINEMON_TEST_RCON_PASSWORD" ]; then
-            MINEMON_TEST_RCON_PASSWORD="$(python3 -c 'import secrets; print(secrets.token_urlsafe(32))')"
-          fi
-          export MINEMON_TEST_RCON_PASSWORD
-          python3 tools/test_world_reopen.py
       - name: Verify two accelerated hover cycles, pose, bob, and real views in Minecraft client
         run: |
           python3 tools/prepare_client_world.py
