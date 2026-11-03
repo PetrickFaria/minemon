@@ -46,6 +46,9 @@ public final class ClientSmokeTest {
  private static final java.util.Map<String,float[]> motionRanges=new java.util.HashMap<>();
  private static int alakazamMeditationRenderFrames;
  private static int alakazamMeditationFirstAirTick=-1;
+ private static BehaviorCycle.Phase alakazamLastNaturalPhase;
+ private static int alakazamCompletedNaturalCycles;
+ private static final java.util.Set<String> alakazamPoseScreenshots=java.util.concurrent.ConcurrentHashMap.newKeySet();
  private static final float[] alakazamMeditationBobRange={Float.MAX_VALUE,-Float.MAX_VALUE};
  private static final double[] alakazamMeditationHeightRange={Double.MAX_VALUE,-Double.MAX_VALUE};
  private static final double[] alakazamMeditationXRange={Double.MAX_VALUE,-Double.MAX_VALUE};
@@ -147,7 +150,7 @@ public final class ClientSmokeTest {
     index,species.size(),dex,slug,phase,completedSpeciesWindows,species.size(),elapsed,lastApprovedCheck);
   System.out.flush();
  }
- private static final int SPECIES_TEST_WINDOW=80;
+ private static final int SPECIES_TEST_WINDOW=Boolean.getBoolean("minemon.clientSmokeAlakazamPose")?280:80;
  private static final int BULBASAUR_VALIDATION_TICK=430;
  private static final int COMBAT_VALIDATION_TICK=BULBASAUR_VALIDATION_TICK+100;
  private static final int SPECIES_START_TICK=COMBAT_VALIDATION_TICK+10;
@@ -292,6 +295,12 @@ public final class ClientSmokeTest {
     // of velocity packets and client-side friction. World movement is still
     // driven by real server travel and checked separately for every species.
     MinemonRenderer.validationInput=entity->{
+     if(entity.getSpeciesSlug().equals("alakazam")&&Boolean.getBoolean("minemon.clientSmokeAlakazamPose")
+         &&entity.naturalPhaseForRender()==BehaviorCycle.Phase.AIR){
+      int airFrame=alakazamMeditationFirstAirTick<0?0:entity.tickCount-alakazamMeditationFirstAirTick;
+      float viewYaw=airFrame>=60?0.0F:airFrame>=36?90.0F:180.0F;
+      entity.setYRot(viewYaw);entity.yBodyRot=viewYaw;entity.yHeadRot=viewYaw;
+     }
      if(entity.getSpeciesSlug().equals("arbok")&&mc.player!=null){
       double dx=mc.player.getX()-entity.getX(),dz=mc.player.getZ()-entity.getZ();
       float yaw=(float)(Math.toDegrees(Math.atan2(dz,dx))-90.0D);
@@ -318,6 +327,12 @@ public final class ClientSmokeTest {
      if(mc.getResourceManager().getResource(model.getTextureResource(entity)).isEmpty())throw new IllegalStateException("Missing rendered texture "+entity.getSpeciesSlug());
      String slug=entity.getSpeciesSlug();renderedSpecies.add(slug);
      String currentClip=entity.getSelectedAnimationForValidation();
+     if(Boolean.getBoolean("minemon.clientSmokeAlakazamPose")&&slug.equals("alakazam")){
+      var naturalPhase=entity.naturalPhaseForRender();
+      if(alakazamLastNaturalPhase==BehaviorCycle.Phase.LANDING&&naturalPhase==BehaviorCycle.Phase.LAND)
+       alakazamCompletedNaturalCycles++;
+      alakazamLastNaturalPhase=naturalPhase;
+     }
      if(Boolean.getBoolean("minemon.clientSmokeAlakazamPose")&&slug.equals("alakazam")
          &&entity.naturalPhaseForRender()==BehaviorCycle.Phase.AIR){
       if(alakazamMeditationFirstAirTick<0)alakazamMeditationFirstAirTick=entity.tickCount;
@@ -337,29 +352,29 @@ public final class ClientSmokeTest {
       var rightHand=processor.getBone("hand_right");var rightSpoon=processor.getBone("spoon_right");
       for(var bone:java.util.List.of(hips,leftUpper,leftLower,leftFoot,rightUpper,rightLower,rightFoot))
        if(bone==null)throw new IllegalStateException("Alakazam meditation lower-body bone missing from rendered model");
-      if(Math.abs(hips.getRotationX()-(float)Math.toRadians(-10.0D))>0.08F
-          ||Math.abs(hips.getPositionY()-hips.getInitialSnapshot().positionOffsetY+12.65F)>0.08F
-          ||Math.abs(leftUpper.getPositionY()-leftUpper.getInitialSnapshot().positionOffsetY+12.5F)>0.08F
-          ||Math.abs(leftUpper.getPositionZ()-leftUpper.getInitialSnapshot().positionOffsetZ+1.0F)>0.08F
-          ||Math.abs(rightUpper.getPositionY()-rightUpper.getInitialSnapshot().positionOffsetY+12.5F)>0.08F
-          ||Math.abs(rightUpper.getPositionZ()-rightUpper.getInitialSnapshot().positionOffsetZ+1.0F)>0.08F
-          ||Math.abs(leftUpper.getRotationX()-(float)Math.toRadians(-157.5D))>0.08F
-          ||Math.abs(leftUpper.getRotationZ()-(float)Math.toRadians(90.0D))>0.08F
-          ||Math.abs(leftLower.getRotationX()-(float)Math.toRadians(75.0D))>0.08F
-          ||Math.abs(leftFoot.getRotationX()-(float)Math.toRadians(67.5D))>0.08F
-          ||Math.abs(rightUpper.getRotationX()-(float)Math.toRadians(-142.5D))>0.08F
-          ||Math.abs(rightUpper.getRotationZ()-(float)Math.toRadians(-90.0D))>0.08F
-          ||Math.abs(rightLower.getRotationX()-(float)Math.toRadians(65.0D))>0.08F
-          ||Math.abs(rightFoot.getRotationX()-(float)Math.toRadians(45.35848D))>0.08F)
-       throw new IllegalStateException("Alakazam's folded sleep-reference leg pose was not applied to the rendered bones");
+      if(Math.abs(hips.getRotationX())>0.08F
+          ||Math.abs(hips.getPositionY()-hips.getInitialSnapshot().positionOffsetY)>0.08F
+          ||Math.abs(leftUpper.getPositionY()-leftUpper.getInitialSnapshot().positionOffsetY)>0.08F
+          ||Math.abs(leftUpper.getPositionZ()-leftUpper.getInitialSnapshot().positionOffsetZ)>0.08F
+          ||Math.abs(rightUpper.getPositionY()-rightUpper.getInitialSnapshot().positionOffsetY)>0.08F
+          ||Math.abs(rightUpper.getPositionZ()-rightUpper.getInitialSnapshot().positionOffsetZ)>0.08F
+          ||Math.abs(leftUpper.getRotationX()-(float)Math.toRadians(65.0D))>0.08F
+          ||Math.abs(leftUpper.getRotationZ())>0.08F
+          ||Math.abs(leftLower.getRotationX()-(float)Math.toRadians(-65.0D))>0.08F
+          ||Math.abs(leftFoot.getRotationX())>0.08F
+          ||Math.abs(rightUpper.getRotationX()-(float)Math.toRadians(65.0D))>0.08F
+          ||Math.abs(rightUpper.getRotationZ())>0.08F
+          ||Math.abs(rightLower.getRotationX()-(float)Math.toRadians(-65.0D))>0.08F
+          ||Math.abs(rightFoot.getRotationX())>0.08F)
+       throw new IllegalStateException("Alakazam hover must keep the bind pivots aligned and bend both legs forward under the pelvis");
       var body=processor.getBone("body");var upperTorso=processor.getBone("upper_torso");
       var lowerTorso=processor.getBone("lower_torso");var head=processor.getBone("head");
       for(var bone:java.util.List.of(body,upperTorso,lowerTorso,head,leftArm,rightArm,
           leftElbow,leftHand,leftSpoon,rightElbow,rightHand,rightSpoon,
           processor.getBone("left_eye"),processor.getBone("right_eye")))
        if(bone==null)throw new IllegalStateException("Alakazam awake upper-body/eye/spoon bone missing from rendered model");
-      if(Math.abs(Math.abs(upperTorso.getRotationX()-upperTorso.getInitialSnapshot().rotationValueX)-(float)Math.toRadians(20.0D))>0.10F
-          ||Math.abs(Math.abs(lowerTorso.getRotationX()-lowerTorso.getInitialSnapshot().rotationValueX)-(float)Math.toRadians(15.0D))>0.10F
+      if(Math.abs(upperTorso.getRotationX()-upperTorso.getInitialSnapshot().rotationValueX)>0.10F
+          ||Math.abs(lowerTorso.getRotationX()-lowerTorso.getInitialSnapshot().rotationValueX)>0.10F
           ||Math.abs(body.getRotationX())>0.08F
           ||Math.abs(Math.abs(head.getRotationX()-head.getInitialSnapshot().rotationValueX)-(float)Math.toRadians(32.5D))>0.14F
           ||Math.abs(head.getRotationY())>(float)Math.toRadians(60.0D)+0.08F
@@ -379,7 +394,7 @@ public final class ClientSmokeTest {
           ||Math.abs(Math.abs(rightSpoon.getRotationX())-(float)Math.toRadians(11.00654D))>0.12F
           ||Math.abs(leftSpoon.getRotationY())>0.12F||Math.abs(rightSpoon.getRotationY())>0.12F
           ||Math.abs(leftSpoon.getRotationZ())>0.12F||Math.abs(rightSpoon.getRotationZ())>0.12F)
-       throw new IllegalStateException("Alakazam meditation pose lost sleep-reference torso/legs, ground-walk arms/head, aligned hands/spoons, or hip connection: body="
+       throw new IllegalStateException("Alakazam hover pose lost upright torso, forward folded legs, ground-walk arms/head, aligned hands/spoons, or hip connection: body="
            +body.getRotationX()+", lowerTorso="+lowerTorso.getRotationX()+", upperTorso="+upperTorso.getRotationX()
            +", head="+head.getRotationX()+"/"+head.getRotationY()+", arms="+leftArm.getRotationX()+"/"+leftArm.getRotationZ()
            +" bases="+leftArm.getInitialSnapshot().rotationValueX+"/"+leftArm.getInitialSnapshot().rotationValueZ
@@ -401,6 +416,17 @@ public final class ClientSmokeTest {
        alakazamMeditationZRange[1]=Math.max(alakazamMeditationZRange[1],pos.z);
       }
       alakazamMeditationRenderFrames++;
+      int airFrame=entity.tickCount-alakazamMeditationFirstAirTick;
+      if(airFrame>=12&&alakazamPoseScreenshots.add("front")){
+       mc.options.hideGui=true;
+       Screenshot.grab(mc.gameDirectory,"alakazam-1.70-front.png",mc.getMainRenderTarget(),message->System.out.println("[CLIENT SMOKE] screenshot front: "+message));
+      }else if(airFrame>=36&&alakazamPoseScreenshots.add("side")){
+       mc.options.hideGui=true;
+       Screenshot.grab(mc.gameDirectory,"alakazam-1.70-side.png",mc.getMainRenderTarget(),message->System.out.println("[CLIENT SMOKE] screenshot side: "+message));
+      }else if(airFrame>=60&&alakazamPoseScreenshots.add("back")){
+       mc.options.hideGui=true;
+       Screenshot.grab(mc.gameDirectory,"alakazam-1.70-back.png",mc.getMainRenderTarget(),message->System.out.println("[CLIENT SMOKE] screenshot back: "+message));
+      }
       }
      }
      lastRenderedEntityTick.put(slug,entity.tickCount);
@@ -713,8 +739,11 @@ public final class ClientSmokeTest {
       throw new IllegalStateException("Alakazam client hover verification failed: frames="+alakazamMeditationRenderFrames
           +" modelBob="+bob+" physicalHeight="+java.util.Arrays.toString(alakazamMeditationHeightRange)
           +" horizontalDrift="+horizontal);
-     Files.writeString(Path.of("client-validation.txt"),"PASS ALAKAZAM CLIENT POSE: rendered sleep-reference torso/hip/leg posture, ground-walk arms/head/face and hands/spoons, unchanged sleep clip, and model-space vertical bob="+bob+"; physical hover height="+java.util.Arrays.toString(alakazamMeditationHeightRange)+"; horizontal drift="+horizontal+"; render frames="+alakazamMeditationRenderFrames+".\n",StandardOpenOption.APPEND);
-     Screenshot.grab(mc.gameDirectory,"alakazam-meditation.png",mc.getMainRenderTarget(),message->{});
+     if(!alakazamPoseScreenshots.containsAll(java.util.Set.of("front","side","back")))
+      throw new IllegalStateException("Missing real Alakazam hover screenshots: "+alakazamPoseScreenshots);
+     if(alakazamCompletedNaturalCycles<2)
+      throw new IllegalStateException("Alakazam did not complete two natural walk-hover-land cycles in fast client validation; completed="+alakazamCompletedNaturalCycles);
+     Files.writeString(Path.of("client-validation.txt"),"PASS ALAKAZAM CLIENT POSE/CYCLE: upright torso; awake head and walk arms/hands/spoons; bind pivots with forward-folded legs; sleep clip unchanged; three real AIR screenshots (front, side, back); completed natural cycles="+alakazamCompletedNaturalCycles+"; model-space vertical bob="+bob+"; physical hover height="+java.util.Arrays.toString(alakazamMeditationHeightRange)+"; horizontal drift="+horizontal+"; render frames="+alakazamMeditationRenderFrames+".\n",StandardOpenOption.APPEND);
     }
     for(String slug:java.util.List.of("charmander","charmeleon","charizard")) {
      if(!species.contains(slug))continue;

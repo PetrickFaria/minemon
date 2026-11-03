@@ -166,13 +166,16 @@ public final class BehaviorCycle {
     }
 
     private void tickGroundFloat(Observation o) {
+        boolean fastAlakazamTest = "alakazam".equals(speciesSlug)
+                && Boolean.getBoolean("minemon.testFastAlakazamCycle");
         switch (phase) {
             case LAND -> {
-                if (o.ground() && ++ticks >= ("alakazam".equals(speciesSlug) ? TICKS_PER_MINUTE * 3 : TICKS_PER_MINUTE * 5)) { stage = 0; enter(Phase.TAKEOFF); }
+                if (o.ground() && ++ticks >= ("alakazam".equals(speciesSlug)
+                        ? fastAlakazamTest ? 20 : TICKS_PER_MINUTE * 3 : TICKS_PER_MINUTE * 5)) { stage = 0; enter(Phase.TAKEOFF); }
             }
             case TAKEOFF -> { if (o.flightBand()) enter(Phase.AIR); }
             case AIR -> {
-                int limit = "alakazam".equals(speciesSlug) ? TICKS_PER_MINUTE / 2
+                int limit = "alakazam".equals(speciesSlug) ? fastAlakazamTest ? 80 : TICKS_PER_MINUTE / 2
                         : stage == 0 ? TICKS_PER_MINUTE * 3
                         : "gengar".equals(speciesSlug) ? TICKS_PER_MINUTE * 2 : 0;
                 if (limit > 0 && o.flightBand() && ++ticks >= limit) {
@@ -263,6 +266,8 @@ public final class BehaviorCycle {
 
     private int phaseLimit() {
         if ("gastly".equals(speciesSlug)) return stage == 0 ? 6000 : 3600;
+        if ("alakazam".equals(speciesSlug) && Boolean.getBoolean("minemon.testFastAlakazamCycle"))
+            return phase == Phase.AIR ? 80 : phase == Phase.LAND || phase == Phase.COOLDOWN ? 20 : 0;
         return switch (phase) {
             case LAND, COOLDOWN -> "alakazam".equals(speciesSlug) ? TICKS_PER_MINUTE * 3 : TICKS_PER_MINUTE * 5;
             case AIR -> "alakazam".equals(speciesSlug) ? TICKS_PER_MINUTE / 2 : stage == 0 ? TICKS_PER_MINUTE * 3 : profile == Profile.GROUND_FLIGHT ? TICKS_PER_MINUTE * 2

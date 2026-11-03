@@ -75,26 +75,28 @@ public class MinemonModel extends AnimatedGeoModel<MinemonCreature> {
     }
 
     /**
-     * GeckoLib 3 does not apply the imported meditation clip's static Bedrock
-     * vectors to the Alakazam hip and leg bones in the live model. Reapply the
-     * complete lower-body sleep-reference pose after animation evaluation.
-     * The hips and upper legs must share the clip's downward offset: the legs
-     * are children of the body while the torso is a child of the hips, so
-     * resetting only the hips to their bind position separates both regions.
-     * This is limited to natural AIR and leaves sleep and ground poses alone.
+     * Keep the awake Alakazam upright while it floats. The previous sleep
+     * offsets lowered hips and thighs by nearly their full segment length and
+     * the opposing 90 degree roll rotations splayed the legs away from the
+     * pelvis. Restore the rig's bind pivots, bend the thighs forward and fold
+     * the shins back underneath them. Arms, hands, head, and spoons continue to
+     * come from the awake meditation animation, and sleep/ground poses remain
+     * untouched.
      */
     private void applyAlakazamMeditationPose(MinemonCreature entity) {
         if (!entity.getSpeciesSlug().equals("alakazam")
                 || entity.naturalPhaseForRender() != br.com.petrickfaria.minemon.entity.BehaviorCycle.Phase.AIR
                 || entity.isSleeping() || entity.isOrderedToSit()) return;
 
-        setMeditationBone("hips", 0.0F, -12.65F, 0.0F, -10.0F, 0.0F, 0.0F);
-        setMeditationBone("left_upper_leg", 0.0F, -12.5F, -1.0F, -157.5F, 0.0F, 90.0F);
-        setMeditationBone("left_lower_leg", 0.0F, 0.0F, 0.0F, 75.0F, 0.0F, 0.0F);
-        setMeditationBone("foot_left", 0.0F, 0.0F, 0.0F, 67.5F, 0.0F, 0.0F);
-        setMeditationBone("right_upper_leg", 0.0F, -12.5F, -1.0F, -142.5F, 0.0F, -90.0F);
-        setMeditationBone("right_lower_leg", 0.0F, 0.0F, 0.0F, 65.0F, 0.0F, 0.0F);
-        setMeditationBone("foot_right", 0.0F, 0.0F, 0.0F, 45.35848F, -1.27891F, -0.94327F);
+        setMeditationBone("hips", 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
+        setMeditationBone("upper_torso", 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
+        setMeditationBone("lower_torso", 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
+        setMeditationBone("left_upper_leg", 0.0F, 0.0F, 0.0F, 65.0F, 0.0F, 0.0F);
+        setMeditationBone("left_lower_leg", 0.0F, 0.0F, 0.0F, -65.0F, 0.0F, 0.0F);
+        setMeditationBone("foot_left", 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
+        setMeditationBone("right_upper_leg", 0.0F, 0.0F, 0.0F, 65.0F, 0.0F, 0.0F);
+        setMeditationBone("right_lower_leg", 0.0F, 0.0F, 0.0F, -65.0F, 0.0F, 0.0F);
+        setMeditationBone("foot_right", 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
     }
 
     private void setMeditationBone(String name, float x, float y, float z, float pitch, float yaw, float roll) {

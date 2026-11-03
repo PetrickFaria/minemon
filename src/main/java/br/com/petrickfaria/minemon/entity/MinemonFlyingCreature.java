@@ -69,8 +69,7 @@ public final class MinemonFlyingCreature extends MinemonCreature {
    double floor=this.naturalSurface();
    double target=this.naturalCycle().phase()==BehaviorCycle.Phase.LANDING?floor:floor+1.0D;
    double difference=target-this.getY();
-   double step=net.minecraft.util.Mth.clamp(difference,-0.08D,0.08D);
-   if(Math.abs(difference)<0.005D)step=0.0D;
+   double step=groundFloatCycleStep(this.naturalCycle().phase(),difference,this.onGround());
    if(step!=0.0D)this.move(net.minecraft.world.entity.MoverType.SELF,new net.minecraft.world.phys.Vec3(0.0D,step,0.0D));
    this.setDeltaMovement(0.0D,0.0D,0.0D);this.fallDistance=0.0F;
    return;
@@ -122,6 +121,17 @@ public final class MinemonFlyingCreature extends MinemonCreature {
     this.move(net.minecraft.world.entity.MoverType.SELF,new net.minecraft.world.phys.Vec3(0.0D,lift,0.0D));
    }
   }
+ }
+ public static double groundFloatCycleStep(BehaviorCycle.Phase phase,double difference,boolean onGround){
+  double step=net.minecraft.util.Mth.clamp(difference,-0.08D,0.08D);
+  // Keep a small collision-checked downward contact step when the entity is
+  // within the old dead band. Otherwise it can hover a few thousandths above
+  // the surface forever, leaving the cycle in LANDING and wander disabled.
+  if(Math.abs(difference)<0.005D){
+   if(phase==BehaviorCycle.Phase.LANDING&&!onGround)step=difference<=0.0D?-0.01D:difference;
+   else step=0.0D;
+  }
+  return step;
  }
  @Override public void tick(){
   super.tick();
