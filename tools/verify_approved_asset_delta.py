@@ -102,6 +102,8 @@ APPROVED_PRIOR_ASSET_BLOBS = {
     "assets/minemon/animations/alakazam_cobblemon_1_8_2/alakazam.animation.json": "b170a8296d7b5ed065c6d699294649e2f5401752",
     # Gengar ground-walk clip added and client-validated in Minemon 1.73 commit 4595aa4d9053201afcc3a2bd9db77c5ef15591de.
     "assets/minemon/animations/gengar_cobblemon_1_8_2/gengar.animation.json": "e90ad86acd79c16359a2e4cd00edcd7659662b05",
+    # Magikarp whisker/sleep pose approved in commit 9a87bf8c4c0f48d6303b1cda3d39e95b26d8496d.
+    "assets/minemon/animations/magikarp_cobblemon_1_8_2/magikarp.animation.json": "566e87dd1c116b8f494ac2c560bdc5441563c7d1",
     # Move Seaking eye cubes to their own bone for aquatic sleep, commit bd2cde6f0ded91c9d0cd8a89f6547e3a052e4ae9.
     "assets/minemon/geo/seaking/seaking_female.geo.json": "c7ffc76315a32345e52b9daee4c3d266143306c2",
     "assets/minemon/geo/seaking/seaking_male.geo.json": "0382d06a1e0d5d5384dc81d2fab2b614d062f297",
