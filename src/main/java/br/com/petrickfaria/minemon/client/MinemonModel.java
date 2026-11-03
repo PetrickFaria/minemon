@@ -259,9 +259,19 @@ public class MinemonModel extends AnimatedGeoModel<MinemonCreature> {
             pitch=(float)Math.sin(time*0.061D)*0.014F;
             roll=(float)Math.cos(time*0.073D)*0.012F;
         }
-        body.setPositionY(body.getPositionY()+bob);
-        body.setRotationX(body.getRotationX()+pitch);
-        body.setRotationZ(body.getRotationZ()+roll);
+        if (alakazamHover) {
+            // The meditation clip does not key the body bone. Set the bob from
+            // its bind snapshot so repeated render frames and repeated hover
+            // cycles cannot accumulate a vertical offset.
+            var initial = body.getInitialSnapshot();
+            body.setPositionY(initial.positionOffsetY + bob);
+            body.setRotationX(initial.rotationValueX + pitch);
+            body.setRotationZ(initial.rotationValueZ + roll);
+        } else {
+            body.setPositionY(body.getPositionY()+bob);
+            body.setRotationX(body.getRotationX()+pitch);
+            body.setRotationZ(body.getRotationZ()+roll);
+        }
     }
 
     private void applyGengarEyeVisibility(MinemonCreature entity) {

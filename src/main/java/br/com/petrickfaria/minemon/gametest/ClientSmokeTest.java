@@ -46,6 +46,7 @@ public final class ClientSmokeTest {
  private static final java.util.Map<String,float[]> motionRanges=new java.util.HashMap<>();
  private static int alakazamMeditationRenderFrames;
  private static int alakazamMeditationFirstAirTick=-1;
+ private static int alakazamCurrentAirFirstTick=-1;
  private static BehaviorCycle.Phase alakazamLastNaturalPhase;
  private static int alakazamCompletedNaturalCycles;
  private static final java.util.Set<String> alakazamPoseScreenshots=java.util.concurrent.ConcurrentHashMap.newKeySet();
@@ -331,6 +332,8 @@ public final class ClientSmokeTest {
       var naturalPhase=entity.naturalPhaseForRender();
       if(alakazamLastNaturalPhase==BehaviorCycle.Phase.LANDING&&naturalPhase==BehaviorCycle.Phase.LAND)
        alakazamCompletedNaturalCycles++;
+      if(naturalPhase==BehaviorCycle.Phase.AIR&&alakazamLastNaturalPhase!=BehaviorCycle.Phase.AIR)
+       alakazamCurrentAirFirstTick=entity.tickCount;
       alakazamLastNaturalPhase=naturalPhase;
      }
      if(Boolean.getBoolean("minemon.clientSmokeAlakazamPose")&&slug.equals("alakazam")
@@ -406,7 +409,7 @@ public final class ClientSmokeTest {
            +" and "+rightSpoon.getPositionX()+"/"+rightSpoon.getRotationX()+"/"+rightSpoon.getRotationY()+"/"+rightSpoon.getRotationZ());
       alakazamMeditationBobRange[0]=Math.min(alakazamMeditationBobRange[0],body.getPositionY());
       alakazamMeditationBobRange[1]=Math.max(alakazamMeditationBobRange[1],body.getPositionY());
-      if(alakazamMeditationRenderFrames>=10){
+      if(alakazamCurrentAirFirstTick>=0&&entity.tickCount-alakazamCurrentAirFirstTick>=8){
        double height=entity.getY()-entity.naturalSurface();var pos=entity.position();
        alakazamMeditationHeightRange[0]=Math.min(alakazamMeditationHeightRange[0],height);
        alakazamMeditationHeightRange[1]=Math.max(alakazamMeditationHeightRange[1],height);
