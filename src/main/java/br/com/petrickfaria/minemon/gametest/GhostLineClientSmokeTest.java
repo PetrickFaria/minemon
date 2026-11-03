@@ -1,6 +1,7 @@
 package br.com.petrickfaria.minemon.gametest;
 
 import br.com.petrickfaria.minemon.client.MinemonRenderer;
+import br.com.petrickfaria.minemon.client.MinemonModel;
 import br.com.petrickfaria.minemon.entity.MinemonCreature;
 import br.com.petrickfaria.minemon.registry.ModEntities;
 import net.minecraft.client.Minecraft;
@@ -22,8 +23,12 @@ final class GhostLineClientSmokeTest {
  private static final Set<String> captures=new HashSet<>();
  private static String pendingScreenshot;
  private static int pendingScreenshotDelay;
+ private static float gengarSleepBobMin=Float.POSITIVE_INFINITY,gengarSleepBobMax=Float.NEGATIVE_INFINITY;
  private static void snap(Minecraft mc,String key){
   if(captures.add(key)){pendingScreenshot=key;pendingScreenshotDelay=4;}
+ }
+ private static void snapNow(Minecraft mc,String key){
+  if(captures.add(key)){pendingScreenshot=key;pendingScreenshotDelay=0;}
  }
  private static MinemonCreature find(Minecraft mc,UUID id){
   if(id==null||mc.level==null)return null;
@@ -63,7 +68,16 @@ final class GhostLineClientSmokeTest {
     if(pendingScreenshotDelay>0)pendingScreenshotDelay--;
     else{
      String view=pendingScreenshot;pendingScreenshot=null;
-     Screenshot.grab(mc.gameDirectory,"ghost-line-1.73-"+view+".png",mc.getMainRenderTarget(),m->System.out.println("[GHOST LINE] screenshot "+view+": "+m));
+     if(view.equals("haunter-blink")){
+      var mob=find(mc,haunterId);
+      if(mob==null||!MinemonModel.ghostEyesClosedForValidation(mob))
+       throw new IllegalStateException("Haunter blink frame did not render the closed-eye mesh");
+     }else if(view.equals("gengar-blink")){
+      var mob=find(mc,gengarId);
+      if(mob==null||!MinemonModel.ghostEyesClosedForValidation(mob))
+       throw new IllegalStateException("Gengar blink frame did not render the closed-eye mesh");
+     }
+     Screenshot.grab(mc.gameDirectory,"ghost-line-1.74-"+view+".png",mc.getMainRenderTarget(),m->System.out.println("[GHOST LINE] screenshot "+view+": "+m));
     }
    }
    if(!opened&&mc.screen instanceof TitleScreen){
@@ -100,26 +114,37 @@ final class GhostLineClientSmokeTest {
    MinemonCreature gastly=find(mc,gastlyId),haunter=find(mc,haunterId),gengar=find(mc,gengarId);
    if(gastly==null||haunter==null||gengar==null)return;
    if(ticks>=5&&!captures.contains("gastly-front")){face(mc,gastly);snap(mc,"gastly-front");}
+   if(ticks>=8&&!captures.contains("gastly-no-tongue")&&MinemonModel.gastlyTongueHiddenForValidation(gastly)){
+    face(mc,gastly);snapNow(mc,"gastly-no-tongue");
+   }
    if(ticks>=25&&!captures.contains("haunter-front-a")){face(mc,haunter);snap(mc,"haunter-front-a");}
    if(ticks>=75&&!captures.contains("haunter-front-b")){face(mc,haunter);snap(mc,"haunter-front-b");}
+   if(ticks>=100&&haunter.isBlinkingForRender()&&pendingScreenshot==null&&!captures.contains("haunter-blink")){
+    face(mc,haunter);snapNow(mc,"haunter-blink");
+   }
+   if(ticks>=100&&gengar.isBlinkingForRender()&&pendingScreenshot==null&&!captures.contains("gengar-blink")){
+    face(mc,gengar);snapNow(mc,"gengar-blink");
+   }
    if(ticks>=90&&ticks<145){
     mc.getSingleplayerServer().execute(()->{
      var authoritative=mc.getSingleplayerServer().overworld().getEntity(gengarId);
      if(authoritative instanceof MinemonCreature g){g.setOnGround(true);g.setDeltaMovement(0.055D,0,0);}
     });
    }
-   if(ticks>=115&&ticks<145&&!captures.contains("gengar-walk")){face(mc,gengar);snap(mc,"gengar-walk");}
+   if(ticks>=115&&ticks<145&&!captures.contains("gengar-walk")){
+    if(!"animation.gengar.ground_walk".equals(readClip(gengar)))
+     throw new IllegalStateException("Gengar walking screenshot was not captured during ground_walk: "+readClip(gengar));
+    face(mc,gengar);snap(mc,"gengar-walk");
+   }
    if(ticks>=150){
     mc.getSingleplayerServer().execute(()->{
      var authoritative=mc.getSingleplayerServer().overworld().getEntity(gengarId);
      if(authoritative instanceof MinemonCreature g)g.setDeltaMovement(0,0,0);
     });
    }
-   if(ticks>=150&&ticks<345){
-    face(mc,gengar);
-    boolean open=Math.floorMod(gengar.tickCount+gengar.getId()*53,240)>=120;
-    if(open&&!captures.contains("gengar-mouth-open"))snap(mc,"gengar-mouth-open");
-    if(!open&&!captures.contains("gengar-mouth-teeth"))snap(mc,"gengar-mouth-teeth");
+   if(ticks>=160&&!captures.contains("gengar-mouth-teeth-fixed")
+       &&MinemonModel.gengarTeethMouthForValidation(gengar)){
+    face(mc,gengar);snap(mc,"gengar-mouth-teeth-fixed");
    }
    if(ticks>=705&&!sleepStarted){
     mc.getSingleplayerServer().execute(()->{
@@ -130,6 +155,10 @@ final class GhostLineClientSmokeTest {
    }
    if(sleepStarted&&ticks>=730&&!captures.contains("gengar-sleep-half-sunk-a")){face(mc,gengar);snap(mc,"gengar-sleep-half-sunk-a");}
    if(sleepStarted&&ticks>=760&&!captures.contains("gengar-sleep-half-sunk-b")){face(mc,gengar);snap(mc,"gengar-sleep-half-sunk-b");}
+   if(sleepStarted){
+    float bob=MinemonModel.gengarSleepBobForValidation(gengar);
+    if(Float.isFinite(bob)){gengarSleepBobMin=Math.min(gengarSleepBobMin,bob);gengarSleepBobMax=Math.max(gengarSleepBobMax,bob);}
+   }
    if(ticks>=700&&!blinkChecked){
     blinkChecked=true;
     int haunterBlink=haunter.blinkEventsForValidation(),gengarBlink=gengar.blinkEventsForValidation();
@@ -140,12 +169,17 @@ final class GhostLineClientSmokeTest {
    if(ticks>=800){
     if(br.com.petrickfaria.minemon.client.GastlyCoreRenderHook.redrawsForValidation()==0)
      throw new IllegalStateException("Gastly was never redrawn above particles during the real-client test");
-    for(String key:List.of("gastly-front","haunter-front-a","haunter-front-b","gengar-walk","gengar-mouth-open","gengar-mouth-teeth","gengar-sleep-half-sunk-a","gengar-sleep-half-sunk-b"))
+    for(String key:List.of("gastly-front","gastly-no-tongue","haunter-front-a","haunter-front-b","haunter-blink",
+            "gengar-walk","gengar-blink","gengar-mouth-teeth-fixed","gengar-sleep-half-sunk-a","gengar-sleep-half-sunk-b"))
      if(!captures.contains(key))throw new IllegalStateException("Missing real-client ghost screenshot: "+key);
+    if(!MinemonModel.gastlyTongueHiddenForValidation(gastly))throw new IllegalStateException("Gastly tongue expression was not suppressed");
+    if(!MinemonModel.gengarTeethMouthForValidation(gengar))throw new IllegalStateException("Gengar teeth mouth was not selected");
+    if(gengarSleepBobMax-gengarSleepBobMin<0.2F)
+     throw new IllegalStateException("Gengar sleep body bob did not vary enough: "+gengarSleepBobMin+".."+gengarSleepBobMax);
     Files.writeString(Path.of("client-validation-ghost-line.txt"),
-      "PASS GHOST LINE CLIENT: real Minecraft render captured Gastly aura/core, two Haunter idle moments, Gengar grounded gait, both authored mouth meshes, and half-sunk bobbing sleep.\n"
+      "PASS GHOST LINE CLIENT: real Minecraft render captured Gastly aura/core with tongue suppressed, visible Haunter and Gengar closed-eye blinks, Gengar lowered-arm gait, fixed teeth mouth, and less-sunk bobbing sleep.\n"
       +"Haunter blink events="+haunter.blinkEventsForValidation()+", last interval="+haunter.lastBlinkIntervalForValidation()+" ticks; Gengar blink events="+gengar.blinkEventsForValidation()+", last interval="+gengar.lastBlinkIntervalForValidation()+" ticks.\n"
-      +"Haunter hand phase is derived from the body phase at tick-20 (one second); Gengar ground walk clip="+readClip(gengar)+"; sleep vertical bob is driven by the existing body bone in model space.\n");
+      +"Haunter hand phase lag="+br.com.petrickfaria.minemon.entity.GhostLineAnimationRules.HAUNTER_HAND_LAG_TICKS+" ticks (2.5 seconds); Gengar ground walk clip="+readClip(gengar)+"; measured sleep bob range="+gengarSleepBobMin+".."+gengarSleepBobMax+".\n");
     System.out.println("[GHOST LINE] PASS: screenshots and runtime checks complete.");
     mc.stop();
    }

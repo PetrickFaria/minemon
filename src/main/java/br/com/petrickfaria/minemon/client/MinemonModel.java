@@ -7,6 +7,16 @@ import net.minecraft.resources.ResourceLocation;
 import software.bernie.geckolib3.model.AnimatedGeoModel;
 
 public class MinemonModel extends AnimatedGeoModel<MinemonCreature> {
+    private static final java.util.Set<java.util.UUID> GHOST_EYES_CLOSED_FOR_VALIDATION=java.util.concurrent.ConcurrentHashMap.newKeySet();
+    private static final java.util.Set<java.util.UUID> GASTLY_TONGUE_HIDDEN_FOR_VALIDATION=java.util.concurrent.ConcurrentHashMap.newKeySet();
+    private static final java.util.Set<java.util.UUID> GENGAR_TEETH_MOUTH_FOR_VALIDATION=java.util.concurrent.ConcurrentHashMap.newKeySet();
+    private static final java.util.Map<java.util.UUID,Float> GENGAR_SLEEP_BOB_FOR_VALIDATION=new java.util.concurrent.ConcurrentHashMap<>();
+
+    public static boolean ghostEyesClosedForValidation(MinemonCreature entity){return GHOST_EYES_CLOSED_FOR_VALIDATION.contains(entity.getUUID());}
+    public static boolean gastlyTongueHiddenForValidation(MinemonCreature entity){return GASTLY_TONGUE_HIDDEN_FOR_VALIDATION.contains(entity.getUUID());}
+    public static boolean gengarTeethMouthForValidation(MinemonCreature entity){return GENGAR_TEETH_MOUTH_FOR_VALIDATION.contains(entity.getUUID());}
+    public static float gengarSleepBobForValidation(MinemonCreature entity){return GENGAR_SLEEP_BOB_FOR_VALIDATION.getOrDefault(entity.getUUID(),Float.NaN);}
+
     private static final java.util.Map<MinemonCreature, Boolean> DEWGONG_SLEEPING =
             java.util.Collections.synchronizedMap(new java.util.WeakHashMap<>());
     @Override
@@ -30,6 +40,8 @@ public class MinemonModel extends AnimatedGeoModel<MinemonCreature> {
         applyDewgongEyeVisibility(entity);
         applyAquaticSleepEyeVisibility(entity);
         applyPidgeWingVisibility(entity);
+        applyGastlyTongueVisibility(entity);
+        applyHaunterEyeVisibility(entity);
         applyGengarEyeVisibility(entity);
         applyGengarMouthExpression(entity);
         applyHaunterIdleLag(entity);
@@ -188,7 +200,7 @@ public class MinemonModel extends AnimatedGeoModel<MinemonCreature> {
         }
     }
 
-    /** Haunter's existing body sway leads the hands by exactly twenty ticks (one second). */
+    /** Haunter's idle hands follow the torso with the approved 50-tick (2.5 second) phase lag. */
     private void applyHaunterIdleLag(MinemonCreature entity) {
         if(!entity.getSpeciesSlug().equals("haunter") || entity.isSleeping()
                 || entity.isOrderedToSit() || entity.isDeadOrDying()
@@ -198,29 +210,27 @@ public class MinemonModel extends AnimatedGeoModel<MinemonCreature> {
         float bodySway=(float)Math.sin(ticks*0.075D)*0.045F;
         var torso=getAnimationProcessor().getBone("torso");
         if(torso!=null)torso.setRotationX(torso.getRotationX()+bodySway);
-        float delayed=(float)Math.sin((ticks-20.0D)*0.075D)*0.055F;
+        float delayed=(float)Math.sin((ticks-br.com.petrickfaria.minemon.entity.GhostLineAnimationRules.HAUNTER_HAND_LAG_TICKS)*0.075D)*0.055F;
         for(String hand:java.util.List.of("hand_left1","hand_right1")) {
             var bone=getAnimationProcessor().getBone(hand);
             if(bone!=null)bone.setRotationZ(bone.getRotationZ()+delayed);
         }
     }
 
-    /** Selects the two authored mouth meshes only; the source texture and cry clip stay intact. */
+    /** Keep the authored teeth mesh selected in every Gengar pose. */
     private void applyGengarMouthExpression(MinemonCreature entity) {
         if(!entity.getSpeciesSlug().equals("gengar"))return;
-        boolean animate=!entity.isSleeping()&&!entity.isOrderedToSit()
-                &&!entity.isDeadOrDying()&&!entity.isAttackAnimationActive();
-        boolean open=animate&&Math.floorMod(entity.tickCount+entity.getId()*53,240)>=120;
-        var closed=getAnimationProcessor().getBone("mouth_closed");
-        var ajar=getAnimationProcessor().getBone("mouth_ajar");
-        var openBone=getAnimationProcessor().getBone("mouth_open");
-        if(closed!=null)closed.setHidden(open,false);
-        if(ajar!=null)ajar.setHidden(true,true);
-        if(openBone!=null)openBone.setHidden(!open,false);
-        for(String name:java.util.List.of("O_mouth","sad_mouth_closed","sad_mouth_ajar","sad_mouth_open")) {
-            var alternate=getAnimationProcessor().getBone(name);
-            if(alternate!=null)alternate.setHidden(true,true);
+        boolean teethSelected=false;
+        for(String name:java.util.List.of("mouth_closed","mouth_ajar","mouth_open","O_mouth",
+                "sad_mouth_closed","sad_mouth_ajar","sad_mouth_open")) {
+            var bone=getAnimationProcessor().getBone(name);
+            if(bone==null)continue;
+            boolean visible=br.com.petrickfaria.minemon.entity.GhostLineAnimationRules.isGengarTeethMouthBoneVisible(name);
+            bone.setHidden(!visible,false);
+            if(name.equals("mouth_closed")&&visible)teethSelected=true;
         }
+        if(teethSelected)GENGAR_TEETH_MOUTH_FOR_VALIDATION.add(entity.getUUID());
+        else GENGAR_TEETH_MOUTH_FOR_VALIDATION.remove(entity.getUUID());
     }
 
     /** Small additive body motion keeps hovering visually distinct from the wing-driven flight clips. */
@@ -244,6 +254,7 @@ public class MinemonModel extends AnimatedGeoModel<MinemonCreature> {
             bob=(float)Math.sin(time*0.11D)*0.70F;
             pitch=0.0F;
             roll=0.0F;
+            if(Boolean.getBoolean("minemon.clientSmokeTest"))GENGAR_SLEEP_BOB_FOR_VALIDATION.put(entity.getUUID(),bob);
         }else if(alakazamHover){
             // Keep the approved fixed hover height in world physics. This tiny
             // model-space bob matches Abra's subtle float without moving the
@@ -275,20 +286,49 @@ public class MinemonModel extends AnimatedGeoModel<MinemonCreature> {
         }
     }
 
+    private void applyGastlyTongueVisibility(MinemonCreature entity) {
+        if(!entity.getSpeciesSlug().equals("gastly"))return;
+        // GeckoLib clamps the source clip's zero tongue scale to a visible sliver.
+        // Hide only the unused tongue-open expression; keep the closed mouth and aura untouched.
+        var tongueMouth=getAnimationProcessor().getBone("mouth_tongue_full_open");
+        if(tongueMouth!=null)tongueMouth.setHidden(true,true);
+        if(tongueMouth!=null)GASTLY_TONGUE_HIDDEN_FOR_VALIDATION.add(entity.getUUID());
+        else GASTLY_TONGUE_HIDDEN_FOR_VALIDATION.remove(entity.getUUID());
+    }
+
+    private void applyHaunterEyeVisibility(MinemonCreature entity) {
+        if(!entity.getSpeciesSlug().equals("haunter"))return;
+        boolean closed=br.com.petrickfaria.minemon.entity.GhostLineAnimationRules.shouldShowClosedGhostEyes(
+                "haunter",entity.isSleeping(),entity.isBlinkingForRender());
+        for(String side:java.util.List.of("left","right")) {
+            for(String name:java.util.List.of("full_eye_","half_eye_","pupil_")) {
+                var open=getAnimationProcessor().getBone(name+side);
+                if(open!=null)open.setHidden(closed,false);
+            }
+            var lid=getAnimationProcessor().getBone("closed_eyelid_"+side);
+            if(lid!=null)lid.setHidden(!closed,false);
+        }
+        if(closed)GHOST_EYES_CLOSED_FOR_VALIDATION.add(entity.getUUID());
+        else GHOST_EYES_CLOSED_FOR_VALIDATION.remove(entity.getUUID());
+    }
+
     private void applyGengarEyeVisibility(MinemonCreature entity) {
         if(!entity.getSpeciesSlug().equals("gengar"))return;
-        boolean sleeping=entity.isSleeping();
+        boolean closed=br.com.petrickfaria.minemon.entity.GhostLineAnimationRules.shouldShowClosedGhostEyes(
+                "gengar",entity.isSleeping(),entity.isBlinkingForRender());
         for(String side:java.util.List.of("left","right")) {
             var eye=getAnimationProcessor().getBone("eye_"+side);
-            // Hide only the open-eye cube; its closed-lid descendant must render.
-            if(eye!=null)eye.setHidden(sleeping,false);
+            // Hide only the open-eye cube; the closed-lid descendant must render.
+            if(eye!=null)eye.setHidden(closed,false);
             for(String name:java.util.List.of("pupil_","eyelid_","half_eyelid_","sad_eyelid_","happy_eyelid_")) {
                 var bone=getAnimationProcessor().getBone(name+side);
-                if(bone!=null)bone.setHidden(sleeping,sleeping);
+                if(bone!=null)bone.setHidden(closed,closed);
             }
-            var closed=getAnimationProcessor().getBone("closed_eyelid_"+side);
-            if(closed!=null)closed.setHidden(!sleeping,!sleeping);
+            var closedLid=getAnimationProcessor().getBone("closed_eyelid_"+side);
+            if(closedLid!=null)closedLid.setHidden(!closed,!closed);
         }
+        if(closed)GHOST_EYES_CLOSED_FOR_VALIDATION.add(entity.getUUID());
+        else GHOST_EYES_CLOSED_FOR_VALIDATION.remove(entity.getUUID());
     }
 
     private void applyPidgeWingVisibility(MinemonCreature entity) {

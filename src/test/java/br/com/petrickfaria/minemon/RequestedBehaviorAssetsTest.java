@@ -82,20 +82,29 @@ public class RequestedBehaviorAssetsTest {
         assertEquals(18,br.com.petrickfaria.minemon.item.PokemonTreatType.values().length);
     }
 
-    @Test public void ghostLineUsesAuthoredMouthsAndGroundGaitWithNaturalBlinkRanges() throws Exception {
+    @Test public void ghostLineUsesVisibleBlinksFixedTeethAndGroundGaitWithNaturalBlinkRanges() throws Exception {
         Path root=Path.of(System.getProperty("minemon.testResources"));
         var gengar=SpeciesDefinitions.get("gengar");
         var animations=JsonParser.parseString(Files.readString(root.resolve(gengar.animation().replace("assets/minemon/","assets/minemon_gen1/"))))
                 .getAsJsonObject().getAsJsonObject("animations");
         var walk=animations.getAsJsonObject("animation.gengar.ground_walk").getAsJsonObject("bones");
-        assertTrue(walk.has("leg_left"));
-        assertTrue(walk.has("leg_right"));
+        for(String bone:java.util.List.of("leg_left","leg_right","arm_left","arm_right","arm_left2","arm_right2"))
+            assertTrue("ground walk must animate "+bone,walk.has(bone));
         var geo=JsonParser.parseString(Files.readString(root.resolve(gengar.model().replace("assets/minemon/","assets/minemon_gen1/"))))
                 .getAsJsonObject().getAsJsonArray("minecraft:geometry").get(0).getAsJsonObject().getAsJsonArray("bones");
         var names=new java.util.HashSet<String>();
         for(JsonElement bone:geo)names.add(bone.getAsJsonObject().get("name").getAsString());
-        assertTrue("authored teeth expression is present",names.contains("mouth_closed"));
-        assertTrue("authored open-mouth expression is present",names.contains("mouth_open"));
+        assertTrue("teeth expression is present",names.contains("mouth_closed"));
+        assertTrue("alternate mouth exists in source but is explicitly disabled",names.contains("mouth_open"));
+        assertTrue(GhostLineAnimationRules.isGengarTeethMouthBoneVisible("mouth_closed"));
+        for(String alternate:java.util.List.of("mouth_ajar","mouth_open","O_mouth","sad_mouth_closed","sad_mouth_ajar","sad_mouth_open"))
+            assertFalse("only teeth mouth may render: "+alternate,GhostLineAnimationRules.isGengarTeethMouthBoneVisible(alternate));
+        assertEquals("Haunter hand phase lag is exactly 2.5 seconds",50,GhostLineAnimationRules.HAUNTER_HAND_LAG_TICKS);
+        assertEquals(8,GhostLineAnimationRules.GHOST_BLINK_DURATION_TICKS);
+        assertEquals(.35D,GhostLineAnimationRules.GENGAR_SLEEP_SINK_FRACTION,0);
+        assertTrue(GhostLineAnimationRules.shouldShowClosedGhostEyes("haunter",false,true));
+        assertTrue(GhostLineAnimationRules.shouldShowClosedGhostEyes("gengar",false,true));
+        assertFalse(GhostLineAnimationRules.shouldShowClosedGhostEyes("gengar",false,false));
         for(String slug:java.util.List.of("haunter","gengar")) {
             for(int offset=0;offset<=200;offset++) {
                 int interval=GhostLineAnimationRules.blinkIntervalFromOffset(slug,offset);
@@ -103,5 +112,12 @@ public class RequestedBehaviorAssetsTest {
                 assertTrue(slug+" blink interval above 15 seconds: "+interval,interval<=300);
             }
         }
+        var haunter=SpeciesDefinitions.get("haunter");
+        var haunterGeo=JsonParser.parseString(Files.readString(root.resolve(haunter.model().replace("assets/minemon/","assets/minemon_gen1/"))))
+                .getAsJsonObject().getAsJsonArray("minecraft:geometry").get(0).getAsJsonObject().getAsJsonArray("bones");
+        var haunterNames=new java.util.HashSet<String>();
+        for(JsonElement bone:haunterGeo)haunterNames.add(bone.getAsJsonObject().get("name").getAsString());
+        assertTrue(haunterNames.contains("closed_eyelid_left"));
+        assertTrue(haunterNames.contains("closed_eyelid_right"));
     }
 }

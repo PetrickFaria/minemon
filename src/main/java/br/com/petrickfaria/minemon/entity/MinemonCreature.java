@@ -109,6 +109,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     private int wildUnreachableTicks;
     private int blinkCooldownTicks;
     private boolean blinkPending;
+    private int blinkTicksRemaining;
     private int blinkEventsForValidation;
     private int lastBlinkIntervalForValidation;
     private int attackAnimationTicks;
@@ -219,6 +220,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     public boolean isSleeping() { return this.entityData.get(SLEEPING); }
     public boolean isAttackAnimationActive() { return this.attackAnimationTicks > 0; }
     public int blinkEventsForValidation() { return blinkEventsForValidation; }
+    public boolean isBlinkingForRender() { return blinkTicksRemaining>0; }
     public int lastBlinkIntervalForValidation() { return lastBlinkIntervalForValidation; }
     public void setSleeping(boolean sleeping) {
         if(isDefeated())sleeping=true;
@@ -778,13 +780,17 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
             }
             if (this.attackAnimationTicks > 0) this.attackAnimationTicks--;
             boolean ghostBlinker=this.getSpeciesSlug().equals("haunter")||this.getSpeciesSlug().equals("gengar");
+            if(this.blinkTicksRemaining>0)this.blinkTicksRemaining--;
             boolean ghostBlinkEligible=!this.isSleeping()&&!this.isOrderedToSit()&&!this.isDeadOrDying()
-                    &&this.attackAnimationTicks<=0&&this.getDeltaMovement().horizontalDistanceSqr()<0.0025D;
+                    &&this.attackAnimationTicks<=0;
             if(!ghostBlinker||ghostBlinkEligible) {
                 if (this.blinkCooldownTicks > 0) this.blinkCooldownTicks--;
                 if (this.blinkCooldownTicks == 0) {
                     this.blinkPending = true;
-                    if(ghostBlinker)this.blinkEventsForValidation++;
+                    if(ghostBlinker){
+                        this.blinkTicksRemaining=GhostLineAnimationRules.GHOST_BLINK_DURATION_TICKS;
+                        this.blinkEventsForValidation++;
+                    }
                     this.blinkCooldownTicks = GhostLineAnimationRules.nextBlinkInterval(this.getSpeciesSlug(),this.getRandom());
                     if(ghostBlinker)this.lastBlinkIntervalForValidation = this.blinkCooldownTicks;
                 }
@@ -1240,9 +1246,12 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
 
     private <E extends IAnimatable> PlayState blinkPredicate(AnimationEvent<E> event) {
         AnimationController<?> controller = event.getController();
-        if (this.isSleeping() || this.isOrderedToSit() || this.isDeadOrDying() || this.isMoving(event) || this.attackAnimationTicks > 0) return PlayState.STOP;
+        String slug=this.getSpeciesSlug();
+        boolean ghostBlinker=slug.equals("haunter")||slug.equals("gengar");
+        if (this.isSleeping() || this.isOrderedToSit() || this.isDeadOrDying()
+                || (!ghostBlinker&&this.isMoving(event)) || this.attackAnimationTicks > 0) return PlayState.STOP;
 
-        String blink = SpeciesAssetIndex.clip(this.getSpeciesSlug(), "blink", "blink");
+        String blink = SpeciesAssetIndex.clip(slug, "blink", "blink");
         if (this.blinkPending && blink != null && controller.getAnimationState() == AnimationState.Stopped) {
             controller.markNeedsReload();
             controller.setAnimation(new AnimationBuilder().addAnimation(blink, false));

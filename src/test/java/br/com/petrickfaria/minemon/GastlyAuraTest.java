@@ -10,7 +10,8 @@ public class GastlyAuraTest {
    assertEquals(5,large);assertEquals(7,small);
   }
  }
- @Test public void originalAndEnlargedSizesAndTransparencyArePreserved(){
+ @Test public void originalAuraDensityAndTransparencyArePreserved(){
+  assertEquals(.55F,GastlyAura.CORE_RADIUS_SCALE,0);
   assertEquals(2.5F,GastlyAura.LARGE_SIZE/GastlyAura.SMALL_SIZE,.0001F);assertEquals(.75F,GastlyAura.OPACITY,0);
  }
 }
