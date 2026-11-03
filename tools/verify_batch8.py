@@ -176,6 +176,7 @@ if not args.segment:
 source_fire_frames={f'src/main/resources/assets/minemon/textures/pokemon/{slug}_cobblemon_1_8_2/fire/normal/{frame}.png' for slug in ('ponyta','rapidash') for frame in range(1,5)}
 allowed_paths.update(source_fire_frames)
 allowed_paths.update({
+ 'src/main/resources/assets/minemon/animations/alakazam_cobblemon_1_8_2/alakazam.animation.json',
  'src/main/resources/assets/minemon/geo/seaking/seaking_female.geo.json',
  'src/main/resources/assets/minemon/geo/seaking/seaking_male.geo.json',
 })
