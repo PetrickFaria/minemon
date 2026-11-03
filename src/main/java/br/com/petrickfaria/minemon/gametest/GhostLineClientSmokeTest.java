@@ -16,7 +16,7 @@ import java.util.*;
 
 /** Real-client visual and timing smoke test for the Gastly evolution line. */
 final class GhostLineClientSmokeTest {
- private static boolean opened,setup,sleepStarted;
+ private static boolean opened,setup,sleepStarted,blinkChecked;
  private static int ticks;
  private static volatile UUID gastlyId,haunterId,gengarId;
  private static final Set<String> captures=new HashSet<>();
@@ -79,16 +79,16 @@ final class GhostLineClientSmokeTest {
    ticks++;
    MinemonCreature gastly=find(mc,gastlyId),haunter=find(mc,haunterId),gengar=find(mc,gengarId);
    if(gastly==null||haunter==null||gengar==null)return;
-   if(ticks==5){face(mc,gastly);snap(mc,"gastly-front");}
-   if(ticks==25){face(mc,haunter);snap(mc,"haunter-front-a");}
-   if(ticks==75){face(mc,haunter);snap(mc,"haunter-front-b");}
+   if(ticks>=5&&!captures.contains("gastly-front")){face(mc,gastly);snap(mc,"gastly-front");}
+   if(ticks>=25&&!captures.contains("haunter-front-a")){face(mc,haunter);snap(mc,"haunter-front-a");}
+   if(ticks>=75&&!captures.contains("haunter-front-b")){face(mc,haunter);snap(mc,"haunter-front-b");}
    if(ticks>=90&&ticks<145){
     mc.getSingleplayerServer().execute(()->{
      var authoritative=mc.getSingleplayerServer().overworld().getEntity(gengarId);
      if(authoritative instanceof MinemonCreature g){g.setOnGround(true);g.setDeltaMovement(0.055D,0,0);}
     });
    }
-   if(ticks==115){face(mc,gengar);snap(mc,"gengar-walk");}
+   if(ticks>=115&&ticks<145&&!captures.contains("gengar-walk")){face(mc,gengar);snap(mc,"gengar-walk");}
    if(ticks>=150){
     mc.getSingleplayerServer().execute(()->{
      var authoritative=mc.getSingleplayerServer().overworld().getEntity(gengarId);
@@ -101,16 +101,17 @@ final class GhostLineClientSmokeTest {
     if(open&&!captures.contains("gengar-mouth-open"))snap(mc,"gengar-mouth-open");
     if(!open&&!captures.contains("gengar-mouth-teeth"))snap(mc,"gengar-mouth-teeth");
    }
-   if(ticks==705){
+   if(ticks>=705&&!sleepStarted){
     mc.getSingleplayerServer().execute(()->{
      var authoritative=mc.getSingleplayerServer().overworld().getEntity(gengarId);
      if(authoritative instanceof MinemonCreature g)g.setSleeping(true);
     });
     sleepStarted=true;
    }
-   if(sleepStarted&&ticks==730){face(mc,gengar);snap(mc,"gengar-sleep-half-sunk-a");}
-   if(sleepStarted&&ticks==760){face(mc,gengar);snap(mc,"gengar-sleep-half-sunk-b");}
-   if(ticks==700){
+   if(sleepStarted&&ticks>=730&&!captures.contains("gengar-sleep-half-sunk-a")){face(mc,gengar);snap(mc,"gengar-sleep-half-sunk-a");}
+   if(sleepStarted&&ticks>=760&&!captures.contains("gengar-sleep-half-sunk-b")){face(mc,gengar);snap(mc,"gengar-sleep-half-sunk-b");}
+   if(ticks>=700&&!blinkChecked){
+    blinkChecked=true;
     int haunterBlink=haunter.blinkEventsForValidation(),gengarBlink=gengar.blinkEventsForValidation();
     if(haunterBlink<2||gengarBlink<2||haunter.lastBlinkIntervalForValidation()<100||haunter.lastBlinkIntervalForValidation()>300
         ||gengar.lastBlinkIntervalForValidation()<100||gengar.lastBlinkIntervalForValidation()>300)
