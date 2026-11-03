@@ -17,7 +17,8 @@ import java.util.*;
 
 /** Real-client visual and timing smoke test for the Gastly evolution line. */
 final class GhostLineClientSmokeTest {
- private static boolean opened,setup,sleepStarted,blinkChecked;
+ private static boolean opened,setup,sleepStarted,blinkChecked,validationComplete;
+ private static int screenshotFlushTicks;
  private static int ticks;
  private static volatile UUID gastlyId,haunterId,gengarId;
  private static final Set<String> captures=new HashSet<>();
@@ -79,6 +80,16 @@ final class GhostLineClientSmokeTest {
      }
      Screenshot.grab(mc.gameDirectory,"ghost-line-1.74-"+view+".png",mc.getMainRenderTarget(),m->System.out.println("[GHOST LINE] screenshot "+view+": "+m));
     }
+   }
+   if(validationComplete){
+    screenshotFlushTicks++;
+    Path screenshotDir=mc.gameDirectory.toPath().resolve("screenshots");
+    boolean allScreenshots=List.of("gastly-front","gastly-no-tongue","haunter-front-a","haunter-front-b","haunter-blink",
+      "gengar-walk","gengar-blink","gengar-mouth-teeth-fixed","gengar-sleep-half-sunk-a","gengar-sleep-half-sunk-b")
+      .stream().allMatch(key->Files.isRegularFile(screenshotDir.resolve("ghost-line-1.74-"+key+".png")));
+    if(allScreenshots){mc.stop();return;}
+    if(screenshotFlushTicks>=200)throw new IllegalStateException("Timed out waiting for all 10 real-client screenshots to be written");
+    return;
    }
    if(!opened&&mc.screen instanceof TitleScreen){
     opened=true;
@@ -166,7 +177,7 @@ final class GhostLineClientSmokeTest {
         ||gengar.lastBlinkIntervalForValidation()<100||gengar.lastBlinkIntervalForValidation()>300)
      throw new IllegalStateException("Ghost blink interval check failed: Haunter events="+haunterBlink+" interval="+haunter.lastBlinkIntervalForValidation()+" Gengar events="+gengarBlink+" interval="+gengar.lastBlinkIntervalForValidation());
    }
-   if(ticks>=800){
+   if(ticks>=800&&!validationComplete){
     if(br.com.petrickfaria.minemon.client.GastlyCoreRenderHook.redrawsForValidation()==0)
      throw new IllegalStateException("Gastly was never redrawn above particles during the real-client test");
     for(String key:List.of("gastly-front","gastly-no-tongue","haunter-front-a","haunter-front-b","haunter-blink",
@@ -180,8 +191,8 @@ final class GhostLineClientSmokeTest {
       "PASS GHOST LINE CLIENT: real Minecraft render captured Gastly aura/core with tongue suppressed, visible Haunter and Gengar closed-eye blinks, Gengar lowered-arm gait, fixed teeth mouth, and less-sunk bobbing sleep.\n"
       +"Haunter blink events="+haunter.blinkEventsForValidation()+", last interval="+haunter.lastBlinkIntervalForValidation()+" ticks; Gengar blink events="+gengar.blinkEventsForValidation()+", last interval="+gengar.lastBlinkIntervalForValidation()+" ticks.\n"
       +"Haunter hand phase lag="+br.com.petrickfaria.minemon.entity.GhostLineAnimationRules.HAUNTER_HAND_LAG_TICKS+" ticks (2.5 seconds); Gengar ground walk clip="+readClip(gengar)+"; measured sleep bob range="+gengarSleepBobMin+".."+gengarSleepBobMax+".\n");
-    System.out.println("[GHOST LINE] PASS: screenshots and runtime checks complete.");
-    mc.stop();
+    validationComplete=true;
+    System.out.println("[GHOST LINE] PASS: runtime checks complete; waiting for all 10 screenshots to be written.");
    }
   }catch(Exception e){throw new IllegalStateException("Ghost line real-client validation failed",e);}
  }
