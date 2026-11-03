@@ -151,7 +151,7 @@ public final class ClientSmokeTest {
     index,species.size(),dex,slug,phase,completedSpeciesWindows,species.size(),elapsed,lastApprovedCheck);
   System.out.flush();
  }
- private static final int SPECIES_TEST_WINDOW=Boolean.getBoolean("minemon.clientSmokeAlakazamPose")?280:80;
+ private static final int SPECIES_TEST_WINDOW=Boolean.getBoolean("minemon.clientSmokeAlakazamPose")?360:80;
  private static final int BULBASAUR_VALIDATION_TICK=430;
  private static final int COMBAT_VALIDATION_TICK=BULBASAUR_VALIDATION_TICK+100;
  private static final int SPECIES_START_TICK=COMBAT_VALIDATION_TICK+10;
@@ -308,7 +308,8 @@ public final class ClientSmokeTest {
       entity.setYRot(yaw);entity.yBodyRot=yaw;entity.yHeadRot=yaw;
      }
      Integer phase=validationPhase(entity);
-     if(phase!=null && ARTICULATION_VALIDATION_SPECIES.contains(entity.getSpeciesSlug())) {
+     if(phase!=null && ARTICULATION_VALIDATION_SPECIES.contains(entity.getSpeciesSlug())
+         &&!(entity.getSpeciesSlug().equals("alakazam")&&Boolean.getBoolean("minemon.clientSmokeAlakazamPose"))) {
       entity.setDeltaMovement(animationVelocity(phase),0,0);
       if(entity.getSpeciesSlug().equals("spearow")||entity.getSpeciesSlug().equals("fearow")) {
        // Probe the native procedural look input while preserving a static idle
@@ -609,6 +610,7 @@ public final class ClientSmokeTest {
     String active=species.get((worldTicks-SPECIES_START_TICK)/SPECIES_TEST_WINDOW);
     int appliedPhase=(worldTicks-SPECIES_START_TICK)%SPECIES_TEST_WINDOW;
     if(ARTICULATION_VALIDATION_SPECIES.contains(active)
+       &&!(active.equals("alakazam")&&Boolean.getBoolean("minemon.clientSmokeAlakazamPose"))
        && (!active.equals(renderedPhaseSpecies)||renderedPhase!=appliedPhase||renderedPhaseFrames<2
            ||!clipHasSettled(active)||appliedPhase==79&&!finalIdleObserved(active)
            ||appliedPhase==23&&!steadyMotionObserved(active,false)
@@ -696,7 +698,11 @@ public final class ClientSmokeTest {
     }
     double waterY=fixtureSurface(slug)?101.0D-WaterMovementGoal.preferredSurfaceDepth(next):101.0D-next.getBbHeight()-0.35D;
     double spawnY=slug.equals("alakazam")&&Boolean.getBoolean("minemon.clientSmokeAlakazamPose")?102.0D:101.0D;
-    next.moveTo(0,aquatic?waterY:spawnY,4,180,0);next.addTag("minemon-locomotion-fixture");next.setNoAi(false);next.goalSelector.removeAllGoals();next.targetSelector.removeAllGoals();setValidationPhase(next,0);level.addFreshEntity(next);testEntity=next.getUUID();
+    next.moveTo(0,aquatic?waterY:spawnY,4,180,0);next.addTag("minemon-locomotion-fixture");next.setNoAi(false);
+    boolean realAlakazamCycle=slug.equals("alakazam")&&Boolean.getBoolean("minemon.clientSmokeAlakazamPose");
+    if(!realAlakazamCycle){next.goalSelector.removeAllGoals();next.targetSelector.removeAllGoals();}
+    else next.targetSelector.removeAllGoals();
+    setValidationPhase(next,0);level.addFreshEntity(next);testEntity=next.getUUID();
     });
    }
    if(worldTicks>=SPECIES_START_TICK && worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW)
@@ -729,8 +735,7 @@ public final class ClientSmokeTest {
      boolean bodyMoved=motionRanges.entrySet().stream().filter(e->e.getKey().startsWith(slug+":")).anyMatch(e->{for(int axis=0;axis<6;axis++)if(e.getValue()[axis+6]-e.getValue()[axis]>0.0001)return true;return false;});
      var definition=SpeciesDefinitions.get(slug);
      boolean staticFallback=definition!=null&&"static".equals(definition.movementFallback());
-     boolean stationaryAlakazamPose=slug.equals("alakazam")&&Boolean.getBoolean("minemon.clientSmokeAlakazamPose");
-     if((!walkedSpecies.contains(slug)&&!stationaryAlakazamPose)||(!staticFallback&&!bodyMoved))throw new IllegalStateException("No rendered movement for "+slug+"; displacement="+walkedSpecies.contains(slug)+" bodyChanged="+bodyMoved+" staticFallback="+staticFallback);
+     if(!walkedSpecies.contains(slug)||(!staticFallback&&!bodyMoved))throw new IllegalStateException("No rendered movement for "+slug+"; displacement="+walkedSpecies.contains(slug)+" bodyChanged="+bodyMoved+" staticFallback="+staticFallback);
     }
     if(Boolean.getBoolean("minemon.clientSmokeAlakazamPose")){
      double bob=alakazamMeditationBobRange[1]-alakazamMeditationBobRange[0];
@@ -762,7 +767,7 @@ public final class ClientSmokeTest {
      if(!walkArms||!fasterArms)
       throw new IllegalStateException("Fire-starter arms remained near T-pose during validated movement for "+slug+"; arm rotations="+java.util.Arrays.toString(arms));
     }
-    validateArticulationProfiles();
+    if(!Boolean.getBoolean("minemon.clientSmokeAlakazamPose"))validateArticulationProfiles();
     if(species.contains("gastly")) {
      var particleJson=new ResourceLocation(Minemon.MOD_ID,"particles/gastly_ghostly_smoke.json");
      if(mc.getResourceManager().getResource(particleJson).isEmpty())
