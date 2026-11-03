@@ -30,14 +30,18 @@ public final class PokecEvents {
             WildEncounterManager.tickPlayer(player);
     }
     @SubscribeEvent public static void trackActivePokemon(EntityJoinLevelEvent event) {
-        if (!event.getEntity().level.isClientSide && event.getEntity() instanceof MinemonCreature) ActivePokemonData.register(event.getEntity());
+        if (event.getEntity().level.isClientSide || !(event.getEntity() instanceof MinemonCreature pokemon)) return;
+        if (WildEncounterManager.isEncounter(pokemon)) WildEncounterManager.trackLoaded(pokemon);
+        else ActivePokemonData.register(pokemon);
     }
     @SubscribeEvent public static void untrackRemovedPokemon(EntityLeaveLevelEvent event) {
         if (event.getEntity().level.isClientSide || !(event.getEntity() instanceof MinemonCreature)) return;
         var reason = event.getEntity().getRemovalReason();
         if (reason == net.minecraft.world.entity.Entity.RemovalReason.DISCARDED
                 || reason == net.minecraft.world.entity.Entity.RemovalReason.KILLED)
-            ActivePokemonData.unregister(event.getEntity());
+            if (WildEncounterManager.isEncounter((MinemonCreature) event.getEntity()))
+                WildEncounterManager.untrackRemoved((MinemonCreature) event.getEntity());
+            else ActivePokemonData.unregister(event.getEntity());
     }
     @SubscribeEvent public static void companionExperience(LivingDeathEvent event) {
         if (event.getEntity().level.isClientSide || !(event.getSource().getEntity() instanceof MinemonCreature attacker)

@@ -84,6 +84,17 @@ public final class WildEncounterManager {
         return data.hasUUID(OWNER) ? data.getUUID(OWNER) : null;
     }
 
+    public static void trackLoaded(MinemonCreature pokemon) {
+        if (!isEncounter(pokemon) || !(pokemon.level instanceof ServerLevel level)) return;
+        UUID owner = owner(pokemon);
+        if (owner != null) WildEncounterData.get(level).put(owner, pokemon.getUUID(), isDowned(pokemon) ? "downed" : "active");
+    }
+
+    public static void untrackRemoved(MinemonCreature pokemon) {
+        if (isEncounter(pokemon) && pokemon.level instanceof ServerLevel level)
+            WildEncounterData.get(level).remove(owner(pokemon), pokemon.getUUID());
+    }
+
     public static void tickPlayer(ServerPlayer player) {
         if (!(player.level instanceof ServerLevel level)) return;
         if (!configLoaded) loadConfig(level);

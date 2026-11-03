@@ -226,7 +226,8 @@ public final class PokeballItem extends Item {
             restoredEntity.discard(); return false;
         }
         if (restoredEntity instanceof MinemonCreature restoredPokemon && restoredPokemon.isTame()
-                && ActivePokemonData.get(level).count(player.getUUID()) >= PokecPlayerData.trainerLevel(player)) {
+                && br.com.petrickfaria.minemon.pokec.ActivePokemonData.get(level).count(player.getUUID())
+                >= br.com.petrickfaria.minemon.pokec.PokecPlayerData.trainerLevel(player)) {
             restoredEntity.discard(); return false;
         }
         BlockPos safe = findSafePosition(level, restoredEntity, origin);
