@@ -50,6 +50,7 @@ public final class ClientSmokeTest {
  private static BehaviorCycle.Phase alakazamLastNaturalPhase;
  private static int alakazamCompletedNaturalCycles;
  private static final java.util.Set<String> alakazamPoseScreenshots=java.util.concurrent.ConcurrentHashMap.newKeySet();
+ private static String pendingAlakazamPoseScreenshot;
  private static final float[] alakazamMeditationBobRange={Float.MAX_VALUE,-Float.MAX_VALUE};
  private static final double[] alakazamMeditationHeightRange={Double.MAX_VALUE,-Double.MAX_VALUE};
  private static boolean alakazamAirHorizontalAnchorSet;
@@ -264,6 +265,11 @@ public final class ClientSmokeTest {
   if(Boolean.getBoolean("minemon.clientSmokePatrol")){HaunterPatrolClientSmokeTest.tick(event);return;}
   Minecraft mc=Minecraft.getInstance();
   try {
+   if(pendingAlakazamPoseScreenshot!=null){
+    String view=pendingAlakazamPoseScreenshot;pendingAlakazamPoseScreenshot=null;
+    Screenshot.grab(mc.gameDirectory,"alakazam-1.70-"+view+".png",mc.getMainRenderTarget(),
+        message->System.out.println("[CLIENT SMOKE] screenshot "+view+": "+message));
+   }
    if(!opened && mc.screen instanceof TitleScreen && titleTicks==0)
    System.out.println("[CLIENT SMOKE] inicialização — TitleScreen alcançada; verificando cache GeckoLib e recursos registrados.");
   if(!opened && mc.screen instanceof TitleScreen && ++titleTicks==20) {
@@ -426,13 +432,13 @@ public final class ClientSmokeTest {
       int airFrame=entity.tickCount-alakazamMeditationFirstAirTick;
       if(airFrame>=12&&alakazamPoseScreenshots.add("front")){
        mc.options.hideGui=true;
-       Screenshot.grab(mc.gameDirectory,"alakazam-1.70-front.png",mc.getMainRenderTarget(),message->System.out.println("[CLIENT SMOKE] screenshot front: "+message));
+       pendingAlakazamPoseScreenshot="front";
       }else if(airFrame>=36&&alakazamPoseScreenshots.add("side")){
        mc.options.hideGui=true;
-       Screenshot.grab(mc.gameDirectory,"alakazam-1.70-side.png",mc.getMainRenderTarget(),message->System.out.println("[CLIENT SMOKE] screenshot side: "+message));
+       pendingAlakazamPoseScreenshot="side";
       }else if(airFrame>=60&&alakazamPoseScreenshots.add("back")){
        mc.options.hideGui=true;
-       Screenshot.grab(mc.gameDirectory,"alakazam-1.70-back.png",mc.getMainRenderTarget(),message->System.out.println("[CLIENT SMOKE] screenshot back: "+message));
+       pendingAlakazamPoseScreenshot="back";
       }
       }
      }
