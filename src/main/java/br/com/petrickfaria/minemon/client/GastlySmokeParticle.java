@@ -89,9 +89,33 @@ public final class GastlySmokeParticle extends TextureSheetParticle {
         return Math.round(from + (to - from) * Math.min(1.0F, Math.max(0.0F, t)));
     }
 
+    private static final ParticleRenderType TRANSLUCENT_WITHOUT_DEPTH_WRITES = new ParticleRenderType() {
+        @Override
+        public void begin(com.mojang.blaze3d.vertex.BufferBuilder buffer,
+                          net.minecraft.client.renderer.texture.TextureManager textureManager) {
+            ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT.begin(buffer, textureManager);
+            // Keep the normal depth test, but let the opaque Gastly core redraw over its aura.
+            com.mojang.blaze3d.systems.RenderSystem.depthMask(false);
+        }
+
+        @Override
+        public void end(net.minecraft.client.renderer.Tesselator tesselator) {
+            try {
+                ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT.end(tesselator);
+            } finally {
+                com.mojang.blaze3d.systems.RenderSystem.depthMask(true);
+            }
+        }
+
+        @Override
+        public String toString() {
+            return "GASTLY_TRANSLUCENT_WITHOUT_DEPTH_WRITES";
+        }
+    };
+
     @Override
     public ParticleRenderType getRenderType() {
-        return ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
+        return TRANSLUCENT_WITHOUT_DEPTH_WRITES;
     }
 
     public static final class Provider implements ParticleProvider<SimpleParticleType> {
