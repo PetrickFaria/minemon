@@ -36,7 +36,18 @@ final class GhostLineClientSmokeTest {
   double dx=mob.getX()-player.getX(),dz=mob.getZ()-player.getZ();
   double dy=mob.getY()+1.15D-player.getEyeY();
   player.setYRot((float)(Math.toDegrees(Math.atan2(dz,dx))-90));
-  player.setXRot((float)Math.toDegrees(Math.atan2(dy,Math.sqrt(dx*dx+dz*dz))));
+  float pitch=(float)-Math.toDegrees(Math.atan2(dy,Math.sqrt(dx*dx+dz*dz)));
+  player.setXRot(pitch);
+  var server=mc.getSingleplayerServer();
+  var playerId=player.getUUID();
+  var mobId=mob.getUUID();
+  float yaw=player.getYRot();
+  server.execute(()->{
+   var authoritativePlayer=server.getPlayerList().getPlayer(playerId);
+   if(authoritativePlayer!=null)authoritativePlayer.teleportTo(server.overworld(),px,py,pz,yaw,pitch);
+   var authoritativeMob=server.overworld().getEntity(mobId);
+   if(authoritativeMob!=null)authoritativeMob.setYRot(180.0F);
+  });
  }
  static void tick(TickEvent.ClientTickEvent event){
   if(event.phase!=TickEvent.Phase.END)return;
@@ -133,7 +144,7 @@ final class GhostLineClientSmokeTest {
  }
  private static MinemonCreature spawn(net.minecraft.server.level.ServerLevel level,String slug,double x,double z){
   var mob=ModEntities.SPECIES.get(slug).get().create(level);
-  mob.moveTo(x,101,z,0,0);mob.setNoAi(true);
+  mob.moveTo(x,101,z,180,0);mob.setNoAi(true);
   level.addFreshEntity(mob);return mob;
  }
  private static String readClip(MinemonCreature mob){
