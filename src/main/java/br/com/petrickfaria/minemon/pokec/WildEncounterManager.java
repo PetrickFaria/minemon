@@ -33,7 +33,7 @@ public final class WildEncounterManager {
     private static final String LAST_CHECK = "MinemonWildSpawnCheck";
     private static final long CHECK_INTERVAL = 20L * 30L;
     private static final long EXPIRY = 20L * 60L * 5L;
-    private static final int MAX_ACTIVE = 5, MAX_DOWNED = 3;
+    public static final int MAX_ACTIVE = 5, MAX_DOWNED = 3;
     private static final List<String> RARITIES = List.of("common", "uncommon", "rare", "legendary", "mythic");
     private static volatile java.util.Map<String, Double> rarityChances = java.util.Map.of(
             "common", .10D, "uncommon", .045D, "rare", .015D, "legendary", .003D, "mythic", .001D);
@@ -88,25 +88,8 @@ public final class WildEncounterManager {
         if (!(player.level instanceof ServerLevel level)) return;
         if (!configLoaded) loadConfig(level);
         long now = level.getGameTime();
-        AABB area = new AABB(player.blockPosition()).inflate(75, 15, 75);
-        List<MinemonCreature> encounters = level.getEntitiesOfClass(MinemonCreature.class, area,
-                pokemon -> isEncounter(pokemon) && player.getUUID().equals(owner(pokemon)));
-        int active = 0, downed = 0;
-        for (MinemonCreature pokemon : encounters) {
-            var data = pokemon.getPersistentData();
-            if (isDowned(pokemon)) {
-                downed++;
-                if (now - data.getLong(DOWNED_AT) >= EXPIRY) {
-                    rewardAndDiscard(level, pokemon, 25);
-                    downed--;
-                }
-            } else {
-                active++;
-                if (pokemon.distanceToSqr(player) > 10000 && now - data.getLong(LAST_CHECK) >= EXPIRY) {
-                    pokemon.discard(); active--;
-                }
-            }
-        }
+        WildEncounterData encounterData = WildEncounterData.get(level);
+        int active = encounterData.count(player.getUUID(), "active");
         var pd = player.getPersistentData();
         if (now - pd.getLong("MinemonWildSpawnAttempt") < CHECK_INTERVAL) return;
         pd.putLong("MinemonWildSpawnAttempt", now);
@@ -131,7 +114,8 @@ public final class WildEncounterManager {
             data.putBoolean(MARKER, true); data.putUUID(OWNER, player.getUUID()); data.putString(STATE, "active");
             data.putLong(LAST_CHECK, now);
             data.putLong(LAST_IN_RANGE, now);
-            if (!level.addFreshEntity(pokemon)) pokemon.discard();
+            if (level.addFreshEntity(pokemon)) encounterData.put(player.getUUID(), pokemon.getUUID(), "active");
+            else pokemon.discard();
             return;
         }
     }
@@ -184,20 +168,14 @@ public final class WildEncounterManager {
         if (!isEncounter(wild) || isDowned(wild) || !attacker.isTame() || owner == null || !owner.equals(attacker.getOwnerUUID())) return false;
         ServerPlayer player = wild.level instanceof ServerLevel server ? server.getServer().getPlayerList().getPlayer(owner) : null;
         if (player == null) return false;
-        long count = serverCountDowned((ServerLevel) wild.level, player);
-        return count < MAX_DOWNED;
-    }
-
-    private static long serverCountDowned(ServerLevel level, ServerPlayer player) {
-        return level.getEntitiesOfClass(MinemonCreature.class, new AABB(player.blockPosition()).inflate(250, 64, 250),
-                pokemon -> isDowned(pokemon) && player.getUUID().equals(owner(pokemon))).size();
+        return WildEncounterData.get((ServerLevel) wild.level).count(owner, "downed") < MAX_DOWNED;
     }
 
     public static boolean hasDefeatedCapacity(MinemonCreature wild) {
         UUID owner = owner(wild);
         if (owner == null || !(wild.level instanceof ServerLevel level)) return false;
         ServerPlayer player = level.getServer().getPlayerList().getPlayer(owner);
-        return player != null && serverCountDowned(level, player) < MAX_DOWNED;
+        return player != null && WildEncounterData.get(level).count(owner, "downed") < MAX_DOWNED;
     }
 
     public static boolean enterDowned(MinemonCreature wild, MinemonCreature attacker) {
@@ -205,6 +183,7 @@ public final class WildEncounterManager {
         var data = wild.getPersistentData();
         data.putString(STATE, "downed"); data.putLong(DOWNED_AT, wild.level.getGameTime());
         data.putInt("MinemonWildCaptureAttempts", 0); data.putInt("MinemonWildTreats", 0);
+        WildEncounterData.get((ServerLevel) wild.level).put(owner(wild), wild.getUUID(), "downed");
         wild.setHealth(1.0F); wild.setEncounterDowned(true);
         ServerPlayer player = wild.level instanceof ServerLevel server ? server.getServer().getPlayerList().getPlayer(owner(wild)) : null;
         if (player != null) PokecPlayerData.addTrainerXp(player, TrainerProgression.pokemonXp(wild.getSpeciesSlug(), wild.getPokemonLevel()));
@@ -215,6 +194,7 @@ public final class WildEncounterManager {
         var data = pokemon.getPersistentData();
         if (!isEncounter(pokemon) || data.getBoolean(REWARDED)) { pokemon.discard(); return; }
         data.putBoolean(REWARDED, true);
+        WildEncounterData.get(level).remove(owner(pokemon), pokemon.getUUID());
         var preview = PokemonSoulConversion.preview(pokemon.getSpeciesSlug(), pokemon.getPokemonLevel());
         if (preview != null && preview.soulType() != null) {
             int amount = WildCaptureRules.souls(preview.base(), percent);
@@ -241,7 +221,10 @@ public final class WildEncounterManager {
                 && Math.abs(player.getZ() - pokemon.getZ()) <= 75.0D
                 && Math.abs(player.getY() - pokemon.getY()) <= 15.0D;
         if (inRange) data.putLong(LAST_IN_RANGE, now);
-        else if (now - data.getLong(LAST_IN_RANGE) >= EXPIRY) pokemon.discard();
+        else if (now - data.getLong(LAST_IN_RANGE) >= EXPIRY) {
+            WildEncounterData.get(level).remove(owner, pokemon.getUUID());
+            pokemon.discard();
+        }
     }
 
     /** Called only by the server when the owner uses an empty ball on their downed encounter. */
@@ -274,6 +257,7 @@ public final class WildEncounterManager {
         PokecPlayerData.addTrainerXp(player, TrainerProgression.pokemonXp(pokemon.getSpeciesSlug(), pokemon.getPokemonLevel()) * .25D);
         var data = pokemon.getPersistentData();
         data.remove("MinemonWildCaptureAttempts"); data.remove("MinemonWildTreats");
+        WildEncounterData.get((ServerLevel) pokemon.level).remove(player.getUUID(), pokemon.getUUID());
     }
 
     public static void restoreCaptureAfterStorageFailure(MinemonCreature pokemon, ServerPlayer player) {

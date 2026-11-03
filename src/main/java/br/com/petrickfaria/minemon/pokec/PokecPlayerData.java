@@ -29,6 +29,7 @@ public final class PokecPlayerData {
         CompoundTag d=data(p);
         TrainerProgression.Progress next=TrainerProgression.add(new TrainerProgression.Progress(trainerLevel(p),trainerXp(p)),amount);
         d.putInt("trainerLevel",next.level());d.putDouble("trainerXp",next.xpTowardNext());
+        br.com.petrickfaria.minemon.network.MinemonNetwork.syncTrainer(p);
         return next;
     }
     public static boolean isUnlocked(ServerPlayer p,String slug){return data(p).getCompound("unlocked").getBoolean(slug);}
