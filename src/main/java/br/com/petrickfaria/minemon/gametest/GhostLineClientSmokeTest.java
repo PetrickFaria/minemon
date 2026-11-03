@@ -18,7 +18,7 @@ import java.util.*;
 final class GhostLineClientSmokeTest {
  private static boolean opened,setup,sleepStarted;
  private static int ticks;
- private static UUID gastlyId,haunterId,gengarId;
+ private static volatile UUID gastlyId,haunterId,gengarId;
  private static final Set<String> captures=new HashSet<>();
  private static String pendingScreenshot;
  private static void snap(Minecraft mc,String key){
@@ -83,11 +83,17 @@ final class GhostLineClientSmokeTest {
    if(ticks==25){face(mc,haunter);snap(mc,"haunter-front-a");}
    if(ticks==75){face(mc,haunter);snap(mc,"haunter-front-b");}
    if(ticks>=90&&ticks<145){
-    mc.getSingleplayerServer().execute(()->{gengar.setOnGround(true);gengar.setDeltaMovement(0.055D,0,0);});
+    mc.getSingleplayerServer().execute(()->{
+     var authoritative=mc.getSingleplayerServer().overworld().getEntity(gengarId);
+     if(authoritative instanceof MinemonCreature g){g.setOnGround(true);g.setDeltaMovement(0.055D,0,0);}
+    });
    }
    if(ticks==115){face(mc,gengar);snap(mc,"gengar-walk");}
    if(ticks>=150){
-    mc.getSingleplayerServer().execute(()->gengar.setDeltaMovement(0,0,0));
+    mc.getSingleplayerServer().execute(()->{
+     var authoritative=mc.getSingleplayerServer().overworld().getEntity(gengarId);
+     if(authoritative instanceof MinemonCreature g)g.setDeltaMovement(0,0,0);
+    });
    }
    if(ticks>=150&&ticks<345){
     face(mc,gengar);
@@ -96,7 +102,10 @@ final class GhostLineClientSmokeTest {
     if(!open&&!captures.contains("gengar-mouth-teeth"))snap(mc,"gengar-mouth-teeth");
    }
    if(ticks==350){
-    mc.getSingleplayerServer().execute(()->gengar.setSleeping(true));
+    mc.getSingleplayerServer().execute(()->{
+     var authoritative=mc.getSingleplayerServer().overworld().getEntity(gengarId);
+     if(authoritative instanceof MinemonCreature g)g.setSleeping(true);
+    });
     sleepStarted=true;
    }
    if(sleepStarted&&ticks==375){face(mc,gengar);snap(mc,"gengar-sleep-half-sunk-a");}
