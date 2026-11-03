@@ -43,11 +43,16 @@ final class GhostLineClientSmokeTest {
   var playerId=player.getUUID();
   var mobId=mob.getUUID();
   float yaw=player.getYRot();
+  mob.setYRot(180.0F);
+  mob.setYBodyRot(180.0F);
+  mob.setYHeadRot(180.0F);
   server.execute(()->{
    var authoritativePlayer=server.getPlayerList().getPlayer(playerId);
    if(authoritativePlayer!=null)authoritativePlayer.teleportTo(server.overworld(),px,py,pz,yaw,pitch);
    var authoritativeMob=server.overworld().getEntity(mobId);
-   if(authoritativeMob!=null)authoritativeMob.setYRot(180.0F);
+   if(authoritativeMob instanceof net.minecraft.world.entity.LivingEntity living){
+    living.setYRot(180.0F);living.setYBodyRot(180.0F);living.setYHeadRot(180.0F);
+   }
   });
  }
  static void tick(TickEvent.ClientTickEvent event){
