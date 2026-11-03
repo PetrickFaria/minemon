@@ -95,9 +95,21 @@ TREAT_RESOURCES = frozenset(
 )
 
 
+# Exact source blob approved by Minemon 1.71 commit 00a3bb54338036885b02e58dcf83c42b26020041.
+# The generic batch baseline predates this deliberate Alakazam pose work. Keep the
+# exception byte-specific so later Alakazam edits still fail the historical audit.
+ALAKAZAM_ANIMATION_PATH = "assets/minemon/animations/alakazam_cobblemon_1_8_2/alakazam.animation.json"
+ALAKAZAM_ANIMATION_BLOB_SHA = "b170a8296d7b5ed065c6d699294649e2f5401752"
+
+
 def is_approved_prior_asset_delta(path, content):
-    """Accept only the reviewed Arbok atlas bytes; all other old assets stay exact."""
-    return path == ARBOK_TEXTURE_PATH and hashlib.sha256(content).hexdigest() == ARBOK_TEXTURE_SHA256
+    """Accept only the reviewed Arbok texture and exact approved Alakazam animation blobs."""
+    if path == ARBOK_TEXTURE_PATH:
+        return hashlib.sha256(content).hexdigest() == ARBOK_TEXTURE_SHA256
+    if path == ALAKAZAM_ANIMATION_PATH:
+        blob_header = f"blob {len(content)}\\0".encode("ascii")
+        return hashlib.sha1(blob_header + content).hexdigest() == ALAKAZAM_ANIMATION_BLOB_SHA
+    return False
 
 
 def pokec_resource_paths():
