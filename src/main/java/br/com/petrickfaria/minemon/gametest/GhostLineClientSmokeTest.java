@@ -21,8 +21,9 @@ final class GhostLineClientSmokeTest {
  private static volatile UUID gastlyId,haunterId,gengarId;
  private static final Set<String> captures=new HashSet<>();
  private static String pendingScreenshot;
+ private static int pendingScreenshotDelay;
  private static void snap(Minecraft mc,String key){
-  if(captures.add(key))pendingScreenshot=key;
+  if(captures.add(key)){pendingScreenshot=key;pendingScreenshotDelay=4;}
  }
  private static MinemonCreature find(Minecraft mc,UUID id){
   if(id==null||mc.level==null)return null;
@@ -54,8 +55,11 @@ final class GhostLineClientSmokeTest {
   Minecraft mc=Minecraft.getInstance();
   try{
    if(pendingScreenshot!=null){
-    String view=pendingScreenshot;pendingScreenshot=null;
-    Screenshot.grab(mc.gameDirectory,"ghost-line-1.73-"+view+".png",mc.getMainRenderTarget(),m->System.out.println("[GHOST LINE] screenshot "+view+": "+m));
+    if(pendingScreenshotDelay>0)pendingScreenshotDelay--;
+    else{
+     String view=pendingScreenshot;pendingScreenshot=null;
+     Screenshot.grab(mc.gameDirectory,"ghost-line-1.73-"+view+".png",mc.getMainRenderTarget(),m->System.out.println("[GHOST LINE] screenshot "+view+": "+m));
+    }
    }
    if(!opened&&mc.screen instanceof TitleScreen){
     opened=true;
