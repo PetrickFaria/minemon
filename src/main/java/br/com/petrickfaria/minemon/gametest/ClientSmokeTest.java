@@ -385,7 +385,6 @@ public final class ClientSmokeTest {
        throw new IllegalStateException("Alakazam hover rendered an unexpected upper-body or spoon transform: torso="
            +lowerTorso.getRotationX()+"/"+upperTorso.getRotationX()+", head="+head.getRotationX()+"/"+head.getRotationY()
            +", arms="+leftArm.getRotationX()+"/"+leftArm.getRotationZ()+" and "+rightArm.getRotationX()+"/"+rightArm.getRotationZ());
-      }
       alakazamMeditationBobRange[0]=Math.min(alakazamMeditationBobRange[0],body.getPositionY());
       alakazamMeditationBobRange[1]=Math.max(alakazamMeditationBobRange[1],body.getPositionY());
       if(alakazamCurrentAirFirstTick>=0&&entity.tickCount-alakazamCurrentAirFirstTick>=8){
