@@ -97,9 +97,8 @@ public class RequestedBehaviorAssetsTest {
         assertTrue("authored teeth expression is present",names.contains("mouth_closed"));
         assertTrue("authored open-mouth expression is present",names.contains("mouth_open"));
         for(String slug:java.util.List.of("haunter","gengar")) {
-            var random=net.minecraft.util.RandomSource.create(173L);
-            for(int i=0;i<1000;i++) {
-                int interval=MinemonCreature.blinkIntervalTicksFor(slug,random);
+            for(int offset=0;offset<=200;offset++) {
+                int interval=GhostLineAnimationRules.blinkIntervalFromOffset(slug,offset);
                 assertTrue(slug+" blink interval below 5 seconds: "+interval,interval>=100);
                 assertTrue(slug+" blink interval above 15 seconds: "+interval,interval<=300);
             }

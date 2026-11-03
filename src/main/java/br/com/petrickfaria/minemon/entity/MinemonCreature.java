@@ -146,7 +146,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
             this.dryNavigation=this.navigation;this.escapeNavigation=new EscapeNavigation(this,level);
         }
 
-        this.blinkCooldownTicks = blinkIntervalTicksFor(this.getSpeciesSlug(),this.getRandom());
+        this.blinkCooldownTicks = GhostLineAnimationRules.nextBlinkInterval(this.getSpeciesSlug(),this.getRandom());
     }
 
     @Override public void travel(net.minecraft.world.phys.Vec3 input){
@@ -220,10 +220,6 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     public boolean isAttackAnimationActive() { return this.attackAnimationTicks > 0; }
     public int blinkEventsForValidation() { return blinkEventsForValidation; }
     public int lastBlinkIntervalForValidation() { return lastBlinkIntervalForValidation; }
-    public static int blinkIntervalTicksFor(String slug, RandomSource random) {
-        return Set.of("haunter","gengar").contains(slug)
-                ? 100 + random.nextInt(201) : 80 + random.nextInt(120);
-    }
     public void setSleeping(boolean sleeping) {
         if(isDefeated())sleeping=true;
         if (!sleeping) this.aquaticSleepY=Double.NaN;
@@ -785,7 +781,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
             if (this.blinkCooldownTicks == 0) {
                 this.blinkPending = true;
                 this.blinkEventsForValidation++;
-                this.blinkCooldownTicks = blinkIntervalTicksFor(this.getSpeciesSlug(),this.getRandom());
+                this.blinkCooldownTicks = GhostLineAnimationRules.nextBlinkInterval(this.getSpeciesSlug(),this.getRandom());
                 this.lastBlinkIntervalForValidation = this.blinkCooldownTicks;
             }
         } else {
