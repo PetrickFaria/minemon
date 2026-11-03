@@ -99,7 +99,7 @@ public final class GastlySmokeParticle extends TextureSheetParticle {
         }
 
         @Override
-        public void end(net.minecraft.client.renderer.Tesselator tesselator) {
+        public void end(com.mojang.blaze3d.vertex.Tesselator tesselator) {
             try {
                 ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT.end(tesselator);
             } finally {
