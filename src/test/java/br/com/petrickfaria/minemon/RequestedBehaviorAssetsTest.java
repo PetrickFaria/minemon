@@ -45,7 +45,17 @@ public class RequestedBehaviorAssetsTest {
         assertNotNull(meditation);
         var sleepLegBones=java.util.List.of("left_upper_leg","left_lower_leg","foot_left","toe_back_left","toe_inner_left","toe_outer_left",
                 "right_upper_leg","right_lower_leg","foot_right","toe_back_right","toe_inner_right","toe_outer_right");
-        for(String bone:sleepLegBones) assertEquals("reuse exact sleep-reference leg/foot pose "+bone,sleep.get(bone),meditation.get(bone));
+        for(String bone:sleepLegBones) {
+            if(bone.equals("left_upper_leg") || bone.equals("right_upper_leg")) {
+                JsonObject expected=sleep.getAsJsonObject(bone).deepCopy();
+                JsonArray expectedPosition=expected.getAsJsonArray("position");
+                expectedPosition.set(1,new JsonPrimitive(expectedPosition.get(1).getAsDouble()+12.5));
+                assertEquals("preserve sleep-leg pose with only vertical hip-fit offset "+bone,expected,meditation.get(bone));
+                assertEquals("sleep-leg rotation remains unchanged "+bone,sleep.getAsJsonObject(bone).get("rotation"),meditation.getAsJsonObject(bone).get("rotation"));
+            } else {
+                assertEquals("reuse exact sleep-reference leg/foot pose "+bone,sleep.get(bone),meditation.get(bone));
+            }
+        }
         var idleUpperBodyBones=java.util.List.of("hips","lower_torso","upper_torso","head","jaw",
                 "left_mustache","left_mustache2","left_mustache3","left_mustache4",
                 "right_mustache","right_mustache2","right_mustache3","right_mustache4",

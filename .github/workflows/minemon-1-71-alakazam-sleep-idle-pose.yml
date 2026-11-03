@@ -54,7 +54,7 @@ jobs:
           after=json.load(open(path))['animations']
           for clip in before:
               if clip != 'animation.alakazam.meditate': assert before[clip] == after[clip], clip
-          print('PASS: 1.70 clips retained except meditation, which now uses ground_idle upper-body tracks and sleep leg tracks.')
+          print('PASS: 1.70 clips retained except meditation; upper body uses ground_idle, sleep legs retain rotations with only a +12.5 Y hip-fit offset on both upper legs.')
           PY
       - name: Create, save, and reopen Alakazam world twice
         env:
@@ -108,7 +108,12 @@ jobs:
           idle_upper={'hips','lower_torso','upper_torso','head','jaw','left_mustache','left_mustache2','left_mustache3','left_mustache4','right_mustache','right_mustache2','right_mustache3','right_mustache4','left_shoulder','left_upper_arm','left_lower_arm','hand_left','finger_index_left','finger_index_left2','finger_index_left3','finger_pinky_left','finger_pinky_left2','finger_pinky_left3','thumb_left','thumb_left2','spoon_left','spoon_left2','right_shoulder','right_upper_arm','right_lower_arm','hand_right','finger_index_right','finger_index_right2','finger_index_right3','finger_pinky_right','finger_pinky_right2','finger_pinky_right3','thumb_right','thumb_right2','spoon_right','spoon_right2'}
           expected=sleep_legs|idle_upper
           assert set(med)==expected, (set(med)-expected,expected-set(med))
-          for bone in sleep_legs: assert med[bone] == sleep[bone], bone
+          for bone in sleep_legs:
+              expected=sleep[bone]
+              if bone in {'left_upper_leg','right_upper_leg'}:
+                  expected=json.loads(json.dumps(expected))
+                  expected['position'][1] += 12.5
+              assert med[bone] == expected, bone
           for bone in idle_upper: assert med[bone] == idle[bone], bone
           assert 'body' not in med, 'hover bob must remain independent of pose tracks'
           PY

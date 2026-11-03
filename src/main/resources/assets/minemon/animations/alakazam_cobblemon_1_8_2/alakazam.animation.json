@@ -5154,7 +5154,7 @@
         "left_upper_leg": {
           "position": [
             0,
-            -12.5,
+            0,
             -1
           ],
           "rotation": [
@@ -5201,7 +5201,7 @@
         "right_upper_leg": {
           "position": [
             0,
-            -12.5,
+            0,
             -1
           ],
           "rotation": [
