@@ -69,7 +69,7 @@ public final class MinemonFlyingCreature extends MinemonCreature {
    double floor=this.naturalSurface();
    double target=this.naturalCycle().phase()==BehaviorCycle.Phase.LANDING?floor:floor+1.0D;
    double difference=target-this.getY();
-   double step=groundFloatCycleStep(this.naturalCycle().phase(),difference,this.onGround());
+   double step=groundFloatCycleStep(this.naturalCycle().phase(),difference,this.onGround);
    if(step!=0.0D)this.move(net.minecraft.world.entity.MoverType.SELF,new net.minecraft.world.phys.Vec3(0.0D,step,0.0D));
    this.setDeltaMovement(0.0D,0.0D,0.0D);this.fallDistance=0.0F;
    return;
