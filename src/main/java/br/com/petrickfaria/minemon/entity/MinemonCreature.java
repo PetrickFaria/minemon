@@ -777,12 +777,17 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
                 }
             }
             if (this.attackAnimationTicks > 0) this.attackAnimationTicks--;
-            if (this.blinkCooldownTicks > 0) this.blinkCooldownTicks--;
-            if (this.blinkCooldownTicks == 0) {
-                this.blinkPending = true;
-                this.blinkEventsForValidation++;
-                this.blinkCooldownTicks = GhostLineAnimationRules.nextBlinkInterval(this.getSpeciesSlug(),this.getRandom());
-                this.lastBlinkIntervalForValidation = this.blinkCooldownTicks;
+            boolean ghostBlinker=this.getSpeciesSlug().equals("haunter")||this.getSpeciesSlug().equals("gengar");
+            boolean ghostBlinkEligible=!this.isSleeping()&&!this.isOrderedToSit()&&!this.isDeadOrDying()
+                    &&this.attackAnimationTicks<=0&&this.getDeltaMovement().horizontalDistanceSqr()<0.0025D;
+            if(!ghostBlinker||ghostBlinkEligible) {
+                if (this.blinkCooldownTicks > 0) this.blinkCooldownTicks--;
+                if (this.blinkCooldownTicks == 0) {
+                    this.blinkPending = true;
+                    if(ghostBlinker)this.blinkEventsForValidation++;
+                    this.blinkCooldownTicks = GhostLineAnimationRules.nextBlinkInterval(this.getSpeciesSlug(),this.getRandom());
+                    if(ghostBlinker)this.lastBlinkIntervalForValidation = this.blinkCooldownTicks;
+                }
             }
         } else {
             if (!this.level.isClientSide) this.tickSpontaneousRun();

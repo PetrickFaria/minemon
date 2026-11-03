@@ -101,22 +101,22 @@ final class GhostLineClientSmokeTest {
     if(open&&!captures.contains("gengar-mouth-open"))snap(mc,"gengar-mouth-open");
     if(!open&&!captures.contains("gengar-mouth-teeth"))snap(mc,"gengar-mouth-teeth");
    }
-   if(ticks==350){
+   if(ticks==705){
     mc.getSingleplayerServer().execute(()->{
      var authoritative=mc.getSingleplayerServer().overworld().getEntity(gengarId);
      if(authoritative instanceof MinemonCreature g)g.setSleeping(true);
     });
     sleepStarted=true;
    }
-   if(sleepStarted&&ticks==375){face(mc,gengar);snap(mc,"gengar-sleep-half-sunk-a");}
-   if(sleepStarted&&ticks==405){face(mc,gengar);snap(mc,"gengar-sleep-half-sunk-b");}
-   if(ticks==650){
+   if(sleepStarted&&ticks==730){face(mc,gengar);snap(mc,"gengar-sleep-half-sunk-a");}
+   if(sleepStarted&&ticks==760){face(mc,gengar);snap(mc,"gengar-sleep-half-sunk-b");}
+   if(ticks==700){
     int haunterBlink=haunter.blinkEventsForValidation(),gengarBlink=gengar.blinkEventsForValidation();
     if(haunterBlink<2||gengarBlink<2||haunter.lastBlinkIntervalForValidation()<100||haunter.lastBlinkIntervalForValidation()>300
         ||gengar.lastBlinkIntervalForValidation()<100||gengar.lastBlinkIntervalForValidation()>300)
      throw new IllegalStateException("Ghost blink interval check failed: Haunter events="+haunterBlink+" interval="+haunter.lastBlinkIntervalForValidation()+" Gengar events="+gengarBlink+" interval="+gengar.lastBlinkIntervalForValidation());
    }
-   if(ticks>=680){
+   if(ticks>=800){
     for(String key:List.of("gastly-front","haunter-front-a","haunter-front-b","gengar-walk","gengar-mouth-open","gengar-mouth-teeth","gengar-sleep-half-sunk-a","gengar-sleep-half-sunk-b"))
      if(!captures.contains(key))throw new IllegalStateException("Missing real-client ghost screenshot: "+key);
     Files.writeString(Path.of("client-validation-ghost-line.txt"),
