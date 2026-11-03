@@ -117,6 +117,8 @@ final class GhostLineClientSmokeTest {
      throw new IllegalStateException("Ghost blink interval check failed: Haunter events="+haunterBlink+" interval="+haunter.lastBlinkIntervalForValidation()+" Gengar events="+gengarBlink+" interval="+gengar.lastBlinkIntervalForValidation());
    }
    if(ticks>=800){
+    if(br.com.petrickfaria.minemon.client.GastlyCoreRenderHook.redrawsForValidation()==0)
+     throw new IllegalStateException("Gastly was never redrawn above particles during the real-client test");
     for(String key:List.of("gastly-front","haunter-front-a","haunter-front-b","gengar-walk","gengar-mouth-open","gengar-mouth-teeth","gengar-sleep-half-sunk-a","gengar-sleep-half-sunk-b"))
      if(!captures.contains(key))throw new IllegalStateException("Missing real-client ghost screenshot: "+key);
     Files.writeString(Path.of("client-validation-ghost-line.txt"),
