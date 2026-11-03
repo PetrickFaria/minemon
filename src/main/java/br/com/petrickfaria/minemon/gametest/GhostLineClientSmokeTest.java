@@ -19,17 +19,20 @@ import java.util.*;
 final class GhostLineClientSmokeTest {
  private static boolean opened,setup,sleepStarted,blinkChecked,validationComplete;
  private static int screenshotFlushTicks;
+ private static boolean screenshotInFlight;
+ private static final Set<String> writtenScreenshots=new HashSet<>();
  private static int ticks;
  private static volatile UUID gastlyId,haunterId,gengarId;
  private static final Set<String> captures=new HashSet<>();
  private static String pendingScreenshot;
  private static int pendingScreenshotDelay;
  private static float gengarSleepBobMin=Float.POSITIVE_INFINITY,gengarSleepBobMax=Float.NEGATIVE_INFINITY;
+ private static boolean screenshotSlotAvailable(){return pendingScreenshot==null&&!screenshotInFlight;}
  private static void snap(Minecraft mc,String key){
-  if(captures.add(key)){pendingScreenshot=key;pendingScreenshotDelay=4;}
+  if(!captures.contains(key)&&screenshotSlotAvailable()){captures.add(key);pendingScreenshot=key;pendingScreenshotDelay=4;}
  }
  private static void snapNow(Minecraft mc,String key){
-  if(captures.add(key)){pendingScreenshot=key;pendingScreenshotDelay=0;}
+  if(!captures.contains(key)&&screenshotSlotAvailable()){captures.add(key);pendingScreenshot=key;pendingScreenshotDelay=0;}
  }
  private static MinemonCreature find(Minecraft mc,UUID id){
   if(id==null||mc.level==null)return null;
@@ -78,15 +81,16 @@ final class GhostLineClientSmokeTest {
       if(mob==null||!MinemonModel.ghostEyesClosedForValidation(mob))
        throw new IllegalStateException("Gengar blink frame did not render the closed-eye mesh");
      }
-     Screenshot.grab(mc.gameDirectory,"ghost-line-1.74-"+view+".png",mc.getMainRenderTarget(),m->System.out.println("[GHOST LINE] screenshot "+view+": "+m));
+     Screenshot.grab(mc.gameDirectory,"ghost-line-1.74-"+view+".png",mc.getMainRenderTarget(),m->{screenshotInFlight=false;writtenScreenshots.add(view);System.out.println("[GHOST LINE] screenshot "+view+": "+m);});
+     screenshotInFlight=true;
     }
    }
    if(validationComplete){
     screenshotFlushTicks++;
     Path screenshotDir=mc.gameDirectory.toPath().resolve("screenshots");
-    boolean allScreenshots=List.of("gastly-front","gastly-no-tongue","haunter-front-a","haunter-front-b","haunter-blink",
+    boolean allScreenshots=writtenScreenshots.size()==10&&List.of("gastly-front","gastly-no-tongue","haunter-front-a","haunter-front-b","haunter-blink",
       "gengar-walk","gengar-blink","gengar-mouth-teeth-fixed","gengar-sleep-half-sunk-a","gengar-sleep-half-sunk-b")
-      .stream().allMatch(key->Files.isRegularFile(screenshotDir.resolve("ghost-line-1.74-"+key+".png")));
+      .stream().allMatch(key->writtenScreenshots.contains(key)&&Files.isRegularFile(screenshotDir.resolve("ghost-line-1.74-"+key+".png")));
     if(allScreenshots){mc.stop();return;}
     if(screenshotFlushTicks>=200)throw new IllegalStateException("Timed out waiting for all 10 real-client screenshots to be written");
     return;
@@ -130,10 +134,10 @@ final class GhostLineClientSmokeTest {
    }
    if(ticks>=25&&!captures.contains("haunter-front-a")){face(mc,haunter);snap(mc,"haunter-front-a");}
    if(ticks>=75&&!captures.contains("haunter-front-b")){face(mc,haunter);snap(mc,"haunter-front-b");}
-   if(ticks>=100&&haunter.isBlinkingForRender()&&pendingScreenshot==null&&!captures.contains("haunter-blink")){
+   if(ticks>=100&&haunter.isBlinkingForRender()&&screenshotSlotAvailable()&&!captures.contains("haunter-blink")){
     face(mc,haunter);snapNow(mc,"haunter-blink");
    }
-   if(ticks>=100&&gengar.isBlinkingForRender()&&pendingScreenshot==null&&!captures.contains("gengar-blink")){
+   if(ticks>=100&&gengar.isBlinkingForRender()&&screenshotSlotAvailable()&&!captures.contains("gengar-blink")){
     face(mc,gengar);snapNow(mc,"gengar-blink");
    }
    if(ticks>=90&&ticks<145){
