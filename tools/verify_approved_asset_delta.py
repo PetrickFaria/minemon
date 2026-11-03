@@ -104,6 +104,9 @@ APPROVED_PRIOR_ASSET_BLOBS = {
     "assets/minemon/geo/seaking/seaking_female.geo.json": "c7ffc76315a32345e52b9daee4c3d266143306c2",
     "assets/minemon/geo/seaking/seaking_male.geo.json": "0382d06a1e0d5d5384dc81d2fab2b614d062f297",
 }
+APPROVED_PRIOR_ASSET_PATHS = frozenset(
+    "src/main/resources/" + path for path in APPROVED_PRIOR_ASSET_BLOBS
+)
 
 
 def is_approved_prior_asset_delta(path, content):
@@ -118,9 +121,9 @@ def is_approved_prior_asset_delta(path, content):
 
 
 def pokec_resource_paths():
-    """Return exact reviewed resources for PokéC, Rocket, treats, Pokébolas, and the breeding egg."""
+    """Return reviewed resources and exact prior asset paths for cumulative audits."""
     recipes = frozenset(f"src/main/resources/data/minemon/recipes/{item}_treat.json" for item in (
         "aquatic", "frozen", "dragon", "electric", "ghost", "fairy", "fire", "bug", "fighting",
         "steel", "normal", "rock", "psychic", "ground", "poison", "flying", "grass", "dark"))
-    return POKEC_RESOURCES | ROCKET_RESOURCES | TREAT_RESOURCES | recipes | {"src/main/resources/data/minemon_gen1/preview_body_pivots.json", "src/main/resources/data/minemon_gen1/defeated_rest_metrics.json", "src/main/resources/data/minemon/recipes/pokeball.json", "src/main/resources/data/minemon/recipes/master_ball.json"}
+    return APPROVED_PRIOR_ASSET_PATHS | POKEC_RESOURCES | ROCKET_RESOURCES | TREAT_RESOURCES | recipes | {"src/main/resources/data/minemon_gen1/preview_body_pivots.json", "src/main/resources/data/minemon_gen1/defeated_rest_metrics.json", "src/main/resources/data/minemon/recipes/pokeball.json", "src/main/resources/data/minemon/recipes/master_ball.json"}
 
