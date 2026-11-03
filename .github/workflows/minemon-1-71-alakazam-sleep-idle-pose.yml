@@ -31,7 +31,7 @@ jobs:
           cat /tmp/minemon-1.71-files.txt
           while IFS= read -r path; do
             case "$path" in
-              .github/workflows/minemon-1-71-alakazam-floating-cycle-fixes.yml|build.gradle|gradle.properties|src/main/java/br/com/petrickfaria/minemon/client/MinemonModel.java|src/main/java/br/com/petrickfaria/minemon/gametest/ClientSmokeTest.java|src/main/resources/assets/minemon/animations/alakazam_cobblemon_1_8_2/alakazam.animation.json) ;;
+              .github/workflows/minemon-1-71-alakazam-sleep-idle-pose.yml|build.gradle|gradle.properties|src/main/java/br/com/petrickfaria/minemon/client/MinemonModel.java|src/main/java/br/com/petrickfaria/minemon/gametest/ClientSmokeTest.java|src/main/resources/assets/minemon/animations/alakazam_cobblemon_1_8_2/alakazam.animation.json) ;;
               *) echo "Out-of-scope file in 1.71 diff: $path"; exit 1 ;;
             esac
           done < /tmp/minemon-1.71-files.txt
