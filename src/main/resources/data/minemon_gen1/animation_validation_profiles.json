@@ -945,6 +945,11 @@
       "arm_left1",
       "arm_right1"
     ],
+    "pose_transition": [
+      "body",
+      "arm_left1",
+      "arm_right1"
+    ],
     "walk": [
       "leg_left",
       "leg_right",
