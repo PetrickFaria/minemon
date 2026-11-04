@@ -939,15 +939,9 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
             boolean hover=SpeciesBehaviorProfiles.hoversDuringNightRest(this.getSpeciesSlug());
             double restHeight=SpeciesBehaviorProfiles.nightRestHoverHeight(this.getSpeciesSlug());
             double waterRestY=waterRest?WaterMovementGoal.waterRestY(this):Double.NaN;
-            boolean shellFloorRest=waterRest&&("shellder".equals(this.getSpeciesSlug())||"cloyster".equals(this.getSpeciesSlug()));
-            double waterSupportY=shellFloorRest?WaterMovementGoal.waterBottomSupportY(this,this.blockPosition()):Double.NaN;
-            boolean settled=shellFloorRest
-                ?Double.isFinite(waterSupportY)&&Math.abs(this.getY()-waterSupportY-0.015D)<0.18D
-                    &&this.level.noCollision(this,this.getBoundingBox().move(0,waterSupportY+0.015D-this.getY(),0))
-                :waterRest?Math.abs(this.getY()-waterRestY)<0.18D
-                    :hover?Math.abs(this.getY()-this.naturalSurface()-restHeight)<0.18D
-                    :this.isOnGround()&&WaterMovementGoal.safeDry(this,this.blockPosition());
-            if(shellFloorRest&&!settled&&this.isSleeping())this.setSleeping(false);
+            boolean settled=waterRest?Math.abs(this.getY()-waterRestY)<0.18D
+                :hover?Math.abs(this.getY()-this.naturalSurface()-restHeight)<0.18D
+                :this.isOnGround()&&WaterMovementGoal.safeDry(this,this.blockPosition());
             if(settled&&!this.isSleeping()){
                 if(waterRest&&SpeciesBehaviorProfiles.locksPositionDuringWaterSleep(this.getSpeciesSlug())
                         &&Double.isFinite(waterRestY)){

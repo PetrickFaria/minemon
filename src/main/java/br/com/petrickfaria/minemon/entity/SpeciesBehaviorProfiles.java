@@ -105,7 +105,7 @@ public final class SpeciesBehaviorProfiles {
     public static boolean restsAtWaterBottom(String slug) { return isVisitor(slug) || slug.equals("gyarados"); }
     /** Species whose approved water-rest pose places them at the submerged support. */
     public static boolean sleepsAtWaterBottom(String slug) {
-        return restsAtWaterBottom(slug) || slug.equals("shellder") || slug.equals("cloyster");
+        return restsAtWaterBottom(slug);
     }
     public static boolean landsForNightRest(String slug) { return LAND_FOR_NIGHT_REST.contains(slug); }
     public static boolean hoversDuringNightRest(String slug) {
