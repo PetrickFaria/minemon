@@ -630,6 +630,10 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
         ItemStack held = player.getItemInHand(hand);
         if (br.com.petrickfaria.minemon.pokec.WildEncounterManager.isEncounter(this)) {
+            // Let the Pokébola's item interaction run; consuming the entity
+            // interaction here prevents its capture transaction from starting.
+            if (held.getItem() instanceof br.com.petrickfaria.minemon.item.PokeballItem)
+                return InteractionResult.PASS;
             if (!br.com.petrickfaria.minemon.pokec.WildEncounterManager.isDowned(this))
                 return InteractionResult.sidedSuccess(this.level.isClientSide);
             if (!(player instanceof ServerPlayer serverPlayer)) return InteractionResult.sidedSuccess(this.level.isClientSide);
