@@ -123,6 +123,9 @@ minecraft {
             property 'minemon.clientSmokeAudio', project.hasProperty('clientSmokeAudio').toString()
             property 'minemon.clientSmokeRocketProfession', project.hasProperty('clientSmokeRocketProfession').toString()
             property 'minemon.clientSmokeTreats', project.hasProperty('clientSmokeTreats').toString()
+            property 'minemon.clientSmokeWildCapture', project.hasProperty('clientSmokeWildCapture').toString()
+            property 'minemon.clientSmokeWildCaptureReopen', project.hasProperty('clientSmokeWildCaptureReopen').toString()
+            property 'minemon.captureReopenIndex', (findProperty('captureReopenIndex') ?: '1').toString()
             property 'minemon.clientSmokePokemonManagement', project.hasProperty('clientSmokePokemonManagement').toString()
             property 'minemon.clientSmokeSpecies', (findProperty('clientSmokeSpecies') ?: '').toString()
         }

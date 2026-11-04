@@ -49,6 +49,14 @@ final class WildCaptureClientSmokeTest {
                 return;
             }
             if (mc.level == null || mc.player == null || mc.getSingleplayerServer() == null || mc.screen != null) return;
+            if (Boolean.getBoolean("minemon.clientSmokeWildCaptureReopen")) {
+                if (!setupRequested) {
+                    setupRequested = true;
+                    int reopenIndex = Integer.getInteger("minemon.captureReopenIndex", 1);
+                    mc.getSingleplayerServer().execute(() -> verifyReopenedCapture(mc, reopenIndex));
+                }
+                return;
+            }
             if (!setupRequested) {
                 setupRequested = true;
                 mc.getSingleplayerServer().execute(() -> setup(mc));
@@ -104,6 +112,30 @@ final class WildCaptureClientSmokeTest {
             if (ticks > 500) throw new IllegalStateException("Timed out waiting for wild capture animation/transaction");
         } catch (Exception failure) {
             throw new IllegalStateException("Wild capture client validation failed", failure);
+        }
+    }
+
+    private static void verifyReopenedCapture(Minecraft mc, int reopenIndex) {
+        try {
+            var server = mc.getSingleplayerServer();
+            var owner = server == null ? null : server.getPlayerList().getPlayer(mc.player.getUUID());
+            if (owner == null) throw new IllegalStateException("Reopened world player unavailable");
+            boolean found = owner.getInventory().items.stream().anyMatch(stack ->
+                    br.com.petrickfaria.minemon.item.PokeballItem.isOccupied(stack)
+                            && br.com.petrickfaria.minemon.item.PokeballItem.readStoredEntity(stack) != null
+                            && owner.getUUID().equals(br.com.petrickfaria.minemon.item.PokeballItem.readStoredEntity(stack).owner()));
+            if (!found) throw new IllegalStateException("Stored captured Pokémon did not survive world reopen " + reopenIndex);
+            if (br.com.petrickfaria.minemon.pokec.PokecPlayerData.trainerXp(owner) <= 0.0D)
+                throw new IllegalStateException("Trainer Pokémon XP did not survive world reopen " + reopenIndex);
+            var downed = br.com.petrickfaria.minemon.pokec.WildEncounterData.get(server.overworld()).count(owner.getUUID(), "downed");
+            if (downed != 0) throw new IllegalStateException("Captured encounter reappeared after world reopen");
+            Files.writeString(Path.of("wild-capture-reopen-" + reopenIndex + ".txt"),
+                    "PASS CAPTURE REOPEN " + reopenIndex + ": occupied owner Pokébola and Trainer XP persisted; no duplicate downed encounter\n");
+            System.out.println("[WILD CAPTURE REOPEN] PASS " + reopenIndex);
+            done = true;
+            mc.execute(mc::stop);
+        } catch (Exception failure) {
+            throw new IllegalStateException("Wild capture persistence validation failed", failure);
         }
     }
 
