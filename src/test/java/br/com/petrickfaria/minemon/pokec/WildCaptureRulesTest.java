@@ -29,4 +29,12 @@ public class WildCaptureRulesTest {
         assertEquals(2, WildCaptureRules.souls(2, 75));
         assertEquals(0, WildCaptureRules.souls(1, 25));
     }
+
+    @Test public void evolvedWildFormsRespectCurrentEvolutionRequirements() {
+        assertEquals(1, WildCaptureRules.minimumSpawnLevel("charmander"));
+        assertEquals(5, WildCaptureRules.minimumSpawnLevel("charmeleon"));
+        assertEquals(10, WildCaptureRules.minimumSpawnLevel("charizard"));
+        assertEquals(5, WildCaptureRules.minimumSpawnLevel("ivysaur"));
+        assertEquals(10, WildCaptureRules.minimumSpawnLevel("venusaur"));
+    }
 }

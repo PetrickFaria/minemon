@@ -28,6 +28,13 @@ public final class WildCaptureRules {
         return Math.min(1.0D, baseChance(rarity) * (1.0D + 0.20D * treatStages(treats)));
     }
 
+    /** Evolution forms inherit the current level requirement that unlocks that form. */
+    public static int minimumSpawnLevel(String slug) {
+        PokecSpecies.Entry species = PokecSpecies.get(slug);
+        if (species == null || !species.isEvolution()) return 1;
+        return Math.max(1, PokemonEvolutionRules.requiredLevel(species.evolvesFrom()));
+    }
+
     /** Half-up rounding keeps fractional soul rewards consistent and non-negative. */
     public static int souls(int baseSouls, int percent) {
         long bounded = Math.max(0, baseSouls);

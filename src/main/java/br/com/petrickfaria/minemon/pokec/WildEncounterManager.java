@@ -182,8 +182,7 @@ public final class WildEncounterManager {
     }
 
     private static int spawnLevel(PokecSpecies.Entry species, net.minecraft.util.RandomSource random) {
-        int min = species.isEvolution() ? PokemonEvolutionRules.requiredLevel(species.evolvesFrom()) : 1;
-        if (!PokemonEvolutionRules.nextForms(species.slug()).isEmpty()) min = 1;
+        int min = WildCaptureRules.minimumSpawnLevel(species.slug());
         int max = Math.max(min, Math.min(30, min + 15));
         return min + random.nextInt(max - min + 1);
     }
