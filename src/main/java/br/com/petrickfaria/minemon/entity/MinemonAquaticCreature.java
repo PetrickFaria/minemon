@@ -150,22 +150,22 @@ public final class MinemonAquaticCreature extends MinemonCreature {
             this.setNoGravity(true);this.fallDistance=0;
             return;
         }
-        // A completed surface route can leave SmoothSwimmingMoveControl holding
-        // its last horizontal waypoint. Clear it even if the body has just
-        // crossed the waterline and the current column has no measurable top.
+        // Gyarados's surface-depth correction owns vertical movement. Keep the
+        // swimming controller's vertical waypoint at the current pose even
+        // while a horizontal path is active, so its stale route height cannot
+        // fight the approved surface depth or create a repeated bobbing cycle.
         if(this.getSpeciesSlug().equals("gyarados")&&this.isNaturalSurface()
-                &&!this.isSleeping()&&!this.isNightResting()&&this.getNavigation().isDone()){
-            // Keep the completed route's vertical target at the current pose.
-            // The surface correction below owns Gyarados's approved depth;
-            // holding the old anchor here makes SmoothSwimmingMoveControl pull
-            // upward while the correction simultaneously pulls downward.
-            double holdY=this.getY();
-            this.getMoveControl().setWantedPosition(this.getX(),holdY,this.getZ(),0.5D);
-            // The completed route no longer owns horizontal motion. Damp its
-            // residual momentum so inertia cannot carry Gyarados over a bank
-            // after the controller has already cleared the stale waypoint.
-            var motion=this.getDeltaMovement();
-            this.setDeltaMovement(motion.x*0.2D,motion.y,motion.z*0.2D);
+                &&!this.isSleeping()&&!this.isNightResting()){
+            var control=this.getMoveControl();
+            double holdX=this.getNavigation().isDone()?this.getX():control.getWantedX();
+            double holdZ=this.getNavigation().isDone()?this.getZ():control.getWantedZ();
+            control.setWantedPosition(holdX,this.getY(),holdZ,0.5D);
+            if(this.getNavigation().isDone()){
+                // The completed route no longer owns horizontal motion. Damp
+                // residual momentum so it cannot carry Gyarados over a bank.
+                var motion=this.getDeltaMovement();
+                this.setDeltaMovement(motion.x*0.2D,motion.y,motion.z*0.2D);
+            }
         }
         if(!this.isInWater()||(!this.naturalBehaviorActive()&&!this.isSleeping()&&!this.isNightResting()))return;
         double top=this.waterSurface();
