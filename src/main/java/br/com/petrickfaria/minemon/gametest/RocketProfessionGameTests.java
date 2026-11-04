@@ -78,6 +78,14 @@ public final class RocketProfessionGameTests {
     @GameTest(template = "test_arena", batch = "rocket_natural", timeoutTicks = 500)
     public static void adultUnemployedVillagerClaimsRocketWorkstationNaturally(GameTestHelper helper) {
         floor(helper);
+        // Keep the vanilla villager inside the prepared POI acquisition arena.
+        // Without the boundary, random idle wandering can take it beyond the
+        // prepared floor and outside the workstation-search area (observed in CI).
+        for (int x = 0; x < 16; x++) for (int z = 0; z < 16; z++) {
+            if (x == 0 || x == 15 || z == 0 || z == 15) {
+                for (int y = 1; y <= 3; y++) helper.setBlock(new BlockPos(x, y, z), Blocks.STONE);
+            }
+        }
         helper.getLevel().setDayTime(5000L);
         BlockPos workstation = new BlockPos(6, 1, 6);
         helper.setBlock(workstation, ModBlocks.ROCKET_BLOCK.get());
