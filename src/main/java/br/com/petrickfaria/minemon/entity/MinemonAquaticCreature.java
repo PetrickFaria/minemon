@@ -155,12 +155,11 @@ public final class MinemonAquaticCreature extends MinemonCreature {
         // crossed the waterline and the current column has no measurable top.
         if(this.getSpeciesSlug().equals("gyarados")&&this.isNaturalSurface()
                 &&!this.isSleeping()&&!this.isNightResting()&&this.getNavigation().isDone()){
+            // Keep the completed route's vertical target at the current pose.
+            // The surface correction below owns Gyarados's approved depth;
+            // holding the old anchor here makes SmoothSwimmingMoveControl pull
+            // upward while the correction simultaneously pulls downward.
             double holdY=this.getY();
-            if(this.isInWater()){
-                double localTop=this.waterSurface();
-                if(Double.isFinite(localTop))
-                    holdY=localTop-WaterMovementGoal.preferredSurfaceDepth(this);
-            }
             this.getMoveControl().setWantedPosition(this.getX(),holdY,this.getZ(),0.5D);
             // The completed route no longer owns horizontal motion. Damp its
             // residual momentum so inertia cannot carry Gyarados over a bank
