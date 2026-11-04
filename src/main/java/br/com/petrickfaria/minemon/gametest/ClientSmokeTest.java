@@ -233,6 +233,10 @@ public final class ClientSmokeTest {
    }
    if(java.util.Set.of("spearow","fearow","articuno","zapdos","moltres").contains(slug)&&fixtureAir(slug))
     return java.util.List.of("wing_open_left","wing_open_right");
+   if(fixtureWater(slug)&&state.startsWith("WALK_")) {
+    var waterTransition=ADDITIONAL_PROFILES.getOrDefault(slug,java.util.Map.of()).get("water_pose_transition");
+    if(waterTransition!=null)return waterTransition;
+   }
    if(ADDITIONAL_PROFILES.containsKey(slug)) {
     String key=state.startsWith("IDLE_")?"idle":state.startsWith("RUN_")
       &&!fixtureAir(slug)&&!fixtureWater(slug)?"run":"walk";
@@ -956,12 +960,16 @@ public final class ClientSmokeTest {
    return !java.util.Set.of("fearow","articuno","zapdos","moltres").contains(slug)&&ADDITIONAL_PROFILES.getOrDefault(slug,java.util.Map.of()).containsKey("idle_static");
   }
   private static boolean sourcePoseTransition(String slug) {
-   // Gengar now has a generated body/tail oscillation over its retained poses.
-   // Require temporal articulation and observe a complete slow float cycle.
-   return !java.util.Set.of("gengar","fearow","articuno","zapdos","moltres").contains(slug)&&ADDITIONAL_PROFILES.getOrDefault(slug,java.util.Map.of()).containsKey("pose_transition");
+   // A water visitor can use native, fixed water_idle/water_swim poses rather
+   // than cyclic gait joints. Compare its separately profiled water poses.
+   // Gengar's generated body/tail float remains covered by its airborne smoke.
+   String profile=fixtureWater(slug)?"water_pose_transition":"pose_transition";
+   return !java.util.Set.of("gengar","fearow","articuno","zapdos","moltres").contains(slug)
+       &&ADDITIONAL_PROFILES.getOrDefault(slug,java.util.Map.of()).containsKey(profile);
   }
   private static int validateSourcePoseTransition(String slug,String idleState,String movementState) {
-   var profile=ADDITIONAL_PROFILES.getOrDefault(slug,java.util.Map.of()).get("pose_transition");
+   String profileKey=fixtureWater(slug)?"water_pose_transition":"pose_transition";
+   var profile=ADDITIONAL_PROFILES.getOrDefault(slug,java.util.Map.of()).get(profileKey);
    if(profile==null||profile.isEmpty())throw new IllegalStateException("Missing source pose transition profile for "+slug);
    if(articulationSampleCounts.getOrDefault(slug,java.util.Map.of()).getOrDefault(idleState,0)<2
       ||articulationSampleCounts.getOrDefault(slug,java.util.Map.of()).getOrDefault(movementState,0)<2)
