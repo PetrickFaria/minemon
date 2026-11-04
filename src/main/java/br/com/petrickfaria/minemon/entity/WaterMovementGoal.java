@@ -413,7 +413,7 @@ public final class WaterMovementGoal extends Goal {
   return mob.level.getFluidState(feet).isEmpty()&&mob.level.getFluidState(feet.below()).isEmpty()
       &&!floor.getCollisionShape(mob.level,feet.below()).isEmpty()
       &&!floor.is(Blocks.MAGMA_BLOCK)&&!floor.is(Blocks.CACTUS)&&!floor.is(Blocks.CAMPFIRE)&&!floor.is(Blocks.SOUL_CAMPFIRE)
-      &&mob.level.noBlockCollision(mob,mob.getBoundingBox());
+      &&mob.level.noCollision(mob.getBoundingBox());
  }
  static boolean safeLanding(MinemonCreature mob,BlockPos feet){
   if(!safeDry(mob,feet))return false;
