@@ -121,6 +121,7 @@ public final class PokeballItem extends Item {
                     || !serverPlayer.getUUID().equals(br.com.petrickfaria.minemon.pokec.WildEncounterManager.owner(wild)))
                 return InteractionResult.FAIL;
             if (stack.getCount() > 1 && serverPlayer.getInventory().getFreeSlot() < 0) return InteractionResult.FAIL;
+            var targetPosition = wild.position();
             var outcome = br.com.petrickfaria.minemon.pokec.WildEncounterManager.attemptCapture(wild, serverPlayer);
             if (outcome == br.com.petrickfaria.minemon.pokec.WildEncounterManager.CaptureResult.INVALID)
                 return InteractionResult.FAIL;
@@ -138,6 +139,8 @@ public final class PokeballItem extends Item {
                     return InteractionResult.FAIL;
                 }
                 br.com.petrickfaria.minemon.pokec.WildEncounterManager.finishCapture(wild, serverPlayer);
+                br.com.petrickfaria.minemon.entity.CaptureBallProjectile.launch((ServerLevel) player.level,
+                        serverPlayer, targetPosition, true);
                 if (stack.getCount() == 1) player.setItemInHand(hand, occupied);
                 else { stack.shrink(1); serverPlayer.getInventory().add(occupied); }
                 wild.discard();
@@ -145,6 +148,8 @@ public final class PokeballItem extends Item {
             }
             if (stack.getCount() == 1) player.setItemInHand(hand, remaining);
             else stack.shrink(1);
+            br.com.petrickfaria.minemon.entity.CaptureBallProjectile.launch((ServerLevel) player.level,
+                    serverPlayer, targetPosition, false);
             if (outcome == br.com.petrickfaria.minemon.pokec.WildEncounterManager.CaptureResult.EXPIRED)
                 return InteractionResult.CONSUME;
             return InteractionResult.CONSUME;

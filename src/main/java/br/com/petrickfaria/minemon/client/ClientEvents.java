@@ -20,6 +20,7 @@ public final class ClientEvents {
     @SubscribeEvent
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(ModEntities.ELEMENTAL_PROJECTILE.get(),ElementalProjectileRenderer::new);
+        event.registerEntityRenderer(ModEntities.CAPTURE_BALL.get(),CaptureBallRenderer::new);
         for (var type : ModEntities.SPECIES.values()) event.registerEntityRenderer(type.get(), MinemonRenderer::new);
     }
 
