@@ -28,6 +28,14 @@ final class WildCaptureClientSmokeTest {
         if (done || event.phase != TickEvent.Phase.END) return;
         Minecraft mc = Minecraft.getInstance();
         try {
+            if (Boolean.getBoolean("minemon.clientSmokeWildCaptureReopen") && ++ticks > 6000) {
+                throw new IllegalStateException("Timed out waiting for the reopened world/player to become ready; screen="
+                        + (mc.screen == null ? "none" : mc.screen.getClass().getName())
+                        + ",level=" + (mc.level == null ? "none" : mc.level.dimension().location())
+                        + ",player=" + (mc.player == null ? "none" : mc.player.getUUID())
+                        + ",server=" + (mc.getSingleplayerServer() == null ? "none" : "ready")
+                        + ",opened=" + opened + ",setupRequested=" + setupRequested);
+            }
             if (!opened && mc.screen instanceof TitleScreen) {
                 opened = true;
                 var model = mc.getItemRenderer().getModel(new ItemStack(ModItems.POKEBALL.get()), mc.level, mc.player, 0);
