@@ -76,20 +76,29 @@ final class NineBehaviorChecks {
  }
  static void followingAltitudes(GameTestHelper h){
   var level=h.getLevel();level.setDayTime(1000);
-  var owner=new net.minecraft.server.level.ServerPlayer(level.getServer(),level,new com.mojang.authlib.GameProfile(UUID.randomUUID(),"AltitudeTrainer"),null);
-  owner.connection=new net.minecraftforge.common.util.FakePlayer(level,new com.mojang.authlib.GameProfile(UUID.randomUUID(),"AltitudeConnection")).connection;
-  var at=h.absolutePos(new BlockPos(20,1,5));owner.moveTo(at.getX()+.5,at.getY(),at.getZ()+.5,0,0);level.addNewPlayer(owner);
-  var species=List.of("gastly","metapod","kakuna","abra","porygon","geodude","pidgey");var mobs=new ArrayList<MinemonCreature>();
+  var species=List.of("gastly","metapod","kakuna","abra","porygon","geodude","pidgey");
+  var owners=new ArrayList<net.minecraft.server.level.ServerPlayer>();var mobs=new ArrayList<MinemonCreature>();
   for(int i=0;i<species.size();i++){
-   var mob=h.spawn(ModEntities.SPECIES.get(species.get(i)).get(),new BlockPos(5,5,1+i));mob.tame(owner);mob.setOrderedToSit(false);mob.naturalCycle().restore("AIR",1000,1);mobs.add(mob);
+   var owner=new net.minecraft.server.level.ServerPlayer(level.getServer(),level,
+       new com.mojang.authlib.GameProfile(UUID.randomUUID(),"AltitudeTrainer"+i),null);
+   owner.connection=new net.minecraftforge.common.util.FakePlayer(level,
+       new com.mojang.authlib.GameProfile(UUID.randomUUID(),"AltitudeConnection"+i)).connection;
+   int z=2+i*3;var ownerAt=h.absolutePos(new BlockPos(20,1,z));
+   owner.moveTo(ownerAt.getX()+.5,ownerAt.getY(),ownerAt.getZ()+.5,0,0);level.addNewPlayer(owner);owners.add(owner);
+   var mob=h.spawn(ModEntities.SPECIES.get(species.get(i)).get(),new BlockPos(5,5,z));
+   mob.tame(owner);mob.setOrderedToSit(false);mob.naturalCycle().restore("AIR",1000,1);mobs.add(mob);
   }
   h.runAfterDelay(220,()->{
    for(var mob:mobs){
     double altitude=mob.getY()-mob.naturalSurface();
-    if(!mob.isFollowingOwner()||Math.abs(altitude-mob.followAltitude())>.35)h.fail("Following altitude incorrect: "+mob.getSpeciesSlug()+" altitude="+altitude+" expected="+mob.followAltitude()+" following="+mob.isFollowingOwner());
+    if(!mob.isFollowingOwner()||Math.abs(altitude-mob.followAltitude())>.35)
+     h.fail("Following altitude incorrect: "+mob.getSpeciesSlug()+" altitude="+altitude
+         +" expected="+mob.followAltitude()+" following="+mob.isFollowingOwner()+" pos="+mob.position()
+         +" motion="+mob.getDeltaMovement()+" nav="+mob.getNavigation().getTargetPos());
     mob.setOrderedToSit(true);
    }
-   h.runAfterDelay(5,()->{for(var mob:mobs){if(mob.isFollowingOwner())h.fail("Sitting did not stop following altitude state");mob.discard();}owner.discard();h.succeed();});
+   h.runAfterDelay(5,()->{for(var mob:mobs){if(mob.isFollowingOwner())h.fail("Sitting did not stop following altitude state");mob.discard();}
+    owners.forEach(net.minecraft.server.level.ServerPlayer::discard);h.succeed();});
   });
  }
 
