@@ -60,9 +60,25 @@ jobs:
             exit "$client_status"
           fi
           grep -F 'PASS WILD CAPTURE CLIENT:' run/wild-capture-client-pass.txt
+          set +e
           ALSOFT_DRIVERS=null timeout --kill-after=30s 900s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeWildCaptureReopen -PcaptureReopenIndex=1 > run/wild-capture-reopen-1.log 2>&1
+          reopen_status=$?
+          set -e
+          if [ "$reopen_status" -ne 0 ] || ! grep -Fq 'PASS CAPTURE REOPEN 1:' run/wild-capture-reopen-1.txt; then
+            cat run/wild-capture-reopen-1.txt 2>/dev/null || true
+            rg -n -C 3 "FAIL CAPTURE REOPEN|Exception|ERROR|timed out" run/wild-capture-reopen-1.log | tail -n 100 || true
+            exit 1
+          fi
           grep -F 'PASS CAPTURE REOPEN 1:' run/wild-capture-reopen-1.txt
+          set +e
           ALSOFT_DRIVERS=null timeout --kill-after=30s 900s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeWildCaptureReopen -PcaptureReopenIndex=2 > run/wild-capture-reopen-2.log 2>&1
+          reopen_status=$?
+          set -e
+          if [ "$reopen_status" -ne 0 ] || ! grep -Fq 'PASS CAPTURE REOPEN 2:' run/wild-capture-reopen-2.txt; then
+            cat run/wild-capture-reopen-2.txt 2>/dev/null || true
+            rg -n -C 3 "FAIL CAPTURE REOPEN|Exception|ERROR|timed out" run/wild-capture-reopen-2.log | tail -n 100 || true
+            exit 1
+          fi
           grep -F 'PASS CAPTURE REOPEN 2:' run/wild-capture-reopen-2.txt
       - name: Build the distributable version 1.69 JAR
         run: ./gradlew --no-daemon build
