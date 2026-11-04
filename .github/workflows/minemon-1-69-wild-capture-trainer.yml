@@ -38,3 +38,12 @@ jobs:
           echo eula=true > run/eula.txt
           python3 tools/prepare_gametest_world.py
           timeout 600s ./gradlew --no-daemon runGameTestServer
+      - name: Create, save, and reopen a Forge world twice
+        env:
+          MINEMON_TEST_RCON_PASSWORD: ${{ secrets.MINEMON_TEST_RCON_PASSWORD }}
+        run: |
+          if [ -z "$MINEMON_TEST_RCON_PASSWORD" ]; then
+            MINEMON_TEST_RCON_PASSWORD="$(python3 -c 'import secrets; print(secrets.token_urlsafe(32))')"
+          fi
+          export MINEMON_TEST_RCON_PASSWORD
+          python3 tools/test_world_reopen.py

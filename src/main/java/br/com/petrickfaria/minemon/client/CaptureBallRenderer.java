@@ -2,12 +2,12 @@ package br.com.petrickfaria.minemon.client;
 
 import br.com.petrickfaria.minemon.Minemon;
 import br.com.petrickfaria.minemon.entity.CaptureBallProjectile;
-import net.minecraft.client.renderer.ItemRenderer;
+import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemTransforms;
+import net.minecraft.client.renderer.block.model.ItemTransforms;
 import com.mojang.math.Vector3f;
 
 public final class CaptureBallRenderer extends EntityRenderer<CaptureBallProjectile> {

@@ -69,6 +69,17 @@ public class MinemonRenderer extends GeoEntityRenderer<MinemonCreature> {
   return player!=null&&br.com.petrickfaria.minemon.pokec.WildEncounterManager.isDowned(entity)
       &&player.getUUID().toString().equals(entity.wildEncounterOwner());
  }
+ private boolean hasEmptyPokeball(){
+  var player=net.minecraft.client.Minecraft.getInstance().player;
+  if(player==null)return false;
+  for(var stack:player.getInventory().items)
+   if(stack.getItem() instanceof br.com.petrickfaria.minemon.item.PokeballItem
+       &&!br.com.petrickfaria.minemon.item.PokeballItem.isOccupied(stack))return true;
+  for(var stack:player.getInventory().offhand)
+   if(stack.getItem() instanceof br.com.petrickfaria.minemon.item.PokeballItem
+       &&!br.com.petrickfaria.minemon.item.PokeballItem.isOccupied(stack))return true;
+  return false;
+ }
  @Override public boolean shouldShowName(MinemonCreature entity){return entity.isTame()||showEncounterChoices(entity);}
  @Override protected void renderNameTag(MinemonCreature entity,Component name,com.mojang.blaze3d.vertex.PoseStack pose,
       net.minecraft.client.renderer.MultiBufferSource buffers,int packedLight){
@@ -79,9 +90,12 @@ public class MinemonRenderer extends GeoEntityRenderer<MinemonCreature> {
     pose.scale(1/wildScale,1/wildScale,1/wildScale);
     double top=br.com.petrickfaria.minemon.entity.ModelMetrics.top(entity.getSpeciesSlug(),wildScale);
     pose.translate(0,Math.max(0,top-entity.getBbHeight()),0);
-    super.renderNameTag(entity,Component.literal("CAPTURAR: Pokébola"),pose,buffers,packedLight);
+    boolean hasBall=hasEmptyPokeball();
+    super.renderNameTag(entity,Component.literal(hasBall?"[ CAPTURAR ]":"[ CAPTURAR ] sem Pokébola")
+        .withStyle(hasBall?net.minecraft.ChatFormatting.GREEN:net.minecraft.ChatFormatting.DARK_GRAY),pose,buffers,packedLight);
     pose.translate(0,-.22D,0);
-    super.renderNameTag(entity,Component.literal("SAQUEAR: agachar + clique"),pose,buffers,packedLight);
+    super.renderNameTag(entity,Component.literal("[ SAQUEAR ] agachar + clique")
+        .withStyle(net.minecraft.ChatFormatting.GOLD),pose,buffers,packedLight);
    }finally{pose.popPose();}
    return;
   }
