@@ -1,283 +1,4 @@
-package br.com.petrickfaria.minemon.gametest;
-
-import br.com.petrickfaria.minemon.Minemon;
-import br.com.petrickfaria.minemon.entity.*;
-import br.com.petrickfaria.minemon.registry.ModEntities;
-import net.minecraft.core.BlockPos;
-import net.minecraft.gametest.framework.*;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraftforge.gametest.*;
-import java.util.*;
-import java.util.function.BooleanSupplier;
-
-@GameTestHolder(Minemon.MOD_ID)
-@PrefixGameTestTemplate(false)
-public final class NightAndSwimmingTests {
- private static void check(GameTestHelper h,boolean ok,String why){if(!ok){h.getLevel().setDayTime(1000);h.fail(why);}}
- private static void await(GameTestHelper h,BooleanSupplier condition,Runnable next,int ticks,String why){
-  await(h,condition,next,ticks,()->why);
- }
- private static void await(GameTestHelper h,BooleanSupplier condition,Runnable next,int ticks,java.util.function.Supplier<String> why){
-  if(condition.getAsBoolean()){next.run();return;}
-  if(ticks<=0){h.getLevel().setDayTime(1000);h.fail(why.get());return;}
-  h.runAfterDelay(5,()->await(h,condition,next,ticks-5,why));
- }
- private static void awaitFlightResume(GameTestHelper h,List<MinemonCreature> mixed,
-     Map<MinemonCreature,Integer> clocks,int remaining,List<String> history){
-  if(mixed.stream().allMatch(m->flightResumeComplete(m,clocks))){h.succeed();return;}
-  if(remaining<=0){
-   h.getLevel().setDayTime(1000);
-   h.fail("Mixed flyers and fixed floaters must resume their correct daylight routine after dawn; pending="
-       +mixed.stream().filter(m->!flightResumeComplete(m,clocks))
-           .map(NightAndSwimmingTests::flightResumeSnapshot).toList()+",history="+history);
-   return;
-  }
-  h.runAfterDelay(5,()->{
-   for(int i:new int[]{0,15,17})if(i<mixed.size())
-    history.add("time="+h.getLevel().getGameTime()+" "+flightResumeSnapshot(mixed.get(i)));
-   awaitFlightResume(h,mixed,clocks,remaining-5,history);
-  });
- }
- private static boolean flightResumeComplete(MinemonCreature m,Map<MinemonCreature,Integer> clocks){
-  if(m.isOnGround())return false;
-  double altitude=m.getY()-m.naturalSurface();
-  return switch(SpeciesBehaviorProfiles.profile(m.getSpeciesSlug())){
-   case FLOAT_HALF -> Math.abs(altitude-m.naturalCycle().minimumAltitude())<=0.12D;
-   case FLOAT_LOW -> altitude>=0.5D&&altitude<=1.0D;
-   default -> m.naturalCycle().ticks()>clocks.get(m);
-  };
- }
- private static String flightResumeSnapshot(MinemonCreature m){
-  var level=m.getCommandSenderWorld();
-  return m.getSpeciesSlug()+"{phase="+m.naturalCycle().phase()+",ticks="+m.naturalCycle().ticks()
-      +",entityTick="+m.tickCount+",stage="+m.naturalCycle().stage()+",air="+m.isFlyingSpecies()
-      +",active="+m.naturalBehaviorActive()
-      +",ground="+m.isOnGround()+",alt="+(m.getY()-m.naturalSurface())+",min="+m.naturalCycle().minimumAltitude()
-      +",landing="+m.wantsNaturalLanding()+",sleep="+m.isSleeping()+",night="+m.isNightResting()
-      +",gravity="+!m.isNoGravity()+",noAI="+m.isNoAi()+",passenger="+m.isPassenger()
-      +",target="+(m.getTarget()==null?"null":m.getTarget().getType())+",pos="+m.position()+",motion="+m.getDeltaMovement()
-      +",chunk="+level.hasChunkAt(m.blockPosition())+",navDone="+m.getNavigation().isDone()
-      +",nav="+m.getNavigation().getTargetPos()+",recovery="+((MinemonFlyingCreature)m).flightRecoveryAttemptsForValidation()
-      +"/"+((MinemonFlyingCreature)m).flightRecoveryMovesForValidation()+",samples="
-      +((MinemonFlyingCreature)m).flightRecoverySamplesForValidation()+"}";
- }
- private static void awaitBottom(GameTestHelper h,MinemonCreature shellder,MinemonCreature krabby,
-     double originY,int remaining,int elapsed,Runnable next){
-  if(elapsed%100==0)for(var m:List.of(shellder,krabby)){
-   var path=m.getNavigation().getPath();
-   com.mojang.logging.LogUtils.getLogger().info("BOTTOM TRACE elapsed="+elapsed+" species="+m.getSpeciesSlug()+" pos="+m.position()+" velocity="+m.getDeltaMovement()+" sleep="+m.isSleeping()+" night="+m.isNightResting()+" pitch="+m.getXRot()+" input="+m.yya+","+m.zza+" navDone="+m.getNavigation().isDone()+" wanted="+m.getMoveControl().getWantedX()+","+m.getMoveControl().getWantedY()+","+m.getMoveControl().getWantedZ()+" path="+(path==null?"null":path.getNextNodeIndex()+"/"+path.getNodeCount()+" next="+(path.isDone()?"done":path.getNextNode())));
-  }
-  if(shellder.isInWater()&&krabby.isInWater()
-      &&shellder.getY()-originY<2.5D&&krabby.getY()-originY<4.5D){next.run();return;}
-  if(remaining<=0){
-   h.getLevel().setDayTime(1000);
-   h.fail("Shellder and Krabby must choose reachable water near the floor; elapsed="+elapsed
-       +" originY="+originY+" shellderLocalY="+(shellder.getY()-originY)+" shellderPos="+shellder.position()
-       +" shellderNav="+shellder.getNavigation().getTargetPos()+" krabbyLocalY="+(krabby.getY()-originY)
-       +" krabbyPos="+krabby.position()+" krabbyNav="+krabby.getNavigation().getTargetPos());
-   return;
-  }
-  h.runAfterDelay(5,()->awaitBottom(h,shellder,krabby,originY,remaining-5,elapsed+5,next));
- }
- private static void arena(GameTestHelper h){
-  for(int x=0;x<32;x++)for(int z=0;z<24;z++){
-   h.setBlock(new BlockPos(x,0,z),Blocks.STONE);
-   for(int y=1;y<20;y++)h.setBlock(new BlockPos(x,y,z),Blocks.AIR);
-  }
- }
- private static MinemonCreature spawn(GameTestHelper h,String slug,int x,int y,int z){return h.spawn(ModEntities.SPECIES.get(slug).get(),new BlockPos(x,y,z));}
- private static void awaitAwakeGyaradosSurface(GameTestHelper h,MinemonCreature mob,int remaining,
-     net.minecraft.world.phys.Vec3 start,Runnable done){
-  double top=WaterMovementGoal.restSurfaceAt(mob,mob.blockPosition());
-  double target=WaterMovementGoal.surfaceSwimY(mob,top);
-  if(Double.isFinite(target)&&Math.abs(mob.getY()-target)<0.25D){
-   double[] minDepth={Double.POSITIVE_INFINITY},maxDepth={Double.NEGATIVE_INFINITY},farthestSq={0.0D};
-   sampleAwakeGyarados(h,mob,30,minDepth,maxDepth,start,farthestSq,()->{
-    double surface=WaterMovementGoal.restSurfaceAt(mob,mob.blockPosition());
-    double originalAnchor=ModelMetrics.anchorForSubmergedFraction(surface,ModelMetrics.bodyBottom("gyarados"),
-        ModelMetrics.bodyHeight("gyarados"),SpeciesDefinitions.get("gyarados").scale()*(mob.isBaby()?0.5D:1.0D),0.10D);
-    check(h,mob.isInWater()&&Double.isFinite(surface)&&Math.abs((originalAnchor-mob.getY())-2.0D)<0.18D,
-        "Awake Gyarados must swim exactly two blocks below its approved 1.63 anchor: old="+originalAnchor
-        +" actual="+mob.getY()+" surface="+surface+" sleep="+mob.isSleeping());
-    check(h,h.getLevel().noCollision(mob,mob.getBoundingBox()),"Gyarados daytime offset must preserve collision safety");
-    check(h,maxDepth[0]-minDepth[0]<=0.45D,"Awake Gyarados surface depth must not oscillate excessively; samples="
-        +minDepth[0]+".."+maxDepth[0]);
-    check(h,farthestSq[0]>0.25D,"Awake Gyarados must continue horizontal swimming; farthest displacement squared="+farthestSq[0]);
-    done.run();
-   });
-   return;
-  }
-  if(remaining<=0){h.fail("Awake Gyarados did not return to its measured surface anchor; y="+mob.getY()+" target="+target);return;}
-  h.runAfterDelay(5,()->awaitAwakeGyaradosSurface(h,mob,remaining-5,start,done));
- }
- private static void sampleAwakeGyarados(GameTestHelper h,MinemonCreature mob,int remaining,
-     double[] minDepth,double[] maxDepth,net.minecraft.world.phys.Vec3 start,double[] farthestSq,Runnable done){
-  double top=WaterMovementGoal.restSurfaceAt(mob,mob.blockPosition());
-  if(Double.isFinite(top)){
-   double depth=top-mob.getY();
-   minDepth[0]=Math.min(minDepth[0],depth);maxDepth[0]=Math.max(maxDepth[0],depth);
-  }
-  double dx=mob.getX()-start.x,dz=mob.getZ()-start.z;
-  farthestSq[0]=Math.max(farthestSq[0],dx*dx+dz*dz);
-  if(remaining<=0){done.run();return;}
-  h.runAfterDelay(10,()->sampleAwakeGyarados(h,mob,remaining-1,minDepth,maxDepth,start,farthestSq,done));
- }
- private static void traceAwakeGyarados(GameTestHelper h,MinemonCreature mob,int elapsed){
-  double top=((MinemonAquaticCreature)mob).waterSurface();
-  var path=mob.getNavigation().getPath();
-  String next=path==null||path.isDone()?"null":path.getNextNode().toString();
-  com.mojang.logging.LogUtils.getLogger().info("GYARADOS TRACE elapsed="+elapsed+" pos="+mob.position()
-      +" water="+mob.isInWater()+" surfaceMode="+mob.isNaturalSurface()+" surface="+top
-      +" centerDepth="+(top-(mob.getY()+mob.getBbHeight()*.5D))
-      +" target="+mob.getNavigation().getTargetPos()+" navDone="+mob.getNavigation().isDone()
-      +" next="+next+" wanted="+mob.getMoveControl().getWantedX()+","+mob.getMoveControl().getWantedY()+","+mob.getMoveControl().getWantedZ()
-      +" motion="+mob.getDeltaMovement());
-  if(elapsed<300)h.runAfterDelay(50,()->traceAwakeGyarados(h,mob,elapsed+50));
- }
- @GameTest(template="test_arena",batch="night_landing_water",timeoutTicks=700)
- public static void landRestingFlyerFindsDryGroundBeforeStartingSleepOverWater(GameTestHelper h){
-  arena(h);var level=h.getLevel();
-  // Keep a real water column and a three-block-safe dry landing site inside
-  // the loaded test area, so this test measures shore flight rather than chunk loading.
-  for(int z=2;z<=12;z++)for(int y=1;y<=8;y++)h.setBlock(new BlockPos(16,y,z),Blocks.WATER);
-  var pidgeot=spawn(h,"pidgeot",16,10,7);level.setDayTime(18000);
-  await(h,()->pidgeot.isSleeping()&&pidgeot.isOnGround(),()->{
-   var support=pidgeot.blockPosition().below();
-   var supportState=level.getBlockState(support);
-   check(h,!pidgeot.isInWaterOrBubble()&&level.getFluidState(support).isEmpty()
-           &&supportState.isSolidRender(level,support),
-       "a land-resting flyer must reach a safe dry support before entering sleep");
-   h.succeed();
-  },500,()->"A flyer over water must navigate to a reachable shoreline and sleep there; pos="+pidgeot.position()
-      +",night="+pidgeot.isNightResting()+",sleep="+pidgeot.isSleeping()+",ground="+pidgeot.isOnGround()
-      +",target="+pidgeot.getNavigation().getTargetPos()+",navDone="+pidgeot.getNavigation().isDone());
- }
- @GameTest(template="test_arena",batch="nocturnal_schedule",timeoutTicks=800)
- public static void nocturnalSpeciesSleepFromMiddayUntilNightAndPauseTheirRoutine(GameTestHelper h){
-  arena(h);var level=h.getLevel();level.getGameRules().getRule(net.minecraft.world.level.GameRules.RULE_DAYLIGHT).set(false,level.getServer());
-  level.setDayTime(5000);
-  var nocturnal=new ArrayList<MinemonCreature>();
-  var slugs=List.of("gastly","haunter","gengar","zubat","golbat");
-  for(int i=0;i<slugs.size();i++)nocturnal.add(spawn(h,slugs.get(i),3+i*5,1,5));
-  await(h,()->nocturnal.stream().allMatch(m->!m.isSleeping()),()->{
-   level.setDayTime(6000);
-   await(h,()->nocturnal.stream().allMatch(MinemonCreature::isSleeping),()->{
-    check(h,nocturnal.get(0).getY()-nocturnal.get(0).naturalSurface()>.8D,"Gastly must sleep at its one-block hover height");
-    check(h,nocturnal.get(1).getY()-nocturnal.get(1).naturalSurface()>.8D,"Haunter must sleep at its one-block hover height");
-    for(int i=2;i<nocturnal.size();i++)check(h,nocturnal.get(i).isOnGround(),nocturnal.get(i).getSpeciesSlug()+" must land for daytime sleep");
-    var paused=new HashMap<MinemonCreature,Integer>();nocturnal.forEach(m->paused.put(m,m.naturalCycle().ticks()));
-    h.runAfterDelay(30,()->{
-     nocturnal.forEach(m->check(h,m.naturalCycle().ticks()==paused.get(m),m.getSpeciesSlug()+" must pause its routine while asleep"));
-     level.setDayTime(12999);
-     h.runAfterDelay(5,()->{
-      check(h,nocturnal.stream().allMatch(MinemonCreature::isSleeping),"Nocturnal species must remain asleep through world time 12,999");
-      level.setDayTime(13000);
-      await(h,()->nocturnal.stream().noneMatch(MinemonCreature::isSleeping),()->h.succeed(),40,
-          "Nocturnal species must wake at the start of night (world time 13,000)");
-     });
-    });
-   },250,"Gastly, Haunter, Gengar, Zubat, and Golbat must begin daytime sleep at world time 6,000");
-  },40,"Nocturnal species must remain awake during the first half of daylight");
- }
- @GameTest(template="test_arena",batch="night_aquatic",timeoutTicks=1500)
- public static void aquaticNightRestKeepsSurfaceAndBottomRoutinesSafe(GameTestHelper h){
-  arena(h);var level=h.getLevel();
-  for(int x=2;x<=15;x++)for(int z=3;z<=10;z++)for(int y=1;y<=14;y++)h.setBlock(new BlockPos(x,y,z),Blocks.WATER);
-  level.setDayTime(18000);
-  var gyarados=spawn(h,"gyarados",4,3,6);var magikarp=spawn(h,"magikarp",8,4,6);var dratini=spawn(h,"dratini",12,6,6);var shellder=spawn(h,"shellder",5,8,9);var vaporeon=spawn(h,"vaporeon",14,7,6);var cloyster=spawn(h,"cloyster",10,7,9);
-  await(h,()->gyarados.isSleeping()&&magikarp.isSleeping()&&dratini.isSleeping()&&shellder.isSleeping()&&vaporeon.isSleeping()&&cloyster.isSleeping(),()->{
-   check(h,gyarados.isInWater()&&magikarp.isInWater()&&dratini.isInWater()&&shellder.isInWater()&&vaporeon.isInWater()&&cloyster.isInWater(),"Aquatic and visitor sleepers must stay wet");
-   double gyaradosY=WaterMovementGoal.waterRestY(gyarados),fishY=WaterMovementGoal.waterRestY(magikarp),visitorY=WaterMovementGoal.waterRestY(dratini),cloysterY=WaterMovementGoal.waterRestY(cloyster);
-   double shellderY=WaterMovementGoal.waterRestY(shellder),originY=h.absolutePos(BlockPos.ZERO).getY();
-   check(h,Math.abs(gyarados.getY()-gyaradosY)<.2D&&gyarados.getY()-originY<2.5D,"Gyarados must rest at the safe water bottom at night");
-   check(h,Math.abs(cloyster.getY()-cloysterY)<.2D&&Math.abs(cloyster.getY()-originY-7)<.2D,"Exclusively aquatic Cloyster must preserve its submerged starting depth");
-   check(h,Math.abs(magikarp.getY()-fishY)<.2D,"Permanent submerged species must float at a safe, fully wet depth");
-   check(h,Math.abs(dratini.getY()-visitorY)<.2D&&dratini.getY()-originY<2.5D,"A water visitor caught in water at night must settle at the bottom");
-   check(h,Math.abs(shellder.getY()-shellderY)<.2D&&Math.abs(shellder.getY()-originY-8)<.2D,
-       "Exclusively aquatic Shellder must preserve its submerged starting depth");
-   // Keep the aggressor north of Dratini, clear of the sleeping Vaporeon body.
-   var attacker=h.spawn(EntityType.COW,new BlockPos(12,1,5));attacker.setNoAi(true);
-   float health=attacker.getHealth();
-   check(h,dratini.hurt(DamageSource.mobAttack(attacker),1)&&!dratini.isSleeping()&&dratini.getTarget()==attacker,
-       "An aquatic night sleeper must wake and retain its attacker");
-   await(h,()->attacker.getHealth()<health,()->{
-    attacker.discard();await(h,dratini::isSleeping,()->{
-     level.setDayTime(1000);
-      await(h,()->!gyarados.isSleeping()&&!magikarp.isSleeping()&&!dratini.isSleeping()&&!shellder.isSleeping()&&!vaporeon.isSleeping()&&!cloyster.isSleeping(),()->{
-      traceAwakeGyarados(h,gyarados,0);
-      var wakePosition=gyarados.position();
-      awaitAwakeGyaradosSurface(h,gyarados,400,wakePosition,h::succeed);
-     },40,"Aquatic sleepers must wake at dawn");
-    },220,()->"A water visitor must return to sleep after combat while it is still night; sleeping="+dratini.isSleeping()+" night="+dratini.isNightResting()+" target="+dratini.getTarget()+" pos="+dratini.position()+" velocity="+dratini.getDeltaMovement()+" restY="+WaterMovementGoal.waterRestY(dratini)+" time="+h.getLevel().getDayTime());
-   },180,()->"The woken water visitor must physically retaliate in water; pos="+dratini.position()+" target="+dratini.getTarget()+" sleep="+dratini.isSleeping()+" attacker="+attacker.position()+" health="+attacker.getHealth());
-  },500,"Permanent swimmers must rest in water and water visitors must settle at the bottom");
- }
- @GameTest(template="test_arena",batch="water_bottom",timeoutTicks=900)
- public static void bottomPreferringSpeciesNavigateCloseToTheChangingLakeFloor(GameTestHelper h){
-  h.getLevel().setDayTime(1000);
-  arena(h);
-  for(int x=2;x<=27;x++)for(int z=2;z<=21;z++){
-   int floor=(x>=13&&z>=9&&z<=15)?2:0;
-   for(int y=1;y<=10;y++)h.setBlock(new BlockPos(x,y,z),Blocks.WATER);
-   if(floor==0)h.setBlock(new BlockPos(x,0,z),Blocks.STONE);
-   else {h.setBlock(new BlockPos(x,1,z),Blocks.STONE);h.setBlock(new BlockPos(x,2,z),Blocks.STONE);}
-  }
-  var shellder=spawn(h,"shellder",7,8,10);var krabby=spawn(h,"krabby",22,8,10);
-  // Krabby is also a land/water visitor and starts in its land cooldown.
-  // This probe is specifically for bottom navigation, so place it in its
-  // established submerged phase instead of exercising the separate exit rule.
-  var cycle=new CompoundTag();krabby.addAdditionalSaveData(cycle);
-  cycle.putInt("NaturalBehaviorStartDelay",0);cycle.putString("NaturalBehaviorPhase","SUBMERGED");
-  cycle.putInt("NaturalBehaviorTicks",0);krabby.readAdditionalSaveData(cycle);
-  double originY=h.absolutePos(BlockPos.ZERO).getY();
-  awaitBottom(h,shellder,krabby,originY,650,0,()->{
-   check(h,h.getLevel().noCollision(shellder,shellder.getBoundingBox()),"Shellder must avoid the solid bottom while seeking it");
-   check(h,h.getLevel().noCollision(krabby,krabby.getBoundingBox()),"Krabby must avoid the solid bottom while seeking it");
-   double shellderLocalY=shellder.getY()-originY,krabbyLocalY=krabby.getY()-originY;
-   check(h,shellderLocalY>=1.0D&&krabbyLocalY>=3.0D,"Bottom-preferring swimmers must stay above the lake bed; shellderLocalY="+shellderLocalY+" krabbyLocalY="+krabbyLocalY);
-   h.succeed();
-  });
- }
- @GameTest(template="test_arena",batch="night_mixed",timeoutTicks=1000)
- public static void realNightLandingHoverWakeRetaliationReturnAndDawn(GameTestHelper h){
-  arena(h);var level=h.getLevel();level.setDayTime(1000);
-  // Keep sleeping hoverers clear of the wide grounded sleepers: collision
-  // pushing is physical displacement, not autonomous sleep travel.
-  for(int ax=0;ax<32;ax++)for(int az=26;az<44;az++){
-   h.setBlock(new BlockPos(ax,0,az),Blocks.STONE);
-   for(int ay=1;ay<20;ay++)h.setBlock(new BlockPos(ax,ay,az),Blocks.AIR);
-  }
-  var ground=spawn(h,"bulbasaur",3,1,3);
-  var mixed=new ArrayList<MinemonCreature>();var air=new ArrayList<MinemonCreature>();
-  int x=5;
-  // Land-resting flyers include ground/air cycle species and species with an approved night landing pose.
-  var mixedSpecies=List.of("charizard","scyther","dragonite","pidgey","pidgeotto","pidgeot","venomoth","aerodactyl","butterfree","beedrill","spearow","fearow","articuno","zapdos","moltres","metapod","kakuna","geodude","kadabra","alakazam");
-  for(int i=0;i<mixedSpecies.size();i++){
-   String slug=mixedSpecies.get(i);x=3+(i%5)*6;int z=5+(i/5)*5;
-   var m=spawn(h,slug,x,7,z);
-   var tag=new CompoundTag();m.addAdditionalSaveData(tag);tag.putInt("NaturalBehaviorStartDelay",0);
-   tag.putString("NaturalBehaviorPhase","AIR");tag.putInt("NaturalBehaviorTicks",1234);m.readAdditionalSaveData(tag);mixed.add(m);
-  }
-  x=3;
-  // These airborne species keep their one-block hover while asleep.
-  for(String slug:List.of("koffing","weezing","magnemite","magneton","mewtwo","mew")){
-   int airX=3+(air.size()%5)*6,airZ=29+(air.size()/5)*8;air.add(spawn(h,slug,airX,7,airZ));
-  }
-  h.runAfterDelay(5,()->{
-   level.setDayTime(18000);
-   await(h,()->ground.isSleeping()&&mixed.stream().allMatch(m->m.isSleeping()&&m.isOnGround())
-       &&air.stream().allMatch(m->m.isSleeping()&&!m.isOnGround()&&Math.abs(m.getY()-m.naturalSurface()-1)<.2),()->{
-    var clocks=new HashMap<MinemonCreature,Integer>();mixed.forEach(m->clocks.put(m,m.naturalCycle().ticks()));
-    var positions=new HashMap<MinemonCreature,net.minecraft.world.phys.Vec3>();air.forEach(m->positions.put(m,m.position()));
-    h.runAfterDelay(30,()->{
-     mixed.forEach(m->check(h,m.naturalCycle().ticks()==clocks.get(m),"Night must preserve cycle progress: "+m.getSpeciesSlug()));
-     air.forEach(m->check(h,m.position().subtract(positions.get(m)).horizontalDistanceSqr()<.001,"Sleeping hover must stop horizontal travel"));
-     var attacker=h.spawn(EntityType.COW,new BlockPos(4,1,3));attacker.setNoAi(true);float health=attacker.getHealth();
-     check(h,ground.hurt(DamageSource.mobAttack(attacker),1),"Attack must damage sleeping creature");
-     check(h,!ground.isSleeping()&&ground.getTarget()==attacker,"Attack must wake and retain aggressor immediately");
+YªçŠx-®éÜj×¢ëiºÚ+Š§j[h‘éÜ¢éí÷m»N‹Z–‹­¦ëeŠw¬ÕÁ…­…”‰È¹½´¹Á•ÑÉ¥­™…É¥„¹µ¥¹•µ½¸¹…µ•Ñ•ÍÐì()¥µÁ½ÉÐ‰È¹½´¹Á•ÑÉ¥­™…É¥„¹µ¥¹•µ½¸¹5¥¹•µ½¸ì)¥µÁ½ÉÐ‰È¹½´¹Á•ÑÉ¥­™…É¥„¹µ¥¹•µ½¸¹•¹Ñ¥Ñä¸¨ì)¥µÁ½ÉÐ‰È¹½´¹Á•ÑÉ¥­™…É¥„¹µ¥¹•µ½¸¹É•¥ÍÑÉä¹5½‘¹Ñ¥Ñ¥•Ìì)¥µÁ½ÉÐ¹•Ð¹µ¥¹•É…™Ð¹½É”¹	±½­A½Ìì)¥µÁ½ÉÐ¹•Ð¹µ¥¹•É…™Ð¹…µ•Ñ•ÍÐ¹™É…µ•Ý½É¬¸¨ì)¥µÁ½ÉÐ¹•Ð¹µ¥¹•É…™Ð¹¹‰Ð¹½µÁ½Õ¹‘Q…œì)¥µÁ½ÉÐ¹•Ð¹µ¥¹•É…™Ð¹Ý½É±¹•¹Ñ¥Ñä¹¹Ñ¥ÑåQåÁ”ì)¥µÁ½ÉÐ¹•Ð¹µ¥¹•É…™Ð¹Ý½É±¹‘…µ…•Í½ÕÉ”¹…µ…•M½ÕÉ”ì)¥µÁ½ÉÐ¹•Ð¹µ¥¹•É…™Ð¹Ý½É±¹±•Ù•°¹‰±½¬¹	±½­Ìì)¥µÁ½ÉÐ¹•Ð¹µ¥¹•É…™Ñ™½É”¹…µ•Ñ•ÍÐ¸¨ì)¥µÁ½ÉÐ©…Ù„¹ÕÑ¥°¸¨ì)¥µÁ½ÉÐ©…Ù„¹ÕÑ¥°¹™Õ¹Ñ¥½¸¹	½½±•…¹MÕÁÁ±¥•Èì()…µ•Q•ÍÑ!½±‘•È¡5¥¹•µ½¸¹5=}%¤)AÉ•™¥á…µ•Q•ÍÑQ•µÁ±…Ñ”¡™…±Í”¤)ÁÕ‰±¥Œ™¥¹…°±…ÍÌ9¥¡Ñ¹‘MÝ¥µµ¥¹Q•ÍÑÌì(ÁÉ¥Ù…Ñ”ÍÑ…Ñ¥ŒÙ½¥¡•¬¡…µ•Q•ÍÑ!•±Á•È ±‰½½±•…¸½¬±MÑÉ¥¹œÝ¡ä¥í¥˜ …½¬¥í ¹•Ñ1•Ù•° ¤¹Í•Ñ…åQ¥µ” ÄÀÀÀ¤í ¹™…¥°¡Ý¡ä¤íõô(ÁÉ¥Ù…Ñ”ÍÑ…Ñ¥ŒÙ½¥…Ý…¥Ð¡…µ•Q•ÍÑ!•±Á•È ±	½½±•…¹MÕÁÁ±¥•È½¹‘¥Ñ¥½¸±IÕ¹¹…‰±”¹•áÐ±¥¹ÐÑ¥­Ì±MÑÉ¥¹œÝ¡ä¥ì(€…Ý…¥Ð¡ ±½¹‘¥Ñ¥½¸±¹•áÐ±Ñ¥­Ì° ¤´ùÝ¡ä¤ì(ô(ÁÉ¥Ù…Ñ”ÍÑ…Ñ¥ŒÙ½¥…Ý…¥Ð¡…µ•Q•ÍÑ!•±Á•È ±	½½±•…¹MÕÁÁ±¥•È½¹‘¥Ñ¥½¸±IÕ¹¹…‰±”¹•áÐ±¥¹ÐÑ¥­Ì±©…Ù„¹ÕÑ¥°¹™Õ¹Ñ¥½¸¹MÕÁÁ±¥•ÈñMÑÉ¥¹œøÝ¡ä¥ì(€¥˜¡½¹‘¥Ñ¥½¸¹•ÑÍ	½½±•…¸ ¤¥í¹•áÐ¹ÉÕ¸ ¤íÉ•ÑÕÉ¸íô(€¥˜¡Ñ¥­ÌðôÀ¥í ¹•Ñ1•Ù•° ¤¹Í•Ñ…åQ¥µ” ÄÀÀÀ¤í ¹™…¥°¡Ý¡ä¹•Ð ¤¤íÉ•ÑÕÉ¸íô(€ ¹ÉÕ¹™Ñ•É•±…ä Ô° ¤´ù…Ý…¥Ð¡ ±½¹‘¥Ñ¥½¸±¹•áÐ±Ñ¥­Ì´Ô±Ý¡ä¤¤ì(ô(ÁÉ¥Ù…Ñ”ÍÑ…Ñ¥ŒÙ½¥…Ý…¥Ñ±¥¡ÑI•ÍÕµ”¡…µ•Q•ÍÑ!•±Á•È ±1¥ÍÐñ5¥¹•µ½¹É•…ÑÕÉ”øµ¥á•°(€€€€5…Àñ5¥¹•µ½¹É•…ÑÕÉ”±%¹Ñ••Èø±½­Ì±¥¹ÐÉ•µ…¥¹¥¹œ±1¥ÍÐñMÑÉ¥¹œø¡¥ÍÑ½Éä¥ì(€¥˜¡µ¥á•¹ÍÑÉ•…´ ¤¹…±±5…Ñ ¡´´ù™±¥¡ÑI•ÍÕµ•½µÁ±•Ñ”¡´±±½­Ì¤¤¥í ¹ÍÕ•• ¤íÉ•ÑÕÉ¸íô(€¥˜¡É•µ…¥¹¥¹œðôÀ¥ì(€€ ¹•Ñ1•Ù•° ¤¹Í•Ñ…åQ¥µ” ÄÀÀÀ¤ì(€€ ¹™…¥° ‰5¥á•™±å•ÉÌ…¹™¥á•™±½…Ñ•ÉÌµÕÍÐÉ•ÍÕµ”Ñ¡•¥È½ÉÉ•Ð‘…å±¥¡ÐÉ½ÕÑ¥¹”…™Ñ•È‘…Ý¸ìÁ•¹‘¥¹œôˆ(€€€€€€€­µ¥á•¹ÍÑÉ•…´ ¤¹™¥±Ñ•È¡´´ø…™±¥¡ÑI•ÍÕµ•½µÁ±•Ñ”¡´±±½­Ì¤¤(€€€€€€€€€€€¹µ…À¡9¥¡Ñ¹‘MÝ¥µµ¥¹Q•ÍÑÌèé™±¥¡ÑI•ÍÕµ•M¹…ÁÍ¡½Ð¤¹Ñ½1¥ÍÐ ¤¬ˆ±¡¥ÍÑ½Éäôˆ­¡¥ÍÑ½Éä¤ì(€€É•ÑÕÉ¸ì(€ô(€ ¹ÉÕ¹™Ñ•É•±…ä Ô° ¤´ùì(€€™½È¡¥¹Ð¤é¹•Ü¥¹ÑmuìÀ°ÄÔ°ÄÝô¥¥˜¡¤ñµ¥á•¹Í¥é” ¤¤(€€€¡¥ÍÑ½Éä¹…‘ ‰Ñ¥µ”ôˆ­ ¹•Ñ1•Ù•° ¤¹•Ñ…µ•Q¥µ” ¤¬ˆ€ˆ­™±¥¡ÑI•ÍÕµ•M¹…ÁÍ¡½Ð¡µ¥á•¹•Ð¡¤¤¤¤ì(€€…Ý…¥Ñ±¥¡ÑI•ÍÕµ”¡ ±µ¥á•±±½­Ì±É•µ…¥¹¥¹œ´Ô±¡¥ÍÑ½Éä¤ì(€ô¤ì(ô(ÁÉ¥Ù…Ñ”ÍÑ…Ñ¥Œ‰½½±•…¸™±¥¡ÑI•ÍÕµ•½µÁ±•Ñ”¡5¥¹•µ½¹É•…ÑÕÉ”´±5…Àñ5¥¹•µ½¹É•…ÑÕÉ”±%¹Ñ••Èø±½­Ì¥ì(€¥˜¡´¹¥Í=¹É½Õ¹ ¤¥É•ÑÕÉ¸™…±Í”ì(€‘½Õ‰±”…±Ñ¥ÑÕ‘”õ´¹•Ñd ¤µ´¹¹…ÑÕÉ…±MÕÉ™…” ¤ì(€É•ÑÕÉ¸ÍÝ¥Ñ ¡MÁ•¥•Í	•¡…Ù¥½ÉAÉ½™¥±•Ì¹ÁÉ½™¥±”¡´¹•ÑMÁ•¥•ÍM±Õœ ¤¤¥ì(€€…Í”1=Q}!1€´ø5…Ñ ¹…‰Ì¡…±Ñ¥ÑÕ‘”µ´¹¹…ÑÕÉ…±å±” ¤¹µ¥¹¥µÕµ±Ñ¥ÑÕ‘” ¤¤ðôÀ¸ÄÉì(€€…Í”1=Q}1=\€´ø…±Ñ¥ÑÕ‘”øôÀ¸Õ˜™…±Ñ¥ÑÕ‘”ðôÄ¸Áì(€€‘•™…Õ±Ð€´ø´¹¹…ÑÕÉ…±å±” ¤¹Ñ¥­Ì ¤ù±½­Ì¹•Ð¡´¤ì(€ôì(ô(ÁÉ¥Ù…Ñ”ÍÑ…Ñ¥ŒMÑÉ¥¹œ™±¥¡ÑI•ÍÕµ•M¹…ÁÍ¡½Ð¡5¥¹•µ½¹É•…ÑÕÉ”´¥ì(€Ù…È±•Ù•°õ´¹•Ñ½µµ…¹‘M•¹‘•É]½É± ¤ì(€MÑÉ¥¹œÉ•½Ù•Éäõ´¥¹ÍÑ…¹•½˜5¥¹•µ½¹±å¥¹É•…ÑÕÉ”™±å•È(€€€€€€ü™±å•È¹™±¥¡ÑI•½Ù•ÉåÑÑ•µÁÑÍ½ÉY…±¥‘…Ñ¥½¸ ¤¬ˆ¼ˆ­™±å•È¹™±¥¡ÑI•½Ù•Éå5½Ù•Í½ÉY…±¥‘…Ñ¥½¸ ¤¬ˆ±Í…µÁ±•Ìôˆ(€€€€€€€€€€­™±å•È¹™±¥¡ÑI•½Ù•ÉåM…µÁ±•Í½ÉY…±¥‘…Ñ¥½¸ ¤€è€‰¹½Ðµ…ÁÁ±¥…‰±”ˆì(€É•ÑÕÉ¸´¹•ÑMÁ•¥•ÍM±Õœ ¤¬‰íÁ¡…Í”ôˆ­´¹¹…ÑÕÉ…±å±” ¤¹Á¡…Í” ¤¬ˆ±Ñ¥­Ìôˆ­´¹¹…ÑÕÉ…±å±” ¤¹Ñ¥­Ì ¤(€€€€€€¬ˆ±•¹Ñ¥ÑåQ¥¬ôˆ­´¹Ñ¥­½Õ¹Ð¬ˆ±ÍÑ…”ôˆ­´¹¹…ÑÕÉ…±å±” ¤¹ÍÑ…” ¤¬ˆ±…¥Èôˆ­´¹¥Í±å¥¹MÁ•¥•Ì ¤(€€€€€€¬ˆ±…Ñ¥Ù”ôˆ­´¹¹…ÑÕÉ…±	•¡…Ù¥½ÉÑ¥Ù” ¤(€€€€€€¬ˆ±É½Õ¹ôˆ­´¹¥Í=¹É½Õ¹ ¤¬ˆ±…±Ðôˆ¬¡´¹•Ñd ¤µ´¹¹…ÑÕÉ…±MÕÉ™…” ¤¤¬ˆ±µ¥¸ôˆ­´¹¹…ÑÕÉ…±å±” ¤¹µ¥¹¥µÕµ±Ñ¥ÑÕ‘” ¤(€€€€€€¬ˆ±±…¹‘¥¹œôˆ­´¹Ý…¹ÑÍ9…ÑÕÉ…±1…¹‘¥¹œ ¤¬ˆ±Í±••Àôˆ­´¹¥ÍM±••Á¥¹œ ¤¬ˆ±¹¥¡Ðôˆ­´¹¥Í9¥¡ÑI•ÍÑ¥¹œ ¤(€€€€€€¬ˆ±É…Ù¥Ñäôˆ¬…´¹¥Í9½É…Ù¥Ñä ¤¬ˆ±¹½$ôˆ­´¹¥Í9½¤ ¤¬ˆ±Á…ÍÍ•¹•Èôˆ­´¹¥ÍA…ÍÍ•¹•È ¤(€€€€€€¬ˆ±Ñ…É•Ðôˆ¬¡´¹•ÑQ…É•Ð ¤ôõ¹Õ±°ü‰¹Õ±°ˆé´¹•ÑQ…É•Ð ¤¹•ÑQåÁ” ¤¤¬ˆ±Á½Ìôˆ­´¹Á½Í¥Ñ¥½¸ ¤¬ˆ±µ½Ñ¥½¸ôˆ­´¹•Ñ•±Ñ…5½Ù•µ•¹Ð ¤(€€€€€€¬ˆ±¡Õ¹¬ôˆ­±•Ù•°¹¡…Í¡Õ¹­Ð¡´¹‰±½­A½Í¥Ñ¥½¸ ¤¤¬ˆ±¹…Ù½¹”ôˆ­´¹•Ñ9…Ù¥…Ñ¥½¸ ¤¹¥Í½¹” ¤(€€€€€€¬ˆ±¹…Øôˆ­´¹•Ñ9…Ù¥…Ñ¥½¸ ¤¹•ÑQ…É•ÑA½Ì ¤¬ˆ±É•½Ù•Éäôˆ­É•½Ù•Éä¬‰ôˆì(ô(ÁÉ¥Ù…Ñ”ÍÑ…Ñ¥ŒÙ½¥…Ý…¥Ñ	½ÑÑ½´¡…µ•Q•ÍÑ!•±Á•È ±5¥¹•µ½¹É•…ÑÕÉ”Í¡•±±‘•È±5¥¹•µ½¹É•…ÑÕÉ”­É…‰‰ä°(€€€€‘½Õ‰±”½É¥¥¹d±¥¹ÐÉ•µ…¥¹¥¹œ±¥¹Ð•±…ÁÍ•±IÕ¹¹…‰±”¹•áÐ¥ì(€¥˜¡•±…ÁÍ•”ÄÀÀôôÀ¥™½È¡Ù…È´é1¥ÍÐ¹½˜¡Í¡•±±‘•È±­É…‰‰ä¤¥ì(€€Ù…ÈÁ…Ñ õ´¹•Ñ9…Ù¥…Ñ¥½¸ ¤¹•ÑA…Ñ  ¤ì(€€½´¹µ½©…¹œ¹±½¥¹œ¹1½UÑ¥±Ì¹•Ñ1½•È ¤¹¥¹™¼ ‰	=QQ=4QI•±…ÁÍ•ôˆ­•±…ÁÍ•¬ˆÍÁ•¥•Ìôˆ­´¹•ÑMÁ•¥•ÍM±Õœ ¤¬ˆÁ½Ìôˆ­´¹Á½Í¥Ñ¥½¸ ¤¬ˆÙ•±½¥Ñäôˆ­´¹•Ñ•±Ñ…5½Ù•µ•¹Ð ¤¬ˆÍ±••Àôˆ­´¹¥ÍM±••Á¥¹œ ¤¬ˆ¹¥¡Ðôˆ­´¹¥Í9¥¡ÑI•ÍÑ¥¹œ ¤¬ˆÁ¥Ñ ôˆ­´¹•ÑaI½Ð ¤¬ˆ¥¹ÁÕÐôˆ­´¹åå„¬ˆ°ˆ­´¹éé„¬ˆ¹…Ù½¹”ôˆ­´¹•Ñ9…Ù¥…Ñ¥½¸ ¤¹¥Í½¹” ¤¬ˆÝ…¹Ñ•ôˆ­´¹•Ñ5½Ù•½¹ÑÉ½° ¤¹•Ñ]…¹Ñ•‘` ¤¬ˆ°ˆ­´¹•Ñ5½Ù•½¹ÑÉ½° ¤¹•Ñ]…¹Ñ•‘d ¤¬ˆ°ˆ­´¹•Ñ5½Ù•½¹ÑÉ½° ¤¹•Ñ]…¹Ñ•‘h ¤¬ˆÁ…Ñ ôˆ¬¡Á…Ñ ôõ¹Õ±°ü‰¹Õ±°ˆéÁ…Ñ ¹•Ñ9•áÑ9½‘•%¹‘•à ¤¬ˆ¼ˆ­Á…Ñ ¹•Ñ9½‘•½Õ¹Ð ¤¬ˆ¹•áÐôˆ¬¡Á…Ñ ¹¥Í½¹” ¤ü‰‘½¹”ˆéÁ…Ñ ¹•Ñ9•áÑ9½‘” ¤¤¤¤ì(€ô(€¥˜¡Í¡•±±‘•È¹¥Í%¹]…Ñ•È ¤˜™­É…‰‰ä¹¥Í%¹]…Ñ•È ¤(€€€€€€˜™Í¡•±±‘•È¹•Ñd ¤µ½É¥¥¹dðÈ¸Õ˜™­É…‰‰ä¹•Ñd ¤µ½É¥¥¹dðÐ¸Õ¥í¹•áÐ¹ÉÕ¸ ¤íÉ•ÑÕÉ¸íô(€¥˜¡É•µ…¥¹¥¹œðôÀ¥ì(€€ ¹•Ñ1•Ù•° ¤¹Í•Ñ…åQ¥µ” ÄÀÀÀ¤ì(€€ ¹™…¥° ‰M¡•±±‘•È…¹-É…‰‰äµÕÍÐ¡½½Í”É•…¡…‰±”Ý…Ñ•È¹•…ÈÑ¡”™±½½Èì•±…ÁÍ•ôˆ­•±…ÁÍ•(€€€€€€€¬ˆ½É¥¥¹dôˆ­½É¥¥¹d¬ˆÍ¡•±±‘•É1½…±dôˆ¬¡Í¡•±±‘•È¹•Ñd ¤µ½É¥¥¹d¤¬ˆÍ¡•±±‘•ÉA½Ìôˆ­Í¡•±±‘•È¹Á½Í¥Ñ¥½¸ ¤(€€€€€€€¬ˆÍ¡•±±‘•É9…Øôˆ­Í¡•±±‘•È¹•Ñ9…Ù¥…Ñ¥½¸ ¤¹•ÑQ…É•ÑA½Ì ¤¬ˆ­É…‰‰å1½…±dôˆ¬¡­É…‰‰ä¹•Ñd ¤µ½É¥¥¹d¤(€€€€€€€¬ˆ­É…‰‰åA½Ìôˆ­­É…‰‰ä¹Á½Í¥Ñ¥½¸ ¤¬ˆ­É…‰‰å9…Øôˆ­­É…‰‰ä¹•Ñ9…Ù¥…Ñ¥½¸ ¤¹•ÑQ…É•ÑA½Ì ¤¤ì(€€É•ÑÕÉ¸ì(€ô(€ ¹ÉÕ¹™Ñ•É•±…ä Ô° ¤´ù…Ý…¥Ñ	½ÑÑ½´¡ ±Í¡•±±‘•È±­É…‰‰ä±½É¥¥¹d±É•µ…¥¹¥¹œ´Ô±•±…ÁÍ•¬Ô±¹•áÐ¤¤ì(ô(ÁÉ¥Ù…Ñ”ÍÑ…Ñ¥ŒÙ½¥…É•¹„¡…µ•Q•ÍÑ!•±Á•È ¥ì(€™½È¡¥¹ÐàôÀíàðÌÈíà¬¬¥™½È¡¥¹ÐèôÀíèðÈÐíè¬¬¥ì(€€ ¹Í•Ñ	±½¬¡¹•Ü	±½­A½Ì¡à°À±è¤±	±½­Ì¹MQ=9¤ì(€€™½È¡¥¹ÐäôÄíäðÈÀíä¬¬¥ ¹Í•Ñ	±½¬¡¹•Ü	±½­A½Ì¡à±ä±è¤±	±½­Ì¹%H¤ì(€ô(ô(ÁÉ¥Ù…Ñ”ÍÑ…Ñ¥Œ5¥¹•µ½¹É•…ÑÕÉ”ÍÁ…Ý¸¡…µ•Q•ÍÑ!•±Á•È ±MÑÉ¥¹œÍ±Õœ±¥¹Ðà±¥¹Ðä±¥¹Ðè¥íÉ•ÑÕÉ¸ ¹ÍÁ…Ý¸¡5½‘¹Ñ¥Ñ¥•Ì¹MA%L¹•Ð¡Í±Õœ¤¹•Ð ¤±¹•Ü	±½­A½Ì¡à±ä±è¤¤íô(ÁÉ¥Ù…Ñ”ÍÑ…Ñ¥ŒÙ½¥…Ý…¥ÑÝ…­•å…É…‘½ÍMÕÉ™…”¡…µ•Q•ÍÑ!•±Á•È ±5¥¹•µ½¹É•…ÑÕÉ”µ½ˆ±¥¹ÐÉ•µ…¥¹¥¹œ°(€€€€¹•Ð¹µ¥¹•É…™Ð¹Ý½É±¹Á¡åÌ¹Y•ŒÌÍÑ…ÉÐ±IÕ¹¹…‰±”‘½¹”¥ì(€‘½Õ‰±”Ñ½Àõ]…Ñ•É5½Ù•µ•¹Ñ½…°¹É•ÍÑMÕÉ™…•Ð¡µ½ˆ±µ½ˆ¹‰±½­A½Í¥Ñ¥½¸ ¤¤ì(€‘½Õ‰±”Ñ…É•Ðõ]…Ñ•É5½Ù•µ•¹Ñ½…°¹ÍÕÉ™…•MÝ¥µd¡µ½ˆ±Ñ½À¤ì(€¥˜¡½Õ‰±”¹¥Í¥¹¥Ñ”¡Ñ…É•Ð¤˜™5…Ñ ¹…‰Ì¡µ½ˆ¹•Ñd ¤µÑ…É•Ð¤ðÀ¸ÈÕ¥ì(€€‘½Õ‰±•mtµ¥¹•ÁÑ õí½Õ‰±”¹A=M%Q%Y}%9%9%Qeô±µ…á•ÁÑ õí½Õ‰±”¹9Q%Y}%9%9%Qeô±™…ÉÑ¡•ÍÑMÄõìÀ¸Áôì(€€Í…µÁ±•Ý…­•å…É…‘½Ì¡ ±µ½ˆ°ÌÀ±µ¥¹•ÁÑ ±µ…á•ÁÑ ±ÍÑ…ÉÐ±™…ÉÑ¡•ÍÑMÄ° ¤´ùì(€€€‘½Õ‰±”ÍÕÉ™…”õ]…Ñ•É5½Ù•µ•¹Ñ½…°¹É•ÍÑMÕÉ™…•Ð¡µ½ˆ±µ½ˆ¹‰±½­A½Í¥Ñ¥½¸ ¤¤ì(€€€‘½Õ‰±”½É¥¥¹…±¹¡½Èõ5½‘•±5•ÑÉ¥Ì¹…¹¡½É½ÉMÕ‰µ•É•‘É…Ñ¥½¸¡ÍÕÉ™…”±5½‘•±5•ÑÉ¥Ì¹‰½‘å	½ÑÑ½´ ‰å…É…‘½Ìˆ¤°(€€€€€€€5½‘•±5•ÑÉ¥Ì¹‰½‘å!•¥¡Ð ‰å…É…‘½Ìˆ¤±MÁ•¥•Í•™¥¹¥Ñ¥½¹Ì¹•Ð ‰å…É…‘½Ìˆ¤¹Í…±” ¤¨¡µ½ˆ¹¥Í	…‰ä ¤üÀ¸ÕèÄ¸Á¤°À¸ÄÁ¤ì(€€€¡•¬¡ ±µ½ˆ¹¥Í%¹]…Ñ•È ¤˜™½Õ‰±”¹¥Í¥¹¥Ñ”¡ÍÕÉ™…”¤˜™5…Ñ ¹…‰Ì ¡½É¥¥¹…±¹¡½Èµµ½ˆ¹•Ñd ¤¤´È¸Á¤ðÀ¸Äá°(€€€€€€€€‰Ý…­”å…É…‘½ÌµÕÍÐÍÝ¥´•á…Ñ±äÑÝ¼‰±½­Ì‰•±½Ü¥ÑÌ…ÁÁÉ½Ù•€Ä¸ØÌ…¹¡½Èè½±ôˆ­½É¥¥¹…±¹¡½È(€€€€€€€€¬ˆ…ÑÕ…°ôˆ­µ½ˆ¹•Ñd ¤¬ˆÍÕÉ™…”ôˆ­ÍÕÉ™…”¬ˆÍ±••Àôˆ­µ½ˆ¹¥ÍM±••Á¥¹œ ¤¤ì(€€€¡•¬¡ ± ¹•Ñ1•Ù•° ¤¹¹½½±±¥Í¥½¸¡µ½ˆ±µ½ˆ¹•Ñ	½Õ¹‘¥¹	½à ¤¤°‰å…É…‘½Ì‘…åÑ¥µ”½™™Í•ÐµÕÍÐÁÉ•Í•ÉÙ”½±±¥Í¥½¸Í…™•Ñäˆ¤ì(€€€¡•¬¡ ±µ…á•ÁÑ¡lÁtµµ¥¹•ÁÑ¡lÁtðôÀ¸ÐÕ°‰Ý…­”å…É…‘½ÌÍÕÉ™…”‘•ÁÑ µÕÍÐ¹½Ð½Í¥±±…Ñ”•á•ÍÍ¥Ù•±äìÍ…µÁ±•Ìôˆ(€€€€€€€€­µ¥¹•ÁÑ¡lÁt¬ˆ¸¸ˆ­µ…á•ÁÑ¡lÁt¤ì(€€€¡•¬¡ ±™…ÉÑ¡•ÍÑMÅlÁtøÀ¸ÈÕ°‰Ý…­”å…É…‘½ÌµÕÍÐ½¹Ñ¥¹Õ”¡½É¥é½¹Ñ…°ÍÝ¥µµ¥¹œì™…ÉÑ¡•ÍÐ‘¥ÍÁ±…•µ•¹ÐÍÅÕ…É•ôˆ­™…ÉÑ¡•ÍÑMÅlÁt¤ì(€€€‘½¹”¹ÉÕ¸ ¤ì(€€ô¤ì(€€É•ÑÕÉ¸ì(€ô(€¥˜¡É•µ…¥¹¥¹œðôÀ¥í ¹™…¥° ‰Ý…­”å…É…‘½Ì‘¥¹½ÐÉ•ÑÕÉ¸Ñ¼¥ÑÌµ•…ÍÕÉ•ÍÕÉ™…”…¹¡½Èìäôˆ­µ½ˆ¹•Ñd ¤¬ˆÑ…É•Ðôˆ­Ñ…É•Ð¤íÉ•ÑÕÉ¸íô(€ ¹ÉÕ¹™Ñ•É•±…ä Ô° ¤´ù…Ý…¥ÑÝ…­•å…É…‘½ÍMÕÉ™…”¡ ±µ½ˆ±É•µ…¥¹¥¹œ´Ô±ÍÑ…ÉÐ±‘½¹”¤¤ì(ô(ÁÉ¥Ù…Ñ”ÍÑ…Ñ¥ŒÙ½¥Í…µÁ±•Ý…­•å…É…‘½Ì¡…µ•Q•ÍÑ!•±Á•È ±5¥¹•µ½¹É•…ÑÕÉ”µ½ˆ±¥¹ÐÉ•µ…¥¹¥¹œ°(€€€€‘½Õ‰±•mtµ¥¹•ÁÑ ±‘¿¶îÚ$z{-®éÜj× check(h,!ground.isSleeping()&&ground.getTarget()==attacker,"Attack must wake and retain aggressor immediately");
      await(h,()->attacker.getHealth()<health,()->{
       attacker.discard();
       await(h,ground::isSleeping,()->{
