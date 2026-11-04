@@ -248,9 +248,9 @@ public final class NightAndSwimmingTests {
  @GameTest(template="test_arena",batch="night_mixed",timeoutTicks=1000)
  public static void realNightLandingHoverWakeRetaliationReturnAndDawn(GameTestHelper h){
   arena(h);var level=h.getLevel();level.setDayTime(1000);
-  // Keep sleeping hoverers clear of the wide grounded sleepers: collision
-  // pushing is physical displacement, not autonomous sleep travel.
-  for(int ax=0;ax<32;ax++)for(int az=26;az<44;az++){
+  // Keep sleepers on a continuous floor while they navigate to rest points;
+  // a gap here lets an edge route fall and confounds natural landing checks.
+  for(int ax=0;ax<32;ax++)for(int az=24;az<44;az++){
    h.setBlock(new BlockPos(ax,0,az),Blocks.STONE);
    for(int ay=1;ay<20;ay++)h.setBlock(new BlockPos(ax,ay,az),Blocks.AIR);
   }
