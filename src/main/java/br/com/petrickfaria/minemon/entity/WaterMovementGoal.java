@@ -408,6 +408,13 @@ public final class WaterMovementGoal extends Goal {
       &&!floor.is(Blocks.MAGMA_BLOCK)&&!floor.is(Blocks.CACTUS)&&!floor.is(Blocks.CAMPFIRE)&&!floor.is(Blocks.SOUL_CAMPFIRE)
       &&mob.level.noCollision(mob,mob.getBoundingBox().move(feet.getX()+0.5D-mob.getX(),feet.getY()-mob.getY(),feet.getZ()+0.5D-mob.getZ()));
  }
+ static boolean safeDryRestingSupport(MinemonCreature mob,BlockPos feet){
+  var floor=mob.level.getBlockState(feet.below());
+  return mob.level.getFluidState(feet).isEmpty()&&mob.level.getFluidState(feet.below()).isEmpty()
+      &&!floor.getCollisionShape(mob.level,feet.below()).isEmpty()
+      &&!floor.is(Blocks.MAGMA_BLOCK)&&!floor.is(Blocks.CACTUS)&&!floor.is(Blocks.CAMPFIRE)&&!floor.is(Blocks.SOUL_CAMPFIRE)
+      &&mob.level.noBlockCollision(mob,mob.getBoundingBox());
+ }
  static boolean safeLanding(MinemonCreature mob,BlockPos feet){
   if(!safeDry(mob,feet))return false;
   var box=mob.getBoundingBox().move(feet.getX()+.5D-mob.getX(),feet.getY()-mob.getY(),feet.getZ()+.5D-mob.getZ());
