@@ -945,6 +945,9 @@
       "arm_left1",
       "arm_right1"
     ],
+    "water_pose_transition": [
+      "body"
+    ],
     "walk": [
       "leg_left",
       "leg_right",
