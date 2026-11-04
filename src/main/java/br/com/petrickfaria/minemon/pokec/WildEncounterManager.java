@@ -36,7 +36,7 @@ public final class WildEncounterManager {
     public static final int MAX_ACTIVE = 5, MAX_DOWNED = 3;
     private static final List<String> RARITIES = List.of("common", "uncommon", "rare", "legendary", "mythic");
     private static volatile java.util.Map<String, Double> rarityChances = java.util.Map.of(
-            "common", .10D, "uncommon", .045D, "rare", .015D, "legendary", .003D, "mythic", .001D);
+            "common", .04D, "uncommon", .015D, "rare", .005D, "legendary", .001D, "mythic", .0003D);
 
     private static volatile java.util.Map<String, Double> speciesChances = java.util.Map.of();
     private static volatile boolean configLoaded;
@@ -49,8 +49,8 @@ public final class WildEncounterManager {
             if (!Files.exists(file)) {
                 var lines = List.of("# Chance per 30-second player check before environment modifiers.",
                         "# Values are probabilities from 0 to 1; species can override with species.<slug>=value.",
-                        "rarity.common=0.10", "rarity.uncommon=0.045", "rarity.rare=0.015",
-                        "rarity.legendary=0.003", "rarity.mythic=0.001");
+                        "rarity.common=0.04", "rarity.uncommon=0.015", "rarity.rare=0.005",
+                        "rarity.legendary=0.001", "rarity.mythic=0.0003");
                 Files.write(file, lines);
             }
             var rarity = new java.util.HashMap<String, Double>();
@@ -104,7 +104,7 @@ public final class WildEncounterManager {
         var pd = player.getPersistentData();
         if (now - pd.getLong("MinemonWildSpawnAttempt") < CHECK_INTERVAL) return;
         pd.putLong("MinemonWildSpawnAttempt", now);
-        if (active >= MAX_ACTIVE || player.getRandom().nextDouble() >= .35D) return;
+        if (active >= MAX_ACTIVE) return;
         List<PokecSpecies.Entry> candidates = PokecPlayerData.unlocked(player).stream()
                 .map(PokecSpecies::get).filter(java.util.Objects::nonNull)
                 .filter(entry -> ModEntities.SPECIES.containsKey(entry.slug()))
@@ -114,7 +114,7 @@ public final class WildEncounterManager {
             PokecSpecies.Entry species = candidates.get(player.getRandom().nextInt(candidates.size()));
             double chance = speciesChances.getOrDefault(species.slug(), rarityChances.getOrDefault(
                     PokecEconomy.resolveRarity(species.rarity(), "common"), .05D));
-            if (player.getRandom().nextDouble() >= chance * .35D) continue;
+            if (player.getRandom().nextDouble() >= chance) continue;
             BlockPos pos = samplePosition(player, level, species);
             if (pos == null || !environmentAllows(species, level, pos)) continue;
             Entity created = ModEntities.SPECIES.get(species.slug()).get().create(level);
