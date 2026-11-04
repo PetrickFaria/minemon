@@ -42,16 +42,15 @@ public final class NightAndSwimmingTests {
   });
  }
  private static boolean flightResumeComplete(MinemonCreature m,Map<MinemonCreature,Integer> clocks){
-  if(m.isOnGround())return false;
   double altitude=m.getY()-m.naturalSurface();
   return switch(SpeciesBehaviorProfiles.profile(m.getSpeciesSlug())){
-   case FLOAT_HALF -> Math.abs(altitude-m.naturalCycle().minimumAltitude())<=0.12D;
-   case FLOAT_LOW -> altitude>=0.5D&&altitude<=1.0D;
    case GROUND -> m.isOnGround()&&altitude<=0.15D;
    case GROUND_FLOAT_CYCLE -> m.getSpeciesSlug().equals("alakazam")
        ?m.naturalCycle().phase()==BehaviorCycle.Phase.LAND&&m.isOnGround()
-       :m.naturalCycle().ticks()>clocks.get(m);
-   default -> m.naturalCycle().ticks()>clocks.get(m);
+       :!m.isOnGround()&&m.naturalCycle().ticks()>clocks.get(m);
+   case FLOAT_HALF -> !m.isOnGround()&&Math.abs(altitude-m.naturalCycle().minimumAltitude())<=0.12D;
+   case FLOAT_LOW -> !m.isOnGround()&&altitude>=0.5D&&altitude<=1.0D;
+   default -> !m.isOnGround()&&m.naturalCycle().ticks()>clocks.get(m);
   };
  }
  private static String flightResumeSnapshot(MinemonCreature m){

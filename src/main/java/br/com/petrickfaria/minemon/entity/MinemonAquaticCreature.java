@@ -159,7 +159,7 @@ public final class MinemonAquaticCreature extends MinemonCreature {
             if(this.isInWater()){
                 double localTop=this.waterSurface();
                 if(Double.isFinite(localTop))
-                    holdY=WaterMovementGoal.surfaceSwimY(this,localTop);
+                    holdY=localTop-WaterMovementGoal.preferredSurfaceDepth(this);
             }
             this.getMoveControl().setWantedPosition(this.getX(),holdY,this.getZ(),0.5D);
             // The completed route no longer owns horizontal motion. Damp its
