@@ -16,7 +16,7 @@ public final class ActivePokemonData extends SavedData {
                 ActivePokemonData::new, STORAGE_KEY);
     }
 
-    private static ActivePokemonData load(CompoundTag tag) {
+    static ActivePokemonData load(CompoundTag tag) {
         ActivePokemonData data = new ActivePokemonData();
         data.owners.merge(tag.getCompound("Owners"));
         return data;

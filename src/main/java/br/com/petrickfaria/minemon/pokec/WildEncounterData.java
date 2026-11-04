@@ -17,7 +17,7 @@ public final class WildEncounterData extends SavedData {
                 WildEncounterData::new, STORAGE_KEY);
     }
 
-    private static WildEncounterData load(CompoundTag tag) {
+    static WildEncounterData load(CompoundTag tag) {
         WildEncounterData data = new WildEncounterData();
         data.owners.merge(tag.getCompound("Owners"));
         return data;
