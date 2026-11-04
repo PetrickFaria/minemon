@@ -295,7 +295,8 @@ public final class NightAndSwimmingTests {
       },180,()->"After combat, a creature must return to sleep while still night; sleeping="+ground.isSleeping()
           +",night="+ground.isNightResting()+",target="+ground.getTarget()
           +",lastHurt="+ground.getLastHurtByMob()+",pos="+ground.position()+",onGround="+ground.isOnGround()
-          +",noAI="+ground.isNoAi()+",time="+level.getDayTime());
+          +",noAI="+ground.isNoAi()+",time="+level.getDayTime()+",wakeGrace="+ground.wakeGraceTicksForValidation()
+          +",nightCombat="+ground.nightCombatTicksForValidation()+",nightRoutine="+ground.nightRoutineForValidation());
      },150,"Woken creature must physically retaliate using melee AI");
     });
    },350,()->"Night must settle ground/mixed creatures on land and air-only creatures in a one-block hover; mixed="
