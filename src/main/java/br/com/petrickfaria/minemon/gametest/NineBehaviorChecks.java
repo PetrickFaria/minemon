@@ -77,13 +77,21 @@ final class NineBehaviorChecks {
  static void followingAltitudes(GameTestHelper h){
   var level=h.getLevel();level.setDayTime(1000);
   var species=List.of("gastly","metapod","kakuna","abra","porygon","geodude","pidgey");
+  // The preceding continuous-following arena only prepares z=0..9. The
+  // altitude probe must supply its own solid floor and clear air for every
+  // species; otherwise Abra (z=11) and later species spawn above unprepared
+  // terrain outside that arena and can lose navigation for unrelated reasons.
+  for(int x=1;x<15;x++)for(int z=1;z<15;z++){
+   h.setBlock(new BlockPos(x,0,z),Blocks.STONE);
+   for(int y=1;y<=10;y++)h.setBlock(new BlockPos(x,y,z),Blocks.AIR);
+  }
   var owners=new ArrayList<net.minecraft.server.level.ServerPlayer>();var mobs=new ArrayList<MinemonCreature>();
   for(int i=0;i<species.size();i++){
    var owner=new net.minecraft.server.level.ServerPlayer(level.getServer(),level,
        new com.mojang.authlib.GameProfile(UUID.randomUUID(),"AltitudeTrainer"+i),null);
    owner.connection=new net.minecraftforge.common.util.FakePlayer(level,
        new com.mojang.authlib.GameProfile(UUID.randomUUID(),"AltitudeConnection"+i)).connection;
-   int z=2+i*3;var ownerAt=h.absolutePos(new BlockPos(12,1,z));
+   int z=2+i*2;var ownerAt=h.absolutePos(new BlockPos(12,1,z));
    owner.moveTo(ownerAt.getX()+.5,ownerAt.getY(),ownerAt.getZ()+.5,0,0);level.addNewPlayer(owner);owners.add(owner);
    var mob=h.spawn(ModEntities.SPECIES.get(species.get(i)).get(),new BlockPos(5,5,z));
    mob.tame(owner);mob.setOrderedToSit(false);mob.naturalCycle().restore("AIR",1000,1);mobs.add(mob);
