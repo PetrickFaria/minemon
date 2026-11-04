@@ -917,6 +917,17 @@ public final class ClientSmokeTest {
   private static boolean hasSelectedClip(String slug,String state,String clip) {
    return clip!=null && articulationClips.getOrDefault(slug,java.util.Map.of()).getOrDefault(state,java.util.Set.of()).contains(clip);
   }
+  private static boolean hasSelectedWaterClip(String slug,String state,boolean idle) {
+   var definition=SpeciesDefinitions.get(slug);
+   if(definition==null)return false;
+   String surface=idle
+       ?firstMappedClip(definition,"surface_water_idle","surfacewater_idle","water_surface_idle","water_idle")
+       :firstMappedClip(definition,"surface_water_swim","surfacewater_swim","water_surface_swim","water_swim");
+   String submerged=idle
+       ?firstMappedClip(definition,"water_idle","water_surface_idle","surface_water_idle","surfacewater_idle")
+       :firstMappedClip(definition,"water_swim","water_surface_swim","surface_water_swim","surfacewater_swim");
+   return hasSelectedClip(slug,state,surface)||hasSelectedClip(slug,state,submerged);
+  }
   private static boolean hasVelocitySample(String slug,String state,String clip,boolean aboveRunThreshold) {
    for(String sample:articulationInputs.getOrDefault(slug,java.util.Map.of()).getOrDefault(state,java.util.Set.of())) {
     if(!sample.contains("clip="+clip+",velocitySqr="))continue;
@@ -1008,7 +1019,10 @@ public final class ClientSmokeTest {
     String expected=expectedWalk(slug,definition);
      if(!hasSelectedClip(slug,"WALK_STEADY",expected))throw new IllegalStateException("Fallback classification did not match selected walk clip for "+slug);
      if(ADDITIONAL_PROFILES.containsKey(slug)) {
-      if(!hasSelectedClip(slug,"IDLE_INITIAL",expectedIdle(slug,definition))||!hasSelectedClip(slug,"IDLE_FINAL",expectedIdle(slug,definition)))
+      boolean sourceIdleMatches=fixtureWater(slug)
+       ?hasSelectedWaterClip(slug,"IDLE_INITIAL",true)&&hasSelectedWaterClip(slug,"IDLE_FINAL",true)
+       :hasSelectedClip(slug,"IDLE_INITIAL",expectedIdle(slug,definition))&&hasSelectedClip(slug,"IDLE_FINAL",expectedIdle(slug,definition));
+      if(!sourceIdleMatches)
        throw new IllegalStateException("Source idle fallback did not select the expected clip for "+slug);
       if(sourceStaticIdle(slug))validateSourceStaticIdle(slug);
       else if(movingJointCount(slug,"IDLE_FINAL")<1)
@@ -1023,9 +1037,15 @@ public final class ClientSmokeTest {
     String run=fixtureAir(slug)||fixtureWater(slug)
       ?null:SpeciesAssetIndex.clip(slug,"ground_run","run");
     String idle=expectedIdle(slug,definition);
-    if(!hasSelectedClip(slug,"IDLE_INITIAL",idle)||!hasSelectedClip(slug,"IDLE_FINAL",idle)||!hasSelectedClip(slug,"IDLE_RETURN",idle))
+    boolean idleMatches=fixtureWater(slug)
+      ?hasSelectedWaterClip(slug,"IDLE_INITIAL",true)&&hasSelectedWaterClip(slug,"IDLE_FINAL",true)&&hasSelectedWaterClip(slug,"IDLE_RETURN",true)
+      :hasSelectedClip(slug,"IDLE_INITIAL",idle)&&hasSelectedClip(slug,"IDLE_FINAL",idle)&&hasSelectedClip(slug,"IDLE_RETURN",idle);
+    if(!idleMatches)
      throw new IllegalStateException("Idle state selection did not return to expected clip for "+slug+" expected="+idle+" observed="+articulationClips.get(slug));
-    if(!hasSelectedClip(slug,"WALK_STEADY",walk)||!hasSelectedClip(slug,"WALK_START",walk)||!hasSelectedClip(slug,"WALK_DECEL",walk))
+    boolean walkMatches=fixtureWater(slug)
+      ?hasSelectedWaterClip(slug,"WALK_STEADY",false)&&hasSelectedWaterClip(slug,"WALK_START",false)&&hasSelectedWaterClip(slug,"WALK_DECEL",false)
+      :hasSelectedClip(slug,"WALK_STEADY",walk)&&hasSelectedClip(slug,"WALK_START",walk)&&hasSelectedClip(slug,"WALK_DECEL",walk);
+    if(!walkMatches)
      throw new IllegalStateException("Walk state selection failed for "+slug+" expected="+walk+" states="+articulationClips.get(slug)+" samples="+articulationSampleCounts.get(slug)+" measured="+articulationInputs.get(slug));
     if(run!=null&&!hasSelectedClip(slug,"RUN_STEADY",run))
      throw new IllegalStateException("Run state selection failed for "+slug+" expected="+run+" states="+articulationClips.get(slug));
