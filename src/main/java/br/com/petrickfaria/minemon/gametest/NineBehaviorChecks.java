@@ -83,7 +83,7 @@ final class NineBehaviorChecks {
        new com.mojang.authlib.GameProfile(UUID.randomUUID(),"AltitudeTrainer"+i),null);
    owner.connection=new net.minecraftforge.common.util.FakePlayer(level,
        new com.mojang.authlib.GameProfile(UUID.randomUUID(),"AltitudeConnection"+i)).connection;
-   int z=2+i*3;var ownerAt=h.absolutePos(new BlockPos(20,1,z));
+   int z=2+i*3;var ownerAt=h.absolutePos(new BlockPos(12,1,z));
    owner.moveTo(ownerAt.getX()+.5,ownerAt.getY(),ownerAt.getZ()+.5,0,0);level.addNewPlayer(owner);owners.add(owner);
    var mob=h.spawn(ModEntities.SPECIES.get(species.get(i)).get(),new BlockPos(5,5,z));
    mob.tame(owner);mob.setOrderedToSit(false);mob.naturalCycle().restore("AIR",1000,1);mobs.add(mob);

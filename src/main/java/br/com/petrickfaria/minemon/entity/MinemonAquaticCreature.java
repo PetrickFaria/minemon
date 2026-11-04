@@ -193,7 +193,10 @@ public final class MinemonAquaticCreature extends MinemonCreature {
         // Surface and submerged correction share the swimming controller; do not
         // add another navigation goal or override horizontal pursuit.
         if(!ShoreTraversal.exiting(this)&&(surface||this.getY()>target)){
-            double vy=net.minecraft.util.Mth.clamp(this.getDeltaMovement().y*0.5D+(target-this.getY())*0.05D,-0.09D,0.09D);
+            boolean gyarados=this.getSpeciesSlug().equals("gyarados");
+            double retention=gyarados?0.25D:0.5D;
+            double response=gyarados?0.10D:0.05D;
+            double vy=net.minecraft.util.Mth.clamp(this.getDeltaMovement().y*retention+(target-this.getY())*response,-0.09D,0.09D);
             this.setDeltaMovement(this.getDeltaMovement().x,vy,this.getDeltaMovement().z);
         }
     }
