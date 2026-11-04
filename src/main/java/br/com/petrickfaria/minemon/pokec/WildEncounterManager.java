@@ -120,6 +120,7 @@ public final class WildEncounterManager {
             Entity created = ModEntities.SPECIES.get(species.slug()).get().create(level);
             if (!(created instanceof MinemonCreature pokemon)) { if (created != null) created.discard(); continue; }
             pokemon.moveTo(pos.getX() + .5D, pos.getY(), pos.getZ() + .5D, player.getRandom().nextFloat() * 360, 0);
+            if (!level.noCollision(pokemon) || !safeEntityVolume(level, pokemon)) { pokemon.discard(); continue; }
             pokemon.setPokemonLevel(spawnLevel(species, player.getRandom()));
             var data = pokemon.getPersistentData();
             data.putBoolean(MARKER, true); data.putUUID(OWNER, player.getUUID()); data.putString(STATE, "active");
@@ -147,6 +148,19 @@ public final class WildEncounterManager {
             return pos;
         }
         return null;
+    }
+
+    private static boolean safeEntityVolume(ServerLevel level, MinemonCreature pokemon) {
+        AABB box = pokemon.getBoundingBox().inflate(-0.01D);
+        int minX = net.minecraft.util.Mth.floor(box.minX), maxX = net.minecraft.util.Mth.floor(box.maxX);
+        int minY = net.minecraft.util.Mth.floor(box.minY), maxY = net.minecraft.util.Mth.floor(box.maxY);
+        int minZ = net.minecraft.util.Mth.floor(box.minZ), maxZ = net.minecraft.util.Mth.floor(box.maxZ);
+        for (BlockPos pos : BlockPos.betweenClosed(minX, minY, minZ, maxX, maxY, maxZ)) {
+            if (!level.hasChunkAt(pos)) return false;
+            if (level.getFluidState(pos).is(net.minecraft.tags.FluidTags.LAVA)
+                    || level.getBlockState(pos).is(Blocks.FIRE) || level.getBlockState(pos).is(Blocks.SOUL_FIRE)) return false;
+        }
+        return true;
     }
 
     private static boolean environmentAllows(PokecSpecies.Entry species, ServerLevel level, BlockPos pos) {
