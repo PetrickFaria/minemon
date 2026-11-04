@@ -61,9 +61,9 @@ jobs:
           fi
           grep -F 'PASS WILD CAPTURE CLIENT:' run/wild-capture-client-pass.txt
           ALSOFT_DRIVERS=null timeout --kill-after=30s 900s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeWildCaptureReopen -PcaptureReopenIndex=1 > run/wild-capture-reopen-1.log 2>&1
-          grep -F 'PASS CAPTURE REOPEN 1:' wild-capture-reopen-1.txt
+          grep -F 'PASS CAPTURE REOPEN 1:' run/wild-capture-reopen-1.txt
           ALSOFT_DRIVERS=null timeout --kill-after=30s 900s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeWildCaptureReopen -PcaptureReopenIndex=2 > run/wild-capture-reopen-2.log 2>&1
-          grep -F 'PASS CAPTURE REOPEN 2:' wild-capture-reopen-2.txt
+          grep -F 'PASS CAPTURE REOPEN 2:' run/wild-capture-reopen-2.txt
       - name: Build the distributable version 1.69 JAR
         run: ./gradlew --no-daemon build
       - name: Validate exact JAR filename, metadata, and contents

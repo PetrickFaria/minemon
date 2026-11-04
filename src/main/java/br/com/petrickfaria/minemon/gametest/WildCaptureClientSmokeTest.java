@@ -129,7 +129,7 @@ final class WildCaptureClientSmokeTest {
                 throw new IllegalStateException("Trainer Pokémon XP did not survive world reopen " + reopenIndex);
             var downed = br.com.petrickfaria.minemon.pokec.WildEncounterData.get(server.overworld()).count(owner.getUUID(), "downed");
             if (downed != 0) throw new IllegalStateException("Captured encounter reappeared after world reopen");
-            Files.writeString(Path.of("wild-capture-reopen-" + reopenIndex + ".txt"),
+            Files.writeString(Path.of("run", "wild-capture-reopen-" + reopenIndex + ".txt"),
                     "PASS CAPTURE REOPEN " + reopenIndex + ": occupied owner Pokébola and Trainer XP persisted; no duplicate downed encounter\n");
             System.out.println("[WILD CAPTURE REOPEN] PASS " + reopenIndex);
             done = true;
