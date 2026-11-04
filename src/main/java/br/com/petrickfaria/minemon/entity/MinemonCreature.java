@@ -671,7 +671,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
             if (!this.isTame()) {
                 if (player instanceof ServerPlayer owner
                         && !br.com.petrickfaria.minemon.pokec.ActivePokemonData.hasCapacity(owner)) {
-                    owner.displayClientMessage(Component.literal(
+                    owner.displayClientMessage(net.minecraft.network.chat.Component.literal(
                             "Seu nível de Treinador não permite manter mais Pokémon ativos."), true);
                     return InteractionResult.sidedSuccess(false);
                 }
