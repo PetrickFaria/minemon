@@ -78,7 +78,7 @@ final class NineBehaviorChecks {
   var level=h.getLevel();level.setDayTime(1000);
   var owner=new net.minecraft.server.level.ServerPlayer(level.getServer(),level,new com.mojang.authlib.GameProfile(UUID.randomUUID(),"AltitudeTrainer"),null);
   owner.connection=new net.minecraftforge.common.util.FakePlayer(level,new com.mojang.authlib.GameProfile(UUID.randomUUID(),"AltitudeConnection")).connection;
-  var at=h.absolutePos(new BlockPos(30,1,5));owner.moveTo(at.getX()+.5,at.getY(),at.getZ()+.5,0,0);level.addNewPlayer(owner);
+  var at=h.absolutePos(new BlockPos(20,1,5));owner.moveTo(at.getX()+.5,at.getY(),at.getZ()+.5,0,0);level.addNewPlayer(owner);
   var species=List.of("gastly","metapod","kakuna","abra","porygon","geodude","pidgey");var mobs=new ArrayList<MinemonCreature>();
   for(int i=0;i<species.size();i++){
    var mob=h.spawn(ModEntities.SPECIES.get(species.get(i)).get(),new BlockPos(5,5,1+i));mob.tame(owner);mob.setOrderedToSit(false);mob.naturalCycle().restore("AIR",1000,1);mobs.add(mob);

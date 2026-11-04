@@ -1,251 +1,338 @@
-YªçŠx-®éÜj×¢ëiºÚ+Š§j[h‘éÜ¢éíë½»N‹Z–‹­¦ëeŠw¬ÕÁ…­…”‰È¹½´¹Á•ÑÉ¥­™…É¥„¹µ¥¹•µ½¸¹Á½­•Œì()¥µÁ½ÉÐ‰È¹½´¹Á•ÑÉ¥­™…É¥„¹µ¥¹•µ½¸¹•¹Ñ¥Ñä¹5¥¹•µ½¹É•…ÑÕÉ”ì)¥µÁ½ÉÐ‰È¹½´¹Á•ÑÉ¥­™…É¥„¹µ¥¹•µ½¸¹•¹Ñ¥Ñä¹MÁ•¥•Í	•¡…Ù¥½ÉAÉ½™¥±•Ìì)¥µÁ½ÉÐ‰È¹½´¹Á•ÑÉ¥­™…É¥„¹µ¥¹•µ½¸¹É•¥ÍÑÉä¹5½‘¹Ñ¥Ñ¥•Ìì)¥µÁ½ÉÐ¹•Ð¹µ¥¹•É…™Ð¹½É”¹	±½­A½Ìì)¥µÁ½ÉÐ¹•Ð¹µ¥¹•É…™Ð¹Í•ÉÙ•È¹±•Ù•°¹M•ÉÙ•É1•Ù•°ì)¥µÁ½ÉÐ¹•Ð¹µ¥¹•É…™Ð¹Í•ÉÙ•È¹±•Ù•°¹M•ÉÙ•ÉA±…å•Èì)¥µÁ½ÉÐ¹•Ð¹µ¥¹•É…™Ð¹Ý½É±¹•¹Ñ¥Ñä¹¹Ñ¥Ñäì)¥µÁ½ÉÐ¹•Ð¹µ¥¹•É…™Ð¹Ý½É±¹•¹Ñ¥Ñä¹5½ˆì)¥µÁ½ÉÐ¹•Ð¹µ¥¹•É…™Ð¹Ý½É±¹±•Ù•°¹‰±½¬¹	±½­Ìì)¥µÁ½ÉÐ¹•Ð¹µ¥¹•É…™Ð¹Ý½É±¹Á¡åÌ¹	ì)¥µÁ½ÉÐ¹•Ð¹µ¥¹•É…™Ð¹Ý½É±¹Á¡åÌ¹Y•ŒÌì()¥µÁ½ÉÐ©…Ù„¹¥¼¹%=á•ÁÑ¥½¸ì)¥µÁ½ÉÐ©…Ù„¹¹¥¼¹™¥±”¹¥±•Ìì)¥µÁ½ÉÐ©…Ù„¹¹¥¼¹™¥±”¹A…Ñ ì)¥µÁ½ÉÐ©…Ù„¹ÕÑ¥°¹ÉÉ…å1¥ÍÐì)¥µÁ½ÉÐ©…Ù„¹ÕÑ¥°¹½µÁ…É…Ñ½Èì)¥µÁ½ÉÐ©…Ù„¹ÕÑ¥°¹1¥ÍÐì)¥µÁ½ÉÐ©…Ù„¹ÕÑ¥°¹1½…±”ì)¥µÁ½ÉÐ©…Ù„¹ÕÑ¥°¹UU%ì((¼¨¨M•ÉÙ•È…ÕÑ¡½É¥Ñä™½ÈÁ±…å•Èµ‰½Õ¹Ý¥±•¹½Õ¹Ñ•ÉÌ¸¹½Õ¹Ñ•Èµ•Ñ…‘…Ñ„±¥Ù•Ì½¸Ñ¡”A½¯¥µ½¸•¹Ñ¥Ñä¸€¨¼)ÁÕ‰±¥Œ™¥¹…°±…ÍÌ]¥±‘¹½Õ¹Ñ•É5…¹…•Èì(€€€ÁÕ‰±¥Œ•¹Õ´…ÁÑÕÉ•I•ÍÕ±Ðì%9Y1%°%1°aA%I°AQUIô(€€€ÁÉ¥Ù…Ñ”ÍÑ…Ñ¥Œ™¥¹…°MÑÉ¥¹œ5I-H€ô€‰5¥¹•µ½¹]¥±‘¹½Õ¹Ñ•Èˆì(€€€ÁÉ¥Ù…Ñ”ÍÑ…Ñ¥Œ™¥¹…°MÑÉ¥¹œ=]9H€ô€‰5¥¹•µ½¹¹½Õ¹Ñ•É=Ý¹•Èˆì(€€€ÁÉ¥Ù…Ñ”ÍÑ…Ñ¥Œ™¥¹…°MÑÉ¥¹œMQQ€ô€‰5¥¹•µ½¹¹½Õ¹Ñ•ÉMÑ…Ñ”ˆì(€€€ÁÉ¥Ù…Ñ”ÍÑ…Ñ¥Œ™¥¹…°MÑÉ¥¹œ=]9}P€ô€‰5¥¹•µ½¹¹½Õ¹Ñ•É½Ý¹•‘Ðˆì(€€€ÁÉ¥Ù…Ñ”ÍÑ…Ñ¥Œ™¥¹…°MÑÉ¥¹œ1MQ}%9}I9€ô€‰5¥¹•µ½¹¹½Õ¹Ñ•É1…ÍÑ%¹I…¹”ˆì(€€€ÁÉ¥Ù…Ñ”ÍÑ…Ñ¥Œ™¥¹…°MÑÉ¥¹œI]I€ô€‰5¥¹•µ½¹¹½Õ¹Ñ•ÉI•Ý…É‘•ˆì(€€€ÁÉ¥Ù…Ñ”ÍÑ…Ñ¥Œ™¥¹…°MÑÉ¥¹œ1MQ}!,€ô€‰5¥¹•µ½¹]¥±‘MÁ…Ý¹¡•¬ˆì(€€€ÁÉ¥Ù…Ñ”ÍÑ…Ñ¥Œ™¥¹…°±½¹œ!-}%9QIY0€ô€ÈÁ0€¨€ÌÁ0ì(€€€ÁÉ¥Ù…Ñ”ÍÑ…Ñ¥Œ™¥¹…°±½¹œaA%Id€ô€ÈÁ0€¨€ØÁ0€¨€Õ0ì(€€€ÁÕ‰±¥ŒÍÑ…Ñ¥Œ™¥¹…°¥¹Ð5a}Q%Y€ô€Ô°5a}=]9€ô€Ìì(€€€ÁÉ¥Ù…Ñ”ÍÑ…Ñ¥Œ™¥¹…°1¥ÍÐñMÑÉ¥¹œøII%Q%L€ô1¥ÍÐ¹½˜ ‰½µµ½¸ˆ°€‰Õ¹½µµ½¸ˆ°€‰É…É”ˆ°€‰±••¹‘…Éäˆ°€‰µåÑ¡¥Œˆ¤ì(€€€ÁÉ¥Ù…Ñ”ÍÑ…Ñ¥ŒÙ½±…Ñ¥±”©…Ù„¹ÕÑ¥°¹5…ÀñMÑÉ¥¹œ°½Õ‰±”øÉ…É¥Ñå¡…¹•Ì€ô©…Ù„¹ÕÑ¥°¹5…À¹½˜ (€€€€€€€€€€€€‰½µµ½¸ˆ°€¸ÀÑ°€‰Õ¹½µµ½¸ˆ°€¸ÀÄÕ°€‰É…É”ˆ°€¸ÀÀÕ°€‰±••¹‘…Éäˆ°€¸ÀÀÅ°€‰µåÑ¡¥Œˆ°€¸ÀÀÀÍ¤ì((€€€ÁÉ¥Ù…Ñ”ÍÑ…Ñ¥ŒÙ½±…Ñ¥±”©…Ù„¹ÕÑ¥°¹5…ÀñMÑÉ¥¹œ°½Õ‰±”øÍÁ•¥•Í¡…¹•Ì€ô©…Ù„¹ÕÑ¥°¹5…À¹½˜ ¤ì(€€€ÁÉ¥Ù…Ñ”ÍÑ…Ñ¥ŒÙ½±…Ñ¥±”‰½½±•…¸½¹™¥1½…‘•ì((€€€ÁÕ‰±¥ŒÍÑ…Ñ¥ŒÍå¹¡É½¹¥é•Ù½¥±½…‘½¹™¥œ¡M•ÉÙ•É1•Ù•°±•Ù•°¤ì(€€€€€€€A…Ñ ™¥±”€ô±•Ù•°¹•ÑM•ÉÙ•È ¤¹•ÑM•ÉÙ•É¥É•Ñ½Éä ¤¹Ñ½A…Ñ  ¤¹É•Í½±Ù” ‰½¹™¥œ½µ¥¹•µ½¸½Ý¥±µÍÁ…Ý¸¹ÁÉ½Á•ÉÑ¥•Ìˆ¤ì(€€€€€€€Ù…ÈÙ…±Õ•Ì€ô¹•Ü©…Ù„¹ÕÑ¥°¹1¥¹­•‘!…Í¡5…ÀñMÑÉ¥¹œ°½Õ‰±”ø¡É…É¥Ñå¡…¹•Ì¤ì(€€€€€€€ÑÉäì(€€€€€€€€€€€¥±•Ì¹É•…Ñ•¥É•Ñ½É¥•Ì¡™¥±”¹•ÑA…É•¹Ð ¤¤ì(€€€€€€€€€€€¥˜€ …¥±•Ì¹•á¥ÍÑÌ¡™¥±”¤¤ì(€€€€€€€€€€€€€€€Ù…È±¥¹•Ì€ô1¥ÍÐ¹½˜ ˆŒ¡…¹”Á•È€ÌÀµÍ•½¹Á±…å•È¡•¬‰•™½É”•¹Ù¥É½¹µ•¹Ðµ½‘¥™¥•ÉÌ¸ˆ°(€€€€€€€€€€€€€€€€€€€€€€€€ˆŒY…±Õ•Ì…É”ÁÉ½‰…‰¥±¥Ñ¥•Ì™É½´€ÀÑ¼€ÄìÍÁ•¥•Ì…¸½Ù•ÉÉ¥‘”Ý¥Ñ ÍÁ•¥•Ì¸ñÍ±ÕœøõÙ…±Õ”¸ˆ°(€€€€€€€€€€€€€€€€€€€€€€€€‰É…É¥Ñä¹½µµ½¸ôÀ¸ÀÐˆ°€‰É…É¥Ñä¹Õ¹½µµ½¸ôÀ¸ÀÄÔˆ°€‰É…É¥Ñä¹É…É”ôÀ¸ÀÀÔˆ°(€€€€€€€€€€€€€€€€€€€€€€€€‰É…É¥Ñä¹±••¹‘…ÉäôÀ¸ÀÀÄˆ°€‰É…É¥Ñä¹µåÑ¡¥ŒôÀ¸ÀÀÀÌˆ¤ì(€€€€€€€€€€€€€€€¥±•Ì¹ÝÉ¥Ñ”¡™¥±”°±¥¹•Ì¤ì(€€€€€€€€€€€ô(€€€€€€€€€€€Ù…ÈÉ…É¥Ñä€ô¹•Ü©…Ù„¹ÕÑ¥°¹!…Í¡5…ÀñMÑÉ¥¹œ°½Õ‰±”ø ¤ì(€€€€€€€€€€€Ù…ÈÍÁ•¥•Ì€ô¹•Ü©…Ù„¹ÕÑ¥°¹!…Í¡5…ÀñMÑÉ¥¹œ°½Õ‰±”ø ¤ì(€€€€€€€€€€€™½È€¡MÑÉ¥¹œ±¥¹”€è¥±•Ì¹É•…‘±±1¥¹•Ì¡™¥±”¤¤ì(€€€€€€€€€€€€€€€MÑÉ¥¹œÑÉ¥µµ•€ô±¥¹”¹ÍÑÉ¥À ¤ì(€€€€€€€€€€€€€€€¥˜€¡ÑÉ¥µµ•¹¥ÍµÁÑä ¤ñðÑÉ¥µµ•¹ÍÑ…ÉÑÍ]¥Ñ  ˆŒˆ¤ñð€…ÑÉ¥µµ•¹½¹Ñ…¥¹Ì ˆôˆ¤¤½¹Ñ¥¹Õ”ì(€€€€€€€€€€€€€€€MÑÉ¥¹mtÁ…¥È€ôÑÉ¥µµ•¹ÍÁ±¥Ð ˆôˆ°€È¤ì(€€€€€€€€€€€€€€€ÑÉäì(€€€€€€€€€€€€€€€€€€€‘½Õ‰±”Ù…±Õ”€ô½Õ‰±”¹Á…ÉÍ•½Õ‰±”¡Á…¥ÉlÅt¹ÍÑÉ¥À ¤¤ì(€€€€€€€€€€€€€€€€€€€¥˜€ …½Õ‰±”¹¥Í¥¹¥Ñ”¡Ù…±Õ”¤ñðÙ…±Õ”€ð€ÀñðÙ…±Õ”€ø€Ä¤½¹Ñ¥¹Õ”ì(€€€€€€€€€€€€€€€€€€€MÑÉ¥¹œ­•ä€ôÁ…¥ÉlÁt¹ÍÑÉ¥À ¤¹Ñ½1½Ý•É…Í”¡1½…±”¹I==P¤ì(€€€€€€€€€€€€€€€€€€€¥˜€¡­•ä¹ÍÑ…ÉÑÍ]¥Ñ  ‰É…É¥Ñä¸ˆ¤¤É…É¥Ñä¹ÁÕÐ¡­•ä¹ÍÕ‰ÍÑÉ¥¹œ Ü¤°Ù…±Õ”¤ì(€€€€€€€€€€€€€€€€€€€•±Í”¥˜€¡­•ä¹ÍÑ…ÉÑÍ]¥Ñ  ‰ÍÁ•¥•Ì¸ˆ¤€˜˜A½­•MÁ•¥•Ì¹•Ð¡­•ä¹ÍÕ‰ÍÑÉ¥¹œ à¤¤€„ô¹Õ±°¤ÍÁ•¥•Ì¹ÁÕÐ¡­•ä¹ÍÕ‰ÍÑÉ¥¹œ à¤°Ù…±Õ”¤ì(€€€€€€€€€€€€€€€ô…Ñ €¡9Õµ‰•É½Éµ…Ñá•ÁÑ¥½¸¥¹½É•¤ìô(€€€€€€€€€€€ô(€€€€€€€€€€€™½È€¡MÑÉ¥¹œ­•ä€èII%Q%L¤Ù…±Õ•Ì¹ÁÕÐ¡­•ä°É…É¥Ñä¹•Ñ=É•™…Õ±Ð¡­•ä°Ù…±Õ•Ì¹•Ð¡­•ä¤¤¤ì(€€€€€€€€€€€É…É¥Ñå¡…¹•Ì€ô©…Ù„¹ÕÑ¥°¹5…À¹½Áå=˜¡Ù…±Õ•Ì¤ì(€€€€€€€€€€€ÍÁ•¥•Í¡…¹•Ì€ô©…Ù„¹ÕÑ¥°¹5…À¹½Áå=˜¡ÍÁ•¥•Ì¤ì(€€€€€€€€€€€½¹™¥1½…‘•€ôÑÉÕ”ì(€€€€€€€ô…Ñ €¡%=á•ÁÑ¥½¸•ÉÉ½È¤ì(€€€€€€€€€€€Ñ¡É½Ü¹•Ü%±±•…±MÑ…Ñ•á•ÁÑ¥½¸ ‰U¹…‰±”Ñ¼±½…Ý¥±µÍÁ…Ý¸½¹™¥œ€ˆ€¬™¥±”°•ÉÉ½È¤ì(€€€€€€€ô(€€€ô(€€€ÁÕ‰±¥ŒÍÑ…Ñ¥Œ‰½½±•…¸¥Í¹½Õ¹Ñ•È¡5¥¹•µ½¹É•…ÑÕÉ”Á½­•µ½¸¤ì(€€€€€€€É•ÑÕÉ¸Á½­•µ½¸¹±•Ù•°¹¥Í±¥•¹ÑM¥‘”€üÁ½­•µ½¸¹¥Í]¥±‘¹½Õ¹Ñ•È ¤€èÁ½­•µ½¸¹•ÑA•ÉÍ¥ÍÑ•¹Ñ…Ñ„ ¤¹•Ñ	½½±•…¸¡5I-H¤ì(€€€ô(€€€ÁÕ‰±¥ŒÍÑ…Ñ¥Œ‰½½±•…¸¥Í½Ý¹•¡5¥¹•µ½¹É•…ÑÕÉ”Á½­•µ½¸¤ì(€€€€€€€É•ÑÕÉ¸¥Í¹½Õ¹Ñ•È¡Á½­•µ½¸¤€˜˜€¡Á½­•µ½¸¹±•Ù•°¹¥Í±¥•¹ÑM¥‘”€üÁ½­•µ½¸¹¥Í]¥±‘¹½Õ¹Ñ•É½Ý¹• ¤(€€€€€€€€€€€€€€€€è€‰‘½Ý¹•ˆ¹•ÅÕ…±Ì¡Á½­•µ½¸¹•ÑA•ÉÍ¥ÍÑ•¹Ñ…Ñ„ ¤¹•ÑMÑÉ¥¹œ¡MQQ¤¤¤ì(€€€ô(€€€ÁÕ‰±¥ŒÍÑ…Ñ¥ŒUU%½Ý¹•È¡5¥¹•µ½¹É•…ÑÕÉ”Á½­•µ½¸¤ì(€€€€€€€Ù…È‘…Ñ„€ôÁ½­•µ½¸¹•ÑA•ÉÍ¥ÍÑ•¹Ñ…Ñ„ ¤ì(€€€€€€€É•ÑÕÉ¸‘…Ñ„¹¡…ÍUU%¡=]9H¤€ü‘…Ñ„¹•ÑUU%¡=]9H¤€è¹Õ±°ì(€€€ô((€€€ÁÕ‰±¥ŒÍÑ…Ñ¥ŒÙ½¥ÑÉ…­1½…‘•¡5¥¹•µ½¹É•…ÑÕÉ”Á½­•µ½¸¤ì(€€€€€€€¥˜€ …¥Í¹½Õ¹Ñ•È¡Á½­•µ½¸¤ñð€„¡Á½­•µ½¸¹±•Ù•°¥¹ÍÑ…¹•½˜M•ÉÙ•É1•Ù•°±•Ù•°¤¤É•ÑÕÉ¸ì(€€€€€€€UU%½Ý¹•È€ô½Ý¹•È¡Á½­•µ½¸¤ì(€€€€€€€Á½­•µ½¸¹Í•Ñ]¥±‘¹½Õ¹Ñ•È¡ÑÉÕ”¤ì(€€€€€€€Á½­•µ½¸¹Í•Ñ]¥±‘¹½Õ¹Ñ•É=Ý¹•È¡½Ý¹•È¤ì(€€€€€€€Á½­•µ½¸¹Í•Ñ]¥±‘¹½Õ¹Ñ•É½Ý¹•¡¥Í½Ý¹•¡Á½­•µ½¸¤¤ì(€€€€€€€¥˜€¡¥Í½Ý¹•¡Á½­•µ½¸¤¤Á½­•µ½¸¹Í•Ñ¹½Õ¹Ñ•É½Ý¹•¡ÑÉÕ”¤ì(€€€€€€€¥˜€¡½Ý¹•È€„ô¹Õ±°¤]¥±‘¹½Õ¹Ñ•É…Ñ„¹•Ð¡±•Ù•°¤¹ÁÕÐ¡½Ý¹•È°Á½­•µ½¸¹•ÑUU% ¤°¥Í½Ý¹•¡Á½­•µ½¸¤€ü€‰‘½Ý¹•ˆ€è€‰…Ñ¥Ù”ˆ¤ì(€€€ô((€€€ÁÕ‰±¥ŒÍÑ…Ñ¥ŒÙ½¥Õ¹ÑÉ…­I•µ½Ù•¡5¥¹•µ½¹É•…ÑÕÉ”Á½­•µ½¸¤ì(€€€€€€€¥˜€¡¥Í¹½Õ¹Ñ•È¡Á½­•µ½¸¤€˜˜Á½­•µ½¸¹±•Ù•°¥¹ÍÑ…¹•½˜M•ÉÙ•É1•Ù•°±•Ù•°¤(€€€€€€€€€€€]¥±‘¹½Õ¹Ñ•É…Ñ„¹•Ð¡±•Ù•°¤¹É•µ½Ù”¡½Ý¹•È¡Á½­•µ½¸¤°Á½­•µ½¸¹•ÑUU% ¤¤ì(€€€ô((€€€ÁÕ‰±¥ŒÍÑ…Ñ¥ŒÙ½¥Ñ¥­A±…å•È¡M•ÉÙ•ÉA±…å•ÈÁ±…å•È¤ì(€€€€€€€¥˜€ „¡Á±…å•È¹±•Ù•°¥¹ÍÑ…¹•½˜M•ÉÙ•É1•Ù•°±•Ù•°¤¤É•ÑÕÉ¸ì(€€€€€€€¥˜€ …½¹™¥1½…‘•¤±½…‘½¹™¥œ¡±•Ù•°¤ì(€€€€€€€±½¹œ¹½Ü€ô±•Ù•°¹•Ñ…µ•Q¥µ” ¤ì(€€€€€€€]¥±‘¹½Õ¹Ñ•É…Ñ„•¹½Õ¹Ñ•É…Ñ„€ô]¥±‘¹½Õ¹Ñ•É…Ñ„¹•Ð¡±•Ù•°¤ì(€€€€€€€¥¹Ð…Ñ¥Ù”€ô•¹½Õ¹Ñ•É…Ñ„¹½Õ¹Ð¡Á±…å•È¹•ÑUU% ¤°€‰…Ñ¥Ù”ˆ¤ì(€€€€€€€Ù…ÈÁ€ôÁ±…å•È¹•ÑA•ÉÍ¥ÍÑ•¹Ñ…Ñ„ ¤ì(€€€€€€€¥˜€¡¹½Ü€´Á¹•Ñ1½¹œ ‰5¥¹•µ½¹]¥±‘MÁ…Ý¹ÑÑ•µÁÐˆ¤€ð!-}%9QIY0¤É•ÑÕÉ¸ì(€€€€€€€Á¹ÁÕÑ1½¹œ ‰5¥¹•µ½¹]¥±‘MÁ…Ý¹ÑÑ•µÁÐˆ°¹½Ü¤ì(€€€€€€€¥˜€¡…Ñ¥Ù”€øô5a}Q%Y¤É•ÑÕÉ¸ì(€€€€€€€1¥ÍÐñA½­•MÁ•¥•Ì¹¹ÑÉäø…¹‘¥‘…Ñ•Ì€ôA½­•A±…å•É…Ñ„¹Õ¹±½­•¡Á±…å•È¤¹ÍÑÉ•…´ ¤(€€€€€€€€€€€€€€€€¹µ…À¡A½­•MÁ•¥•Ìèé•Ð¤¹™¥±Ñ•È¡©…Ù„¹ÕÑ¥°¹=‰©•ÑÌèé¹½¹9Õ±°¤(€€€€€€€€€€€€€€€€¹™¥±Ñ•È¡•¹ÑÉä€´ø5½‘¹Ñ¥Ñ¥•Ì¹MA%L¹½¹Ñ…¥¹Í-•ä¡•¹ÑÉä¹Í±Õœ ¤¤¤(€€€€€€€€€€€€€€€€¹Í½ÉÑ•¡½µÁ…É…Ñ½È¹½µÁ…É¥¹%¹Ð¡A½­•MÁ•¥•Ì¹¹ÑÉäèé¹Õµ‰•È¤¤¹Ñ½1¥ÍÐ ¤ì(€€€€€€€¥˜€¡…¹‘¥‘…Ñ•Ì¹¥ÍµÁÑä ¤¤É•ÑÕÉ¸ì(€€€€€€€€¼¼=¹”ÁÉ½‰…‰¥±¥ÑäÉ½±°É•ÁÉ•Í•¹ÑÌÑ¡¥Ì€ÌÀµÍ•½¹¡•¬¸A½Í¥Ñ¥½¸É•ÑÉ¥•Ì‰•±½Ü(€€€€€€€€¼¼½¹±ä±½½¬™½È„Í…™”Á±…”ìÑ¡•äµÕÍÐ¹½ÐµÕ±Ñ¥Á±äÑ¡”ÍÁ•¥•ÌÍÁ…Ý¸¡…¹”¸(€€€€€€€A½­•MÁ•¥•Ì¹¹ÑÉäÍÁ•¥•Ì€ô…¹‘¥‘…Ñ•Ì¹•Ð¡Á±…å•È¹•ÑI…¹‘½´ ¤¹¹•áÑ%¹Ð¡…¹‘¥‘…Ñ•Ì¹Í¥é” ¤¤¤ì(€€€€€€€‘½Õ‰±”¡…¹”€ôÍÁ•¥•Í¡…¹•Ì¹•Ñ=É•™…Õ±Ð¡ÍÁ•¥•Ì¹Í±Õœ ¤°É…É¥Ñå¡…¹•Ì¹•Ñ=É•™…Õ±Ð (€€€€€€€€€€€€€€€A½­•½¹½µä¹É•Í½±Ù•I…É¥Ñä¡ÍÁ•¥•Ì¹É…É¥Ñä ¤°€‰½µµ½¸ˆ¤°€¸ÀÕ¤¤ì(€€€€€€€¥˜€¡Á±…å•È¹•ÑI…¹‘½´ ¤¹¹•áÑ½Õ‰±” ¤€øô¡…¹”¤É•ÑÕÉ¸ì(€€€€€€€™½È€¡¥¹Ð¤€ô€Àì¤€ð€ÄÈì¤¬¬¤ì(€€€€€€€€€€€	±½­A½ÌÁ½Ì€ôÍ…µÁ±•A½Í¥Ñ¥½¸¡Á±…å•È°±•Ù•°°ÍÁ•¥•Ì¤ì(€€€€€€€€€€€¥˜€¡Á½Ì€ôô¹Õ±°ñð€…•¹Ù¥É½¹µ•¹Ñ±±½ÝÌ¡ÍÁ•¥•Ì°±•Ù•°°Á½Ì¤¤½¹Ñ¥¹Õ”ì(€€€€€€€€€€€¹Ñ¥ÑäÉ•…Ñ•€ô5½‘¹Ñ¥Ñ¥•Ì¹MA%L¹•Ð¡ÍÁ•¥•Ì¹Í±Õœ ¤¤¹•Ð ¤¹É•…Ñ”¡±•Ù•°¤ì(€€€€€€€€€€€¥˜€ „¡É•…Ñ•¥¹ÍÑ…¹•½˜5¥¹•µ½¹É•…ÑÕÉ”Á½­•µ½¸¤¤ì¥˜€¡É•…Ñ•€„ô¹Õ±°¤É•…Ñ•¹‘¥Í…É ¤ì½¹Ñ¥¹Õ”ìô(€€€€€€€€€€€Á½­•µ½¸¹µ½Ù•Q¼¡Á½Ì¹•Ñ` ¤€¬€¸Õ°Á½Ì¹•Ñd ¤°Á½Ì¹•Ñh ¤€¬€¸Õ°Á±…å•È¹•ÑI…¹‘½´ ¤¹¹•áÑ±½…Ð ¤€¨€ÌØÀ°€À¤ì(€€€€€€€€€€€¥˜€ …±•Ù•°¹¹½½±±¥Í¥½¸¡Á½­•µ½¸¤ñð€…Í…™•¹Ñ¥ÑåY½±Õµ”¡±•Ù•°°Á½­•µ½¸¤¤ìÁ½­•µ½¸¹‘¥Í…É ¤ì½¹Ñ¥¹Õ”ìô(€€€€€€€€€€€Á½­•µ½¸¹Í•ÑA½­•µ½¹1•Ù•°¡ÍÁ…Ý¹1•Ù•°¡ÍÁ•¥•Ì°Á±…å•È¹•ÑI…¹‘½´ ¤¤¤ì(€€€€€€€€€€€Ù…È‘…Ñ„€ôÁ½­•µ½¸¹•ÑA•ÉÍ¥ÍÑ•¹Ñ…Ñ„ ¤ì(€€€€€€€€€€€‘…Ñ„¹ÁÕÑ	½½±•…¸¡5I-H°ÑÉÕ”¤ì‘…Ñ„¹ÁÕÑUU%¡=]9H°Á±…å•È¹•ÑUU% ¤¤ì‘…Ñ„¹ÁÕÑMÑÉ¥¹œ¡MQQ°€‰…Ñ¥Ù”ˆ¤ì(€€€€€€€€€€€Á½­•µ½¸¹Í•Ñ]¥±‘¹½Õ¹Ñ•È¡ÑÉÕ”¤ì(€€€€€€€€€€€Á½­•µ½¸¹Í•Ñ]¥±‘¹½Õ¹Ñ•É=Ý¹•È¡Á±…å•È¹•ÑUU% ¤¤ì(€€€€€€€€€€€‘…Ñ„¹ÁÕÑ1½¹œ¡1MQ}!,°¹½Ü¤ì(€€€€€€€€€€€‘…Ñ„¹ÁÕÑ1½¹œ¡1MQ}%9}I9°¹½Ü¤ì(€€€€€€€€€€€¥˜€¡±•Ù•°¹…‘‘É•Í¡¹Ñ¥Ñä¡Á½­•µ½¸¤¤•¹½Õ¹Ñ•É…Ñ„¹ÁÕÐ¡Á±…å•È¹•ÑUU% ¤°Á½­•µ½¸¹•ÑUU% ¤°€‰…Ñ¥Ù”ˆ¤ì(€€€€€€€€€€€•±Í”Á½­•µ½¸¹‘¥Í…É ¤ì(€€€€€€€€€€€É•ÑÕÉ¸ì(€€€€€€€ô(€€€ô((€€€ÁÉ¥Ù…Ñ”ÍÑ…Ñ¥Œ	±½­A½ÌÍ…µÁ±•A½Í¥Ñ¥½¸¡M•ÉÙ•ÉA±…å•ÈÁ±…å•È°M•ÉÙ•É1•Ù•°±•Ù•°°A½­•MÁ•¥•Ì¹¹ÑÉäÍÁ•¥•Ì¤ì(€€€€€€€‰½½±•…¸…ÅÕ…Ñ¥Œ€ôMÁ•¥•Í	•¡…Ù¥½ÉAÉ½™¥±•Ì¹Ý…Ñ•É…Á…‰±”¡ÍÁ•¥•Ì¹Í±Õœ ¤¤ì(€€€€€€€¥¹Ðà€ôÁ±…å•È¹‰±½­A½Í¥Ñ¥½¸ ¤¹•Ñ` ¤€¬Á±…å•È¹•ÑI…¹‘½´ ¤¹¹•áÑ%¹Ð ÄÔÄ¤€´€ÜÔì(€€€€€€€¥¹Ðè€ôÁ±…å•È¹‰±½­A½Í¥Ñ¥½¸ ¤¹•Ñh ¤€¬Á±…å•È¹•ÑI…¹‘½´ ¤¹¹•áÑ%¹Ð ÄÔÄ¤€´€ÜÔì(€€€€€€€¥¹Ðä€ôÁ±…å•È¹‰±½­A½Í¥Ñ¥½¸ ¤¹•Ñd ¤€¬Á±…å•È¹•ÑI…¹‘½´ ¤¹¹•áÑ%¹Ð ÌÄ¤€´€ÄÔì(€€€€€€€	±½­A½ÌÁ½Ì€ô¹•Ü	±½­A½Ì¡à°ä°è¤ì(€€€€€€€¥˜€¡Á±…å•È¹‘¥ÍÑ…¹•Q½MÅÈ¡Y•ŒÌ¹…Ñ•¹Ñ•É=˜¡Á½Ì¤¤€ð€ØÐñð€…±•Ù•°¹¡…Í¡Õ¹­Ð¡Á½Ì¤¤É•ÑÕÉ¸¹Õ±°ì(€€€€€€€¥˜€ …±•Ù•°¹•Ñ	±½­MÑ…Ñ”¡Á½Ì¤¹•Ñ½±±¥Í¥½¹M¡…Á”¡±•Ù•°°Á½Ì¤¹¥ÍµÁÑä ¤¤É•ÑÕÉ¸¹Õ±°ì(€€€€€€€¥˜€¡±•Ù•°¹•Ñ	±½­MÑ…Ñ”¡Á½Ì¤¹¥Ì¡	±½­Ì¹1Y¤ñð±•Ù•°¹•Ñ	±½­MÑ…Ñ”¡Á½Ì¤¹¥Ì¡	±½­Ì¹%I¤(€€€€€€€€€€€€€€€ñð±•Ù•°¹•Ñ	±½­MÑ…Ñ”¡Á½Ì¤¹¥Ì¡	±½­Ì¹M=U1}%I¤¤É•ÑÕÉ¸¹Õ±°ì(€€€€€€€¥˜€¡…ÅÕ…Ñ¥Œ€ü€…±•Ù•°¹•Ñ±Õ¥‘MÑ…Ñ”¡Á½Ì¤¹¥Ì¡¹•Ð¹µ¥¹•É…™Ð¹Ñ…Ì¹±Õ¥‘Q…Ì¹]QH¤(€€€€€€€€€€€€€€€€è€…±•Ù•°¹•Ñ±Õ¥‘MÑ…Ñ”¡Á½Ì¤¹¥ÍµÁÑä ¤¤É•ÑÕÉ¸¹Õ±°ì(€€€€€€€É•ÑÕÉ¸Á½Ìì(€€€ô((€€€ÁÉ¥Ù…Ñ”ÍÑ…Ñ¥Œ‰½½±•…¸Í…™•¹Ñ¥ÑåY½±Õµ”¡M•ÉÙ•É1•Ù•°±•Ù•°°5¥¹•µ½¹É•…ÑÕÉ”Á½­•µ½¸¤ì(€€€€€€€	‰½à€ôÁ½­•µ½¸¹•Ñ	½Õ¹‘¥¹	½à ¤¹¥¹™±…Ñ” ´À¸ÀÅ¤ì(€€€€€€€¥¹Ðµ¥¹`€ô¹•Ð¹µ¥¹•É…™Ð¹ÕÑ¥°¹5Ñ ¹™±½½È¡‰½à¹µ¥¹`¤°µ…á`€ô¹•Ð¹µ¥¹•É…™Ð¹ÕÑ¥°¹5Ñ ¹™±½½È¡‰½à¹µ…á`¤ì(€€€€€€€¥¹Ðµ¥¹d€ô¹•Ð¹µ¥¹•É…™Ð¹ÕÑ¥°¹5Ñ ¹™±½½È¡‰½à¹µ¥¹d¤°µ…ád€ô¹•Ð¹·m»¶‰žËkºwµç[Ùš[\ËØ]\Ø\X›JÜXÚY\ËœÛYÊ
-JNÂˆYˆ
-\]X]XÊHÂˆ[Ø]\ˆHÂˆ›Üˆ
-[HLNÈHNÈ
-ÊÊH›Üˆ
-[ˆHLNÈˆHNÈŠÊÊBˆYˆ
-]™[™Ù]›ZYÝ]JÜË›Ù™œÙ]
-ŠJKš\Ê™]›Z[™XÜ˜YYÜË‘›ZYYÜË•ÐUTŠJHØ]\ŠÊÎÂˆ™]\›ˆØ]\ˆHNÂˆBˆYˆ
-]™[™Ù]›ZYÝ]JÜË˜™[ÝÊ
-JKš\Ê™]›Z[™XÜ˜YYÜË‘›ZYYÜË“UJJH™]\›ˆ˜[ÙNÂˆÝš[™ÈÛYÈHÜXÚY\ËœÛYÊ
-NÂˆYˆ
-ÛYË™\]X[Ê™Ù[ÙYHŠHÛYË™\]X[Ê™Ü˜]™[\ˆŠHÛYË™\]X[Ê™ÛÛ[HŠJBˆ™]\›ˆ]™[™Ù]›ØÚÔÝ]JÜË˜™[ÝÊ
-JKš\ÔÛÛY™[™\Š]™[ÜË˜™[ÝÊ
-JNÂˆYˆ
-ÛYË™\]X[Ê›Ù\ÚŠHÛYË™\]X[Ê™ÛÛÛHŠHÛYË™\]X[Êš[\[YHŠJBˆ™]\›ˆ]™[™Ù]›ØÚÔÝ]JÜË˜™[ÝÊ
-JKš\Ê›ØÚÜË‘ÔTÔ×Ð“ÐÒÊH]™[™Ù]›ØÚÔÝ]JÜË˜™[ÝÊ
-JKš\Ê›ØÚÜË‘‘T“ŠNÂˆYˆ
-ÛYË™\]X[Ê™Ø\ÝHŠHÛYË™\]X[Êš][\ˆŠHÛYË™\]X[Ê™Ù[™Ø\ˆŠJH™]\›ˆ]™[™Ù]X^ØØ[˜]ÐœšYÚ™\ÜÊÜÊHHÎÂˆ™]\›ˆ]™[™Ù]›ØÚÔÝ]JÜË˜™[ÝÊ
-JKš\ÔÛÛY™[™\Š]™[ÜË˜™[ÝÊ
-JNÂˆB‚ˆš]˜]HÝ]XÈ[Ü]Û“]™[
-ÚÙXÔÜXÚY\Ë‘[žHÜXÚY\Ë™]›Z[™XÜ˜Y][”˜[™ÛTÛÝ\˜ÙH˜[™ÛJHÂˆ[Z[ˆHÚ[Ø\\™T[\Ë›Z[š[][TÜ]Û“]™[
-ÜXÚY\ËœÛYÊ
-JNÂˆ[X^HX]›X^
-Z[‹X]›Z[ŠÌZ[ˆ
-ÈMJJNÂˆ™]\›ˆZ[ˆ
-È˜[™ÛK›™^[
-X^HZ[ˆ
-ÈJNÂˆB‚ˆX›XÈÝ]XÈ›ÛÛX[ˆØ[‘Y™X]
-Z[™[[ÛÜ™X]\™HÚ[Z[™[[ÛÜ™X]\™H]XÚÙ\ŠHÂˆURQÝÛ™\ˆHÝÛ™\ŠÚ[
-NÂˆYˆ
-Z\Ñ[˜ÛÝ[\ŠÚ[
-H\ÑÝÛ™Y
-Ú[
-HX]XÚÙ\‹š\Õ[YJ
-HÝÛ™\ˆOH[[ÝÛ™\‹™\]X[Ê]XÚÙ\‹™Ù]ÝÛ™\•URQ
+package br.com.petrickfaria.minemon.pokec;
 
-JJH™]\›ˆ˜[ÙNÂˆÙ\™\”^Y\ˆ^Y\ˆHÚ[›]™[[œÝ[˜Ù[ÙˆÙ\™\“]™[Ù\™\ˆÈÙ\™\‹™Ù]Ù\™\Š
-K™Ù]^Y\“\Ý
+import br.com.petrickfaria.minemon.entity.MinemonCreature;
+import br.com.petrickfaria.minemon.entity.SpeciesBehaviorProfiles;
+import br.com.petrickfaria.minemon.registry.ModEntities;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 
-K™Ù]^Y\ŠÝÛ™\ŠHˆ[ÂˆYˆ
-^Y\ˆOH[
-H™]\›ˆ˜[ÙNÂˆ™]\›ˆÚ[[˜ÛÝ[\‘]K™Ù]
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Locale;
+import java.util.UUID;
 
-Ù\™\“]™[
-HÚ[›]™[
-K˜ÛÝ[
-ÝÛ™\‹™ÝÛ™YŠHPVÑÕÓ‘QÂˆB‚ˆX›XÈÝ]XÈZ[™[[ÛÜ™X]\™HÚÙ[[Û]XÚÙ\Š™]›Z[™XÜ˜YÛÜ›™[XYÙ\ÛÝ\˜ÙK‘[XYÙTÛÝ\˜ÙHÛÝ\˜ÙJHÂˆYˆ
-ÛÝ\˜ÙK™Ù][]J
-H[œÝ[˜Ù[ÙˆZ[™[[ÛÜ™X]\™HÚÙ[[ÛŠH™]\›ˆÚÙ[[ÛŽÂˆYˆ
-ÛÝ\˜ÙK™Ù][]J
-H[œÝ[˜Ù[Ùˆœ‹˜ÛÛKœ]šXÚÙ˜\šXK›Z[™[[Û‹™[]K‘[[Y[[›Ú™XÝ[H›Ú™XÝ[Bˆ	‰ˆ›Ú™XÝ[K™Ù]ÝÛ™\Š
-H[œÝ[˜Ù[ÙˆZ[™[[ÛÜ™X]\™HÚÙ[[ÛŠH™]\›ˆÚÙ[[ÛŽÂˆ™]\›ˆ[ÂˆB‚ˆX›XÈÝ]XÈ›ÛÛX[ˆØ[‘[XYÙJZ[™[[ÛÜ™X]\™HÚ[™]›Z[™XÜ˜YÛÜ›™[XYÙ\ÛÝ\˜ÙK‘[XYÙTÛÝ\˜ÙHÛÝ\˜ÙJHÂˆZ[™[[ÛÜ™X]\™H]XÚÙ\ˆHÚÙ[[Û]XÚÙ\ŠÛÝ\˜ÙJNÂˆ™]\›ˆ]XÚÙ\ˆOH[	‰ˆØ[‘Y™X]
-Ú[]XÚÙ\ŠNÂˆB‚ˆX›XÈÝ]XÈ›ÛÛX[ˆ\ÑY™X]YØ\XÚ]JZ[™[[ÛÜ™X]\™HÚ[
-HÂˆURQÝÛ™\ˆHÝÛ™\ŠÚ[
-NÂˆYˆ
-ÝÛ™\ˆOH[JÚ[›]™[[œÝ[˜Ù[ÙˆÙ\™\“]™[]™[
-JH™]\›ˆ˜[ÙNÂˆÙ\™\”^Y\ˆ^Y\ˆH]™[™Ù]Ù\™\Š
-K™Ù]^Y\“\Ý
+/** Server authority for player-bound wild encounters. Encounter metadata lives on the PokÃ©mon entity. */
+public final class WildEncounterManager {
+    public enum CaptureResult { INVALID, FAILED, EXPIRED, CAPTURED }
+    private static final String MARKER = "MinemonWildEncounter";
+    private static final String OWNER = "MinemonEncounterOwner";
+    private static final String STATE = "MinemonEncounterState";
+    private static final String DOWNED_AT = "MinemonEncounterDownedAt";
+    private static final String LAST_IN_RANGE = "MinemonEncounterLastInRange";
+    private static final String REWARDED = "MinemonEncounterRewarded";
+    private static final String LAST_CHECK = "MinemonWildSpawnCheck";
+    private static final long CHECK_INTERVAL = 20L * 30L;
+    private static final long EXPIRY = 20L * 60L * 5L;
+    public static final int MAX_ACTIVE = 5, MAX_DOWNED = 3;
+    private static final List<String> RARITIES = List.of("common", "uncommon", "rare", "legendary", "mythic");
+    private static volatile java.util.Map<String, Double> rarityChances = java.util.Map.of(
+            "common", .04D, "uncommon", .015D, "rare", .005D, "legendary", .001D, "mythic", .0003D);
 
-K™Ù]^Y\ŠÝÛ™\ŠNÂˆ™]\›ˆ^Y\ˆOH[	‰ˆÚ[[˜ÛÝ[\‘]K™Ù]
-]™[
-K˜ÛÝ[
-ÝÛ™\‹™ÝÛ™YŠHPVÑÕÓ‘QÂˆB‚ˆX›XÈÝ]XÈ›ÛÛX[ˆ[\‘ÝÛ™Y
-Z[™[[ÛÜ™X]\™HÚ[™]›Z[™XÜ˜YÛÜ›™[XYÙ\ÛÝ\˜ÙK‘[XYÙTÛÝ\˜ÙHÛÝ\˜ÙJHÂˆZ[™[[ÛÜ™X]\™H]XÚÙ\ˆHÚÙ[[Û]XÚÙ\ŠÛÝ\˜ÙJNÂˆYˆ
-XØ[‘Y™X]
-Ú[]XÚÙ\ŠJH™]\›ˆ˜[ÙNÂˆ˜\ˆ]HHÚ[™Ù]\œÚ\Ý[]J
-NÂˆ]Kœ]Ýš[™ÊÕUK™ÝÛ™YŠNÈ]Kœ]Û™ÊÕÓ‘QÐUÚ[›]™[™Ù]Ø[YU[YJ
-JNÂˆ]Kœ][
-“Z[™[[Û•Ú[Ø\\™P][\È‹
-NÈ]Kœ][
-“Z[™[[Û•Ú[™X]È‹
-NÂˆÚ[[˜ÛÝ[\‘]K™Ù]
+    private static volatile java.util.Map<String, Double> speciesChances = java.util.Map.of();
+    private static volatile boolean configLoaded;
 
-Ù\™\“]™[
-HÚ[›]™[
-Kœ]
-ÝÛ™\ŠÚ[
-KÚ[™Ù]URQ
+    public static synchronized void loadConfig(ServerLevel level) {
+        Path file = level.getServer().getServerDirectory().toPath().resolve("config/minemon/wild-spawn.properties");
+        var values = new java.util.LinkedHashMap<String, Double>(rarityChances);
+        try {
+            Files.createDirectories(file.getParent());
+            if (!Files.exists(file)) {
+                var lines = List.of("# Chance per 30-second player check before environment modifiers.",
+                        "# Values are probabilities from 0 to 1; species can override with species.<slug>=value.",
+                        "rarity.common=0.04", "rarity.uncommon=0.015", "rarity.rare=0.005",
+                        "rarity.legendary=0.001", "rarity.mythic=0.0003");
+                Files.write(file, lines);
+            }
+            var rarity = new java.util.HashMap<String, Double>();
+            var species = new java.util.HashMap<String, Double>();
+            for (String line : Files.readAllLines(file)) {
+                String trimmed = line.strip();
+                if (trimmed.isEmpty() || trimmed.startsWith("#") || !trimmed.contains("=")) continue;
+                String[] pair = trimmed.split("=", 2);
+                try {
+                    double value = Double.parseDouble(pair[1].strip());
+                    if (!Double.isFinite(value) || value < 0 || value > 1) continue;
+                    String key = pair[0].strip().toLowerCase(Locale.ROOT);
+                    if (key.startsWith("rarity.")) rarity.put(key.substring(7), value);
+                    else if (key.startsWith("species.") && PokecSpecies.get(key.substring(8)) != null) species.put(key.substring(8), value);
+                } catch (NumberFormatException ignored) { }
+            }
+            for (String key : RARITIES) values.put(key, rarity.getOrDefault(key, values.get(key)));
+            rarityChances = java.util.Map.copyOf(values);
+            speciesChances = java.util.Map.copyOf(species);
+            configLoaded = true;
+        } catch (IOException error) {
+            throw new IllegalStateException("Unable to load wild-spawn config " + file, error);
+        }
+    }
+    public static boolean isEncounter(MinemonCreature pokemon) {
+        return pokemon.level.isClientSide ? pokemon.isWildEncounter() : pokemon.getPersistentData().getBoolean(MARKER);
+    }
+    public static boolean isDowned(MinemonCreature pokemon) {
+        return isEncounter(pokemon) && (pokemon.level.isClientSide ? pokemon.isWildEncounterDowned()
+                : "downed".equals(pokemon.getPersistentData().getString(STATE)));
+    }
+    public static UUID owner(MinemonCreature pokemon) {
+        var data = pokemon.getPersistentData();
+        return data.hasUUID(OWNER) ? data.getUUID(OWNER) : null;
+    }
 
-K™ÝÛ™YŠNÂˆÚ[œÙ]X[
-KŒŠNÈÚ[œÙ][˜ÛÝ[\‘ÝÛ™Y
-YJNÂˆÙ\™\”^Y\ˆ^Y\ˆHÚ[›]™[[œÝ[˜Ù[ÙˆÙ\™\“]™[Ù\™\ˆÈÙ\™\‹™Ù]Ù\™\Š
-K™Ù]^Y\“\Ý
+    public static void trackLoaded(MinemonCreature pokemon) {
+        if (!isEncounter(pokemon) || !(pokemon.level instanceof ServerLevel level)) return;
+        UUID owner = owner(pokemon);
+        pokemon.setWildEncounter(true);
+        pokemon.setWildEncounterOwner(owner);
+        pokemon.setWildEncounterDowned(isDowned(pokemon));
+        if (isDowned(pokemon)) pokemon.setEncounterDowned(true);
+        if (owner != null) WildEncounterData.get(level).put(owner, pokemon.getUUID(), isDowned(pokemon) ? "downed" : "active");
+    }
 
-K™Ù]^Y\ŠÝÛ™\ŠÚ[
-JHˆ[ÂˆYˆ
-^Y\ˆOH[
-HÚÙXÔ^Y\‘]K˜Y˜Z[™\–
-^Y\‹˜Z[™\”›ÙÜ™\ÜÚ[Û‹œÚÙ[[Û–
-Ú[™Ù]ÜXÚY\ÔÛYÊ
-KÚ[™Ù]ÚÙ[[Û“]™[
+    public static void untrackRemoved(MinemonCreature pokemon) {
+        if (isEncounter(pokemon) && pokemon.level instanceof ServerLevel level)
+            WildEncounterData.get(level).remove(owner(pokemon), pokemon.getUUID());
+    }
 
-JJNÂˆ™]\›ˆYNÂˆB‚ˆX›XÈÝ]XÈ›ÚY™]Ø\™[™\ØØ\™
-Ù\™\“]™[]™[Z[™[[ÛÜ™X]\™HÚÙ[[Û‹[\˜Ù[
-HÂˆ˜\ˆ]HHÚÙ[[Û‹™Ù]\œÚ\Ý[]J
-NÂˆYˆ
-Z\Ñ[˜ÛÝ[\ŠÚÙ[[ÛŠH]K™Ù]›ÛÛX[Š‘UÐT‘Q
-JHÈÚÙ[[Û‹™\ØØ\™
+    public static void tickPlayer(ServerPlayer player) {
+        if (!(player.level instanceof ServerLevel level)) return;
+        if (!configLoaded) loadConfig(level);
+        long now = level.getGameTime();
+        WildEncounterData encounterData = WildEncounterData.get(level);
+        int active = encounterData.count(player.getUUID(), "active");
+        var pd = player.getPersistentData();
+        if (now - pd.getLong("MinemonWildSpawnAttempt") < CHECK_INTERVAL) return;
+        pd.putLong("MinemonWildSpawnAttempt", now);
+        if (active >= MAX_ACTIVE) return;
+        List<PokecSpecies.Entry> candidates = PokecPlayerData.unlocked(player).stream()
+                .map(PokecSpecies::get).filter(java.util.Objects::nonNull)
+                .filter(entry -> ModEntities.SPECIES.containsKey(entry.slug()))
+                .sorted(Comparator.comparingInt(PokecSpecies.Entry::number)).toList();
+        if (candidates.isEmpty()) return;
+        // One probability roll represents this 30-second check. Position retries below
+        // only look for a safe place; they must not multiply the species spawn chance.
+        PokecSpecies.Entry species = candidates.get(player.getRandom().nextInt(candidates.size()));
+        double chance = speciesChances.getOrDefault(species.slug(), rarityChances.getOrDefault(
+                PokecEconomy.resolveRarity(species.rarity(), "common"), .05D));
+        if (player.getRandom().nextDouble() >= chance) return;
+        for (int i = 0; i < 12; i++) {
+            BlockPos pos = samplePosition(player, level, species);
+            if (pos == null || !environmentAllows(species, level, pos)) continue;
+            Entity created = ModEntities.SPECIES.get(species.slug()).get().create(level);
+            if (!(created instanceof MinemonCreature pokemon)) { if (created != null) created.discard(); continue; }
+            pokemon.moveTo(pos.getX() + .5D, pos.getY(), pos.getZ() + .5D, player.getRandom().nextFloat() * 360, 0);
+            if (!level.noCollision(pokemon) || !safeEntityVolume(level, pokemon)) { pokemon.discard(); continue; }
+            pokemon.setPokemonLevel(spawnLevel(species, player.getRandom()));
+            var data = pokemon.getPersistentData();
+            data.putBoolean(MARKER, true); data.putUUID(OWNER, player.getUUID()); data.putString(STATE, "active");
+            pokemon.setWildEncounter(true);
+            pokemon.setWildEncounterOwner(player.getUUID());
+            data.putLong(LAST_CHECK, now);
+            data.putLong(LAST_IN_RANGE, now);
+            if (level.addFreshEntity(pokemon)) encounterData.put(player.getUUID(), pokemon.getUUID(), "active");
+            else pokemon.discard();
+            return;
+        }
+    }
 
-NÈ™]\›ŽÈBˆ]Kœ]›ÛÛX[Š‘UÐT‘QYJNÂˆÚ[[˜ÛÝ[\‘]K™Ù]
-]™[
-Kœ™[[Ý™JÝÛ™\ŠÚÙ[[ÛŠKÚÙ[[Û‹™Ù]URQ
+    private static BlockPos samplePosition(ServerPlayer player, ServerLevel level, PokecSpecies.Entry species) {
+        boolean aquatic = SpeciesBehaviorProfiles.waterCapable(species.slug());
+        int x = player.blockPosition().getX() + player.getRandom().nextInt(151) - 75;
+        int z = player.blockPosition().getZ() + player.getRandom().nextInt(151) - 75;
+        int y = player.blockPosition().getY() + player.getRandom().nextInt(31) - 15;
+        BlockPos pos = new BlockPos(x, y, z);
+        if (player.distanceToSqr(Vec3.atCenterOf(pos)) < 64 || !level.hasChunkAt(pos)) return null;
+        if (!level.getBlockState(pos).getCollisionShape(level, pos).isEmpty()) return null;
+        if (level.getBlockState(pos).is(Blocks.LAVA) || level.getBlockState(pos).is(Blocks.FIRE)
+                || level.getBlockState(pos).is(Blocks.SOUL_FIRE)) return null;
+        if (aquatic ? !level.getFluidState(pos).is(net.minecraft.tags.FluidTags.WATER)
+                : !level.getFluidState(pos).isEmpty()) return null;
+        return pos;
+    }
 
-JNÂˆ˜\ˆ™]šY]ÈHÚÙ[[Û”ÛÝ[ÛÛ™\œÚ[Û‹œ™]šY]ÊÚÙ[[Û‹™Ù]ÜXÚY\ÔÛYÊ
-KÚÙ[[Û‹™Ù]ÚÙ[[Û“]™[
+    private static boolean safeEntityVolume(ServerLevel level, MinemonCreature pokemon) {
+        AABB box = pokemon.getBoundingBox().inflate(-0.01D);
+        int minX = net.minecraft.util.Mth.floor(box.minX), maxX = net.minecraft.util.Mth.floor(box.maxX);
+        int minY = net.minecraft.util.Mth.floor(box.minY), maxY = net.minecraft.util.Mth.floor(box.maxY);
+        int minZ = net.minecraft.util.Mth.floor(box.minZ), maxZ = net.minecraft.util.Mth.floor(box.maxZ);
+        for (BlockPos pos : BlockPos.betweenClosed(minX, minY, minZ, maxX, maxY, maxZ)) {
+            if (!level.hasChunkAt(pos)) return false;
+            if (level.getFluidState(pos).is(net.minecraft.tags.FluidTags.LAVA)
+                    || level.getBlockState(pos).is(Blocks.FIRE) || level.getBlockState(pos).is(Blocks.SOUL_FIRE)) return false;
+        }
+        return true;
+    }
 
-JNÂˆYˆ
-™]šY]ÈOH[	‰ˆ™]šY]ËœÛÝ[\J
-HOH[
-HÂˆ[[[Ý[HÚ[Ø\\™T[\ËœÛÝ[Ê™]šY]Ë˜˜\ÙJ
-K\˜Ù[
-NÂˆ˜\ˆ][HHœ‹˜ÛÛKœ]šXÚÙ˜\šXK›Z[™[[Û‹œ™YÚ\ÝžK“[Ù][\Ë”ÓÕSË™Ù]
-™]šY]ËœÛÝ[\J
-KšY
+    private static boolean environmentAllows(PokecSpecies.Entry species, ServerLevel level, BlockPos pos) {
+        boolean aquatic = SpeciesBehaviorProfiles.waterCapable(species.slug());
+        if (aquatic) {
+            int water = 0;
+            for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++)
+                if (level.getFluidState(pos.offset(dx, 0, dz)).is(net.minecraft.tags.FluidTags.WATER)) water++;
+            return water >= 5;
+        }
+        if (level.getFluidState(pos.below()).is(net.minecraft.tags.FluidTags.LAVA)) return false;
+        String slug = species.slug();
+        if (slug.equals("geodude") || slug.equals("graveler") || slug.equals("golem"))
+            return level.getBlockState(pos.below()).isSolidRender(level, pos.below());
+        if (slug.equals("oddish") || slug.equals("gloom") || slug.equals("vileplume"))
+            return level.getBlockState(pos.below()).is(Blocks.GRASS_BLOCK) || level.getBlockState(pos.below()).is(Blocks.FERN);
+        if (slug.equals("gastly") || slug.equals("haunter") || slug.equals("gengar")) return level.getMaxLocalRawBrightness(pos) <= 7;
+        return level.getBlockState(pos.below()).isSolidRender(level, pos.below());
+    }
 
-JNÂˆYˆ
-][HOH[	‰ˆ[[Ý[ˆ
-H]™[˜Yœ™\Ú[]J™]È™]›Z[™XÜ˜YÛÜ›™[]Kš][K’][Q[]J]™[ˆÚÙ[[Û‹™Ù]
+    private static int spawnLevel(PokecSpecies.Entry species, net.minecraft.util.RandomSource random) {
+        int min = WildCaptureRules.minimumSpawnLevel(species.slug());
+        int max = Math.max(min, Math.min(30, min + 15));
+        return min + random.nextInt(max - min + 1);
+    }
 
-KÚÙ[[Û‹™Ù]J
-KÚÙ[[Û‹™Ù]Š
-K™]È™]›Z[™XÜ˜YÛÜ›š][K’][TÝXÚÊ][K™Ù]
+    public static boolean canDefeat(MinemonCreature wild, MinemonCreature attacker) {
+        UUID owner = owner(wild);
+        if (!isEncounter(wild) || isDowned(wild) || !attacker.isTame() || owner == null || !owner.equals(attacker.getOwnerUUID())) return false;
+        ServerPlayer player = wild.level instanceof ServerLevel server ? server.getServer().getPlayerList().getPlayer(owner) : null;
+        if (player == null) return false;
+        return WildEncounterData.get((ServerLevel) wild.level).count(owner, "downed") < MAX_DOWNED;
+    }
 
-K[[Ý[
-JJNÂˆBˆÚÙ[[Û‹™\ØØ\™
+    public static MinemonCreature pokemonAttacker(net.minecraft.world.damagesource.DamageSource source) {
+        if (source.getEntity() instanceof MinemonCreature pokemon) return pokemon;
+        if (source.getEntity() instanceof br.com.petrickfaria.minemon.entity.ElementalProjectile projectile
+                && projectile.getOwner() instanceof MinemonCreature pokemon) return pokemon;
+        return null;
+    }
 
-NÂˆB‚ˆÊŠˆ[˜ÛÝ[\ˆY™XÞXÛH\Èš]™[ˆžHHØYY[]KÛÈ›ÈÚ[šÜÈ\™H›Ü˜ÙK[ØYYˆ
-‹ÂˆX›XÈÝ]XÈ›ÚYXÚÑ[˜ÛÝ[\ŠZ[™[[ÛÜ™X]\™HÚÙ[[ÛŠHÂˆYˆ
-ÚÙ[[Û‹›]™[š\ÐÛY[ÚYHZ\Ñ[˜ÛÝ[\ŠÚÙ[[ÛŠHJÚÙ[[Û‹›]™[[œÝ[˜Ù[ÙˆÙ\™\“]™[]™[
-JH™]\›ŽÂˆ˜\ˆ]HHÚÙ[[Û‹™Ù]\œÚ\Ý[]J
-NÂˆÛ™È›ÝÈH]™[™Ù]Ø[YU[YJ
-NÂˆURQÝÛ™\ˆHÝÛ™\ŠÚÙ[[ÛŠNÂˆÙ\™\”^Y\ˆ^Y\ˆHÝÛ™\ˆOH[È[ˆ]™[™Ù]Ù\™\Š
-K™Ù]^Y\“\Ý
+    public static boolean canDamage(MinemonCreature wild, net.minecraft.world.damagesource.DamageSource source) {
+        MinemonCreature attacker = pokemonAttacker(source);
+        return attacker != null && canDefeat(wild, attacker);
+    }
 
-K™Ù]^Y\ŠÝÛ™\ŠNÂˆYˆ
-\ÑÝÛ™Y
-ÚÙ[[ÛŠJHÂˆYˆ
-›ÝÈH]K™Ù]Û™ÊÕÓ‘QÐU
-HHVT–JH™]Ø\™[™\ØØ\™
-]™[ÚÙ[[Û‹JNÂˆ™]\›ŽÂˆBˆ›ÛÛX[ˆ[”˜[™ÙHH^Y\ˆOH[	‰ˆ^Y\‹›]™[OH]™[ˆ	‰ˆX]˜XœÊ^Y\‹™Ù]
+    public static boolean hasDefeatedCapacity(MinemonCreature wild) {
+        UUID owner = owner(wild);
+        if (owner == null || !(wild.level instanceof ServerLevel level)) return false;
+        ServerPlayer player = level.getServer().getPlayerList().getPlayer(owner);
+        return player != null && WildEncounterData.get(level).count(owner, "downed") < MAX_DOWNED;
+    }
 
-HHÚÙ[[Û‹™Ù]
+    public static boolean enterDowned(MinemonCreature wild, net.minecraft.world.damagesource.DamageSource source) {
+        MinemonCreature attacker = pokemonAttacker(source);
+        if (!canDefeat(wild, attacker)) return false;
+        var data = wild.getPersistentData();
+        data.putString(STATE, "downed"); data.putLong(DOWNED_AT, wild.level.getGameTime());
+        data.putInt("MinemonWildCaptureAttempts", 0); data.putInt("MinemonWildTreats", 0);
+        WildEncounterData.get((ServerLevel) wild.level).put(owner(wild), wild.getUUID(), "downed");
+        wild.setHealth(1.0F); wild.setEncounterDowned(true);
+        ServerPlayer player = wild.level instanceof ServerLevel server ? server.getServer().getPlayerList().getPlayer(owner(wild)) : null;
+        if (player != null) PokecPlayerData.addTrainerXp(player, TrainerProgression.pokemonXp(wild.getSpeciesSlug(), wild.getPokemonLevel()));
+        return true;
+    }
 
-JHHÍKŒˆ	‰ˆX]˜XœÊ^Y\‹™Ù]Š
-HHÚÙ[[Û‹™Ù]Š
-JHHÍKŒˆ	‰ˆX]˜XœÊ^Y\‹™Ù]J
-HHÚÙ[[Û‹™Ù]J
-JHHMKŒÂˆYˆ
-[”˜[™ÙJH]Kœ]Û™ÊTÕÒS—ÔS‘ÑK›ÝÊNÂˆ[ÙHYˆ
-›ÝÈH]K™Ù]Û™ÊTÕÒS—ÔS‘ÑJHHVT–JHÂˆÚ[[˜ÛÝ[\‘]K™Ù]
-]™[
-Kœ™[[Ý™JÝÛ™\‹ÚÙ[[Û‹™Ù]URQ
+    public static void rewardAndDiscard(ServerLevel level, MinemonCreature pokemon, int percent) {
+        var data = pokemon.getPersistentData();
+        if (!isEncounter(pokemon) || data.getBoolean(REWARDED)) { pokemon.discard(); return; }
+        data.putBoolean(REWARDED, true);
+        WildEncounterData.get(level).remove(owner(pokemon), pokemon.getUUID());
+        var preview = PokemonSoulConversion.preview(pokemon.getSpeciesSlug(), pokemon.getPokemonLevel());
+        if (preview != null && preview.soulType() != null) {
+            int amount = WildCaptureRules.souls(preview.base(), percent);
+            var item = br.com.petrickfaria.minemon.registry.ModItems.SOULS.get(preview.soulType().id());
+            if (item != null && amount > 0) level.addFreshEntity(new net.minecraft.world.entity.item.ItemEntity(level,
+                    pokemon.getX(), pokemon.getY(), pokemon.getZ(), new net.minecraft.world.item.ItemStack(item.get(), amount)));
+        }
+        pokemon.discard();
+    }
 
-JNÂˆÚÙ[[Û‹™\ØØ\™
+    /** Encounter lifecycle is driven by the loaded entity, so no chunks are force-loaded. */
+    public static void tickEncounter(MinemonCreature pokemon) {
+        if (pokemon.level.isClientSide || !isEncounter(pokemon) || !(pokemon.level instanceof ServerLevel level)) return;
+        var data = pokemon.getPersistentData();
+        long now = level.getGameTime();
+        UUID owner = owner(pokemon);
+        ServerPlayer player = owner == null ? null : level.getServer().getPlayerList().getPlayer(owner);
+        if (isDowned(pokemon)) {
+            if (now - data.getLong(DOWNED_AT) >= EXPIRY) rewardAndDiscard(level, pokemon, 25);
+            return;
+        }
+        boolean inRange = player != null && player.level == level
+                && Math.abs(player.getX() - pokemon.getX()) <= 75.0D
+                && Math.abs(player.getZ() - pokemon.getZ()) <= 75.0D
+                && Math.abs(player.getY() - pokemon.getY()) <= 15.0D;
+        if (inRange) data.putLong(LAST_IN_RANGE, now);
+        else if (now - data.getLong(LAST_IN_RANGE) >= EXPIRY) {
+            WildEncounterData.get(level).remove(owner, pokemon.getUUID());
+            pokemon.discard();
+        }
+    }
 
-NÂˆBˆB‚ˆÊŠˆØ[YÛ›HžHHÙ\™\ˆÚ[ˆHÝÛ™\ˆ\Ù\È[ˆ[\H˜[ÛˆZ\ˆÝÛ™Y[˜ÛÝ[\‹ˆ
-‹ÂˆX›XÈÝ]XÈØ\\™T™\Ý[][\Ø\\™JZ[™[[ÛÜ™X]\™HÚÙ[[Û‹Ù\™\”^Y\ˆ^Y\ŠHÂˆYˆ
-Z\ÑÝÛ™Y
-ÚÙ[[ÛŠH\^Y\‹™Ù]URQ
+    /** Called only by the server when the owner uses an empty ball on their downed encounter. */
+    public static CaptureResult attemptCapture(MinemonCreature pokemon, ServerPlayer player) {
+        if (!isDowned(pokemon) || !player.getUUID().equals(owner(pokemon))
+                || player.distanceToSqr(pokemon) > 36.0D) return CaptureResult.INVALID;
+        var data = pokemon.getPersistentData();
+        int attempts = Math.max(0, data.getInt("MinemonWildCaptureAttempts"));
+        if (attempts >= WildCaptureRules.MAX_ATTEMPTS) return CaptureResult.INVALID;
+        int next = attempts + 1;
+        data.putInt("MinemonWildCaptureAttempts", next);
+        double chance = WildCaptureRules.chance(pokemon.getPokemonRarity(), data.getInt("MinemonWildTreats"));
+        if (player.getRandom().nextDouble() < chance) {
+            double captureXp = TrainerProgression.pokemonXp(pokemon.getSpeciesSlug(), pokemon.getPokemonLevel()) * .25D;
+            player.awardStat(net.minecraft.stats.Stats.ITEM_USED.get(br.com.petrickfaria.minemon.registry.ModItems.POKEBALL.get()));
+            pokemon.tame(player);
+            pokemon.setEncounterDowned(false);
+            pokemon.setWildEncounter(false);
+            pokemon.setWildEncounterOwner(null);
+            pokemon.setHealth(pokemon.getMaxHealth());
+            data.remove(MARKER); data.remove(OWNER); data.remove(STATE); data.remove(DOWNED_AT); data.remove(REWARDED);
+            return CaptureResult.CAPTURED;
+        }
+        if (next >= WildCaptureRules.MAX_ATTEMPTS) {
+            rewardAndDiscard((ServerLevel) pokemon.level, pokemon, 50);
+            return CaptureResult.EXPIRED;
+        }
+        return CaptureResult.FAILED;
+    }
 
-K™\]X[ÊÝÛ™\ŠÚÙ[[ÛŠJBˆ^Y\‹™\Ý[˜ÙUÔÜ\ŠÚÙ[[ÛŠHˆÍ‹Œ
-H™]\›ˆØ\\™T™\Ý[’S•SQÂˆ˜\ˆ]HHÚÙ[[Û‹™Ù]\œÚ\Ý[]J
-NÂˆ[][\ÈHX]›X^
-]K™Ù][
-“Z[™[[Û•Ú[Ø\\™P][\ÈŠJNÂˆYˆ
-][\ÈHÚ[Ø\\™T[\Ë“PVÐUSTÊH™]\›ˆØ\\™T™\Ý[’S•SQÂˆ[™^H][\È
-ÈNÂˆ]Kœ][
-“Z[™[[Û•Ú[Ø\\™P][\È‹™^
-NÂˆÝX›HÚ[˜ÙHHÚ[Ø\\™T[\Ë˜Ú[˜ÙJÚÙ[[Û‹™Ù]ÚÙ[[Û”˜\š]J
-K]K™Ù][
-“Z[™[[Û•Ú[™X]ÈŠJNÂˆYˆ
-^Y\‹™Ù]˜[™ÛJ
-K›™^ÝX›J
-HÚ[˜ÙJHÂˆÝX›HØ\\™VH˜Z[™\”›ÙÜ™\ÜÚ[Û‹œÚÙ[[Û–
-ÚÙ[[Û‹™Ù]ÜXÚY\ÔÛYÊ
-KÚÙ[[Û‹™Ù]ÚÙ[[Û“]™[
+    public static void finishCapture(MinemonCreature pokemon, ServerPlayer player) {
+        PokecPlayerData.addTrainerXp(player, TrainerProgression.pokemonXp(pokemon.getSpeciesSlug(), pokemon.getPokemonLevel()) * .25D);
+        var data = pokemon.getPersistentData();
+        data.remove("MinemonWildCaptureAttempts"); data.remove("MinemonWildTreats");
+        WildEncounterData.get((ServerLevel) pokemon.level).remove(player.getUUID(), pokemon.getUUID());
+    }
 
-JH
-ˆŒQÂˆ^Y\‹˜]Ø\™Ý]
-™]›Z[™XÜ˜YœÝ]Ë”Ý]Ë’USWÕTÑQ™Ù]
-œ‹˜ÛÛKœ]šXÚÙ˜\šXK›Z[™[[Û‹œ™YÚ\ÝžK“[Ù][\Ë”ÒÑPS™Ù]
+    public static void restoreCaptureAfterStorageFailure(MinemonCreature pokemon, ServerPlayer player) {
+        pokemon.setTame(false);
+        pokemon.setOwnerUUID(null);
+        pokemon.getPersistentData().putBoolean(MARKER, true);
+        pokemon.getPersistentData().putUUID(OWNER, player.getUUID());
+        pokemon.getPersistentData().putString(STATE, "downed");
+        pokemon.setEncounterDowned(true);
+    }
 
-JJNÂˆÚÙ[[Û‹[YJ^Y\ŠNÂˆÚÙ[[Û‹œÙ][˜ÛÝ[\‘ÝÛ™Y
-˜[ÙJNÂˆÚÙ[[Û‹œÙ]Ú[[˜ÛÝ[\Š˜[ÙJNÂˆÚÙ[[Û‹œÙ]Ú[[˜ÛÝ[\“ÝÛ™\Š[
-NÂˆÚÙ[[Û‹œÙ]X[
-ÚÙ[[Û‹™Ù]X^X[
+    public static boolean offerTreat(MinemonCreature pokemon, ServerPlayer player, net.minecraft.world.InteractionHand hand) {
+        if (!isDowned(pokemon) || !player.getUUID().equals(owner(pokemon)) || player.distanceToSqr(pokemon) > 36.0D) return false;
+        var stack = player.getItemInHand(hand);
+        if (!(stack.getItem() instanceof br.com.petrickfaria.minemon.item.PokemonTreatItem) || stack.isEmpty()) return false;
+        var data = pokemon.getPersistentData();
+        int count = Math.max(0, data.getInt("MinemonWildTreats"));
+        if (count >= WildCaptureRules.MAX_TREATS) return false;
+        data.putInt("MinemonWildTreats", count + 1);
+        if (!player.getAbilities().instabuild) stack.shrink(1);
+        return true;
+    }
 
-JNÂˆ]Kœ™[[Ý™JPT’ÑTŠNÈ]Kœ™[[Ý™JÕÓ‘TŠNÈ]Kœ™[[Ý™JÕUJNÈ]Kœ™[[Ý™JÕÓ‘QÐU
-NÈ]Kœ™[[Ý™J‘UÐT‘Q
-NÂˆ™]\›ˆØ\\™T™\Ý[ÐTT‘QÂˆBˆYˆ
-™^HÚ[Ø\\™T[\Ë“PVÐUSTÊHÂˆ™]Ø\™[™\ØØ\™
+    public static boolean loot(MinemonCreature pokemon, ServerPlayer player) {
+        if (!isDowned(pokemon) || !player.getUUID().equals(owner(pokemon)) || player.distanceToSqr(pokemon) > 36.0D) return false;
+        rewardAndDiscard((ServerLevel) pokemon.level, pokemon, 75);
+        return true;
+    }
 
-Ù\™\“]™[
-HÚÙ[[Û‹›]™[ÚÙ[[Û‹L
-NÂˆ™]\›ˆØ\\™T™\Ý[‘VT‘QÂˆBˆ™]\›ˆØ\\™T™\Ý[‘RSQÂˆB‚ˆX›XÈÝ]XÈ›ÚYš[š\ÚØ\\™JZ[™[[ÛÜ™X]\™HÚÙ[[Û‹Ù\™\”^Y\ˆ^Y\ŠHÂˆÚÙXÔ^Y\‘]K˜Y˜Z[™\–
-^Y\‹˜Z[™\”›ÙÜ™\ÜÚ[Û‹œÚÙ[[Û–
-ÚÙ[[Û‹™Ù]ÜXÚY\ÔÛYÊ
-KÚÙ[[Û‹™Ù]ÚÙ[[Û“]™[
-
-JH
-ˆŒQ
-NÂˆ˜\ˆ]HHÚÙ[[Û‹™Ù]\œÚ\Ý[]J
-NÂˆ]Kœ™[[Ý™J“Z[™[[Û•Ú[Ø\\™P][\ÈŠNÈ]Kœ™[[Ý™J“Z[™[[Û•Ú[™X]ÈŠNÂˆÚ[[˜ÛÝ[\‘]K™Ù]
-
-Ù\™\“]™[
-HÚÙ[[Û‹›]™[
-Kœ™[[Ý™J^Y\‹™Ù]URQ
-
-KÚÙ[[Û‹™Ù]URQ
-
-JNÂˆB‚ˆX›XÈÝ]XÈ›ÚY™\ÝÜ™PØ\\™PY\”ÝÜ˜YÙQ˜Z[\™JZ[™[[ÛÜ™X]\™HÚÙ[[Û‹Ù\™\”^Y\ˆ^Y\ŠHÂˆÚÙ[[Û‹œÙ][YJ˜[ÙJNÂˆÚÙ[[Û‹œÙ]ÝÛ™\•URQ
-[
-NÂˆÚÙ[[Û‹™Ù]\œÚ\Ý[]J
-Kœ]›ÛÛX[ŠPT’ÑT‹YJNÂˆÚÙ[[Û‹™Ù]\œÚ\Ý[]J
-Kœ]URQ
-ÕÓ‘T‹^Y\‹™Ù]URQ
-
-JNÂˆÚÙ[[Û‹™Ù]\œÚ\Ý[]J
-Kœ]Ýš[™ÊÕUK™ÝÛ™YŠNÂˆÚÙ[[Û‹œÙ][˜ÛÝ[\‘ÝÛ™Y
-YJNÂˆB‚ˆX›XÈÝ]XÈ›ÛÛX[ˆÙ™™\•™X]
-Z[™[[ÛÜ™X]\™HÚÙ[[Û‹Ù\™\”^Y\ˆ^Y\‹™]›Z[™XÜ˜YÛÜ›’[\˜XÝ[Û’[™[™
-HÂˆYˆ
-Z\ÑÝÛ™Y
-ÚÙ[[ÛŠH\^Y\‹™Ù]URQ
-
-K™\]X[ÊÝÛ™\ŠÚÙ[[ÛŠJH^Y\‹™\Ý[˜ÙUÔÜ\ŠÚÙ[[ÛŠHˆÍ‹Œ
-H™]\›ˆ˜[ÙNÂˆ˜\ˆÝXÚÈH^Y\‹™Ù]][R[’[™
-[™
-NÂˆYˆ
-JÝXÚË™Ù]][J
-H[œÝ[˜Ù[Ùˆœ‹˜ÛÛKœ]šXÚÙ˜\šXK›Z[™[[Û‹š][K”ÚÙ[[Û•™X]][JHÝXÚËš\Ñ[\J
-JH™]\›ˆ˜[ÙNÂˆ˜\ˆ]HHÚÙ[[Û‹™Ù]\œÚ\Ý[]J
-NÂˆ[ÛÝ[HX]›X^
-]K™Ù][
-“Z[™[[Û•Ú[™X]ÈŠJNÂˆYˆ
-ÛÝ[HÚ[Ø\\™T[\Ë“PVÕ‘PUÊH™]\›ˆ˜[ÙNÂˆ]Kœ][
-“Z[™[[Û•Ú[™X]È‹ÛÝ[
-ÈJNÂˆYˆ
-\^Y\‹™Ù]Xš[]Y\Ê
-Kš[œÝXZ[
-HÝXÚËœÚš[šÊJNÂˆ™]\›ˆYNÂˆB‚ˆX›XÈÝ]XÈ›ÛÛX[ˆÛÝ
-Z[™[[ÛÜ™X]\™HÚÙ[[Û‹Ù\™\”^Y\ˆ^Y\ŠHÂˆYˆ
-Z\ÑÝÛ™Y
-ÚÙ[[ÛŠH\^Y\‹™Ù]URQ
-
-K™\]X[ÊÝÛ™\ŠÚÙ[[ÛŠJH^Y\‹™\Ý[˜ÙUÔÜ\ŠÚÙ[[ÛŠHˆÍ‹Œ
-H™]\›ˆ˜[ÙNÂˆ™]Ø\™[™\ØØ\™
-
-Ù\™\“]™[
-HÚÙ[[Û‹›]™[ÚÙ[[Û‹ÍJNÂˆ™]\›ˆYNÂˆB‚ˆš]˜]HÚ[[˜ÛÝ[\“X[˜YÙ\Š
-HÈBŸB
+    private WildEncounterManager() { }
+}

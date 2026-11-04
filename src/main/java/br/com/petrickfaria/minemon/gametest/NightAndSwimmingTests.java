@@ -288,7 +288,10 @@ public final class NightAndSwimmingTests {
         mixed.forEach(m->check(h,m.naturalCycle().ticks()>=clocks.get(m),"Dawn must resume saved clock"));
         awaitFlightResume(h,mixed,clocks,200,new ArrayList<>());
        },30,"All night sleepers must wake at dawn");
-      },180,"After combat, a creature must return to sleep while still night");
+      },180,()->"After combat, a creature must return to sleep while still night; sleeping="+ground.isSleeping()
+          +",night="+ground.isNightResting()+",target="+ground.getTarget()
+          +",lastHurt="+ground.getLastHurtByMob()+",pos="+ground.position()+",onGround="+ground.isOnGround()
+          +",noAI="+ground.isNoAi()+",time="+level.getDayTime());
      },150,"Woken creature must physically retaliate using melee AI");
     });
    },350,()->"Night must settle ground/mixed creatures on land and air-only creatures in a one-block hover; mixed="
