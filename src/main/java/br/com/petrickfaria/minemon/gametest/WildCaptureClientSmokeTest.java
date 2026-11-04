@@ -135,7 +135,15 @@ final class WildCaptureClientSmokeTest {
             done = true;
             mc.execute(mc::stop);
         } catch (Exception failure) {
-            throw new IllegalStateException("Wild capture persistence validation failed", failure);
+            try {
+                Files.writeString(Path.of("run", "wild-capture-reopen-" + reopenIndex + ".txt"),
+                        "FAIL CAPTURE REOPEN " + reopenIndex + ": " + failure + "\\n");
+            } catch (Exception reportFailure) {
+                failure.addSuppressed(reportFailure);
+            }
+            failure.printStackTrace();
+            done = true;
+            mc.execute(mc::stop);
         }
     }
 
