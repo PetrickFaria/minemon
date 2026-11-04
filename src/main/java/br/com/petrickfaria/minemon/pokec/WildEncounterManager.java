@@ -308,11 +308,16 @@ public final class WildEncounterManager {
     }
 
     public static void restoreCaptureAfterStorageFailure(MinemonCreature pokemon, ServerPlayer player) {
+        var data = pokemon.getPersistentData();
+        // The failed inventory transaction consumed neither a Pokébola nor an
+        // attempt; return the encounter to the exact capture state it had before.
+        data.putInt("MinemonWildCaptureAttempts", Math.max(0,
+                data.getInt("MinemonWildCaptureAttempts") - 1));
         pokemon.setTame(false);
         pokemon.setOwnerUUID(null);
-        pokemon.getPersistentData().putBoolean(MARKER, true);
-        pokemon.getPersistentData().putUUID(OWNER, player.getUUID());
-        pokemon.getPersistentData().putString(STATE, "downed");
+        data.putBoolean(MARKER, true);
+        data.putUUID(OWNER, player.getUUID());
+        data.putString(STATE, "downed");
         pokemon.setEncounterDowned(true);
     }
 
