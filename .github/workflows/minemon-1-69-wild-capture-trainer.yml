@@ -27,5 +27,14 @@ jobs:
             echo 'Possible embedded credential found.'
             exit 1
           fi
-      - name: Compile and run focused unit tests on Java 17
-        run: ./gradlew --no-daemon clean compileJava compileTestJava test --tests 'br.com.petrickfaria.minemon.pokec.*Test'
+      - name: Compile Java 17 source and run all unit tests
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon clean compileJava compileTestJava
+          ./gradlew --no-daemon test
+      - name: Run Minecraft GameTests
+        run: |
+          mkdir -p run
+          echo eula=true > run/eula.txt
+          python3 tools/prepare_gametest_world.py
+          timeout 600s ./gradlew --no-daemon runGameTestServer
