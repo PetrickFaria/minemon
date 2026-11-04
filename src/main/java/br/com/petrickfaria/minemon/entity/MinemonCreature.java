@@ -1254,9 +1254,17 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
                 ||this.naturalCycle.phase()==BehaviorCycle.Phase.SURFACE)
                 &&WaterMovementGoal.canDive(this,this.blockPosition());
         var previousPhase=this.naturalCycle.phase();int previousStage=this.naturalCycle.stage();
+        // Alakazam's approved meditation cycle controls its vertical position
+        // without gravity. At the landing anchor the collision resolver cannot
+        // set vanilla onGround, so report safe support to the cycle explicitly.
+        boolean alakazamSupportedLanding=this.getSpeciesSlug().equals("alakazam")
+            &&this.naturalCycle.phase()==BehaviorCycle.Phase.LANDING
+            &&Math.abs(this.getY()-this.naturalSurface())<0.15D
+            &&WaterMovementGoal.safeLandingBelow(this);
+        boolean dryGround=(this.isOnGround()||alakazamSupportedLanding)&&!wet;
         this.naturalCycle.tick(new BehaviorCycle.Observation(this.naturalBehaviorActive(),
-            this.isOnGround()&&!wet,
-            band,wet,submerged,surface,this.isOnGround()&&!wet,canDive));
+            dryGround,
+            band,wet,submerged,surface,dryGround,canDive));
         if(previousPhase!=this.naturalCycle.phase()||previousStage!=this.naturalCycle.stage())this.getNavigation().stop();
         this.syncNaturalState();
     }
