@@ -67,7 +67,13 @@ final class WildCaptureClientSmokeTest {
             }
             if (!setupRequested) {
                 setupRequested = true;
-                mc.getSingleplayerServer().execute(() -> setup(mc));
+                mc.getSingleplayerServer().execute(() -> {
+                    var server = mc.getSingleplayerServer();
+                    server.setDifficulty(net.minecraft.world.Difficulty.PEACEFUL, true);
+                    var owner = server.getPlayerList().getPlayer(mc.player.getUUID());
+                    if (owner != null) owner.setInvulnerable(true);
+                    setup(mc);
+                });
                 return;
             }
             ticks++;
