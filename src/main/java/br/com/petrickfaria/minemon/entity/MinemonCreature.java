@@ -61,6 +61,9 @@ import software.bernie.geckolib3.util.GeckoLibUtil;
 /** Shared wolf-like companion behavior. This first registered species is the integration fixture. */
 public class MinemonCreature extends TamableAnimal implements IAnimatable {
     private static final EntityDataAccessor<Boolean> DEFEATED = SynchedEntityData.defineId(MinemonCreature.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> WILD_ENCOUNTER = SynchedEntityData.defineId(MinemonCreature.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> WILD_ENCOUNTER_DOWNED = SynchedEntityData.defineId(MinemonCreature.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<String> WILD_ENCOUNTER_OWNER = SynchedEntityData.defineId(MinemonCreature.class, EntityDataSerializers.STRING);
     private boolean aiBeforeDefeat;
     private final DefeatedRest defeatedRest=new DefeatedRest(this);
     private boolean defeatTargetsCleared;
@@ -238,6 +241,9 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         super.defineSynchedData();
         this.entityData.define(RANGED_CHARGES,3);
         this.entityData.define(DEFEATED, false);
+        this.entityData.define(WILD_ENCOUNTER, false);
+        this.entityData.define(WILD_ENCOUNTER_DOWNED, false);
+        this.entityData.define(WILD_ENCOUNTER_OWNER, "");
         this.entityData.define(NIGHT_REST, false);
         this.entityData.define(NATURAL_LANDING, false);
         this.entityData.define(NATURAL_FLIGHT, false);
@@ -283,6 +289,10 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         this.entityData.set(ORDERED_SIT, super.isOrderedToSit());
         this.loadingPokemonData=true;
         this.entityData.set(DEFEATED,tag.getBoolean("MinemonDefeated"));
+        this.entityData.set(WILD_ENCOUNTER, this.getPersistentData().getBoolean("MinemonWildEncounter"));
+        this.entityData.set(WILD_ENCOUNTER_DOWNED, this.getPersistentData().getString("MinemonEncounterState").equals("downed"));
+        this.entityData.set(WILD_ENCOUNTER_OWNER, this.getPersistentData().hasUUID("MinemonEncounterOwner")
+                ? this.getPersistentData().getUUID("MinemonEncounterOwner").toString() : "");
         this.aiBeforeDefeat=tag.getBoolean("MinemonAiBeforeDefeat");
         rangedCharges.load(tag);entityData.set(RANGED_CHARGES,rangedCharges.charges());
         this.successfulMeleeAttacks=Math.max(0,Math.min(4,tag.getInt("MinemonMeleeSequence")));
@@ -599,6 +609,10 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     public boolean isBlackListTarget(net.minecraft.world.entity.Mob target) {
         if (target == null || target == this || target instanceof MinemonCreature pokemonTarget && pokemonTarget.isDefeated() || target.isInvulnerable() || !target.isAlive()
                 || this.isOwnerEntity(target)) return false;
+        if (this.isTame() && target instanceof MinemonCreature encounter
+                && br.com.petrickfaria.minemon.pokec.WildEncounterManager.isEncounter(encounter)
+                && this.getOwnerUUID() != null && this.getOwnerUUID().equals(
+                br.com.petrickfaria.minemon.pokec.WildEncounterManager.owner(encounter))) return true;
         if (target instanceof MinemonCreature pokemon && pokemon.isTame()
                 && this.getOwnerUUID() != null && this.getOwnerUUID().equals(pokemon.getOwnerUUID())) return false;
         ResourceLocation id = ForgeRegistries.ENTITY_TYPES.getKey(target.getType());
@@ -622,6 +636,22 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     @Override
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
         ItemStack held = player.getItemInHand(hand);
+        if (br.com.petrickfaria.minemon.pokec.WildEncounterManager.isEncounter(this)) {
+            // Let the Pokébola's item interaction run; consuming the entity
+            // interaction here prevents its capture transaction from starting.
+            if (held.getItem() instanceof br.com.petrickfaria.minemon.item.PokeballItem)
+                return InteractionResult.PASS;
+            if (!br.com.petrickfaria.minemon.pokec.WildEncounterManager.isDowned(this))
+                return InteractionResult.sidedSuccess(this.level.isClientSide);
+            if (!(player instanceof ServerPlayer serverPlayer)) return InteractionResult.sidedSuccess(this.level.isClientSide);
+            if (held.getItem() instanceof PokemonTreatItem) {
+                if (this.level.isClientSide) return InteractionResult.sidedSuccess(true);
+                return InteractionResult.sidedSuccess(br.com.petrickfaria.minemon.pokec.WildEncounterManager.offerTreat(this, serverPlayer, hand));
+            }
+            if (player.isCrouching() && held.isEmpty() && !this.level.isClientSide)
+                return InteractionResult.sidedSuccess(br.com.petrickfaria.minemon.pokec.WildEncounterManager.loot(this, serverPlayer));
+            return InteractionResult.sidedSuccess(this.level.isClientSide);
+        }
         // A capture item in either hand owns the interaction. Failed, occupied, and
         // foreign-owner attempts must not fall through into the Pokémon screen.
         for (InteractionHand ballHand : InteractionHand.values()) {
@@ -639,10 +669,18 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
             if (!compatible || this.getTarget() != null || this.attackAnimationTicks > 0)
                 return InteractionResult.sidedSuccess(false);
             if (!this.isTame()) {
+                if (player instanceof ServerPlayer owner
+                        && !br.com.petrickfaria.minemon.pokec.ActivePokemonData.hasCapacity(owner)) {
+                    owner.displayClientMessage(Component.literal(
+                            "Seu nível de Treinador não permite manter mais Pokémon ativos."), true);
+                    return InteractionResult.sidedSuccess(false);
+                }
                 if (!player.getAbilities().instabuild) held.shrink(1);
                 int chance = MinemonConfig.TAME_CHANCE_PERCENT.get();
                 if (this.getRandom().nextInt(100) < chance) {
                     this.tame(player);
+                    if (player instanceof ServerPlayer owner)
+                        br.com.petrickfaria.minemon.pokec.ActivePokemonData.register(this);
                     this.setOrderedToSit(true);
                     this.setTarget(null);
                     this.getNavigation().stop();
@@ -689,6 +727,15 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     @Override
     public boolean hurt(DamageSource source, float amount) {
         if(isDefeated())return false;
+        if (br.com.petrickfaria.minemon.pokec.WildEncounterManager.isEncounter(this)) {
+            if (br.com.petrickfaria.minemon.pokec.WildEncounterManager.isDowned(this)) return false;
+            if (!br.com.petrickfaria.minemon.pokec.WildEncounterManager.canDamage(this, source)) return false;
+            // When every defeated slot is occupied, attacks can reduce an encounter
+            // to one health point, but the entity cannot die or grant a reward.
+            if (this.getHealth() - amount <= 0.0F
+                    && !br.com.petrickfaria.minemon.pokec.WildEncounterManager.hasDefeatedCapacity(this))
+                amount = Math.max(0.0F, this.getHealth() - 1.0F);
+        }
         boolean wokeFromRest=this.isSleeping()||this.isNightResting();
         boolean hurt = super.hurt(source, amount);
         if(hurt&&!this.level.isClientSide){
@@ -708,6 +755,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
 
     @Override
     public void tick() {
+        br.com.petrickfaria.minemon.pokec.WildEncounterManager.tickEncounter(this);
         if(this.escapeNavigation!=null){
             var desired=this.isInWater()?this.escapeNavigation:this.dryNavigation;
             if(this.navigation!=desired){this.navigation.stop();this.navigation=desired;}
@@ -847,6 +895,9 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     }
 
     public int customSoundTicksForValidation() { return this.customSoundTicks; }
+    public int wakeGraceTicksForValidation() { return this.wakeGraceTicks; }
+    public int nightCombatTicksForValidation() { return this.nightCombatTicks; }
+    public boolean nightRoutineForValidation() { return this.nightRoutine; }
     public void setCustomSoundTicksForValidation(int ticks) {
         this.customSoundTicks = Math.max(0, Math.min(6000, ticks));
         this.customSoundDayActive = ticks > 0;
@@ -1005,6 +1056,25 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         level.broadcastEntityEvent(this,(byte)61);return true;
     }
     public boolean isDefeated(){return entityData.get(DEFEATED);}
+    public boolean isWildEncounter(){return entityData.get(WILD_ENCOUNTER);}
+    public boolean isWildEncounterDowned(){return entityData.get(WILD_ENCOUNTER_DOWNED);}
+    public String wildEncounterOwner(){return entityData.get(WILD_ENCOUNTER_OWNER);}
+    public void setWildEncounter(boolean encounter){entityData.set(WILD_ENCOUNTER,encounter);}
+    public void setWildEncounterDowned(boolean downed){entityData.set(WILD_ENCOUNTER_DOWNED,downed);}
+    public void setWildEncounterOwner(UUID owner){entityData.set(WILD_ENCOUNTER_OWNER,owner==null?"":owner.toString());}
+    /** Called only by the wild encounter manager; domestic defeat remains unchanged. */
+    public void setEncounterDowned(boolean downed) {
+        if (downed) {
+            entityData.set(WILD_ENCOUNTER_DOWNED, true);
+            entityData.set(DEFEATED, true); aiBeforeDefeat = isNoAi(); setNoAi(true);
+            setHealth(1.0F); setTarget(null); getNavigation().stop(); resetLove();
+            attackAnimationTicks=0; stopSpontaneousRun(); setFollowingRun(false); setFollowingOwner(false);
+            setSleeping(true); setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO); fallDistance=0;
+        } else {
+            entityData.set(WILD_ENCOUNTER_DOWNED, false);
+            entityData.set(DEFEATED, false); setNoAi(aiBeforeDefeat); setSleeping(false);
+        }
+    }
     @Override public boolean isAttackable(){return !isDefeated() && super.isAttackable();}
     @Override public boolean canBeSeenAsEnemy(){return !isDefeated() && super.canBeSeenAsEnemy();}
     @Override public boolean isPushable(){return !isDefeated() && super.isPushable();}
@@ -1012,6 +1082,10 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     @Override public boolean isDeadOrDying(){return !isDefeated() && super.isDeadOrDying();}
     @Override public void heal(float amount){if(!isDefeated())super.heal(amount);}
     @Override public void die(DamageSource source){
+        if (br.com.petrickfaria.minemon.pokec.WildEncounterManager.isEncounter(this)) {
+            if (br.com.petrickfaria.minemon.pokec.WildEncounterManager.enterDowned(this, source)) return;
+            setHealth(1.0F); return;
+        }
         if(!isTame()){super.die(source);return;}
         if(isDefeated())return;
         entityData.set(DEFEATED,true);aiBeforeDefeat=isNoAi();setNoAi(true);
@@ -1220,9 +1294,17 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
                 ||this.naturalCycle.phase()==BehaviorCycle.Phase.SURFACE)
                 &&WaterMovementGoal.canDive(this,this.blockPosition());
         var previousPhase=this.naturalCycle.phase();int previousStage=this.naturalCycle.stage();
+        // Alakazam's approved meditation cycle controls its vertical position
+        // without gravity. At the landing anchor the collision resolver cannot
+        // set vanilla onGround, so report safe support to the cycle explicitly.
+        boolean alakazamSupportedLanding=this.getSpeciesSlug().equals("alakazam")
+            &&this.naturalCycle.phase()==BehaviorCycle.Phase.LANDING
+            &&Math.abs(this.getY()-this.naturalSurface())<0.15D
+            &&WaterMovementGoal.safeLandingBelow(this);
+        boolean dryGround=(this.isOnGround()||alakazamSupportedLanding)&&!wet;
         this.naturalCycle.tick(new BehaviorCycle.Observation(this.naturalBehaviorActive(),
-            this.isOnGround()&&!wet,
-            band,wet,submerged,surface,this.isOnGround()&&!wet,canDive));
+            dryGround,
+            band,wet,submerged,surface,dryGround,canDive));
         if(previousPhase!=this.naturalCycle.phase()||previousStage!=this.naturalCycle.stage())this.getNavigation().stop();
         this.syncNaturalState();
     }

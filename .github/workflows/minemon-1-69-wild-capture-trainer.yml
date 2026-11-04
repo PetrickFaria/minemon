@@ -1,0 +1,107 @@
+name: Minemon 1.69 work in progress
+on:
+  push:
+    branches: [feature/minemon-1.69-wild-capture-trainer]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Verify 1.68 base ancestry and credentials
+        run: |
+          set -euo pipefail
+          base=48fec7de785cbc4cc44e5eabe7adaac0e7ee79aa
+          git merge-base --is-ancestor "$base" HEAD
+          test "$(git merge-base "$base" HEAD)" = "$base"
+          if git grep -n -I -E -i '(gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,})' -- . ':!gradlew*'; then
+            echo 'Possible embedded credential found.'
+            exit 1
+          fi
+      - name: Compile Java 17 source and run all unit tests
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon clean compileJava compileTestJava
+          ./gradlew --no-daemon test
+      - name: Run Minecraft GameTests
+        run: |
+          mkdir -p run
+          echo eula=true > run/eula.txt
+          python3 tools/prepare_gametest_world.py
+          timeout 600s ./gradlew --no-daemon runGameTestServer
+      - name: Create, save, and reopen a Forge world twice
+        env:
+          MINEMON_TEST_RCON_PASSWORD: ${{ secrets.MINEMON_TEST_RCON_PASSWORD }}
+        run: |
+          if [ -z "$MINEMON_TEST_RCON_PASSWORD" ]; then
+            MINEMON_TEST_RCON_PASSWORD="$(python3 -c 'import secrets; print(secrets.token_urlsafe(32))')"
+          fi
+          export MINEMON_TEST_RCON_PASSWORD
+          python3 tools/test_world_reopen.py
+      - name: Validate wild capture animation in the Minecraft client
+        run: |
+          python3 tools/prepare_client_world.py
+          set +e
+          ALSOFT_DRIVERS=null timeout --kill-after=30s 900s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeWildCapture > run/wild-capture-client.log 2>&1
+          client_status=$?
+          set -e
+          if [ "$client_status" -ne 0 ]; then
+            grep -n -C 3 -E "Wild capture client validation failed|WILD CAPTURE CLIENT|Exception|ERROR" run/wild-capture-client.log | tail -n 100 || true
+            for crash in run/crash-reports/*-client.txt; do [ -f "$crash" ] && sed -n '1,100p' "$crash"; done
+            exit "$client_status"
+          fi
+          grep -F 'PASS WILD CAPTURE CLIENT:' run/wild-capture-client-pass.txt
+          set +e
+          ALSOFT_DRIVERS=null timeout --kill-after=30s 900s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeWildCaptureReopen -PcaptureReopenIndex=1 > run/wild-capture-reopen-1.log 2>&1
+          reopen_status=$?
+          set -e
+          if [ "$reopen_status" -ne 0 ] || ! grep -Fq 'PASS CAPTURE REOPEN 1:' run/wild-capture-reopen-1.txt; then
+            cat run/wild-capture-reopen-1.txt 2>/dev/null || true
+            grep -n -C 3 -E "FAIL CAPTURE REOPEN|Exception|ERROR|timed out" run/wild-capture-reopen-1.log | tail -n 100 || true
+            exit 1
+          fi
+          grep -F 'PASS CAPTURE REOPEN 1:' run/wild-capture-reopen-1.txt
+          set +e
+          ALSOFT_DRIVERS=null timeout --kill-after=30s 900s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeWildCaptureReopen -PcaptureReopenIndex=2 > run/wild-capture-reopen-2.log 2>&1
+          reopen_status=$?
+          set -e
+          if [ "$reopen_status" -ne 0 ] || ! grep -Fq 'PASS CAPTURE REOPEN 2:' run/wild-capture-reopen-2.txt; then
+            cat run/wild-capture-reopen-2.txt 2>/dev/null || true
+            grep -n -C 3 -E "FAIL CAPTURE REOPEN|Exception|ERROR|timed out" run/wild-capture-reopen-2.log | tail -n 100 || true
+            exit 1
+          fi
+          grep -F 'PASS CAPTURE REOPEN 2:' run/wild-capture-reopen-2.txt
+      - name: Build the distributable version 1.69 JAR
+        run: ./gradlew --no-daemon build
+      - name: Validate exact JAR filename, metadata, and contents
+        run: |
+          set -euo pipefail
+          jar_file='build/libs/Minemon-1.19.2-1.69.jar'
+          test -f "$jar_file"
+          unzip -t "$jar_file"
+          unzip -p "$jar_file" META-INF/mods.toml | grep -F 'version="1.69"'
+          jar tf "$jar_file" | grep -Fx 'br/com/petrickfaria/minemon/pokec/WildEncounterManager.class'
+          jar tf "$jar_file" | grep -Fx 'br/com/petrickfaria/minemon/entity/CaptureBallProjectile.class'
+          grep -F 'PASS SERVER WORLD SAVE:' run/world-reopen-pass.txt
+          grep -F 'PASS WILD CAPTURE CLIENT:' run/wild-capture-client-pass.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Minemon-1.19.2-1.69
+          path: |
+            build/libs/Minemon-1.19.2-1.69.jar
+            run/world-reopen-pass.txt
+            run/wild-capture-client-pass.txt
+            run/wild-capture-reopen-1.txt
+            run/wild-capture-reopen-2.txt
+            run/screenshots/wild-capture-*.png
+          if-no-files-found: error
+          retention-days: 14

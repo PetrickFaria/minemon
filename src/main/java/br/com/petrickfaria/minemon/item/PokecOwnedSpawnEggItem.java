@@ -40,6 +40,11 @@ public final class PokecOwnedSpawnEggItem extends ForgeSpawnEggItem {
         if (!(context.getPlayer() instanceof ServerPlayer player)
                 || !player.getUUID().equals(stack.getTag().getUUID("MinemonPokecOwner"))
                 || !(context.getLevel() instanceof ServerLevel level)) return InteractionResult.FAIL;
+        if (!br.com.petrickfaria.minemon.pokec.ActivePokemonData.hasCapacity(player)) {
+            player.displayClientMessage(net.minecraft.network.chat.Component.literal(
+                    "Seu nível de Treinador não permite manter mais Pokémon ativos."), true);
+            return InteractionResult.FAIL;
+        }
 
         BlockPos pos = context.getClickedPos().relative(context.getClickedFace());
         Mob pokemon = type.get().create(level);

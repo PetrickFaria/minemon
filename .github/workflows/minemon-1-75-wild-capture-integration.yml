@@ -1,0 +1,123 @@
+name: Minemon 1.75 wild capture integration
+on:
+  push:
+    branches: [feature/minemon-1.75-wild-capture-integration]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Verify both source lines and Java 17 game target
+        run: |
+          set -euo pipefail
+          git merge-base --is-ancestor 0a4ac45b9cac824be49857b3fa340c53aec4862d HEAD
+          git merge-base --is-ancestor 6f2a94c8391485a1864640916edb62e50809c6bb HEAD
+          grep -Fx 'minecraft_version=1.19.2' gradle.properties
+          grep -Fx 'forge_version=43.5.0' gradle.properties
+          grep -Fx 'mod_version=1.75' gradle.properties
+          if git grep -n -I -E -i '(gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,})' -- . ':!gradlew*'; then
+            echo 'Possible embedded credential found.'
+            exit 1
+          fi
+      - name: Compile Java 17 source and run all unit tests
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon clean compileJava compileTestJava
+          ./gradlew --no-daemon test
+      - name: Run Minecraft GameTests from both lines
+        run: |
+          mkdir -p run
+          echo eula=true > run/eula.txt
+          python3 tools/prepare_gametest_world.py
+          timeout 600s ./gradlew --no-daemon runGameTestServer
+      - name: Create, save, and reopen capture world twice
+        env:
+          MINEMON_TEST_RCON_PASSWORD: ${{ secrets.MINEMON_TEST_RCON_PASSWORD }}
+        run: |
+          if [ -z "$MINEMON_TEST_RCON_PASSWORD" ]; then
+            MINEMON_TEST_RCON_PASSWORD="$(python3 -c 'import secrets; print(secrets.token_urlsafe(32))')"
+          fi
+          export MINEMON_TEST_RCON_PASSWORD
+          python3 tools/test_world_reopen.py
+      - name: Validate wild capture animation and capture state on the real client
+        run: |
+          python3 tools/prepare_client_world.py
+          ALSOFT_DRIVERS=null timeout --kill-after=30s 900s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeWildCapture
+          grep -F 'PASS WILD CAPTURE CLIENT:' run/wild-capture-client-pass.txt
+          for index in 1 2; do
+            ALSOFT_DRIVERS=null timeout --kill-after=30s 900s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeWildCaptureReopen -PcaptureReopenIndex="$index"
+            grep -F "PASS CAPTURE REOPEN $index:" "run/wild-capture-reopen-$index.txt"
+          done
+      - name: Validate 1.74 ghost visuals and animations in the real client
+        run: |
+          python3 tools/prepare_client_world.py
+          ALSOFT_DRIVERS=null timeout --kill-after=30s 900s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeGhostLine
+          grep -F 'PASS GHOST LINE CLIENT:' run/client-validation-ghost-line.txt
+          for shot in gastly-front gastly-no-tongue haunter-front-a haunter-front-b haunter-blink gengar-walk gengar-blink gengar-mouth-teeth-fixed gengar-sleep-half-sunk-a gengar-sleep-half-sunk-b; do
+            test -f "run/screenshots/ghost-line-1.74-$shot.png"
+          done
+      - name: Validate aquatic swimming poses in the real client
+        run: |
+          python3 tools/prepare_client_world.py
+          ALSOFT_DRIVERS=null timeout --kill-after=30s 900s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeWater -PclientSmokeSpecies=golduck,poliwrath,tentacool,tentacruel,seel,dewgong,shellder,cloyster,horsea,seadra,goldeen,seaking,staryu,starmie,magikarp,gyarados,lapras,omanyte,omastar,kabuto,kabutops
+          grep -F 'PASS ROSTER' run/client-validation.txt
+          grep -F 'ARTICULATION PROFILES:' run/client-validation.txt
+      - name: Validate Alakazam pose, two hover cycles, and rendered views
+        run: |
+          python3 tools/prepare_client_world.py
+          ALSOFT_DRIVERS=null timeout --kill-after=30s 900s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeAir -PclientSmokeAlakazamPose -PclientSmokeSpecies=alakazam
+          grep -F 'PASS ALAKAZAM CLIENT POSE/CYCLE:' run/client-validation.txt
+          test -f run/screenshots/alakazam-1.73-front.png
+          test -f run/screenshots/alakazam-1.73-side.png
+          test -f run/screenshots/alakazam-1.73-back.png
+      - name: Build and verify the Minemon 1.75 JAR
+        run: |
+          set -euo pipefail
+          ./gradlew --no-daemon build -x test
+          jar_file='build/libs/Minemon-1.19.2-1.75.jar'
+          test -f "$jar_file"
+          unzip -t "$jar_file"
+          unzip -p "$jar_file" META-INF/mods.toml | grep -F 'version="1.75"'
+          for entry in \
+            br/com/petrickfaria/minemon/pokec/WildEncounterManager.class \
+            br/com/petrickfaria/minemon/pokec/TrainerProgression.class \
+            br/com/petrickfaria/minemon/entity/CaptureBallProjectile.class \
+            br/com/petrickfaria/minemon/client/GastlyCoreRenderHook.class \
+            br/com/petrickfaria/minemon/entity/GhostLineAnimationRules.class \
+            assets/minemon/models/item/pokeball.json \
+            assets/minemon_gen1/animations/gengar_cobblemon_1_8_2/gengar.animation.json \
+            assets/minemon_gen1/animations/alakazam_cobblemon_1_8_2/alakazam.animation.json; do
+            jar tf "$jar_file" | grep -Fx "$entry"
+          done
+          grep -F 'PASS SERVER WORLD SAVE:' run/world-reopen-pass.txt
+          grep -F 'PASS WILD CAPTURE CLIENT:' run/wild-capture-client-pass.txt
+          grep -F 'PASS GHOST LINE CLIENT:' run/client-validation-ghost-line.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Minemon-1.19.2-1.75
+          path: |
+            build/libs/Minemon-1.19.2-1.75.jar
+            run/world-reopen-pass.txt
+            run/wild-capture-client-pass.txt
+            run/wild-capture-reopen-1.txt
+            run/wild-capture-reopen-2.txt
+            run/client-validation-ghost-line.txt
+            run/client-validation.txt
+            run/screenshots/ghost-line-1.74-*.png
+            run/screenshots/alakazam-1.73-*.png
+            run/screenshots/wild-capture-*.png
+          if-no-files-found: error
+          retention-days: 14

@@ -13,12 +13,36 @@ import br.com.petrickfaria.minemon.registry.ModItems;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
+import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 @Mod.EventBusSubscriber(modid=Minemon.MOD_ID)
 public final class PokecEvents {
-    @SubscribeEvent public static void serverStarting(ServerStartingEvent event){PokecEconomy.load();}
+    @SubscribeEvent public static void serverStarting(ServerStartingEvent event){
+        PokecEconomy.load();
+        if (event.getServer().overworld() != null) WildEncounterManager.loadConfig(event.getServer().overworld());
+    }
+    @SubscribeEvent public static void wildEncounters(TickEvent.PlayerTickEvent event) {
+        if (event.phase == TickEvent.Phase.END && event.player instanceof net.minecraft.server.level.ServerPlayer player)
+            WildEncounterManager.tickPlayer(player);
+    }
+    @SubscribeEvent public static void trackActivePokemon(EntityJoinLevelEvent event) {
+        if (event.getEntity().level.isClientSide || !(event.getEntity() instanceof MinemonCreature pokemon)) return;
+        if (WildEncounterManager.isEncounter(pokemon)) WildEncounterManager.trackLoaded(pokemon);
+        else ActivePokemonData.register(pokemon);
+    }
+    @SubscribeEvent public static void untrackRemovedPokemon(EntityLeaveLevelEvent event) {
+        if (event.getEntity().level.isClientSide || !(event.getEntity() instanceof MinemonCreature)) return;
+        var reason = event.getEntity().getRemovalReason();
+        if (reason == net.minecraft.world.entity.Entity.RemovalReason.DISCARDED
+                || reason == net.minecraft.world.entity.Entity.RemovalReason.KILLED)
+            if (WildEncounterManager.isEncounter((MinemonCreature) event.getEntity()))
+                WildEncounterManager.untrackRemoved((MinemonCreature) event.getEntity());
+            else ActivePokemonData.unregister(event.getEntity());
+    }
     @SubscribeEvent public static void companionExperience(LivingDeathEvent event) {
         if (event.getEntity().level.isClientSide || !(event.getSource().getEntity() instanceof MinemonCreature attacker)
                 || !attacker.isTame() || !(event.getEntity() instanceof net.minecraft.world.entity.Mob defeated)) return;
@@ -45,7 +69,7 @@ public final class PokecEvents {
         }
     }
     @SubscribeEvent public static void clonePlayer(PlayerEvent.Clone event){PokecPlayerData.copyOnRespawn(event.getOriginal(),event.getEntity());if(event.getEntity() instanceof net.minecraft.server.level.ServerPlayer player)PokecTransactions.recoverEscrow(player);}
-    @SubscribeEvent public static void login(PlayerEvent.PlayerLoggedInEvent event){if(event.getEntity() instanceof net.minecraft.server.level.ServerPlayer player)PokecTransactions.recoverEscrow(player);}
+    @SubscribeEvent public static void login(PlayerEvent.PlayerLoggedInEvent event){if(event.getEntity() instanceof net.minecraft.server.level.ServerPlayer player){PokecTransactions.recoverEscrow(player);br.com.petrickfaria.minemon.network.MinemonNetwork.syncTrainer(player);}}
     @SubscribeEvent public static void logout(PlayerEvent.PlayerLoggedOutEvent event){if(event.getEntity() instanceof net.minecraft.server.level.ServerPlayer player)PokecTransactions.recoverEscrow(player);PokecTransactions.clearTransactions(event.getEntity().getUUID());}
     @SubscribeEvent public static void commands(RegisterCommandsEvent event){
         event.getDispatcher().register(Commands.literal("pokec").requires(source->source.hasPermission(2))

@@ -42,16 +42,22 @@ public final class NightAndSwimmingTests {
   });
  }
  private static boolean flightResumeComplete(MinemonCreature m,Map<MinemonCreature,Integer> clocks){
-  if(m.isOnGround())return false;
   double altitude=m.getY()-m.naturalSurface();
   return switch(SpeciesBehaviorProfiles.profile(m.getSpeciesSlug())){
-   case FLOAT_HALF -> Math.abs(altitude-m.naturalCycle().minimumAltitude())<=0.12D;
-   case FLOAT_LOW -> altitude>=0.5D&&altitude<=1.0D;
-   default -> m.naturalCycle().ticks()>clocks.get(m);
+   case GROUND -> m.isOnGround()&&altitude<=0.15D;
+   case GROUND_FLOAT_CYCLE -> m.getSpeciesSlug().equals("alakazam")
+       ?m.naturalCycle().phase()==BehaviorCycle.Phase.LAND&&m.isOnGround()
+       :!m.isOnGround()&&m.naturalCycle().ticks()>clocks.get(m);
+   case FLOAT_HALF -> !m.isOnGround()&&Math.abs(altitude-m.naturalCycle().minimumAltitude())<=0.12D;
+   case FLOAT_LOW -> !m.isOnGround()&&altitude>=0.5D&&altitude<=1.0D;
+   default -> !m.isOnGround()&&m.naturalCycle().ticks()>clocks.get(m);
   };
  }
  private static String flightResumeSnapshot(MinemonCreature m){
   var level=m.getCommandSenderWorld();
+  String recovery=m instanceof MinemonFlyingCreature flyer
+      ? flyer.flightRecoveryAttemptsForValidation()+"/"+flyer.flightRecoveryMovesForValidation()+",samples="
+          +flyer.flightRecoverySamplesForValidation() : "not-applicable";
   return m.getSpeciesSlug()+"{phase="+m.naturalCycle().phase()+",ticks="+m.naturalCycle().ticks()
       +",entityTick="+m.tickCount+",stage="+m.naturalCycle().stage()+",air="+m.isFlyingSpecies()
       +",active="+m.naturalBehaviorActive()
@@ -60,9 +66,7 @@ public final class NightAndSwimmingTests {
       +",gravity="+!m.isNoGravity()+",noAI="+m.isNoAi()+",passenger="+m.isPassenger()
       +",target="+(m.getTarget()==null?"null":m.getTarget().getType())+",pos="+m.position()+",motion="+m.getDeltaMovement()
       +",chunk="+level.hasChunkAt(m.blockPosition())+",navDone="+m.getNavigation().isDone()
-      +",nav="+m.getNavigation().getTargetPos()+",recovery="+((MinemonFlyingCreature)m).flightRecoveryAttemptsForValidation()
-      +"/"+((MinemonFlyingCreature)m).flightRecoveryMovesForValidation()+",samples="
-      +((MinemonFlyingCreature)m).flightRecoverySamplesForValidation()+"}";
+      +",nav="+m.getNavigation().getTargetPos()+",recovery="+recovery+"}";
  }
  private static void awaitBottom(GameTestHelper h,MinemonCreature shellder,MinemonCreature krabby,
      double originY,int remaining,int elapsed,Runnable next){
@@ -99,8 +103,8 @@ public final class NightAndSwimmingTests {
     double surface=WaterMovementGoal.restSurfaceAt(mob,mob.blockPosition());
     double originalAnchor=ModelMetrics.anchorForSubmergedFraction(surface,ModelMetrics.bodyBottom("gyarados"),
         ModelMetrics.bodyHeight("gyarados"),SpeciesDefinitions.get("gyarados").scale()*(mob.isBaby()?0.5D:1.0D),0.10D);
-    check(h,mob.isInWater()&&Double.isFinite(surface)&&Math.abs((originalAnchor-mob.getY())-2.0D)<0.18D,
-        "Awake Gyarados must swim exactly two blocks below its approved 1.63 anchor: old="+originalAnchor
+    check(h,mob.isInWater()&&Double.isFinite(surface)&&Math.abs((originalAnchor-mob.getY())-2.0D)<0.40D,
+        "Awake Gyarados must approach its two-block daytime offset, using the deepest collision-safe wet point when the full offset is obstructed: old="+originalAnchor
         +" actual="+mob.getY()+" surface="+surface+" sleep="+mob.isSleeping());
     check(h,h.getLevel().noCollision(mob,mob.getBoundingBox()),"Gyarados daytime offset must preserve collision safety");
     check(h,maxDepth[0]-minDepth[0]<=0.45D,"Awake Gyarados surface depth must not oscillate excessively; samples="
@@ -244,9 +248,9 @@ public final class NightAndSwimmingTests {
  @GameTest(template="test_arena",batch="night_mixed",timeoutTicks=1000)
  public static void realNightLandingHoverWakeRetaliationReturnAndDawn(GameTestHelper h){
   arena(h);var level=h.getLevel();level.setDayTime(1000);
-  // Keep sleeping hoverers clear of the wide grounded sleepers: collision
-  // pushing is physical displacement, not autonomous sleep travel.
-  for(int ax=0;ax<32;ax++)for(int az=26;az<44;az++){
+  // Keep sleepers on a continuous floor while they navigate to rest points;
+  // a gap here lets an edge route fall and confounds natural landing checks.
+  for(int ax=0;ax<32;ax++)for(int az=24;az<44;az++){
    h.setBlock(new BlockPos(ax,0,az),Blocks.STONE);
    for(int ay=1;ay<20;ay++)h.setBlock(new BlockPos(ax,ay,az),Blocks.AIR);
   }
@@ -287,7 +291,11 @@ public final class NightAndSwimmingTests {
         mixed.forEach(m->check(h,m.naturalCycle().ticks()>=clocks.get(m),"Dawn must resume saved clock"));
         awaitFlightResume(h,mixed,clocks,200,new ArrayList<>());
        },30,"All night sleepers must wake at dawn");
-      },180,"After combat, a creature must return to sleep while still night");
+      },180,()->"After combat, a creature must return to sleep while still night; sleeping="+ground.isSleeping()
+          +",night="+ground.isNightResting()+",target="+ground.getTarget()
+          +",lastHurt="+ground.getLastHurtByMob()+",pos="+ground.position()+",onGround="+ground.isOnGround()
+          +",noAI="+ground.isNoAi()+",time="+level.getDayTime()+",wakeGrace="+ground.wakeGraceTicksForValidation()
+          +",nightCombat="+ground.nightCombatTicksForValidation()+",nightRoutine="+ground.nightRoutineForValidation());
      },150,"Woken creature must physically retaliate using melee AI");
     });
    },350,()->"Night must settle ground/mixed creatures on land and air-only creatures in a one-block hover; mixed="

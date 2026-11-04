@@ -61,7 +61,15 @@ public final class RocketProfessionGameTests {
         if (remaining <= 0) {
             helper.fail("adult unemployed villager did not naturally claim the accessible Rocket workstation; profession="
                     + villager.getVillagerData().getProfession() + ", jobSite="
-                    + villager.getBrain().getMemory(MemoryModuleType.JOB_SITE));
+                    + villager.getBrain().getMemory(MemoryModuleType.JOB_SITE)
+                    + ", potentialJobSite=" + villager.getBrain().getMemory(MemoryModuleType.POTENTIAL_JOB_SITE)
+                    + ", villagerPos=" + villager.position()
+                    + ", station=" + workstation
+                    + ", navigationDone=" + villager.getNavigation().isDone()
+                    + ", navigationTarget=" + villager.getNavigation().getTargetPos()
+                    + ", baby=" + villager.isBaby()
+                    + ", villagerAiDisabled=" + villager.isNoAi()
+                    + ", activeActivity=" + villager.getBrain().getActiveNonCoreActivity());
             return;
         }
         helper.runAfterDelay(10, () -> awaitProfession(helper, villager, workstation, remaining - 10));
@@ -70,6 +78,14 @@ public final class RocketProfessionGameTests {
     @GameTest(template = "test_arena", batch = "rocket_natural", timeoutTicks = 500)
     public static void adultUnemployedVillagerClaimsRocketWorkstationNaturally(GameTestHelper helper) {
         floor(helper);
+        // Keep the vanilla villager inside the prepared POI acquisition arena.
+        // Without the boundary, random idle wandering can take it beyond the
+        // prepared floor and outside the workstation-search area (observed in CI).
+        for (int x = 0; x < 16; x++) for (int z = 0; z < 16; z++) {
+            if (x == 0 || x == 15 || z == 0 || z == 15) {
+                for (int y = 1; y <= 3; y++) helper.setBlock(new BlockPos(x, y, z), Blocks.STONE);
+            }
+        }
         helper.getLevel().setDayTime(5000L);
         BlockPos workstation = new BlockPos(6, 1, 6);
         helper.setBlock(workstation, ModBlocks.ROCKET_BLOCK.get());

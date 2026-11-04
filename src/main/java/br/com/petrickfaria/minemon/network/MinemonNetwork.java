@@ -32,6 +32,23 @@ public final class MinemonNetwork {
         CHANNEL.messageBuilder(PokecState.class,3).encoder(PokecState::encode).decoder(PokecState::decode).consumerMainThread(PokecState::handle).add();
         CHANNEL.messageBuilder(BlackListAction.class,4).encoder(BlackListAction::encode).decoder(BlackListAction::decode).consumerMainThread(BlackListAction::handle).add();
         CHANNEL.messageBuilder(BlackListState.class,5).encoder(BlackListState::encode).decoder(BlackListState::decode).consumerMainThread(BlackListState::handle).add();
+        CHANNEL.messageBuilder(TrainerState.class,6).encoder(TrainerState::encode).decoder(TrainerState::decode).consumerMainThread(TrainerState::handle).add();
+    }
+
+    public static void syncTrainer(ServerPlayer player) {
+        CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), new TrainerState(
+                PokecPlayerData.trainerLevel(player), PokecPlayerData.trainerXp(player)));
+    }
+
+    private record TrainerState(int level, double xp) {
+        static void encode(TrainerState m, FriendlyByteBuf b) { b.writeVarInt(m.level); b.writeDouble(m.xp); }
+        static TrainerState decode(FriendlyByteBuf b) { return new TrainerState(b.readVarInt(), b.readDouble()); }
+        static void handle(TrainerState m, Supplier<NetworkEvent.Context> s) {
+            var c=s.get(); c.enqueueWork(() -> net.minecraftforge.fml.DistExecutor.unsafeRunWhenOn(
+                    net.minecraftforge.api.distmarker.Dist.CLIENT,
+                    () -> () -> br.com.petrickfaria.minemon.client.TrainerHud.update(m.level, m.xp)));
+            c.setPacketHandled(true);
+        }
     }
 
     public static void playForTracking(MinemonCreature creature) {

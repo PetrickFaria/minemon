@@ -150,23 +150,22 @@ public final class MinemonAquaticCreature extends MinemonCreature {
             this.setNoGravity(true);this.fallDistance=0;
             return;
         }
-        // A completed surface route can leave SmoothSwimmingMoveControl holding
-        // its last horizontal waypoint. Clear it even if the body has just
-        // crossed the waterline and the current column has no measurable top.
+        // Gyarados's surface-depth correction owns vertical movement. Keep the
+        // swimming controller's vertical waypoint at the current pose even
+        // while a horizontal path is active, so its stale route height cannot
+        // fight the approved surface depth or create a repeated bobbing cycle.
         if(this.getSpeciesSlug().equals("gyarados")&&this.isNaturalSurface()
-                &&!this.isSleeping()&&!this.isNightResting()&&this.getNavigation().isDone()){
-            double holdY=this.getY();
-            if(this.isInWater()){
-                double localTop=this.waterSurface();
-                if(Double.isFinite(localTop))
-                    holdY=localTop-WaterMovementGoal.preferredSurfaceDepth(this);
+                &&!this.isSleeping()&&!this.isNightResting()){
+            var control=this.getMoveControl();
+            double holdX=this.getNavigation().isDone()?this.getX():control.getWantedX();
+            double holdZ=this.getNavigation().isDone()?this.getZ():control.getWantedZ();
+            control.setWantedPosition(holdX,this.getY(),holdZ,0.5D);
+            if(this.getNavigation().isDone()){
+                // The completed route no longer owns horizontal motion. Damp
+                // residual momentum so it cannot carry Gyarados over a bank.
+                var motion=this.getDeltaMovement();
+                this.setDeltaMovement(motion.x*0.2D,motion.y,motion.z*0.2D);
             }
-            this.getMoveControl().setWantedPosition(this.getX(),holdY,this.getZ(),0.5D);
-            // The completed route no longer owns horizontal motion. Damp its
-            // residual momentum so inertia cannot carry Gyarados over a bank
-            // after the controller has already cleared the stale waypoint.
-            var motion=this.getDeltaMovement();
-            this.setDeltaMovement(motion.x*0.2D,motion.y,motion.z*0.2D);
         }
         if(!this.isInWater()||(!this.naturalBehaviorActive()&&!this.isSleeping()&&!this.isNightResting()))return;
         double top=this.waterSurface();
@@ -194,7 +193,10 @@ public final class MinemonAquaticCreature extends MinemonCreature {
         // Surface and submerged correction share the swimming controller; do not
         // add another navigation goal or override horizontal pursuit.
         if(!ShoreTraversal.exiting(this)&&(surface||this.getY()>target)){
-            double vy=net.minecraft.util.Mth.clamp(this.getDeltaMovement().y*0.5D+(target-this.getY())*0.05D,-0.09D,0.09D);
+            boolean gyarados=this.getSpeciesSlug().equals("gyarados");
+            double retention=gyarados?0.25D:0.5D;
+            double response=gyarados?0.10D:0.05D;
+            double vy=net.minecraft.util.Mth.clamp(this.getDeltaMovement().y*retention+(target-this.getY())*response,-0.09D,0.09D);
             this.setDeltaMovement(this.getDeltaMovement().x,vy,this.getDeltaMovement().z);
         }
     }
