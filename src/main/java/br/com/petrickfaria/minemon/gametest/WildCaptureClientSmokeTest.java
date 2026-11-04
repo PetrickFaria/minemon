@@ -30,6 +30,13 @@ final class WildCaptureClientSmokeTest {
         try {
             if (!opened && mc.screen instanceof TitleScreen) {
                 opened = true;
+                var model = mc.getItemRenderer().getModel(new ItemStack(ModItems.POKEBALL.get()), mc.level, mc.player, 0);
+                if (model == mc.getModelManager().getMissingModel())
+                    throw new IllegalStateException("Pokébola 3D item model resolved to the missing model");
+                int modelQuads = model.getQuads(null, null, net.minecraft.util.RandomSource.create(0)).size();
+                for (var direction : net.minecraft.core.Direction.values())
+                    modelQuads += model.getQuads(null, direction, net.minecraft.util.RandomSource.create(0)).size();
+                if (modelQuads < 6) throw new IllegalStateException("Pokébola 3D model has too few baked faces: " + modelQuads);
                 Object flows = Minecraft.class.getMethod("createWorldOpenFlows").invoke(mc);
                 for (var method : flows.getClass().getMethods()) if (method.getName().equals("loadLevel")) {
                     if (method.getParameterCount() == 2 && method.getParameterTypes()[1] == String.class) {

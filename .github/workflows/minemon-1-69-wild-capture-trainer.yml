@@ -47,3 +47,39 @@ jobs:
           fi
           export MINEMON_TEST_RCON_PASSWORD
           python3 tools/test_world_reopen.py
+      - name: Validate wild capture animation in the Minecraft client
+        run: |
+          python3 tools/prepare_client_world.py
+          set +e
+          ALSOFT_DRIVERS=null timeout --kill-after=30s 900s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeWildCapture > run/wild-capture-client.log 2>&1
+          client_status=$?
+          set -e
+          if [ "$client_status" -ne 0 ]; then
+            rg -n -C 3 "Wild capture client validation failed|WILD CAPTURE CLIENT|Exception|ERROR" run/wild-capture-client.log | tail -n 100 || true
+            for crash in run/crash-reports/*-client.txt; do [ -f "$crash" ] && sed -n '1,100p' "$crash"; done
+            exit "$client_status"
+          fi
+          grep -F 'PASS WILD CAPTURE CLIENT:' run/wild-capture-client-pass.txt
+      - name: Build the distributable version 1.69 JAR
+        run: ./gradlew --no-daemon build
+      - name: Validate exact JAR filename, metadata, and contents
+        run: |
+          set -euo pipefail
+          jar_file='build/libs/Minemon-1.19.2-1.69.jar'
+          test -f "$jar_file"
+          unzip -t "$jar_file"
+          unzip -p "$jar_file" META-INF/mods.toml | grep -F 'version="1.69"'
+          jar tf "$jar_file" | grep -Fx 'br/com/petrickfaria/minemon/pokec/WildEncounterManager.class'
+          jar tf "$jar_file" | grep -Fx 'br/com/petrickfaria/minemon/entity/CaptureBallProjectile.class'
+          grep -F 'PASS SERVER WORLD SAVE:' run/world-reopen-pass.txt
+          grep -F 'PASS WILD CAPTURE CLIENT:' run/wild-capture-client-pass.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Minemon-1.19.2-1.69
+          path: |
+            build/libs/Minemon-1.19.2-1.69.jar
+            run/world-reopen-pass.txt
+            run/wild-capture-client-pass.txt
+            run/screenshots/wild-capture-*.png
+          if-no-files-found: error
+          retention-days: 14
