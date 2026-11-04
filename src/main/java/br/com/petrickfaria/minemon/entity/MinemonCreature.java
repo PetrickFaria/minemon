@@ -61,6 +61,9 @@ import software.bernie.geckolib3.util.GeckoLibUtil;
 /** Shared wolf-like companion behavior. This first registered species is the integration fixture. */
 public class MinemonCreature extends TamableAnimal implements IAnimatable {
     private static final EntityDataAccessor<Boolean> DEFEATED = SynchedEntityData.defineId(MinemonCreature.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> WILD_ENCOUNTER = SynchedEntityData.defineId(MinemonCreature.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> WILD_ENCOUNTER_DOWNED = SynchedEntityData.defineId(MinemonCreature.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<String> WILD_ENCOUNTER_OWNER = SynchedEntityData.defineId(MinemonCreature.class, EntityDataSerializers.STRING);
     private boolean aiBeforeDefeat;
     private final DefeatedRest defeatedRest=new DefeatedRest(this);
     private boolean defeatTargetsCleared;
@@ -231,6 +234,9 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         super.defineSynchedData();
         this.entityData.define(RANGED_CHARGES,3);
         this.entityData.define(DEFEATED, false);
+        this.entityData.define(WILD_ENCOUNTER, false);
+        this.entityData.define(WILD_ENCOUNTER_DOWNED, false);
+        this.entityData.define(WILD_ENCOUNTER_OWNER, "");
         this.entityData.define(NIGHT_REST, false);
         this.entityData.define(NATURAL_LANDING, false);
         this.entityData.define(NATURAL_FLIGHT, false);
@@ -276,6 +282,10 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         this.entityData.set(ORDERED_SIT, super.isOrderedToSit());
         this.loadingPokemonData=true;
         this.entityData.set(DEFEATED,tag.getBoolean("MinemonDefeated"));
+        this.entityData.set(WILD_ENCOUNTER, this.getPersistentData().getBoolean("MinemonWildEncounter"));
+        this.entityData.set(WILD_ENCOUNTER_DOWNED, this.getPersistentData().getString("MinemonEncounterState").equals("downed"));
+        this.entityData.set(WILD_ENCOUNTER_OWNER, this.getPersistentData().hasUUID("MinemonEncounterOwner")
+                ? this.getPersistentData().getUUID("MinemonEncounterOwner").toString() : "");
         this.aiBeforeDefeat=tag.getBoolean("MinemonAiBeforeDefeat");
         rangedCharges.load(tag);entityData.set(RANGED_CHARGES,rangedCharges.charges());
         this.successfulMeleeAttacks=Math.max(0,Math.min(4,tag.getInt("MinemonMeleeSequence")));
@@ -592,6 +602,10 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     public boolean isBlackListTarget(net.minecraft.world.entity.Mob target) {
         if (target == null || target == this || target instanceof MinemonCreature pokemonTarget && pokemonTarget.isDefeated() || target.isInvulnerable() || !target.isAlive()
                 || this.isOwnerEntity(target)) return false;
+        if (this.isTame() && target instanceof MinemonCreature encounter
+                && br.com.petrickfaria.minemon.pokec.WildEncounterManager.isEncounter(encounter)
+                && this.getOwnerUUID() != null && this.getOwnerUUID().equals(
+                br.com.petrickfaria.minemon.pokec.WildEncounterManager.owner(encounter))) return true;
         if (target instanceof MinemonCreature pokemon && pokemon.isTame()
                 && this.getOwnerUUID() != null && this.getOwnerUUID().equals(pokemon.getOwnerUUID())) return false;
         ResourceLocation id = ForgeRegistries.ENTITY_TYPES.getKey(target.getType());
@@ -1011,14 +1025,22 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         level.broadcastEntityEvent(this,(byte)61);return true;
     }
     public boolean isDefeated(){return entityData.get(DEFEATED);}
+    public boolean isWildEncounter(){return entityData.get(WILD_ENCOUNTER);}
+    public boolean isWildEncounterDowned(){return entityData.get(WILD_ENCOUNTER_DOWNED);}
+    public String wildEncounterOwner(){return entityData.get(WILD_ENCOUNTER_OWNER);}
+    public void setWildEncounter(boolean encounter){entityData.set(WILD_ENCOUNTER,encounter);}
+    public void setWildEncounterDowned(boolean downed){entityData.set(WILD_ENCOUNTER_DOWNED,downed);}
+    public void setWildEncounterOwner(UUID owner){entityData.set(WILD_ENCOUNTER_OWNER,owner==null?"":owner.toString());}
     /** Called only by the wild encounter manager; domestic defeat remains unchanged. */
     public void setEncounterDowned(boolean downed) {
         if (downed) {
+            entityData.set(WILD_ENCOUNTER_DOWNED, true);
             entityData.set(DEFEATED, true); aiBeforeDefeat = isNoAi(); setNoAi(true);
             setHealth(1.0F); setTarget(null); getNavigation().stop(); resetLove();
             attackAnimationTicks=0; stopSpontaneousRun(); setFollowingRun(false); setFollowingOwner(false);
             setSleeping(true); setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO); fallDistance=0;
         } else {
+            entityData.set(WILD_ENCOUNTER_DOWNED, false);
             entityData.set(DEFEATED, false); setNoAi(aiBeforeDefeat); setSleeping(false);
         }
     }

@@ -64,11 +64,15 @@ public class MinemonRenderer extends GeoEntityRenderer<MinemonCreature> {
   if(validationObserver!=null)validationObserver.accept(entity,this.minemonModel);
  }
 
- @Override public boolean shouldShowName(MinemonCreature entity){return entity.isTame()
-     ||br.com.petrickfaria.minemon.pokec.WildEncounterManager.isDowned(entity);}
+ private boolean showEncounterChoices(MinemonCreature entity){
+  var player=net.minecraft.client.Minecraft.getInstance().player;
+  return player!=null&&br.com.petrickfaria.minemon.pokec.WildEncounterManager.isDowned(entity)
+      &&player.getUUID().toString().equals(entity.wildEncounterOwner());
+ }
+ @Override public boolean shouldShowName(MinemonCreature entity){return entity.isTame()||showEncounterChoices(entity);}
  @Override protected void renderNameTag(MinemonCreature entity,Component name,com.mojang.blaze3d.vertex.PoseStack pose,
       net.minecraft.client.renderer.MultiBufferSource buffers,int packedLight){
-  if(br.com.petrickfaria.minemon.pokec.WildEncounterManager.isDowned(entity)){
+  if(showEncounterChoices(entity)){
    float wildScale=SpeciesDefinitions.get(entity.getSpeciesSlug()).scale()*(entity.isBaby()?.5F:1);
    pose.pushPose();
    try{

@@ -75,9 +75,12 @@ public final class WildEncounterManager {
             throw new IllegalStateException("Unable to load wild-spawn config " + file, error);
         }
     }
-    public static boolean isEncounter(MinemonCreature pokemon) { return pokemon.getPersistentData().getBoolean(MARKER); }
+    public static boolean isEncounter(MinemonCreature pokemon) {
+        return pokemon.level.isClientSide ? pokemon.isWildEncounter() : pokemon.getPersistentData().getBoolean(MARKER);
+    }
     public static boolean isDowned(MinemonCreature pokemon) {
-        return isEncounter(pokemon) && "downed".equals(pokemon.getPersistentData().getString(STATE));
+        return isEncounter(pokemon) && (pokemon.level.isClientSide ? pokemon.isWildEncounterDowned()
+                : "downed".equals(pokemon.getPersistentData().getString(STATE)));
     }
     public static UUID owner(MinemonCreature pokemon) {
         var data = pokemon.getPersistentData();
@@ -87,6 +90,10 @@ public final class WildEncounterManager {
     public static void trackLoaded(MinemonCreature pokemon) {
         if (!isEncounter(pokemon) || !(pokemon.level instanceof ServerLevel level)) return;
         UUID owner = owner(pokemon);
+        pokemon.setWildEncounter(true);
+        pokemon.setWildEncounterOwner(owner);
+        pokemon.setWildEncounterDowned(isDowned(pokemon));
+        if (isDowned(pokemon)) pokemon.setEncounterDowned(true);
         if (owner != null) WildEncounterData.get(level).put(owner, pokemon.getUUID(), isDowned(pokemon) ? "downed" : "active");
     }
 
@@ -124,6 +131,8 @@ public final class WildEncounterManager {
             pokemon.setPokemonLevel(spawnLevel(species, player.getRandom()));
             var data = pokemon.getPersistentData();
             data.putBoolean(MARKER, true); data.putUUID(OWNER, player.getUUID()); data.putString(STATE, "active");
+            pokemon.setWildEncounter(true);
+            pokemon.setWildEncounterOwner(player.getUUID());
             data.putLong(LAST_CHECK, now);
             data.putLong(LAST_IN_RANGE, now);
             if (level.addFreshEntity(pokemon)) encounterData.put(player.getUUID(), pokemon.getUUID(), "active");
@@ -279,6 +288,8 @@ public final class WildEncounterManager {
             player.awardStat(net.minecraft.stats.Stats.ITEM_USED.get(br.com.petrickfaria.minemon.registry.ModItems.POKEBALL.get()));
             pokemon.tame(player);
             pokemon.setEncounterDowned(false);
+            pokemon.setWildEncounter(false);
+            pokemon.setWildEncounterOwner(null);
             pokemon.setHealth(pokemon.getMaxHealth());
             data.remove(MARKER); data.remove(OWNER); data.remove(STATE); data.remove(DOWNED_AT); data.remove(REWARDED);
             return CaptureResult.CAPTURED;
