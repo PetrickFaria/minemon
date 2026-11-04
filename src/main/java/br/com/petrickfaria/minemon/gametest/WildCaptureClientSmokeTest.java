@@ -91,7 +91,7 @@ final class WildCaptureClientSmokeTest {
             if (interactionSent && !balls.isEmpty()) {
                 CaptureBallProjectile ball = balls.get(0);
                 int age = ball.tickCount;
-                int[] frameTicks = {15, 30, 45, 60};
+                int[] frameTicks = {12, 26, 40, 58};
                 String[] frameNames = {"wild-capture-throw.png", "wild-capture-wobble-1.png",
                         "wild-capture-wobble-2.png", "wild-capture-stars.png"};
                 for (int i = 0; i < frameTicks.length; i++) if (!screenshots[i] && age >= frameTicks[i]) {
@@ -109,7 +109,7 @@ final class WildCaptureClientSmokeTest {
                 if (mc.level.getEntity(encounterId) != null) throw new IllegalStateException("Captured wild encounter remained in the world");
                 if (mc.level.getEntitiesOfClass(CaptureBallProjectile.class, mc.player.getBoundingBox().inflate(24)).size() != 0)
                     throw new IllegalStateException("Capture visual entity remained after its animation");
-                for (boolean written : screenshots) if (!written) throw new IllegalStateException("Missing client capture animation frame");
+                for (boolean written : screenshots) if (!written) throw new IllegalStateException("Missing client capture animation frame; frames="+java.util.Arrays.toString(screenshots)+", interactionSent="+interactionSent+", elapsed="+ticks);
                 Files.writeString(Path.of("wild-capture-client-pass.txt"),
                         "PASS WILD CAPTURE CLIENT: options label, 3D ball throw, capture wobbles, success stars, and stored Pokémon validated in the Minecraft client\n");
                 System.out.println("[WILD CAPTURE CLIENT] PASS: four rendered sequence frames and server-side capture transaction validated");
