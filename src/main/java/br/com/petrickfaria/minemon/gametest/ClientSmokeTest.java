@@ -926,6 +926,8 @@ public final class ClientSmokeTest {
    String submerged=idle
        ?firstMappedClip(definition,"water_idle","water_surface_idle","surface_water_idle","surfacewater_idle")
        :firstMappedClip(definition,"water_swim","water_surface_swim","surface_water_swim","surfacewater_swim");
+   if(surface==null&&submerged==null)
+    return hasSelectedClip(slug,state,idle?definition.idle():definition.walk());
    return hasSelectedClip(slug,state,surface)||hasSelectedClip(slug,state,submerged);
   }
   private static boolean hasVelocitySample(String slug,String state,String clip,boolean aboveRunThreshold) {
