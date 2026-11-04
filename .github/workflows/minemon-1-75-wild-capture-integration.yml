@@ -121,3 +121,15 @@ jobs:
             run/screenshots/wild-capture-*.png
           if-no-files-found: error
           retention-days: 14
+
+      - name: Upload validation diagnostics after a failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Minemon-1.75-validation-diagnostics
+          path: |
+            run/client-validation.txt
+            run/logs/**
+            run/screenshots/**
+          if-no-files-found: ignore
+          retention-days: 7
