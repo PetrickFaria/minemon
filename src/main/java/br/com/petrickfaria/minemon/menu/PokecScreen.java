@@ -218,6 +218,7 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
             drawCentered(pose, "?", 268, 61, 0xFF404040);
             drawCentered(pose, "ESPÉCIE BLOQUEADA", 268, 105, 0xFF404040);
         }
+        com.mojang.blaze3d.systems.RenderSystem.disableDepthTest();
         GuiComponent.fill(pose, 154, 136, 382, 137, 0xFFC6C6C6);
         font.draw(pose, "DADOS DA ESPÉCIE", 154, 139, 0xFF404040);
         String rarity=PokecEconomy.get().rarity(species.slug());
@@ -230,7 +231,7 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         font.draw(pose,"Nível: "+level,302,176,0xFF404040);
         font.draw(pose,"Raridade: "+rarityLabel(rarity),154,188,0xFF404040);
         String types=species.types().stream().map(type->{var soul=SoulType.fromSpeciesType(type);return soul==null?type:soulTypeLabel(soul.name());}).collect(java.util.stream.Collectors.joining(" / "));
-        font.draw(pose,fitText("Tipo: "+types,234),154,200,0xFF404040);
+        font.draw(pose,fitText("Tipo: "+types,234),154,197,0xFF404040);
         drawAcquisitionPanel(pose, species, unlocked, species.isEvolution() && !unlocked, mouseX, mouseY);
         drawCompactConversion(pose);
     }
