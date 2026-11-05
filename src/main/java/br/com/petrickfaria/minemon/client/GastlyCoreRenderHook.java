@@ -35,7 +35,12 @@ public final class GastlyCoreRenderHook {
             var draws=new ArrayList<AuraDraw>();
             for(var gastly:gastlys){
                 double distanceSqr=gastly.distanceToSqr(camera.x,camera.y,camera.z);
-                if(distanceSqr>br.com.petrickfaria.minemon.entity.GastlyAura.MAX_RENDER_DISTANCE
+                var bounds=gastly.getBoundingBox();
+                double dx=Math.max(0.0D,Math.max(bounds.minX-camera.x,camera.x-bounds.maxX));
+                double dy=Math.max(0.0D,Math.max(bounds.minY-camera.y,camera.y-bounds.maxY));
+                double dz=Math.max(0.0D,Math.max(bounds.minZ-camera.z,camera.z-bounds.maxZ));
+                double distanceToBodySqr=dx*dx+dy*dy+dz*dz;
+                if(distanceToBodySqr>br.com.petrickfaria.minemon.entity.GastlyAura.MAX_RENDER_DISTANCE
                         *br.com.petrickfaria.minemon.entity.GastlyAura.MAX_RENDER_DISTANCE)continue;
                 int tick=gastly.tickCount;
                 for(int slot=0;slot<5;slot++)addDraw(draws,gastly,slot,false,slot*3,tick,distanceSqr);
