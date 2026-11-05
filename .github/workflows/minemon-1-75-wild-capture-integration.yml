@@ -1,10 +1,13 @@
-name: Minemon 1.75 wild capture integration
+name: Minemon versioned wild capture integration
 on:
   push:
     branches: [feature/minemon-1.75-wild-capture-integration]
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
+concurrency:
+  group: minemon-publication-${{ github.ref }}
+  cancel-in-progress: false
 jobs:
   validate:
     runs-on: ubuntu-latest
@@ -20,6 +23,12 @@ jobs:
         with:
           python-version: '3.12'
       - uses: gradle/actions/setup-gradle@v4
+      - name: Resolve release version
+        run: |
+          set -euo pipefail
+          version="$(python3 tools/minemon_version.py)"
+          echo "MINEMON_VERSION=$version" >> "$GITHUB_ENV"
+          echo "Publishing candidate: $version"
       - name: Verify both source lines and Java 17 game target
         run: |
           set -euo pipefail
@@ -27,7 +36,7 @@ jobs:
           git merge-base --is-ancestor 6f2a94c8391485a1864640916edb62e50809c6bb HEAD
           grep -Fx 'minecraft_version=1.19.2' gradle.properties
           grep -Fx 'forge_version=43.5.0' gradle.properties
-          grep -Fx 'mod_version=1.75' gradle.properties
+          test "$(python3 tools/minemon_version.py)" = "$MINEMON_VERSION"
           if git grep -n -I -E -i '(gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,})' -- . ':!gradlew*'; then
             echo 'Possible embedded credential found.'
             exit 1
@@ -87,14 +96,15 @@ jobs:
           test -f run/screenshots/alakazam-1.73-front.png
           test -f run/screenshots/alakazam-1.73-side.png
           test -f run/screenshots/alakazam-1.73-back.png
-      - name: Build and verify the Minemon 1.75 JAR
+      - name: Build and verify the versioned Minemon JAR
         run: |
           set -euo pipefail
           ./gradlew --no-daemon build -x test
-          jar_file='build/libs/Minemon-1.19.2-1.75.jar'
+          jar_file="build/libs/Minemon-1.19.2-${MINEMON_VERSION}.jar"
           test -f "$jar_file"
           unzip -t "$jar_file"
-          unzip -p "$jar_file" META-INF/mods.toml | grep -F 'version="1.75"'
+          unzip -p "$jar_file" META-INF/mods.toml | grep -F "version=\"${MINEMON_VERSION}\""
+          unzip -p "$jar_file" META-INF/MANIFEST.MF | grep -F "Implementation-Version: ${MINEMON_VERSION}"
           for entry in \
             br/com/petrickfaria/minemon/pokec/WildEncounterManager.class \
             br/com/petrickfaria/minemon/pokec/TrainerProgression.class \
@@ -112,9 +122,9 @@ jobs:
           grep -F 'PASS GHOST LINE CLIENT:' run/client-validation-ghost-line.txt
       - uses: actions/upload-artifact@v4
         with:
-          name: Minemon-1.19.2-1.75
+          name: Minemon-1.19.2-${{ env.MINEMON_VERSION }}
           path: |
-            build/libs/Minemon-1.19.2-1.75.jar
+            build/libs/Minemon-1.19.2-${{ env.MINEMON_VERSION }}.jar
             run/world-reopen-pass.txt
             run/wild-capture-client-pass.txt
             run/wild-capture-reopen-1.txt
@@ -131,10 +141,26 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: Minemon-1.75-validation-diagnostics
+          name: Minemon-${{ env.MINEMON_VERSION }}-validation-diagnostics
           path: |
             run/client-validation.txt
             run/logs/**
             run/screenshots/**
           if-no-files-found: ignore
           retention-days: 7
+
+      - name: Record the version after successful validation and artifact upload
+        if: success()
+        env:
+          RELEASE_VERSION: ${{ env.MINEMON_VERSION }}
+        run: |
+          set -euo pipefail
+          tag="minemon-v${RELEASE_VERSION}"
+          remote_commit="$(git ls-remote --refs origin "refs/tags/${tag}" | awk 'NR == 1 { print $1 }')"
+          if [ -n "$remote_commit" ]; then
+            test "$remote_commit" = "$GITHUB_SHA"
+            echo "Release tag ${tag} already points to this commit."
+          else
+            git tag "$tag" "$GITHUB_SHA"
+            git push origin "refs/tags/${tag}"
+          fi

@@ -6,7 +6,19 @@ plugins {
 }
 
 group = 'br.com.petrickfaria.minemon'
-version = mod_version
+def resolvedModVersion = System.getenv('MINEMON_VERSION')?.trim()
+if (!resolvedModVersion) {
+    def versionOutput = new ByteArrayOutputStream()
+    exec {
+        commandLine 'python3', 'tools/minemon_version.py'
+        standardOutput = versionOutput
+    }
+    resolvedModVersion = versionOutput.toString('UTF-8').trim()
+}
+if (!(resolvedModVersion ==~ /\d+\.\d{2}/)) {
+    throw new GradleException("Invalid Minemon version: ${resolvedModVersion}")
+}
+version = resolvedModVersion
 base { archivesName = 'Minemon-1.19.2' }
 
 configurations {
@@ -190,7 +202,7 @@ jar.finalizedBy('reobfJar')
 // ForgeGradle produces the executable Jar-in-Jar artifact as a separate task.
 // Include it in assemble so build outputs the JLayer-bearing production JAR.
 tasks.named('jarJar') {
-    archiveFileName = 'Minemon-1.19.2-1.75.jar'
+    archiveFileName = "Minemon-1.19.2-${project.version}.jar"
     finalizedBy('reobfJarJar')
     exclude 'br/com/petrickfaria/minemon/gametest/**'
     exclude 'data/minemon_gen1/structures/test_arena.nbt'
