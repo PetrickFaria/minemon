@@ -18,7 +18,7 @@ public final class PokecTerminalSlots {
     private final Inventory inventory;
     private final SimpleContainer items = new SimpleContainer(4);
     private boolean changing;
-    private final net.minecraft.world.inventory.SimpleContainerData state=new net.minecraft.world.inventory.SimpleContainerData(2);
+    private final net.minecraft.world.inventory.SimpleContainerData state=new net.minecraft.world.inventory.SimpleContainerData(3);
     public PokecTerminalSlots(PokecMenu menu, Inventory inventory) {
         this.menu=menu;this.inventory=inventory;
         if(inventory.player instanceof ServerPlayer player){
@@ -32,11 +32,13 @@ public final class PokecTerminalSlots {
     private Slot createSlot(int index,int x,int y) {
         return switch(index) {
             case 0 -> new Slot(items,0,x,y){
+                @Override public boolean isActive(){return (state.get(2)&1)!=0;}
                 @Override public boolean mayPlace(ItemStack stack){return acceptsPayment(stack);}
                 @Override public int getMaxStackSize(){return Math.min(64,remaining());}
                 @Override public int getMaxStackSize(ItemStack stack){return Math.min(stack.getMaxStackSize(),remaining());}
             };
             case 1 -> new Slot(items,1,x,y){
+                @Override public boolean isActive(){return (state.get(2)&2)!=0;}
                 @Override public boolean mayPlace(ItemStack stack){return false;}
                 @Override public boolean mayPickup(Player player){return player.level.isClientSide||canBuy();}
                 @Override public void onTake(Player player,ItemStack stack){if(player instanceof ServerPlayer server)pay(server);super.onTake(player,stack);}
@@ -83,6 +85,8 @@ public final class PokecTerminalSlots {
     }
     public void refresh(){
         if(server()==null||changing)return;
+        var species=PokecSpecies.get(menu.selectedSlug());
+        state.set(2,(species!=null&&(!species.isEvolution()||unlocked())?1:0)|(unlocked()?2:0));
         state.set(0,PokecPlayerData.spawnEnabled(server(),menu.selectedSlug())?1:0);
         state.set(1,(int)Math.round(WildEncounterManager.configuredSpawnChance(server(),menu.selectedSlug())*10000));
         changing=true;

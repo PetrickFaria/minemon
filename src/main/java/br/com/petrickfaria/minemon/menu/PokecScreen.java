@@ -189,6 +189,7 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         font.draw(pose, "INVENTÁRIO", Math.round(276*uiScale)-INVENTORY_SLOT_WIDTH/2+2, inventoryTop + INVENTORY_LABEL_Y, 0xFF404040);
         for (int i=0;i<menu.slots.size();i++) {
             var slot=menu.slots.get(i);
+            if(!slot.isActive())continue;
             if(i==37&&!syncedUnlocked.contains(selectedSlug))continue;
             MinemonGui.slot(pose, slot.x-1, slot.y-1, 18, 18);
         }
