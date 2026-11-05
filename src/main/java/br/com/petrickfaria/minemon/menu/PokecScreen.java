@@ -551,6 +551,7 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         super.render(pose, mouseX, mouseY, partialTick);
         // Container item rendering must finish before the damage caption is composited.
         Minecraft.getInstance().renderBuffers().bufferSource().endBatch();
+        com.mojang.blaze3d.systems.RenderSystem.disableScissor();
         pose.pushPose();
         pose.translate(leftPos,topPos,400);
         pose.scale(uiScale,uiScale,1);
