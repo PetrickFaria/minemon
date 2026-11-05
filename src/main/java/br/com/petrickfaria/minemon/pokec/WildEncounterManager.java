@@ -217,7 +217,7 @@ public final class WildEncounterManager {
     public static boolean canDefeat(MinemonCreature wild, MinemonCreature attacker) {
         UUID owner = owner(wild);
         if (!isEncounter(wild) || isDowned(wild) || !attacker.isTame() || owner == null || !owner.equals(attacker.getOwnerUUID())) return false;
-        ServerPlayer player = wild.level instanceof ServerLevel server ? server.getServer().getPlayerList().getPlayer(owner) : null;
+        ServerPlayer player = encounterPlayer(wild, owner);
         if (player == null) return false;
         return WildEncounterData.get((ServerLevel) wild.level).count(owner, "downed") < MAX_DOWNED;
     }
@@ -237,8 +237,17 @@ public final class WildEncounterManager {
     public static boolean hasDefeatedCapacity(MinemonCreature wild) {
         UUID owner = owner(wild);
         if (owner == null || !(wild.level instanceof ServerLevel level)) return false;
-        ServerPlayer player = level.getServer().getPlayerList().getPlayer(owner);
+        ServerPlayer player = encounterPlayer(wild, owner);
         return player != null && WildEncounterData.get(level).count(owner, "downed") < MAX_DOWNED;
+    }
+
+    /** Find an owner in the player list, with a loaded-level fallback for in-world test transports. */
+    private static ServerPlayer encounterPlayer(MinemonCreature wild, UUID owner) {
+        if (!(wild.level instanceof ServerLevel level) || owner == null) return null;
+        ServerPlayer player = level.getServer().getPlayerList().getPlayer(owner);
+        if (player != null) return player;
+        return level.getEntitiesOfClass(ServerPlayer.class, wild.getBoundingBox().inflate(128.0D),
+                candidate -> owner.equals(candidate.getUUID())).stream().findFirst().orElse(null);
     }
 
     public static boolean enterDowned(MinemonCreature wild, net.minecraft.world.damagesource.DamageSource source) {
@@ -249,7 +258,7 @@ public final class WildEncounterManager {
         data.putInt("MinemonWildCaptureAttempts", 0); data.putInt("MinemonWildTreats", 0);
         WildEncounterData.get((ServerLevel) wild.level).put(owner(wild), wild.getUUID(), "downed");
         wild.setHealth(1.0F); wild.setEncounterDowned(true);
-        ServerPlayer player = wild.level instanceof ServerLevel server ? server.getServer().getPlayerList().getPlayer(owner(wild)) : null;
+        ServerPlayer player = encounterPlayer(wild, owner(wild));
         if (player != null) PokecPlayerData.addTrainerXp(player, TrainerProgression.pokemonXp(wild.getSpeciesSlug(), wild.getPokemonLevel()));
         return true;
     }

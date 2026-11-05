@@ -216,6 +216,8 @@ public final class CompanionTests {
       "An egg-spawned wild encounter must not occupy a domesticated Pokémon slot");
   MinemonCreature ally=h.spawn(ModEntities.SPECIES.get("charizard").get(),new BlockPos(7,1,7));
   ally.tame(owner);ally.setOwnerUUID(owner.getUUID());wild.setHealth(2.0F);
+  check(h,br.com.petrickfaria.minemon.pokec.WildEncounterManager.canDefeat(wild,ally),
+      "A same-level owner and its active companion must be authorized to defeat this wild encounter");
   check(h,wild.hurt(DamageSource.mobAttack(ally),20.0F),"Owned Pokémon must be able to defeat its egg-spawned wild target");
   check(h,br.com.petrickfaria.minemon.pokec.WildEncounterManager.isDowned(wild)&&wild.getHealth()==1.0F
       &&!wild.isRemoved()&&wild.isAlive(),"Defeated egg-spawned Pokémon must enter the capture-ready state instead of dying");
