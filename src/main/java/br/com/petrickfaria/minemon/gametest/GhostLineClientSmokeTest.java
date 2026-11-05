@@ -18,8 +18,8 @@ import java.util.*;
 /** Real-client visual and timing smoke test for the Gastly evolution line. */
 final class GhostLineClientSmokeTest {
  private static boolean opened,setup,sleepStarted,blinkChecked,validationComplete;
- private static boolean farTeleportRequested,farTeleportApplied;
- private static int farTeleportStartTick;
+ private static boolean farViewRequested,farViewApplied;
+ private static int farViewStartTick;
  private static int screenshotFlushTicks;
  private static boolean screenshotInFlight;
  private static final Set<String> writtenScreenshots=new HashSet<>();
@@ -80,20 +80,20 @@ final class GhostLineClientSmokeTest {
    if(authoritativePlayer!=null)authoritativePlayer.teleportTo(server.overworld(),px,py,pz,yaw,pitch);
   });
  }
- private static void faceFromDistance(Minecraft mc,MinemonCreature mob,double distance){
-  var player=mc.player;if(player==null)return;
-  double px=mob.getX(),py=mob.getY()-0.2D,pz=mob.getZ()-distance;
-  double dx=mob.getX()-px,dz=mob.getZ()-pz,dy=mob.getY()+1.15D-player.getEyeY();
-  player.setPos(px,py,pz);
-  player.setYRot((float)(Math.toDegrees(Math.atan2(dz,dx))-90));
-  player.setXRot((float)-Math.toDegrees(Math.atan2(dy,Math.sqrt(dx*dx+dz*dz))));
-  var server=mc.getSingleplayerServer();var playerId=player.getUUID();float yaw=player.getYRot(),pitch=player.getXRot();
-  farTeleportRequested=true;farTeleportStartTick=ticks;farTeleportApplied=false;
+ private static void prepareFarGastlyView(Minecraft mc,MinemonCreature mob){
+  var server=mc.getSingleplayerServer();if(server==null)return;
+  // Keep the camera at the established near viewpoint and move the fixture entity
+  // into the loaded 50-block corridor. A player teleport beyond the entity's
+  // current chunk is reverted by the integrated server during this smoke test.
+  face(mc,mob);
+  farViewRequested=true;farViewStartTick=ticks;farViewApplied=false;
+  var mobId=mob.getUUID();
   server.execute(()->{
-   var authoritativePlayer=server.getPlayerList().getPlayer(playerId);
-   if(authoritativePlayer!=null){
-    authoritativePlayer.teleportTo(server.overworld(),px,py,pz,yaw,pitch);
-    mc.execute(()->farTeleportApplied=true);
+   var authoritative=server.overworld().getEntity(mobId);
+   if(authoritative instanceof MinemonCreature gastly){
+    gastly.moveTo(0.0D,101.0D,54.0D,180.0F,0.0F);
+    gastly.setYBodyRot(180.0F);gastly.setYHeadRot(180.0F);
+    mc.execute(()->farViewApplied=true);
    }
   });
  }
@@ -146,7 +146,7 @@ final class GhostLineClientSmokeTest {
     setup=true;
     mc.getSingleplayerServer().execute(()->{
      var level=mc.getSingleplayerServer().overworld();
-     for(int x=-8;x<=8;x++)for(int z=-48;z<=16;z++){
+     for(int x=-8;x<=8;x++)for(int z=-48;z<=64;z++){
       level.setBlockAndUpdate(new BlockPos(x,100,z),Blocks.STONE.defaultBlockState());
       for(int y=101;y<=112;y++)level.setBlockAndUpdate(new BlockPos(x,y,z),Blocks.AIR.defaultBlockState());
      }
@@ -169,16 +169,16 @@ final class GhostLineClientSmokeTest {
    if(ticks>=20&&screenshotSlotAvailable()&&!captures.contains("gastly-back")){faceFromAngle(mc,gastly,180);snapNow(mc,"gastly-back");}
    if(ticks>=28&&screenshotSlotAvailable()&&!captures.contains("gastly-left")){faceFromAngle(mc,gastly,270);snapNow(mc,"gastly-left");}
    if(ticks>=36&&screenshotSlotAvailable()&&!captures.contains("gastly-50-block")){
-    if(!farTeleportRequested)faceFromDistance(mc,gastly,50.0D);
-    else if(farTeleportApplied){
+    if(!farViewRequested)prepareFarGastlyView(mc,gastly);
+    else if(farViewApplied){
      double playerDistance=Math.sqrt(gastly.distanceToSqr(mc.player.getX(),mc.player.getY(),mc.player.getZ()));
      double renderedCameraDistance=br.com.petrickfaria.minemon.client.GastlyCoreRenderHook.maxCameraDistanceForValidation();
      if(playerDistance>=49.0D&&renderedCameraDistance>=49.0D){
       System.out.println("[GHOST LINE] 50-block setup player="+mc.player.position()+" gastly="+gastly.position()
           +" playerDistance="+playerDistance+" renderedCameraDistance="+renderedCameraDistance);
       snap(mc,"gastly-50-block");
-     }else if(ticks-farTeleportStartTick>40)
-      throw new IllegalStateException("Server/client render hook did not observe the requested 50-block Gastly view; playerDistance="
+     }else if(ticks-farViewStartTick>40)
+      throw new IllegalStateException("Server/client render hook did not observe Gastly at the requested 50-block view; playerDistance="
           +playerDistance+" renderedCameraDistance="+renderedCameraDistance);
     }
    }
