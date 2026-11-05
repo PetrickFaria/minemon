@@ -75,18 +75,15 @@ public final class GastlySmokeParticle extends TextureSheetParticle {
         if(owner==null)return;
         float scale=SpeciesDefinitions.get("gastly").scale();
         double angle=slot*2.3999632297+owner.tickCount*.012;
-        // Keep the entire camera-facing smoke quad outside the projected core silhouette.
-        // Normal particle depth testing then preserves the body while retaining the aura ring.
+        // Contract the original radial orbit uniformly. The cutout core pass and the
+        // post-particle redraw provide the same depth rule wherever a billboard crosses it.
         double bodyWidth=br.com.petrickfaria.minemon.entity.ModelMetrics.bodyWidth("gastly")*scale;
-        // The billboard quad has screen-space extent, so placing its center at the
-        // core edge still lets its corners cover the face. Keep the whole aura quad
-        // outside the core silhouette for every camera azimuth.
-        double radius=br.com.petrickfaria.minemon.entity.GastlyAura.minimumVisibleParticleRadius(bodyWidth,this.quadSize);
+        double radius=br.com.petrickfaria.minemon.entity.GastlyAura.particleOrbitRadius(bodyWidth,this.quadSize);
         double center=br.com.petrickfaria.minemon.entity.ModelMetrics.bodyCenterY("gastly")*scale;
         if(owner instanceof br.com.petrickfaria.minemon.entity.MinemonCreature pokemon && pokemon.isDefeated())center+=br.com.petrickfaria.minemon.entity.ModelMetrics.defeatedOffset("gastly",scale);
         double height=br.com.petrickfaria.minemon.entity.ModelMetrics.bodyHeight("gastly")*scale;
         double px=owner.getX()+Math.cos(angle)*radius,pz=owner.getZ()+Math.sin(angle)*radius;
-        double py=owner.getY()+center+((slot%3)-.65)*height*.32;
+        double py=owner.getY()+center+((slot%3)-.65)*height*.32*br.com.petrickfaria.minemon.entity.GastlyAura.RADIAL_DISTRIBUTION_SCALE;
         this.xo=this.x;this.yo=this.y;this.zo=this.z;setPos(px,py,pz);
     }
     private static int lerp(float t, int from, int to) {

@@ -65,8 +65,8 @@ public final class CompanionTests {
   check(h,b.canAttackType(EntityType.PLAYER),"Player entity type must be a valid retaliation target");
   float wildHealth=b.getHealth();
   b.setNoAi(true);h.runAfterDelay(80,()->{b.setNoAi(false);b.getNavigation().stop();
-   check(h,!b.hurt(DamageSource.playerAttack(p),1),"A player swing must not damage a wild Pokémon");
-   check(h,b.getHealth()==wildHealth&&b.getTarget()==null,"Direct player hits must not damage or provoke a wild Pokémon");
+   check(h,b.hurt(DamageSource.playerAttack(p),12.0F),"A direct melee hit must reach the wild Pokémon damage flow");
+   check(h,b.getHealth()==wildHealth-1.0F&&b.getTarget()==null,"A player hit must deal one HP and must not make the wild Pokémon retaliate");
    check(h,p.getHealth()==health,"A wild Pokémon must not retaliate against a player hit");p.discard();h.succeed();});
  }
  @GameTest(template="test_arena",timeoutTicks=300)
@@ -195,24 +195,78 @@ public final class CompanionTests {
 
  @GameTest(template="test_arena",timeoutTicks=100)
  public static void directPlayerHitsCommandOwnedPokemonToFocusWildTarget(GameTestHelper h){
-  ServerPlayer owner=player(h);var wild=h.spawn(ModEntities.SPECIES.get("geodude").get(),new BlockPos(8,1,8));
+  ServerPlayer owner=player(h);var egg=br.com.petrickfaria.minemon.registry.ModItems.EGGS.get("geodude").get();
+  BlockPos eggFloor=h.absolutePos(new BlockPos(8,0,8));
+  owner.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,new net.minecraft.world.item.ItemStack(egg));
+  var eggHit=new net.minecraft.world.phys.BlockHitResult(net.minecraft.world.phys.Vec3.atCenterOf(eggFloor),net.minecraft.core.Direction.UP,eggFloor,false);
+  check(h,egg.useOn(new net.minecraft.world.item.context.UseOnContext(owner,net.minecraft.world.InteractionHand.MAIN_HAND,eggHit)).consumesAction(),"Geodude spawn egg must create the wild target");
+  var spawned=h.getLevel().getEntitiesOfClass(MinemonCreature.class,new net.minecraft.world.phys.AABB(eggFloor).inflate(4),m->m.getSpeciesSlug().equals("geodude")&&!m.isTame());
+  check(h,!spawned.isEmpty(),"Spawn-egg Geodude must be a wild Pokémon");
+  MinemonCreature wild=spawned.get(0);
   MinemonCreature[] team=new MinemonCreature[3];String[] species={"charizard","jolteon","gengar"};
   for(int i=0;i<team.length;i++){
    team[i]=h.spawn(ModEntities.SPECIES.get(species[i]).get(),new BlockPos(7+i,1,7));team[i].tame(owner);team[i].setOwnerUUID(owner.getUUID());
   }
   team[0].setSleeping(true);team[2].setOrderedToSit(true);float hp=wild.getHealth();
-  var attack=new net.minecraftforge.event.entity.living.LivingAttackEvent(wild,net.minecraft.world.damagesource.DamageSource.playerAttack(owner),1.0F);
-  br.com.petrickfaria.minemon.pokec.PokecEvents.playerPokemonAttack(attack);
-  check(h,attack.isCanceled(),"Direct player damage to Minemon must be canceled on the server");
-  check(h,wild.getHealth()==hp,"Player hit must not reduce wild Pokémon health");
+  owner.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.NETHERITE_SWORD));
+  owner.attack(wild);
+  check(h,wild.getHealth()==hp-1.0F,"A Netherite sword hit against a spawn-egg Pokémon must cause exactly one HP of damage");
   check(h,team[0].getTarget()==wild&&team[1].getTarget()==wild&&team[2].getTarget()==wild,"Every loaded companion must focus the exact wild Pokémon hit");
   check(h,!team[0].isSleeping(),"A sleeping companion must wake immediately for the focused attack");
+  float companionHealth=team[1].getHealth();
+  check(h,!team[1].hurt(DamageSource.playerAttack(owner),20.0F)&&team[1].getHealth()==companionHealth,
+      "Direct player damage must remain blocked against the owner's domesticated Pokémon");
   wild.discard();
   h.runAfterDelay(1,()->{
    check(h,team[0].isSleeping(),"A companion that was asleep before combat must resume sleep when its focus target disappears");
    check(h,team[2].isOrderedToSit(),"The sit command must be restored after a temporary focused attack");
    owner.discard();h.succeed();
   });
+ }
+
+ @GameTest(template="test_arena",timeoutTicks=100)
+ public static void playerDamageCapIgnoresWeaponAndAttributeDamage(GameTestHelper h){
+  ServerPlayer owner=player(h);String[] species={"bulbasaur","charmander","squirtle","pikachu","geodude","gastly"};
+  net.minecraft.world.item.Item[] weapons={net.minecraft.world.item.Items.AIR,net.minecraft.world.item.Items.WOODEN_SWORD,
+      net.minecraft.world.item.Items.IRON_SWORD,net.minecraft.world.item.Items.DIAMOND_SWORD,
+      net.minecraft.world.item.Items.NETHERITE_SWORD,net.minecraft.world.item.Items.NETHERITE_AXE};
+  float[] incoming={1.0F,3.0F,6.0F,8.0F,15.0F,40.0F};
+  for(int i=0;i<species.length;i++){
+   MinemonCreature wild=h.spawn(ModEntities.SPECIES.get(species[i]).get(),new BlockPos(3+i,1,10));
+   float health=wild.getHealth();owner.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,new net.minecraft.world.item.ItemStack(weapons[i]));
+   check(h,wild.hurt(DamageSource.playerAttack(owner),incoming[i]),"Direct player melee must be accepted for weapon fixture "+weapons[i]);
+   check(h,wild.getHealth()==health-1.0F,"Player melee must be capped at one HP for "+weapons[i]+" even when incoming damage is "+incoming[i]);
+   wild.hurt(DamageSource.playerAttack(owner),incoming[i]);
+   check(h,wild.getHealth()==health-1.0F,"Repeated calls inside the vanilla hurt window must not add damage for "+weapons[i]);
+  }
+  owner.discard();h.succeed();
+ }
+
+ @GameTest(template="test_arena",timeoutTicks=100)
+ public static void playerDamageRulesDoNotChangeForVanillaMobsOrOwnedPokemon(GameTestHelper h){
+  ServerPlayer owner=player(h);MinemonCreature pokemon=h.spawn(ModEntities.SPECIES.get("pikachu").get(),new BlockPos(8,1,8));
+  pokemon.tame(owner);pokemon.setOwnerUUID(owner.getUUID());float pokemonHealth=pokemon.getHealth();
+  check(h,!pokemon.hurt(DamageSource.playerAttack(owner),30.0F)&&pokemon.getHealth()==pokemonHealth,
+      "Domestic Minemon must retain direct-player damage protection");
+  Cow cow=h.spawn(EntityType.COW,new BlockPos(10,1,8));float cowHealth=cow.getHealth();
+  check(h,cow.hurt(DamageSource.playerAttack(owner),7.0F)&&cow.getHealth()==cowHealth-7.0F,
+      "Vanilla mobs must retain their unmodified player damage");
+  owner.discard();h.succeed();
+ }
+
+ @GameTest(template="test_arena",timeoutTicks=100)
+ public static void naturalEncounterPlayerHitsStayOneHpAndNeverDownTheEncounter(GameTestHelper h){
+  ServerPlayer owner=player(h);MinemonCreature wild=h.spawn(ModEntities.SPECIES.get("bulbasaur").get(),new BlockPos(8,1,8));
+  var data=wild.getPersistentData();data.putBoolean("MinemonWildEncounter",true);data.putUUID("MinemonEncounterOwner",owner.getUUID());data.putString("MinemonEncounterState","active");
+  wild.setWildEncounter(true);wild.setWildEncounterOwner(owner.getUUID());wild.setHealth(2.0F);
+  check(h,wild.hurt(DamageSource.playerAttack(owner),50.0F),"A direct hit must be accepted on a naturally managed wild encounter");
+  check(h,wild.getHealth()==1.0F&&!br.com.petrickfaria.minemon.pokec.WildEncounterManager.isDowned(wild),
+      "A player's capped hit must leave a natural encounter at one HP without triggering capture/downed state");
+  wild.invulnerableTime=0;
+  wild.hurt(DamageSource.playerAttack(owner),50.0F);
+  check(h,wild.getHealth()==1.0F&&!br.com.petrickfaria.minemon.pokec.WildEncounterManager.isDowned(wild),
+      "A player's next hit must not kill or down a natural encounter");
+  owner.discard();h.succeed();
  }
 
  @GameTest(template="test_arena",timeoutTicks=1240)
@@ -483,8 +537,8 @@ public final class CompanionTests {
    check(h,mob.getTarget()==null,"Unprovoked Pokemon must remain neutral toward the player");
    check(h,water?mob.isInWater():mob.isFlyingSpecies()&&!mob.isOnGround(),"Provocation must occur in the actual movement medium");
    float health=p.getHealth(),wildHealth=mob.getHealth();
-   check(h,!mob.hurt(DamageSource.playerAttack(p),1),"Direct player hits must not damage wild Pokemon");
-   check(h,mob.getHealth()==wildHealth&&mob.getTarget()==null,"Wild Pokemon must remain unharmed and neutral after a direct player hit");
+   check(h,mob.hurt(DamageSource.playerAttack(p),12.0F),"A direct player hit must reach the wild Pokemon damage flow");
+   check(h,mob.getHealth()==wildHealth-1.0F&&mob.getTarget()==null,"A direct player hit must deal one HP without making the wild Pokemon retaliate");
    h.runAfterDelay(200,()->{
     check(h,p.getHealth()==health,"A wild Pokemon must not retaliate against the player's direct hit: "+state(mob,p));
     p.discard();h.succeed();

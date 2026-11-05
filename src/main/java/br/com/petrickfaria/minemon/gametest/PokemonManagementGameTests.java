@@ -256,10 +256,10 @@ public final class PokemonManagementGameTests {
         h.runAfterDelay(35, () -> {
             check(h, wild.getTarget() == null, "wild Pokémon must not acquire a nearby player as an unprovoked target");
             float health=wild.getHealth();
-            check(h, !wild.hurt(DamageSource.playerAttack(player), 1.0F), "a player swing must not damage a wild Pokémon");
+            check(h, wild.hurt(DamageSource.playerAttack(player), 9.0F), "a direct player hit must reach a wild Pokémon");
             h.runAfterDelay(2, () -> {
-                check(h, wild.getHealth()==health&&wild.getTarget()==null,
-                        "direct player hits must not damage or provoke a wild Pokémon");
+                check(h, wild.getHealth()==health-1.0F&&wild.getTarget()==null,
+                        "direct player hits must deal one HP and must not provoke a wild Pokémon");
                 player.discard();
                 h.succeed();
             });

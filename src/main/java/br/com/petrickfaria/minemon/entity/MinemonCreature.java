@@ -736,13 +736,15 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     @Override
     public boolean hurt(DamageSource source, float amount) {
         if(isDefeated())return false;
-        if (!isRocketSpecial() && source.getEntity() instanceof Player player && source.getDirectEntity() == player) return false;
+        boolean directPlayerMelee=source.getEntity() instanceof Player player&&source.getDirectEntity()==player;
+        if (!isRocketSpecial() && isTame() && directPlayerMelee) return false;
         if (br.com.petrickfaria.minemon.pokec.WildEncounterManager.isEncounter(this)) {
             if (br.com.petrickfaria.minemon.pokec.WildEncounterManager.isDowned(this)) return false;
-            if (!br.com.petrickfaria.minemon.pokec.WildEncounterManager.canDamage(this, source)) return false;
+            if (!directPlayerMelee&&!br.com.petrickfaria.minemon.pokec.WildEncounterManager.canDamage(this, source)) return false;
+            if(directPlayerMelee)amount=Math.min(amount,Math.max(0.0F,this.getHealth()-1.0F));
             // When every defeated slot is occupied, attacks can reduce an encounter
             // to one health point, but the entity cannot die or grant a reward.
-            if (this.getHealth() - amount <= 0.0F
+            if (!directPlayerMelee&&this.getHealth() - amount <= 0.0F
                     && !br.com.petrickfaria.minemon.pokec.WildEncounterManager.hasDefeatedCapacity(this))
                 amount = Math.max(0.0F, this.getHealth() - 1.0F);
         }
@@ -751,7 +753,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         if(hurt&&!this.level.isClientSide){
             this.setSleeping(false);this.entityData.set(NIGHT_REST,false);this.wakeGraceTicks=100;this.syncNaturalState();
         }
-        if (hurt && !this.level.isClientSide && source.getEntity() instanceof LivingEntity attacker
+        if (hurt && !directPlayerMelee && !this.level.isClientSide && source.getEntity() instanceof LivingEntity attacker
                 && this.canAttack(attacker)) {
             this.setTarget(attacker);
             if(wokeFromRest){this.nightCombatTicks=WILD_AGGRESSION_DURATION_TICKS;this.nightUnreachableTicks=0;}

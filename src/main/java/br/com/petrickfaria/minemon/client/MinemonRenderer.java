@@ -281,6 +281,10 @@ public class MinemonRenderer extends GeoEntityRenderer<MinemonCreature> {
   @Override public net.minecraft.client.renderer.RenderType getRenderType(net.minecraft.resources.ResourceLocation texture){
    if(texture.getPath().contains("moltres_cobblemon_1_8_2"))
     return net.minecraft.client.renderer.RenderType.entityCutoutNoCull(texture);
+   // Gastly's source texture has binary alpha. A cutout pass keeps every opaque
+   // core texel depth-writing, so particles use the same occlusion rule in all views.
+   if(texture.getPath().contains("/gastly/")||texture.getPath().contains("gastly_cobblemon_1_8_2"))
+    return net.minecraft.client.renderer.RenderType.entityCutoutNoCull(texture);
    return net.minecraft.client.renderer.RenderType.entityTranslucent(texture);
   }
  }

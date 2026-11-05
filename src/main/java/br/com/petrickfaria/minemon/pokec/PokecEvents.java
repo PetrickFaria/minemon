@@ -23,22 +23,31 @@ import net.minecraftforge.fml.common.Mod;
 @Mod.EventBusSubscriber(modid=Minemon.MOD_ID)
 public final class PokecEvents {
     @SubscribeEvent public static void playerPokemonAttack(LivingAttackEvent event) {
-        if (!(event.getEntity() instanceof MinemonCreature) || ((MinemonCreature) event.getEntity()).isRocketSpecial()
+        if (!(event.getEntity() instanceof MinemonCreature wild) || wild.isRocketSpecial()
                 || event.getEntity().level.isClientSide
                 || !(event.getSource().getEntity() instanceof net.minecraft.server.level.ServerPlayer player)
                 || event.getSource().getDirectEntity() != player) return;
-        // Player swings are target commands only; no Minemon takes direct player damage.
-        event.setCanceled(true);
-        if (!(event.getEntity() instanceof MinemonCreature wild) || wild.isTame()
-                || wild.isDefeated() || !wild.isAlive()
-                || br.com.petrickfaria.minemon.pokec.WildEncounterManager.isDowned(wild)
-                || player.level != wild.level || player.distanceToSqr(wild) > 36.0D) return;
-        var area = wild.getBoundingBox().inflate(16.0D);
-        for (MinemonCreature companion : wild.level.getEntitiesOfClass(MinemonCreature.class, area,
-                pokemon -> pokemon.isTame() && player.getUUID().equals(pokemon.getOwnerUUID())
-                        && !pokemon.isDefeated() && pokemon.isAlive())) {
-            companion.focusPlayerTarget(wild);
+        // Owned Pokémon remain protected. A valid wild target takes exactly one HP
+        // regardless of the weapon's attack value, strength, critical, or enchantments.
+        if (wild.isTame()) { event.setCanceled(true); return; }
+        if (wild.isDefeated() || !wild.isAlive()
+                || br.com.petrickfaria.minemon.pokec.WildEncounterManager.isDowned(wild)) {
+            event.setCanceled(true);
+            return;
         }
+        if (player.level == wild.level && player.distanceToSqr(wild) <= 36.0D) {
+            var area = wild.getBoundingBox().inflate(16.0D);
+            for (MinemonCreature companion : wild.level.getEntitiesOfClass(MinemonCreature.class, area,
+                    pokemon -> pokemon.isTame() && player.getUUID().equals(pokemon.getOwnerUUID())
+                            && !pokemon.isDefeated() && pokemon.isAlive())) {
+                companion.focusPlayerTarget(wild);
+            }
+        }
+        // Preserve the active-encounter one-HP floor; only its owned companion can
+        // put it into the capture-ready downed state.
+        if (br.com.petrickfaria.minemon.pokec.WildEncounterManager.isEncounter(wild)&&wild.getHealth()<=1.0F)
+            event.setCanceled(true);
+        else event.setAmount(1.0F);
     }
     @SubscribeEvent public static void serverStarting(ServerStartingEvent event){
         PokecEconomy.load();

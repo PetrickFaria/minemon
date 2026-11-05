@@ -663,18 +663,29 @@ public final class ClientSmokeTest {
     mc.getSingleplayerServer().execute(()->{
      var level=mc.getSingleplayerServer().overworld();var old=level.getEntity(testEntity);if(old!=null)old.discard();
      var player=mc.getSingleplayerServer().getPlayerList().getPlayers().get(0);player.teleportTo(level,0,101,0,0,12);player.setGameMode(GameType.SURVIVAL);player.setHealth(20);player.getFoodData().setFoodLevel(20);
-     var wild=ModEntities.BULBASAUR.get().create(level);wild.moveTo(0,101,1.5,180,0);level.addFreshEntity(wild);combatTargetEntity=wild.getUUID();
+     var eggFloor=new BlockPos(0,100,1);var egg=ModItems.EGGS.get("bulbasaur").get();
+     player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,new net.minecraft.world.item.ItemStack(egg));
+     var eggHit=new net.minecraft.world.phys.BlockHitResult(net.minecraft.world.phys.Vec3.atCenterOf(eggFloor),net.minecraft.core.Direction.UP,eggFloor,false);
+     if(!egg.useOn(new net.minecraft.world.item.context.UseOnContext(player,net.minecraft.world.InteractionHand.MAIN_HAND,eggHit)).consumesAction())
+      throw new IllegalStateException("Bulbasaur spawn egg did not create a wild combat target");
+     var spawned=level.getEntitiesOfClass(MinemonCreature.class,new net.minecraft.world.phys.AABB(eggFloor).inflate(4),m->m.getSpeciesSlug().equals("bulbasaur")&&!m.isTame());
+     if(spawned.isEmpty())throw new IllegalStateException("Bulbasaur spawned by egg was not available for player attack");
+     var wild=spawned.get(0);combatTargetEntity=wild.getUUID();
      var companion=ModEntities.SPECIES.get("pikachu").get().create(level);companion.moveTo(0,101,0.75,180,0);companion.tame(player);companion.setOwnerUUID(player.getUUID());companion.setOrderedToSit(false);level.addFreshEntity(companion);testEntity=companion.getUUID();
-     var hit=new net.minecraftforge.event.entity.living.LivingAttackEvent(wild,net.minecraft.world.damagesource.DamageSource.playerAttack(player),1.0F);
-     br.com.petrickfaria.minemon.pokec.PokecEvents.playerPokemonAttack(hit);
-     if(!hit.isCanceled()||wild.getHealth()!=wild.getMaxHealth())throw new IllegalStateException("Player hit must be canceled while ordering a companion to the wild target");
+     var sword=new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.NETHERITE_SWORD);
+     sword.enchant(net.minecraft.world.item.enchantment.Enchantments.SHARPNESS,5);
+     player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,sword);
+     player.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.DAMAGE_BOOST,200,2));
+     player.setSprinting(false);player.setDeltaMovement(0.0D,-0.2D,0.0D);player.setOnGround(false);player.fallDistance=2.0F;
+     float wildHealth=wild.getHealth();player.attack(wild);
+     if(wild.getHealth()!=wildHealth-1.0F)throw new IllegalStateException("Critical Sharpness V Netherite hit with Strength must still deal exactly one HP to a spawn-egg Pokémon: before="+wildHealth+" after="+wild.getHealth());
     });
    }
    if(worldTicks==COMBAT_VALIDATION_TICK)mc.getSingleplayerServer().execute(()->{
     var player=mc.getSingleplayerServer().getPlayerList().getPlayers().get(0);var companion=(MinemonCreature)mc.getSingleplayerServer().overworld().getEntity(testEntity);var wild=(MinemonCreature)mc.getSingleplayerServer().overworld().getEntity(combatTargetEntity);
     combatPassed=companion!=null&&wild!=null&&combatHits>0&&wild.getHealth()<wild.getMaxHealth()&&player.getHealth()==20&&player.isAlive();
-    if(!combatPassed)throw new IllegalStateException("Owned companion did not attack the exact focused target or player damage was not blocked; hits="+combatHits+" playerHealth="+player.getHealth()+" companionTarget="+(companion==null?null:companion.getTarget())+" wildHealth="+(wild==null?null:wild.getHealth()));
-    try{Files.writeString(Path.of("client-validation.txt"),"PASS COMBAT: direct player damage blocked and owned companion damaged the focused wild target; damage events="+combatHits+" playerHealth="+player.getHealth()+"\n",StandardOpenOption.APPEND);}catch(java.io.IOException e){throw new RuntimeException(e);}
+    if(!combatPassed)throw new IllegalStateException("Owned companion did not attack the exact focused target or capped player damage incorrectly; hits="+combatHits+" playerHealth="+player.getHealth()+" companionTarget="+(companion==null?null:companion.getTarget())+" wildHealth="+(wild==null?null:wild.getHealth()));
+    try{Files.writeString(Path.of("client-validation.txt"),"PASS COMBAT: direct player melee dealt exactly one HP and the owned companion damaged the focused wild target; damage events="+combatHits+" playerHealth="+player.getHealth()+"\n",StandardOpenOption.APPEND);}catch(java.io.IOException e){throw new RuntimeException(e);}
     if(companion!=null)companion.discard();if(wild!=null)wild.discard();combatTargetEntity=null;
     player.setGameMode(GameType.CREATIVE);player.setHealth(20);player.teleportTo(mc.getSingleplayerServer().overworld(),0,101,0,0,12);player.fallDistance=0;
    });

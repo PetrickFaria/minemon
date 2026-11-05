@@ -21,4 +21,10 @@ public class GastlyAuraTest {
   assertTrue(radius>GastlyAura.CORE_RADIUS_SCALE*width);
   assertEquals(GastlyAura.minimumVisibleParticleRadius(width,0),Math.max(width*.5,GastlyAura.CORE_RADIUS_SCALE*width),0);
  }
+ @Test public void everyParticleOrbitIsExactlyFifteenPercentCloser(){
+  for(double width:new double[]{.2,.6,1.2,2.4})for(double quad:new double[]{.0,.34,.85})
+   assertEquals(GastlyAura.minimumVisibleParticleRadius(width,quad)*.85,
+       GastlyAura.particleOrbitRadius(width,quad),1e-12);
+  assertEquals(.85,GastlyAura.RADIAL_DISTRIBUTION_SCALE,0);
+ }
 }
