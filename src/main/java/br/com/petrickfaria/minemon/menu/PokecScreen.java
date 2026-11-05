@@ -221,6 +221,8 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         // Retire the preview's depth before text render types enable depth testing again.
         com.mojang.blaze3d.systems.RenderSystem.clear(org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT, Minecraft.ON_OSX);
         com.mojang.blaze3d.systems.RenderSystem.disableDepthTest();
+        pose.pushPose();
+        pose.translate(0,0,300);
         GuiComponent.fill(pose, 154, 136, 382, 137, 0xFFC6C6C6);
         font.draw(pose, "DADOS DA ESPÉCIE", 154, 139, 0xFF404040);
         String rarity=PokecEconomy.get().rarity(species.slug());
@@ -236,6 +238,7 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         font.draw(pose,fitText("Tipo: "+types,234),154,197,0xFF404040);
         drawAcquisitionPanel(pose, species, unlocked, species.isEvolution() && !unlocked, mouseX, mouseY);
         drawCompactConversion(pose);
+        pose.popPose();
     }
 
     private void drawAcquisitionPanel(PoseStack pose,PokecSpecies.Entry species,boolean unlocked,boolean evolution,int mouseX,int mouseY){
