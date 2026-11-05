@@ -80,6 +80,16 @@ final class GhostLineClientSmokeTest {
    if(authoritativePlayer!=null)authoritativePlayer.teleportTo(server.overworld(),px,py,pz,yaw,pitch);
   });
  }
+ private static double pointCameraAt(Minecraft mc,MinemonCreature mob){
+  var player=mc.player;if(player==null)return -1.0D;
+  double dx=mob.getX()-player.getX(),dz=mob.getZ()-player.getZ();
+  double dy=mob.getY()+0.5D-player.getEyeY();
+  float yaw=(float)(Math.toDegrees(Math.atan2(dz,dx))-90.0D);
+  float pitch=(float)-Math.toDegrees(Math.atan2(dy,Math.sqrt(dx*dx+dz*dz)));
+  player.setYRot(yaw);player.setYHeadRot(yaw);player.setYBodyRot(yaw);player.setXRot(pitch);
+  var direction=new net.minecraft.world.phys.Vec3(dx,dy,dz).normalize();
+  return player.getLookAngle().normalize().dot(direction);
+ }
  private static void prepareFarGastlyView(Minecraft mc,MinemonCreature mob){
   var server=mc.getSingleplayerServer();if(server==null)return;
   // Keep the camera at the established near viewpoint and move the fixture entity
@@ -105,6 +115,11 @@ final class GhostLineClientSmokeTest {
     if(pendingScreenshotDelay>0)pendingScreenshotDelay--;
     else{
      String view=pendingScreenshot;pendingScreenshot=null;
+     if(view.equals("gastly-50-block")){
+      var mob=find(mc,gastlyId);
+      if(mob==null)throw new IllegalStateException("Gastly left the client render set before its 50-block screenshot");
+      pointCameraAt(mc,mob);
+     }
      if(view.equals("haunter-blink")){
       var mob=find(mc,haunterId);
       if(mob==null||!mob.isBlinkingForRender())
@@ -172,14 +187,18 @@ final class GhostLineClientSmokeTest {
     if(!farViewRequested)prepareFarGastlyView(mc,gastly);
     else if(farViewApplied){
      double playerDistance=Math.sqrt(gastly.distanceToSqr(mc.player.getX(),mc.player.getY(),mc.player.getZ()));
+     double cameraDistance=mc.gameRenderer.getMainCamera().getPosition().distanceTo(gastly.position());
      double renderedCameraDistance=br.com.petrickfaria.minemon.client.GastlyCoreRenderHook.maxCameraDistanceForValidation();
-     if(playerDistance>=49.0D&&renderedCameraDistance>=49.0D){
+     double cameraAlignment=pointCameraAt(mc,gastly);
+     if(playerDistance>=49.0D&&cameraDistance>=49.0D&&renderedCameraDistance>=49.0D&&cameraAlignment>=0.98D){
       System.out.println("[GHOST LINE] 50-block setup player="+mc.player.position()+" gastly="+gastly.position()
-          +" playerDistance="+playerDistance+" renderedCameraDistance="+renderedCameraDistance);
+          +" playerDistance="+playerDistance+" cameraDistance="+cameraDistance
+          +" renderedCameraDistance="+renderedCameraDistance+" cameraAlignment="+cameraAlignment);
       snap(mc,"gastly-50-block");
      }else if(ticks-farViewStartTick>40)
       throw new IllegalStateException("Server/client render hook did not observe Gastly at the requested 50-block view; playerDistance="
-          +playerDistance+" renderedCameraDistance="+renderedCameraDistance);
+          +playerDistance+" cameraDistance="+cameraDistance+" renderedCameraDistance="+renderedCameraDistance
+          +" cameraAlignment="+cameraAlignment);
     }
    }
    if(ticks>=25&&!captures.contains("haunter-front-a")){face(mc,haunter);snap(mc,"haunter-front-a");}
