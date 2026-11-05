@@ -46,6 +46,25 @@ jobs:
           chmod +x gradlew
           ./gradlew --no-daemon clean compileJava compileTestJava
           ./gradlew --no-daemon test
+      - name: Install native speech library used by client visuals
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y flite1-dev
+      - name: Validate Pokec inventory layout, catalog selection and preview on the real client
+        run: |
+          python3 tools/prepare_client_world.py
+          ALSOFT_DRIVERS=null timeout --kill-after=30s 900s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeTreats
+          grep -F '[TREAT CLIENT] PASS:' run/client-validation-treats.txt
+      - name: Upload Pokec screenshots for visual review
+        uses: actions/upload-artifact@v4
+        with:
+          name: Pokec-interface-visual-check
+          path: |
+            run/screenshots/pokec-locked.png
+            run/screenshots/pokec-unlocked.png
+            run/client-validation-treats.txt
+          if-no-files-found: error
+          retention-days: 7
       - name: Run Minecraft GameTests from both lines
         run: |
           mkdir -p run
@@ -61,10 +80,6 @@ jobs:
           fi
           export MINEMON_TEST_RCON_PASSWORD
           python3 tools/test_world_reopen.py
-      - name: Install native speech library used by client visuals
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y flite1-dev
       - name: Validate wild capture animation and capture state on the real client
         run: |
           python3 tools/prepare_client_world.py
@@ -82,21 +97,6 @@ jobs:
           for shot in gastly-front gastly-no-tongue haunter-front-a haunter-front-b haunter-blink gengar-walk gengar-blink gengar-mouth-teeth-fixed gengar-sleep-half-sunk-a gengar-sleep-half-sunk-b; do
             test -f "run/screenshots/ghost-line-1.74-$shot.png"
           done
-      - name: Validate Pokec inventory layout, catalog selection and preview on the real client
-        run: |
-          python3 tools/prepare_client_world.py
-          ALSOFT_DRIVERS=null timeout --kill-after=30s 900s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeTreats
-          grep -F '[TREAT CLIENT] PASS:' run/client-validation-treats.txt
-      - name: Upload Pokec screenshots for visual review
-        uses: actions/upload-artifact@v4
-        with:
-          name: Pokec-interface-visual-check
-          path: |
-            run/screenshots/pokec-locked.png
-            run/screenshots/pokec-unlocked.png
-            run/client-validation-treats.txt
-          if-no-files-found: error
-          retention-days: 7
       - name: Validate aquatic swimming poses in the real client
         run: |
           python3 tools/prepare_client_world.py
