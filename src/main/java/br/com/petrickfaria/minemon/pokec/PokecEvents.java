@@ -27,8 +27,8 @@ public final class PokecEvents {
                 || event.getEntity().level.isClientSide
                 || !(event.getSource().getEntity() instanceof net.minecraft.server.level.ServerPlayer player)
                 || event.getSource().getDirectEntity() != player) return;
-        // Owned Pokémon remain protected. A valid wild target takes exactly one HP
-        // regardless of the weapon's attack value, strength, critical, or enchantments.
+        // Owned Pokémon remain protected. MinemonCreature caps direct player melee
+        // before delegating to Forge's damage pipeline, regardless of weapon modifiers.
         if (wild.isTame()) { event.setCanceled(true); return; }
         if (wild.isDefeated() || !wild.isAlive()
                 || br.com.petrickfaria.minemon.pokec.WildEncounterManager.isDowned(wild)) {
@@ -47,7 +47,6 @@ public final class PokecEvents {
         // put it into the capture-ready downed state.
         if (br.com.petrickfaria.minemon.pokec.WildEncounterManager.isEncounter(wild)&&wild.getHealth()<=1.0F)
             event.setCanceled(true);
-        else event.setAmount(1.0F);
     }
     @SubscribeEvent public static void serverStarting(ServerStartingEvent event){
         PokecEconomy.load();
