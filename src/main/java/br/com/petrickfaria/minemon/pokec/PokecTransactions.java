@@ -198,6 +198,7 @@ public final class PokecTransactions {
     /** Recover staged physical items after a disconnect or crash prevented normal close cleanup. */
     public static void recoverEscrow(ServerPlayer player) {
         if (player.containerMenu instanceof PokecMenu menu) {
+            menu.terminal.close(player);
             menu.returnEscrow(player);
             return;
         }

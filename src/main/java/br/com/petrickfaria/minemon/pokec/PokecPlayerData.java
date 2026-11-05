@@ -57,6 +57,7 @@ public final class PokecPlayerData {
     }
     public static void clearStaged(ServerPlayer p){CompoundTag d=data(p);d.putInt("stagedCoins",0);d.putInt("stagedSouls",0);d.putString("stagedSoulType","");d.remove("conversionBall");d.remove("conversionOutput");d.putInt("conversionResult",-1);}
     public static void copyOnRespawn(net.minecraft.world.entity.player.Player oldPlayer,net.minecraft.world.entity.player.Player newPlayer){
+        if(oldPlayer.getPersistentData().contains("MinemonPokecSlots"))newPlayer.getPersistentData().put("MinemonPokecSlots",oldPlayer.getPersistentData().getCompound("MinemonPokecSlots").copy());
         if(oldPlayer.getPersistentData().contains(KEY))newPlayer.getPersistentData().put(KEY,oldPlayer.getPersistentData().getCompound(KEY).copy());
     }
     private PokecPlayerData(){}

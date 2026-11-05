@@ -386,7 +386,8 @@ public final class PokecGameTests {
         menu.clicked(37,0,net.minecraft.world.inventory.ClickType.PICKUP,p);
         check(menu.getCarried().isEmpty(),"empty result cannot be taken again");
         p.getInventory().setItem(9,new ItemStack(ModItems.POKE_COIN.get(),3));menu.quickMoveStack(p,0);menu.removed(p);
-        check(p.getInventory().items.stream().filter(s->s.is(ModItems.POKE_COIN.get())).mapToInt(ItemStack::getCount).sum()==3,"closing returns unpaid coins once");
+        PokecTransactions.recoverEscrow(p);
+        check(p.getInventory().items.stream().filter(s->s.is(ModItems.POKE_COIN.get())).mapToInt(ItemStack::getCount).sum()==3,"closing and recovery return unpaid coins only once");
         p.discard();h.succeed();
     }
     @GameTest(template="test_arena",timeoutTicks=200)
