@@ -169,7 +169,10 @@ public final class PokecMenu extends AbstractContainerMenu {
             if (!moveItemStackTo(stack, 0, 36, true)) return ItemStack.EMPTY;
         } else {
             boolean moved = false;
-            if (slots.get(36).mayPlace(stack)) moved = moveItemStackTo(stack,36,37,false);
+            if (slots.get(36).mayPlace(stack)) {
+                moved = moveItemStackTo(stack,36,37,false);
+                if(!moved)return ItemStack.EMPTY;
+            }
             else if (slots.get(38).mayPlace(stack)) moved = moveItemStackTo(stack,38,39,false);
             if (!moved) moved = slotIndex < 27 ? moveItemStackTo(stack,27,36,false) : moveItemStackTo(stack,0,27,false);
             if (!moved) return ItemStack.EMPTY;

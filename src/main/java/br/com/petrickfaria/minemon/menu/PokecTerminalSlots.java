@@ -33,6 +33,7 @@ public final class PokecTerminalSlots {
         return switch(index) {
             case 0 -> new Slot(items,0,x,y){
                 @Override public boolean mayPlace(ItemStack stack){return acceptsPayment(stack);}
+                @Override public int getMaxStackSize(){return Math.min(64,remaining());}
                 @Override public int getMaxStackSize(ItemStack stack){return Math.min(stack.getMaxStackSize(),remaining());}
             };
             case 1 -> new Slot(items,1,x,y){
