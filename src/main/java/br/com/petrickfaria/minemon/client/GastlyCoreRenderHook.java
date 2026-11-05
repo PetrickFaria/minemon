@@ -14,7 +14,9 @@ import java.util.Comparator;
 @Mod.EventBusSubscriber(modid=Minemon.MOD_ID,bus=Mod.EventBusSubscriber.Bus.FORGE,value=Dist.CLIENT)
 public final class GastlyCoreRenderHook {
     private static int redraws;
+    private static double maxCameraDistanceForValidation;
     public static int redrawsForValidation(){return redraws;}
+    public static double maxCameraDistanceForValidation(){return maxCameraDistanceForValidation;}
 
     @SubscribeEvent
     public static void renderCoreAfterParticles(RenderLevelStageEvent event){
@@ -29,6 +31,8 @@ public final class GastlyCoreRenderHook {
             if(!(entity instanceof MinemonCreature gastly)||!gastly.getSpeciesSlug().equals("gastly")
                     ||!gastly.isAlive()||gastly.isRemoved())continue;
             gastlys.add(gastly);
+            maxCameraDistanceForValidation=Math.max(maxCameraDistanceForValidation,
+                    Math.sqrt(gastly.distanceToSqr(camera.x,camera.y,camera.z)));
         }
         if(gastlys.isEmpty())return;
         if(br.com.petrickfaria.minemon.client.GastlySmokeParticle.auraSpritesReady()){

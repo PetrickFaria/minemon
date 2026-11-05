@@ -18,6 +18,8 @@ import java.util.*;
 /** Real-client visual and timing smoke test for the Gastly evolution line. */
 final class GhostLineClientSmokeTest {
  private static boolean opened,setup,sleepStarted,blinkChecked,validationComplete;
+ private static boolean farTeleportRequested,farTeleportApplied;
+ private static int farTeleportStartTick;
  private static int screenshotFlushTicks;
  private static boolean screenshotInFlight;
  private static final Set<String> writtenScreenshots=new HashSet<>();
@@ -86,9 +88,13 @@ final class GhostLineClientSmokeTest {
   player.setYRot((float)(Math.toDegrees(Math.atan2(dz,dx))-90));
   player.setXRot((float)-Math.toDegrees(Math.atan2(dy,Math.sqrt(dx*dx+dz*dz))));
   var server=mc.getSingleplayerServer();var playerId=player.getUUID();float yaw=player.getYRot(),pitch=player.getXRot();
+  farTeleportRequested=true;farTeleportStartTick=ticks;farTeleportApplied=false;
   server.execute(()->{
    var authoritativePlayer=server.getPlayerList().getPlayer(playerId);
-   if(authoritativePlayer!=null)authoritativePlayer.teleportTo(server.overworld(),px,py,pz,yaw,pitch);
+   if(authoritativePlayer!=null){
+    authoritativePlayer.teleportTo(server.overworld(),px,py,pz,yaw,pitch);
+    mc.execute(()->farTeleportApplied=true);
+   }
   });
  }
  static void tick(TickEvent.ClientTickEvent event){
@@ -162,7 +168,17 @@ final class GhostLineClientSmokeTest {
    if(ticks>=12&&screenshotSlotAvailable()&&!captures.contains("gastly-right")){faceFromAngle(mc,gastly,90);snapNow(mc,"gastly-right");}
    if(ticks>=20&&screenshotSlotAvailable()&&!captures.contains("gastly-back")){faceFromAngle(mc,gastly,180);snapNow(mc,"gastly-back");}
    if(ticks>=28&&screenshotSlotAvailable()&&!captures.contains("gastly-left")){faceFromAngle(mc,gastly,270);snapNow(mc,"gastly-left");}
-   if(ticks>=36&&screenshotSlotAvailable()&&!captures.contains("gastly-50-block")){faceFromDistance(mc,gastly,50.0D);snap(mc,"gastly-50-block");}
+   if(ticks>=36&&screenshotSlotAvailable()&&!captures.contains("gastly-50-block")){
+    if(!farTeleportRequested)faceFromDistance(mc,gastly,50.0D);
+    else if(farTeleportApplied){
+     double playerDistance=Math.sqrt(gastly.distanceToSqr(mc.player.getX(),mc.player.getY(),mc.player.getZ()));
+     if(playerDistance>=49.0D){
+      System.out.println("[GHOST LINE] 50-block setup player="+mc.player.position()+" gastly="+gastly.position()+" distance="+playerDistance);
+      snap(mc,"gastly-50-block");
+     }else if(ticks-farTeleportStartTick>40)
+      throw new IllegalStateException("Server/client player did not settle at the requested 50-block Gastly view; observed="+playerDistance);
+    }
+   }
    if(ticks>=25&&!captures.contains("haunter-front-a")){face(mc,haunter);snap(mc,"haunter-front-a");}
    if(ticks>=75&&!captures.contains("haunter-front-b")){face(mc,haunter);snap(mc,"haunter-front-b");}
    if(ticks>=100&&haunter.isBlinkingForRender()&&MinemonModel.ghostEyesClosedForValidation(haunter)
@@ -221,7 +237,8 @@ final class GhostLineClientSmokeTest {
         ||br.com.petrickfaria.minemon.client.GastlySmokeParticle.smallSpawnsForValidation()==0)
      throw new IllegalStateException("Gastly's large and small particles were not both rendered during camera-angle validation");
     if(br.com.petrickfaria.minemon.client.GastlySmokeParticle.farRendersForValidation()==0)
-     throw new IllegalStateException("Gastly aura particles were not rendered beyond the vanilla particle cutoff during the 50-block camera check");
+     throw new IllegalStateException("Gastly aura particles were not rendered beyond the vanilla particle cutoff during the 50-block camera check; render hook maximum camera distance="
+       +br.com.petrickfaria.minemon.client.GastlyCoreRenderHook.maxCameraDistanceForValidation());
     if(br.com.petrickfaria.minemon.client.GastlySmokeParticle.maxRenderDistanceForValidation()<49.0D)
      throw new IllegalStateException("Gastly aura did not reach the 50-block render boundary; maximum observed distance="
        +br.com.petrickfaria.minemon.client.GastlySmokeParticle.maxRenderDistanceForValidation());
