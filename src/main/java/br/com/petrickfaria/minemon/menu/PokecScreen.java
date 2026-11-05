@@ -218,6 +218,8 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
             drawCentered(pose, "?", 268, 61, 0xFF404040);
             drawCentered(pose, "ESPÉCIE BLOQUEADA", 268, 105, 0xFF404040);
         }
+        // Retire the preview's depth before text render types enable depth testing again.
+        com.mojang.blaze3d.systems.RenderSystem.clear(org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT, Minecraft.ON_OSX);
         com.mojang.blaze3d.systems.RenderSystem.disableDepthTest();
         GuiComponent.fill(pose, 154, 136, 382, 137, 0xFFC6C6C6);
         font.draw(pose, "DADOS DA ESPÉCIE", 154, 139, 0xFF404040);
