@@ -202,6 +202,37 @@ public final class PokecGameTests {
         stranger.discard();owner.discard();h.succeed();
     }
 
+    @GameTest(template="test_arena",timeoutTicks=100)
+    public static void pokeballsStoreSleepingAndDefeatedOwnedPokemonWithoutHealing(GameTestHelper h){
+        floor(h);ServerPlayer owner=player(h,h.absolutePos(new BlockPos(7,1,5)));
+        MinemonCreature sleeper=h.spawn(ModEntities.SPECIES.get("pikachu").get(),new BlockPos(5,1,5));
+        sleeper.tame(owner);sleeper.setOwnerUUID(owner.getUUID());sleeper.setHealth(sleeper.getMaxHealth()-4);sleeper.setSleeping(true);
+        ActivePokemonData.register(sleeper);
+        owner.setItemInHand(InteractionHand.MAIN_HAND,new ItemStack(ModItems.POKEBALL.get()));
+        var sleepResult=ModItems.POKEBALL.get().interactLivingEntity(owner.getMainHandItem(),owner,sleeper,InteractionHand.MAIN_HAND);
+        var sleepStored=PokeballItem.readStoredEntity(owner.getMainHandItem());
+        check(sleepResult.consumesAction()&&sleepStored!=null,"An owned sleeping Pokémon should be stored directly");
+        check(sleepStored.entityData().getBoolean("MinemonSleeping")&&sleepStored.entityData().getFloat("Health")==sleeper.getMaxHealth()-4,
+                "Storage must retain sleep and current health without healing");
+        check(sleeper.isRemoved()&&ActivePokemonData.get(h.getLevel()).count(owner.getUUID())==0,
+                "Storage must remove the original and release the active slot");
+
+        MinemonCreature defeated=h.spawn(ModEntities.SPECIES.get("charmander").get(),new BlockPos(6,1,5));
+        defeated.tame(owner);defeated.setOwnerUUID(owner.getUUID());defeated.setPokemonProgress(4,3);ActivePokemonData.register(defeated);
+        defeated.die(net.minecraft.world.damagesource.DamageSource.GENERIC);
+        check(defeated.isDefeated()&&defeated.getHealth()==0.0F,"Fixture must be genuinely defeated before storage");
+        owner.setItemInHand(InteractionHand.MAIN_HAND,new ItemStack(ModItems.POKEBALL.get()));
+        var downResult=ModItems.POKEBALL.get().interactLivingEntity(owner.getMainHandItem(),owner,defeated,InteractionHand.MAIN_HAND);
+        var downStored=PokeballItem.readStoredEntity(owner.getMainHandItem());
+        check(downResult.consumesAction()&&downStored!=null&&downStored.entityData().getBoolean("MinemonDefeated"),
+                "A defeated Pokémon should be stored with its defeat flag intact");
+        check(downStored.entityData().getFloat("Health")==0.0F&&downStored.entityData().getInt("MinemonPokemonLevel")==4,
+                "Storage must preserve zero health and progression without reviving");
+        check(defeated.isRemoved()&&ActivePokemonData.get(h.getLevel()).count(owner.getUUID())==0,
+                "Storing a defeated Pokémon must release its active slot exactly once");
+        owner.discard();h.succeed();
+    }
+
     @GameTest(template="test_arena",timeoutTicks=200)
     public static void masterBallStoresAndRestoresSerializableWildMobs(GameTestHelper h){
         floor(h);BlockPos p=h.absolutePos(new BlockPos(5,1,5));terminal(h,p);

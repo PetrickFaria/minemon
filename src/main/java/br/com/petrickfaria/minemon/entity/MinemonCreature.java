@@ -1,3 +1,6 @@
+Warning: truncated output (original token count: 21912)
+Total output lines: 1408
+
 package br.com.petrickfaria.minemon.entity;
 
 import br.com.petrickfaria.minemon.config.MinemonConfig;
@@ -121,6 +124,11 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     private int attackSequence;
     private int playedAttackSequence;
     private boolean loadingPokemonData;
+    private int naturalHealTicks = 1200;
+    private UUID playerFocusTarget;
+    private boolean resumeSleepingAfterFocus;
+    private boolean resumeNightRestAfterFocus;
+    private boolean resumeSitAfterFocus;
     private double aquaticSleepY=Double.NaN;
     public double aquaticSleepY() { return aquaticSleepY; }
     private int spontaneousRunTicks;
@@ -270,6 +278,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         tag.putInt("MinemonCombatCooldown",(int)Math.max(0,nextCombatTick-level.getGameTime()));
         tag.putInt("MinemonPokemonLevel", this.getPokemonLevel());
         tag.putInt("MinemonPokemonExperience", this.getPokemonExperience());
+        tag.putInt("MinemonNaturalHealTicks", naturalHealTicks);
         tag.putInt("MinemonChanseyCooldownTicks", this.chanseyCooldownTicks);
         tag.putBoolean("MinemonRocketSpecial", this.isRocketSpecial());
         if (this.getPersistentData().hasUUID("RocketVillager"))
@@ -303,6 +312,8 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         this.entityData.set(POKEMON_RARITY, br.com.petrickfaria.minemon.pokec.PokecEconomy.get().rarity(this.getSpeciesSlug()));
         this.refreshPokemonXpThreshold();
         this.chanseyCooldownTicks = Math.max(0, tag.getInt("MinemonChanseyCooldownTicks"));
+        this.naturalHealTicks = tag.contains("MinemonNaturalHealTicks")
+                ? Math.max(1, Math.min(1200, tag.getInt("MinemonNaturalHealTicks"))) : 1200;
         this.setRocketSpecial(tag.getBoolean("MinemonRocketSpecial"));
         if (tag.hasUUID("MinemonRocketVillager")) this.getPersistentData().putUUID("RocketVillager", tag.getUUID("MinemonRocketVillager"));
         this.setSleeping(tag.getBoolean("MinemonSleeping"));
@@ -403,10 +414,10 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     public void setRocketSpecial(boolean special) { this.entityData.set(ROCKET_SPECIAL, special); }
     public void setRocketVillager(UUID villager) { this.getPersistentData().putUUID("RocketVillager", villager); }
 
-    /** Capture is blocked while the Pokémon is sleeping, breeding, or engaged in combat. */
+    /** Capture is blocked during breeding or active combat, but sleep and defeat do not block storage. */
     public boolean canBeStoredInPokeball() {
-        return !this.isDeadOrDying() && !this.isSleeping() && !this.isNightResting()
-                && !this.isInLove() && this.getTarget() == null && this.attackAnimationTicks <= 0
+        return (!this.isDeadOrDying() || this.isDefeated())
+                && !this.isInLove() && (this.isDefeated() || this.getTarget() == null && this.attackAnimationTicks <= 0)
                 && !this.isPassenger();
     }
 
@@ -587,6 +598,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     @Override
     public boolean canAttack(LivingEntity target) {
         if (isDefeated() || target == null || target == this || this.isOwnerEntity(target)) return false;
+        if (playerFocusTarget != null && (target.level != this.level || !playerFocusTarget.equals(target.getUUID()))) return false;
         if (this.isTame() && !CombatGeometry.inRange(this,target,10)) return false;
         // Ordered sitting companions may defend themselves or their owner at close
         // range, but must not start walking after a distant target.
@@ -609,130 +621,12 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     public boolean isBlackListTarget(net.minecraft.world.entity.Mob target) {
         if (target == null || target == this || target instanceof MinemonCreature pokemonTarget && pokemonTarget.isDefeated() || target.isInvulnerable() || !target.isAlive()
                 || this.isOwnerEntity(target)) return false;
+        if (playerFocusTarget != null && !playerFocusTarget.equals(target.getUUID())) return false;
         if (this.isTame() && target instanceof MinemonCreature encounter
                 && br.com.petrickfaria.minemon.pokec.WildEncounterManager.isEncounter(encounter)
                 && this.getOwnerUUID() != null && this.getOwnerUUID().equals(
                 br.com.petrickfaria.minemon.pokec.WildEncounterManager.owner(encounter))) return true;
-        if (target instanceof MinemonCreature pokemon && pokemon.isTame()
-                && this.getOwnerUUID() != null && this.getOwnerUUID().equals(pokemon.getOwnerUUID())) return false;
-        ResourceLocation id = ForgeRegistries.ENTITY_TYPES.getKey(target.getType());
-        if (id == null) return false;
-        CompoundTag overrides = this.getPersistentData().getCompound(BLACK_LIST_KEY);
-        return overrides.contains(id.toString()) ? overrides.getBoolean(id.toString())
-                : MobTargetCategories.defaultSelected(target.getType());
-    }
-    public Map<String, Boolean> getBlackListOverrides() {
-        CompoundTag stored = this.getPersistentData().getCompound(BLACK_LIST_KEY);
-        Map<String, Boolean> result = new TreeMap<>();
-        for (String id : stored.getAllKeys()) result.put(id, stored.getBoolean(id));
-        return result;
-    }
-    public void setBlackListOverride(ResourceLocation type, boolean selected) {
-        CompoundTag stored = this.getPersistentData().getCompound(BLACK_LIST_KEY);
-        stored.putBoolean(type.toString(), selected);
-        this.getPersistentData().put(BLACK_LIST_KEY, stored);
-    }
-
-    @Override
-    public InteractionResult mobInteract(Player player, InteractionHand hand) {
-        ItemStack held = player.getItemInHand(hand);
-        if (br.com.petrickfaria.minemon.pokec.WildEncounterManager.isEncounter(this)) {
-            // Let the Pokébola's item interaction run; consuming the entity
-            // interaction here prevents its capture transaction from starting.
-            if (held.getItem() instanceof br.com.petrickfaria.minemon.item.PokeballItem)
-                return InteractionResult.PASS;
-            if (!br.com.petrickfaria.minemon.pokec.WildEncounterManager.isDowned(this))
-                return InteractionResult.sidedSuccess(this.level.isClientSide);
-            if (!(player instanceof ServerPlayer serverPlayer)) return InteractionResult.sidedSuccess(this.level.isClientSide);
-            if (held.getItem() instanceof PokemonTreatItem) {
-                if (this.level.isClientSide) return InteractionResult.sidedSuccess(true);
-                return InteractionResult.sidedSuccess(br.com.petrickfaria.minemon.pokec.WildEncounterManager.offerTreat(this, serverPlayer, hand));
-            }
-            if (player.isCrouching() && held.isEmpty() && !this.level.isClientSide)
-                return InteractionResult.sidedSuccess(br.com.petrickfaria.minemon.pokec.WildEncounterManager.loot(this, serverPlayer));
-            return InteractionResult.sidedSuccess(this.level.isClientSide);
-        }
-        // A capture item in either hand owns the interaction. Failed, occupied, and
-        // foreign-owner attempts must not fall through into the Pokémon screen.
-        for (InteractionHand ballHand : InteractionHand.values()) {
-            ItemStack ball = player.getItemInHand(ballHand);
-            if (!br.com.petrickfaria.minemon.item.PokeballItem.isOccupied(ball)
-                    && ball.getItem() instanceof br.com.petrickfaria.minemon.item.PokeballItem pokeball) {
-                InteractionResult result = pokeball.interactLivingEntity(ball, player, this, ballHand);
-                return result == InteractionResult.PASS || result == InteractionResult.FAIL
-                        ? InteractionResult.CONSUME : result;
-            }
-        }
-        if (held.getItem() instanceof PokemonTreatItem treat) {
-            boolean compatible = PokemonTreatTypes.accepts(this.getSpeciesSlug(), treat.getTreatType().pokemonType());
-            if (this.level.isClientSide) return InteractionResult.sidedSuccess(compatible);
-            if (!compatible || this.getTarget() != null || this.attackAnimationTicks > 0)
-                return InteractionResult.sidedSuccess(false);
-            if (!this.isTame()) {
-                if (player instanceof ServerPlayer owner
-                        && !br.com.petrickfaria.minemon.pokec.ActivePokemonData.hasCapacity(owner)) {
-                    owner.displayClientMessage(net.minecraft.network.chat.Component.literal(
-                            "Seu nível de Treinador não permite manter mais Pokémon ativos."), true);
-                    return InteractionResult.sidedSuccess(false);
-                }
-                if (!player.getAbilities().instabuild) held.shrink(1);
-                int chance = MinemonConfig.TAME_CHANCE_PERCENT.get();
-                if (this.getRandom().nextInt(100) < chance) {
-                    this.tame(player);
-                    if (player instanceof ServerPlayer owner)
-                        br.com.petrickfaria.minemon.pokec.ActivePokemonData.register(this);
-                    this.setOrderedToSit(true);
-                    this.setTarget(null);
-                    this.getNavigation().stop();
-                    this.level.broadcastEntityEvent(this, (byte) 7);
-                } else {
-                    this.level.broadcastEntityEvent(this, (byte) 6);
-                }
-                return InteractionResult.sidedSuccess(false);
-            }
-            if (!this.isOwnedBy(player)) return InteractionResult.sidedSuccess(false);
-            float maximum = this.getMaxHealth();
-            if (this.getHealth() < maximum) {
-                float amount = Math.min((float)MinemonConfig.TREAT_HEAL_AMOUNT.get(), maximum - this.getHealth());
-                if (amount <= 0.0F) return InteractionResult.sidedSuccess(false);
-                this.setHealth(this.getHealth() + amount);
-                if(isDefeated() && this.getHealth()>=this.getMaxHealth()){
-                    this.entityData.set(DEFEATED,false);this.defeatTargetsCleared=false;this.setNoAi(aiBeforeDefeat);this.setSleeping(false);
-                }
-                consumeTreat(player, held);
-                this.level.broadcastEntityEvent(this, (byte)18);
-                return InteractionResult.sidedSuccess(false);
-            }
-            if (!this.isInLove() && !this.isBaby() && this.getAge() == 0 && !this.isBreedingBusy()
-                    && isBreedingPermitted(this.getSpeciesSlug()) && hasSafeBabyPosition((ServerLevel)this.level, this)) {
-                this.setInLove(player);
-                consumeTreat(player, held);
-                this.level.broadcastEntityEvent(this, (byte)18);
-            }
-            return InteractionResult.sidedSuccess(false);
-        }
-        // TamableAnimal has vanilla bone taming; handle it here without mutation.
-        if (held.is(Items.BONE)) {
-            return InteractionResult.sidedSuccess(this.level.isClientSide);
-        }
-
-        if (this.isTame() && this.isOwnedBy(player) && !this.isFood(held)) {
-            if (!this.level.isClientSide && player instanceof ServerPlayer serverPlayer)
-                br.com.petrickfaria.minemon.menu.PokemonMenus.openInfo(serverPlayer, this);
-            return InteractionResult.sidedSuccess(this.level.isClientSide);
-        }
-        return super.mobInteract(player, hand);
-    }
-
-    @Override
-    public boolean hurt(DamageSource source, float amount) {
-        if(isDefeated())return false;
-        if (br.com.petrickfaria.minemon.pokec.WildEncounterManager.isEncounter(this)) {
-            if (br.com.petrickfaria.minemon.pokec.WildEncounterManager.isDowned(this)) return false;
-            if (!br.com.petrickfaria.minemon.pokec.WildEncounterManager.canDamage(this, source)) return false;
-            // When every defeated slot is occupied, attacks can reduce an encounter
-            // to one health point, but the entity cannot die or grant a reward.
-            if (this.getHealth() - amount <= 0.0F
+        if (target instanceof MinemonCreature pokemon && pokemon.…1912 tokens truncated…getHealth() - amount <= 0.0F
                     && !br.com.petrickfaria.minemon.pokec.WildEncounterManager.hasDefeatedCapacity(this))
                 amount = Math.max(0.0F, this.getHealth() - 1.0F);
         }
@@ -762,6 +656,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         }
         if(!this.level.isClientSide&&!(Boolean.getBoolean("minemon.clientSmokeTest")&&this.getTags().contains("minemon-locomotion-fixture"))){if(!isDefeated())this.tickNightRest();}
         super.tick();
+        if (!level.isClientSide && isTame() && !isDefeated()) tickNaturalHealing();
         if(!level.isClientSide && isTame()){rangedCharges.tick(!isDefeated());entityData.set(RANGED_CHARGES,rangedCharges.charges());}
         if(level.isClientSide)tickGastlySmoke();
         if(isDefeated()){
@@ -777,6 +672,15 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         }
         if(!level.isClientSide)ShoreTraversal.tick(this);
         if(this.getTarget()!=null && !canAttack(this.getTarget())){this.setTarget(null);this.getNavigation().stop();}
+        if (!level.isClientSide && playerFocusTarget != null) {
+            Entity focused = level instanceof ServerLevel serverLevel ? serverLevel.getEntity(playerFocusTarget) : null;
+            if (!(focused instanceof LivingEntity living) || !living.isAlive()
+                    || focused.level != level || !canAttack(living)) {
+                clearPlayerFocus();
+            } else if (getTarget() != living) {
+                setTarget(living);
+            }
+        }
         if (!this.level.isClientSide) {
             this.tickNaturalCycle();
             this.tickChanseyHealing();
@@ -848,6 +752,50 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
             this.tickWildAggression();
             this.tickNightCombat();
         }
+    }
+
+    private void tickNaturalHealing() {
+        if (getHealth() >= getMaxHealth()) { naturalHealTicks = 1200; return; }
+        if (isDefeated()) return;
+        if (--naturalHealTicks <= 0) {
+            setHealth(Math.min(getMaxHealth(), getHealth() + 1.0F));
+            naturalHealTicks = 1200;
+        }
+    }
+
+    public void focusPlayerTarget(LivingEntity target) {
+        if (level.isClientSide || !isTame() || isDefeated() || getOwnerUUID() == null
+                || target == null || !target.isAlive() || target.level != level) return;
+        UUID previousFocus = playerFocusTarget;
+        playerFocusTarget = null;
+        boolean validTarget = canAttack(target);
+        playerFocusTarget = previousFocus;
+        if (!validTarget) return;
+        if (playerFocusTarget == null) {
+            resumeSleepingAfterFocus = isSleeping();
+            resumeNightRestAfterFocus = isNightResting();
+            resumeSitAfterFocus = isOrderedToSit();
+        }
+        playerFocusTarget = target.getUUID();
+        if (isSleeping()) setSleeping(false);
+        entityData.set(NIGHT_REST, false);
+        if (isOrderedToSit()) setOrderedToSit(false);
+        setTarget(target);
+        getNavigation().moveTo(target, 1.0D);
+    }
+
+    private void clearPlayerFocus() {
+        playerFocusTarget = null;
+        if (getTarget() != null) setTarget(null);
+        getNavigation().stop();
+        if (resumeSitAfterFocus) setOrderedToSit(true);
+        else if (isTame() && !isDefeated()) {
+            if (resumeSleepingAfterFocus) setSleeping(true);
+            if (resumeNightRestAfterFocus) { entityData.set(NIGHT_REST, true); nightRoutine = true; }
+        }
+        resumeSleepingAfterFocus = false;
+        resumeNightRestAfterFocus = false;
+        resumeSitAfterFocus = false;
     }
 
     private void tickGastlySmoke(){

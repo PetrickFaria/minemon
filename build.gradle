@@ -66,6 +66,11 @@ processResources {
                 target.bytes = source.bytes
             }
         }
+        def captureModel = new File(sourceRoot, 'assets/minemon/models/item/pokeball_3d.json')
+        if (!captureModel.isFile()) throw new GradleException('Missing capture-only 3D Pokéball model')
+        def captureModelTarget = new File(destinationRoot, 'assets/minemon/models/item/pokeball_3d.json')
+        captureModelTarget.parentFile.mkdirs()
+        captureModelTarget.bytes = captureModel.bytes
         // The special Rocket Rattata has its own red-eye texture; ordinary Rattata
         // continues to use the selected source texture unchanged.
         def rocketEyeSource = new File(sourceRoot, 'assets/minemon/textures/pokemon/rattata_rocket.png')

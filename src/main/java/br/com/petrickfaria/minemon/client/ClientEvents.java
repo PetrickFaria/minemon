@@ -34,6 +34,9 @@ public final class ClientEvents {
     public static void registerScreens(FMLClientSetupEvent event){
         event.enqueueWork(() -> {
             net.minecraft.client.renderer.ItemBlockRenderTypes.setRenderLayer(br.com.petrickfaria.minemon.registry.ModBlocks.BREEDING_EGG.get(),net.minecraft.client.renderer.RenderType.cutout());
+            net.minecraft.client.renderer.item.ItemProperties.register(br.com.petrickfaria.minemon.registry.ModItems.POKEBALL.get(),
+                    new net.minecraft.resources.ResourceLocation(br.com.petrickfaria.minemon.Minemon.MOD_ID, "capture_animation"),
+                    (stack, level, entity, seed) -> stack.hasTag() && stack.getTag().getBoolean("MinemonCaptureAnimation") ? 1.0F : 0.0F);
             MenuScreens.register(ModMenus.POKEC.get(), PokecScreen::new);
             MenuScreens.register(ModMenus.ROCKET_TRADE.get(), RocketTradeScreen::new);
             MenuScreens.register(ModMenus.POKEMON_INFO.get(), PokemonInfoScreen::new);

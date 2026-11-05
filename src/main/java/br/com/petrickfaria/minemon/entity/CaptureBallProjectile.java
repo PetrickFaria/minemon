@@ -85,7 +85,11 @@ public final class CaptureBallProjectile extends Entity {
         }
     }
 
-    public ItemStack renderStack() { return new ItemStack(ModItems.POKEBALL.get()); }
+    public ItemStack renderStack() {
+        ItemStack stack = new ItemStack(ModItems.POKEBALL.get());
+        stack.getOrCreateTag().putBoolean("MinemonCaptureAnimation", true);
+        return stack;
+    }
     public boolean captureSucceeded() { return entityData.get(SUCCESS); }
 
     @Override protected void addAdditionalSaveData(CompoundTag tag) {

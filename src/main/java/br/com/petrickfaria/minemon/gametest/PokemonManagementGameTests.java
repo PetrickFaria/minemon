@@ -255,10 +255,11 @@ public final class PokemonManagementGameTests {
         MinemonCreature wild = h.spawn(ModEntities.SPECIES.get("bulbasaur").get(), new BlockPos(5, 1, 5));
         h.runAfterDelay(35, () -> {
             check(h, wild.getTarget() == null, "wild Pokémon must not acquire a nearby player as an unprovoked target");
-            check(h, wild.hurt(DamageSource.playerAttack(player), 1.0F), "the player must be able to provoke the wild Pokémon");
+            float health=wild.getHealth();
+            check(h, !wild.hurt(DamageSource.playerAttack(player), 1.0F), "a player swing must not damage a wild Pokémon");
             h.runAfterDelay(2, () -> {
-                check(h, wild.getTarget() == player,
-                        "wild Pokémon must retain normal retaliation after the player attacks");
+                check(h, wild.getHealth()==health&&wild.getTarget()==null,
+                        "direct player hits must not damage or provoke a wild Pokémon");
                 player.discard();
                 h.succeed();
             });

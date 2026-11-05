@@ -40,11 +40,13 @@ final class WildCaptureClientSmokeTest {
                 opened = true;
                 var model = mc.getItemRenderer().getModel(new ItemStack(ModItems.POKEBALL.get()), mc.level, mc.player, 0);
                 if (model == mc.getModelManager().getMissingModel())
-                    throw new IllegalStateException("Pokébola 3D item model resolved to the missing model");
-                int modelQuads = model.getQuads(null, null, net.minecraft.util.RandomSource.create(0)).size();
-                for (var direction : net.minecraft.core.Direction.values())
-                    modelQuads += model.getQuads(null, direction, net.minecraft.util.RandomSource.create(0)).size();
-                if (modelQuads < 6) throw new IllegalStateException("Pokébola 3D model has too few baked faces: " + modelQuads);
+                    throw new IllegalStateException("Pokébola 2D sprite resolved to the missing model");
+                if (model.isGui3d()) throw new IllegalStateException("Pokébola normal inventory model must remain 2D");
+                var animatedStack = new br.com.petrickfaria.minemon.entity.CaptureBallProjectile(
+                        br.com.petrickfaria.minemon.registry.ModEntities.CAPTURE_BALL.get(), mc.level).renderStack();
+                var animatedModel = mc.getItemRenderer().getModel(animatedStack, mc.level, mc.player, 0);
+                if (animatedModel == mc.getModelManager().getMissingModel() || !animatedModel.isGui3d())
+                    throw new IllegalStateException("Capture animation must resolve its separate 3D Pokébola model");
                 Object flows = Minecraft.class.getMethod("createWorldOpenFlows").invoke(mc);
                 for (var method : flows.getClass().getMethods()) if (method.getName().equals("loadLevel")) {
                     if (method.getParameterCount() == 2 && method.getParameterTypes()[1] == String.class) {

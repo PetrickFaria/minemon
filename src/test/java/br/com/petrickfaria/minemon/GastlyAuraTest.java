@@ -14,4 +14,11 @@ public class GastlyAuraTest {
   assertEquals(.55F,GastlyAura.CORE_RADIUS_SCALE,0);
   assertEquals(2.5F,GastlyAura.LARGE_SIZE/GastlyAura.SMALL_SIZE,.0001F);assertEquals(.75F,GastlyAura.OPACITY,0);
  }
+ @Test public void billboardExtentKeepsAuraQuadOutsideGastlyCore(){
+  double width=1.2,quad=.85;
+  double radius=GastlyAura.minimumVisibleParticleRadius(width,quad);
+  assertTrue(radius>=width*.5+quad*.72);
+  assertTrue(radius>GastlyAura.CORE_RADIUS_SCALE*width);
+  assertEquals(GastlyAura.minimumVisibleParticleRadius(width,0),Math.max(width*.5,GastlyAura.CORE_RADIUS_SCALE*width),0);
+ }
 }

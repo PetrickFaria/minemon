@@ -159,7 +159,8 @@ public final class PokeballItem extends Item {
         if (!masterBall && (!(mob instanceof MinemonCreature creature)
                 || !creature.isTame() || !creature.canBeStoredInPokeball()))
             return InteractionResult.FAIL;
-        if (mob.isRemoved() || !mob.isAlive() || mob.isPassenger() || mob.isVehicle()) return InteractionResult.FAIL;
+        if (mob.isRemoved() || (!mob.isAlive() && !(mob instanceof MinemonCreature creature && creature.isDefeated()))
+                || mob.isPassenger() || mob.isVehicle()) return InteractionResult.FAIL;
 
         ItemStack occupied = stack.copy();
         occupied.setCount(1);

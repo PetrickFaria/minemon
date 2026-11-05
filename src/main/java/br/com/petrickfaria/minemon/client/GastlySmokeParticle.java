@@ -77,7 +77,11 @@ public final class GastlySmokeParticle extends TextureSheetParticle {
         double angle=slot*2.3999632297+owner.tickCount*.012;
         // Keep the entire camera-facing smoke quad outside the projected core silhouette.
         // Normal particle depth testing then preserves the body while retaining the aura ring.
-        double radius=br.com.petrickfaria.minemon.entity.GastlyAura.CORE_RADIUS_SCALE*br.com.petrickfaria.minemon.entity.ModelMetrics.bodyWidth("gastly")*scale;
+        double bodyWidth=br.com.petrickfaria.minemon.entity.ModelMetrics.bodyWidth("gastly")*scale;
+        // The billboard quad has screen-space extent, so placing its center at the
+        // core edge still lets its corners cover the face. Keep the whole aura quad
+        // outside the core silhouette for every camera azimuth.
+        double radius=br.com.petrickfaria.minemon.entity.GastlyAura.minimumVisibleParticleRadius(bodyWidth,this.quadSize);
         double center=br.com.petrickfaria.minemon.entity.ModelMetrics.bodyCenterY("gastly")*scale;
         if(owner instanceof br.com.petrickfaria.minemon.entity.MinemonCreature pokemon && pokemon.isDefeated())center+=br.com.petrickfaria.minemon.entity.ModelMetrics.defeatedOffset("gastly",scale);
         double height=br.com.petrickfaria.minemon.entity.ModelMetrics.bodyHeight("gastly")*scale;

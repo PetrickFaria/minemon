@@ -63,9 +63,11 @@ public final class CompanionTests {
   MinemonCreature b=spawn(h); ServerPlayer p=player(h);float health=p.getHealth();
   traceMovement(h,"player-retaliation",b,0,180);
   check(h,b.canAttackType(EntityType.PLAYER),"Player entity type must be a valid retaliation target");
-  b.setNoAi(true);h.runAfterDelay(80,()->{b.setNoAi(false);b.getNavigation().stop();check(h,b.hurt(DamageSource.playerAttack(p),1),"Hit must be accepted");
-  check(h,b.getTarget()==p,"Player aggressor must become target");
-  h.runAfterDelay(100,()->{check(h,p.getHealth()<health,"Melee AI must actually damage the player"+state(b,p));p.discard();h.succeed();});});
+  float wildHealth=b.getHealth();
+  b.setNoAi(true);h.runAfterDelay(80,()->{b.setNoAi(false);b.getNavigation().stop();
+   check(h,!b.hurt(DamageSource.playerAttack(p),1),"A player swing must not damage a wild Pokémon");
+   check(h,b.getHealth()==wildHealth&&b.getTarget()==null,"Direct player hits must not damage or provoke a wild Pokémon");
+   check(h,p.getHealth()==health,"A wild Pokémon must not retaliate against a player hit");p.discard();h.succeed();});
  }
  @GameTest(template="test_arena",timeoutTicks=300)
  public static void wildRetaliatesAgainstCreature(GameTestHelper h) {
@@ -176,9 +178,57 @@ public final class CompanionTests {
    var result=egg.useOn(new net.minecraft.world.item.context.UseOnContext(p,net.minecraft.world.InteractionHand.MAIN_HAND,hit));
    check(h,result.consumesAction(),"Egg use failed: "+entry.getKey());
    var created=h.getLevel().getEntitiesOfClass(MinemonCreature.class,new net.minecraft.world.phys.AABB(floorPos).inflate(5),e->e.getType()==entry.getValue().get());
-   check(h,!created.isEmpty(),"Egg did not spawn its entity: "+entry.getKey());created.forEach(net.minecraft.world.entity.Entity::discard);
+   check(h,!created.isEmpty(),"Egg did not spawn its entity: "+entry.getKey());
+   check(h,created.stream().noneMatch(MinemonCreature::isTame),"Spawn eggs must create wild Pokémon: "+entry.getKey());
+   created.forEach(net.minecraft.world.entity.Entity::discard);
   }
+  var ownedTemplate=br.com.petrickfaria.minemon.registry.ModItems.EGGS.get("charmander").get();
+  var ownedStack=br.com.petrickfaria.minemon.item.PokecOwnedSpawnEggItem.ownedStack(new net.minecraft.world.item.ItemStack(ownedTemplate),p.getUUID(),p.getGameProfile().getName());
+  p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,ownedStack);
+  var ownedHit=new net.minecraft.world.phys.BlockHitResult(net.minecraft.world.phys.Vec3.atCenterOf(floorPos),net.minecraft.core.Direction.UP,floorPos,false);
+  check(h,ownedTemplate.useOn(new net.minecraft.world.item.context.UseOnContext(p,net.minecraft.world.InteractionHand.MAIN_HAND,ownedHit)).consumesAction(),"Owner-tagged eggs should still spawn without slot gating");
+  var createdOwned=h.getLevel().getEntitiesOfClass(MinemonCreature.class,new net.minecraft.world.phys.AABB(floorPos).inflate(5),e->e.getSpeciesSlug().equals("charmander"));
+  check(h,!createdOwned.isEmpty()&&createdOwned.stream().noneMatch(MinemonCreature::isTame),"Purchased spawn egg must not assign ownership or active slots");
+  createdOwned.forEach(net.minecraft.world.entity.Entity::discard);
   p.discard();h.succeed();
+ }
+
+ @GameTest(template="test_arena",timeoutTicks=100)
+ public static void directPlayerHitsCommandOwnedPokemonToFocusWildTarget(GameTestHelper h){
+  ServerPlayer owner=player(h);var wild=h.spawn(ModEntities.SPECIES.get("geodude").get(),new BlockPos(8,1,8));
+  MinemonCreature[] team=new MinemonCreature[3];String[] species={"charizard","jolteon","gengar"};
+  for(int i=0;i<team.length;i++){
+   team[i]=h.spawn(ModEntities.SPECIES.get(species[i]).get(),new BlockPos(7+i,1,7));team[i].tame(owner);team[i].setOwnerUUID(owner.getUUID());
+  }
+  team[0].setSleeping(true);team[2].setOrderedToSit(true);float hp=wild.getHealth();
+  var attack=new net.minecraftforge.event.entity.living.LivingAttackEvent(wild,net.minecraft.world.damagesource.DamageSource.playerAttack(owner),1.0F);
+  br.com.petrickfaria.minemon.pokec.PokecEvents.playerPokemonAttack(attack);
+  check(h,attack.isCanceled(),"Direct player damage to Minemon must be canceled on the server");
+  check(h,wild.getHealth()==hp,"Player hit must not reduce wild Pokémon health");
+  check(h,team[0].getTarget()==wild&&team[1].getTarget()==wild&&team[2].getTarget()==wild,"Every loaded companion must focus the exact wild Pokémon hit");
+  check(h,!team[0].isSleeping(),"A sleeping companion must wake immediately for the focused attack");
+  wild.discard();
+  h.runAfterDelay(1,()->{
+   check(h,team[0].isSleeping(),"A companion that was asleep before combat must resume sleep when its focus target disappears");
+   check(h,team[2].isOrderedToSit(),"The sit command must be restored after a temporary focused attack");
+   owner.discard();h.succeed();
+  });
+ }
+
+ @GameTest(template="test_arena",timeoutTicks=1240)
+ public static void domesticatedPokemonRegeneratesOneHealthAfter1200Ticks(GameTestHelper h){
+  ServerPlayer owner=player(h);MinemonCreature pokemon=h.spawn(ModEntities.SPECIES.get("charmander").get(),new BlockPos(6,1,6));
+  pokemon.tame(owner);pokemon.setOwnerUUID(owner.getUUID());pokemon.setNoAi(true);pokemon.setSleeping(true);pokemon.setHealth(pokemon.getMaxHealth()-3.0F);float initial=pokemon.getHealth();
+  MinemonCreature wild=h.spawn(ModEntities.SPECIES.get("charmander").get(),new BlockPos(9,1,6));wild.setNoAi(true);wild.setHealth(wild.getMaxHealth()-3.0F);float wildInitial=wild.getHealth();
+  h.runAfterDelay(1199,()->{
+   check(h,pokemon.getHealth()==initial,"Natural healing must not occur before the full 1200-tick interval");
+   check(h,wild.getHealth()==wildInitial,"The automatic recovery timer must not heal wild Pokémon");
+   h.runAfterDelay(1,()->{
+    check(h,pokemon.getHealth()==initial+1.0F,"A domesticated Pokémon must recover exactly one health point at 1200 ticks");
+    check(h,wild.getHealth()==wildInitial,"The automatic recovery timer must exclude wild Pokémon");
+    check(h,pokemon.getHealth()<=pokemon.getMaxHealth(),"Natural healing must respect species maximum health");owner.discard();h.succeed();
+   });
+  });
  }
 
  @GameTest(template="test_arena",timeoutTicks=420)
@@ -432,10 +482,11 @@ public final class CompanionTests {
   h.runAfterDelay(20,()->{
    check(h,mob.getTarget()==null,"Unprovoked Pokemon must remain neutral toward the player");
    check(h,water?mob.isInWater():mob.isFlyingSpecies()&&!mob.isOnGround(),"Provocation must occur in the actual movement medium");
-   float health=p.getHealth();mob.hurt(DamageSource.playerAttack(p),1);
-   check(h,mob.getTarget()==p,"Pokemon must identify the player aggressor in its movement medium");
+   float health=p.getHealth(),wildHealth=mob.getHealth();
+   check(h,!mob.hurt(DamageSource.playerAttack(p),1),"Direct player hits must not damage wild Pokemon");
+   check(h,mob.getHealth()==wildHealth&&mob.getTarget()==null,"Wild Pokemon must remain unharmed and neutral after a direct player hit");
    h.runAfterDelay(200,()->{
-    check(h,p.getHealth()<health,"Existing melee combat must actually damage the player aggressor: "+state(mob,p));
+    check(h,p.getHealth()==health,"A wild Pokemon must not retaliate against the player's direct hit: "+state(mob,p));
     p.discard();h.succeed();
    });
   });
