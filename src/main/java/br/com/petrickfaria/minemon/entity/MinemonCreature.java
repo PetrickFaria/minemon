@@ -738,7 +738,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         if(isDefeated())return false;
         boolean directPlayerMelee=source.getEntity() instanceof Player player&&source.getDirectEntity()==player;
         if (!isRocketSpecial() && isTame() && directPlayerMelee) return false;
-        if(directPlayerMelee&&!isTame())amount=1.0F;
+        if(directPlayerMelee&&!isTame()&&!isRocketSpecial())amount=1.0F;
         if (br.com.petrickfaria.minemon.pokec.WildEncounterManager.isEncounter(this)) {
             if (br.com.petrickfaria.minemon.pokec.WildEncounterManager.isDowned(this)) return false;
             if (!directPlayerMelee&&!br.com.petrickfaria.minemon.pokec.WildEncounterManager.canDamage(this, source)) return false;
