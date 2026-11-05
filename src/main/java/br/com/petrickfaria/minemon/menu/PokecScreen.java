@@ -37,6 +37,7 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
     private static volatile String syncedConversionSpecies = "", syncedConversionRarity = "", syncedConversionStage = "", syncedConversionType = "";
     private static volatile boolean syncedConversionConfirming;
 
+    private final Map<net.minecraft.resources.ResourceLocation,net.minecraft.resources.ResourceLocation> ghostTextures=new HashMap<>();
     private float uiScale = 1.0F;
     private boolean draggingPreview;
     private float previewYaw,previewPitch,targetPreviewYaw,targetPreviewPitch;
@@ -277,11 +278,31 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         var ball=menu.slots.get(38);if(ball.getItem().isEmpty())ghostItem(pose,new ItemStack(ModItems.POKEBALL.get()),ball.x,ball.y);
     }
     private void ghostItem(PoseStack pose,ItemStack stack,int x,int y){
-        // Neutral wash makes the item silhouette visibly distinct from an inserted stack.
-        itemRenderer.renderAndDecorateItem(stack,leftPos+x,topPos+y);
+        var key=net.minecraftforge.registries.ForgeRegistries.ITEMS.getKey(stack.getItem());
+        if(key==null)return;
+        var texture=ghostTextures.computeIfAbsent(key,id->{
+            var source=new net.minecraft.resources.ResourceLocation(id.getNamespace(),"textures/item/"+id.getPath()+".png");
+            try(var stream=minecraft.getResourceManager().getResource(source).orElseThrow().open()){
+                var pixels=com.mojang.blaze3d.platform.NativeImage.read(stream);
+                for(int py=0;py<pixels.getHeight();py++)for(int px=0;px<pixels.getWidth();px++){
+                    int color=pixels.getPixelRGBA(px,py);
+                    int gray=((color&255)*299+((color>>>8)&255)*587+((color>>>16)&255)*114)/1000;
+                    pixels.setPixelRGBA(px,py,(color&0xFF000000)|(gray<<16)|(gray<<8)|gray);
+                }
+                return minecraft.getTextureManager().register("pokec_hint",new net.minecraft.client.renderer.texture.DynamicTexture(pixels));
+            }catch(java.io.IOException|java.util.NoSuchElementException error){return null;}
+        });
+        if(texture==null)return;
         com.mojang.blaze3d.systems.RenderSystem.enableBlend();
-        pose.pushPose();pose.translate(0,0,200);GuiComponent.fill(pose,x,y,x+16,y+16,0xB0C6C6C6);pose.popPose();
+        com.mojang.blaze3d.systems.RenderSystem.setShaderTexture(0,texture);
+        com.mojang.blaze3d.systems.RenderSystem.setShaderColor(1,1,1,.45F);
+        GuiComponent.blit(pose,x,y,0,0F,0F,16,16,16,16);
+        com.mojang.blaze3d.systems.RenderSystem.setShaderColor(1,1,1,1);
         com.mojang.blaze3d.systems.RenderSystem.disableBlend();
+    }
+    @Override public void removed(){
+        for(var texture:ghostTextures.values())minecraft.getTextureManager().release(texture);
+        ghostTextures.clear();super.removed();
     }
     private void drawDamageHearts(PoseStack pose,double damage,int x,int y){
         com.mojang.blaze3d.systems.RenderSystem.setShaderColor(.22F,.22F,.22F,1);
