@@ -127,8 +127,10 @@ public final class PokemonTreatClientSmokeTest {
                 return;
             }
             if (pokecUiPhase) {
-                if (!(minecraft.screen instanceof PokecScreen screen))
-                    throw new IllegalStateException("PokéC selector closed during focused UI render check");
+                if (!(minecraft.screen instanceof PokecScreen screen)) {
+                    if(clientTicks<200)return;
+                    throw new IllegalStateException("PokéC server menu did not open during focused UI render check");
+                }
                 if (screen.catalogSizeForSmokeTest() != 151)
                     throw new IllegalStateException("PokéC UI did not load the complete 151-species list");
                 if (!screen.conversionPanelFitsAboveInventoryForSmokeTest())
@@ -276,15 +278,21 @@ public final class PokemonTreatClientSmokeTest {
     private static void openPokecUi(Minecraft minecraft) {
         pokecUiPhase = true;
         clientTicks = 0;
-        var menu = new PokecMenu(minecraft.player.containerMenu.containerId + 1,
-                minecraft.player.getInventory(), minecraft.player.blockPosition());
-        minecraft.setScreen(new PokecScreen(menu, minecraft.player.getInventory(), Component.literal("PokéC")));
-        // This standalone UI smoke uses the same starter unlock snapshot the server
-        // sends for a fresh profile, so locked Mew and unlocked Bulbasaur are deterministic.
-        PokecScreen.updateState(0, true, java.util.Set.of("bulbasaur", "charmander", "squirtle", "pikachu", "eevee"),
-                java.util.Map.of(), java.util.Map.of(), java.util.Map.of(), "bulbasaur", 0, 0,
-                net.minecraft.world.item.ItemStack.EMPTY, net.minecraft.world.item.ItemStack.EMPTY, -1,
-                "", "", "", "", 0, 0, 0, 0, false);
+        var server=minecraft.getSingleplayerServer();
+        if(server==null)throw new IllegalStateException("Pokec UI smoke requires the prepared integrated server");
+        var uuid=minecraft.player.getUUID();
+        server.execute(()->{
+            var player=server.getPlayerList().getPlayer(uuid);
+            if(player==null)throw new IllegalStateException("Pokec test player not loaded on server");
+            player.getPersistentData().remove("minemon_gen1_pokec");
+            var pos=player.blockPosition().east(2);
+            var level=(net.minecraft.server.level.ServerLevel)player.level;
+            var state=br.com.petrickfaria.minemon.registry.ModBlocks.POKEC.get().defaultBlockState();
+            level.setBlock(pos,state,3);
+            level.setBlock(pos.above(),state.setValue(br.com.petrickfaria.minemon.block.PokecBlock.HALF,net.minecraft.world.level.block.state.properties.DoubleBlockHalf.UPPER),3);
+            state.use(level,player,net.minecraft.world.InteractionHand.MAIN_HAND,
+                new net.minecraft.world.phys.BlockHitResult(net.minecraft.world.phys.Vec3.atCenterOf(pos),net.minecraft.core.Direction.UP,pos,false));
+        });
     }
     private PokemonTreatClientSmokeTest() {}
 }

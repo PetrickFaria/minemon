@@ -220,7 +220,7 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         GuiComponent.fill(pose, 154, 136, 382, 137, 0xFFC6C6C6);
         font.draw(pose, "DADOS DA ESPÉCIE", 154, 139, 0xFF404040);
         String rarity=PokecEconomy.get().rarity(species.slug());
-        int level=WildCaptureRules.minimumSpawnLevel(species.slug());
+        int level=1;
         font.draw(pose,"Vida:",154,151,0xFF404040);
         drawHealthHearts(pose,(int)Math.ceil(br.com.petrickfaria.minemon.entity.PokemonProgression.healthForRarity(rarity,level)),191,149);
         font.draw(pose,"Dano:",280,151,0xFF404040);
@@ -228,7 +228,8 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         font.draw(pose,"Estágio: "+evolutionStage(species),154,176,0xFF404040);
         font.draw(pose,"Nível: "+level,302,176,0xFF404040);
         font.draw(pose,"Raridade: "+rarityLabel(rarity),154,188,0xFF404040);
-        font.draw(pose,fitText("Tipo: "+species.primaryType(),94),302,188,0xFF404040);
+        String types=species.types().stream().map(type->{var soul=SoulType.fromSpeciesType(type);return soul==null?type:soulTypeLabel(soul.name());}).collect(java.util.stream.Collectors.joining(" / "));
+        font.draw(pose,fitText("Tipo: "+types,234),154,200,0xFF404040);
         drawAcquisitionPanel(pose, species, unlocked, species.isEvolution() && !unlocked, mouseX, mouseY);
         drawCompactConversion(pose);
     }
@@ -353,7 +354,7 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
             case "NORMAL" -> "Normal"; case "FIRE" -> "Fogo"; case "WATER" -> "Água"; case "GRASS" -> "Grama";
             case "ELECTRIC" -> "Elétrica"; case "ICE" -> "Gelo"; case "FIGHTING" -> "Lutadora"; case "POISON" -> "Venenosa";
             case "GROUND" -> "Terrestre"; case "FLYING" -> "Voadora"; case "PSYCHIC" -> "Psíquica"; case "BUG" -> "Inseto";
-            case "ROCK" -> "Pedra"; case "GHOST" -> "Fantasma"; case "DRAGON" -> "Dragão"; default -> type;
+            case "ROCK" -> "Pedra"; case "GHOST" -> "Fantasma"; case "DRAGON" -> "Dragão"; case "DARK" -> "Sombrio"; case "STEEL" -> "Aço"; case "FAIRY" -> "Fada"; default -> type;
         };
     }
 
@@ -364,7 +365,7 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         com.mojang.blaze3d.systems.RenderSystem.setShaderTexture(0, GuiComponent.GUI_ICONS_LOCATION);
         for (int i = 0; i < visible; i++) {
             int row = i / 10, column = i % 10;
-            int hx = x + column * 9, hy = y + row * 9;
+            int hx = x + column * 8, hy = y + row * 9;
             GuiComponent.blit(pose, hx, hy, 0, 16, 0, 9, 9, 256, 256);
             if (i < fullHearts) GuiComponent.blit(pose, hx, hy, 0, 52, 0, 9, 9, 256, 256);
             else if (halfHeart) GuiComponent.blit(pose, hx, hy, 0, 61, 0, 9, 9, 256, 256);
