@@ -59,8 +59,9 @@ def stop_with_rcon() -> bool:
 
 
 def rcon_command(command: str) -> str:
+    response_timeout = 30 if command == "save-all flush" else 3
     with socket.create_connection(("127.0.0.1", RCON_PORT), timeout=3) as sock:
-        sock.settimeout(3)
+        sock.settimeout(response_timeout)
         auth_id, auth_type, _ = rcon_packet(sock, 11, 3, RCON_PASSWORD)
         if auth_id != 11 or auth_type != 2:
             raise RuntimeError("RCON authentication failed")
