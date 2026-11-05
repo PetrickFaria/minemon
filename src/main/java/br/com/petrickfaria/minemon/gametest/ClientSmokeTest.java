@@ -1,6 +1,3 @@
-Warning: truncated output (original token count: 22011)
-Total output lines: 1122
-
 package br.com.petrickfaria.minemon.gametest;
 import br.com.petrickfaria.minemon.Minemon;
 import br.com.petrickfaria.minemon.client.MinemonRenderer;
@@ -538,7 +535,111 @@ public final class ClientSmokeTest {
         for(String joint:profileJoints(slug,state)) {
          var bone=model.getAnimationProcessor().getBone(joint);
          if(bone==null)throw new IllegalStateException("Locomotion profile references missing bone "+slug+":"+joint);
-         float[] values={bone.getRotationX(),bone.getRotationY(),bone.getR…2011 tokens truncated…  int index=(worldTicks-SPECIES_START_TICK)/SPECIES_TEST_WINDOW;
+         float[] values={bone.getRotationX(),bone.getRotationY(),bone.getRotationZ(),bone.getPositionX(),bone.getPositionY(),bone.getPositionZ()};
+         var range=perSpecies.computeIfAbsent(state+":"+joint,k->{var v=new float[12];java.util.Arrays.fill(v,0,6,Float.MAX_VALUE);java.util.Arrays.fill(v,6,12,-Float.MAX_VALUE);return v;});
+         for(int axis=0;axis<6;axis++){range[axis]=Math.min(range[axis],values[axis]);range[axis+6]=Math.max(range[axis+6],values[axis]);}
+        }
+       }
+       if(slug.equals("fearow")&&isSettledClipSample(phase)) {
+        var body=model.getAnimationProcessor().getBone("body");
+        var head=model.getAnimationProcessor().getBone("head");
+        var leftLeg=model.getAnimationProcessor().getBone("leg_left");
+        var rightLeg=model.getAnimationProcessor().getBone("leg_right");
+        var left=model.getAnimationProcessor().getBone("wing_open_left");
+        var right=model.getAnimationProcessor().getBone("wing_open_right");
+        // The adapted pose lifts the head, straightens both legs and keeps
+        // opposite wing orientation while the native rig's wing chains beat.
+        float pitch=(float)Math.toRadians(22.0D),legSplay=(float)Math.toRadians(5.0D);
+        float lookPitch=head==null?Float.NaN:head.getRotationX();
+        if(body==null||head==null||leftLeg==null||rightLeg==null||left==null||right==null
+           ||Math.abs(Math.abs(body.getRotationX())-pitch)>0.02F
+           ||!Float.isFinite(lookPitch)||lookPitch<(float)Math.toRadians(95.0D)-0.02F
+           ||lookPitch>(float)Math.toRadians(115.0D)+0.02F
+           ||Math.abs(Math.abs(leftLeg.getRotationZ())-legSplay)>0.02F
+           ||Math.abs(Math.abs(rightLeg.getRotationZ())-legSplay)>0.02F
+           ||left.getRotationZ()*right.getRotationZ()>=0.0F)
+         throw new IllegalStateException("Fearow adapted air pose must keep the body/feet aligned, opposite wings beating, and the q.look head within its supported pitch range; head="+lookPitch);
+        fearowNativeAirPoseObserved=true;
+       }
+      if(java.util.Set.of("charmander","charmeleon","charizard").contains(slug)) {
+        var flame=model.getAnimationProcessor().getBone("tail_flame");
+        if(flame==null)throw new IllegalStateException(slug+" runtime model is missing tail_flame bone");
+        String mode=(phase<8||phase>=54)?"idle":(phase>=8&&phase<27)?"walk":null;
+        if(mode!=null) {
+         float[] range=tailFlameRanges.computeIfAbsent(slug,k->new java.util.HashMap<>()).computeIfAbsent(mode,k->{var v=new float[6];java.util.Arrays.fill(v,0,3,Float.MAX_VALUE);java.util.Arrays.fill(v,3,6,-Float.MAX_VALUE);return v;});
+         float[] rotations={flame.getRotationX(),flame.getRotationY(),flame.getRotationZ()};
+         for(int axis=0;axis<3;axis++){range[axis]=Math.min(range[axis],rotations[axis]);range[axis+3]=Math.max(range[axis+3],rotations[axis]);}
+        }
+        String flameClip=entity.getSelectedTailFlameAnimationForValidation();if(flameClip!=null)tailFlameClips.computeIfAbsent(slug,k->java.util.concurrent.ConcurrentHashMap.newKeySet()).add(flameClip);
+       }
+      }
+     if(testEntity==null||!entity.getUUID().equals(testEntity)||worldTicks<110||worldTicks>=BULBASAUR_VALIDATION_TICK)return;
+     var leg=model.getAnimationProcessor().getBone("leg_front_right");var body=model.getAnimationProcessor().getBone("body");
+     minLeg=Math.min(minLeg,leg.getRotationX());maxLeg=Math.max(maxLeg,leg.getRotationX());minBody=Math.min(minBody,body.getPositionY());maxBody=Math.max(maxBody,body.getPositionY());frames++;
+    };
+   }
+   if(mc.level==null||mc.player==null||mc.getSingleplayerServer()==null)return;
+   if(!setup) {
+    setup=true;mc.getSingleplayerServer().execute(()->{
+     var level=mc.getSingleplayerServer().overworld();level.setDayTime(1000);level.getGameRules().getRule(GameRules.RULE_DOMOBSPAWNING).set(false,mc.getSingleplayerServer());
+     for(int x=-8;x<=8;x++)for(int z=-5;z<=12;z++)level.setBlockAndUpdate(new BlockPos(x,100,z),Blocks.STONE.defaultBlockState());
+     // The generated validation world can contain terrain or structures above y=100.
+     // Clear a roomy air volume so the render fixture cannot suffocate before sampling.
+     for(int x=-8;x<=8;x++)for(int z=-5;z<=12;z++)for(int y=101;y<=110;y++)
+      level.setBlockAndUpdate(new BlockPos(x,y,z),Blocks.AIR.defaultBlockState());
+     var player=mc.getSingleplayerServer().getPlayerList().getPlayers().get(0);player.setGameMode(GameType.CREATIVE);player.teleportTo(level,0,101,0,0,12);
+     var b=ModEntities.BULBASAUR.get().create(level);b.moveTo(0,101,4,180,0);b.tame(player);b.setOrderedToSit(false);b.setNoAi(true);level.addFreshEntity(b);testEntity=b.getUUID();initialEntityId=b.getId();
+    });
+   }
+   if(mc.screen!=null || (worldTicks==0 && (initialEntityId==0 || mc.level.getEntity(initialEntityId)==null || mc.player.getY()<100)))return;
+   if(worldTicks>=SPECIES_START_TICK&&worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW&&testEntity!=null) {
+    // Keep real airborne/swimming specimens in view during the longer idle
+    // observation; camera movement does not alter their pose or physics.
+    for(var tracked:mc.level.entitiesForRendering())if(tracked.getUUID().equals(testEntity)) {
+     double dx=tracked.getX()-mc.player.getX(),dz=tracked.getZ()-mc.player.getZ();
+     double dy=tracked.getY()+tracked.getBbHeight()*0.5D-mc.player.getEyeY();
+     mc.player.setYRot((float)(Math.toDegrees(Math.atan2(dz,dx))-90.0D));
+     mc.player.setXRot((float)-Math.toDegrees(Math.atan2(dy,Math.sqrt(dx*dx+dz*dz))));
+     break;
+    }
+   }
+   // Do not skip a short input phase when the client batches ticks between
+   // render frames. Keep every original phase and assertion, and require two
+   // rendered observations before advancing the ten-species fixture.
+   if(worldTicks>=SPECIES_START_TICK && worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW) {
+    String active=species.get((worldTicks-SPECIES_START_TICK)/SPECIES_TEST_WINDOW);
+    int appliedPhase=(worldTicks-SPECIES_START_TICK)%SPECIES_TEST_WINDOW;
+    if(ARTICULATION_VALIDATION_SPECIES.contains(active)
+       &&!(active.equals("alakazam")&&Boolean.getBoolean("minemon.clientSmokeAlakazamPose"))
+       && (!active.equals(renderedPhaseSpecies)||renderedPhase!=appliedPhase||renderedPhaseFrames<2
+           ||!clipHasSettled(active)||appliedPhase==79&&!finalIdleObserved(active)
+           ||appliedPhase==23&&!steadyMotionObserved(active,false)
+           ||appliedPhase==46&&!steadyMotionObserved(active,true))) {
+     applyValidationInput(mc,appliedPhase);
+     return;
+    }
+   }
+   worldTicks++;
+   if(Boolean.getBoolean("minemon.clientSmokeAudio")&&worldTicks>=110&&worldTicks<350&&!customAudioSmokeRequested) {
+    var audioEntity=mc.level.getEntity(initialEntityId);
+    if(audioEntity instanceof MinemonCreature creature&&creature.isAlive()&&creature.getUUID().equals(testEntity)
+        &&!mc.level.isNight()) {
+     // Wait for client-side entity tracking and daytime synchronization before
+     // issuing exactly one request. Decoding and OpenAL startup are asynchronous.
+     br.com.petrickfaria.minemon.client.CustomCreatureAudio.play(initialEntityId,testEntity);
+     customAudioSmokeRequested=true;
+     customAudioSmokeRequestTick=worldTicks;
+    }
+   }
+   if(Boolean.getBoolean("minemon.clientSmokeAudio")&&worldTicks==350) {
+    if(!customAudioSmokeRequested||!br.com.petrickfaria.minemon.client.CustomCreatureAudio.wasStarted(testEntity))
+     throw new IllegalStateException("Synthetic local OGG did not start positionally; requested="
+         +customAudioSmokeRequested+", requestTick="+customAudioSmokeRequestTick+", clientEntity="
+         +mc.level.getEntity(initialEntityId)+", daytime="+!mc.level.isNight()+", "+customAudioSmokeDiagnostics(testEntity));
+    Files.writeString(Path.of("client-validation.txt"),"PASS CUSTOM AUDIO: synthetic local OGG decoded and started positionally in the Minecraft client.\n",StandardOpenOption.APPEND);
+   }
+   if(worldTicks>=SPECIES_START_TICK&&worldTicks<SPECIES_START_TICK+species.size()*SPECIES_TEST_WINDOW) {
+    int index=(worldTicks-SPECIES_START_TICK)/SPECIES_TEST_WINDOW;
     int phase=(worldTicks-SPECIES_START_TICK)%SPECIES_TEST_WINDOW;
     if(phase==0&&index>completedSpeciesWindows) {
      completedSpeciesWindows=index;
