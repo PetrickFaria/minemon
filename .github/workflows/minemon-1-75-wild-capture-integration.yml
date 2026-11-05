@@ -50,6 +50,12 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y flite1-dev
+      - name: Run Minecraft GameTests from both lines
+        run: |
+          mkdir -p run
+          echo eula=true > run/eula.txt
+          python3 tools/prepare_gametest_world.py
+          timeout 600s ./gradlew --no-daemon runGameTestServer
       - name: Validate Pokec inventory layout, catalog selection and preview on the real client
         run: |
           python3 tools/prepare_client_world.py
@@ -65,12 +71,6 @@ jobs:
             run/client-validation-treats.txt
           if-no-files-found: error
           retention-days: 7
-      - name: Run Minecraft GameTests from both lines
-        run: |
-          mkdir -p run
-          echo eula=true > run/eula.txt
-          python3 tools/prepare_gametest_world.py
-          timeout 600s ./gradlew --no-daemon runGameTestServer
       - name: Create, save, and reopen capture world twice
         env:
           MINEMON_TEST_RCON_PASSWORD: ${{ secrets.MINEMON_TEST_RCON_PASSWORD }}
