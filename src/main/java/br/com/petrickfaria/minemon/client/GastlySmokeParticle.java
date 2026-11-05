@@ -13,8 +13,13 @@ import net.minecraft.core.particles.SimpleParticleType;
 /** GeckoLib/Forge client adapter for Cobblemon 1.8.2's ghostly_smoke emitter. */
 public final class GastlySmokeParticle extends TextureSheetParticle {
     private static final java.util.concurrent.atomic.AtomicInteger LARGE_COUNT=new java.util.concurrent.atomic.AtomicInteger(),SMALL_COUNT=new java.util.concurrent.atomic.AtomicInteger();
+    private static final java.util.concurrent.atomic.AtomicInteger FAR_RENDER_COUNT=new java.util.concurrent.atomic.AtomicInteger();
+    private static volatile double MAX_RENDER_DISTANCE_FOR_VALIDATION;
+    private static volatile SpriteSet LARGE_SPRITES,SMALL_SPRITES;
     public static int largeSpawnsForValidation(){return LARGE_COUNT.get();}
     public static int smallSpawnsForValidation(){return SMALL_COUNT.get();}
+    public static int farRendersForValidation(){return FAR_RENDER_COUNT.get();}
+    public static double maxRenderDistanceForValidation(){return MAX_RENDER_DISTANCE_FOR_VALIDATION;}
     private static final java.util.concurrent.atomic.AtomicInteger SPAWN_COUNT = new java.util.concurrent.atomic.AtomicInteger();
     private final SpriteSet sprites;
     private final net.minecraft.world.entity.Entity owner;
@@ -24,13 +29,11 @@ public final class GastlySmokeParticle extends TextureSheetParticle {
     private GastlySmokeParticle(ClientLevel level, double x, double y, double z,
                                 double xd, double yd, double zd, SpriteSet sprites,boolean small) {
         super(level, x, y, z, xd, yd, zd);
-        SPAWN_COUNT.incrementAndGet();
         this.sprites = sprites;
         // Particle's default constructor adds random velocity. Keep the inward
         // aura trajectory inside its compact source radius instead of scattering.
         this.xd = this.yd = this.zd = 0;
         this.owner=level.getEntity((int)xd);this.slot=(int)yd;this.small=small;
-        (small?SMALL_COUNT:LARGE_COUNT).incrementAndGet();
         this.lifetime = br.com.petrickfaria.minemon.entity.GastlyAura.LIFETIME; // Native maximum lifetime: 0.8 s.
         this.gravity = 0.0F;
         this.friction = 0.96F;
@@ -78,7 +81,7 @@ public final class GastlySmokeParticle extends TextureSheetParticle {
         // Contract the original radial orbit uniformly. The cutout core pass and the
         // post-particle redraw provide the same depth rule wherever a billboard crosses it.
         double bodyWidth=br.com.petrickfaria.minemon.entity.ModelMetrics.bodyWidth("gastly")*scale;
-        double radius=br.com.petrickfaria.minemon.entity.GastlyAura.particleOrbitRadius(bodyWidth,this.quadSize);
+        double radius=br.com.petrickfaria.minemon.entity.GastlyAura.particleOrbitRadius(bodyWidth);
         double center=br.com.petrickfaria.minemon.entity.ModelMetrics.bodyCenterY("gastly")*scale;
         if(owner instanceof br.com.petrickfaria.minemon.entity.MinemonCreature pokemon && pokemon.isDefeated())center+=br.com.petrickfaria.minemon.entity.ModelMetrics.defeatedOffset("gastly",scale);
         double height=br.com.petrickfaria.minemon.entity.ModelMetrics.bodyHeight("gastly")*scale;
@@ -119,12 +122,43 @@ public final class GastlySmokeParticle extends TextureSheetParticle {
         return TRANSLUCENT_WITHOUT_DEPTH_WRITES;
     }
 
+    static boolean auraSpritesReady(){return LARGE_SPRITES!=null&&SMALL_SPRITES!=null;}
+    static void beginAuraFrame(com.mojang.blaze3d.vertex.BufferBuilder buffer,
+                               net.minecraft.client.renderer.texture.TextureManager textures){
+        TRANSLUCENT_WITHOUT_DEPTH_WRITES.begin(buffer,textures);
+    }
+    static void endAuraFrame(com.mojang.blaze3d.vertex.Tesselator tesselator){
+        TRANSLUCENT_WITHOUT_DEPTH_WRITES.end(tesselator);
+    }
+    static void renderAuraParticle(br.com.petrickfaria.minemon.entity.MinemonCreature owner,int slot,
+                                  boolean small,int age,float partialTick,net.minecraft.client.Camera camera,
+                                  com.mojang.blaze3d.vertex.VertexConsumer buffer,double distanceSqr){
+        SpriteSet sprites=small?SMALL_SPRITES:LARGE_SPRITES;
+        if(sprites==null||!(owner.level instanceof ClientLevel level))return;
+        GastlySmokeParticle particle=new GastlySmokeParticle(level,owner.getX(),owner.getY(),owner.getZ(),
+                owner.getId(),slot,0.0D,sprites,small);
+        particle.age=Math.max(0,Math.min(age,particle.lifetime-1));
+        particle.setSpriteFromAge(sprites);
+        float progress=Math.min(1.0F,Math.max(0.0F,(age+partialTick)/(float)particle.lifetime));
+        particle.setColor(lerp(progress,0xBE,0x7B)/255.0F,lerp(progress,0x81,0x23)/255.0F,
+                lerp(progress,0xE8,0xD6)/255.0F);
+        particle.updateSourceSize(progress);
+        particle.followBody();
+        particle.xo=particle.x;particle.yo=particle.y;particle.zo=particle.z;
+        particle.render(buffer,camera,partialTick);
+        SPAWN_COUNT.incrementAndGet();
+        (small?SMALL_COUNT:LARGE_COUNT).incrementAndGet();
+        if(distanceSqr>=32.0D*32.0D)FAR_RENDER_COUNT.incrementAndGet();
+        MAX_RENDER_DISTANCE_FOR_VALIDATION=Math.max(MAX_RENDER_DISTANCE_FOR_VALIDATION,Math.sqrt(distanceSqr));
+    }
+
     public static final class Provider implements ParticleProvider<SimpleParticleType> {
         private final SpriteSet sprites;
         private final boolean small;
         public Provider(SpriteSet sprites){this(sprites,false);}
         public Provider(SpriteSet sprites,boolean small) {
             this.sprites = sprites;this.small=small;
+            if(small)SMALL_SPRITES=sprites;else LARGE_SPRITES=sprites;
         }
 
         @Override

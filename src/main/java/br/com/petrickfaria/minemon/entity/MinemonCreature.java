@@ -777,7 +777,6 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         super.tick();
         if (!level.isClientSide && isTame() && !isDefeated()) tickNaturalHealing();
         if(!level.isClientSide && isTame()){rangedCharges.tick(!isDefeated());entityData.set(RANGED_CHARGES,rangedCharges.charges());}
-        if(level.isClientSide)tickGastlySmoke();
         if(isDefeated()){
             this.getNavigation().stop();this.setTarget(null);this.setJumping(false);
             this.setSpeed(0);this.setXxa(0);this.setYya(0);this.setZza(0);
@@ -914,13 +913,6 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         resumeSleepingAfterFocus = false;
         resumeNightRestAfterFocus = false;
         resumeSitAfterFocus = false;
-    }
-
-    private void tickGastlySmoke(){
-        if(!getSpeciesSlug().equals("gastly") || isRemoved())return;
-        int large=GastlyAura.largeSlot(tickCount),small=GastlyAura.smallSlot(tickCount);
-        if(large>=0)level.addParticle(br.com.petrickfaria.minemon.registry.ModParticles.GASTLY_GHOSTLY_SMOKE.get(),getX(),getY(),getZ(),getId(),large,0);
-        if(small>=0)level.addParticle(br.com.petrickfaria.minemon.registry.ModParticles.GASTLY_SMALL_SMOKE.get(),getX(),getY(),getZ(),getId(),small,0);
     }
 
     /** Independent, persisted world-time counter. Unloaded chunks do not advance it. */

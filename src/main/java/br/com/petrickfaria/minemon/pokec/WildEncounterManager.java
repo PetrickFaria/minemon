@@ -29,6 +29,7 @@ public final class WildEncounterManager {
     private static final String STATE = "MinemonEncounterState";
     private static final String DOWNED_AT = "MinemonEncounterDownedAt";
     private static final String LAST_IN_RANGE = "MinemonEncounterLastInRange";
+    private static final String SPAWN_EGG_ENCOUNTER = "MinemonSpawnEggEncounter";
     private static final String REWARDED = "MinemonEncounterRewarded";
     private static final String LAST_CHECK = "MinemonWildSpawnCheck";
     private static final long CHECK_INTERVAL = 20L * 30L;
@@ -94,7 +95,25 @@ public final class WildEncounterManager {
         pokemon.setWildEncounterOwner(owner);
         pokemon.setWildEncounterDowned(isDowned(pokemon));
         if (isDowned(pokemon)) pokemon.setEncounterDowned(true);
-        if (owner != null) WildEncounterData.get(level).put(owner, pokemon.getUUID(), isDowned(pokemon) ? "downed" : "active");
+        if (owner != null) WildEncounterData.get(level).put(owner, pokemon.getUUID(), isDowned(pokemon) ? "downed"
+                : pokemon.getPersistentData().getBoolean(SPAWN_EGG_ENCOUNTER) ? "spawn_egg" : "active");
+    }
+
+    /** Spawn-egg Pokémon enter the same wild defeat/capture lifecycle without being tamed or slot-counted. */
+    public static void registerSpawnEggEncounter(MinemonCreature pokemon, ServerPlayer encounterPlayer) {
+        if (pokemon.level.isClientSide || !(pokemon.level instanceof ServerLevel level) || pokemon.isTame()
+                || encounterPlayer.level != level) return;
+        var data = pokemon.getPersistentData();
+        if (data.getBoolean(MARKER)) return;
+        data.putBoolean(MARKER, true);
+        data.putBoolean(SPAWN_EGG_ENCOUNTER, true);
+        data.putUUID(OWNER, encounterPlayer.getUUID());
+        data.putString(STATE, "spawn_egg");
+        data.putLong(LAST_IN_RANGE, level.getGameTime());
+        pokemon.setWildEncounter(true);
+        pokemon.setWildEncounterOwner(encounterPlayer.getUUID());
+        pokemon.setWildEncounterDowned(false);
+        WildEncounterData.get(level).put(encounterPlayer.getUUID(), pokemon.getUUID(), "spawn_egg");
     }
 
     public static void untrackRemoved(MinemonCreature pokemon) {

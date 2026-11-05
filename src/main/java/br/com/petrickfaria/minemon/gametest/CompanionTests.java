@@ -180,6 +180,9 @@ public final class CompanionTests {
    var created=h.getLevel().getEntitiesOfClass(MinemonCreature.class,new net.minecraft.world.phys.AABB(floorPos).inflate(5),e->e.getType()==entry.getValue().get());
    check(h,!created.isEmpty(),"Egg did not spawn its entity: "+entry.getKey());
    check(h,created.stream().noneMatch(MinemonCreature::isTame),"Spawn eggs must create wild Pokémon: "+entry.getKey());
+   check(h,created.stream().allMatch(pokemon->br.com.petrickfaria.minemon.pokec.WildEncounterManager.isEncounter(pokemon)
+       &&p.getUUID().equals(br.com.petrickfaria.minemon.pokec.WildEncounterManager.owner(pokemon))),
+       "Spawn eggs must register capture encounters without assigning Pokémon ownership: "+entry.getKey());
    created.forEach(net.minecraft.world.entity.Entity::discard);
   }
   var ownedTemplate=br.com.petrickfaria.minemon.registry.ModItems.EGGS.get("charmander").get();
@@ -191,6 +194,39 @@ public final class CompanionTests {
   check(h,!createdOwned.isEmpty()&&createdOwned.stream().noneMatch(MinemonCreature::isTame),"Purchased spawn egg must not assign ownership or active slots");
   createdOwned.forEach(net.minecraft.world.entity.Entity::discard);
   p.discard();h.succeed();
+ }
+
+ @GameTest(template="test_arena",timeoutTicks=100)
+ public static void eggSpawnedWildPokemonDownsAndPersistsInsteadOfDying(GameTestHelper h){
+  ServerPlayer owner=player(h);var egg=br.com.petrickfaria.minemon.registry.ModItems.EGGS.get("bulbasaur").get();
+  BlockPos floor=h.absolutePos(new BlockPos(8,0,8));owner.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,
+      new net.minecraft.world.item.ItemStack(egg));
+  var hit=new net.minecraft.world.phys.BlockHitResult(net.minecraft.world.phys.Vec3.atCenterOf(floor),
+      net.minecraft.core.Direction.UP,floor,false);
+  check(h,egg.useOn(new net.minecraft.world.item.context.UseOnContext(owner,net.minecraft.world.InteractionHand.MAIN_HAND,hit)).consumesAction(),
+      "Bulbasaur spawn egg must create the test wild");
+  var found=h.getLevel().getEntitiesOfClass(MinemonCreature.class,new net.minecraft.world.phys.AABB(floor).inflate(4),
+      pokemon->pokemon.getSpeciesSlug().equals("bulbasaur")&&!pokemon.isTame());
+  check(h,!found.isEmpty(),"Spawn-egg Bulbasaur must remain wild");
+  MinemonCreature wild=found.get(0);
+  check(h,br.com.petrickfaria.minemon.pokec.WildEncounterManager.isEncounter(wild)
+      &&owner.getUUID().equals(br.com.petrickfaria.minemon.pokec.WildEncounterManager.owner(wild))
+      &&wild.getOwnerUUID()==null,"Capture attribution must not domesticate or assign the Pokémon owner");
+  check(h,br.com.petrickfaria.minemon.pokec.ActivePokemonData.get(h.getLevel()).count(owner.getUUID())==0,
+      "An egg-spawned wild encounter must not occupy a domesticated Pokémon slot");
+  MinemonCreature ally=h.spawn(ModEntities.SPECIES.get("charizard").get(),new BlockPos(7,1,7));
+  ally.tame(owner);ally.setOwnerUUID(owner.getUUID());wild.setHealth(2.0F);
+  check(h,wild.hurt(DamageSource.mobAttack(ally),20.0F),"Owned Pokémon must be able to defeat its egg-spawned wild target");
+  check(h,br.com.petrickfaria.minemon.pokec.WildEncounterManager.isDowned(wild)&&wild.getHealth()==1.0F
+      &&!wild.isRemoved()&&wild.isAlive(),"Defeated egg-spawned Pokémon must enter the capture-ready state instead of dying");
+  CompoundTag saved=new CompoundTag();wild.saveWithoutId(saved);wild.discard();
+  MinemonCreature restored=ModEntities.SPECIES.get("bulbasaur").get().create(h.getLevel());restored.load(saved);
+  check(h,h.getLevel().addFreshEntity(restored),"Downed egg encounter must reload into the test world");
+  check(h,br.com.petrickfaria.minemon.pokec.WildEncounterManager.isEncounter(restored)
+      &&br.com.petrickfaria.minemon.pokec.WildEncounterManager.isDowned(restored)
+      &&owner.getUUID().equals(br.com.petrickfaria.minemon.pokec.WildEncounterManager.owner(restored))
+      &&!restored.isTame()&&!restored.isRemoved(),"Downed state and wild status must survive entity persistence");
+  h.succeed();
  }
 
  @GameTest(template="test_arena",timeoutTicks=100)
