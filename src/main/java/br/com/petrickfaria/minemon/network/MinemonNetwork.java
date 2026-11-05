@@ -19,7 +19,7 @@ import java.util.function.Supplier;
 
 /** Sends only a playback cue; user audio remains local to each client. */
 public final class MinemonNetwork {
-    private static final String VERSION = "4";
+    private static final String VERSION = "5";
     private static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             new ResourceLocation(Minemon.MOD_ID, "main"), () -> VERSION, VERSION::equals, VERSION::equals);
 

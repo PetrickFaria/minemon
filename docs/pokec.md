@@ -57,7 +57,7 @@ reject inserted items.
 The spawn toggle persists in the player's Pokec data for the selected species.
 Only that player's periodic encounter candidate list checks the toggle; spawn
 rates, timing and world entity behavior are otherwise unchanged. The GUI displays
-the configured chance for each 30-second check, or zero while disabled.
+the configured species chance, or zero while disabled.
 
 The Liberar button commits ball conversion once through PokemonBallLedger. The
 empty original ball remains in its input, and the elemental soul reward remains
