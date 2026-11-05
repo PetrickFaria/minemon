@@ -326,7 +326,8 @@ public final class PokecGameTests {
                 "reverse shift-click must not duplicate the moved stack");
         owner.discard();h.succeed();
     }
-    @GameTest(template="test_arena",timeoutTicks=200)
+    // Preserve legacy combat arena placement by sharing the existing persistence batch.
+    @GameTest(template="test_arena",batch="refinement_stats",timeoutTicks=200)
     public static void terminalSlotsSupportVanillaClicksAndPartialSpeciesDeposits(GameTestHelper h){
         floor(h);BlockPos pos=h.absolutePos(new BlockPos(5,1,5));terminal(h,pos);
         ServerPlayer p=player(h,h.absolutePos(new BlockPos(7,1,5)));
@@ -369,7 +370,7 @@ public final class PokecGameTests {
         check(!PokecPlayerData.spawnEnabled(p,"gastly")&&PokecPlayerData.spawnEnabled(p,"abra"),"spawn toggle changes only selected species");
         menu.removed(p);p.discard();h.succeed();
     }
-    @GameTest(template="test_arena",timeoutTicks=200)
+    @GameTest(template="test_arena",batch="refinement_stats",timeoutTicks=200)
     public static void terminalPurchaseResultChargesOnceAndReturnsUnspentPayment(GameTestHelper h){
         floor(h);BlockPos pos=h.absolutePos(new BlockPos(5,1,5));terminal(h,pos);
         ServerPlayer p=player(h,h.absolutePos(new BlockPos(7,1,5)));
@@ -390,7 +391,7 @@ public final class PokecGameTests {
         check(p.getInventory().items.stream().filter(s->s.is(ModItems.POKE_COIN.get())).mapToInt(ItemStack::getCount).sum()==3,"closing and recovery return unpaid coins only once");
         p.discard();h.succeed();
     }
-    @GameTest(template="test_arena",timeoutTicks=200)
+    @GameTest(template="test_arena",batch="refinement_stats",timeoutTicks=200)
     public static void terminalReleaseKeepsBothBallTypesAndRejectsSpentTokens(GameTestHelper h){
         floor(h);BlockPos pos=h.absolutePos(new BlockPos(5,1,5));terminal(h,pos);
         ServerPlayer p=player(h,h.absolutePos(new BlockPos(7,1,5)));
