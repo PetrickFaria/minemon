@@ -87,6 +87,16 @@ jobs:
           python3 tools/prepare_client_world.py
           ALSOFT_DRIVERS=null timeout --kill-after=30s 900s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeTreats
           grep -F '[TREAT CLIENT] PASS:' run/client-validation-treats.txt
+      - name: Upload Pokec screenshots for visual review
+        uses: actions/upload-artifact@v4
+        with:
+          name: Pokec-interface-visual-check
+          path: |
+            run/screenshots/pokec-locked.png
+            run/screenshots/pokec-unlocked.png
+            run/client-validation-treats.txt
+          if-no-files-found: error
+          retention-days: 7
       - name: Validate aquatic swimming poses in the real client
         run: |
           python3 tools/prepare_client_world.py
