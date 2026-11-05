@@ -146,7 +146,7 @@ final class GhostLineClientSmokeTest {
     setup=true;
     mc.getSingleplayerServer().execute(()->{
      var level=mc.getSingleplayerServer().overworld();
-     for(int x=-20;x<=20;x++)for(int z=-20;z<=20;z++){
+     for(int x=-20;x<=20;x++)for(int z=-64;z<=20;z++){
       level.setBlockAndUpdate(new BlockPos(x,100,z),Blocks.STONE.defaultBlockState());
       for(int y=101;y<=112;y++)level.setBlockAndUpdate(new BlockPos(x,y,z),Blocks.AIR.defaultBlockState());
      }
