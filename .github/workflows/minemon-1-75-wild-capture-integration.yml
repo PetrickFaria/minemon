@@ -52,6 +52,10 @@ jobs:
           fi
           export MINEMON_TEST_RCON_PASSWORD
           python3 tools/test_world_reopen.py
+      - name: Install native speech library used by client visuals
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libflite-dev
       - name: Validate wild capture animation and capture state on the real client
         run: |
           python3 tools/prepare_client_world.py
