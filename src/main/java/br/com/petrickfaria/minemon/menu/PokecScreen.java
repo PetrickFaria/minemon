@@ -240,7 +240,8 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         // Flush item/preview passes and keep this caption independent of their depth state.
         var captionBuffers=Minecraft.getInstance().renderBuffers().bufferSource();
         captionBuffers.endBatch();
-        font.drawInBatch("Dano:",280,151,0xFF404040,false,pose.last().pose(),captionBuffers,true,0,15728880);
+        com.mojang.blaze3d.systems.RenderSystem.disableDepthTest();
+        drawPixelDamageCaption(pose,280,151);
         captionBuffers.endBatch();
         pose.popPose();
     }
@@ -315,6 +316,17 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
     @Override public void removed(){
         for(var texture:ghostTextures.values())minecraft.getTextureManager().release(texture);
         ghostTextures.clear();super.removed();
+    }
+    /** Minecraft-style caption independent of the font buffers used by previews. */
+    private void drawPixelDamageCaption(PoseStack pose,int x,int y){
+        int[][] glyphs={{30,17,17,17,17,17,30},{0,0,14,1,15,17,15},
+            {0,0,30,17,17,17,17},{0,0,14,17,17,17,14},{0,4,0,0,4,0,0}};
+        com.mojang.blaze3d.systems.RenderSystem.setShaderColor(1,1,1,1);
+        for(int glyph=0;glyph<glyphs.length;glyph++)for(int row=0;row<7;row++)for(int column=0;column<5;column++){
+            if((glyphs[glyph][row]&(1<<(4-column)))==0)continue;
+            int px=x+glyph*6+column,py=y+row+1;
+            GuiComponent.fill(pose,px,py,px+1,py+1,0xFF404040);
+        }
     }
     private void drawDamageHearts(PoseStack pose,double damage,int x,int y){
         com.mojang.blaze3d.systems.RenderSystem.setShaderColor(.22F,.22F,.22F,1);
