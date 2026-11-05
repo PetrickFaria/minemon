@@ -19,7 +19,7 @@ import java.util.*;
 
 /** Pokédex selector and server-authoritative purchase/unlock panel. */
 public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
-    private static final int LOGICAL_WIDTH = 520, TOP_HEIGHT = 166, INVENTORY_HEIGHT = 100;
+    private static final int LOGICAL_WIDTH = 640, TOP_HEIGHT = 210, INVENTORY_HEIGHT = 100;
     private static final int LIST_X = 8, LIST_Y = 27, LIST_W = 136, LIST_H = 133, ROW_H = 11;
     private static final int INVENTORY_SLOT_WIDTH = 9 * 18, INVENTORY_LABEL_Y = 4;
     private static final int INVENTORY_MAIN_Y = 18, INVENTORY_HOTBAR_Y = 76;
@@ -105,10 +105,10 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         previewYaw=previewPitch=targetPreviewYaw=targetPreviewPitch=0;
         return moved&&!draggingPreview;
     }
-    public boolean conversionPanelFitsAboveInventoryForSmokeTest() { return 98 + 20 < TOP_HEIGHT && 145 + 18 < TOP_HEIGHT; }
+    public boolean conversionPanelFitsAboveInventoryForSmokeTest() { return menu.slots.get(38).x > menu.slots.get(8).x && menu.slots.get(39).y + 18 <= imageHeight; }
     public boolean inventorySlotsForSmokeTest() {
-        if (menu.slots.size() != 36) return false;
-        int x = (imageWidth - INVENTORY_SLOT_WIDTH) / 2;
+        if (menu.slots.size() != 40) return false;
+        int x = Math.round(276 * uiScale) - INVENTORY_SLOT_WIDTH / 2;
         int mainY = Math.round(TOP_HEIGHT * uiScale) + INVENTORY_MAIN_Y;
         int hotbarY = Math.round(TOP_HEIGHT * uiScale) + INVENTORY_HOTBAR_Y;
         for (int i = 0; i < 36; i++) {
@@ -131,9 +131,11 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         imageWidth = Math.round(LOGICAL_WIDTH * uiScale);
         imageHeight = Math.round(TOP_HEIGHT * uiScale) + INVENTORY_HEIGHT;
         super.init();
-        int inventoryX = (imageWidth - INVENTORY_SLOT_WIDTH) / 2;
+        int inventoryX = Math.round(276 * uiScale) - INVENTORY_SLOT_WIDTH / 2;
         int inventoryTop = Math.round(TOP_HEIGHT * uiScale);
         menu.layoutPlayerInventory(inventoryX, inventoryTop + INVENTORY_MAIN_Y, inventoryTop + INVENTORY_HOTBAR_Y);
+        menu.terminal.layout(Math.round(420*uiScale),Math.round(55*uiScale),Math.round(550*uiScale),Math.round(55*uiScale),
+            Math.round(420*uiScale),Math.round(244*uiScale),Math.round(550*uiScale),Math.round(244*uiScale));
         ordered = PokecSpecies.ordered();
         selectedSlug = PokecSpecies.get(syncedSelectedSlug) == null ? "bulbasaur" : syncedSelectedSlug;
         MinemonNetwork.requestPokecState(menu.pos());
@@ -148,14 +150,15 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         pose.translate(leftPos, topPos, 0);
         pose.pushPose();
         pose.scale(uiScale, uiScale, 1);
-        MinemonGui.panel(pose, 0, 0, LOGICAL_WIDTH, TOP_HEIGHT);
+        MinemonGui.panel(pose, 0, 0, LOGICAL_WIDTH, totalHeight());
         font.draw(pose, "POKÉC  /  POKÉDEX", 10, 9, 0xFF404040);
-        font.draw(pose, "Saldo: " + syncedCoins + " PokéCoins", 384, 9, 0xFF705028);
+        font.draw(pose, "Saldo: " + syncedCoins + " PokéCoins", 420, 9, 0xFF705028);
         GuiComponent.fill(pose, 8, 20, LOGICAL_WIDTH - 8, 21, 0xFF9A4545);
 
-        drawPanel(pose, LIST_X, LIST_Y - 5, LIST_W, LIST_H + 8);
-        drawPanel(pose, 150, 24, 236, TOP_HEIGHT - 28);
-        drawPanel(pose, 390, 24, 122, TOP_HEIGHT - 28);
+        drawPanel(pose, LIST_X, LIST_Y - 5, LIST_W, totalHeight() - LIST_Y - 2);
+        drawPanel(pose, 150, 24, 248, TOP_HEIGHT - 28);
+        drawPanel(pose, 410, 24, 222, 118);
+        drawPanel(pose, 410, 146, 222, totalHeight()-154);
         font.draw(pose, "ESPÉCIES   001–151", LIST_X + 5, LIST_Y - 1, 0xFF404040);
         int visible = visibleRows();
         for (int row = 0; row < visible; row++) {
@@ -181,13 +184,19 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         pose.popPose();
 
         int inventoryTop = Math.round(TOP_HEIGHT * uiScale);
-        drawPanel(pose, 0, inventoryTop, imageWidth, INVENTORY_HEIGHT);
-        font.draw(pose, "INVENTÁRIO", 8, inventoryTop + INVENTORY_LABEL_Y, 0xFF404040);
-        for (var slot : menu.slots) MinemonGui.slot(pose, slot.x, slot.y, 18, 18);
+        drawPanel(pose, Math.round(150*uiScale), inventoryTop, Math.round(248*uiScale), INVENTORY_HEIGHT);
+        font.draw(pose, "INVENTÁRIO", Math.round(154*uiScale), inventoryTop + INVENTORY_LABEL_Y, 0xFF404040);
+        for (int i=0;i<menu.slots.size();i++) {
+            var slot=menu.slots.get(i);
+            if(i==37&&!syncedUnlocked.contains(selectedSlug))continue;
+            MinemonGui.slot(pose, slot.x-1, slot.y-1, 18, 18);
+        }
+        drawGhostHints(pose);
         pose.popPose();
     }
 
-    private int visibleRows() { return Math.max(1, (LIST_H - 17) / ROW_H); }
+    private int totalHeight(){return Math.round(imageHeight/uiScale);}
+    private int visibleRows() { return Math.max(1, (totalHeight() - LIST_Y - 22) / ROW_H); }
     private void drawPanel(PoseStack pose, int x, int y, int w, int h) {
         MinemonGui.slot(pose, x, y, w, h);
     }
@@ -209,78 +218,74 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         }
         GuiComponent.fill(pose, 154, 136, 382, 137, 0xFFC6C6C6);
         font.draw(pose, "DADOS DA ESPÉCIE", 154, 139, 0xFF404040);
-        var definition = SpeciesDefinitions.get(species.slug());
-        if (definition != null) {
-            int health = (int)Math.ceil(br.com.petrickfaria.minemon.entity.PokemonProgression.healthForRarity(PokecEconomy.get().rarity(species.slug()),1));
-            font.draw(pose, "Vida:", 154, 150, 0xFF404040);
-            drawHealthHearts(pose, health, 193, 148);
-            font.draw(pose, "Dano: " + formatStat(br.com.petrickfaria.minemon.entity.PokemonProgression.damageForRarity(PokecEconomy.get().rarity(species.slug()),1)), 302, 150, 0xFF404040);
-            font.draw(pose, "Raridade: " + rarityLabel(PokecEconomy.get().rarity(species.slug())), 154, 158, 0xFF404040);
-            font.draw(pose, "Estágio: " + evolutionStage(species), 275, 158, 0xFF404040);
-        }
+        String rarity=PokecEconomy.get().rarity(species.slug());
+        int level=WildCaptureRules.minimumSpawnLevel(species.slug());
+        font.draw(pose,"Vida:",154,151,0xFF404040);
+        drawHealthHearts(pose,(int)Math.ceil(br.com.petrickfaria.minemon.entity.PokemonProgression.healthForRarity(rarity,level)),191,149);
+        font.draw(pose,"Dano:",280,151,0xFF404040);
+        drawDamageHearts(pose,br.com.petrickfaria.minemon.entity.PokemonProgression.damageForRarity(rarity,level),316,149);
+        font.draw(pose,"Estágio: "+evolutionStage(species),154,176,0xFF404040);
+        font.draw(pose,"Nível: "+level,302,176,0xFF404040);
+        font.draw(pose,"Raridade: "+rarityLabel(rarity),154,188,0xFF404040);
+        font.draw(pose,fitText("Tipo: "+species.primaryType(),94),302,188,0xFF404040);
         drawAcquisitionPanel(pose, species, unlocked, species.isEvolution() && !unlocked, mouseX, mouseY);
         drawCompactConversion(pose);
     }
 
-    private void drawAcquisitionPanel(PoseStack pose, PokecSpecies.Entry species, boolean unlocked,
-                                      boolean evolution, int mouseX, int mouseY) {
-        int x = 394;
-        if (evolution) {
-            font.draw(pose, "POR EVOLUÇÃO", x, 28, 0xFF705028);
-            font.draw(pose, "Evolua um", x, 42, 0xFF404040);
-            font.draw(pose, "Minemon para liberar.", x, 52, 0xFF404040);
-            font.draw(pose, "Não aceita almas ou moedas.", x, 62, 0xFF404040);
-            return;
-        }
-        if (unlocked) {
-            int price = syncedPrices.getOrDefault(species.slug(), PokecEconomy.get().coins(species.slug()));
-            boolean free = syncedFreeAvailable;
-            font.draw(pose, "AQUISIÇÃO", x, 28, free ? 0xFF705028 : 0xFF404040);
-            font.draw(pose, "Preço: " + (free ? 0 : price), x, 40, 0xFF404040);
-            drawCompactItemSlot(pose, x, 52, ModItems.POKE_COIN.get(), syncedStagedCoins);
-            boolean canBuy = free || syncedCoins + syncedStagedCoins >= price;
-            drawButton(pose, 420, 52, 84, 22, "ADQUIRIR", canBuy, mouseX, mouseY);
-        } else {
-            int required = syncedRequirements.getOrDefault(species.slug(), PokecEconomy.get().souls(species.slug()));
-            int deposited = syncedDeposits.getOrDefault(species.slug(), 0);
-            var soulType = SoulType.fromSpeciesType(species.primaryType());
-            var soulItem = soulType == null ? null : ModItems.SOULS.get(soulType.id());
-            font.draw(pose, "ALMAS " + species.primaryType().toUpperCase(Locale.ROOT), x, 28, 0xFF404040);
-            font.draw(pose, fitText("Precisa: " + required, 112), x, 40, 0xFF404040);
-            font.draw(pose, fitText("Progresso: " + deposited + "/" + required, 112), x, 50, 0xFF404040);
-            if (soulItem != null) {
-                drawCompactItemSlot(pose, x, 61, soulItem.get(), Math.min(64, syncedStagedSouls));
-                drawCompactItemSlot(pose, x + 22, 61, soulItem.get(), Math.max(0, syncedStagedSouls - 64));
-            }
-            font.draw(pose, fitText("Separadas: " + syncedStagedSouls, 72), x + 46, 67, 0xFF404040);
-            drawButton(pose, 420, 61, 84, 22, "LIBERAR", deposited + syncedStagedSouls >= required, mouseX, mouseY);
-        }
+    private void drawAcquisitionPanel(PoseStack pose,PokecSpecies.Entry species,boolean unlocked,boolean evolution,int mouseX,int mouseY){
+        font.draw(pose,unlocked?"COMPRA":"DESBLOQUEIO",420,29,0xFF404040);
+        if(evolution){font.draw(pose,"Libere por evolução",420,47,0xFF404040);return;}
+        font.draw(pose,"Valor",420,43,0xFF404040);
+        if(unlocked){
+            font.draw(pose,"→",503,59,0xFF202020);
+            drawButton(pose,420,87,95,19,"Comprar",true,mouseX,mouseY);
+            boolean enabled=menu.terminal.spawnEnabled();
+            drawButton(pose,420,114,63,19,"Spawn",true,mouseX,mouseY);
+            GuiComponent.fill(pose,423,117,426,130,enabled?0xFF228B36:0xFFBB3030);
+            font.draw(pose,String.format(Locale.ROOT,"%.2f%% / 30s",enabled?menu.terminal.spawnChance()*100:0),491,120,0xFF404040);
+        }else drawButton(pose,420,87,116,19,"Desbloquear",menu.terminal.payment().getCount()>0,mouseX,mouseY);
     }
-
-    private void drawCompactConversion(PoseStack pose) {
-        int x = 394;
-        font.draw(pose, "DEVOLVER À NATUREZA", x, 86, 0xFF404040);
-        drawCompactItemSlot(pose, x, 98, syncedConversionBall.isEmpty() ? null : syncedConversionBall.getItem(),
-                syncedConversionBall.isEmpty() ? 0 : syncedConversionBall.getCount());
-        if (syncedConversionBall.isEmpty()) {
-            font.draw(pose, "Insira Pokébola", x + 24, 100, 0xFF404040);
-        } else if (!syncedConversionSpecies.isEmpty()) {
-            var species = PokecSpecies.get(syncedConversionSpecies);
-            String name = species == null ? syncedConversionSpecies : species.name();
-            font.draw(pose, fitText(name, 88), x + 24, 97, 0xFF404040);
-            font.draw(pose, String.format(Locale.ROOT, "#%03d  Nv. %d", species == null ? 0 : species.number(), syncedConversionLevel), x + 24, 106, 0xFF404040);
-            font.draw(pose, fitText(rarityLabel(syncedConversionRarity) + " / " + conversionStageLabel(syncedConversionStage), 88), x + 24, 115, 0xFF404040);
-            font.draw(pose, "Base: " + syncedConversionBase, x, 124, 0xFF404040);
-            font.draw(pose, fitText("Recebe: " + syncedConversionMinimum + "–" + syncedConversionMaximum + " almas", 118), x, 133, 0xFF404040);
-        } else if (syncedConversionResult >= 0) {
-            font.draw(pose, "Devolução concluída", x + 24, 100, 0xFF404040);
-            font.draw(pose, syncedConversionResult + " almas", x + 24, 110, 0xFF404040);
+    private void drawCompactConversion(PoseStack pose){
+        font.draw(pose,"LIBERAÇÃO",420,152,0xFF404040);
+        var stored=br.com.petrickfaria.minemon.item.PokeballItem.readStored(menu.terminal.ball());
+        if(stored!=null){
+            var species=PokecSpecies.get(stored.species());
+            String rarity=PokecEconomy.get().rarity(stored.species());
+            font.draw(pose,fitText(species==null?stored.species():species.name(),195),420,166,0xFF404040);
+            font.draw(pose,"Vida:",420,180,0xFF404040);
+            drawHealthHearts(pose,(int)Math.ceil(stored.health()),454,178);
+            font.draw(pose,"Dano:",420,205,0xFF404040);
+            drawDamageHearts(pose,br.com.petrickfaria.minemon.entity.PokemonProgression.damageForRarity(rarity,stored.level()),454,203);
+            font.draw(pose,"Nível: "+stored.level()+"  "+rarityLabel(rarity),420,230,0xFF404040);
+        }else font.draw(pose,"Insira uma bola com Pokémon",420,174,0xFF666666);
+        font.draw(pose,"→",503,249,0xFF202020);
+        drawButton(pose,420,279,116,19,"Liberar",stored!=null&&menu.slots.get(39).getItem().isEmpty(),-1,-1);
+    }
+    private void drawGhostHints(PoseStack pose){
+        var species=PokecSpecies.get(selectedSlug);if(species==null)return;
+        boolean unlocked=syncedUnlocked.contains(selectedSlug);
+        net.minecraft.world.item.Item item=null;
+        int remaining;
+        if(unlocked){item=ModItems.POKE_COIN.get();remaining=syncedFreeAvailable?0:Math.max(0,syncedPrices.getOrDefault(selectedSlug,0)-syncedCoins);}
+        else{var type=SoulType.fromSpeciesType(species.primaryType());if(type!=null&&ModItems.SOULS.containsKey(type.id()))item=ModItems.SOULS.get(type.id()).get();remaining=Math.max(0,syncedRequirements.getOrDefault(selectedSlug,0)-syncedDeposits.getOrDefault(selectedSlug,0));}
+        if(!species.isEvolution()||unlocked){
+            var input=menu.slots.get(36);
+            if(input.getItem().isEmpty()&&item!=null)ghostItem(pose,new ItemStack(item),input.x,input.y);
+            font.draw(pose,Integer.toString(Math.max(0,remaining-input.getItem().getCount())),input.x+23,input.y+4,0xFF404040);
         }
-        if (!syncedConversionBall.isEmpty() && syncedConversionResult < 0) {
-            boolean confirming = syncedConversionConfirming;
-            drawButton(pose, x, 145, 55, 18, confirming ? "CONFIRMAR" : "DEVOLVER", true, -1, -1);
-            if (confirming) drawButton(pose, x + 61, 145, 55, 18, "CANCELAR", true, -1, -1);
-        }
+        var ball=menu.slots.get(38);if(ball.getItem().isEmpty())ghostItem(pose,new ItemStack(ModItems.POKEBALL.get()),ball.x,ball.y);
+    }
+    private void ghostItem(PoseStack pose,ItemStack stack,int x,int y){
+        // Neutral wash makes the item silhouette visibly distinct from an inserted stack.
+        itemRenderer.renderAndDecorateItem(stack,leftPos+x,topPos+y);
+        com.mojang.blaze3d.systems.RenderSystem.enableBlend();
+        pose.pushPose();pose.translate(0,0,200);GuiComponent.fill(pose,x,y,x+16,y+16,0xB0C6C6C6);pose.popPose();
+        com.mojang.blaze3d.systems.RenderSystem.disableBlend();
+    }
+    private void drawDamageHearts(PoseStack pose,double damage,int x,int y){
+        com.mojang.blaze3d.systems.RenderSystem.setShaderColor(.22F,.22F,.22F,1);
+        drawHealthHearts(pose,(int)Math.ceil(damage),x,y);
+        com.mojang.blaze3d.systems.RenderSystem.setShaderColor(1,1,1,1);
     }
 
     private void drawCompactItemSlot(PoseStack pose, int x, int y, net.minecraft.world.item.Item item, int count) {
@@ -457,36 +462,15 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         PokecSpecies.Entry species = PokecSpecies.get(selectedSlug);
         if (species != null && syncedUnlocked.contains(species.slug()) && inRect(x,y,152,44,232,88)) { draggingPreview=true; return true; }
         if (species == null) return super.mouseClicked(mouseX, mouseY, button);
-        if (inRect(x, y, 394, 98, 20, 20)) {
-            MinemonNetwork.performPokecAction(menu.pos(), selectedSlug, syncedConversionBall.isEmpty() ? PokecTransactions.Action.STAGE_POKEBALL : PokecTransactions.Action.RETURN_POKEBALL);
-            return true;
-        }
-        if (inRect(x, y, 394, 145, 55, 18) && !syncedConversionBall.isEmpty() && syncedConversionResult < 0) {
-            MinemonNetwork.performPokecAction(menu.pos(), selectedSlug, syncedConversionConfirming ? PokecTransactions.Action.CONFIRM_CONVERSION : PokecTransactions.Action.REQUEST_CONVERSION);
-            return true;
-        }
-        if (inRect(x, y, 455, 145, 55, 18) && syncedConversionConfirming) {
-            MinemonNetwork.performPokecAction(menu.pos(), selectedSlug, PokecTransactions.Action.CANCEL_CONVERSION);
-            return true;
-        }
         boolean unlocked = syncedUnlocked.contains(species.slug());
-        boolean evolution = species.isEvolution() && !unlocked;
-        if (unlocked && !syncedFreeAvailable && inRect(x, y, 394, 52, 20, 20)) {
-            MinemonNetwork.performPokecAction(menu.pos(), selectedSlug, PokecTransactions.Action.STAGE_COINS);
-            return true;
+        if(inRect(x,y,420,279,116,19)){
+            MinemonNetwork.performPokecAction(menu.pos(),selectedSlug,PokecTransactions.Action.RELEASE_INPUT);return true;
         }
-        if (!unlocked && !evolution && (inRect(x, y, 394, 61, 20, 20) || inRect(x, y, 416, 61, 20, 20))) {
-            MinemonNetwork.performPokecAction(menu.pos(), selectedSlug, PokecTransactions.Action.STAGE_SOULS);
-            return true;
+        if(inRect(x,y,420,114,63,19)&&unlocked){
+            MinemonNetwork.performPokecAction(menu.pos(),selectedSlug,PokecTransactions.Action.TOGGLE_SPAWN);return true;
         }
-        if (unlocked && inRect(x, y, 420, 52, 84, 22)) {
-            if (syncedFreeAvailable || syncedCoins + syncedStagedCoins >= syncedPrices.getOrDefault(selectedSlug, PokecEconomy.get().coins(selectedSlug)))
-                MinemonNetwork.performPokecAction(menu.pos(), selectedSlug, PokecTransactions.Action.PURCHASE);
-            return true;
-        }
-        if (!unlocked && !evolution && inRect(x, y, 420, 61, 84, 22)) {
-            MinemonNetwork.performPokecAction(menu.pos(), selectedSlug, PokecTransactions.Action.CONFIRM_SOULS);
-            return true;
+        if(inRect(x,y,420,87,116,19)){
+            MinemonNetwork.performPokecAction(menu.pos(),selectedSlug,unlocked?PokecTransactions.Action.BUY_INPUT:PokecTransactions.Action.UNLOCK_INPUT);return true;
         }
         return super.mouseClicked(mouseX, mouseY, button);
     }
@@ -514,7 +498,7 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
     }
     @Override public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
         int x = (int) ((mouseX - leftPos) / uiScale), y = (int) ((mouseY - topPos) / uiScale);
-        if (x >= LIST_X && x < LIST_X + LIST_W && y >= LIST_Y && y < LIST_Y + LIST_H) {
+        if (x >= LIST_X && x < LIST_X + LIST_W && y >= LIST_Y && y < totalHeight()-8) {
             int max = Math.max(0, ordered.size() - visibleRows());
             scrollOffset = Math.max(0, Math.min(max, scrollOffset + (delta < 0 ? 3 : -3)));
             return true;
@@ -525,5 +509,6 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
     @Override public void render(PoseStack pose, int mouseX, int mouseY, float partialTick) {
         renderBackground(pose);
         super.render(pose, mouseX, mouseY, partialTick);
+        renderTooltip(pose,mouseX,mouseY);
     }
 }

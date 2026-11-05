@@ -21,7 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /** All PokéC state changes are validated and committed on the server. */
 public final class PokecTransactions {
     public enum Action { DEPOSIT, PURCHASE, SELECT, STAGE_COINS, STAGE_SOULS, CONFIRM_SOULS,
-        STAGE_POKEBALL, RETURN_POKEBALL, CLAIM_CONVERSION_OUTPUT, REQUEST_CONVERSION, CONFIRM_CONVERSION, CANCEL_CONVERSION }
+        STAGE_POKEBALL, RETURN_POKEBALL, CLAIM_CONVERSION_OUTPUT, REQUEST_CONVERSION, CONFIRM_CONVERSION, CANCEL_CONVERSION, UNLOCK_INPUT, BUY_INPUT, RELEASE_INPUT, TOGGLE_SPAWN }
     private static final Map<UUID, Set<Long>> RECENT_IDS = new ConcurrentHashMap<>();
 
     public static boolean perform(ServerPlayer player, BlockPos pos, String slug, Action action, long id) {
@@ -62,6 +62,10 @@ public final class PokecTransactions {
                 case STAGE_COINS -> stageCoins(player, menu, species);
                 case STAGE_SOULS -> stageSouls(player, menu, species);
                 case CONFIRM_SOULS -> confirmSouls(player, menu, species);
+                case UNLOCK_INPUT -> menu.terminal.unlock();
+                case BUY_INPUT -> { menu.terminal.refresh(); yield true; }
+                case RELEASE_INPUT -> menu.terminal.release();
+                case TOGGLE_SPAWN -> { if(!PokecPlayerData.isUnlocked(player,slug)) yield false; PokecPlayerData.toggleSpawn(player,slug); yield true; }
                 case SELECT -> true;
                 default -> false;
             };
@@ -197,6 +201,7 @@ public final class PokecTransactions {
             menu.returnEscrow(player);
             return;
         }
+        br.com.petrickfaria.minemon.menu.PokecTerminalSlots.recover(player);
         int coins = PokecPlayerData.stagedCoins(player);
         while (coins > 0) {
             int count = Math.min(coins, ModItems.POKE_COIN.get().getMaxStackSize());

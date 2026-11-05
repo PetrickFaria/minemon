@@ -82,6 +82,11 @@ jobs:
           for shot in gastly-front gastly-no-tongue haunter-front-a haunter-front-b haunter-blink gengar-walk gengar-blink gengar-mouth-teeth-fixed gengar-sleep-half-sunk-a gengar-sleep-half-sunk-b; do
             test -f "run/screenshots/ghost-line-1.74-$shot.png"
           done
+      - name: Validate Pokec inventory layout, catalog selection and preview on the real client
+        run: |
+          python3 tools/prepare_client_world.py
+          ALSOFT_DRIVERS=null timeout --kill-after=30s 900s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeTreats
+          grep -F '[TREAT CLIENT] PASS:' run/client-validation-treats.txt
       - name: Validate aquatic swimming poses in the real client
         run: |
           python3 tools/prepare_client_world.py
@@ -134,6 +139,9 @@ jobs:
             run/screenshots/ghost-line-1.74-*.png
             run/screenshots/alakazam-1.73-*.png
             run/screenshots/wild-capture-*.png
+            run/screenshots/*.png
+            run/client-validation-treats.txt
+            build/test-results/test/*.xml
           if-no-files-found: error
           retention-days: 14
 

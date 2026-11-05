@@ -105,6 +105,7 @@ public final class PokemonTreatClientSmokeTest {
                 if (!(minecraft.screen instanceof PokecScreen screen) || !screen.selectedSpeciesForSmokeTest("bulbasaur")
                         || !screen.previewExistsForSmokeTest("bulbasaur"))
                     throw new IllegalStateException("Unlocked Bulbasaur preview was not instantiated after selection");
+                net.minecraft.client.Screenshot.grab(minecraft.gameDirectory,minecraft.getMainRenderTarget(),message->{});
                 if(!screen.dragPreviewForSmokeTest())throw new IllegalStateException("Pokec drag did not rotate both axes");
                 pokeballPhase = true;
                 pokeballFixtureEntityId = -1;

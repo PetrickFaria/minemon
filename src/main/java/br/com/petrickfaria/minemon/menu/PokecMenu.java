@@ -22,6 +22,7 @@ import net.minecraftforge.registries.RegistryObject;
 
 /** Menu anchor and short-lived, server-owned PokéC payment slots. */
 public final class PokecMenu extends AbstractContainerMenu {
+    public final PokecTerminalSlots terminal;
     private final BlockPos pos;
     private final Inventory playerInventory;
     private String selectedSlug = "bulbasaur";
@@ -43,6 +44,7 @@ public final class PokecMenu extends AbstractContainerMenu {
             addSlot(new net.minecraft.world.inventory.Slot(inventory, column + row * 9 + 9, 0, 0));
         for (int column = 0; column < 9; column++)
             addSlot(new net.minecraft.world.inventory.Slot(inventory, column, 0, 0));
+        terminal = new PokecTerminalSlots(this, inventory);
         if (!inventory.player.level.isClientSide && inventory.player instanceof ServerPlayer serverPlayer) {
             stagedCoins = PokecPlayerData.stagedCoins(serverPlayer);
             stagedSouls = PokecPlayerData.stagedSouls(serverPlayer);
@@ -52,6 +54,8 @@ public final class PokecMenu extends AbstractContainerMenu {
             refreshConversionPreview(serverPlayer);
         }
     }
+    public void addTerminalData(net.minecraft.world.inventory.ContainerData data) { addDataSlots(data); }
+    public void addTerminalSlot(net.minecraft.world.inventory.Slot slot) { addSlot(slot); }
     public BlockPos pos() { return pos; }
     /** Screen-only coordinates; slot indices and backing Inventory remain vanilla. */
     public void layoutPlayerInventory(int x, int mainY, int hotbarY) {
@@ -64,6 +68,7 @@ public final class PokecMenu extends AbstractContainerMenu {
             slots.set(27 + column, new net.minecraft.world.inventory.Slot(playerInventory,
                     column, x + column * 18, hotbarY));
         }
+        for(int i=0;i<36;i++)slots.get(i).index=i;
     }
     public String selectedSlug() { return selectedSlug; }
     public int stagedCoins() { return stagedCoins; }
@@ -108,8 +113,10 @@ public final class PokecMenu extends AbstractContainerMenu {
     /** A species change returns all uncommitted physical items before changing the slot filters. */
     public void selectSpecies(ServerPlayer player, String slug) {
         if (!selectedSlug.equals(slug)) {
+            terminal.returnPayment(player);
             returnEscrow(player);
             selectedSlug = slug;
+            terminal.refresh();
         }
     }
 
@@ -154,33 +161,31 @@ public final class PokecMenu extends AbstractContainerMenu {
     }
 
     @Override public ItemStack quickMoveStack(Player player, int slotIndex) {
-        if (slotIndex < 0 || slotIndex >= 36) return ItemStack.EMPTY;
-        var menuSlot = slots.get(slotIndex);
-        ItemStack stack = menuSlot.getItem();
-        if (stack.isEmpty()) return ItemStack.EMPTY;
-        ItemStack original = stack.copy();
-        PokecTransactions.Action action = null;
-        if (stack.getItem() == ModItems.POKE_COIN.get()) action = PokecTransactions.Action.STAGE_COINS;
-        else if (stack.getItem() instanceof SoulItem) action = PokecTransactions.Action.STAGE_SOULS;
-        else if (PokeballItem.readStored(stack) != null) action = PokecTransactions.Action.STAGE_POKEBALL;
-        if (action != null) {
-            if (player.level.isClientSide) MinemonNetwork.performPokecAction(pos, selectedSlug, action);
-            return ItemStack.EMPTY;
+        if (slotIndex < 0 || slotIndex >= slots.size()) return ItemStack.EMPTY;
+        var slot = slots.get(slotIndex);
+        if (!slot.hasItem() || !slot.mayPickup(player)) return ItemStack.EMPTY;
+        ItemStack stack = slot.getItem(), original = stack.copy();
+        if (slotIndex >= 36) {
+            if (!moveItemStackTo(stack, 0, 36, true)) return ItemStack.EMPTY;
+        } else {
+            boolean moved = false;
+            if (slots.get(36).mayPlace(stack)) moved = moveItemStackTo(stack,36,37,false);
+            else if (slots.get(38).mayPlace(stack)) moved = moveItemStackTo(stack,38,39,false);
+            if (!moved) moved = slotIndex < 27 ? moveItemStackTo(stack,27,36,false) : moveItemStackTo(stack,0,27,false);
+            if (!moved) return ItemStack.EMPTY;
         }
-
-        // With no PokéC item slots, quick-move preserves vanilla inventory behavior:
-        // main inventory stacks move to the hotbar, and hotbar stacks move to main.
-        boolean moved = slotIndex < 27
-                ? moveItemStackTo(stack, 27, 36, false)
-                : moveItemStackTo(stack, 0, 27, false);
-        if (!moved) return ItemStack.EMPTY;
-        if (stack.isEmpty()) menuSlot.set(ItemStack.EMPTY);
-        else menuSlot.setChanged();
+        if (stack.isEmpty()) slot.set(ItemStack.EMPTY); else slot.setChanged();
+        slot.onTake(player, original);
+        terminal.refresh();
         return original;
+    }
+    @Override public void broadcastChanges() {
+        terminal.refresh();
+        super.broadcastChanges();
     }
     @Override public boolean stillValid(Player player) { return stillValid(ContainerLevelAccess.create(player.level, pos), player, ModBlocks.POKEC.get()); }
     @Override public void removed(Player player) {
-        if (!player.level.isClientSide && player instanceof ServerPlayer serverPlayer) returnEscrow(serverPlayer);
+        if (!player.level.isClientSide && player instanceof ServerPlayer serverPlayer) { terminal.close(serverPlayer); returnEscrow(serverPlayer); }
         super.removed(player);
     }
 }

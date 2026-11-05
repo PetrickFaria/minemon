@@ -121,6 +121,11 @@ public final class WildEncounterManager {
             WildEncounterData.get(level).remove(owner(pokemon), pokemon.getUUID());
     }
 
+    public static double configuredSpawnChance(ServerPlayer player,String slug) {
+        if(player.level instanceof ServerLevel level&&!configLoaded)loadConfig(level);
+        var species=PokecSpecies.get(slug);if(species==null)return 0;
+        return speciesChances.getOrDefault(slug,rarityChances.getOrDefault(PokecEconomy.resolveRarity(species.rarity(),"common"),.05D));
+    }
     public static void tickPlayer(ServerPlayer player) {
         if (!(player.level instanceof ServerLevel level)) return;
         if (!configLoaded) loadConfig(level);
@@ -134,6 +139,7 @@ public final class WildEncounterManager {
         List<PokecSpecies.Entry> candidates = PokecPlayerData.unlocked(player).stream()
                 .map(PokecSpecies::get).filter(java.util.Objects::nonNull)
                 .filter(entry -> ModEntities.SPECIES.containsKey(entry.slug()))
+                .filter(entry -> PokecPlayerData.spawnEnabled(player,entry.slug()))
                 .sorted(Comparator.comparingInt(PokecSpecies.Entry::number)).toList();
         if (candidates.isEmpty()) return;
         // One probability roll represents this 30-second check. Position retries below

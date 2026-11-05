@@ -306,7 +306,7 @@ public final class PokecGameTests {
         floor(h);ServerPlayer owner=player(h,h.absolutePos(new BlockPos(7,1,5)));
         PokecMenu menu=new PokecMenu(22,owner.getInventory(),h.absolutePos(new BlockPos(5,1,5)));
         owner.containerMenu=menu;
-        check(menu.slots.size()==36,"PokéC must expose the player's existing 36 inventory slots");
+        check(menu.slots.size()==40,"PokéC must expose 36 player slots plus four terminal slots");
         owner.getInventory().setItem(9,new ItemStack(Blocks.DIRT,7));
         ItemStack movedToHotbar=menu.quickMoveStack(owner,0);
         check(movedToHotbar.getCount()==7,"shift-click should return the moved original stack");
@@ -326,5 +326,93 @@ public final class PokecGameTests {
                 "reverse shift-click must not duplicate the moved stack");
         owner.discard();h.succeed();
     }
+    @GameTest(template="test_arena",timeoutTicks=200)
+    public static void terminalSlotsSupportVanillaClicksAndPartialSpeciesDeposits(GameTestHelper h){
+        floor(h);BlockPos pos=h.absolutePos(new BlockPos(5,1,5));terminal(h,pos);
+        ServerPlayer p=player(h,h.absolutePos(new BlockPos(7,1,5)));
+        PokecMenu menu=new PokecMenu(31,p.getInventory(),pos);p.containerMenu=menu;
+        p.getInventory().setItem(9,new ItemStack(Blocks.DIRT,12));
+        menu.clicked(0,1,net.minecraft.world.inventory.ClickType.PICKUP,p);
+        check(menu.getCarried().getCount()==6&&menu.slots.get(0).getItem().getCount()==6,"right click splits vanilla stack");
+        menu.clicked(1,1,net.minecraft.world.inventory.ClickType.PICKUP,p);
+        check(menu.slots.get(1).getItem().getCount()==1&&menu.getCarried().getCount()==5,"right click places one item");
+        menu.clicked(2,0,net.minecraft.world.inventory.ClickType.PICKUP,p);
+        check(menu.getCarried().isEmpty()&&menu.slots.get(2).getItem().getCount()==5,"left click places remainder");
+        menu.clicked(2,2,net.minecraft.world.inventory.ClickType.SWAP,p);
+        check(p.getInventory().getItem(2).getCount()==5&&menu.slots.get(2).getItem().isEmpty(),"number key swaps with hotbar");
+        menu.clicked(0,0,net.minecraft.world.inventory.ClickType.PICKUP,p);
+        menu.clicked(-999,0,net.minecraft.world.inventory.ClickType.QUICK_CRAFT,p);
+        menu.clicked(3,1,net.minecraft.world.inventory.ClickType.QUICK_CRAFT,p);
+        menu.clicked(4,1,net.minecraft.world.inventory.ClickType.QUICK_CRAFT,p);
+        menu.clicked(-999,2,net.minecraft.world.inventory.ClickType.QUICK_CRAFT,p);
+        check(menu.slots.get(3).getItem().getCount()==3&&menu.slots.get(4).getItem().getCount()==3&&menu.getCarried().isEmpty(),"vanilla left drag distributes evenly");
+        menu.selectSpecies(p,"gastly");
+        var type=SoulType.fromSpeciesType(PokecSpecies.get("gastly").primaryType());
+        var soul=ModItems.SOULS.get(type.id()).get();int cost=PokecEconomy.get().souls("gastly");
+        p.getInventory().setItem(9,new ItemStack(soul,10));menu.quickMoveStack(p,0);
+        check(menu.slots.get(36).getItem().getCount()==10,"shift click moves actual soul stack to input");
+        check(menu.terminal.unlock()&&PokecPlayerData.deposited(p,"gastly")==10,"partial deposit consumes only inserted souls");
+        check(!PokecPlayerData.isUnlocked(p,"gastly"),"partial deposit does not unlock early");
+        menu.selectSpecies(p,"abra");check(PokecPlayerData.deposited(p,"abra")==0,"deposits are species specific");
+        menu.removed(p);menu=new PokecMenu(32,p.getInventory(),pos);p.containerMenu=menu;menu.selectSpecies(p,"gastly");
+        check(PokecPlayerData.deposited(p,"gastly")==10,"committed souls survive reopening terminal");
+        for(int left=cost-10;left>0;){
+            int remaining=cost-PokecPlayerData.deposited(p,"gastly");
+            p.getInventory().setItem(9,new ItemStack(soul,64));menu.quickMoveStack(p,0);
+            int inserted=Math.min(64,remaining);
+            check(menu.slots.get(36).getItem().getCount()==inserted,"shift click is capped at outstanding cost");
+            check(menu.terminal.unlock(),"remaining deposit accepted");left-=inserted;
+        }
+        check(PokecPlayerData.isUnlocked(p,"gastly")&&menu.slots.get(36).getItem().isEmpty(),"exact cost unlocks and empties soul slot");
+        check(PokecPlayerData.spawnEnabled(p,"gastly"),"unlocked species defaults to enabled spawn");
+        PokecPlayerData.toggleSpawn(p,"gastly");
+        check(!PokecPlayerData.spawnEnabled(p,"gastly")&&PokecPlayerData.spawnEnabled(p,"abra"),"spawn toggle changes only selected species");
+        menu.removed(p);p.discard();h.succeed();
+    }
+    @GameTest(template="test_arena",timeoutTicks=200)
+    public static void terminalPurchaseResultChargesOnceAndReturnsUnspentPayment(GameTestHelper h){
+        floor(h);BlockPos pos=h.absolutePos(new BlockPos(5,1,5));terminal(h,pos);
+        ServerPlayer p=player(h,h.absolutePos(new BlockPos(7,1,5)));
+        PokecMenu menu=new PokecMenu(33,p.getInventory(),pos);p.containerMenu=menu;
+        PokecPlayerData.setFreePurchaseUsed(p);int price=PokecEconomy.get().coins("bulbasaur");
+        p.getInventory().setItem(9,new ItemStack(ModItems.POKE_COIN.get(),64));menu.quickMoveStack(p,0);menu.broadcastChanges();
+        check(menu.slots.get(36).getItem().getCount()==price&&p.getInventory().getItem(9).getCount()==64-price,"coin shift click inserts exact purchase cost");
+        check(menu.slots.get(37).getItem().is(ModItems.EGGS.get("bulbasaur").get()),"funded purchase previews selected egg");
+        check(!menu.slots.get(37).mayPlace(new ItemStack(Blocks.DIRT)),"purchase output rejects inserted items");
+        menu.clicked(37,0,net.minecraft.world.inventory.ClickType.PICKUP,p);menu.broadcastChanges();
+        check(menu.getCarried().is(ModItems.EGGS.get("bulbasaur").get())&&menu.getCarried().getCount()==1,"result gives exactly one egg");
+        check(menu.slots.get(36).getItem().isEmpty()&&menu.slots.get(37).getItem().isEmpty(),"taking result spends coins and clears preview");
+        menu.clicked(2,0,net.minecraft.world.inventory.ClickType.PICKUP,p);
+        menu.clicked(37,0,net.minecraft.world.inventory.ClickType.PICKUP,p);
+        check(menu.getCarried().isEmpty(),"empty result cannot be taken again");
+        p.getInventory().setItem(9,new ItemStack(ModItems.POKE_COIN.get(),3));menu.quickMoveStack(p,0);menu.removed(p);
+        check(p.getInventory().items.stream().filter(s->s.is(ModItems.POKE_COIN.get())).mapToInt(ItemStack::getCount).sum()==3,"closing returns unpaid coins once");
+        p.discard();h.succeed();
+    }
+    @GameTest(template="test_arena",timeoutTicks=200)
+    public static void terminalReleaseKeepsBothBallTypesAndRejectsSpentTokens(GameTestHelper h){
+        floor(h);BlockPos pos=h.absolutePos(new BlockPos(5,1,5));terminal(h,pos);
+        ServerPlayer p=player(h,h.absolutePos(new BlockPos(7,1,5)));
+        PokecMenu menu=new PokecMenu(34,p.getInventory(),pos);p.containerMenu=menu;
+        for(var ballItem:java.util.List.of(ModItems.POKEBALL.get(),ModItems.MASTER_BALL.get())){
+            MinemonCreature creature=h.spawn(ModEntities.SPECIES.get("charmander").get(),new BlockPos(8,1,5));creature.tame(p);creature.setPokemonLevel(4);
+            ItemStack ball=new ItemStack(ballItem);p.setItemInHand(InteractionHand.MAIN_HAND,ball);
+            check(ballItem.interactLivingEntity(ball,p,creature,InteractionHand.MAIN_HAND).consumesAction(),"fixture captures owned Pokémon");
+            ItemStack filled=p.getMainHandItem().copy();p.setItemInHand(InteractionHand.MAIN_HAND,ItemStack.EMPTY);
+            menu.slots.get(38).set(filled);menu.broadcastChanges();
+            check(!menu.slots.get(39).hasItem()&&PokeballItem.isOccupied(menu.slots.get(38).getItem()),"insertion previews without releasing");
+            var preview=PokemonSoulConversion.preview("charmander",4);
+            check(menu.terminal.release(),"Liberar commits release");
+            check(menu.slots.get(38).getItem().is(ballItem)&&!PokeballItem.isOccupied(menu.slots.get(38).getItem()),"original ball remains empty in input");
+            int reward=menu.slots.get(39).getItem().getCount();
+            check(reward>=preview.minimum()&&reward<=preview.maximum(),"reward remains within existing soul yield rules");
+            check(!menu.terminal.release(),"repeated release cannot duplicate reward");
+            menu.quickMoveStack(p,39);menu.quickMoveStack(p,38);
+            menu.slots.get(38).set(filled.copy());
+            check(!menu.terminal.release(),"replayed consumed ball token cannot produce another reward");menu.slots.get(38).set(ItemStack.EMPTY);
+        }
+        menu.removed(p);p.discard();h.succeed();
+    }
+
     private PokecGameTests(){}
 }

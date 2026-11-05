@@ -37,6 +37,8 @@ public final class PokecPlayerData {
     public static Set<String> unlocked(ServerPlayer p){CompoundTag tag=data(p).getCompound("unlocked");Set<String> out=new HashSet<>();for(String s:PokecSpecies.ALL.keySet())if(tag.getBoolean(s))out.add(s);return out;}
     public static int deposited(ServerPlayer p,String slug){return data(p).getCompound("deposits").getInt(slug);}
     public static int addDeposit(ServerPlayer p,String slug){CompoundTag d=data(p);CompoundTag deposits=d.getCompound("deposits");int n=deposits.getInt(slug)+1;deposits.putInt(slug,n);d.put("deposits",deposits);return n;}
+    public static boolean spawnEnabled(ServerPlayer p,String slug){return !data(p).getCompound("disabledSpawn").getBoolean(slug);}
+    public static void toggleSpawn(ServerPlayer p,String slug){CompoundTag d=data(p), disabled=d.getCompound("disabledSpawn");disabled.putBoolean(slug,spawnEnabled(p,slug));d.put("disabledSpawn",disabled);}
     public static boolean usedFreePurchase(ServerPlayer p){return data(p).getBoolean("freePurchaseUsed");}
     public static void setFreePurchaseUsed(ServerPlayer p){data(p).putBoolean("freePurchaseUsed",true);}
     public static int stagedCoins(ServerPlayer p){return Math.max(0,data(p).getInt("stagedCoins"));}
