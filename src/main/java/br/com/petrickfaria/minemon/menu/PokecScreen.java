@@ -224,10 +224,10 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         pose.pushPose();
         pose.translate(0,0,300);
         GuiComponent.fill(pose, 154, 136, 382, 137, 0xFFC6C6C6);
-        font.draw(pose, "DADOS DA ESPÉCIE", 154, 139, 0xFF404040);
+        font.draw(pose, "VIDA", 191, 139, 0xFF404040);
+        font.draw(pose, "DANO", 316, 139, 0xFF404040);
         String rarity=PokecEconomy.get().rarity(species.slug());
         int level=1;
-        font.draw(pose,"Vida:",154,151,0xFF404040);
         drawHealthHearts(pose,(int)Math.ceil(br.com.petrickfaria.minemon.entity.PokemonProgression.healthForRarity(rarity,level)),191,149);
         drawDamageHearts(pose,br.com.petrickfaria.minemon.entity.PokemonProgression.damageForRarity(rarity,level),316,149);
         font.draw(pose,"Estágio: "+evolutionStage(species),154,176,0xFF404040);
@@ -310,15 +310,6 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
     @Override public void removed(){
         for(var texture:ghostTextures.values())minecraft.getTextureManager().release(texture);
         ghostTextures.clear();super.removed();
-    }
-    private void drawDamageIcon(PoseStack pose,int x,int y){
-        com.mojang.blaze3d.systems.RenderSystem.setShaderColor(1,1,1,1);
-        com.mojang.blaze3d.systems.RenderSystem.enableBlend();
-        com.mojang.blaze3d.systems.RenderSystem.defaultBlendFunc();
-        com.mojang.blaze3d.systems.RenderSystem.setShaderTexture(0,
-            new net.minecraft.resources.ResourceLocation("minecraft","textures/item/iron_sword.png"));
-        GuiComponent.blit(pose,x,y-3,0,0F,0F,16,16,16,16);
-        com.mojang.blaze3d.systems.RenderSystem.disableBlend();
     }
     private void drawDamageHearts(PoseStack pose,double damage,int x,int y){
         com.mojang.blaze3d.systems.RenderSystem.setShaderColor(.22F,.22F,.22F,1);
@@ -547,16 +538,6 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
     @Override public void render(PoseStack pose, int mouseX, int mouseY, float partialTick) {
         renderBackground(pose);
         super.render(pose, mouseX, mouseY, partialTick);
-        // Container item rendering must finish before the damage icon is composited.
-        Minecraft.getInstance().renderBuffers().bufferSource().endBatch();
-        com.mojang.blaze3d.systems.RenderSystem.disableScissor();
-        pose.pushPose();
-        pose.translate(leftPos,topPos,400);
-        pose.scale(uiScale,uiScale,1);
-        com.mojang.blaze3d.systems.RenderSystem.disableDepthTest();
-        drawDamageIcon(pose,280,151);
-        com.mojang.blaze3d.systems.RenderSystem.enableDepthTest();
-        pose.popPose();
         int tooltipX=(int)((mouseX-leftPos)/uiScale),tooltipY=(int)((mouseY-topPos)/uiScale);
         if(inRect(tooltipX,tooltipY,280,146,116,25))renderTooltip(pose,Component.literal("Dano"),mouseX,mouseY);
         else renderTooltip(pose,mouseX,mouseY);
