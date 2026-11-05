@@ -172,11 +172,14 @@ final class GhostLineClientSmokeTest {
     if(!farTeleportRequested)faceFromDistance(mc,gastly,50.0D);
     else if(farTeleportApplied){
      double playerDistance=Math.sqrt(gastly.distanceToSqr(mc.player.getX(),mc.player.getY(),mc.player.getZ()));
-     if(playerDistance>=49.0D){
-      System.out.println("[GHOST LINE] 50-block setup player="+mc.player.position()+" gastly="+gastly.position()+" distance="+playerDistance);
+     double cameraDistance=mc.gameRenderer.getMainCamera().getPosition().distanceTo(gastly.position());
+     if(playerDistance>=49.0D&&cameraDistance>=49.0D){
+      System.out.println("[GHOST LINE] 50-block setup player="+mc.player.position()+" gastly="+gastly.position()
+          +" playerDistance="+playerDistance+" cameraDistance="+cameraDistance);
       snap(mc,"gastly-50-block");
      }else if(ticks-farTeleportStartTick>40)
-      throw new IllegalStateException("Server/client player did not settle at the requested 50-block Gastly view; observed="+playerDistance);
+      throw new IllegalStateException("Server/client camera did not settle at the requested 50-block Gastly view; playerDistance="
+          +playerDistance+" cameraDistance="+cameraDistance);
     }
    }
    if(ticks>=25&&!captures.contains("haunter-front-a")){face(mc,haunter);snap(mc,"haunter-front-a");}
