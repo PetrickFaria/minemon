@@ -74,12 +74,12 @@ final class GhostLineClientSmokeTest {
      String view=pendingScreenshot;pendingScreenshot=null;
      if(view.equals("haunter-blink")){
       var mob=find(mc,haunterId);
-      if(mob==null||!MinemonModel.ghostEyesClosedForValidation(mob))
-       throw new IllegalStateException("Haunter blink frame did not render the closed-eye mesh");
+      if(mob==null||!mob.isBlinkingForRender())
+       throw new IllegalStateException("Haunter blink ended before its closed-eye screenshot was captured");
      }else if(view.equals("gengar-blink")){
       var mob=find(mc,gengarId);
-      if(mob==null||!MinemonModel.ghostEyesClosedForValidation(mob))
-       throw new IllegalStateException("Gengar blink frame did not render the closed-eye mesh");
+      if(mob==null||!mob.isBlinkingForRender())
+       throw new IllegalStateException("Gengar blink ended before its closed-eye screenshot was captured");
      }
      Screenshot.grab(mc.gameDirectory,"ghost-line-1.74-"+view+".png",mc.getMainRenderTarget(),m->{screenshotInFlight=false;writtenScreenshots.add(view);System.out.println("[GHOST LINE] screenshot "+view+": "+m);});
      screenshotInFlight=true;
@@ -134,10 +134,12 @@ final class GhostLineClientSmokeTest {
    }
    if(ticks>=25&&!captures.contains("haunter-front-a")){face(mc,haunter);snap(mc,"haunter-front-a");}
    if(ticks>=75&&!captures.contains("haunter-front-b")){face(mc,haunter);snap(mc,"haunter-front-b");}
-   if(ticks>=100&&haunter.isBlinkingForRender()&&screenshotSlotAvailable()&&!captures.contains("haunter-blink")){
+   if(ticks>=100&&haunter.isBlinkingForRender()&&MinemonModel.ghostEyesClosedForValidation(haunter)
+       &&screenshotSlotAvailable()&&!captures.contains("haunter-blink")){
     face(mc,haunter);snapNow(mc,"haunter-blink");
    }
-   if(ticks>=100&&gengar.isBlinkingForRender()&&screenshotSlotAvailable()&&!captures.contains("gengar-blink")){
+   if(ticks>=100&&gengar.isBlinkingForRender()&&MinemonModel.ghostEyesClosedForValidation(gengar)
+       &&screenshotSlotAvailable()&&!captures.contains("gengar-blink")){
     face(mc,gengar);snapNow(mc,"gengar-blink");
    }
    if(ticks>=90&&ticks<145){
