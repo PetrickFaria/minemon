@@ -285,7 +285,7 @@ public final class PokemonTreatClientSmokeTest {
             var player=server.getPlayerList().getPlayer(uuid);
             if(player==null)throw new IllegalStateException("Pokec test player not loaded on server");
             player.getPersistentData().remove("minemon_gen1_pokec");
-            var pos=player.blockPosition().east(2);
+            var pos=player.blockPosition().west(2);
             var level=(net.minecraft.server.level.ServerLevel)player.level;
             var state=br.com.petrickfaria.minemon.registry.ModBlocks.POKEC.get().defaultBlockState();
             level.setBlock(pos,state,3);
