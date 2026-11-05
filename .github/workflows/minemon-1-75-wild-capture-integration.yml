@@ -55,7 +55,7 @@ jobs:
       - name: Install native speech library used by client visuals
         run: |
           sudo apt-get update
-          sudo apt-get install -y libflite-dev
+          sudo apt-get install -y flite1-dev
       - name: Validate wild capture animation and capture state on the real client
         run: |
           python3 tools/prepare_client_world.py
