@@ -229,7 +229,6 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         int level=1;
         font.draw(pose,"Vida:",154,151,0xFF404040);
         drawHealthHearts(pose,(int)Math.ceil(br.com.petrickfaria.minemon.entity.PokemonProgression.healthForRarity(rarity,level)),191,149);
-        font.draw(pose,"Dano:",280,151,0xFF404040);
         drawDamageHearts(pose,br.com.petrickfaria.minemon.entity.PokemonProgression.damageForRarity(rarity,level),316,149);
         font.draw(pose,"Estágio: "+evolutionStage(species),154,176,0xFF404040);
         font.draw(pose,"Nível: "+level,302,176,0xFF404040);
@@ -238,6 +237,11 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         font.draw(pose,fitText("Tipo: "+types,234),154,197,0xFF404040);
         drawAcquisitionPanel(pose, species, unlocked, species.isEvolution() && !unlocked, mouseX, mouseY);
         drawCompactConversion(pose);
+        // Flush item/preview passes and keep this caption independent of their depth state.
+        var captionBuffers=Minecraft.getInstance().renderBuffers().bufferSource();
+        captionBuffers.endBatch();
+        font.drawInBatch("Dano:",280,151,0xFF404040,false,pose.last().pose(),captionBuffers,true,0,15728880);
+        captionBuffers.endBatch();
         pose.popPose();
     }
 
