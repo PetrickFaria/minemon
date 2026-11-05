@@ -237,12 +237,6 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         font.draw(pose,fitText("Tipo: "+types,234),154,197,0xFF404040);
         drawAcquisitionPanel(pose, species, unlocked, species.isEvolution() && !unlocked, mouseX, mouseY);
         drawCompactConversion(pose);
-        // Flush item/preview passes and keep this caption independent of their depth state.
-        var captionBuffers=Minecraft.getInstance().renderBuffers().bufferSource();
-        captionBuffers.endBatch();
-        com.mojang.blaze3d.systems.RenderSystem.disableDepthTest();
-        drawPixelDamageCaption(pose,280,151);
-        captionBuffers.endBatch();
         pose.popPose();
     }
 
@@ -555,6 +549,15 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
     @Override public void render(PoseStack pose, int mouseX, int mouseY, float partialTick) {
         renderBackground(pose);
         super.render(pose, mouseX, mouseY, partialTick);
+        // Container item rendering must finish before the damage caption is composited.
+        Minecraft.getInstance().renderBuffers().bufferSource().endBatch();
+        pose.pushPose();
+        pose.translate(leftPos,topPos,400);
+        pose.scale(uiScale,uiScale,1);
+        com.mojang.blaze3d.systems.RenderSystem.disableDepthTest();
+        drawPixelDamageCaption(pose,280,151);
+        com.mojang.blaze3d.systems.RenderSystem.enableDepthTest();
+        pose.popPose();
         renderTooltip(pose,mouseX,mouseY);
     }
 }
