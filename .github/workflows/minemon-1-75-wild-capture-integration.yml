@@ -7,7 +7,7 @@ permissions:
   contents: write
 concurrency:
   group: minemon-publication-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 jobs:
   validate:
     runs-on: ubuntu-latest
@@ -104,6 +104,7 @@ jobs:
       - name: Build and verify the versioned Minemon JAR
         run: |
           set -euo pipefail
+          test "$(git ls-remote origin "$GITHUB_REF" | awk 'NR == 1 { print $1 }')" = "$GITHUB_SHA"
           ./gradlew --no-daemon build -x test
           jar_file="build/libs/Minemon-1.19.2-${MINEMON_VERSION}.jar"
           test -f "$jar_file"
@@ -163,6 +164,7 @@ jobs:
           RELEASE_VERSION: ${{ env.MINEMON_VERSION }}
         run: |
           set -euo pipefail
+          test "$(git ls-remote origin "$GITHUB_REF" | awk 'NR == 1 { print $1 }')" = "$GITHUB_SHA"
           tag="minemon-v${RELEASE_VERSION}"
           remote_commit="$(git ls-remote --refs origin "refs/tags/${tag}" | awk 'NR == 1 { print $1 }')"
           if [ -n "$remote_commit" ]; then

@@ -35,3 +35,33 @@ The existing Minemon code has no evolution trigger or evolution operation. Poké
 ## Data source
 
 `data/minemon_gen1/pokec_species.json` lists the National Pokédex number, display name, Gen I type(s), explicit starting rarity, and in-generation evolution parent for every card. The first listed type is the soul type. PokéC reuses the registered species definitions and existing GeckoLib resources.
+
+
+## Terminal GUI (after 1.79)
+
+The species list fills the left column; the existing draggable 3D preview stays in
+the center. The 27 inventory slots and nine hotbar slots remain backed by the
+player Inventory and use AbstractContainerScreen/AbstractContainerMenu click
+handling. The four terminal slots follow those 36 indices: payment (36), purchase
+preview (37), stored ball (38), soul reward (39). Inventory interactions use the
+vanilla click packet, including right click, drag splitting and hotbar swaps.
+
+Unlocking commits only the souls actually placed in the payment slot. Deposits
+are permanent and specific to a species. Uncommitted input returns on selection
+change or close. Evolved forms retain the existing evolution unlock requirement.
+Buying previews an egg when physical coins plus the existing wallet cover the
+price (including the existing first free starter purchase). Taking that output
+charges the price once; closing never grants an unpaid preview. Output slots
+reject inserted items.
+
+The spawn toggle persists in the player's Pokec data for the selected species.
+Only that player's periodic encounter candidate list checks the toggle; spawn
+rates, timing and world entity behavior are otherwise unchanged. The GUI displays
+the configured chance for each 30-second check, or zero while disabled.
+
+The Liberar button commits ball conversion once through PokemonBallLedger. The
+empty original ball remains in its input, and the elemental soul reward remains
+in the output until collected. Both Pokeball and Master Ball use the same flow;
+foreign owners, spent tokens and non-Pokemon payloads are rejected. Menu escrow
+is saved separately from the unpaid purchase preview and is returned on close or
+recovered on login. Legacy action handlers remain available for existing callers.

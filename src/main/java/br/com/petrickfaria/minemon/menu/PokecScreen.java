@@ -184,8 +184,8 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         pose.popPose();
 
         int inventoryTop = Math.round(TOP_HEIGHT * uiScale);
-        drawPanel(pose, Math.round(150*uiScale), inventoryTop, Math.round(248*uiScale), INVENTORY_HEIGHT);
-        font.draw(pose, "INVENTÁRIO", Math.round(154*uiScale), inventoryTop + INVENTORY_LABEL_Y, 0xFF404040);
+        drawPanel(pose, Math.round(276*uiScale)-INVENTORY_SLOT_WIDTH/2-2, inventoryTop, INVENTORY_SLOT_WIDTH+4, INVENTORY_HEIGHT);
+        font.draw(pose, "INVENTÁRIO", Math.round(276*uiScale)-INVENTORY_SLOT_WIDTH/2+2, inventoryTop + INVENTORY_LABEL_Y, 0xFF404040);
         for (int i=0;i<menu.slots.size();i++) {
             var slot=menu.slots.get(i);
             if(i==37&&!syncedUnlocked.contains(selectedSlug))continue;
@@ -241,7 +241,8 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
             drawButton(pose,420,87,95,19,"Comprar",true,mouseX,mouseY);
             boolean enabled=menu.terminal.spawnEnabled();
             drawButton(pose,420,114,63,19,"Spawn",true,mouseX,mouseY);
-            GuiComponent.fill(pose,423,117,426,130,enabled?0xFF228B36:0xFFBB3030);
+            GuiComponent.fill(pose,423,117,480,130,enabled?0xFF398348:0xFFAB3939);
+            drawCentered(pose,"Spawn",451,120,0xFFFFFFFF);
             font.draw(pose,String.format(Locale.ROOT,"%.2f%% / 30s",enabled?menu.terminal.spawnChance()*100:0),491,120,0xFF404040);
         }else drawButton(pose,420,87,116,19,"Desbloquear",menu.terminal.payment().getCount()>0,mouseX,mouseY);
     }
