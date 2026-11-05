@@ -5,6 +5,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraft.world.entity.LivingEntity;
@@ -297,8 +298,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         this.entityData.set(DEFEATED,tag.getBoolean("MinemonDefeated"));
         this.entityData.set(WILD_ENCOUNTER, this.getPersistentData().getBoolean("MinemonWildEncounter"));
         this.entityData.set(WILD_ENCOUNTER_DOWNED, this.getPersistentData().getString("MinemonEncounterState").equals("downed"));
-        this.entityData.set(WILD_ENCOUNTER_OWNER, this.getPersistentData().hasUUID("MinemonEncounterOwner")
-                ? this.getPersistentData().getUUID("MinemonEncounterOwner").toString() : "");
+        this.entityData.set(WILD_ENCOUNTER_OWNER, this.getPersistentData().hasUUID("MinemonEncounterOwner")                ? this.getPersistentData().getUUID("MinemonEncounterOwner").toString() : "");
         this.aiBeforeDefeat=tag.getBoolean("MinemonAiBeforeDefeat");
         rangedCharges.load(tag);entityData.set(RANGED_CHARGES,rangedCharges.charges());
         this.successfulMeleeAttacks=Math.max(0,Math.min(4,tag.getInt("MinemonMeleeSequence")));
@@ -597,8 +597,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         if (isDefeated() || target == null || target == this || this.isOwnerEntity(target)) return false;
         if (playerFocusTarget != null && (target.level != this.level || !playerFocusTarget.equals(target.getUUID()))) return false;
         if (this.isTame() && !CombatGeometry.inRange(this,target,10)) return false;
-        // Ordered sitting companions may defend themselves or their owner at close
-        // range, but must not start walking after a distant target.
+        // Ordered sitting companions may defend themselves or their owner at close        // range, but must not start walking after a distant target.
         if (this.isTame() && this.isOrderedToSit() && !CombatGeometry.inRange(this,target,10)) return false;
         if (target instanceof MinemonCreature other) {
             if(other.isDefeated())return false;
@@ -897,8 +896,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         if (isSleeping()) setSleeping(false);
         entityData.set(NIGHT_REST, false);
         if (isOrderedToSit()) setOrderedToSit(false);
-        setTarget(target);
-        getNavigation().moveTo(target, 1.0D);
+        setTarget(target);        getNavigation().moveTo(target, 1.0D);
     }
 
     private void clearPlayerFocus() {
@@ -1197,8 +1195,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
                 clip=firstClip(slug,"sleep","water_sleep","night_sleep","ground_sleep");
             } else if(Set.of("seadra","tentacool","tentacruel").contains(slug)) {
                 clip=firstClip(slug,"water_sleep","water_idle","water_swim","surface_water_swim","surfacewater_swim","water_surface_swim");
-            } else if(Set.of("magikarp","goldeen","seaking").contains(slug)) {
-                clip=firstClip(slug,"water_sleep","water_swim","surface_water_swim","surfacewater_swim","water_surface_swim","water_idle");
+            } else if(Set.of("magikarp","goldeen","seaking").contains(slug)) {                clip=firstClip(slug,"water_sleep","water_swim","surface_water_swim","surfacewater_swim","water_surface_swim","water_idle");
             } else {
                 // Unmentioned aquatic species retain the approved 1.64 clip.
                 clip=firstClip(slug,"water_swim","surface_water_swim","surfacewater_swim","water_surface_swim");
