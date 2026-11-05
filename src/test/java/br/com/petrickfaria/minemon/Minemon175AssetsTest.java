@@ -12,7 +12,7 @@ public class Minemon175AssetsTest {
         var normal = JsonParser.parseString(Files.readString(root.resolve("assets/minemon/models/item/pokeball.json"))).getAsJsonObject();
         assertEquals("minecraft:item/generated", normal.get("parent").getAsString());
         assertEquals("minemon:item/pokeball", normal.getAsJsonObject("textures").get("layer0").getAsString());
-        assertEquals("minemon:capture_animation", normal.getAsJsonArray("overrides").get(0).getAsJsonObject()
+        assertEquals("minemon_gen1:capture_animation", normal.getAsJsonArray("overrides").get(0).getAsJsonObject()
                 .getAsJsonObject("predicate").entrySet().iterator().next().getKey());
         assertEquals("minemon:item/pokeball_3d", normal.getAsJsonArray("overrides").get(0).getAsJsonObject()
                 .get("model").getAsString());
