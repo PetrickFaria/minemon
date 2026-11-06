@@ -15,8 +15,10 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import java.util.UUID;
 import net.minecraftforge.network.NetworkHooks;
 
 /** Short-lived world visual for a Pokéball throw and its capture shake sequence. */
@@ -26,20 +28,30 @@ public final class CaptureBallProjectile extends Entity {
     private static final EntityDataAccessor<Float> TARGET_Z = SynchedEntityData.defineId(CaptureBallProjectile.class, EntityDataSerializers.FLOAT);
     private static final EntityDataAccessor<Boolean> SUCCESS = SynchedEntityData.defineId(CaptureBallProjectile.class, EntityDataSerializers.BOOLEAN);
     private double startX, startY, startZ;
+    private UUID pendingWild;
+    private UUID pendingOwner;
+    private boolean pendingExpired;
+    private boolean masterBall;
+    private int destinationSlot;
 
     public CaptureBallProjectile(EntityType<? extends CaptureBallProjectile> type, Level level) { super(type, level); }
 
-    public static void launch(ServerLevel level, ServerPlayer player, Vec3 target, boolean success) {
+    public static boolean launch(ServerLevel level, ServerPlayer player, MinemonCreature wild,
+                                 boolean success, boolean expired, boolean masterBall,
+                                 net.minecraft.world.InteractionHand hand) {
         CaptureBallProjectile ball = ModEntities.CAPTURE_BALL.get().create(level);
-        if (ball == null) return;
+        if (ball == null) return false;
         ball.moveTo(player.getX(), player.getEyeY() - .12D, player.getZ(), player.getYRot(), player.getXRot());
         ball.startX = ball.getX(); ball.startY = ball.getY(); ball.startZ = ball.getZ();
-        ball.entityData.set(TARGET_X, (float) target.x);
-        ball.entityData.set(TARGET_Y, (float) target.y);
-        ball.entityData.set(TARGET_Z, (float) target.z);
+        ball.entityData.set(TARGET_X, (float) wild.getX());
+        ball.entityData.set(TARGET_Y, (float) wild.getY());
+        ball.entityData.set(TARGET_Z, (float) wild.getZ());
         ball.entityData.set(SUCCESS, success);
+        ball.pendingWild=wild.getUUID();ball.pendingOwner=player.getUUID();
+        ball.pendingExpired=expired;ball.masterBall=masterBall;
+        ball.destinationSlot=hand==net.minecraft.world.InteractionHand.MAIN_HAND?player.getInventory().selected:40;
         ball.setNoGravity(true);
-        level.addFreshEntity(ball);
+        return level.addFreshEntity(ball);
     }
 
     @Override protected void defineSynchedData() {
@@ -77,12 +89,46 @@ public final class CaptureBallProjectile extends Entity {
             }
             if (tickCount == 24 || tickCount == 36 || tickCount == 48)
                 server.playSound(null, blockPosition(), SoundEvents.CHAIN_HIT, SoundSource.PLAYERS, .65F, 1.35F);
-            if (tickCount == 58 && entityData.get(SUCCESS)) {
+            if (tickCount == 64 && entityData.get(SUCCESS)) {
                 server.playSound(null, blockPosition(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, .7F, 1.4F);
                 server.sendParticles(ParticleTypes.FIREWORK, getX(), getY() + .25D, getZ(), 12, .3D, .35D, .3D, .12D);
             }
-            if (tickCount >= 64) discard();
+            if (tickCount >= 64) completePending(server);
         }
+    }
+
+    private void completePending(ServerLevel server) {
+        if (pendingWild == null || pendingOwner == null) { discard(); return; }
+        ServerPlayer player=server.getServer().getPlayerList().getPlayer(pendingOwner);
+        if (player == null || player.level != server) return; // Keep the persisted transaction until its owner returns.
+        Entity target=server.getEntity(pendingWild);
+        if (!(target instanceof MinemonCreature wild)) { discard(); return; }
+        if (entityData.get(SUCCESS)) {
+            if (!br.com.petrickfaria.minemon.pokec.WildEncounterManager.completeCapture(wild,player)) return;
+            Item item=masterBall?ModItems.MASTER_BALL.get():ModItems.POKEBALL.get();
+            ItemStack occupied=new ItemStack(item);
+            try {
+                br.com.petrickfaria.minemon.item.PokeballItem.store(occupied,wild,player);
+                if(br.com.petrickfaria.minemon.item.PokeballItem.readStoredEntity(occupied)==null)
+                    throw new IllegalStateException("Captured Pokémon could not be restored from the Pokébola");
+            }
+            catch (RuntimeException invalid) {
+                br.com.petrickfaria.minemon.pokec.WildEncounterManager.restoreCaptureAfterStorageFailure(wild,player);
+                ItemStack returnedBall=new ItemStack(item);
+                if(!player.getInventory().add(returnedBall))player.drop(returnedBall,false);
+                discard();return;
+            }
+            br.com.petrickfaria.minemon.pokec.WildEncounterManager.finishCapture(wild,player);
+            wild.discard();
+            if(destinationSlot>=0&&destinationSlot<36&&player.getInventory().getItem(destinationSlot).isEmpty())
+                player.getInventory().setItem(destinationSlot,occupied);
+            else if(destinationSlot==40&&player.getOffhandItem().isEmpty())
+                player.setItemInHand(net.minecraft.world.InteractionHand.OFF_HAND,occupied);
+            else if (!player.getInventory().add(occupied)) player.drop(occupied,false);
+        } else {
+            br.com.petrickfaria.minemon.pokec.WildEncounterManager.cancelCapturePending(wild,pendingExpired);
+        }
+        discard();
     }
 
     public ItemStack renderStack() {
@@ -96,11 +142,16 @@ public final class CaptureBallProjectile extends Entity {
         tag.putDouble("StartX", startX); tag.putDouble("StartY", startY); tag.putDouble("StartZ", startZ);
         tag.putFloat("TargetX", entityData.get(TARGET_X)); tag.putFloat("TargetY", entityData.get(TARGET_Y));
         tag.putFloat("TargetZ", entityData.get(TARGET_Z)); tag.putBoolean("Success", entityData.get(SUCCESS));
+        if(pendingWild!=null)tag.putUUID("PendingWild",pendingWild);if(pendingOwner!=null)tag.putUUID("PendingOwner",pendingOwner);
+        tag.putBoolean("PendingExpired",pendingExpired);tag.putBoolean("MasterBall",masterBall);tag.putInt("DestinationSlot",destinationSlot);
     }
     @Override protected void readAdditionalSaveData(CompoundTag tag) {
         startX=tag.getDouble("StartX"); startY=tag.getDouble("StartY"); startZ=tag.getDouble("StartZ");
         entityData.set(TARGET_X,tag.getFloat("TargetX")); entityData.set(TARGET_Y,tag.getFloat("TargetY"));
         entityData.set(TARGET_Z,tag.getFloat("TargetZ")); entityData.set(SUCCESS,tag.getBoolean("Success"));
+        pendingWild=tag.hasUUID("PendingWild")?tag.getUUID("PendingWild"):null;
+        pendingOwner=tag.hasUUID("PendingOwner")?tag.getUUID("PendingOwner"):null;
+        pendingExpired=tag.getBoolean("PendingExpired");masterBall=tag.getBoolean("MasterBall");destinationSlot=tag.getInt("DestinationSlot");
     }
     @Override public Packet<?> getAddEntityPacket() { return NetworkHooks.getEntitySpawningPacket(this); }
 }

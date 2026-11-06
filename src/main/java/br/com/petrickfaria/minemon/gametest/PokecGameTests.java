@@ -3,6 +3,7 @@ package br.com.petrickfaria.minemon.gametest;
 import br.com.petrickfaria.minemon.Minemon;
 import br.com.petrickfaria.minemon.block.PokecBlock;
 import br.com.petrickfaria.minemon.entity.MinemonCreature;
+import br.com.petrickfaria.minemon.entity.CaptureBallProjectile;
 import br.com.petrickfaria.minemon.menu.PokecMenu;
 import br.com.petrickfaria.minemon.pokec.*;
 import br.com.petrickfaria.minemon.registry.ModBlocks;
@@ -414,6 +415,80 @@ public final class PokecGameTests {
             check(!menu.terminal.release(),"replayed consumed ball token cannot produce another reward");menu.slots.get(38).set(ItemStack.EMPTY);
         }
         menu.removed(p);p.discard();h.succeed();
+    }
+
+    @GameTest(template="test_arena",timeoutTicks=200)
+    public static void companionOnlyAttacksTheWildTargetItsOwnerHits(GameTestHelper h) {
+        floor(h);
+        ServerPlayer owner=player(h,h.absolutePos(new BlockPos(7,1,5)));
+        MinemonCreature companion=h.spawn(ModEntities.SPECIES.get("bulbasaur").get(),new BlockPos(5,1,5));
+        MinemonCreature first=h.spawn(ModEntities.SPECIES.get("charmander").get(),new BlockPos(9,1,5));
+        MinemonCreature second=h.spawn(ModEntities.SPECIES.get("squirtle").get(),new BlockPos(10,1,5));
+        companion.tame(owner);companion.setOwnerUUID(owner.getUUID());
+        check(!companion.canAttack(first)&&!companion.canAttack(second),"a nearby wild Pokémon is not a target before its owner hits one");
+        companion.focusPlayerTarget(first);
+        check(companion.canAttack(first)&&!companion.canAttack(second),"a direct owner hit focuses the companion on that wild Pokémon alone");
+        companion.discard();first.discard();second.discard();owner.discard();h.succeed();
+    }
+
+    @GameTest(template="test_arena",timeoutTicks=200)
+    public static void defeatedWildCanBeLootedByOneDirectLeftClick(GameTestHelper h) {
+        floor(h);
+        ServerPlayer owner=player(h,h.absolutePos(new BlockPos(7,1,5)));
+        MinemonCreature wild=h.spawn(ModEntities.SPECIES.get("bulbasaur").get(),new BlockPos(8,1,5));
+        var data=wild.getPersistentData();data.putBoolean("MinemonWildEncounter",true);
+        data.putUUID("MinemonEncounterOwner",owner.getUUID());data.putString("MinemonEncounterState","downed");
+        wild.setWildEncounter(true);wild.setWildEncounterOwner(owner.getUUID());wild.setEncounterDowned(true);
+        var hit=new net.minecraftforge.event.entity.living.LivingAttackEvent(wild,net.minecraft.world.damagesource.DamageSource.playerAttack(owner));
+        PokecEvents.playerPokemonAttack(hit);
+        check(hit.isCanceled()&&wild.isRemoved(),"one direct left-click collects and removes the defeated wild without opening a menu");
+        int collected=owner.getInventory().items.stream().filter(stack->ModItems.SOULS.values().stream().anyMatch(item->stack.is(item.get()))).mapToInt(ItemStack::getCount).sum();
+        check(collected>0,"loot is delivered into the owner's inventory");
+        var duplicate=new net.minecraftforge.event.entity.living.LivingAttackEvent(wild,net.minecraft.world.damagesource.DamageSource.playerAttack(owner));
+        PokecEvents.playerPokemonAttack(duplicate);
+        int after=owner.getInventory().items.stream().filter(stack->ModItems.SOULS.values().stream().anyMatch(item->stack.is(item.get()))).mapToInt(ItemStack::getCount).sum();
+        check(after==collected,"repeated attacks cannot duplicate the reward");
+        owner.discard();h.succeed();
+    }
+
+    @GameTest(template="test_arena",timeoutTicks=200)
+    public static void spawnEggEncounterCreditsLethalBlowToCompanion(GameTestHelper h) {
+        floor(h);
+        ServerPlayer owner=player(h,h.absolutePos(new BlockPos(7,1,5)));
+        MinemonCreature attacker=h.spawn(ModEntities.SPECIES.get("bulbasaur").get(),new BlockPos(5,1,5));
+        MinemonCreature wild=h.spawn(ModEntities.SPECIES.get("charmander").get(),new BlockPos(8,1,5));
+        attacker.tame(owner);attacker.setOwnerUUID(owner.getUUID());wild.setHealth(1.0F);
+        WildEncounterManager.registerSpawnEggEncounter(wild,owner);
+        int oldLevel=attacker.getPokemonLevel(),oldXp=attacker.getPokemonExperience();
+        check(WildEncounterManager.enterDowned(wild,net.minecraft.world.damagesource.DamageSource.mobAttack(attacker)),"lethal companion hit downs an owned spawn-egg encounter");
+        int reward=wild.getExperienceReward();
+        check(wild.getPersistentData().getBoolean("MinemonCompanionXpHandled"),"spawn-egg lethal blow is recorded by the exactly-once XP handler");
+        check(reward==0?attacker.getPokemonLevel()==oldLevel&&attacker.getPokemonExperience()==oldXp
+                :attacker.getPokemonLevel()>oldLevel||attacker.getPokemonExperience()>oldXp,
+                "spawn-egg lethal blow awards its existing vanilla mob XP amount without changing the formula");
+        int awardedLevel=attacker.getPokemonLevel(),awardedXp=attacker.getPokemonExperience();
+        WildEncounterManager.awardCompanionExperience(wild,net.minecraft.world.damagesource.DamageSource.mobAttack(attacker));
+        check(attacker.getPokemonLevel()==awardedLevel&&attacker.getPokemonExperience()==awardedXp,"the same encounter cannot award companion XP twice");
+        attacker.discard();wild.discard();owner.discard();h.succeed();
+    }
+
+    @GameTest(template="test_arena",timeoutTicks=120)
+    public static void captureCommitsOnlyAfterTheBallAnimationCompletes(GameTestHelper h) {
+        floor(h);
+        ServerPlayer owner=player(h,h.absolutePos(new BlockPos(7,1,5)));
+        MinemonCreature wild=h.spawn(ModEntities.SPECIES.get("bulbasaur").get(),new BlockPos(8,1,5));
+        var data=wild.getPersistentData();data.putBoolean("MinemonWildEncounter",true);
+        data.putUUID("MinemonEncounterOwner",owner.getUUID());data.putString("MinemonEncounterState","downed");
+        wild.setWildEncounter(true);wild.setWildEncounterOwner(owner.getUUID());wild.setEncounterDowned(true);
+        WildEncounterManager.markCapturePending(wild);
+        check(CaptureBallProjectile.launch((net.minecraft.server.level.ServerLevel)h.getLevel(),owner,wild,true,false,false,InteractionHand.MAIN_HAND),"capture animation projectile should spawn");
+        check(WildEncounterManager.isDowned(wild)&&!wild.isTame()&&!wild.isRemoved(),"capture must remain uncommitted during the ball animation");
+        h.runAfterDelay(65,()->{
+            check(wild.isRemoved(),"successful capture removes the wild only after animation completion");
+            check(PokeballItem.isOccupied(owner.getMainHandItem()),"completed capture delivers one occupied Pokébola to the source slot");
+            check(PokeballItem.readStoredEntity(owner.getMainHandItem())!=null,"the delivered ball contains the captured Pokémon");
+            owner.discard();h.succeed();
+        });
     }
 
     private PokecGameTests(){}

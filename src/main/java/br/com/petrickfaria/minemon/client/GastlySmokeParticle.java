@@ -74,7 +74,8 @@ public final class GastlySmokeParticle extends TextureSheetParticle {
         this.quadSize = (small?br.com.petrickfaria.minemon.entity.GastlyAura.SMALL_SIZE:br.com.petrickfaria.minemon.entity.GastlyAura.LARGE_SIZE) * SpeciesDefinitions.get("gastly").scale() * sample;
     }
 
-    private void followBody(){
+    private void followBody(){ followBody(1.0F); }
+    private void followBody(float partialTick){
         if(owner==null)return;
         float scale=SpeciesDefinitions.get("gastly").scale();
         double angle=slot*2.3999632297+owner.tickCount*.012;
@@ -85,8 +86,9 @@ public final class GastlySmokeParticle extends TextureSheetParticle {
         double center=br.com.petrickfaria.minemon.entity.ModelMetrics.bodyCenterY("gastly")*scale;
         if(owner instanceof br.com.petrickfaria.minemon.entity.MinemonCreature pokemon && pokemon.isDefeated())center+=br.com.petrickfaria.minemon.entity.ModelMetrics.defeatedOffset("gastly",scale);
         double height=br.com.petrickfaria.minemon.entity.ModelMetrics.bodyHeight("gastly")*scale;
-        double px=owner.getX()+Math.cos(angle)*radius,pz=owner.getZ()+Math.sin(angle)*radius;
-        double py=owner.getY()+center+((slot%3)-.65)*height*.32*br.com.petrickfaria.minemon.entity.GastlyAura.RADIAL_DISTRIBUTION_SCALE;
+        net.minecraft.world.phys.Vec3 renderPosition=owner.getPosition(partialTick);
+        double px=renderPosition.x+Math.cos(angle)*radius,pz=renderPosition.z+Math.sin(angle)*radius;
+        double py=renderPosition.y+center+((slot%3)-.65)*height*.32*br.com.petrickfaria.minemon.entity.GastlyAura.RADIAL_DISTRIBUTION_SCALE;
         this.xo=this.x;this.yo=this.y;this.zo=this.z;setPos(px,py,pz);
     }
     private static int lerp(float t, int from, int to) {
@@ -143,7 +145,7 @@ public final class GastlySmokeParticle extends TextureSheetParticle {
         particle.setColor(lerp(progress,0xBE,0x7B)/255.0F,lerp(progress,0x81,0x23)/255.0F,
                 lerp(progress,0xE8,0xD6)/255.0F);
         particle.updateSourceSize(progress);
-        particle.followBody();
+        particle.followBody(partialTick);
         particle.xo=particle.x;particle.yo=particle.y;particle.zo=particle.z;
         particle.render(buffer,camera,partialTick);
         SPAWN_COUNT.incrementAndGet();

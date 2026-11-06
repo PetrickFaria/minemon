@@ -565,20 +565,14 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
 
         // Wild creatures only acquire a target after being hurt. Tamed creatures also protect
         // their owner and assist against the owner's current target.
-        this.targetSelector.addGoal(1, new OwnerHurtByTargetGoal(this));
+        // A companion joins a fight only when its owner directly attacks a target.
         this.targetSelector.addGoal(2, new OwnerHurtTargetGoal(this));
-        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, LivingEntity.class, 10, true, false,
-                target -> MinemonCreature.this.isTame() && !MinemonCreature.this.isOrderedToSit()
-                        && target instanceof net.minecraft.world.entity.Mob mob
-                        && MinemonCreature.this.isBlackListTarget(mob)) {
-            @Override protected net.minecraft.world.phys.AABB getTargetSearchArea(double radius){return this.mob.getBoundingBox().inflate(10.0D);}
-        });
         this.targetSelector.addGoal(4, new HurtByTargetGoal(this) {
             @Override public boolean canUse() {
-                return (MinemonCreature.this.isTame() || MinemonCreature.this.wildAggressionTicks > 0) && super.canUse();
+                return (!MinemonCreature.this.isTame() && MinemonCreature.this.wildAggressionTicks > 0) && super.canUse();
             }
             @Override public boolean canContinueToUse() {
-                return (MinemonCreature.this.isTame() || MinemonCreature.this.wildAggressionTicks > 0) && super.canContinueToUse();
+                return (!MinemonCreature.this.isTame() && MinemonCreature.this.wildAggressionTicks > 0) && super.canContinueToUse();
             }
         });
     }
@@ -595,6 +589,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     @Override
     public boolean canAttack(LivingEntity target) {
         if (isDefeated() || target == null || target == this || this.isOwnerEntity(target)) return false;
+        if (this.isTame() && (playerFocusTarget == null || !playerFocusTarget.equals(target.getUUID()))) return false;
         if (playerFocusTarget != null && (target.level != this.level || !playerFocusTarget.equals(target.getUUID()))) return false;
         if (this.isTame() && !CombatGeometry.inRange(this,target,10)) return false;
         // Ordered sitting companions may defend themselves or their owner at close        // range, but must not start walking after a distant target.
@@ -735,7 +730,13 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
 
     @Override
     public boolean hurt(DamageSource source, float amount) {
-        if(isDefeated())return false;
+        if (isDefeated()) {
+            if (!level.isClientSide && source.getEntity() instanceof ServerPlayer player
+                    && source.getDirectEntity() == player
+                    && br.com.petrickfaria.minemon.pokec.WildEncounterManager.isDowned(this))
+                br.com.petrickfaria.minemon.pokec.WildEncounterManager.loot(this, player);
+            return false;
+        }
         boolean directPlayerMelee=source.getEntity() instanceof Player player&&source.getDirectEntity()==player;
         if (!isRocketSpecial() && isTame() && directPlayerMelee) return false;
         if(directPlayerMelee&&!isTame()&&!isRocketSpecial())amount=1.0F;
@@ -885,7 +886,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         if (level.isClientSide || !isTame() || isDefeated() || getOwnerUUID() == null
                 || target == null || !target.isAlive() || target.level != level) return;
         UUID previousFocus = playerFocusTarget;
-        playerFocusTarget = null;
+        playerFocusTarget = target.getUUID();
         boolean validTarget = canAttack(target);
         playerFocusTarget = previousFocus;
         if (!validTarget) return;
