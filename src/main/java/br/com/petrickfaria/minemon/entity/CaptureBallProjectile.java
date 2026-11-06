@@ -100,6 +100,9 @@ public final class CaptureBallProjectile extends Entity {
     private void completePending(ServerLevel server) {
         if (pendingWild == null || pendingOwner == null) { discard(); return; }
         ServerPlayer player=server.getServer().getPlayerList().getPlayer(pendingOwner);
+        if(player==null)player=server.getEntitiesOfClass(ServerPlayer.class,
+                getBoundingBox().inflate(128.0D),candidate->pendingOwner.equals(candidate.getUUID()))
+                .stream().findFirst().orElse(null);
         if (player == null || player.level != server) return; // Keep the persisted transaction until its owner returns.
         Entity target=server.getEntity(pendingWild);
         if (!(target instanceof MinemonCreature wild)) { discard(); return; }
