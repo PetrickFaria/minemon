@@ -59,6 +59,10 @@ public final class GastlyCoreRenderHook {
                 modelView.pushPose();
                 modelView.mulPoseMatrix(event.getPoseStack().last().pose());
                 com.mojang.blaze3d.systems.RenderSystem.applyModelViewMatrix();
+                mc.gameRenderer.lightTexture().turnOnLightLayer();
+                com.mojang.blaze3d.systems.RenderSystem.enableDepthTest();
+                com.mojang.blaze3d.systems.RenderSystem.setShader(net.minecraft.client.renderer.GameRenderer::getParticleShader);
+                com.mojang.blaze3d.systems.RenderSystem.setShaderColor(1.0F,1.0F,1.0F,1.0F);
                 GastlySmokeParticle.beginAuraFrame(builder,mc.getTextureManager());
                 try{
                     draws.sort(Comparator.comparingDouble(AuraDraw::distanceSqr).reversed());
@@ -67,6 +71,7 @@ public final class GastlyCoreRenderHook {
                 }finally{
                     try{GastlySmokeParticle.endAuraFrame(tessellator);}
                     finally{
+                        mc.gameRenderer.lightTexture().turnOffLightLayer();
                         modelView.popPose();
                         com.mojang.blaze3d.systems.RenderSystem.applyModelViewMatrix();
                     }

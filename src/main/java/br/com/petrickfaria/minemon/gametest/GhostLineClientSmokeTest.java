@@ -125,6 +125,7 @@ final class GhostLineClientSmokeTest {
       if(mob==null||!mob.isBlinkingForRender())
        throw new IllegalStateException("Gengar blink ended before its closed-eye screenshot was captured");
      }
+     if(Set.of("gastly-10-block","gastly-motion","gastly-float").contains(view))verifyVisibleAura(mc,view);
      Screenshot.grab(mc.gameDirectory,"ghost-line-1.74-"+view+".png",mc.getMainRenderTarget(),m->{screenshotInFlight=false;writtenScreenshots.add(view);System.out.println("[GHOST LINE] screenshot "+view+": "+m);});
      screenshotInFlight=true;
     }
@@ -342,6 +343,20 @@ final class GhostLineClientSmokeTest {
     System.out.println("[GHOST LINE] PASS: runtime checks complete; waiting for all 18 screenshots to be written.");
    }
   }catch(Exception e){throw new IllegalStateException("Ghost line real-client validation failed",e);}
+ }
+ private static void verifyVisibleAura(Minecraft mc,String view){
+  // Read the actual framebuffer, rather than accepting render-call counters as visibility.
+  try(var frame=Screenshot.takeScreenshot(mc.getMainRenderTarget())){
+   int purple=0;
+   for(int y=frame.getHeight()/5;y<frame.getHeight()*7/10;y++)
+    for(int x=frame.getWidth()/4;x<frame.getWidth()*3/4;x++){
+     int pixel=frame.getPixelRGBA(x,y);
+     int red=pixel&255,green=(pixel>>>8)&255,blue=(pixel>>>16)&255;
+     if(red>40&&blue>55&&red>green+12&&blue>green+15)purple++;
+    }
+   if(purple<5)throw new IllegalStateException("Gastly aura is absent from the actual "+view+" framebuffer: purple pixels="+purple);
+   System.out.println("[GHOST LINE] visible aura "+view+": "+purple+" purple pixels near the target");
+  }
  }
  private static MinemonCreature spawn(net.minecraft.server.level.ServerLevel level,String slug,double x,double z){
   return spawn(level,slug,x,z,net.minecraft.world.entity.MobSpawnType.NATURAL);
