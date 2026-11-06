@@ -4,6 +4,7 @@ import br.com.petrickfaria.minemon.entity.*;
 import br.com.petrickfaria.minemon.registry.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.damagesource.DamageSource;
