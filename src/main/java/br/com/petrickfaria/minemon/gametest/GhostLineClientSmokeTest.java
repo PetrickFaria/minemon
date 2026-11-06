@@ -265,6 +265,15 @@ final class GhostLineClientSmokeTest {
    }
    if(ticks>=145&&!captures.contains("gengar-walk"))
     throw new IllegalStateException("Gengar walking screenshot was not captured during ground_walk: "+readClip(gengar));
+   // Keep each ghost in the render view while waiting for its intermittent blink.
+   // The eyes-closed render state only advances when that entity is rendered.
+   if(ticks>=145&&ticks<705&&(!captures.contains("haunter-blink")||!captures.contains("gengar-blink"))){
+    boolean needHaunterBlink=!captures.contains("haunter-blink");
+    boolean needGengarBlink=!captures.contains("gengar-blink");
+    if(needHaunterBlink&&needGengarBlink)face(mc,((ticks/20)%2==0)?haunter:gengar);
+    else if(needHaunterBlink)face(mc,haunter);
+    else face(mc,gengar);
+   }
    if(ticks>=150){
     mc.getSingleplayerServer().execute(()->{
      var authoritative=mc.getSingleplayerServer().overworld().getEntity(gengarId);
