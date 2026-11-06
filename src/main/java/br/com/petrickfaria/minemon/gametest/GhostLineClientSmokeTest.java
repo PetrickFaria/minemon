@@ -203,34 +203,29 @@ final class GhostLineClientSmokeTest {
           +" cameraAlignment="+cameraAlignment);
     }
    }
-   if(ticks==40){
-    movingGastlyStartX=secondGastly.getX();
-    mc.getSingleplayerServer().execute(()->{
-     var moving=mc.getSingleplayerServer().overworld().getEntity(secondGastlyId);
-     if(moving instanceof MinemonCreature g){g.setNoGravity(true);g.setDeltaMovement(.08D,0,0);}
-    });
-   }
+   if(ticks==40)movingGastlyStartX=secondGastly.getX();
+   // Move the no-AI spawn-egg fixture by authoritative world positions. Its
+   // velocity is intentionally ignored by the server's no-AI movement setup,
+   // so moveTo gives the alignment check deterministic horizontal travel.
+   if(ticks>40&&ticks<56)mc.getSingleplayerServer().execute(()->{
+    var moving=mc.getSingleplayerServer().overworld().getEntity(secondGastlyId);
+    if(moving instanceof MinemonCreature g)g.moveTo(g.getX()+.12D,g.getY(),g.getZ(),g.getYRot(),g.getXRot());
+   });
    if(ticks>=50&&screenshotSlotAvailable()&&!captures.contains("gastly-motion")){
     if(secondGastly.getX()<movingGastlyStartX+.35D)
      throw new IllegalStateException("The spawn-egg Gastly fixture did not move far enough for the attachment check");
     face(mc,secondGastly);snap(mc,"gastly-motion");
    }
-   if(ticks==56){
-    floatingGastlyStartY=secondGastly.getY();
-    mc.getSingleplayerServer().execute(()->{
-     var moving=mc.getSingleplayerServer().overworld().getEntity(secondGastlyId);
-     if(moving instanceof MinemonCreature g)g.setDeltaMovement(0,.08D,0);
-    });
-   }
+   if(ticks==56)floatingGastlyStartY=secondGastly.getY();
+   if(ticks>56&&ticks<76)mc.getSingleplayerServer().execute(()->{
+    var moving=mc.getSingleplayerServer().overworld().getEntity(secondGastlyId);
+    if(moving instanceof MinemonCreature g)g.moveTo(g.getX(),g.getY()+.1D,g.getZ(),g.getYRot(),g.getXRot());
+   });
    if(ticks>=66&&screenshotSlotAvailable()&&!captures.contains("gastly-float")){
     if(secondGastly.getY()<floatingGastlyStartY+.35D)
      throw new IllegalStateException("The spawn-egg Gastly fixture did not float far enough for the attachment check");
     face(mc,secondGastly);snap(mc,"gastly-float");
    }
-   if(ticks>=76)mc.getSingleplayerServer().execute(()->{
-    var moving=mc.getSingleplayerServer().overworld().getEntity(secondGastlyId);
-    if(moving instanceof MinemonCreature g)g.setDeltaMovement(0,0,0);
-   });
    if(ticks>=25&&!captures.contains("haunter-front-a")){face(mc,haunter);snap(mc,"haunter-front-a");}
    if(ticks>=75&&!captures.contains("haunter-front-b")){face(mc,haunter);snap(mc,"haunter-front-b");}
    if(ticks>=100&&haunter.isBlinkingForRender()&&MinemonModel.ghostEyesClosedForValidation(haunter)
