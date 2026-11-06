@@ -203,7 +203,7 @@ public final class GastlySmokeParticle extends TextureSheetParticle {
             GastlySmokeParticle particle=new GastlySmokeParticle(level, x, y, z, xd, yd, zd,
                     this.sprites,small,null,0,false);
             if(Boolean.getBoolean("minemon.clientSmokeTest")){
-                double dx=particle.x-emitterX,dy=particle.y-emitterY,dz=particle.z-emitterZ;
+                double dx=particle.x-particle.emitterX,dy=particle.y-particle.emitterY,dz=particle.z-particle.emitterZ;
                 MAX_NATIVE_EMITTER_DRIFT=Math.max(MAX_NATIVE_EMITTER_DRIFT,Math.sqrt(dx*dx+dy*dy+dz*dz));
             }
             return particle;
