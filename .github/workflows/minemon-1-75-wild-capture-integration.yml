@@ -92,7 +92,7 @@ jobs:
           done
       - name: Validate 1.74 ghost visuals and animations in the real client
         run: |
-          python3 tools/prepare_client_world.py
+          python3 tools/prepare_client_world.py --ghost-line
           ALSOFT_DRIVERS=null timeout --kill-after=30s 900s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeGhostLine
           grep -F 'PASS GHOST LINE CLIENT:' run/client-validation-ghost-line.txt
           for shot in gastly-front gastly-no-tongue haunter-front-a haunter-front-b haunter-blink gengar-walk gengar-blink gengar-mouth-teeth-fixed gengar-sleep-half-sunk-a gengar-sleep-half-sunk-b; do

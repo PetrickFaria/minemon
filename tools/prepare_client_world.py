@@ -1,4 +1,9 @@
 from pathlib import Path
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--ghost-line", action="store_true")
+args = parser.parse_args()
 import shutil
 run=Path('run');candidates=[p.parent for p in run.rglob('level.dat') if 'saves' not in p.parts]
 if not candidates:raise SystemExit('Minecraft GameTest world not found for client render validation')
@@ -18,6 +23,9 @@ if options.exists():
         if ':' in line:
             key,value=line.split(':',1)
             settings[key]=value
-settings.update({'renderDistance':'4','simulationDistance':'5','maxFps':'60','enableVsync':'false','particles':'0'})
+view_distance = '8' if args.ghost_line else '4'
+# The ghost test waits for fixtures on both sides of its 50-block camera path.
+# Entity tracking is capped by server view distance, even with a 10-chunk type range.
+settings.update({'renderDistance':view_distance,'simulationDistance':'5','maxFps':'60','enableVsync':'false','particles':'0'})
 options.write_text(''.join(f'{key}:{value}\n' for key,value in settings.items()))
-print('Headless render fixture configured: 4-chunk view, all particles, full species/phase coverage')
+print(f'Headless render fixture configured: {view_distance}-chunk view, all particles, full species/phase coverage')
