@@ -155,13 +155,16 @@ final class GhostLineClientSmokeTest {
     setup=true;
     mc.getSingleplayerServer().execute(()->{
      var level=mc.getSingleplayerServer().overworld();
-     for(int x=-8;x<=8;x++)for(int z=-48;z<=64;z++){
+      // Keep each camera sweep visually isolated. The provider fixture still
+      // has a second Gastly whose ID is supplied as velocity, but it sits far
+      // enough away that its aura cannot be mistaken for the target's aura.
+      for(int x=-40;x<=40;x++)for(int z=-48;z<=64;z++){
       level.setBlockAndUpdate(new BlockPos(x,100,z),Blocks.STONE.defaultBlockState());
       for(int y=101;y<=112;y++)level.setBlockAndUpdate(new BlockPos(x,y,z),Blocks.AIR.defaultBlockState());
      }
      var gastly=spawn(level,"gastly",0,8,net.minecraft.world.entity.MobSpawnType.NATURAL);
-     var secondGastly=spawn(level,"gastly",3,12,net.minecraft.world.entity.MobSpawnType.SPAWN_EGG);
-     var haunter=spawn(level,"haunter",4,8);var gengar=spawn(level,"gengar",-4,8);
+     var secondGastly=spawn(level,"gastly",32,12,net.minecraft.world.entity.MobSpawnType.SPAWN_EGG);
+     var haunter=spawn(level,"haunter",-16,8);var gengar=spawn(level,"gengar",16,8);
      gastlyId=gastly.getUUID();secondGastlyId=secondGastly.getUUID();haunterId=haunter.getUUID();gengarId=gengar.getUUID();
      var player=level.getServer().getPlayerList().getPlayers().get(0);
      player.setGameMode(GameType.SPECTATOR);player.teleportTo(level,0,101,3,0,0);
@@ -317,7 +320,7 @@ final class GhostLineClientSmokeTest {
     if(gengarSleepBobMax-gengarSleepBobMin<0.2F)
      throw new IllegalStateException("Gengar sleep body bob did not vary enough: "+gengarSleepBobMin+".."+gengarSleepBobMax);
     Files.writeString(Path.of("client-validation-ghost-line.txt"),
-      "PASS GHOST LINE CLIENT: real Minecraft render captured Gastly aura/core from four camera angles and at 10, 25, and 50 blocks; two adjacent Gastlys (natural and spawn-egg spawn); horizontal movement and vertical float; no native smoke drift from its locator; visible Haunter and Gengar closed-eye blinks, Gengar lowered-arm gait, fixed teeth mouth, and less-sunk bobbing sleep.\n"
+      "PASS GHOST LINE CLIENT: real Minecraft render captured Gastly aura/core from four camera angles and at 10, 25, and 50 blocks; isolated target and distant spawn-egg Gastly provider fixture; horizontal movement and vertical float; no native smoke drift from its locator; visible Haunter and Gengar closed-eye blinks, Gengar lowered-arm gait, fixed teeth mouth, and less-sunk bobbing sleep.\n"
       +"Gastly native particles="+br.com.petrickfaria.minemon.client.GastlySmokeParticle.nativeEmitterCountForValidation()+", source-distance samples="+br.com.petrickfaria.minemon.client.GastlySmokeParticle.nativeSourceSampleCountForValidation()+", maximum source distance="+br.com.petrickfaria.minemon.client.GastlySmokeParticle.maxNativeSourceDistanceFromGastlyForValidation()+", tracked ticks="+br.com.petrickfaria.minemon.client.GastlySmokeParticle.nativeEmitterTickCountForValidation()+", maximum drift="+br.com.petrickfaria.minemon.client.GastlySmokeParticle.maxNativeEmitterDriftForValidation()+".\n"
       +"Haunter blink events="+haunter.blinkEventsForValidation()+", last interval="+haunter.lastBlinkIntervalForValidation()+" ticks; Gengar blink events="+gengar.blinkEventsForValidation()+", last interval="+gengar.lastBlinkIntervalForValidation()+" ticks.\n"
       +"Haunter hand phase lag="+br.com.petrickfaria.minemon.entity.GhostLineAnimationRules.HAUNTER_HAND_LAG_TICKS+" ticks (2.5 seconds); Gengar ground walk clip="+readClip(gengar)+"; measured sleep bob range="+gengarSleepBobMin+".."+gengarSleepBobMax+".\n");
