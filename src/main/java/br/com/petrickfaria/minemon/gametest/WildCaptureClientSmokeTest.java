@@ -99,7 +99,7 @@ final class WildCaptureClientSmokeTest {
             if (interactionSent && !balls.isEmpty()) {
                 CaptureBallProjectile ball = balls.get(0);
                 int age = ball.tickCount;
-                int[] frameTicks = {12, 26, 40, 58};
+                int[] frameTicks = {12, 26, 40, 64};
                 String[] frameNames = {"wild-capture-throw.png", "wild-capture-wobble-1.png",
                         "wild-capture-wobble-2.png", "wild-capture-stars.png"};
                 for (int i = 0; i < frameTicks.length; i++) if (!screenshots[i] && age >= frameTicks[i]) {
@@ -107,6 +107,14 @@ final class WildCaptureClientSmokeTest {
                     Screenshot.grab(mc.gameDirectory, frameNames[i], mc.getMainRenderTarget(), message -> {});
                 }
                 if (age >= 60 && !ball.captureSucceeded()) throw new IllegalStateException("15 treats did not guarantee a common wild capture");
+            }
+            // The server may remove the ball before the next client query at age 64.
+            // Capture the success stars as soon as the stored result confirms completion.
+            if (interactionSent && !screenshots[3]
+                    && br.com.petrickfaria.minemon.item.PokeballItem.isOccupied(mc.player.getMainHandItem())
+                    && mc.level.getEntity(encounterId) == null) {
+                screenshots[3] = true;
+                Screenshot.grab(mc.gameDirectory, "wild-capture-stars.png", mc.getMainRenderTarget(), message -> {});
             }
             if (interactionSent && ticks > 85) {
                 if (!br.com.petrickfaria.minemon.item.PokeballItem.isOccupied(mc.player.getMainHandItem()))
