@@ -577,11 +577,15 @@ public final class CompanionTests {
    float health=p.getHealth(),wildHealth=mob.getHealth();
    check(h,mob.hurt(DamageSource.playerAttack(p),12.0F),"A direct player hit must reach the wild Pokemon damage flow");
    check(h,mob.getHealth()==wildHealth-1.0F&&mob.getTarget()==null,"A direct player hit must deal one HP without making the wild Pokemon retaliate");
-   h.runAfterDelay(200,()->{
-    check(h,p.getHealth()==health,"A wild Pokemon must not retaliate against the player's direct hit: "+state(mob,p));
-    p.discard();h.succeed();
-   });
+   watchForRetaliation(h,mob,p,200);
   });
+ }
+ private static void watchForRetaliation(GameTestHelper h,MinemonCreature mob,ServerPlayer player,int remaining){
+  if(mob.getTarget()==player||player.getLastHurtByMob()==mob){
+   h.fail("A wild Pokemon must not retaliate against the player's direct hit: "+state(mob,player));return;
+  }
+  if(remaining<=0){player.discard();h.succeed();return;}
+  h.runAfterDelay(1,()->watchForRetaliation(h,mob,player,remaining-1));
  }
 
  @GameTest(template="test_arena",timeoutTicks=1000)
