@@ -155,15 +155,15 @@ final class GhostLineClientSmokeTest {
     setup=true;
     mc.getSingleplayerServer().execute(()->{
      var level=mc.getSingleplayerServer().overworld();
-      // Keep each camera sweep visually isolated. The provider fixture still
-      // has a second Gastly whose ID is supplied as velocity, but it sits far
-      // enough away that its aura cannot be mistaken for the target's aura.
-      for(int x=-40;x<=40;x++)for(int z=-48;z<=64;z++){
+      // Keep the second provider fixture outside the 50-block aura range during
+      // the primary Gastly screenshots. It remains inside the loaded arena for
+      // its later movement/float screenshots.
+      for(int x=-56;x<=56;x++)for(int z=-48;z<=96;z++){
       level.setBlockAndUpdate(new BlockPos(x,100,z),Blocks.STONE.defaultBlockState());
       for(int y=101;y<=112;y++)level.setBlockAndUpdate(new BlockPos(x,y,z),Blocks.AIR.defaultBlockState());
      }
      var gastly=spawn(level,"gastly",0,8,net.minecraft.world.entity.MobSpawnType.NATURAL);
-     var secondGastly=spawn(level,"gastly",32,12,net.minecraft.world.entity.MobSpawnType.SPAWN_EGG);
+     var secondGastly=spawn(level,"gastly",48,80,net.minecraft.world.entity.MobSpawnType.SPAWN_EGG);
      var haunter=spawn(level,"haunter",-16,8);var gengar=spawn(level,"gengar",16,8);
      gastlyId=gastly.getUUID();secondGastlyId=secondGastly.getUUID();haunterId=haunter.getUUID();gengarId=gengar.getUUID();
      var player=level.getServer().getPlayerList().getPlayers().get(0);
