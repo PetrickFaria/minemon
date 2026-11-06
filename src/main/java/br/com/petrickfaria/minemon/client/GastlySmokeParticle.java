@@ -24,6 +24,8 @@ public final class GastlySmokeParticle extends TextureSheetParticle {
     private static final java.util.concurrent.atomic.AtomicInteger NATIVE_EMITTER_COUNT = new java.util.concurrent.atomic.AtomicInteger();
     private static final java.util.concurrent.atomic.AtomicInteger NATIVE_SOURCE_SAMPLE_COUNT = new java.util.concurrent.atomic.AtomicInteger();
     private static final java.util.concurrent.atomic.AtomicInteger NATIVE_TICK_COUNT = new java.util.concurrent.atomic.AtomicInteger();
+    private static final java.util.concurrent.atomic.AtomicInteger NATIVE_LARGE_SLOT = new java.util.concurrent.atomic.AtomicInteger();
+    private static final java.util.concurrent.atomic.AtomicInteger NATIVE_SMALL_SLOT = new java.util.concurrent.atomic.AtomicInteger();
     private static volatile double MAX_NATIVE_EMITTER_DRIFT;
     private static volatile double MAX_NATIVE_SOURCE_DISTANCE_FROM_GASTLY;
     private final SpriteSet sprites;
@@ -40,9 +42,9 @@ public final class GastlySmokeParticle extends TextureSheetParticle {
         this.sprites = sprites;
         this.emitterX=x;this.emitterY=y;this.emitterZ=z;
         this.owner=owner;this.slot=slot;this.small=small;this.followsOwner=followsOwner;
-        // Particle's default constructor adds random velocity. Keep both the
-        // native locator sprites and attached aura sprites within their compact
-        // source radius. GeckoLib's xd/yd/zd are motion values, never entity IDs.
+        // Particle's default constructor adds random velocity. Keep native and
+        // attached aura sprites within a compact body radius. GeckoLib's
+        // xd/yd/zd are motion values, never entity IDs.
         this.xd = this.yd = this.zd = 0;
         this.lifetime = br.com.petrickfaria.minemon.entity.GastlyAura.LIFETIME; // Native maximum lifetime: 0.8 s.
         this.gravity = 0.0F;
@@ -78,9 +80,10 @@ public final class GastlySmokeParticle extends TextureSheetParticle {
         if(followsOwner){
             if(owner==null || owner.isRemoved()){remove();return;}
             followBody();
-        }else if(Boolean.getBoolean("minemon.clientSmokeTest")){
+        }
+        if(Boolean.getBoolean("minemon.clientSmokeTest")&&followsOwner){
             NATIVE_TICK_COUNT.incrementAndGet();
-            double dx=x-emitterX,dy=y-emitterY,dz=z-emitterZ;
+            double dx=x-owner.getX(),dy=y-owner.getY(),dz=z-owner.getZ();
             MAX_NATIVE_EMITTER_DRIFT=Math.max(MAX_NATIVE_EMITTER_DRIFT,Math.sqrt(dx*dx+dy*dy+dz*dz));
         }
         if (this.removed) return;
@@ -208,8 +211,17 @@ public final class GastlySmokeParticle extends TextureSheetParticle {
                             MAX_NATIVE_SOURCE_DISTANCE_FROM_GASTLY,Math.sqrt(closest));
                 }
             }
+            br.com.petrickfaria.minemon.entity.MinemonCreature owner=null;
+            double closest=Double.POSITIVE_INFINITY;
+            for(var entity:level.entitiesForRendering())if(entity instanceof br.com.petrickfaria.minemon.entity.MinemonCreature pokemon
+                    &&pokemon.getSpeciesSlug().equals("gastly")){
+                double distance=entity.distanceToSqr(x,y,z);
+                if(distance<closest){closest=distance;owner=pokemon;}
+            }
+            int slot=small?5+Math.floorMod(NATIVE_SMALL_SLOT.getAndIncrement(),7)
+                    :Math.floorMod(NATIVE_LARGE_SLOT.getAndIncrement(),5);
             GastlySmokeParticle particle=new GastlySmokeParticle(level, x, y, z, xd, yd, zd,
-                    this.sprites,small,null,0,false);
+                    this.sprites,small,owner,slot,owner!=null);
             if(Boolean.getBoolean("minemon.clientSmokeTest")){
                 double dx=particle.x-particle.emitterX,dy=particle.y-particle.emitterY,dz=particle.z-particle.emitterZ;
                 MAX_NATIVE_EMITTER_DRIFT=Math.max(MAX_NATIVE_EMITTER_DRIFT,Math.sqrt(dx*dx+dy*dy+dz*dz));
