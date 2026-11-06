@@ -439,12 +439,12 @@ public final class PokecGameTests {
         var data=wild.getPersistentData();data.putBoolean("MinemonWildEncounter",true);
         data.putUUID("MinemonEncounterOwner",owner.getUUID());data.putString("MinemonEncounterState","downed");
         wild.setWildEncounter(true);wild.setWildEncounterOwner(owner.getUUID());wild.setEncounterDowned(true);
-        var hit=new net.minecraftforge.event.entity.living.LivingAttackEvent(wild,net.minecraft.world.damagesource.DamageSource.playerAttack(owner));
+        var hit=new net.minecraftforge.event.entity.living.LivingAttackEvent(wild,net.minecraft.world.damagesource.DamageSource.playerAttack(owner),1.0F);
         PokecEvents.playerPokemonAttack(hit);
         check(hit.isCanceled()&&wild.isRemoved(),"one direct left-click collects and removes the defeated wild without opening a menu");
         int collected=owner.getInventory().items.stream().filter(stack->ModItems.SOULS.values().stream().anyMatch(item->stack.is(item.get()))).mapToInt(ItemStack::getCount).sum();
         check(collected>0,"loot is delivered into the owner's inventory");
-        var duplicate=new net.minecraftforge.event.entity.living.LivingAttackEvent(wild,net.minecraft.world.damagesource.DamageSource.playerAttack(owner));
+        var duplicate=new net.minecraftforge.event.entity.living.LivingAttackEvent(wild,net.minecraft.world.damagesource.DamageSource.playerAttack(owner),1.0F);
         PokecEvents.playerPokemonAttack(duplicate);
         int after=owner.getInventory().items.stream().filter(stack->ModItems.SOULS.values().stream().anyMatch(item->stack.is(item.get()))).mapToInt(ItemStack::getCount).sum();
         check(after==collected,"repeated attacks cannot duplicate the reward");
