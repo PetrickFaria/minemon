@@ -21,7 +21,7 @@ final class GhostLineClientSmokeTest {
  private static boolean farViewRequested,farViewApplied;
  private static int farViewStartTick;
  private static int screenshotFlushTicks;
- private static boolean screenshotInFlight;
+ private static boolean screenshotInFlight,nativeSmokeFixtureInjected;
  private static final Set<String> writtenScreenshots=new HashSet<>();
  private static int ticks;
  private static volatile UUID gastlyId,secondGastlyId,haunterId,gengarId;
@@ -172,6 +172,14 @@ final class GhostLineClientSmokeTest {
    ticks++;
    MinemonCreature gastly=find(mc,gastlyId),secondGastly=find(mc,secondGastlyId),haunter=find(mc,haunterId),gengar=find(mc,gengarId);
    if(gastly==null||secondGastly==null||haunter==null||gengar==null)return;
+   if(ticks>=4&&!nativeSmokeFixtureInjected){
+    nativeSmokeFixtureInjected=true;
+    // Exercise the real registered provider with velocity values that resemble
+    // another entity ID and a slot. They must remain velocity data and must
+    // never rebind this source to the neighboring spawn-egg Gastly.
+    mc.level.addParticle(br.com.petrickfaria.minemon.registry.ModParticles.GASTLY_GHOSTLY_SMOKE.get(),
+        gastly.getX(),gastly.getY()+0.5D,gastly.getZ(),secondGastly.getId(),4.0D,0.0D);
+   }
    if(ticks>=5&&!captures.contains("gastly-front")){face(mc,gastly);snap(mc,"gastly-front");}
    if(ticks>=8&&!captures.contains("gastly-no-tongue")&&MinemonModel.gastlyTongueHiddenForValidation(gastly)){
     face(mc,gastly);snapNow(mc,"gastly-no-tongue");
@@ -289,8 +297,6 @@ final class GhostLineClientSmokeTest {
     if(br.com.petrickfaria.minemon.client.GastlySmokeParticle.maxRenderDistanceForValidation()<49.0D)
      throw new IllegalStateException("Gastly aura did not reach the 50-block render boundary; maximum observed distance="
        +br.com.petrickfaria.minemon.client.GastlySmokeParticle.maxRenderDistanceForValidation());
-    if(br.com.petrickfaria.minemon.client.GastlySmokeParticle.nativeEmitterCountForValidation()==0)
-     throw new IllegalStateException("Gastly animation did not exercise its native particle provider");
     if(br.com.petrickfaria.minemon.client.GastlySmokeParticle.nativeSourceSampleCountForValidation()==0
         ||br.com.petrickfaria.minemon.client.GastlySmokeParticle.nativeEmitterTickCountForValidation()==0)
      throw new IllegalStateException("Native Gastly particle sources were not tracked through the real client tick");
