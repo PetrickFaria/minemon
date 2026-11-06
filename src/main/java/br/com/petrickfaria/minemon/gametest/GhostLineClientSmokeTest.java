@@ -174,11 +174,14 @@ final class GhostLineClientSmokeTest {
    if(gastly==null||secondGastly==null||haunter==null||gengar==null)return;
    if(ticks>=4&&!nativeSmokeFixtureInjected){
     nativeSmokeFixtureInjected=true;
-    // Exercise the real registered provider with velocity values that resemble
-    // another entity ID and a slot. They must remain velocity data and must
-    // never rebind this source to the neighboring spawn-egg Gastly.
-    mc.level.addParticle(br.com.petrickfaria.minemon.registry.ModParticles.GASTLY_GHOSTLY_SMOKE.get(),
-        gastly.getX(),gastly.getY()+0.5D,gastly.getZ(),secondGastly.getId(),4.0D,0.0D);
+    // Exercise the real provider with velocity values that resemble another
+    // entity ID and slot. Tick the returned client particle directly so the
+    // smoke test does not depend on ParticleEngine scheduling.
+    var source=br.com.petrickfaria.minemon.client.GastlySmokeParticle.createNativeSmokeForValidation(
+        (net.minecraft.client.multiplayer.ClientLevel)mc.level,gastly.getX(),gastly.getY()+0.5D,gastly.getZ(),
+        secondGastly.getId(),4.0D,0.0D);
+    if(source==null)throw new IllegalStateException("Gastly particle sprites were not ready for provider validation");
+    source.tick();
    }
    if(ticks>=5&&!captures.contains("gastly-front")){face(mc,gastly);snap(mc,"gastly-front");}
    if(ticks>=8&&!captures.contains("gastly-no-tongue")&&MinemonModel.gastlyTongueHiddenForValidation(gastly)){

@@ -63,6 +63,14 @@ public final class GastlySmokeParticle extends TextureSheetParticle {
     public static int nativeEmitterTickCountForValidation(){return NATIVE_TICK_COUNT.get();}
     public static double maxNativeEmitterDriftForValidation(){return MAX_NATIVE_EMITTER_DRIFT;}
     public static double maxNativeSourceDistanceFromGastlyForValidation(){return MAX_NATIVE_SOURCE_DISTANCE_FROM_GASTLY;}
+    public static Particle createNativeSmokeForValidation(ClientLevel level,double x,double y,double z,
+                                                           double xd,double yd,double zd){
+        SpriteSet sprites=LARGE_SPRITES;
+        if(sprites==null)return null;
+        return new Provider(sprites).createParticle(
+                br.com.petrickfaria.minemon.registry.ModParticles.GASTLY_GHOSTLY_SMOKE.get(),
+                level,x,y,z,xd,yd,zd);
+    }
 
     @Override
     public void tick() {
