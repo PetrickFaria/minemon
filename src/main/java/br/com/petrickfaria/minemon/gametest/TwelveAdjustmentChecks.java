@@ -43,7 +43,7 @@ final class TwelveAdjustmentChecks {
   saved=copy.saveWithoutId(new CompoundTag());mob.load(saved);
   if(!mob.isBlackListTarget(creeper))h.fail("Explicit creeper choice did not persist");
   creeper.setPos(mob.getX()+12,mob.getY(),mob.getZ());if(mob.canAttack(creeper))h.fail("Tamed attacker accepted target beyond ten blocks");
-  verifyCombat(h);
+  verifyCombat(h,owner);
   verifyRecipes(h,owner);
   verifyExactHatching(h);
   var pos=new BlockPos(0,1,0);var state=ModBlocks.BREEDING_EGG.get().defaultBlockState();
@@ -55,17 +55,17 @@ final class TwelveAdjustmentChecks {
   restored.load(legacy.saveWithoutMetadata());if(restored.remainingTicks()!=12000)h.fail("Existing egg progress was reset");
   }finally{owner.discard();}
  }
- private static void verifyCombat(GameTestHelper h){
+ private static void verifyCombat(GameTestHelper h,ServerPlayer owner){
   var level=h.getLevel();long originalTime=level.getGameTime();
   var attacker=ModEntities.SPECIES.get("charmander").get().create(level);
   var point=h.absolutePos(new BlockPos(5,2,5));attacker.moveTo(point.getX()+.5,point.getY(),point.getZ()+.5,0,0);
-  attacker.setTame(true);attacker.setOwnerUUID(UUID.randomUUID());attacker.setNoAi(true);
+  attacker.tame(owner);attacker.setOwnerUUID(owner.getUUID());attacker.setNoAi(true);
   var cow=EntityType.COW.create(level);cow.moveTo(attacker.getX()+2,attacker.getY(),attacker.getZ(),0,0);
   cow.setNoAi(true);cow.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).setBaseValue(200);cow.setHealth(200);level.addFreshEntity(cow);
   try{
    if(attacker.rangedCharges().charges()!=3)h.fail("New companion must have three ranged charges");
    for(int i=0;i<3;i++){
-    cow.invulnerableTime=0;float before=cow.getHealth();
+    cow.invulnerableTime=0;float before=cow.getHealth();attacker.focusPlayerTarget(cow);
     if(!attacker.fireElementalProjectile(cow))h.fail("Charged ranged strike was cancelled");
     if(attacker.fireElementalProjectile(cow)||attacker.doHurtTarget(cow))h.fail("Switching attack mode bypassed shared cooldown");
     var shots=level.getEntitiesOfClass(ElementalProjectile.class,attacker.getBoundingBox().inflate(12),shot->shot.getOwner()==attacker);

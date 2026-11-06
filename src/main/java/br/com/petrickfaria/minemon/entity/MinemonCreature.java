@@ -565,14 +565,15 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
 
         // Wild creatures only acquire a target after being hurt. Tamed creatures also protect
         // their owner and assist against the owner's current target.
-        // A companion joins a fight only when its owner directly attacks a target.
+        // A companion joins a fight when its owner directly attacks or is attacked.
+        this.targetSelector.addGoal(1, new OwnerHurtByTargetGoal(this));
         this.targetSelector.addGoal(2, new OwnerHurtTargetGoal(this));
         this.targetSelector.addGoal(4, new HurtByTargetGoal(this) {
             @Override public boolean canUse() {
-                return (!MinemonCreature.this.isTame() && MinemonCreature.this.wildAggressionTicks > 0) && super.canUse();
+                return (MinemonCreature.this.isTame() || MinemonCreature.this.wildAggressionTicks > 0) && super.canUse();
             }
             @Override public boolean canContinueToUse() {
-                return (!MinemonCreature.this.isTame() && MinemonCreature.this.wildAggressionTicks > 0) && super.canContinueToUse();
+                return (MinemonCreature.this.isTame() || MinemonCreature.this.wildAggressionTicks > 0) && super.canContinueToUse();
             }
         });
     }
@@ -589,7 +590,12 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     @Override
     public boolean canAttack(LivingEntity target) {
         if (isDefeated() || target == null || target == this || this.isOwnerEntity(target)) return false;
-        if (this.isTame() && (playerFocusTarget == null || !playerFocusTarget.equals(target.getUUID()))) return false;
+        if (this.isTame() && playerFocusTarget == null) {
+            Entity owner=this.getOwner();
+            boolean ownerTarget=owner instanceof LivingEntity living
+                    && (living.getLastHurtMob()==target || living.getLastHurtByMob()==target);
+            if (!ownerTarget && this.getLastHurtByMob()!=target) return false;
+        }
         if (playerFocusTarget != null && (target.level != this.level || !playerFocusTarget.equals(target.getUUID()))) return false;
         if (this.isTame() && !CombatGeometry.inRange(this,target,10)) return false;
         // Ordered sitting companions may defend themselves or their owner at close        // range, but must not start walking after a distant target.

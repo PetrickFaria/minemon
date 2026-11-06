@@ -32,30 +32,29 @@ public final class PokecEvents {
     }
 
     @SubscribeEvent public static void playerPokemonAttack(LivingAttackEvent event) {
-        if (!(event.getEntity() instanceof MinemonCreature wild) || wild.isRocketSpecial()
-                || event.getEntity().level.isClientSide
+        if (event.getEntity().level.isClientSide
                 || !(event.getSource().getEntity() instanceof net.minecraft.server.level.ServerPlayer player)
                 || event.getSource().getDirectEntity() != player) return;
-        if (WildEncounterManager.isDowned(wild)) {
+        if (event.getEntity() instanceof MinemonCreature target && target.isRocketSpecial()) return;
+        if (event.getEntity() instanceof MinemonCreature wild && WildEncounterManager.isDowned(wild)) {
             WildEncounterManager.loot(wild, player);
             event.setCanceled(true);
             return;
         }
-        // Owned Pokémon remain protected. MinemonCreature caps direct player melee
-        // before delegating to Forge's damage pipeline, regardless of weapon modifiers.
-        if (wild.isTame()) { event.setCanceled(true); return; }
-        if (wild.isDefeated() || !wild.isAlive()) {
+        if (event.getEntity() instanceof MinemonCreature wild && (wild.isDefeated() || !wild.isAlive())) {
             event.setCanceled(true);
             return;
         }
-        if (player.level == wild.level && player.distanceToSqr(wild) <= 36.0D) {
-            var area = wild.getBoundingBox().inflate(16.0D);
-            for (MinemonCreature companion : wild.level.getEntitiesOfClass(MinemonCreature.class, area,
-                    pokemon -> pokemon.isTame() && player.getUUID().equals(pokemon.getOwnerUUID())
-                            && !pokemon.isDefeated() && pokemon.isAlive())) {
-                companion.focusPlayerTarget(wild);
-            }
+        var area=event.getEntity().getBoundingBox().inflate(16.0D);
+        for (MinemonCreature companion : event.getEntity().level.getEntitiesOfClass(MinemonCreature.class, area,
+                pokemon -> pokemon.isTame() && player.getUUID().equals(pokemon.getOwnerUUID())
+                        && !pokemon.isDefeated() && pokemon.isAlive())) {
+            companion.focusPlayerTarget(event.getEntity());
         }
+        if (!(event.getEntity() instanceof MinemonCreature wild)) return;
+        // Owned Pokémon remain protected. MinemonCreature caps direct player melee
+        // before delegating to Forge's damage pipeline, regardless of weapon modifiers.
+        if (wild.isTame()) { event.setCanceled(true); return; }
         // Preserve the active-encounter one-HP floor; only its owned companion can
         // put it into the capture-ready downed state.
         if (br.com.petrickfaria.minemon.pokec.WildEncounterManager.isEncounter(wild)&&wild.getHealth()<=1.0F)
