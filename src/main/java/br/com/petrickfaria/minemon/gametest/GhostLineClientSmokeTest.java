@@ -24,7 +24,8 @@ final class GhostLineClientSmokeTest {
  private static boolean screenshotInFlight;
  private static final Set<String> writtenScreenshots=new HashSet<>();
  private static int ticks;
- private static volatile UUID gastlyId,haunterId,gengarId;
+ private static volatile UUID gastlyId,secondGastlyId,haunterId,gengarId;
+ private static double movingGastlyStartX=Double.NaN,floatingGastlyStartY=Double.NaN;
  private static final Set<String> captures=new HashSet<>();
  private static String pendingScreenshot;
  private static int pendingScreenshotDelay;
@@ -42,11 +43,15 @@ final class GhostLineClientSmokeTest {
   return null;
  }
  private static void face(Minecraft mc,MinemonCreature mob){
+  faceAtDistance(mc,mob,4.0D,0.0D);
+ }
+ private static void faceAtDistance(Minecraft mc,MinemonCreature mob,double distance,double degrees){
   var player=mc.player;if(player==null)return;
-  double px=mob.getX(),py=mob.getY()-0.2D,pz=mob.getZ()-4.0D;
+  double angle=Math.toRadians(degrees);
+  double px=mob.getX()+Math.sin(angle)*distance,py=mob.getY()-0.2D,pz=mob.getZ()-Math.cos(angle)*distance;
+  double dx=mob.getX()-px,dz=mob.getZ()-pz;
+  double dy=mob.getY()+1.15D-(py+player.getEyeHeight());
   player.setPos(px,py,pz);
-  double dx=mob.getX()-player.getX(),dz=mob.getZ()-player.getZ();
-  double dy=mob.getY()+1.15D-player.getEyeY();
   player.setYRot((float)(Math.toDegrees(Math.atan2(dz,dx))-90));
   float pitch=(float)-Math.toDegrees(Math.atan2(dy,Math.sqrt(dx*dx+dz*dz)));
   player.setXRot(pitch);
@@ -67,18 +72,7 @@ final class GhostLineClientSmokeTest {
   });
  }
  private static void faceFromAngle(Minecraft mc,MinemonCreature mob,double degrees){
-  var player=mc.player;if(player==null)return;
-  double angle=Math.toRadians(degrees),px=mob.getX()+Math.sin(angle)*4.0D,pz=mob.getZ()-Math.cos(angle)*4.0D;
-  double py=mob.getY()-0.2D,dx=mob.getX()-px,dz=mob.getZ()-pz;
-  double dy=mob.getY()+1.15D-player.getEyeY();
-  player.setPos(px,py,pz);
-  player.setYRot((float)(Math.toDegrees(Math.atan2(dz,dx))-90));
-  player.setXRot((float)-Math.toDegrees(Math.atan2(dy,Math.sqrt(dx*dx+dz*dz))));
-  var server=mc.getSingleplayerServer();var playerId=player.getUUID();var mobId=mob.getUUID();float yaw=player.getYRot(),pitch=player.getXRot();
-  server.execute(()->{
-   var authoritativePlayer=server.getPlayerList().getPlayer(playerId);
-   if(authoritativePlayer!=null)authoritativePlayer.teleportTo(server.overworld(),px,py,pz,yaw,pitch);
-  });
+  faceAtDistance(mc,mob,4.0D,degrees);
  }
  private static double pointCameraAt(Minecraft mc,MinemonCreature mob){
   var player=mc.player;if(player==null)return -1.0D;
@@ -136,11 +130,11 @@ final class GhostLineClientSmokeTest {
    if(validationComplete){
     screenshotFlushTicks++;
     Path screenshotDir=mc.gameDirectory.toPath().resolve("screenshots");
-    boolean allScreenshots=writtenScreenshots.size()==14&&List.of("gastly-front","gastly-no-tongue","gastly-right","gastly-back","gastly-left","gastly-50-block","haunter-front-a","haunter-front-b","haunter-blink",
+   boolean allScreenshots=writtenScreenshots.size()==18&&List.of("gastly-front","gastly-no-tongue","gastly-right","gastly-back","gastly-left","gastly-10-block","gastly-25-block","gastly-50-block","gastly-motion","gastly-float","haunter-front-a","haunter-front-b","haunter-blink",
       "gengar-walk","gengar-blink","gengar-mouth-teeth-fixed","gengar-sleep-half-sunk-a","gengar-sleep-half-sunk-b")
       .stream().allMatch(key->writtenScreenshots.contains(key)&&Files.isRegularFile(screenshotDir.resolve("ghost-line-1.74-"+key+".png")));
-    if(allScreenshots){mc.stop();return;}
-    if(screenshotFlushTicks>=200)throw new IllegalStateException("Timed out waiting for all 14 real-client screenshots to be written");
+   if(allScreenshots){mc.stop();return;}
+   if(screenshotFlushTicks>=200)throw new IllegalStateException("Timed out waiting for all 18 real-client screenshots to be written");
     return;
    }
    if(!opened&&mc.screen instanceof TitleScreen){
@@ -165,8 +159,10 @@ final class GhostLineClientSmokeTest {
       level.setBlockAndUpdate(new BlockPos(x,100,z),Blocks.STONE.defaultBlockState());
       for(int y=101;y<=112;y++)level.setBlockAndUpdate(new BlockPos(x,y,z),Blocks.AIR.defaultBlockState());
      }
-     var gastly=spawn(level,"gastly",0,8);var haunter=spawn(level,"haunter",4,8);var gengar=spawn(level,"gengar",-4,8);
-     gastlyId=gastly.getUUID();haunterId=haunter.getUUID();gengarId=gengar.getUUID();
+     var gastly=spawn(level,"gastly",0,8,net.minecraft.world.entity.MobSpawnType.NATURAL);
+     var secondGastly=spawn(level,"gastly",3,12,net.minecraft.world.entity.MobSpawnType.SPAWN_EGG);
+     var haunter=spawn(level,"haunter",4,8);var gengar=spawn(level,"gengar",-4,8);
+     gastlyId=gastly.getUUID();secondGastlyId=secondGastly.getUUID();haunterId=haunter.getUUID();gengarId=gengar.getUUID();
      var player=level.getServer().getPlayerList().getPlayers().get(0);
      player.setGameMode(GameType.SPECTATOR);player.teleportTo(level,0,101,3,0,0);
     });
@@ -174,15 +170,21 @@ final class GhostLineClientSmokeTest {
     return;
    }
    ticks++;
-   MinemonCreature gastly=find(mc,gastlyId),haunter=find(mc,haunterId),gengar=find(mc,gengarId);
-   if(gastly==null||haunter==null||gengar==null)return;
+   MinemonCreature gastly=find(mc,gastlyId),secondGastly=find(mc,secondGastlyId),haunter=find(mc,haunterId),gengar=find(mc,gengarId);
+   if(gastly==null||secondGastly==null||haunter==null||gengar==null)return;
    if(ticks>=5&&!captures.contains("gastly-front")){face(mc,gastly);snap(mc,"gastly-front");}
    if(ticks>=8&&!captures.contains("gastly-no-tongue")&&MinemonModel.gastlyTongueHiddenForValidation(gastly)){
     face(mc,gastly);snapNow(mc,"gastly-no-tongue");
    }
+   if(ticks>=10&&screenshotSlotAvailable()&&!captures.contains("gastly-10-block")){
+    faceAtDistance(mc,gastly,10.0D,0.0D);snap(mc,"gastly-10-block");
+   }
    if(ticks>=12&&screenshotSlotAvailable()&&!captures.contains("gastly-right")){faceFromAngle(mc,gastly,90);snapNow(mc,"gastly-right");}
    if(ticks>=20&&screenshotSlotAvailable()&&!captures.contains("gastly-back")){faceFromAngle(mc,gastly,180);snapNow(mc,"gastly-back");}
    if(ticks>=28&&screenshotSlotAvailable()&&!captures.contains("gastly-left")){faceFromAngle(mc,gastly,270);snapNow(mc,"gastly-left");}
+   if(ticks>=32&&screenshotSlotAvailable()&&!captures.contains("gastly-25-block")){
+    faceAtDistance(mc,gastly,25.0D,45.0D);snap(mc,"gastly-25-block");
+   }
    if(ticks>=36&&screenshotSlotAvailable()&&!captures.contains("gastly-50-block")){
     if(!farViewRequested)prepareFarGastlyView(mc,gastly);
     else if(farViewApplied){
@@ -201,6 +203,34 @@ final class GhostLineClientSmokeTest {
           +" cameraAlignment="+cameraAlignment);
     }
    }
+   if(ticks==40){
+    movingGastlyStartX=secondGastly.getX();
+    mc.getSingleplayerServer().execute(()->{
+     var moving=mc.getSingleplayerServer().overworld().getEntity(secondGastlyId);
+     if(moving instanceof MinemonCreature g){g.setNoGravity(true);g.setDeltaMovement(.08D,0,0);}
+    });
+   }
+   if(ticks>=50&&screenshotSlotAvailable()&&!captures.contains("gastly-motion")){
+    if(secondGastly.getX()<movingGastlyStartX+.35D)
+     throw new IllegalStateException("The spawn-egg Gastly fixture did not move far enough for the attachment check");
+    face(mc,secondGastly);snap(mc,"gastly-motion");
+   }
+   if(ticks==56){
+    floatingGastlyStartY=secondGastly.getY();
+    mc.getSingleplayerServer().execute(()->{
+     var moving=mc.getSingleplayerServer().overworld().getEntity(secondGastlyId);
+     if(moving instanceof MinemonCreature g)g.setDeltaMovement(0,.08D,0);
+    });
+   }
+   if(ticks>=66&&screenshotSlotAvailable()&&!captures.contains("gastly-float")){
+    if(secondGastly.getY()<floatingGastlyStartY+.35D)
+     throw new IllegalStateException("The spawn-egg Gastly fixture did not float far enough for the attachment check");
+    face(mc,secondGastly);snap(mc,"gastly-float");
+   }
+   if(ticks>=76)mc.getSingleplayerServer().execute(()->{
+    var moving=mc.getSingleplayerServer().overworld().getEntity(secondGastlyId);
+    if(moving instanceof MinemonCreature g)g.setDeltaMovement(0,0,0);
+   });
    if(ticks>=25&&!captures.contains("haunter-front-a")){face(mc,haunter);snap(mc,"haunter-front-a");}
    if(ticks>=75&&!captures.contains("haunter-front-b")){face(mc,haunter);snap(mc,"haunter-front-b");}
    if(ticks>=100&&haunter.isBlinkingForRender()&&MinemonModel.ghostEyesClosedForValidation(haunter)
@@ -264,7 +294,18 @@ final class GhostLineClientSmokeTest {
     if(br.com.petrickfaria.minemon.client.GastlySmokeParticle.maxRenderDistanceForValidation()<49.0D)
      throw new IllegalStateException("Gastly aura did not reach the 50-block render boundary; maximum observed distance="
        +br.com.petrickfaria.minemon.client.GastlySmokeParticle.maxRenderDistanceForValidation());
-    for(String key:List.of("gastly-front","gastly-no-tongue","gastly-right","gastly-back","gastly-left","gastly-50-block","haunter-front-a","haunter-front-b","haunter-blink",
+    if(br.com.petrickfaria.minemon.client.GastlySmokeParticle.nativeEmitterCountForValidation()==0)
+     throw new IllegalStateException("Gastly animation did not exercise its native particle provider");
+    if(br.com.petrickfaria.minemon.client.GastlySmokeParticle.nativeSourceSampleCountForValidation()==0
+        ||br.com.petrickfaria.minemon.client.GastlySmokeParticle.nativeEmitterTickCountForValidation()==0)
+     throw new IllegalStateException("Native Gastly particle sources were not tracked through the real client tick");
+    if(br.com.petrickfaria.minemon.client.GastlySmokeParticle.maxNativeSourceDistanceFromGastlyForValidation()>2.0D)
+     throw new IllegalStateException("A native smoke particle was emitted away from both Gastly bodies; maximum source distance="
+       +br.com.petrickfaria.minemon.client.GastlySmokeParticle.maxNativeSourceDistanceFromGastlyForValidation());
+    if(br.com.petrickfaria.minemon.client.GastlySmokeParticle.maxNativeEmitterDriftForValidation()>0.05D)
+     throw new IllegalStateException("A native smoke particle left its Gastly animation locator instead of staying in the source aura; maximum drift="
+       +br.com.petrickfaria.minemon.client.GastlySmokeParticle.maxNativeEmitterDriftForValidation());
+    for(String key:List.of("gastly-front","gastly-no-tongue","gastly-right","gastly-back","gastly-left","gastly-10-block","gastly-25-block","gastly-50-block","gastly-motion","gastly-float","haunter-front-a","haunter-front-b","haunter-blink",
             "gengar-walk","gengar-blink","gengar-mouth-teeth-fixed","gengar-sleep-half-sunk-a","gengar-sleep-half-sunk-b"))
      if(!captures.contains(key))throw new IllegalStateException("Missing real-client ghost screenshot: "+key);
     if(!MinemonModel.gastlyTongueHiddenForValidation(gastly))throw new IllegalStateException("Gastly tongue expression was not suppressed");
@@ -272,16 +313,22 @@ final class GhostLineClientSmokeTest {
     if(gengarSleepBobMax-gengarSleepBobMin<0.2F)
      throw new IllegalStateException("Gengar sleep body bob did not vary enough: "+gengarSleepBobMin+".."+gengarSleepBobMax);
     Files.writeString(Path.of("client-validation-ghost-line.txt"),
-      "PASS GHOST LINE CLIENT: real Minecraft render captured Gastly aura/core from four camera angles and at 50 blocks with large and small particles and tongue suppressed, visible Haunter and Gengar closed-eye blinks, Gengar lowered-arm gait, fixed teeth mouth, and less-sunk bobbing sleep.\n"
+      "PASS GHOST LINE CLIENT: real Minecraft render captured Gastly aura/core from four camera angles and at 10, 25, and 50 blocks; two adjacent Gastlys (natural and spawn-egg spawn); horizontal movement and vertical float; no native smoke drift from its locator; visible Haunter and Gengar closed-eye blinks, Gengar lowered-arm gait, fixed teeth mouth, and less-sunk bobbing sleep.\n"
+      +"Gastly native particles="+br.com.petrickfaria.minemon.client.GastlySmokeParticle.nativeEmitterCountForValidation()+", source-distance samples="+br.com.petrickfaria.minemon.client.GastlySmokeParticle.nativeSourceSampleCountForValidation()+", maximum source distance="+br.com.petrickfaria.minemon.client.GastlySmokeParticle.maxNativeSourceDistanceFromGastlyForValidation()+", tracked ticks="+br.com.petrickfaria.minemon.client.GastlySmokeParticle.nativeEmitterTickCountForValidation()+", maximum drift="+br.com.petrickfaria.minemon.client.GastlySmokeParticle.maxNativeEmitterDriftForValidation()+".\n"
       +"Haunter blink events="+haunter.blinkEventsForValidation()+", last interval="+haunter.lastBlinkIntervalForValidation()+" ticks; Gengar blink events="+gengar.blinkEventsForValidation()+", last interval="+gengar.lastBlinkIntervalForValidation()+" ticks.\n"
       +"Haunter hand phase lag="+br.com.petrickfaria.minemon.entity.GhostLineAnimationRules.HAUNTER_HAND_LAG_TICKS+" ticks (2.5 seconds); Gengar ground walk clip="+readClip(gengar)+"; measured sleep bob range="+gengarSleepBobMin+".."+gengarSleepBobMax+".\n");
     validationComplete=true;
-    System.out.println("[GHOST LINE] PASS: runtime checks complete; waiting for all 14 screenshots to be written.");
+    System.out.println("[GHOST LINE] PASS: runtime checks complete; waiting for all 18 screenshots to be written.");
    }
   }catch(Exception e){throw new IllegalStateException("Ghost line real-client validation failed",e);}
  }
  private static MinemonCreature spawn(net.minecraft.server.level.ServerLevel level,String slug,double x,double z){
+  return spawn(level,slug,x,z,net.minecraft.world.entity.MobSpawnType.NATURAL);
+ }
+ private static MinemonCreature spawn(net.minecraft.server.level.ServerLevel level,String slug,double x,double z,
+      net.minecraft.world.entity.MobSpawnType spawnType){
   var mob=ModEntities.SPECIES.get(slug).get().create(level);
+  mob.finalizeSpawn(level,level.getCurrentDifficultyAt(new BlockPos((int)x,101,(int)z)),spawnType,null,null);
   mob.moveTo(x,101,z,180,0);mob.setNoAi(true);
   level.addFreshEntity(mob);return mob;
  }

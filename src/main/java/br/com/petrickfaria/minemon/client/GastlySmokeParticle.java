@@ -21,19 +21,29 @@ public final class GastlySmokeParticle extends TextureSheetParticle {
     public static int farRendersForValidation(){return FAR_RENDER_COUNT.get();}
     public static double maxRenderDistanceForValidation(){return MAX_RENDER_DISTANCE_FOR_VALIDATION;}
     private static final java.util.concurrent.atomic.AtomicInteger SPAWN_COUNT = new java.util.concurrent.atomic.AtomicInteger();
+    private static final java.util.concurrent.atomic.AtomicInteger NATIVE_EMITTER_COUNT = new java.util.concurrent.atomic.AtomicInteger();
+    private static final java.util.concurrent.atomic.AtomicInteger NATIVE_SOURCE_SAMPLE_COUNT = new java.util.concurrent.atomic.AtomicInteger();
+    private static final java.util.concurrent.atomic.AtomicInteger NATIVE_TICK_COUNT = new java.util.concurrent.atomic.AtomicInteger();
+    private static volatile double MAX_NATIVE_EMITTER_DRIFT;
+    private static volatile double MAX_NATIVE_SOURCE_DISTANCE_FROM_GASTLY;
     private final SpriteSet sprites;
     private final net.minecraft.world.entity.Entity owner;
     private final int slot;
     private final boolean small;
+    private final boolean followsOwner;
+    private final double emitterX, emitterY, emitterZ;
 
     private GastlySmokeParticle(ClientLevel level, double x, double y, double z,
-                                double xd, double yd, double zd, SpriteSet sprites,boolean small) {
+                                double xd, double yd, double zd, SpriteSet sprites,boolean small,
+                                net.minecraft.world.entity.Entity owner,int slot,boolean followsOwner) {
         super(level, x, y, z, xd, yd, zd);
         this.sprites = sprites;
-        // Particle's default constructor adds random velocity. Keep the inward
-        // aura trajectory inside its compact source radius instead of scattering.
+        this.emitterX=x;this.emitterY=y;this.emitterZ=z;
+        this.owner=owner;this.slot=slot;this.small=small;this.followsOwner=followsOwner;
+        // Particle's default constructor adds random velocity. Keep both the
+        // native locator sprites and attached aura sprites within their compact
+        // source radius. GeckoLib's xd/yd/zd are motion values, never entity IDs.
         this.xd = this.yd = this.zd = 0;
-        this.owner=level.getEntity((int)xd);this.slot=(int)yd;this.small=small;
         this.lifetime = br.com.petrickfaria.minemon.entity.GastlyAura.LIFETIME; // Native maximum lifetime: 0.8 s.
         this.gravity = 0.0F;
         this.friction = 0.96F;
@@ -42,18 +52,29 @@ public final class GastlySmokeParticle extends TextureSheetParticle {
         this.setSpriteFromAge(sprites);
         this.setColor(0xBE / 255.0F, 0x81 / 255.0F, 0xE8 / 255.0F);
         this.updateSourceSize(0.0F);
-        this.followBody();
+        if(followsOwner)this.followBody();
     }
 
     public static int spawnCountForValidation() {
         return SPAWN_COUNT.get();
     }
+    public static int nativeEmitterCountForValidation(){return NATIVE_EMITTER_COUNT.get();}
+    public static int nativeSourceSampleCountForValidation(){return NATIVE_SOURCE_SAMPLE_COUNT.get();}
+    public static int nativeEmitterTickCountForValidation(){return NATIVE_TICK_COUNT.get();}
+    public static double maxNativeEmitterDriftForValidation(){return MAX_NATIVE_EMITTER_DRIFT;}
+    public static double maxNativeSourceDistanceFromGastlyForValidation(){return MAX_NATIVE_SOURCE_DISTANCE_FROM_GASTLY;}
 
     @Override
     public void tick() {
         super.tick();
-        if(owner==null || owner.isRemoved()){remove();return;}
-        followBody();
+        if(followsOwner){
+            if(owner==null || owner.isRemoved()){remove();return;}
+            followBody();
+        }else if(Boolean.getBoolean("minemon.clientSmokeTest")){
+            NATIVE_TICK_COUNT.incrementAndGet();
+            double dx=x-emitterX,dy=y-emitterY,dz=z-emitterZ;
+            MAX_NATIVE_EMITTER_DRIFT=Math.max(MAX_NATIVE_EMITTER_DRIFT,Math.sqrt(dx*dx+dy*dy+dz*dz));
+        }
         if (this.removed) return;
         float progress = (float) this.age / (float) this.lifetime;
         this.setSpriteFromAge(this.sprites);
@@ -138,7 +159,7 @@ public final class GastlySmokeParticle extends TextureSheetParticle {
         SpriteSet sprites=small?SMALL_SPRITES:LARGE_SPRITES;
         if(sprites==null||!(owner.level instanceof ClientLevel level))return;
         GastlySmokeParticle particle=new GastlySmokeParticle(level,owner.getX(),owner.getY(),owner.getZ(),
-                owner.getId(),slot,0.0D,sprites,small);
+                0.0D,0.0D,0.0D,sprites,small,owner,slot,true);
         particle.age=Math.max(0,Math.min(age,particle.lifetime-1));
         particle.setSpriteFromAge(sprites);
         float progress=Math.min(1.0F,Math.max(0.0F,(age+partialTick)/(float)particle.lifetime));
@@ -167,7 +188,19 @@ public final class GastlySmokeParticle extends TextureSheetParticle {
         public Particle createParticle(SimpleParticleType type, ClientLevel level,
                                        double x, double y, double z,
                                        double xd, double yd, double zd) {
-            return new GastlySmokeParticle(level, x, y, z, xd, yd, zd, this.sprites,small);
+            NATIVE_EMITTER_COUNT.incrementAndGet();
+            if(Boolean.getBoolean("minemon.clientSmokeTest")){
+                double closest=Double.POSITIVE_INFINITY;
+                for(var entity:level.entitiesForRendering())if(entity instanceof br.com.petrickfaria.minemon.entity.MinemonCreature pokemon
+                        &&pokemon.getSpeciesSlug().equals("gastly"))
+                    closest=Math.min(closest,entity.distanceToSqr(x,y,z));
+                if(Double.isFinite(closest)){
+                    NATIVE_SOURCE_SAMPLE_COUNT.incrementAndGet();
+                    MAX_NATIVE_SOURCE_DISTANCE_FROM_GASTLY=Math.max(
+                            MAX_NATIVE_SOURCE_DISTANCE_FROM_GASTLY,Math.sqrt(closest));
+                }
+            }
+            return new GastlySmokeParticle(level, x, y, z, xd, yd, zd, this.sprites,small,null,0,false);
         }
     }
 }
