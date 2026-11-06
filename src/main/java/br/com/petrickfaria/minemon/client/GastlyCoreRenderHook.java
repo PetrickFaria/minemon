@@ -30,9 +30,6 @@ public final class GastlyCoreRenderHook {
         for(var entity:mc.level.entitiesForRendering()){
             if(!(entity instanceof MinemonCreature gastly)||!gastly.getSpeciesSlug().equals("gastly")
                     ||!gastly.isAlive()||gastly.isRemoved())continue;
-            // Do not draw detached-looking aura billboards from a Gastly whose
-            // body is outside the current camera frustum.
-            if(!event.getFrustum().isVisible(gastly.getBoundingBoxForCulling()))continue;
             gastlys.add(gastly);
             maxCameraDistanceForValidation=Math.max(maxCameraDistanceForValidation,
                     Math.sqrt(gastly.distanceToSqr(camera.x,camera.y,camera.z)));
