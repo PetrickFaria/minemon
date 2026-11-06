@@ -257,10 +257,14 @@ final class GhostLineClientSmokeTest {
     });
    }
    if(ticks>=115&&ticks<145&&!captures.contains("gengar-walk")){
-    if(!"animation.gengar.ground_walk".equals(readClip(gengar)))
-     throw new IllegalStateException("Gengar walking screenshot was not captured during ground_walk: "+readClip(gengar));
-    face(mc,gengar);snap(mc,"gengar-walk");
+    // Bring Gengar into the view before requiring a selected render clip. The
+    // animation predicate only updates while the entity is actually rendered.
+    face(mc,gengar);
+    if(screenshotSlotAvailable()&&"animation.gengar.ground_walk".equals(readClip(gengar)))
+     snap(mc,"gengar-walk");
    }
+   if(ticks>=145&&!captures.contains("gengar-walk"))
+    throw new IllegalStateException("Gengar walking screenshot was not captured during ground_walk: "+readClip(gengar));
    if(ticks>=150){
     mc.getSingleplayerServer().execute(()->{
      var authoritative=mc.getSingleplayerServer().overworld().getEntity(gengarId);
