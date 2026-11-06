@@ -53,12 +53,24 @@ public final class GastlyCoreRenderHook {
             if(!draws.isEmpty()){
                 var tessellator=com.mojang.blaze3d.vertex.Tesselator.getInstance();
                 var builder=tessellator.getBuilder();
+                // Particle vertices are camera-relative world coordinates. Match
+                // ParticleEngine's camera rotation before submitting this extra pass.
+                var modelView=com.mojang.blaze3d.systems.RenderSystem.getModelViewStack();
+                modelView.pushPose();
+                modelView.mulPoseMatrix(event.getPoseStack().last().pose());
+                com.mojang.blaze3d.systems.RenderSystem.applyModelViewMatrix();
                 GastlySmokeParticle.beginAuraFrame(builder,mc.getTextureManager());
                 try{
                     draws.sort(Comparator.comparingDouble(AuraDraw::distanceSqr).reversed());
                     for(var draw:draws)GastlySmokeParticle.renderAuraParticle(draw.owner(),draw.slot(),draw.small(),
                             draw.age(),event.getPartialTick(),event.getCamera(),builder,draw.distanceSqr());
-                }finally{GastlySmokeParticle.endAuraFrame(tessellator);}
+                }finally{
+                    try{GastlySmokeParticle.endAuraFrame(tessellator);}
+                    finally{
+                        modelView.popPose();
+                        com.mojang.blaze3d.systems.RenderSystem.applyModelViewMatrix();
+                    }
+                }
             }
         }
         for(var gastly:gastlys){

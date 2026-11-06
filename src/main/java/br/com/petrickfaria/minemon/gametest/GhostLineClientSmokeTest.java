@@ -46,6 +46,8 @@ final class GhostLineClientSmokeTest {
   faceAtDistance(mc,mob,4.0D,0.0D);
  }
  private static void faceAtDistance(Minecraft mc,MinemonCreature mob,double distance,double degrees){
+  // A queued screenshot owns the viewpoint until the framebuffer is captured.
+  if(!screenshotSlotAvailable())return;
   var player=mc.player;if(player==null)return;
   double angle=Math.toRadians(degrees);
   double px=mob.getX()+Math.sin(angle)*distance,py=mob.getY()-0.2D,pz=mob.getZ()-Math.cos(angle)*distance;
