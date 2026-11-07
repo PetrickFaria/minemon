@@ -1,5 +1,6 @@
 package br.com.petrickfaria.minemon.gametest;
 import br.com.petrickfaria.minemon.entity.MinemonCreature;
+import br.com.petrickfaria.minemon.entity.CombatGeometry;
 import br.com.petrickfaria.minemon.entity.NaturalMovementGoals;
 import br.com.petrickfaria.minemon.entity.WaterMovementGoal;
 import br.com.petrickfaria.minemon.registry.ModEntities;
