@@ -216,7 +216,12 @@ public final class NightAndSwimmingTests {
       awaitAwakeGyaradosSurface(h,gyarados,400,wakePosition,h::succeed);
      },40,"Aquatic sleepers must wake at dawn");
     },220,()->"A water visitor must return to sleep after combat while it is still night; sleeping="+dratini.isSleeping()+" night="+dratini.isNightResting()+" target="+dratini.getTarget()+" pos="+dratini.position()+" velocity="+dratini.getDeltaMovement()+" restY="+WaterMovementGoal.waterRestY(dratini)+" time="+h.getLevel().getDayTime());
-   },180,()->"The woken water visitor must physically retaliate in water; pos="+dratini.position()+" target="+dratini.getTarget()+" sleep="+dratini.isSleeping()+" attacker="+attacker.position()+" health="+attacker.getHealth());
+   },180,()->"The woken water visitor must retaliate with ranged damage in water; pos="+dratini.position()+" target="+dratini.getTarget()
+       +" canAttack="+dratini.canAttack(attacker)+" canFireAt="+dratini.canFireAt(attacker)+" combatReady="+dratini.combatReady()
+       +" sight="+dratini.getSensing().hasLineOfSight(attacker)+" distance="+dratini.distanceTo(attacker)
+       +" navDone="+dratini.getNavigation().isDone()+" navTarget="+dratini.getNavigation().getTargetPos()
+       +" sleep="+dratini.isSleeping()+" nightRest="+dratini.isNightResting()+" nightCombat="+dratini.nightCombatTicksForValidation()
+       +" attacker="+attacker.position()+" health="+attacker.getHealth());
   },500,"Permanent swimmers must rest in water and water visitors must settle at the bottom");
  }
  @GameTest(template="test_arena",batch="water_bottom",timeoutTicks=900)
@@ -332,7 +337,12 @@ public final class NightAndSwimmingTests {
    attacker.discard();
    await(h,mob::isSleeping,()->runEeveeLineCombat(h,sleepers,index+1,done),240,
        ()->mob.getSpeciesSlug()+" must return to sleep after combat while it is still night: pos="+mob.position()+" ground="+mob.isOnGround()+" night="+mob.isNightResting()+" target="+mob.getTarget()+" time="+h.getLevel().getDayTime()+" collision="+h.getLevel().noCollision(mob,mob.getBoundingBox()));
-  },180,mob.getSpeciesSlug()+" must retaliate with ranged damage from a safe distance");
+  },180,()->mob.getSpeciesSlug()+" must retaliate with ranged damage from a safe distance; target="+mob.getTarget()
+      +" canAttack="+mob.canAttack(attacker)+" canFireAt="+mob.canFireAt(attacker)+" combatReady="+mob.combatReady()
+      +" sight="+mob.getSensing().hasLineOfSight(attacker)+" distance="+mob.distanceTo(attacker)
+      +" navDone="+mob.getNavigation().isDone()+" navTarget="+mob.getNavigation().getTargetPos()
+      +" sleeping="+mob.isSleeping()+" nightRest="+mob.isNightResting()+" nightCombat="+mob.nightCombatTicksForValidation()
+      +" attackerHealth="+attacker.getHealth());
  }
  @GameTest(template="test_arena",batch="water_speed",timeoutTicks=240)
  public static void nonAquaticCreatureEscapesToReachableShore(GameTestHelper h){
