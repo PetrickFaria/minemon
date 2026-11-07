@@ -103,8 +103,11 @@ final class ElementalCombatGoal extends Goal {
             double cos = Math.cos(angle), sin = Math.sin(angle);
             double dx = away.x * cos - away.z * sin;
             double dz = away.x * sin + away.z * cos;
-            double destinationX = retreat ? pokemon.getX() + dx * desired : target.getX() + dx * desired;
-            double destinationZ = retreat ? pokemon.getZ() + dz * desired : target.getZ() + dz * desired;
+            // Treat desired as a target-centered firing radius. Adding it to
+            // the Pokémon's current position overshoots by the current gap and
+            // can push a retreat goal against the arena edge before it can fire.
+            double destinationX = target.getX() + dx * desired;
+            double destinationZ = target.getZ() + dz * desired;
             BlockPos destination = new BlockPos((int)Math.floor(destinationX),
                     (int)Math.floor(pokemon.getY()), (int)Math.floor(destinationZ));
             var path = navigation.createPath(destination, 0);
