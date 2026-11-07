@@ -199,7 +199,7 @@ public final class PokemonManagementGameTests {
         h.runAfterDelay(8, () -> {
             check(h, target.getHealth() == 200.0F, "a nearby mob must not be attacked before trainer authorization");
             br.com.petrickfaria.minemon.pokec.PokecEvents.playerPokemonAttack(
-                    new net.minecraftforge.event.entity.living.LivingAttackEvent(target, DamageSource.playerAttack(owner)));
+                    new net.minecraftforge.event.entity.living.LivingAttackEvent(target, DamageSource.playerAttack(owner), 1.0F));
             h.runAfterDelay(100, () -> {
                 check(h, target.getHealth() < 200.0F, "a seated Pokémon must attack an authorized target within ranged reach");
                 check(h, pokemon.isOrderedToSit() && pokemon.position().distanceToSqr(anchor) < 1.0E-6D,
