@@ -216,11 +216,11 @@ final class GhostLineClientSmokeTest {
    if(ticks>=10&&screenshotSlotAvailable()&&!captures.contains("gastly-10-block")){
     faceAtDistance(mc,gastly,10.0D,0.0D);snap(mc,"gastly-10-block");
    }
-   if(ticks>=12&&screenshotSlotAvailable()&&!captures.contains("gastly-right")){faceFromAngle(mc,gastly,90);snapNow(mc,"gastly-right");}
-   if(ticks>=20&&screenshotSlotAvailable()&&!captures.contains("gastly-back")){faceFromAngle(mc,gastly,180);snapNow(mc,"gastly-back");}
-   if(ticks>=28&&screenshotSlotAvailable()&&!captures.contains("gastly-left")){faceFromAngle(mc,gastly,270);snapNow(mc,"gastly-left");}
-   if(ticks>=31&&screenshotSlotAvailable()&&!captures.contains("gastly-top")){faceVertical(mc,gastly,true);snapNow(mc,"gastly-top");}
-   if(ticks>=34&&screenshotSlotAvailable()&&!captures.contains("gastly-bottom")){faceVertical(mc,gastly,false);snapNow(mc,"gastly-bottom");}
+   if(ticks>=12&&screenshotSlotAvailable()&&!captures.contains("gastly-right")){faceFromAngle(mc,gastly,90);snap(mc,"gastly-right");}
+   if(ticks>=20&&screenshotSlotAvailable()&&!captures.contains("gastly-back")){faceFromAngle(mc,gastly,180);snap(mc,"gastly-back");}
+   if(ticks>=28&&screenshotSlotAvailable()&&!captures.contains("gastly-left")){faceFromAngle(mc,gastly,270);snap(mc,"gastly-left");}
+   if(ticks>=31&&screenshotSlotAvailable()&&!captures.contains("gastly-top")){faceVertical(mc,gastly,true);snap(mc,"gastly-top");}
+   if(ticks>=34&&screenshotSlotAvailable()&&!captures.contains("gastly-bottom")){faceVertical(mc,gastly,false);snap(mc,"gastly-bottom");}
    if(ticks>=32&&screenshotSlotAvailable()&&!captures.contains("gastly-25-block")){
     faceAtDistance(mc,gastly,25.0D,45.0D);snap(mc,"gastly-25-block");
    }
