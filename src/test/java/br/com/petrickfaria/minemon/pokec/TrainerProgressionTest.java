@@ -4,25 +4,29 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 public class TrainerProgressionTest {
-    @Test public void trainerThresholdsMatchRequestedCurve() {
-        assertEquals(5.0D, TrainerProgression.xpToNext(1), 0.0D);
-        assertEquals(15.0D, TrainerProgression.xpToNext(2), 0.0D);
-        assertEquals(30.0D, TrainerProgression.xpToNext(3), 0.0D);
-        assertEquals(135.0D, TrainerProgression.xpToNext(10), 0.0D);
+    @Test public void trainerThresholdsMatchTenZombiesThenFiveMoreEachLevel() {
+        double[] expected = {50, 75, 100, 125, 150, 175, 200, 225, 250};
+        for (int level = 1; level <= expected.length; level++) {
+            assertEquals(expected[level - 1], TrainerProgression.xpToNext(level, 5), 0.0D);
+        }
+        assertEquals(275.0D, TrainerProgression.xpToNext(10, 5), 0.0D);
+        assertEquals(100.0D, TrainerProgression.xpToNext(1, 10), 0.0D);
     }
 
-    @Test public void progressionPreservesRemainderAndSupportsMultipleLevels() {
-        var first = TrainerProgression.add(new TrainerProgression.Progress(1, 0.0D), 6.5D);
-        assertEquals(2, first.level()); assertEquals(1.5D, first.xpTowardNext(), 0.0D);
-        var multiple = TrainerProgression.add(new TrainerProgression.Progress(1, 0.0D), 50.0D);
-        assertEquals(4, multiple.level()); assertEquals(0.0D, multiple.xpTowardNext(), 0.0D);
+    @Test public void trainerGetsAnAdditionalTenPercentOfTheCompanionAward() {
+        assertEquals(10.0D, TrainerProgression.trainerShareForCompanionXpHalfUnits(200), 0.0D);
+        assertEquals(5.0D, TrainerProgression.trainerShareForCompanionXpHalfUnits(100), 0.0D);
+        assertEquals(0.25D, TrainerProgression.trainerShareForCompanionXpHalfUnits(5), 0.0D);
+        assertEquals(0.0D, TrainerProgression.trainerShareForCompanionXpHalfUnits(-1), 0.0D);
     }
 
-    @Test public void pokemonXpUsesRarityStageAndIndividualLevelBonuses() {
-        assertEquals(7.575D, TrainerProgression.pokemonXp("bulbasaur", 1), 1.0E-9D);
-        assertEquals(9.0D, TrainerProgression.pokemonXp("ivysaur", 5), 1.0E-9D);
-        assertEquals(10.5D, TrainerProgression.pokemonXp("venusaur", 10), 1.0E-9D);
-        assertEquals(0.0D, TrainerProgression.pokemonXp("not_a_species", 10), 0.0D);
+    @Test public void progressionPreservesFractionalRemainderAndSupportsMultipleLevels() {
+        var first = TrainerProgression.add(new TrainerProgression.Progress(1, 0.0D), 56.5D);
+        assertEquals(2, first.level()); assertEquals(6.5D, first.xpTowardNext(), 0.0D);
+        var multiple = TrainerProgression.add(new TrainerProgression.Progress(1, 0.0D), 235.0D);
+        assertEquals(4, multiple.level()); assertEquals(10.0D, multiple.xpTowardNext(), 0.0D);
+        var exact = TrainerProgression.add(new TrainerProgression.Progress(1, 0.0D), 125.0D);
+        assertEquals(3, exact.level()); assertEquals(0.0D, exact.xpTowardNext(), 0.0D);
     }
 
     @Test public void levelCapConsumesNoFurtherExperience() {

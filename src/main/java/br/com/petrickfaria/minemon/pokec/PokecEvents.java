@@ -104,7 +104,7 @@ public final class PokecEvents {
         }
     }
     @SubscribeEvent public static void clonePlayer(PlayerEvent.Clone event){PokecPlayerData.copyOnRespawn(event.getOriginal(),event.getEntity());if(event.getEntity() instanceof net.minecraft.server.level.ServerPlayer player)PokecTransactions.recoverEscrow(player);}
-    @SubscribeEvent public static void login(PlayerEvent.PlayerLoggedInEvent event){if(event.getEntity() instanceof net.minecraft.server.level.ServerPlayer player){PokecTransactions.recoverEscrow(player);br.com.petrickfaria.minemon.network.MinemonNetwork.syncTrainer(player);}}
+    @SubscribeEvent public static void login(PlayerEvent.PlayerLoggedInEvent event){if(event.getEntity() instanceof net.minecraft.server.level.ServerPlayer player){PokecTransactions.recoverEscrow(player);TrainerXpLedger.deliver(player);br.com.petrickfaria.minemon.network.MinemonNetwork.syncTrainer(player);}}
     @SubscribeEvent public static void logout(PlayerEvent.PlayerLoggedOutEvent event){if(event.getEntity() instanceof net.minecraft.server.level.ServerPlayer player)PokecTransactions.recoverEscrow(player);PokecTransactions.clearTransactions(event.getEntity().getUUID());}
     @SubscribeEvent public static void commands(RegisterCommandsEvent event){
         event.getDispatcher().register(Commands.literal("pokec").requires(source->source.hasPermission(2))

@@ -460,16 +460,84 @@ public final class PokecGameTests {
         attacker.tame(owner);attacker.setOwnerUUID(owner.getUUID());wild.setHealth(1.0F);
         WildEncounterManager.registerSpawnEggEncounter(wild,owner);
         int oldLevel=attacker.getPokemonLevel(),oldXp=attacker.getPokemonExperience();
+        int oldTrainerLevel=PokecPlayerData.trainerLevel(owner);
+        double oldTrainerXp=PokecPlayerData.trainerXp(owner);
+        int rewardHalfUnits=br.com.petrickfaria.minemon.entity.PokemonProgression.xpRewardHalfUnitsForWildRarity(
+                wild.getPokemonRarity(),br.com.petrickfaria.minemon.config.MinemonConfig.POKEMON_XP_PER_ZOMBIE.get());
         check(WildEncounterManager.enterDowned(wild,net.minecraft.world.damagesource.DamageSource.mobAttack(attacker)),"lethal companion hit downs an owned spawn-egg encounter");
-        int reward=wild.getExperienceReward();
         check(wild.getPersistentData().getBoolean("MinemonCompanionXpHandled"),"spawn-egg lethal blow is recorded by the exactly-once XP handler");
-        check(reward==0?attacker.getPokemonLevel()==oldLevel&&attacker.getPokemonExperience()==oldXp
-                :attacker.getPokemonLevel()>oldLevel||attacker.getPokemonExperience()>oldXp,
-                "spawn-egg lethal blow awards its existing vanilla mob XP amount without changing the formula");
+        check(attacker.getPokemonLevel()>oldLevel||attacker.getPokemonExperience()>oldXp,
+                "spawn-egg lethal blow awards rarity-scaled Pokémon XP");
+        check(PokecPlayerData.trainerLevel(owner)>oldTrainerLevel||PokecPlayerData.trainerXp(owner)>oldTrainerXp,
+                "trainer receives the additional ten percent share");
+        double awardedTrainerXp=PokecPlayerData.trainerXp(owner);
         int awardedLevel=attacker.getPokemonLevel(),awardedXp=attacker.getPokemonExperience();
         WildEncounterManager.awardCompanionExperience(wild,net.minecraft.world.damagesource.DamageSource.mobAttack(attacker));
         check(attacker.getPokemonLevel()==awardedLevel&&attacker.getPokemonExperience()==awardedXp,"the same encounter cannot award companion XP twice");
+        check(PokecPlayerData.trainerXp(owner)==awardedTrainerXp,"the same encounter cannot award trainer XP twice");
         attacker.discard();wild.discard();owner.discard();h.succeed();
+    }
+
+    @GameTest(template="test_arena",timeoutTicks=200)
+    public static void masterBallStoresWildEncounterWithoutDomesticatingIt(GameTestHelper h) {
+        floor(h);
+        ServerPlayer owner=player(h,h.absolutePos(new BlockPos(7,1,5)));
+        MinemonCreature wild=h.spawn(ModEntities.SPECIES.get("bulbasaur").get(),new BlockPos(8,1,5));
+        wild.getPersistentData().putBoolean("MinemonWildEncounter",true);
+        wild.getPersistentData().putUUID("MinemonEncounterOwner",UUID.randomUUID());
+        wild.getPersistentData().putString("MinemonEncounterState","active");
+        wild.setCustomName(net.minecraft.network.chat.Component.literal("Stored Wild Pokémon"));
+        wild.setHealth(3.0F);
+        ItemStack ball=new ItemStack(ModItems.MASTER_BALL.get());
+        owner.setItemInHand(InteractionHand.MAIN_HAND,ball);
+        var result=ModItems.MASTER_BALL.get().interactLivingEntity(ball,owner,wild,InteractionHand.MAIN_HAND);
+        var stored=PokeballItem.readStoredEntity(owner.getMainHandItem());
+        check(result.consumesAction()&&stored!=null,"Master Ball stores a wild encounter without conventional capture rolls");
+        check(stored.entityData().getBoolean("MinemonWildEncounter")
+                &&stored.entityData().getString("MinemonEncounterState").equals("active"),
+                "Master Ball preserves wild encounter state in entity NBT");
+        check(stored.entityData().getBoolean("Tame")==false,
+                "stored wild encounter remains untamed in the saved entity data");
+        var releaseHit=new BlockHitResult(Vec3.atCenterOf(h.absolutePos(new BlockPos(5,0,5))),
+                net.minecraft.core.Direction.UP,h.absolutePos(new BlockPos(5,0,5)),false);
+        var release=ModItems.MASTER_BALL.get().useOn(new net.minecraft.world.item.context.UseOnContext(
+                owner,InteractionHand.MAIN_HAND,releaseHit));
+        var restored=h.getLevel().getEntitiesOfClass(MinemonCreature.class,
+                new net.minecraft.world.phys.AABB(h.absolutePos(new BlockPos(3,1,3)),h.absolutePos(new BlockPos(12,5,8))),
+                entity->entity.hasCustomName()&&entity.getCustomName().getString().equals("Stored Wild Pokémon"));
+        check(release.consumesAction()&&restored.size()==1
+                &&!restored.get(0).isTame()
+                &&restored.get(0).getPersistentData().getBoolean("MinemonWildEncounter"),
+                "released Master Ball restores the wild encounter without domesticating it");
+        owner.discard();h.succeed();
+    }
+
+    @GameTest(template="test_arena",timeoutTicks=120)
+    public static void ordinaryMobKillAwardsCompanionAndTrainerExperienceOnce(GameTestHelper h) {
+        floor(h);
+        ServerPlayer owner=player(h,h.absolutePos(new BlockPos(7,1,5)));
+        MinemonCreature attacker=h.spawn(ModEntities.SPECIES.get("bulbasaur").get(),new BlockPos(5,1,5));
+        var zombie=h.spawn(net.minecraft.world.entity.EntityType.ZOMBIE,new BlockPos(8,1,5));
+        attacker.tame(owner);attacker.setOwnerUUID(owner.getUUID());
+        int expected=zombie.getExperienceReward();
+        WildEncounterManager.awardCompanionExperience(zombie,net.minecraft.world.damagesource.DamageSource.mobAttack(attacker));
+        check(zombie.getPersistentData().getBoolean("MinemonCompanionXpHandled"),"ordinary mob XP award is marked exactly once");
+        check(expected<=0||(attacker.getPokemonLevel()>1||attacker.getPokemonExperience()>0),
+                "companion receives ordinary mob XP");
+        double expectedTrainer=Math.max(0,expected)*0.1D;
+        check(Math.abs(PokecPlayerData.trainerXp(owner)-expectedTrainer)<1.0E-9D,
+                "trainer receives exactly ten percent of ordinary mob XP");
+        double before=PokecPlayerData.trainerXp(owner);
+        WildEncounterManager.awardCompanionExperience(zombie,net.minecraft.world.damagesource.DamageSource.mobAttack(attacker));
+        check(PokecPlayerData.trainerXp(owner)==before,"duplicate mob death handling does not award trainer XP twice");
+        owner.discard();zombie.discard();attacker.discard();h.succeed();
+    }
+
+    @GameTest(template="test_arena",timeoutTicks=120)
+    public static void encounterCapsMatchRequestedLimits(GameTestHelper h) {
+        check(WildEncounterManager.MAX_ACTIVE==25,"active encounter cap is twenty-five");
+        check(WildEncounterManager.MAX_DOWNED==10,"downed encounter cap is ten");
+        h.succeed();
     }
 
     @GameTest(template="test_arena",timeoutTicks=120)

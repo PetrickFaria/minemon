@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
-"""Resolve the next Minemon release version from immutable publication tags.
+"""Resolve Minemon's pinned publication version or fall back to immutable tags.
 
-Successful releases are recorded as lightweight Git tags named
-``minemon-vMAJOR.MINOR``. A commit already tagged for a release keeps that
-version on retries. Untagged commits use the next hundredth after the newest
-release. The bootstrap base is 1.75, the latest published Minemon version
-before version tags were introduced.
+A checked-in tools/minemon_release_version.txt pin takes precedence. Update that
+file deliberately for the next release; this prevents commits and retry runs from
+silently incrementing versions. Without a pin, the historical tag algorithm remains.
 """
 
 from __future__ import annotations
@@ -13,6 +11,7 @@ from __future__ import annotations
 import re
 import subprocess
 from decimal import Decimal
+from pathlib import Path
 
 TAG_PREFIX = "minemon-v"
 BOOTSTRAP_LAST_RELEASE = Decimal("1.75")
@@ -33,6 +32,13 @@ def parse_tag(tag: str) -> Decimal | None:
 
 
 def resolve_version() -> str:
+    pin_file = Path(__file__).with_name("minemon_release_version.txt")
+    if pin_file.exists():
+        pinned = pin_file.read_text(encoding="utf-8").strip()
+        if not VERSION_PATTERN.fullmatch(pinned):
+            raise SystemExit(f"Invalid pinned Minemon version: {pinned!r}")
+        return pinned
+
     head = git("rev-parse", "HEAD")
     releases: list[tuple[str, Decimal, str]] = []
 

@@ -3,14 +3,18 @@ import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--ghost-line", action="store_true")
+parser.add_argument("--reuse-world", action="store_true", help="Keep the previously prepared client world for persistence checks")
 args = parser.parse_args()
 import shutil
 run=Path('run');candidates=[p.parent for p in run.rglob('level.dat') if 'saves' not in p.parts]
 if not candidates:raise SystemExit('Minecraft GameTest world not found for client render validation')
 dst=run/'saves/minemon-validation';dst.parent.mkdir(exist_ok=True,parents=True)
-if dst.exists():shutil.rmtree(dst)
-shutil.copytree(candidates[0],dst,ignore=shutil.ignore_patterns('session.lock'))
-print('Client validation world prepared from',candidates[0])
+if args.reuse_world and (dst/'level.dat').exists():
+    print('Reusing saved client validation world',dst)
+else:
+    if dst.exists():shutil.rmtree(dst)
+    shutil.copytree(candidates[0],dst,ignore=shutil.ignore_patterns('session.lock'))
+    print('Client validation world prepared from',candidates[0])
 
 # Most fixtures fit inside two chunks, but the Gastly aura regression deliberately
 # moves the camera 50 blocks away. Four chunks load the entity and the whole camera

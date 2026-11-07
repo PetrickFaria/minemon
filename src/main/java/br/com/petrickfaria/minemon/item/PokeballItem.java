@@ -116,7 +116,8 @@ public final class PokeballItem extends Item {
         if (player.level.isClientSide) return InteractionResult.sidedSuccess(true);
         if (!(player instanceof ServerPlayer serverPlayer) || !(player.level instanceof ServerLevel))
             return InteractionResult.FAIL;
-        if (mob instanceof MinemonCreature wild && br.com.petrickfaria.minemon.pokec.WildEncounterManager.isEncounter(wild)) {
+        if (!masterBall && mob instanceof MinemonCreature wild
+                && br.com.petrickfaria.minemon.pokec.WildEncounterManager.isEncounter(wild)) {
             if (!br.com.petrickfaria.minemon.pokec.WildEncounterManager.isDowned(wild)
                     || !serverPlayer.getUUID().equals(br.com.petrickfaria.minemon.pokec.WildEncounterManager.owner(wild)))
                 return InteractionResult.FAIL;

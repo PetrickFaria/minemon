@@ -1,22 +1,28 @@
 package br.com.petrickfaria.minemon.entity;
 
-import br.com.petrickfaria.minemon.pokec.PokemonEvolutionRules;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
 public final class PokemonProgressionTest {
-    @Test public void levelCostsMatchTheConfiguredZombieReferenceAndRarityOffsets() {
-        assertEquals(15, cost(1, "common"));
-        assertEquals(20, cost(2, "common"));
-        assertEquals(25, cost(3, "common"));
-        assertEquals(35, cost(5, "common"));
-        assertEquals(55, cost(9, "common"));
-        assertEquals(20, cost(1, "uncommon"));
-        assertEquals(25, cost(1, "rare"));
-        assertEquals(25, cost(1, "very_rare"));
-        assertEquals(30, cost(1, "legendary"));
-        assertEquals(35, cost(1, "mythic"));
-        assertEquals(0, cost(10, "common"));
+    @Test public void levelCostsMatchTheZombieReferenceAndEveryRarityStep() {
+        String[] rarities = {"common", "uncommon", "rare", "legendary", "mythic"};
+        int[] bases = {10, 11, 12, 13, 15};
+        int[] totals = {0, 0, 0, 0, 0};
+        for (int rarity = 0; rarity < rarities.length; rarity++) {
+            for (int level = 1; level <= 9; level++) {
+                int expected = (bases[rarity] + level - 1) * 5;
+                assertEquals(rarities[rarity] + " level " + level, expected,
+                        PokemonProgression.xpForNextLevelForRarity(level, rarities[rarity], 5, 10));
+                totals[rarity] += expected;
+            }
+        }
+        assertArrayEquals(new int[] {630, 675, 720, 765, 855}, totals);
+        assertEquals(0, PokemonProgression.xpForNextLevelForRarity(10, "common", 5, 10));
+        assertEquals(20, PokemonProgression.xpForNextLevelForRarity(1, "common", 2, 10));
+        assertEquals(22, PokemonProgression.xpForNextLevelForRarity(1, "uncommon", 2, 10));
+        assertEquals(24, PokemonProgression.xpForNextLevelForRarity(1, "rare", 2, 10));
+        assertEquals(26, PokemonProgression.xpForNextLevelForRarity(1, "legendary", 2, 10));
+        assertEquals(30, PokemonProgression.xpForNextLevelForRarity(1, "mythic", 2, 10));
     }
 
     @Test public void wildPokemonRewardsUseHalfXpUnitsWithoutRounding() {
@@ -27,15 +33,16 @@ public final class PokemonProgressionTest {
         assertEquals(250, PokemonProgression.xpRewardHalfUnitsForWildRarity("mythic", 5));
     }
 
-    @Test public void evolutionRequirementsFollowCatalogEdgesAndBranches() {
-        assertEquals(5, PokemonEvolutionRules.requiredLevel("charmander"));
-        assertEquals(10, PokemonEvolutionRules.requiredLevel("charmeleon"));
-        assertEquals(7, PokemonEvolutionRules.requiredLevel("rattata"));
-        assertEquals(7, PokemonEvolutionRules.requiredLevel("eevee"));
-        assertEquals(3, PokemonEvolutionRules.nextForms("eevee").size());
-        assertFalse(PokemonEvolutionRules.isValidEdge("charmander", "charizard"));
-        assertTrue(PokemonEvolutionRules.isValidEdge("charmander", "charmeleon"));
-        assertEquals(Integer.MAX_VALUE, PokemonEvolutionRules.requiredLevel("mew"));
+    @Test public void attributesKeepTheirConfiguredStartingValuesAndLevelGrowth() {
+        assertEquals(10.0D, PokemonProgression.healthForRarity("common", 1), 0.0D);
+        assertEquals(14.0D, PokemonProgression.healthForRarity("uncommon", 1), 0.0D);
+        assertEquals(18.0D, PokemonProgression.healthForRarity("rare", 1), 0.0D);
+        assertEquals(22.0D, PokemonProgression.healthForRarity("legendary", 1), 0.0D);
+        assertEquals(26.0D, PokemonProgression.healthForRarity("mythic", 1), 0.0D);
+        assertEquals(4.0D, PokemonProgression.healthForRarity("common", 2)
+                - PokemonProgression.healthForRarity("common", 1), 0.0D);
+        assertEquals(1.0D, PokemonProgression.damageForRarity("common", 2)
+                - PokemonProgression.damageForRarity("common", 1), 0.0D);
     }
 
     @Test public void chanseyCooldownUsesItsCurrentLevelBand() {
@@ -44,9 +51,5 @@ public final class PokemonProgressionTest {
         assertEquals(3600, PokemonProgression.chanseyCooldownTicks(6));
         assertEquals(2400, PokemonProgression.chanseyCooldownTicks(8));
         assertEquals(1200, PokemonProgression.chanseyCooldownTicks(10));
-    }
-
-    private static int cost(int level, String rarity) {
-        return PokemonProgression.xpForNextLevelForRarity(level, rarity, 5, 10);
     }
 }

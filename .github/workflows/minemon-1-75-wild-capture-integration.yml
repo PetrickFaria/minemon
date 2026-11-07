@@ -95,11 +95,20 @@ jobs:
           python3 tools/prepare_client_world.py --ghost-line
           ALSOFT_DRIVERS=null timeout --kill-after=30s 900s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeGhostLine
           grep -F 'PASS GHOST LINE CLIENT:' run/client-validation-ghost-line.txt
+          grep -F 'PASS GASTLY PERSISTENCE REOPEN 1:' run/gastly-persistence-reopen-1.txt
+          grep -F 'PASS GASTLY PERSISTENCE REOPEN 2:' run/gastly-persistence-reopen-2.txt
           for shot in gastly-front gastly-no-tongue haunter-front-a haunter-front-b haunter-blink gengar-walk gengar-blink gengar-mouth-teeth-fixed gengar-sleep-half-sunk-a gengar-sleep-half-sunk-b; do
             test -f "run/screenshots/ghost-line-1.74-$shot.png"
           done
           for shot in gastly-right gastly-back gastly-left gastly-10-block gastly-25-block gastly-50-block gastly-motion gastly-float; do
             test -f "run/screenshots/ghost-line-1.74-$shot.png"
+          done
+      - name: Reopen the saved Gastly world and verify aura visibility twice
+        run: |
+          for index in 1 2; do
+            python3 tools/prepare_client_world.py --reuse-world --ghost-line
+            ALSOFT_DRIVERS=null timeout --kill-after=30s 900s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeGhostLinePersistence -PgastlyReopenIndex="$index"
+            grep -F "PASS GASTLY PERSISTENCE REOPEN $index:" "run/gastly-persistence-reopen-$index.txt"
           done
       - name: Validate aquatic swimming poses in the real client
         run: |
@@ -120,7 +129,7 @@ jobs:
           set -euo pipefail
           test "$(git ls-remote origin "$GITHUB_REF" | awk 'NR == 1 { print $1 }')" = "$GITHUB_SHA"
           ./gradlew --no-daemon build -x test
-          jar_file="build/libs/Minemon-1.19.2-${MINEMON_VERSION}.jar"
+          jar_file="build/libs/minemon-${MINEMON_VERSION}.jar"
           test -f "$jar_file"
           unzip -t "$jar_file"
           unzip -p "$jar_file" META-INF/mods.toml | grep -F "version=\"${MINEMON_VERSION}\""
@@ -128,6 +137,7 @@ jobs:
           for entry in \
             br/com/petrickfaria/minemon/pokec/WildEncounterManager.class \
             br/com/petrickfaria/minemon/pokec/TrainerProgression.class \
+            br/com/petrickfaria/minemon/pokec/TrainerXpLedger.class \
             br/com/petrickfaria/minemon/entity/CaptureBallProjectile.class \
             br/com/petrickfaria/minemon/client/GastlyCoreRenderHook.class \
             br/com/petrickfaria/minemon/entity/GhostLineAnimationRules.class \
@@ -142,14 +152,16 @@ jobs:
           grep -F 'PASS GHOST LINE CLIENT:' run/client-validation-ghost-line.txt
       - uses: actions/upload-artifact@v4
         with:
-          name: Minemon-1.19.2-${{ env.MINEMON_VERSION }}
+          name: Minemon ${{ env.MINEMON_VERSION }}
           path: |
-            build/libs/Minemon-1.19.2-${{ env.MINEMON_VERSION }}.jar
+            build/libs/minemon-${{ env.MINEMON_VERSION }}.jar
             run/world-reopen-pass.txt
             run/wild-capture-client-pass.txt
             run/wild-capture-reopen-1.txt
             run/wild-capture-reopen-2.txt
             run/client-validation-ghost-line.txt
+            run/gastly-persistence-reopen-1.txt
+            run/gastly-persistence-reopen-2.txt
             run/client-validation.txt
             run/screenshots/ghost-line-1.74-*.png
             run/screenshots/alakazam-1.73-*.png
@@ -181,10 +193,15 @@ jobs:
           test "$(git ls-remote origin "$GITHUB_REF" | awk 'NR == 1 { print $1 }')" = "$GITHUB_SHA"
           tag="minemon-v${RELEASE_VERSION}"
           remote_commit="$(git ls-remote --refs origin "refs/tags/${tag}" | awk 'NR == 1 { print $1 }')"
+          if [ -n "$remote_commit" ] && [ "$remote_commit" != "$GITHUB_SHA" ]; then
+            # Preserve the historical release ref and identify this reissue by commit.
+            tag="minemon-reissue-v${RELEASE_VERSION}-${GITHUB_SHA:0:12}"
+            remote_commit="$(git ls-remote --refs origin "refs/tags/${tag}" | awk 'NR == 1 { print $1 }')"
+          fi
           if [ -n "$remote_commit" ]; then
             test "$remote_commit" = "$GITHUB_SHA"
-            echo "Release tag ${tag} already points to this commit."
+            echo "Release reference ${tag} already points to this commit."
           else
             git tag "$tag" "$GITHUB_SHA"
-            git push origin "refs/tags/${tag}"
+            git push origin "refs/tags/$tag"
           fi

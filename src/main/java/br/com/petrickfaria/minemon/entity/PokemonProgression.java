@@ -33,7 +33,9 @@ public final class PokemonProgression {
 
     public static int xpForNextLevelForRarity(int currentLevel, String rarity, int baseXp, int maximumLevel) {
         if (currentLevel >= maximumLevel) return 0;
-        long needed = ((long) Math.max(1, currentLevel) + rarityOffset(rarity)) * Math.max(0, baseXp);
+        long level = Math.max(1, currentLevel);
+        long zombieEquivalent = level + rarityOffset(rarity);
+        long needed = zombieEquivalent * Math.max(0, baseXp);
         return (int) Math.max(1L, Math.min(Integer.MAX_VALUE, needed));
     }
 
@@ -50,11 +52,11 @@ public final class PokemonProgression {
 
     public static int rarityOffset(String rarity) {
         return switch (rarityKey(rarity)) {
-            case "uncommon" -> 3;
-            case "rare" -> 4;
-            case "legendary" -> 5;
-            case "mythic" -> 6;
-            default -> 2;
+            case "uncommon" -> 10;
+            case "rare" -> 11;
+            case "legendary" -> 12;
+            case "mythic" -> 14;
+            default -> 9;
         };
     }
 

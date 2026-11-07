@@ -34,7 +34,7 @@ public final class WildEncounterManager {
     private static final String LAST_CHECK = "MinemonWildSpawnCheck";
     private static final long CHECK_INTERVAL = 20L * 30L;
     private static final long EXPIRY = 20L * 60L * 5L;
-    public static final int MAX_ACTIVE = 5, MAX_DOWNED = 3;
+    public static final int MAX_ACTIVE = 25, MAX_DOWNED = 10;
     private static final List<String> RARITIES = List.of("common", "uncommon", "rare", "legendary", "mythic");
     private static volatile java.util.Map<String, Double> rarityChances = java.util.Map.of(
             "common", .04D, "uncommon", .015D, "rare", .005D, "legendary", .001D, "mythic", .0003D);
@@ -250,6 +250,13 @@ public final class WildEncounterManager {
                 : (int)Math.min(Integer.MAX_VALUE, (long)Math.max(0, defeated.getExperienceReward()) * 2L);
         data.putBoolean("MinemonCompanionXpHandled", true);
         attacker.awardPokemonExperienceHalfUnits(rewardHalfUnits);
+        double trainerShare = TrainerProgression.trainerShareForCompanionXpHalfUnits(rewardHalfUnits);
+        UUID trainerId = attacker.getOwnerUUID();
+        if (trainerShare > 0.0D && trainerId != null && defeated.level instanceof ServerLevel serverLevel) {
+            ServerPlayer trainer = serverLevel.getServer().getPlayerList().getPlayer(trainerId);
+            if (trainer != null) PokecPlayerData.addTrainerXp(trainer, trainerShare);
+            else TrainerXpLedger.queue(serverLevel, trainerId, trainerShare);
+        }
     }
 
     public static boolean canDamage(MinemonCreature wild, net.minecraft.world.damagesource.DamageSource source) {
@@ -282,8 +289,6 @@ public final class WildEncounterManager {
         WildEncounterData.get((ServerLevel) wild.level).put(owner(wild), wild.getUUID(), "downed");
         wild.setHealth(1.0F); wild.setEncounterDowned(true);
         awardCompanionExperience(wild, source);
-        ServerPlayer player = encounterPlayer(wild, owner(wild));
-        if (player != null) PokecPlayerData.addTrainerXp(player, TrainerProgression.pokemonXp(wild.getSpeciesSlug(), wild.getPokemonLevel()));
         return true;
     }
 
@@ -380,7 +385,6 @@ public final class WildEncounterManager {
     }
 
     public static void finishCapture(MinemonCreature pokemon, ServerPlayer player) {
-        PokecPlayerData.addTrainerXp(player, TrainerProgression.pokemonXp(pokemon.getSpeciesSlug(), pokemon.getPokemonLevel()) * .25D);
         var data = pokemon.getPersistentData();
         data.remove("MinemonWildCaptureAttempts"); data.remove("MinemonWildTreats");
         WildEncounterData.get((ServerLevel) pokemon.level).remove(player.getUUID(), pokemon.getUUID());

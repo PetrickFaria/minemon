@@ -268,6 +268,7 @@ public final class ClientSmokeTest {
       ||Boolean.getBoolean("minemon.clientSmokeWildCaptureReopen")){
    WildCaptureClientSmokeTest.tick(event);return;
   }
+  if(Boolean.getBoolean("minemon.clientSmokeGhostLinePersistence")){GhostLineClientSmokeTest.reopenTick(event);return;}
   if(Boolean.getBoolean("minemon.clientSmokeGhostLine")){GhostLineClientSmokeTest.tick(event);return;}
   if(Boolean.getBoolean("minemon.clientSmokePokemonManagement")){PokemonManagementClientSmokeTest.tick(event);return;}
   if(Boolean.getBoolean("minemon.clientSmokeTreats")){PokemonTreatClientSmokeTest.tick(event);return;}

@@ -165,6 +165,8 @@ final class GhostLineClientSmokeTest {
       for(int y=101;y<=112;y++)level.setBlockAndUpdate(new BlockPos(x,y,z),Blocks.AIR.defaultBlockState());
      }
      var gastly=spawn(level,"gastly",0,8,net.minecraft.world.entity.MobSpawnType.NATURAL);
+     gastly.setCustomName(net.minecraft.network.chat.Component.literal("Minemon Gastly Persistence Fixture"));
+     gastly.setCustomNameVisible(false);
      var secondGastly=spawn(level,"gastly",64,16,net.minecraft.world.entity.MobSpawnType.SPAWN_EGG);
      var haunter=spawn(level,"haunter",-16,8);var gengar=spawn(level,"gengar",16,8);
      gastlyId=gastly.getUUID();secondGastlyId=secondGastly.getUUID();haunterId=haunter.getUUID();gengarId=gengar.getUUID();
@@ -358,6 +360,20 @@ final class GhostLineClientSmokeTest {
    System.out.println("[GHOST LINE] visible aura "+view+": "+purple+" purple pixels near the target");
   }
  }
+ private static void verifyVisibleCore(Minecraft mc,String view){
+  try(var frame=Screenshot.takeScreenshot(mc.getMainRenderTarget())){
+   int darkCore=0;
+   int x0=frame.getWidth()*43/100,x1=frame.getWidth()*57/100;
+   int y0=frame.getHeight()*38/100,y1=frame.getHeight()*66/100;
+   for(int y=y0;y<y1;y++)for(int x=x0;x<x1;x++){
+    int pixel=frame.getPixelRGBA(x,y);
+    int red=pixel&255,green=(pixel>>>8)&255,blue=(pixel>>>16)&255;
+    if(red<85&&green<85&&blue<110)darkCore++;
+   }
+   if(darkCore<12)throw new IllegalStateException("Gastly core is obscured in the actual "+view+" framebuffer: dark core pixels="+darkCore);
+   System.out.println("[GHOST LINE] visible core "+view+": "+darkCore+" dark pixels");
+  }
+ }
  private static MinemonCreature spawn(net.minecraft.server.level.ServerLevel level,String slug,double x,double z){
   return spawn(level,slug,x,z,net.minecraft.world.entity.MobSpawnType.NATURAL);
  }
@@ -371,6 +387,56 @@ final class GhostLineClientSmokeTest {
  private static String readClip(MinemonCreature mob){
   try{var f=MinemonCreature.class.getDeclaredField("selectedAnimationForValidation");f.setAccessible(true);return String.valueOf(f.get(mob));}
   catch(Exception ignored){return "unavailable";}
+ }
+ private static boolean reopenOpened,reopenFinished,reopenPositioned;
+ private static int reopenTicks,reopenCaptureAt;
+ static void reopenTick(TickEvent.ClientTickEvent event) {
+  if(event.phase!=TickEvent.Phase.END||reopenFinished)return;
+  Minecraft mc=Minecraft.getInstance();
+  try {
+   if(!reopenOpened&&mc.screen instanceof TitleScreen){
+    reopenOpened=true;
+    var file=Path.of("saves/minemon-validation/level.dat").toFile();
+    var tag=net.minecraft.nbt.NbtIo.readCompressed(file);
+    tag.getCompound("Data").putBoolean("confirmedExperimentalSettings",true);
+    net.minecraft.nbt.NbtIo.writeCompressed(tag,file);
+    Object flows=Minecraft.class.getMethod("createWorldOpenFlows").invoke(mc);
+    for(var method:flows.getClass().getMethods())if(method.getName().equals("loadLevel")){
+     if(method.getParameterCount()==2&&method.getParameterTypes()[1]==String.class){method.invoke(flows,mc.screen,"minemon-validation");break;}
+     if(method.getParameterCount()==1&&method.getParameterTypes()[0]==String.class){method.invoke(flows,"minemon-validation");break;}
+    }
+    return;
+   }
+   if(mc.level==null||mc.player==null||mc.getSingleplayerServer()==null||mc.screen!=null)return;
+   reopenTicks++;
+   MinemonCreature gastly=null;
+   for(var e:mc.level.entitiesForRendering())if(e instanceof MinemonCreature m&&m.hasCustomName()
+       &&m.getCustomName().getString().equals("Minemon Gastly Persistence Fixture")){gastly=m;break;}
+   if(gastly==null){
+    if(reopenTicks>240)throw new IllegalStateException("Named Gastly was not restored after reopening the saved world");
+    return;
+   }
+   if(reopenTicks<30)return;
+   if(!reopenPositioned){
+    mc.player.setGameMode(GameType.SPECTATOR);
+    face(mc,gastly);
+    reopenPositioned=true;reopenCaptureAt=reopenTicks+5;
+    return;
+   }
+   if(reopenTicks<reopenCaptureAt)return;
+   String reopenLabel="save/reopen "+System.getProperty("minemon.gastlyReopenIndex","1");
+   verifyVisibleAura(mc,reopenLabel);
+   verifyVisibleCore(mc,reopenLabel);
+   Screenshot.grab(mc.gameDirectory,"gastly-persistence-reopen-"+System.getProperty("minemon.gastlyReopenIndex","1")+".png",
+      mc.getMainRenderTarget(),message->{
+       try {
+        String index=System.getProperty("minemon.gastlyReopenIndex","1");
+        Files.writeString(Path.of("gastly-persistence-reopen-"+index+".txt"),
+          "PASS GASTLY PERSISTENCE REOPEN "+index+": saved Gastly entity restored and its aura is visible in the real client framebuffer.\n");
+        reopenFinished=true;mc.stop();
+       } catch(Exception failure){throw new RuntimeException(failure);}
+      });
+  } catch(Exception failure){throw new RuntimeException("Gastly persistence client validation failed",failure);}
  }
  private GhostLineClientSmokeTest(){}
 }
