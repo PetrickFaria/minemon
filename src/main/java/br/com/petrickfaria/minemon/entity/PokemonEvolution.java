@@ -32,7 +32,7 @@ public final class PokemonEvolution {
         saved.putBoolean("NightRoutine", false);
         evolved.load(saved);
         evolved.moveTo(source.getX(), source.getY(), source.getZ(), source.getYRot(), source.getXRot());
-        evolved.setPokemonProgress(source.getPokemonLevel(), source.getPokemonExperience());
+        evolved.setPokemonProgressHalfUnits(source.getPokemonLevel(), source.getPokemonExperienceHalfUnits());
         evolved.setOrderedToSit(source.isOrderedToSit());
         evolved.setTarget(null);
         evolved.getNavigation().stop();

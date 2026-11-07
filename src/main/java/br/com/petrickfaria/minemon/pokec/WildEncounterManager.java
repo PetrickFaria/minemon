@@ -236,7 +236,7 @@ public final class WildEncounterManager {
         return null;
     }
 
-    /** Awards vanilla mob XP once to the domestic Minemon that delivered the lethal hit. */
+    /** Awards one defeat reward to the domestic Minemon responsible for the final hit. */
     public static void awardCompanionExperience(net.minecraft.world.entity.Mob defeated,
                                                  net.minecraft.world.damagesource.DamageSource source) {
         if (defeated.level.isClientSide) return;
@@ -244,8 +244,12 @@ public final class WildEncounterManager {
         if (attacker == null || !attacker.isTame()) return;
         var data = defeated.getPersistentData();
         if (data.getBoolean("MinemonCompanionXpHandled")) return;
+        int rewardHalfUnits = defeated instanceof MinemonCreature wildPokemon
+                ? br.com.petrickfaria.minemon.entity.PokemonProgression.xpRewardHalfUnitsForWildRarity(
+                        wildPokemon.getPokemonRarity(), br.com.petrickfaria.minemon.config.MinemonConfig.POKEMON_XP_PER_ZOMBIE.get())
+                : (int)Math.min(Integer.MAX_VALUE, (long)Math.max(0, defeated.getExperienceReward()) * 2L);
         data.putBoolean("MinemonCompanionXpHandled", true);
-        attacker.awardPokemonExperience(Math.max(0, defeated.getExperienceReward()));
+        attacker.awardPokemonExperienceHalfUnits(rewardHalfUnits);
     }
 
     public static boolean canDamage(MinemonCreature wild, net.minecraft.world.damagesource.DamageSource source) {

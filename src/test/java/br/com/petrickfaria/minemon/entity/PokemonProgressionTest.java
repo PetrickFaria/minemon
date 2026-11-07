@@ -5,18 +5,26 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 public final class PokemonProgressionTest {
-    @Test public void levelCostsAndRarityMultipliersMatchTheRequestedTable() {
-        assertEquals(5, cost(1, "common"));
-        assertEquals(15, cost(2, "common"));
-        assertEquals(30, cost(3, "common"));
-        assertEquals(75, cost(5, "common"));
-        assertEquals(225, cost(9, "common"));
-        assertEquals(10, cost(1, "uncommon"));
-        assertEquals(20, cost(1, "rare"));
-        assertEquals(40, cost(1, "very_rare"));
-        assertEquals(80, cost(1, "legendary"));
-        assertEquals(80, cost(1, "mythic"));
+    @Test public void levelCostsMatchTheConfiguredZombieReferenceAndRarityOffsets() {
+        assertEquals(15, cost(1, "common"));
+        assertEquals(20, cost(2, "common"));
+        assertEquals(25, cost(3, "common"));
+        assertEquals(35, cost(5, "common"));
+        assertEquals(55, cost(9, "common"));
+        assertEquals(20, cost(1, "uncommon"));
+        assertEquals(25, cost(1, "rare"));
+        assertEquals(25, cost(1, "very_rare"));
+        assertEquals(30, cost(1, "legendary"));
+        assertEquals(35, cost(1, "mythic"));
         assertEquals(0, cost(10, "common"));
+    }
+
+    @Test public void wildPokemonRewardsUseHalfXpUnitsWithoutRounding() {
+        assertEquals(5, PokemonProgression.xpRewardHalfUnitsForWildRarity("common", 5));
+        assertEquals(10, PokemonProgression.xpRewardHalfUnitsForWildRarity("uncommon", 5));
+        assertEquals(20, PokemonProgression.xpRewardHalfUnitsForWildRarity("rare", 5));
+        assertEquals(100, PokemonProgression.xpRewardHalfUnitsForWildRarity("legendary", 5));
+        assertEquals(250, PokemonProgression.xpRewardHalfUnitsForWildRarity("mythic", 5));
     }
 
     @Test public void evolutionRequirementsFollowCatalogEdgesAndBranches() {

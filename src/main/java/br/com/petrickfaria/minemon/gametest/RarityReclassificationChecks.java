@@ -28,10 +28,10 @@ public final class RarityReclassificationChecks {
  public static void reclassificationKeepsOverflowXpUntilNextAward(GameTestHelper h){
   var m=ModEntities.SPECIES.get("rattata").get().create(h.getLevel());
   var owner=java.util.UUID.randomUUID();m.setTame(true);m.setOwnerUUID(owner);m.setPokemonLevel(3);m.setHealth(3);
-  var saved=m.saveWithoutId(new CompoundTag());saved.putInt("MinemonPokemonExperience",37);
+  var saved=m.saveWithoutId(new CompoundTag());saved.remove("MinemonPokemonExperienceHalfUnits");saved.putInt("MinemonPokemonExperience",37);
   m.load(saved);m.load(m.saveWithoutId(new CompoundTag()));
   if(m.getPokemonLevel()!=3||m.getPokemonExperience()!=37||m.getHealth()!=3||!owner.equals(m.getOwnerUUID()))h.fail("Existing XP, level, health or owner was lost");
-  if(m.awardPokemonExperience(1)!=1||m.getPokemonLevel()!=4||m.getPokemonExperience()!=8||m.getHealth()!=5)h.fail("Saved overflow must carry forward without duplicated growth");
+  if(m.awardPokemonExperience(1)!=1||m.getPokemonLevel()!=4||m.getPokemonExperience()!=13||m.getHealth()!=3)h.fail("Saved XP overflow must carry forward without duplicated growth or healing");
  }
  public static void oldConfigCannotOverrideCatalogAndUnrelatedSettingsSurvive(GameTestHelper h) throws Exception{
   Path file=FMLPaths.CONFIGDIR.get().resolve("minemon/pokec-economy.toml");byte[] original=Files.readAllBytes(file);

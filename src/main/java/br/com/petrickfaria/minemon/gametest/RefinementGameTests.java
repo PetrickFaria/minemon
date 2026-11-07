@@ -15,11 +15,11 @@ public class RefinementGameTests {
   var mob=ModEntities.SPECIES.get("charmander").get().create(h.getLevel());
   mob.setPokemonLevel(1);double hp=PokemonProgression.healthForRarity(mob.getPokemonRarity(),1);
   mob.setHealth(3);mob.setPokemonLevel(5);
-  if(mob.getMaxHealth()!=hp+8||mob.getHealth()!=11)h.fail("Level growth must add 8 HP, without full healing");
+  if(mob.getMaxHealth()!=hp+16||mob.getHealth()!=3)h.fail("Level growth must add 16 max HP while preserving current health");
   double damage=mob.getAttributeValue(Attributes.ATTACK_DAMAGE);
   var data=mob.saveWithoutId(new CompoundTag());var copy=ModEntities.SPECIES.get("charmander").get().create(h.getLevel());copy.load(data);
-  if(copy.getMaxHealth()!=mob.getMaxHealth()||copy.getHealth()!=11||copy.getAttributeValue(Attributes.ATTACK_DAMAGE)!=damage)h.fail("Reload duplicated stat growth or healed");
-  copy.setPokemonProgress(5,copy.getPokemonExperience());if(copy.getHealth()!=11)h.fail("Same-level update must not heal");
+  if(copy.getMaxHealth()!=mob.getMaxHealth()||copy.getHealth()!=3||copy.getAttributeValue(Attributes.ATTACK_DAMAGE)!=damage)h.fail("Reload duplicated stat growth or healed");
+  copy.setPokemonProgress(5,copy.getPokemonExperience());if(copy.getHealth()!=3)h.fail("Same-level update must not heal");
   // Keep rarity checks in the existing persistence batch: new named batches
   // reorder shared-world legacy arenas and contaminate their water/time fixtures.
   RarityReclassificationChecks.all151EntitiesUseCatalogStatsAndSavedProgress(h);

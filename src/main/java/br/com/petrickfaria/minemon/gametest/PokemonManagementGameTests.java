@@ -132,6 +132,19 @@ public final class PokemonManagementGameTests {
         check(h, pokemon.getPokemonLevel() == afterLevel && pokemon.getPokemonExperience() == afterXp,
                 "a single entity death must not award companion XP twice");
 
+        MinemonCreature otherCompanion = h.spawn(ModEntities.SPECIES.get("charmander").get(), new BlockPos(4, 1, 5));
+        otherCompanion.tame(owner);
+        net.minecraft.world.entity.animal.Cow cow = h.spawn(EntityType.COW, new BlockPos(10, 1, 5));
+        br.com.petrickfaria.minemon.entity.ElementalProjectile shot =
+                new br.com.petrickfaria.minemon.entity.ElementalProjectile(pokemon, cow);
+        int cowReward = cow.getExperienceReward();
+        br.com.petrickfaria.minemon.pokec.PokecEvents.companionExperience(
+                new LivingDeathEvent(cow, DamageSource.indirectMobAttack(shot, pokemon)));
+        check(h, pokemon.getPokemonExperienceHalfUnits() == afterXp * 2 + cowReward * 2
+                        && otherCompanion.getPokemonExperienceHalfUnits() == 0,
+                "a final elemental projectile must credit exactly its owning Pokémon for normal passive-mob XP");
+        otherCompanion.discard(); cow.discard();
+
         pokemon.setPokemonProgress(1, 4);
         var saved = pokemon.saveWithoutId(new net.minecraft.nbt.CompoundTag());
         MinemonCreature restored = ModEntities.SPECIES.get("bulbasaur").get().create(h.getLevel());
@@ -140,6 +153,84 @@ public final class PokemonManagementGameTests {
                 "companion level progress must survive entity save and load");
         owner.discard();
         h.succeed();
+    }
+
+    @GameTest(template = "test_arena", timeoutTicks = 220)
+    public static void wildPokemonHalfXpAccumulatesAndPersistsAcrossEntityReload(GameTestHelper h) {
+        floor(h);
+        ServerPlayer owner = player(h, h.absolutePos(new BlockPos(7, 1, 5)));
+        MinemonCreature attacker = h.spawn(ModEntities.SPECIES.get("rattata").get(), new BlockPos(5, 1, 5));
+        attacker.tame(owner);
+        MinemonCreature first = h.spawn(ModEntities.SPECIES.get("rattata").get(), new BlockPos(9, 1, 5));
+        MinemonCreature second = h.spawn(ModEntities.SPECIES.get("rattata").get(), new BlockPos(10, 1, 5));
+        br.com.petrickfaria.minemon.pokec.WildEncounterManager.awardCompanionExperience(first, DamageSource.mobAttack(attacker));
+        check(h, attacker.getPokemonExperienceHalfUnits() == 5 && attacker.getPokemonLevel() == 1,
+                "a common wild Pokémon must award exactly 2.5 XP without rounding or an early level-up");
+        var saved = attacker.saveWithoutId(new net.minecraft.nbt.CompoundTag());
+        MinemonCreature restored = ModEntities.SPECIES.get("rattata").get().create(h.getLevel());
+        restored.load(saved);
+        var savedAgain = restored.saveWithoutId(new net.minecraft.nbt.CompoundTag());
+        MinemonCreature reopened = ModEntities.SPECIES.get("rattata").get().create(h.getLevel());
+        reopened.load(savedAgain);
+        br.com.petrickfaria.minemon.pokec.WildEncounterManager.awardCompanionExperience(second, DamageSource.mobAttack(reopened));
+        check(h, reopened.getPokemonExperienceHalfUnits() == 10 && reopened.getPokemonExperienceExact() == 5.0D,
+                "half XP must survive saving and a second common defeat must total exactly 5 XP");
+        reopened.awardPokemonExperienceHalfUnits(180);
+        check(h, reopened.getPokemonLevel() == 5 && reopened.getPokemonExperienceExact() == 5.0D,
+                "a large reward must pass through every affordable level and preserve its remainder");
+        attacker.discard(); restored.discard(); reopened.discard(); first.discard(); second.discard(); owner.discard();
+        h.succeed();
+    }
+
+    @GameTest(template = "test_arena", timeoutTicks = 220)
+    public static void sittingPokemonRetaliatesOnlyWithAuthorizationAndStaysAtItsAnchor(GameTestHelper h) {
+        floor(h);
+        ServerPlayer owner = player(h, h.absolutePos(new BlockPos(7, 1, 5)));
+        MinemonCreature pokemon = h.spawn(ModEntities.SPECIES.get("pikachu").get(), new BlockPos(5, 1, 5));
+        pokemon.tame(owner);
+        pokemon.setOrderedToSit(true);
+        net.minecraft.world.entity.monster.Zombie target = h.spawn(EntityType.ZOMBIE, new BlockPos(10, 1, 5));
+        target.setNoAi(true);
+        target.setHealth(200.0F);
+        target.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).setBaseValue(200.0D);
+        target.setHealth(200.0F);
+        var anchor = pokemon.position();
+        pokemon.setTarget(target);
+        h.runAfterDelay(8, () -> {
+            check(h, target.getHealth() == 200.0F, "a nearby mob must not be attacked before trainer authorization");
+            br.com.petrickfaria.minemon.pokec.PokecEvents.playerPokemonAttack(
+                    new net.minecraftforge.event.entity.living.LivingAttackEvent(target, DamageSource.playerAttack(owner)));
+            h.runAfterDelay(100, () -> {
+                check(h, target.getHealth() < 200.0F, "a seated Pokémon must attack an authorized target within ranged reach");
+                check(h, pokemon.isOrderedToSit() && pokemon.position().distanceToSqr(anchor) < 1.0E-6D,
+                        "the seated Pokémon must remain at its anchor while attacking");
+                pokemon.discard(); target.discard(); owner.discard();
+                h.succeed();
+            });
+        });
+    }
+
+    @GameTest(template = "test_arena", timeoutTicks = 140)
+    public static void sittingPokemonCanMeleeWithinReachWithoutSteppingForward(GameTestHelper h) {
+        floor(h);
+        ServerPlayer owner = player(h, h.absolutePos(new BlockPos(7, 1, 5)));
+        MinemonCreature pokemon = h.spawn(ModEntities.SPECIES.get("rattata").get(), new BlockPos(5, 1, 5));
+        pokemon.tame(owner);
+        for (int i = 0; i < br.com.petrickfaria.minemon.entity.CombatCharges.CAPACITY; i++) pokemon.rangedCharges().consume();
+        pokemon.setOrderedToSit(true);
+        net.minecraft.world.entity.animal.Cow target = h.spawn(EntityType.COW, new BlockPos(5, 1, 5));
+        target.setNoAi(true);
+        target.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).setBaseValue(200.0D);
+        target.setHealth(200.0F);
+        pokemon.focusPlayerTarget(target);
+        var anchor = pokemon.position();
+        h.runAfterDelay(80, () -> {
+            check(h, target.getHealth() < 200.0F, "a seated Pokémon must use melee attacks against a target already in reach");
+            check(h, pokemon.isOrderedToSit() && pokemon.position().distanceToSqr(anchor) < 1.0E-6D,
+                    "a seated melee attacker must remain at its original position");
+            pokemon.discard(); target.discard(); owner.discard();
+            h.succeed();
+        });
     }
 
     @GameTest(template = "test_arena", timeoutTicks = 220)

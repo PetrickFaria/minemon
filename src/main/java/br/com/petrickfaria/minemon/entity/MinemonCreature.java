@@ -122,6 +122,9 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     private int attackSequence;
     private int playedAttackSequence;
     private boolean loadingPokemonData;
+    private double sitAnchorX = Double.NaN;
+    private double sitAnchorY = Double.NaN;
+    private double sitAnchorZ = Double.NaN;
     private int naturalHealTicks = 1200;
     private UUID playerFocusTarget;
     private boolean resumeSleepingAfterFocus;
@@ -162,7 +165,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     @Override public void travel(net.minecraft.world.phys.Vec3 input){
         if(!this.level.isClientSide&&!this.isAquaticSpecies()&&!SpeciesBehaviorProfiles.canFly(this.getSpeciesSlug()))
             this.setNoGravity(this.isInWater());
-        if (isDefeated() || this.isOrderedToSit() && !this.commandLanding() || this.commandLanding() && this.isOnGround()) {
+        if (isDefeated() || this.isOrderedToSit()) {
             input=net.minecraft.world.phys.Vec3.ZERO;
             this.setSpeed(0); this.setXxa(0); this.setYya(0); this.setZza(0); this.setJumping(false);
         }
@@ -218,11 +221,14 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         super.setOrderedToSit(orderedToSit);
         this.entityData.set(ORDERED_SIT, orderedToSit);
         if (orderedToSit) {
+            sitAnchorX = getX(); sitAnchorY = getY(); sitAnchorZ = getZ();
             this.setSleeping(false); this.entityData.set(NIGHT_REST, false); this.nightRoutine=false;
             this.getNavigation().stop(); this.stopSpontaneousRun(); this.setFollowingRun(false);
             this.getMoveControl().setWantedPosition(this.getX(),this.getY(),this.getZ(),0);
             this.setSpeed(0); this.setXxa(0); this.setYya(0); this.setZza(0); this.setJumping(false);
-            this.setDeltaMovement(0,this.getDeltaMovement().y,0);
+            this.setDeltaMovement(0,0,0);
+        } else {
+            sitAnchorX = sitAnchorY = sitAnchorZ = Double.NaN;
         }
     }
 
@@ -275,7 +281,13 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         tag.putInt("MinemonMeleeSequence",successfulMeleeAttacks);
         tag.putInt("MinemonCombatCooldown",(int)Math.max(0,nextCombatTick-level.getGameTime()));
         tag.putInt("MinemonPokemonLevel", this.getPokemonLevel());
-        tag.putInt("MinemonPokemonExperience", this.getPokemonExperience());
+        tag.putInt("MinemonPokemonExperience", this.getPokemonExperience()); // Legacy whole-XP value for older builds.
+        tag.putInt("MinemonPokemonExperienceHalfUnits", this.getPokemonExperienceHalfUnits());
+        if (isOrderedToSit()) {
+            tag.putDouble("MinemonSitAnchorX", Double.isFinite(sitAnchorX) ? sitAnchorX : getX());
+            tag.putDouble("MinemonSitAnchorY", Double.isFinite(sitAnchorY) ? sitAnchorY : getY());
+            tag.putDouble("MinemonSitAnchorZ", Double.isFinite(sitAnchorZ) ? sitAnchorZ : getZ());
+        }
         tag.putInt("MinemonNaturalHealTicks", naturalHealTicks);
         tag.putInt("MinemonChanseyCooldownTicks", this.chanseyCooldownTicks);
         tag.putBoolean("MinemonRocketSpecial", this.isRocketSpecial());
@@ -304,8 +316,11 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         this.successfulMeleeAttacks=Math.max(0,Math.min(4,tag.getInt("MinemonMeleeSequence")));
         this.nextCombatTick=level.getGameTime()+Math.max(0,tag.getInt("MinemonCombatCooldown"));
         this.setRocketSpecial(tag.getBoolean("MinemonRocketSpecial"));
-        this.setPokemonProgress(tag.contains("MinemonPokemonLevel") ? tag.getInt("MinemonPokemonLevel") : 1,
-                tag.getInt("MinemonPokemonExperience"));
+        int savedHalfUnits = tag.contains("MinemonPokemonExperienceHalfUnits")
+                ? Math.max(0, tag.getInt("MinemonPokemonExperienceHalfUnits"))
+                : (int)Math.min(Integer.MAX_VALUE, (long)Math.max(0, tag.getInt("MinemonPokemonExperience")) * 2L);
+        this.setPokemonProgressHalfUnits(tag.contains("MinemonPokemonLevel") ? tag.getInt("MinemonPokemonLevel") : 1,
+                savedHalfUnits);
         this.entityData.set(POKEMON_RARITY, br.com.petrickfaria.minemon.pokec.PokecEconomy.get().rarity(this.getSpeciesSlug()));
         this.refreshPokemonXpThreshold();
         this.chanseyCooldownTicks = Math.max(0, tag.getInt("MinemonChanseyCooldownTicks"));
@@ -325,6 +340,11 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
                     ? tag.getBoolean("MinemonCustomSoundDayActive") : this.customSoundTicks > 0;
         }
         this.aquaticSleepY=tag.contains("AquaticSleepAnchorY")?tag.getDouble("AquaticSleepAnchorY"):Double.NaN;
+        if (isOrderedToSit()) {
+            sitAnchorX = tag.contains("MinemonSitAnchorX") ? tag.getDouble("MinemonSitAnchorX") : getX();
+            sitAnchorY = tag.contains("MinemonSitAnchorY") ? tag.getDouble("MinemonSitAnchorY") : getY();
+            sitAnchorZ = tag.contains("MinemonSitAnchorZ") ? tag.getDouble("MinemonSitAnchorZ") : getZ();
+        }
         this.refreshPokemonAttributes(0);
         if(tag.contains("Health"))this.setHealth(Math.min(this.getMaxHealth(),tag.getFloat("Health")));
         if(isDefeated()){setNoAi(true);setTarget(null);setSleeping(true);}
@@ -333,39 +353,53 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     }
 
     public int getPokemonLevel() { return Math.max(1, this.entityData.get(POKEMON_LEVEL)); }
-    public int getPokemonExperience() { return Math.max(0, this.entityData.get(POKEMON_XP)); }
+    /** Whole-XP compatibility accessor; use getPokemonExperienceHalfUnits for fractional precision. */
+    public int getPokemonExperience() { return getPokemonExperienceHalfUnits() / 2; }
+    public int getPokemonExperienceHalfUnits() { return Math.max(0, this.entityData.get(POKEMON_XP)); }
+    public double getPokemonExperienceExact() { return getPokemonExperienceHalfUnits() / 2.0D; }
+    public String getPokemonExperienceText() {
+        int units = getPokemonExperienceHalfUnits();
+        return (units % 2 == 0 ? Integer.toString(units / 2) : (units / 2) + ",5");
+    }
     public String getPokemonRarity() { return this.entityData.get(POKEMON_RARITY); }
     public int getPokemonXpToNextLevel() { return Math.max(0, this.entityData.get(POKEMON_XP_TO_NEXT)); }
     public void setPokemonLevel(int level) { setPokemonProgress(level, 0); }
     public void setPokemonProgress(int level, int experience) {
+        setPokemonProgressHalfUnits(level, (int)Math.min(Integer.MAX_VALUE, (long)Math.max(0, experience) * 2L));
+    }
+    public void setPokemonProgressHalfUnits(int level, int experienceHalfUnits) {
         int oldLevel=this.getPokemonLevel();
         int boundedLevel = Math.max(1, Math.min(PokemonProgression.maxLevel(), level));
         this.entityData.set(POKEMON_LEVEL, boundedLevel);
         int needed = PokemonProgression.xpForNextLevel(boundedLevel, this.getSpeciesSlug());
-        this.entityData.set(POKEMON_XP, needed <= 0 ? 0 : Math.max(0, loadingPokemonData?experience:Math.min(needed - 1, experience)));
+        int nextLevelUnits = needed <= 0 ? 0 : needed * 2;
+        this.entityData.set(POKEMON_XP, needed <= 0 ? 0 : Math.max(0, loadingPokemonData
+                ? experienceHalfUnits : Math.min(nextLevelUnits - 1, experienceHalfUnits)));
         this.refreshPokemonXpThreshold();
         this.refreshPokemonAttributes(loadingPokemonData?0:Math.max(0,boundedLevel-oldLevel));
     }
     public int awardPokemonExperience(int amount) {
-        if (this.isDefeated() || amount <= 0 || !this.isTame() || this.level.isClientSide) return 0;
+        if (amount <= 0) return 0;
+        return awardPokemonExperienceHalfUnits((int)Math.min(Integer.MAX_VALUE, (long)amount * 2L)) / 2;
+    }
+    public int awardPokemonExperienceHalfUnits(int amountHalfUnits) {
+        if (this.isDefeated() || amountHalfUnits <= 0 || !this.isTame() || this.level.isClientSide) return 0;
         int oldLevel=this.getPokemonLevel();
-        int awarded = 0;
-        long pending = Math.min((long) amount, Integer.MAX_VALUE);
+        long pending = Math.min((long) amountHalfUnits, Integer.MAX_VALUE);
         while (pending > 0 && this.getPokemonLevel() < PokemonProgression.maxLevel()) {
-            int need = PokemonProgression.xpForNextLevel(this.getPokemonLevel(), this.getSpeciesSlug());
-            int room = Math.max(0,need - this.getPokemonExperience());
+            int need = PokemonProgression.xpForNextLevel(this.getPokemonLevel(), this.getSpeciesSlug()) * 2;
+            int room = Math.max(0,need - this.getPokemonExperienceHalfUnits());
             int add = (int) Math.min(pending, room);
-            this.entityData.set(POKEMON_XP, this.getPokemonExperience() + add);
+            this.entityData.set(POKEMON_XP, this.getPokemonExperienceHalfUnits() + add);
             pending -= add;
-            awarded += add;
-            if (this.getPokemonExperience() >= need) {
-                this.entityData.set(POKEMON_XP, this.getPokemonExperience()-need);
+            if (this.getPokemonExperienceHalfUnits() >= need) {
+                this.entityData.set(POKEMON_XP, this.getPokemonExperienceHalfUnits()-need);
                 this.entityData.set(POKEMON_LEVEL, this.getPokemonLevel() + 1);
             }
         }
         this.refreshPokemonXpThreshold();
         this.refreshPokemonAttributes(Math.max(0,this.getPokemonLevel()-oldLevel));
-        return awarded;
+        return amountHalfUnits - (int)pending;
     }
     private void refreshPokemonAttributes(int gainedLevels) {
         if(this.level.isClientSide)return;
@@ -374,7 +408,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         float health=this.getHealth();
         this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(PokemonProgression.healthForRarity(rarity,this.getPokemonLevel()));
         this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(PokemonProgression.damageForRarity(rarity,this.getPokemonLevel()));
-        this.setHealth(Math.min(this.getMaxHealth(),health+2.0F*gainedLevels));
+        this.setHealth(Math.min(this.getMaxHealth(),health));
     }
     private void refreshPokemonXpThreshold() {
         if (this.entityData == null) return;
@@ -542,7 +576,8 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         if (!this.isAquaticSpecies()) this.goalSelector.addGoal(0, new WaterEscapeGoal(this));
         this.goalSelector.addGoal(0,new NightRestGoal(this));
         this.goalSelector.addGoal(1, new SitWhenOrderedToGoal(this) {
-            @Override public boolean canUse(){return (!MinemonCreature.this.commandLanding() || MinemonCreature.this.isOnGround()) && super.canUse();}
+            @Override public boolean canUse(){return super.canUse();}
+            @Override public java.util.EnumSet<Flag> getFlags(){return java.util.EnumSet.noneOf(Flag.class);}
         });
         this.goalSelector.addGoal(1, new BreedGoal(this, 1.0D));
         this.goalSelector.addGoal(2, new ElementalCombatGoal(this));
@@ -782,6 +817,12 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         }
         if(!this.level.isClientSide&&!(Boolean.getBoolean("minemon.clientSmokeTest")&&this.getTags().contains("minemon-locomotion-fixture"))){if(!isDefeated())this.tickNightRest();}
         super.tick();
+        if (isOrderedToSit() && Double.isFinite(sitAnchorX) && Double.isFinite(sitAnchorY) && Double.isFinite(sitAnchorZ)) {
+            getNavigation().stop();
+            if (distanceToSqr(sitAnchorX, sitAnchorY, sitAnchorZ) > 1.0E-8D) setPos(sitAnchorX, sitAnchorY, sitAnchorZ);
+            setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
+            setSpeed(0); setXxa(0); setYya(0); setZza(0); setJumping(false);
+        }
         if (!level.isClientSide && isTame() && !isDefeated()) tickNaturalHealing();
         if(!level.isClientSide && isTame()){rangedCharges.tick(!isDefeated());entityData.set(RANGED_CHARGES,rangedCharges.charges());}
         if(isDefeated()){
@@ -904,8 +945,9 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         playerFocusTarget = target.getUUID();
         if (isSleeping()) setSleeping(false);
         entityData.set(NIGHT_REST, false);
-        if (isOrderedToSit()) setOrderedToSit(false);
-        setTarget(target);        getNavigation().moveTo(target, 1.0D);
+        setTarget(target);
+        if (isOrderedToSit()) getNavigation().stop();
+        else getNavigation().moveTo(target, 1.0D);
     }
 
     private void clearPlayerFocus() {
