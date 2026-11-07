@@ -158,8 +158,10 @@ public final class CompanionTests {
  }
  @GameTest(template="test_arena",timeoutTicks=180)
  public static void wildRetaliatesAgainstAnotherMinemon(GameTestHelper h) {
-  MinemonCreature b=spawn(h);MinemonCreature attacker=h.spawn(ModEntities.BULBASAUR.get(),new BlockPos(2,1,5));attacker.setNoAi(true);float health=attacker.getHealth();
-  b.hurt(DamageSource.mobAttack(attacker),1);
+  floor(h);MinemonCreature b=h.spawn(ModEntities.BULBASAUR.get(),new BlockPos(10,1,5));
+  MinemonCreature attacker=h.spawn(ModEntities.BULBASAUR.get(),new BlockPos(4,1,5));attacker.setNoAi(true);float health=attacker.getHealth();
+  check(h,b.hurt(DamageSource.mobAttack(attacker),1)&&b.getTarget()==attacker,
+      "A damaging Minemon hit must acquire the attacker before ranged repositioning; "+state(b,attacker));
   awaitWildRangedRetaliation(h,b,attacker,health,0);
  }
  private static void awaitWildRangedRetaliation(GameTestHelper h,MinemonCreature defender,MinemonCreature attacker,float initialHealth,int elapsed){

@@ -1162,7 +1162,8 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         }
 
         this.wildAggressionTicks--;
-        if (this.getNavigation().isDone() && target.distanceToSqr(this) > 16.0D) {
+        boolean stillCreatingRangedSpace = CombatGeometry.horizontalCenterDistanceSquared(this, target) < 49.0D;
+        if (this.getNavigation().isDone() && target.distanceToSqr(this) > 16.0D && !stillCreatingRangedSpace) {
             this.wildUnreachableTicks++;
         } else {
             this.wildUnreachableTicks = 0;
