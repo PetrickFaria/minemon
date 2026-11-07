@@ -385,6 +385,8 @@ public final class WildEncounterManager {
     }
 
     public static void finishCapture(MinemonCreature pokemon, ServerPlayer player) {
+        PokecPlayerData.addTrainerXp(player,
+                TrainerProgression.pokemonXp(pokemon.getSpeciesSlug(), pokemon.getPokemonLevel()) * 0.25D);
         var data = pokemon.getPersistentData();
         data.remove("MinemonWildCaptureAttempts"); data.remove("MinemonWildTreats");
         WildEncounterData.get((ServerLevel) pokemon.level).remove(player.getUUID(), pokemon.getUUID());

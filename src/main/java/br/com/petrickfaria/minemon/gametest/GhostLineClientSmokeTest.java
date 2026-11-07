@@ -418,7 +418,11 @@ final class GhostLineClientSmokeTest {
    }
    if(reopenTicks<30)return;
    if(!reopenPositioned){
-    mc.player.setGameMode(GameType.SPECTATOR);
+    UUID playerId=mc.player.getUUID();
+    mc.getSingleplayerServer().execute(()->{
+     var serverPlayer=mc.getSingleplayerServer().getPlayerList().getPlayer(playerId);
+     if(serverPlayer!=null)serverPlayer.setGameMode(GameType.SPECTATOR);
+    });
     face(mc,gastly);
     reopenPositioned=true;reopenCaptureAt=reopenTicks+5;
     return;

@@ -8,6 +8,33 @@ public final class TrainerProgression {
 
     public record Progress(int level, double xpTowardNext) { }
 
+    /** XP for a Pokémon conversion or capture action before applying its action percentage. */
+    public static double pokemonXp(String slug, int pokemonLevel) {
+        PokecSpecies.Entry species = PokecSpecies.get(slug);
+        if (species == null) return 0.0D;
+        double base = switch (PokecEconomy.resolveRarity(species.rarity(), "common")) {
+            case "uncommon" -> 7.5D;
+            case "rare" -> 37.5D;
+            case "legendary" -> 375.0D;
+            case "mythic" -> 9375.0D;
+            default -> 2.5D;
+        };
+        int stage = evolutionStage(species);
+        double stageBonus = stage <= 1 ? 0.0D : stage == 2 ? 0.15D : 0.30D;
+        return base * (1.0D + stageBonus + 0.01D * Math.max(1, pokemonLevel));
+    }
+
+    public static int evolutionStage(PokecSpecies.Entry species) {
+        int stage = 1;
+        String parent = species.evolvesFrom();
+        while (parent != null && !parent.isBlank() && stage < 3) {
+            stage++;
+            PokecSpecies.Entry previous = PokecSpecies.get(parent);
+            parent = previous == null ? null : previous.evolvesFrom();
+        }
+        return stage;
+    }
+
     /** XP needed for the next trainer level, in adult-zombie XP equivalents. */
     public static double xpToNext(int level) {
         return xpToNext(level, MinemonConfig.POKEMON_XP_PER_ZOMBIE.get());
