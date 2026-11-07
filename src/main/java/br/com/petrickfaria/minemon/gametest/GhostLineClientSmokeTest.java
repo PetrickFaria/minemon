@@ -112,8 +112,13 @@ final class GhostLineClientSmokeTest {
   var mobId=mob.getUUID();
   server.execute(()->{
    var authoritative=server.overworld().getEntity(mobId);
-   if(authoritative instanceof MinemonCreature gastly){
-    gastly.moveTo(0.0D,101.0D,54.0D,180.0F,0.0F);
+   var player=server.getPlayerList().getPlayers().stream().findFirst().orElse(null);
+   if(authoritative instanceof MinemonCreature gastly&&player!=null){
+    // Measure the 50-block fixture from the camera anchor established by
+    // face(), not from a hard-coded world origin. Keep a 0.1-block margin
+    // inside the configured aura cutoff for the camera's eye-height offset
+    // and floating-point rounding; the resulting view remains a 50-block test.
+    gastly.moveTo(player.getX(),player.getY()+0.2D,player.getZ()+49.9D,180.0F,0.0F);
     gastly.setYBodyRot(180.0F);gastly.setYHeadRot(180.0F);
     mc.execute(()->farViewApplied=true);
    }
