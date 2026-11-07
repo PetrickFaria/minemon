@@ -493,7 +493,7 @@ public final class PokecGameTests {
         var result=ModItems.MASTER_BALL.get().interactLivingEntity(ball,owner,wild,InteractionHand.MAIN_HAND);
         var stored=PokeballItem.readStoredEntity(owner.getMainHandItem());
         check(result.consumesAction()&&stored!=null,"Master Ball stores a wild encounter without conventional capture rolls");
-        CompoundTag forgeData=stored.entityData().getCompound("ForgeData");
+        var forgeData=stored.entityData().getCompound("ForgeData");
         check(forgeData.getBoolean("MinemonWildEncounter")
                 &&forgeData.getString("MinemonEncounterState").equals("active"),
                 "Master Ball preserves wild encounter state in entity NBT");
