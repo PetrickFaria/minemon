@@ -275,31 +275,31 @@ final class GhostLineClientSmokeTest {
        &&screenshotSlotAvailable()&&!captures.contains("gengar-blink")){
     face(mc,gengar);snapNow(mc,"gengar-blink");
    }
-   if(ticks>=90&&ticks<145){
+   if(ticks>=90&&ticks<205){
     mc.getSingleplayerServer().execute(()->{
      var authoritative=mc.getSingleplayerServer().overworld().getEntity(gengarId);
      if(authoritative instanceof MinemonCreature g){g.setOnGround(true);g.setDeltaMovement(0.055D,0,0);}
     });
    }
-   if(ticks>=115&&ticks<145&&!captures.contains("gengar-walk")){
-    // Bring Gengar into the view before requiring a selected render clip. The
-    // animation predicate only updates while the entity is actually rendered.
+   if(ticks>=115&&ticks<205&&!captures.contains("gengar-walk")){
+    // Keep the test window open until the renderer has selected the real
+    // ground gait and a screenshot slot is available.
     face(mc,gengar);
     if(screenshotSlotAvailable()&&"animation.gengar.ground_walk".equals(readClip(gengar)))
      snap(mc,"gengar-walk");
    }
-   if(ticks>=145&&!captures.contains("gengar-walk"))
+   if(ticks>=205&&!captures.contains("gengar-walk"))
     throw new IllegalStateException("Gengar walking screenshot was not captured during ground_walk: "+readClip(gengar));
    // Keep each ghost in the render view while waiting for its intermittent blink.
-   // The eyes-closed render state only advances when that entity is rendered.
-   if(ticks>=145&&ticks<705&&(!captures.contains("haunter-blink")||!captures.contains("gengar-blink"))){
+   // Do not steal the camera from the Gengar gait check before its screenshot.
+   if(ticks>=145&&ticks<705&&captures.contains("gengar-walk")&&(!captures.contains("haunter-blink")||!captures.contains("gengar-blink"))){
     boolean needHaunterBlink=!captures.contains("haunter-blink");
     boolean needGengarBlink=!captures.contains("gengar-blink");
     if(needHaunterBlink&&needGengarBlink)face(mc,((ticks/20)%2==0)?haunter:gengar);
     else if(needHaunterBlink)face(mc,haunter);
     else face(mc,gengar);
    }
-   if(ticks>=150){
+   if(ticks>=210&&captures.contains("gengar-walk")){
     mc.getSingleplayerServer().execute(()->{
      var authoritative=mc.getSingleplayerServer().overworld().getEntity(gengarId);
      if(authoritative instanceof MinemonCreature g)g.setDeltaMovement(0,0,0);
