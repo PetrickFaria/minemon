@@ -204,6 +204,7 @@ public final class NightAndSwimmingTests {
        "Exclusively aquatic Shellder must preserve its submerged starting depth");
    // Keep the aggressor north of Dratini, clear of the sleeping Vaporeon body.
    var attacker=h.spawn(EntityType.COW,new BlockPos(12,1,5));attacker.setNoAi(true);
+   ElementalProjectile.resetCollisionValidation();
    float health=attacker.getHealth();
    check(h,dratini.hurt(DamageSource.mobAttack(attacker),1)&&!dratini.isSleeping()&&dratini.getTarget()==attacker,
        "An aquatic night sleeper must wake and retain its attacker");
@@ -221,7 +222,7 @@ public final class NightAndSwimmingTests {
        +" sight="+dratini.getSensing().hasLineOfSight(attacker)+" distance="+dratini.distanceTo(attacker)
        +" navDone="+dratini.getNavigation().isDone()+" navTarget="+dratini.getNavigation().getTargetPos()
        +" sleep="+dratini.isSleeping()+" nightRest="+dratini.isNightResting()+" nightCombat="+dratini.nightCombatTicksForValidation()
-       +" attacker="+attacker.position()+" health="+attacker.getHealth());
+       +" attacker="+attacker.position()+" health="+attacker.getHealth()+" projectile="+ElementalProjectile.collisionValidation());
   },500,"Permanent swimmers must rest in water and water visitors must settle at the bottom");
  }
  @GameTest(template="test_arena",batch="water_bottom",timeoutTicks=900)

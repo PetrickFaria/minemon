@@ -15,6 +15,8 @@ public final class ElementalProjectile extends ThrowableProjectile {
     private static final EntityDataAccessor<Integer> COLOR=SynchedEntityData.defineId(ElementalProjectile.class,EntityDataSerializers.INT);
     private float damage;
     private java.util.UUID targetId;
+    private static int validationEntityHits,validationBlockHits,validationTargetDamage;
+    private static String validationLastCollision="none";
     public ElementalProjectile(EntityType<? extends ElementalProjectile> type,Level level){super(type,level);}
     public ElementalProjectile(MinemonCreature attacker,LivingEntity target){
         this(ModEntities.ELEMENTAL_PROJECTILE.get(),attacker.level);
@@ -27,8 +29,12 @@ public final class ElementalProjectile extends ThrowableProjectile {
         shoot(direction.x,direction.y,direction.z,.65F,0);
     }
     public int color(){return entityData.get(COLOR);}
+    public static void resetCollisionValidation(){validationEntityHits=0;validationBlockHits=0;validationTargetDamage=0;validationLastCollision="none";}
+    public static String collisionValidation(){return "entityHits="+validationEntityHits+" blockHits="+validationBlockHits
+            +" targetDamage="+validationTargetDamage+" last="+validationLastCollision;}
     @Override protected void defineSynchedData(){entityData.define(COLOR,0xFFFFFF);}
     @Override protected float getGravity(){return 0;}
+    @Override protected float getInertia(){return 0.99F;}
     @Override protected boolean canHitEntity(net.minecraft.world.entity.Entity entity){
         // This shot is aimed at one authorized target. Creatures crossing its
         // path (including the attacker's allies) must not absorb and waste it.
@@ -43,13 +49,15 @@ public final class ElementalProjectile extends ThrowableProjectile {
     }
     @Override protected void onHitEntity(EntityHitResult result){
         if(level.isClientSide)return;
+        validationEntityHits++;validationLastCollision="entity:"+result.getEntity().getType()+"/"+result.getEntity().getUUID();
         if(getOwner() instanceof MinemonCreature owner && !owner.isDefeated()
                 && result.getEntity() instanceof LivingEntity target
-                && target.getUUID().equals(targetId) && owner.canAttack(target))
-            target.hurt(DamageSource.indirectMobAttack(this,owner),(float)owner.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE));
+                && target.getUUID().equals(targetId) && owner.canAttack(target)
+                &&target.hurt(DamageSource.indirectMobAttack(this,owner),(float)owner.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE)))
+            validationTargetDamage++;
         discard();
     }
-    @Override protected void onHitBlock(BlockHitResult result){if(!level.isClientSide)discard();}
+    @Override protected void onHitBlock(BlockHitResult result){if(!level.isClientSide){validationBlockHits++;validationLastCollision="block:"+result.getBlockPos();discard();}}
     @Override public void tick(){super.tick();if(!level.isClientSide && tickCount>40)discard();}
     @Override protected void addAdditionalSaveData(CompoundTag tag){super.addAdditionalSaveData(tag);tag.putInt("ElementColor",color());tag.putFloat("Damage",damage);if(targetId!=null)tag.putUUID("Target",targetId);}
     @Override protected void readAdditionalSaveData(CompoundTag tag){super.readAdditionalSaveData(tag);entityData.set(COLOR,tag.getInt("ElementColor"));damage=tag.getFloat("Damage");targetId=tag.hasUUID("Target")?tag.getUUID("Target"):null;}
