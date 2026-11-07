@@ -20,6 +20,7 @@ final class GhostLineClientSmokeTest {
  private static boolean opened,setup,sleepStarted,blinkChecked,validationComplete;
  private static int cameraMatrixIndex=-1,cameraMatrixDelay,cameraMatrixPasses;
  private static boolean cameraMatrixComplete;
+ private static int gengarWalkStartTick=-1;
  private static final int[] CAMERA_YAWS={0,45,90,135,180,225,270,315};
  private static final int[] CAMERA_PITCHES={-30,0,30};
  private static boolean farViewRequested,farViewApplied;
@@ -323,20 +324,25 @@ final class GhostLineClientSmokeTest {
        &&!cameraMatrixActive()&&screenshotSlotAvailable()&&!captures.contains("gengar-blink")){
     face(mc,gengar);snapNow(mc,"gengar-blink");
    }
-   if(ticks>=90&&ticks<205){
+   // The 24-view GAS-02 camera sweep can finish after this client test's
+   // former fixed Gengar gait window began. Start the gait fixture only once
+   // that sweep is done, then give the real renderer a full 180-tick window.
+   if(cameraMatrixComplete&&gengarWalkStartTick<0)gengarWalkStartTick=ticks;
+   boolean gengarWalkWindow=gengarWalkStartTick>=0&&ticks-gengarWalkStartTick<180;
+   if(gengarWalkWindow){
     mc.getSingleplayerServer().execute(()->{
      var authoritative=mc.getSingleplayerServer().overworld().getEntity(gengarId);
      if(authoritative instanceof MinemonCreature g){g.setOnGround(true);g.setDeltaMovement(0.055D,0,0);}
     });
    }
-   if(ticks>=115&&ticks<205&&!cameraMatrixActive()&&!captures.contains("gengar-walk")){
+   if(gengarWalkStartTick>=0&&ticks-gengarWalkStartTick>=10&&gengarWalkWindow&&!captures.contains("gengar-walk")){
     // Keep the test window open until the renderer has selected the real
     // ground gait and a screenshot slot is available.
     face(mc,gengar);
     if(screenshotSlotAvailable()&&"animation.gengar.ground_walk".equals(readClip(gengar)))
      snap(mc,"gengar-walk");
    }
-   if(ticks>=205&&!captures.contains("gengar-walk"))
+   if(gengarWalkStartTick>=0&&ticks-gengarWalkStartTick>=180&&!captures.contains("gengar-walk"))
     throw new IllegalStateException("Gengar walking screenshot was not captured during ground_walk: "+readClip(gengar));
    // Keep each ghost in the render view while waiting for its intermittent blink.
    // Do not steal the camera from the Gengar gait check before its screenshot.
@@ -347,7 +353,7 @@ final class GhostLineClientSmokeTest {
     else if(needHaunterBlink)face(mc,haunter);
     else face(mc,gengar);
    }
-   if(ticks>=210&&captures.contains("gengar-walk")){
+   if(gengarWalkStartTick>=0&&ticks>=gengarWalkStartTick+180&&captures.contains("gengar-walk")){
     mc.getSingleplayerServer().execute(()->{
      var authoritative=mc.getSingleplayerServer().overworld().getEntity(gengarId);
      if(authoritative instanceof MinemonCreature g)g.setDeltaMovement(0,0,0);
