@@ -371,7 +371,11 @@ final class GhostLineClientSmokeTest {
   // Read the actual framebuffer, rather than accepting render-call counters as visibility.
   try(var frame=Screenshot.takeScreenshot(mc.getMainRenderTarget())){
    int purple=0;
-   for(int y=frame.getHeight()/5;y<frame.getHeight()*7/10;y++)
+   // Looking at Gastly from directly below places the aura lower in the
+   // framebuffer than the near-horizontal views. Keep the centered horizontal
+   // region around the target, but scan nearly the full vertical frame so the
+   // visibility assertion does not mistake camera framing for a missing aura.
+   for(int y=frame.getHeight()/20;y<frame.getHeight()*19/20;y++)
     for(int x=frame.getWidth()/4;x<frame.getWidth()*3/4;x++){
      int pixel=frame.getPixelRGBA(x,y);
      int red=pixel&255,green=(pixel>>>8)&255,blue=(pixel>>>16)&255;
