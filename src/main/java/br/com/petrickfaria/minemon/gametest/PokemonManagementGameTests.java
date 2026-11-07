@@ -176,7 +176,7 @@ public final class PokemonManagementGameTests {
         br.com.petrickfaria.minemon.pokec.WildEncounterManager.awardCompanionExperience(second, DamageSource.mobAttack(reopened));
         check(h, reopened.getPokemonExperienceHalfUnits() == 10 && reopened.getPokemonExperienceExact() == 5.0D,
                 "half XP must survive saving and a second common defeat must total exactly 5 XP");
-        reopened.awardPokemonExperienceHalfUnits(180);
+        reopened.awardPokemonExperienceHalfUnits(460);
         check(h, reopened.getPokemonLevel() == 5 && reopened.getPokemonExperienceExact() == 5.0D,
                 "a large reward must pass through every affordable level and preserve its remainder");
         attacker.discard(); restored.discard(); reopened.discard(); first.discard(); second.discard(); owner.discard();

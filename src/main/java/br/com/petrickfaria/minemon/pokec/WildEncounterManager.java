@@ -254,6 +254,8 @@ public final class WildEncounterManager {
         UUID trainerId = attacker.getOwnerUUID();
         if (trainerShare > 0.0D && trainerId != null && defeated.level instanceof ServerLevel serverLevel) {
             ServerPlayer trainer = serverLevel.getServer().getPlayerList().getPlayer(trainerId);
+            if (trainer == null) trainer = serverLevel.players().stream()
+                    .filter(candidate -> trainerId.equals(candidate.getUUID())).findFirst().orElse(null);
             if (trainer != null) PokecPlayerData.addTrainerXp(trainer, trainerShare);
             else TrainerXpLedger.queue(serverLevel, trainerId, trainerShare);
         }

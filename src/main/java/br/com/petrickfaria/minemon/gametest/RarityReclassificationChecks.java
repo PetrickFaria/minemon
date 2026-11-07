@@ -31,7 +31,7 @@ public final class RarityReclassificationChecks {
   var saved=m.saveWithoutId(new CompoundTag());saved.remove("MinemonPokemonExperienceHalfUnits");saved.putInt("MinemonPokemonExperience",37);
   m.load(saved);m.load(m.saveWithoutId(new CompoundTag()));
   if(m.getPokemonLevel()!=3||m.getPokemonExperience()!=37||m.getHealth()!=3||!owner.equals(m.getOwnerUUID()))h.fail("Existing XP, level, health or owner was lost");
-  if(m.awardPokemonExperience(1)!=1||m.getPokemonLevel()!=4||m.getPokemonExperience()!=13||m.getHealth()!=3)h.fail("Saved XP overflow must carry forward without duplicated growth or healing");
+  if(m.awardPokemonExperience(1)!=1||m.getPokemonLevel()!=3||m.getPokemonExperience()!=38||m.getHealth()!=3)h.fail("Legacy XP must remain below the new level-three threshold without duplicated growth or healing");
  }
  public static void oldConfigCannotOverrideCatalogAndUnrelatedSettingsSurvive(GameTestHelper h) throws Exception{
   Path file=FMLPaths.CONFIGDIR.get().resolve("minemon/pokec-economy.toml");byte[] original=Files.readAllBytes(file);
