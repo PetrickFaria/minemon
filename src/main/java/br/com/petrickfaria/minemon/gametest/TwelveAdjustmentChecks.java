@@ -63,6 +63,8 @@ final class TwelveAdjustmentChecks {
   attacker.tame(owner);attacker.setOwnerUUID(owner.getUUID());attacker.setNoAi(true);
   var cow=EntityType.COW.create(level);cow.moveTo(attacker.getX()+9,attacker.getY(),attacker.getZ(),0,0);
   cow.setNoAi(true);cow.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).setBaseValue(200);cow.setHealth(200);level.addFreshEntity(cow);
+  var blocker=EntityType.COW.create(level);blocker.moveTo(attacker.getX()+4.5D,attacker.getY(),attacker.getZ(),0,0);
+  blocker.setNoAi(true);float blockerHealth=blocker.getHealth();level.addFreshEntity(blocker);
   try{
    cow.setPos(attacker.getX()+9,attacker.getY(),attacker.getZ());
    for(int i=0;i<3;i++){
@@ -75,6 +77,7 @@ final class TwelveAdjustmentChecks {
     for(int tick=0;tick<30&&!shot.isRemoved();tick++)shot.tick();
     float expected=(float)attacker.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE);
     if(Math.abs(before-cow.getHealth()-expected)>.001||cow.isOnFire())h.fail("Projectile damage changed or ignited target");
+    if(blocker.getHealth()!=blockerHealth)h.fail("A creature crossing the shot path must not absorb a projectile aimed at another target");
     level.getServer().getWorldData().overworldData().setGameTime(level.getGameTime()+99);
     if(attacker.combatReady())h.fail("Attack cooldown ended before 100 ticks");
     level.getServer().getWorldData().overworldData().setGameTime(level.getGameTime()+1);
@@ -87,7 +90,7 @@ final class TwelveAdjustmentChecks {
    cow.setPos(attacker.getX(),attacker.getY()+20,attacker.getZ());if(attacker.canAttack(cow))h.fail("Target beyond 3D radius accepted");
   }finally{
    for(var shot:level.getEntitiesOfClass(ElementalProjectile.class,attacker.getBoundingBox().inflate(16),shot->shot.getOwner()==attacker))shot.discard();
-   cow.discard();level.getServer().getWorldData().overworldData().setGameTime(originalTime);
+   cow.discard();blocker.discard();level.getServer().getWorldData().overworldData().setGameTime(originalTime);
   }
  }
  private static void verifyRecipes(GameTestHelper h,net.minecraft.server.level.ServerPlayer owner){

@@ -30,6 +30,9 @@ public final class ElementalProjectile extends ThrowableProjectile {
     @Override protected void defineSynchedData(){entityData.define(COLOR,0xFFFFFF);}
     @Override protected float getGravity(){return 0;}
     @Override protected boolean canHitEntity(net.minecraft.world.entity.Entity entity){
+        // This shot is aimed at one authorized target. Creatures crossing its
+        // path (including the attacker's allies) must not absorb and waste it.
+        if(targetId!=null&&!targetId.equals(entity.getUUID()))return false;
         if(!super.canHitEntity(entity))return false;
         if(getOwner() instanceof MinemonCreature owner && entity instanceof LivingEntity living){
             if(owner.getOwnerUUID()!=null && owner.getOwnerUUID().equals(living.getUUID()))return false;

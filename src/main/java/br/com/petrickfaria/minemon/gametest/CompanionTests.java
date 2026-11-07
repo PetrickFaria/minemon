@@ -401,7 +401,7 @@ public final class CompanionTests {
   h.runAfterDelay(5,()->awaitCommandedLanding(h,birds,remaining-5,next));
  }
 
- @GameTest(template="test_arena",batch="minemon_flyer_sit_night",timeoutTicks=600)
+ @GameTest(template="test_arena",batch="minemon_flyer_sit_night",timeoutTicks=520)
  public static void sittingFlyerSleepsAtNightAndFollowCommandWakesIt(GameTestHelper h){
   floor(h);long originalDayTime=h.getLevel().getDayTime();h.getLevel().setDayTime(1000);
   MinemonCreature bird=h.spawn(ModEntities.SPECIES.get("pidgey").get(),new BlockPos(5,6,5));
@@ -416,21 +416,26 @@ public final class CompanionTests {
    h.runAfterDelay(300,()->{
     boolean slept=bird.isSleeping()&&bird.isOnGround();
     if(!slept){h.getLevel().setDayTime(originalDayTime);h.fail("A sitting flyer must land and sleep during its natural night period");return;}
-    double horizontalBefore=bird.position().subtract(owner.position()).horizontalDistance();
+    ServerPlayer followOwner=player(h);
+    followOwner.setInvulnerable(true);followOwner.setNoGravity(true);
+    BlockPos followPos=h.absolutePos(new BlockPos(13,1,5));
+    followOwner.moveTo(followPos.getX()+0.5D,followPos.getY(),followPos.getZ()+0.5D,0,0);
+    bird.tame(followOwner);
+    double horizontalBefore=bird.position().subtract(followOwner.position()).horizontalDistance();
     bird.setOrderedToSit(false);
-    h.runAfterDelay(200,()->{
+    h.runAfterDelay(120,()->{
      boolean awake=!bird.isSleeping()&&!bird.isNightResting();
-     double horizontalAfter=bird.position().subtract(owner.position()).horizontalDistance();
+     double horizontalAfter=bird.position().subtract(followOwner.position()).horizontalDistance();
      boolean followed=horizontalAfter<horizontalBefore-1.0D;
      String state=" awake="+awake+" followed="+followed+" horizontalBefore="+horizontalBefore+" horizontalAfter="+horizontalAfter
-         +" owner="+owner.position()+" ownerAlive="+owner.isAlive()+" ownerRemoved="+owner.isRemoved()
+         +" owner="+followOwner.position()+" ownerAlive="+followOwner.isAlive()+" ownerRemoved="+followOwner.isRemoved()
          +" orderedSit="+bird.isOrderedToSit()+" following="+bird.isFollowingOwner()+" target="+bird.getNavigation().getTargetPos()
          +" goals="+bird.goalSelector.getAvailableGoals().stream().map(g->g.getGoal().getClass().getSimpleName()+":"+g.isRunning()).toList()
          +" position="+bird.position();
      h.getLevel().setDayTime(originalDayTime);
      if(!awake){h.fail("The Follow order must wake the flyer and suppress automatic return to sleep;"+state);return;}
      if(!followed){h.fail("The woken Pidgey must follow its trainer;"+state);return;}
-     bird.discard();owner.discard();h.succeed();
+     bird.discard();owner.discard();followOwner.discard();h.succeed();
     });
    });
   });
