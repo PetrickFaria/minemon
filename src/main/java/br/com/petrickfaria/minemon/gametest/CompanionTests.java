@@ -116,7 +116,7 @@ public final class CompanionTests {
   h.succeed();
  }
 
- @GameTest(template="test_arena",timeoutTicks=100)
+ @GameTest(template="test_arena",batch="taming_bone",timeoutTicks=100)
  public static void boneTamingAndSitCommands(GameTestHelper h) {
   MinemonCreature b=spawn(h);ServerPlayer p=player(h);
   int previous=br.com.petrickfaria.minemon.config.MinemonConfig.TAME_CHANCE_PERCENT.get();
@@ -412,10 +412,12 @@ public final class CompanionTests {
    check(h,Math.abs(bird.getY()-NaturalMovementGoals.surfaceBelow(h.getLevel(),bird.getX(),bird.getY(),bird.getZ())-1.0D)<0.2D,
        "A sitting Pidgey must hover one block above ground during daytime");
    check(h,bird.position().subtract(horizontal).horizontalDistanceSqr()<1.0E-6D,"A sitting flyer must not drift horizontally");
+   boolean previousMobSpawning=h.getLevel().getGameRules().getBoolean(net.minecraft.world.level.GameRules.RULE_DOMOBSPAWNING);
+   h.getLevel().getGameRules().getRule(net.minecraft.world.level.GameRules.RULE_DOMOBSPAWNING).set(false,h.getLevel().getServer());
    h.getLevel().setDayTime(18000);
    h.runAfterDelay(300,()->{
     boolean slept=bird.isSleeping()&&bird.isOnGround();
-    if(!slept){h.getLevel().setDayTime(originalDayTime);h.fail("A sitting flyer must land and sleep during its natural night period");return;}
+    if(!slept){h.getLevel().setDayTime(originalDayTime);h.getLevel().getGameRules().getRule(net.minecraft.world.level.GameRules.RULE_DOMOBSPAWNING).set(previousMobSpawning,h.getLevel().getServer());h.fail("A sitting flyer must land and sleep during its natural night period");return;}
     ServerPlayer followOwner=player(h);
     followOwner.setInvulnerable(true);followOwner.setNoGravity(true);
     BlockPos followPos=h.absolutePos(new BlockPos(13,1,5));
@@ -429,10 +431,12 @@ public final class CompanionTests {
      boolean followed=horizontalAfter<horizontalBefore-1.0D;
      String state=" awake="+awake+" followed="+followed+" horizontalBefore="+horizontalBefore+" horizontalAfter="+horizontalAfter
          +" owner="+followOwner.position()+" ownerAlive="+followOwner.isAlive()+" ownerRemoved="+followOwner.isRemoved()
+         +" ownerUUID="+followOwner.getUUID()+" mobOwner="+bird.getOwnerUUID()+" combatTarget="+bird.getTarget()
          +" orderedSit="+bird.isOrderedToSit()+" following="+bird.isFollowingOwner()+" target="+bird.getNavigation().getTargetPos()
          +" goals="+bird.goalSelector.getAvailableGoals().stream().map(g->g.getGoal().getClass().getSimpleName()+":"+g.isRunning()).toList()
          +" position="+bird.position();
      h.getLevel().setDayTime(originalDayTime);
+     h.getLevel().getGameRules().getRule(net.minecraft.world.level.GameRules.RULE_DOMOBSPAWNING).set(previousMobSpawning,h.getLevel().getServer());
      if(!awake){h.fail("The Follow order must wake the flyer and suppress automatic return to sleep;"+state);return;}
      if(!followed){h.fail("The woken Pidgey must follow its trainer;"+state);return;}
      bird.discard();owner.discard();followOwner.discard();h.succeed();

@@ -66,6 +66,26 @@ final class ElementalCombatGoal extends Goal {
         }
     }
 
+    private boolean keepsSafeDistance(net.minecraft.world.level.pathfinder.Path path, LivingEntity target) {
+        Vec3 targetCenter = target.getBoundingBox().getCenter();
+        double previousDistance = pokemon.position().distanceTo(targetCenter);
+        for (int i = 0; i < path.getNodeCount(); i++) {
+            var node = path.getNode(i);
+            Vec3 end = new Vec3(node.x + 0.5D, node.y, node.z + 0.5D);
+            Vec3 start = i == 0 ? pokemon.position() : new Vec3(
+                    path.getNode(i - 1).x + 0.5D, path.getNode(i - 1).y, path.getNode(i - 1).z + 0.5D);
+            int samples = Math.max(1, (int)Math.ceil(end.distanceTo(start) * 2.0D));
+            for (int sample = 1; sample <= samples; sample++) {
+                Vec3 point = start.lerp(end, sample / (double)samples);
+                double distance = point.distanceTo(targetCenter);
+                if (distance < MIN_DISTANCE && !(previousDistance < MIN_DISTANCE && distance > previousDistance)) return false;
+                if (previousDistance < MIN_DISTANCE && distance < previousDistance) return false;
+                previousDistance = distance;
+            }
+        }
+        return path.getNodeCount() > 0;
+    }
+
     private void reposition(LivingEntity target, boolean retreat) {
         if (repositionCooldown-- > 0) return;
         repositionCooldown = 10;
@@ -88,7 +108,7 @@ final class ElementalCombatGoal extends Goal {
             BlockPos destination = new BlockPos((int)Math.floor(destinationX),
                     (int)Math.floor(pokemon.getY()), (int)Math.floor(destinationZ));
             var path = navigation.createPath(destination, 0);
-            if (path != null && path.canReach()) {
+            if (path != null && path.canReach() && keepsSafeDistance(path, target)) {
                 navigation.moveTo(path, 1.0D);
                 return;
             }
