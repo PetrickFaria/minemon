@@ -132,8 +132,9 @@ final class GhostLineClientSmokeTest {
       if(mob==null)throw new IllegalStateException("Gastly left the client render set before its 50-block screenshot");
       pointCameraAt(mc,mob);
      }
-     if(Set.of("gastly-front","gastly-right","gastly-back","gastly-left","gastly-top","gastly-bottom").contains(view))
+     if(Set.of("gastly-front","gastly-right","gastly-back","gastly-left","gastly-top").contains(view))
       verifyVisibleCore(mc,view);
+     else if(view.equals("gastly-bottom"))verifyVisibleAura(mc,view);
      if(view.equals("haunter-blink")){
       var mob=find(mc,haunterId);
       if(mob==null||!mob.isBlinkingForRender())
