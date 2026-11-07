@@ -63,6 +63,7 @@ public final class MinemonFlyingCreature extends MinemonCreature {
       &&(this.naturalCycle().phase()==BehaviorCycle.Phase.TAKEOFF||this.naturalCycle().phase()==BehaviorCycle.Phase.AIR
       ||this.naturalCycle().phase()==BehaviorCycle.Phase.LANDING);
   if(alakazamCycle){
+   double anchorX=this.getX(),anchorZ=this.getZ();
    this.getNavigation().stop();this.setNoGravity(true);this.setDeltaMovement(0.0D,0.0D,0.0D);
    input=net.minecraft.world.phys.Vec3.ZERO;
    super.travel(input);
@@ -71,6 +72,9 @@ public final class MinemonFlyingCreature extends MinemonCreature {
    double difference=target-this.getY();
    double step=BehaviorCycle.naturalLandingStep(this.naturalCycle().phase(),difference,this.onGround);
    if(step!=0.0D)this.move(net.minecraft.world.entity.MoverType.SELF,new net.minecraft.world.phys.Vec3(0.0D,step,0.0D));
+   // The flight controller can retain a horizontal destination while the
+   // natural Alakazam cycle is active; keep takeoff, hover, and landing fixed.
+   this.setPos(anchorX,this.getY(),anchorZ);
    this.setDeltaMovement(0.0D,0.0D,0.0D);this.fallDistance=0.0F;
    return;
   }
