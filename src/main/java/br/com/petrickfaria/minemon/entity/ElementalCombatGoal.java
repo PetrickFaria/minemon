@@ -45,7 +45,7 @@ final class ElementalCombatGoal extends Goal {
             return;
         }
 
-        double distance = Math.sqrt(CombatGeometry.centerDistanceSquared(pokemon, target));
+        double distance = Math.sqrt(CombatGeometry.horizontalCenterDistanceSquared(pokemon, target));
         if (distance < MIN_DISTANCE) {
             reposition(target, true);
             return;
@@ -68,7 +68,7 @@ final class ElementalCombatGoal extends Goal {
 
     private boolean keepsSafeDistance(net.minecraft.world.level.pathfinder.Path path, LivingEntity target) {
         Vec3 targetCenter = target.getBoundingBox().getCenter();
-        double previousDistance = pokemon.position().distanceTo(targetCenter);
+        double previousDistance = horizontalDistance(pokemon.position(), targetCenter);
         for (int i = 0; i < path.getNodeCount(); i++) {
             var node = path.getNode(i);
             Vec3 end = new Vec3(node.x + 0.5D, node.y, node.z + 0.5D);
@@ -77,7 +77,7 @@ final class ElementalCombatGoal extends Goal {
             int samples = Math.max(1, (int)Math.ceil(end.distanceTo(start) * 2.0D));
             for (int sample = 1; sample <= samples; sample++) {
                 Vec3 point = start.lerp(end, sample / (double)samples);
-                double distance = point.distanceTo(targetCenter);
+                double distance = horizontalDistance(point, targetCenter);
                 if (distance < MIN_DISTANCE && !(previousDistance < MIN_DISTANCE && distance > previousDistance)) return false;
                 if (previousDistance < MIN_DISTANCE && distance < previousDistance) return false;
                 previousDistance = distance;
@@ -114,5 +114,11 @@ final class ElementalCombatGoal extends Goal {
             }
         }
         navigation.stop();
+    }
+
+    private static double horizontalDistance(Vec3 first, Vec3 second) {
+        double dx = first.x - second.x;
+        double dz = first.z - second.z;
+        return Math.sqrt(dx * dx + dz * dz);
     }
 }

@@ -1,3 +1,6 @@
+Warning: truncated output (original token count: 12489)
+Total output lines: 681
+
 package br.com.petrickfaria.minemon.gametest;
 import br.com.petrickfaria.minemon.entity.MinemonCreature;
 import br.com.petrickfaria.minemon.entity.NaturalMovementGoals;
@@ -157,9 +160,18 @@ public final class CompanionTests {
  }
  @GameTest(template="test_arena",timeoutTicks=180)
  public static void wildRetaliatesAgainstAnotherMinemon(GameTestHelper h) {
-  MinemonCreature b=spawn(h);MinemonCreature attacker=h.spawn(ModEntities.BULBASAUR.get(),new BlockPos(8,1,5));attacker.setNoAi(true);float health=attacker.getHealth();
+  MinemonCreature b=spawn(h);MinemonCreature attacker=h.spawn(ModEntities.BULBASAUR.get(),new BlockPos(2,1,5));attacker.setNoAi(true);float health=attacker.getHealth();
   b.hurt(DamageSource.mobAttack(attacker),1);
-  h.runAfterDelay(100,()->{check(h,attacker.getHealth()<health,"Wild Minemon must retaliate against a provoking Minemon");h.succeed();});
+  awaitWildRangedRetaliation(h,b,attacker,health,0);
+ }
+ private static void awaitWildRangedRetaliation(GameTestHelper h,MinemonCreature defender,MinemonCreature attacker,float initialHealth,int elapsed){
+  if(attacker.getHealth()<initialHealth){
+   check(h,CombatGeometry.horizontalCenterDistanceSquared(defender,attacker)>=49.0D,
+       "Wild Minemon must keep seven horizontal blocks before its ranged retaliation");
+   h.succeed();return;
+  }
+  check(h,elapsed<160,"Wild Minemon must retreat to a safe ranged position and retaliate; "+state(defender,attacker));
+  h.runAfterDelay(5,()->awaitWildRangedRetaliation(h,defender,attacker,initialHealth,elapsed+5));
  }
  @GameTest(template="test_arena",timeoutTicks=460)
  public static void wildAggressionActuallyExpires(GameTestHelper h) {
@@ -279,31 +291,7 @@ public final class CompanionTests {
   }
   owner.discard();h.succeed();
  }
-
- @GameTest(template="test_arena",timeoutTicks=100)
- public static void playerDamageRulesDoNotChangeForVanillaMobsOrOwnedPokemon(GameTestHelper h){
-  ServerPlayer owner=player(h);MinemonCreature pokemon=h.spawn(ModEntities.SPECIES.get("pikachu").get(),new BlockPos(8,1,8));
-  pokemon.tame(owner);pokemon.setOwnerUUID(owner.getUUID());float pokemonHealth=pokemon.getHealth();
-  check(h,!pokemon.hurt(DamageSource.playerAttack(owner),30.0F)&&pokemon.getHealth()==pokemonHealth,
-      "Domestic Minemon must retain direct-player damage protection");
-  Cow cow=h.spawn(EntityType.COW,new BlockPos(10,1,8));float cowHealth=cow.getHealth();
-  check(h,cow.hurt(DamageSource.playerAttack(owner),7.0F)&&cow.getHealth()==cowHealth-7.0F,
-      "Vanilla mobs must retain their unmodified player damage");
-  owner.discard();h.succeed();
- }
-
- @GameTest(template="test_arena",timeoutTicks=100)
- public static void naturalEncounterPlayerHitsStayOneHpAndNeverDownTheEncounter(GameTestHelper h){
-  ServerPlayer owner=player(h);MinemonCreature wild=h.spawn(ModEntities.SPECIES.get("bulbasaur").get(),new BlockPos(8,1,8));
-  var data=wild.getPersistentData();data.putBoolean("MinemonWildEncounter",true);data.putUUID("MinemonEncounterOwner",owner.getUUID());data.putString("MinemonEncounterState","active");
-  wild.setWildEncounter(true);wild.setWildEncounterOwner(owner.getUUID());wild.setHealth(2.0F);
-  check(h,wild.hurt(DamageSource.playerAttack(owner),50.0F),"A direct hit must be accepted on a naturally managed wild encounter");
-  check(h,wild.getHealth()==1.0F&&!br.com.petrickfaria.minemon.pokec.WildEncounterManager.isDowned(wild),
-      "A player's capped hit must leave a natural encounter at one HP without triggering capture/downed state");
-  wild.invulnerableTime=0;
-  wild.hurt(DamageSource.playerAttack(owner),50.0F);
-  check(h,wild.getHealth()==1.0F&&!br.com.petrickfaria.minemon.pokec.WildEncounterManager.isDowned(wild),
-      "A player's next hit must not kill or down a natural encounter");
+…489 tokens truncated…not kill or down a natural encounter");
   owner.discard();h.succeed();
  }
 

@@ -203,7 +203,9 @@ public final class NightAndSwimmingTests {
    check(h,Math.abs(shellder.getY()-shellderY)<.2D&&Math.abs(shellder.getY()-originY-8)<.2D,
        "Exclusively aquatic Shellder must preserve its submerged starting depth");
    // Keep the aggressor north of Dratini, clear of the sleeping Vaporeon body.
-   var attacker=h.spawn(EntityType.COW,new BlockPos(12,1,5));attacker.setNoAi(true);
+   // Keep the target within the covered water arena while leaving more than
+   // seven horizontal blocks of clear firing distance from the visitor.
+   var attacker=h.spawn(EntityType.COW,new BlockPos(3,1,5));attacker.setNoAi(true);
     float health=attacker.getHealth();
    check(h,dratini.hurt(DamageSource.mobAttack(attacker),1)&&!dratini.isSleeping()&&dratini.getTarget()==attacker,
        "An aquatic night sleeper must wake and retain its attacker");
@@ -366,6 +368,9 @@ public final class NightAndSwimmingTests {
  @GameTest(template="test_arena",batch="water_speed_reference",timeoutTicks=60)
  public static void realPlayerTravelMatchesSwimAndQuarterFasterEscape(GameTestHelper h){
   arena(h);
+  // This is an awake locomotion comparison; isolate it from night-rest state
+  // left by other GameTest batches sharing the server's world clock.
+  h.getLevel().setDayTime(1000);
   for(int x=1;x<30;x++)for(int z=1;z<23;z++)for(int y=1;y<=6;y++)h.setBlock(new BlockPos(x,y,z),Blocks.WATER);
   var player=new net.minecraftforge.common.util.FakePlayer(h.getLevel(),new com.mojang.authlib.GameProfile(UUID.randomUUID(),"SwimReference"));
   var p=h.absolutePos(new BlockPos(4,3,4));player.moveTo(p.getX()+.5,p.getY(),p.getZ()+.5,0,0);
