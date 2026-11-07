@@ -18,6 +18,10 @@ import java.util.*;
 /** Real-client visual and timing smoke test for the Gastly evolution line. */
 final class GhostLineClientSmokeTest {
  private static boolean opened,setup,sleepStarted,blinkChecked,validationComplete;
+ private static int cameraMatrixIndex=-1,cameraMatrixDelay,cameraMatrixPasses;
+ private static boolean cameraMatrixComplete;
+ private static final int[] CAMERA_YAWS={0,45,90,135,180,225,270,315};
+ private static final int[] CAMERA_PITCHES={-30,0,30};
  private static boolean farViewRequested,farViewApplied;
  private static int farViewStartTick;
  private static int screenshotFlushTicks;
@@ -76,6 +80,28 @@ final class GhostLineClientSmokeTest {
  private static void faceFromAngle(Minecraft mc,MinemonCreature mob,double degrees){
   faceAtDistance(mc,mob,4.0D,degrees);
  }
+ private static void faceAtCameraAngles(Minecraft mc,MinemonCreature mob,double distance,double yawDegrees,double pitchDegrees){
+  if(mc.player==null)return;
+  var player=mc.player;
+  double yaw=Math.toRadians(yawDegrees),pitch=Math.toRadians(pitchDegrees);
+  double horizontal=distance*Math.cos(pitch);
+  double px=mob.getX()+Math.sin(yaw)*horizontal;
+  double pz=mob.getZ()-Math.cos(yaw)*horizontal;
+  double eyeY=mob.getY()+1.15D+distance*Math.sin(pitch);
+  double py=eyeY-player.getEyeHeight();
+  player.setPos(px,py,pz);player.setYRot((float)yawDegrees);player.setYHeadRot((float)yawDegrees);
+  player.setYBodyRot((float)yawDegrees);player.setXRot((float)pitchDegrees);
+  var server=mc.getSingleplayerServer();var playerId=player.getUUID();var mobId=mob.getUUID();
+  server.execute(()->{
+   var authoritativePlayer=server.getPlayerList().getPlayer(playerId);
+   if(authoritativePlayer!=null)authoritativePlayer.teleportTo(server.overworld(),px,py,pz,(float)yawDegrees,(float)pitchDegrees);
+   var authoritativeMob=server.overworld().getEntity(mobId);
+   if(authoritativeMob instanceof net.minecraft.world.entity.LivingEntity living){
+    living.setYRot(180.0F);living.setYBodyRot(180.0F);living.setYHeadRot(180.0F);
+   }
+  });
+ }
+ private static boolean cameraMatrixActive(){return cameraMatrixIndex>=0&&!cameraMatrixComplete;}
  private static void faceVertical(Minecraft mc,MinemonCreature mob,boolean fromAbove){
   if(!screenshotSlotAvailable()||mc.player==null)return;
   var player=mc.player;
@@ -203,6 +229,23 @@ final class GhostLineClientSmokeTest {
    ticks++;
    MinemonCreature gastly=find(mc,gastlyId),secondGastly=find(mc,secondGastlyId),haunter=find(mc,haunterId),gengar=find(mc,gengarId);
    if(gastly==null||secondGastly==null||haunter==null||gengar==null)return;
+   if(ticks>=50&&cameraMatrixIndex<0&&writtenScreenshots.contains("gastly-50-block"))cameraMatrixIndex=0;
+   if(cameraMatrixActive()){
+    if(cameraMatrixDelay==0){
+     int yaw=CAMERA_YAWS[cameraMatrixIndex/CAMERA_PITCHES.length];
+     int pitch=CAMERA_PITCHES[cameraMatrixIndex%CAMERA_PITCHES.length];
+     faceAtCameraAngles(mc,gastly,5.0D,yaw,pitch);cameraMatrixDelay=4;
+    }else if(--cameraMatrixDelay==0){
+     int yaw=CAMERA_YAWS[cameraMatrixIndex/CAMERA_PITCHES.length];
+     int pitch=CAMERA_PITCHES[cameraMatrixIndex%CAMERA_PITCHES.length];
+     verifyVisibleCore(mc,"GAS-02 yaw="+yaw+" pitch="+pitch);
+     cameraMatrixPasses++;cameraMatrixIndex++;
+     if(cameraMatrixIndex>=CAMERA_YAWS.length*CAMERA_PITCHES.length){
+      cameraMatrixComplete=true;face(mc,gastly);
+      System.out.println("[GHOST LINE] PASS GAS-02: "+cameraMatrixPasses+" horizontal/vertical camera combinations");
+     }
+    }
+   }
    if(ticks>=4&&!nativeSmokeFixtureInjected){
     nativeSmokeFixtureInjected=true;
     // Exercise the real provider with velocity values that resemble another
@@ -255,7 +298,7 @@ final class GhostLineClientSmokeTest {
     var moving=mc.getSingleplayerServer().overworld().getEntity(secondGastlyId);
     if(moving instanceof MinemonCreature g)g.moveTo(g.getX()+.12D,g.getY(),g.getZ(),g.getYRot(),g.getXRot());
    });
-   if(ticks>=50&&screenshotSlotAvailable()&&!captures.contains("gastly-motion")){
+   if(ticks>=50&&!cameraMatrixActive()&&screenshotSlotAvailable()&&!captures.contains("gastly-motion")){
     if(secondGastly.getX()<movingGastlyStartX+.35D)
      throw new IllegalStateException("The spawn-egg Gastly fixture did not move far enough for the attachment check");
     face(mc,secondGastly);snap(mc,"gastly-motion");
@@ -265,19 +308,19 @@ final class GhostLineClientSmokeTest {
     var moving=mc.getSingleplayerServer().overworld().getEntity(secondGastlyId);
     if(moving instanceof MinemonCreature g)g.moveTo(g.getX(),g.getY()+.1D,g.getZ(),g.getYRot(),g.getXRot());
    });
-   if(ticks>=66&&screenshotSlotAvailable()&&!captures.contains("gastly-float")){
+   if(ticks>=66&&!cameraMatrixActive()&&screenshotSlotAvailable()&&!captures.contains("gastly-float")){
     if(secondGastly.getY()<floatingGastlyStartY+.35D)
      throw new IllegalStateException("The spawn-egg Gastly fixture did not float far enough for the attachment check");
     face(mc,secondGastly);snap(mc,"gastly-float");
    }
-   if(ticks>=25&&!captures.contains("haunter-front-a")){face(mc,haunter);snap(mc,"haunter-front-a");}
-   if(ticks>=75&&!captures.contains("haunter-front-b")){face(mc,haunter);snap(mc,"haunter-front-b");}
+   if(ticks>=25&&!cameraMatrixActive()&&!captures.contains("haunter-front-a")){face(mc,haunter);snap(mc,"haunter-front-a");}
+   if(ticks>=75&&!cameraMatrixActive()&&!captures.contains("haunter-front-b")){face(mc,haunter);snap(mc,"haunter-front-b");}
    if(ticks>=100&&haunter.isBlinkingForRender()&&MinemonModel.ghostEyesClosedForValidation(haunter)
-       &&screenshotSlotAvailable()&&!captures.contains("haunter-blink")){
+       &&!cameraMatrixActive()&&screenshotSlotAvailable()&&!captures.contains("haunter-blink")){
     face(mc,haunter);snapNow(mc,"haunter-blink");
    }
    if(ticks>=100&&gengar.isBlinkingForRender()&&MinemonModel.ghostEyesClosedForValidation(gengar)
-       &&screenshotSlotAvailable()&&!captures.contains("gengar-blink")){
+       &&!cameraMatrixActive()&&screenshotSlotAvailable()&&!captures.contains("gengar-blink")){
     face(mc,gengar);snapNow(mc,"gengar-blink");
    }
    if(ticks>=90&&ticks<205){
@@ -286,7 +329,7 @@ final class GhostLineClientSmokeTest {
      if(authoritative instanceof MinemonCreature g){g.setOnGround(true);g.setDeltaMovement(0.055D,0,0);}
     });
    }
-   if(ticks>=115&&ticks<205&&!captures.contains("gengar-walk")){
+   if(ticks>=115&&ticks<205&&!cameraMatrixActive()&&!captures.contains("gengar-walk")){
     // Keep the test window open until the renderer has selected the real
     // ground gait and a screenshot slot is available.
     face(mc,gengar);
@@ -297,7 +340,7 @@ final class GhostLineClientSmokeTest {
     throw new IllegalStateException("Gengar walking screenshot was not captured during ground_walk: "+readClip(gengar));
    // Keep each ghost in the render view while waiting for its intermittent blink.
    // Do not steal the camera from the Gengar gait check before its screenshot.
-   if(ticks>=145&&ticks<705&&captures.contains("gengar-walk")&&(!captures.contains("haunter-blink")||!captures.contains("gengar-blink"))){
+   if(ticks>=145&&ticks<705&&!cameraMatrixActive()&&captures.contains("gengar-walk")&&(!captures.contains("haunter-blink")||!captures.contains("gengar-blink"))){
     boolean needHaunterBlink=!captures.contains("haunter-blink");
     boolean needGengarBlink=!captures.contains("gengar-blink");
     if(needHaunterBlink&&needGengarBlink)face(mc,((ticks/20)%2==0)?haunter:gengar);
@@ -310,7 +353,7 @@ final class GhostLineClientSmokeTest {
      if(authoritative instanceof MinemonCreature g)g.setDeltaMovement(0,0,0);
     });
    }
-   if(ticks>=160&&!captures.contains("gengar-mouth-teeth-fixed")
+   if(ticks>=160&&!cameraMatrixActive()&&!captures.contains("gengar-mouth-teeth-fixed")
        &&MinemonModel.gengarTeethMouthForValidation(gengar)){
     face(mc,gengar);snap(mc,"gengar-mouth-teeth-fixed");
    }
@@ -321,8 +364,8 @@ final class GhostLineClientSmokeTest {
     });
     sleepStarted=true;
    }
-   if(sleepStarted&&ticks>=730&&!captures.contains("gengar-sleep-half-sunk-a")){face(mc,gengar);snap(mc,"gengar-sleep-half-sunk-a");}
-   if(sleepStarted&&ticks>=760&&!captures.contains("gengar-sleep-half-sunk-b")){face(mc,gengar);snap(mc,"gengar-sleep-half-sunk-b");}
+   if(sleepStarted&&ticks>=730&&!cameraMatrixActive()&&!captures.contains("gengar-sleep-half-sunk-a")){face(mc,gengar);snap(mc,"gengar-sleep-half-sunk-a");}
+   if(sleepStarted&&ticks>=760&&!cameraMatrixActive()&&!captures.contains("gengar-sleep-half-sunk-b")){face(mc,gengar);snap(mc,"gengar-sleep-half-sunk-b");}
    if(sleepStarted){
     float bob=MinemonModel.gengarSleepBobForValidation(gengar);
     if(Float.isFinite(bob)){gengarSleepBobMin=Math.min(gengarSleepBobMin,bob);gengarSleepBobMax=Math.max(gengarSleepBobMax,bob);}
@@ -335,6 +378,8 @@ final class GhostLineClientSmokeTest {
      throw new IllegalStateException("Ghost blink interval check failed: Haunter events="+haunterBlink+" interval="+haunter.lastBlinkIntervalForValidation()+" Gengar events="+gengarBlink+" interval="+gengar.lastBlinkIntervalForValidation());
    }
    if(ticks>=800&&!validationComplete){
+    if(!cameraMatrixComplete||cameraMatrixPasses!=24)
+     throw new IllegalStateException("Gastly camera acceptance matrix incomplete: "+cameraMatrixPasses+"/24 views");
     if(br.com.petrickfaria.minemon.client.GastlyCoreRenderHook.redrawsForValidation()==0)
      throw new IllegalStateException("Gastly was never redrawn above particles during the real-client test");
     if(br.com.petrickfaria.minemon.client.GastlySmokeParticle.largeSpawnsForValidation()==0
@@ -364,6 +409,7 @@ final class GhostLineClientSmokeTest {
      throw new IllegalStateException("Gengar sleep body bob did not vary enough: "+gengarSleepBobMin+".."+gengarSleepBobMax);
     Files.writeString(Path.of("client-validation-ghost-line.txt"),
       "PASS GHOST LINE CLIENT: real Minecraft render captured Gastly aura/core from front, side, rear, top, and bottom camera views and at 10, 25, and 50 blocks; isolated target and distant spawn-egg Gastly provider fixture; horizontal movement and vertical float; native smoke bound to Gastly; visible Haunter and Gengar closed-eye blinks, Gengar lowered-arm gait, fixed teeth mouth, and less-sunk bobbing sleep.\n"
+      +"PASS GAS-02: "+cameraMatrixPasses+" camera combinations (yaw 0/45/90/135/180/225/270/315°, pitch -30/0/+30°) retained visible opaque core pixels at 5 blocks.\n"
       +"Gastly native particles="+br.com.petrickfaria.minemon.client.GastlySmokeParticle.nativeEmitterCountForValidation()+", source-distance samples="+br.com.petrickfaria.minemon.client.GastlySmokeParticle.nativeSourceSampleCountForValidation()+", maximum source distance="+br.com.petrickfaria.minemon.client.GastlySmokeParticle.maxNativeSourceDistanceFromGastlyForValidation()+", tracked ticks="+br.com.petrickfaria.minemon.client.GastlySmokeParticle.nativeEmitterTickCountForValidation()+", maximum body distance="+br.com.petrickfaria.minemon.client.GastlySmokeParticle.maxNativeEmitterDriftForValidation()+".\n"
       +"Haunter blink events="+haunter.blinkEventsForValidation()+", last interval="+haunter.lastBlinkIntervalForValidation()+" ticks; Gengar blink events="+gengar.blinkEventsForValidation()+", last interval="+gengar.lastBlinkIntervalForValidation()+" ticks.\n"
       +"Haunter hand phase lag="+br.com.petrickfaria.minemon.entity.GhostLineAnimationRules.HAUNTER_HAND_LAG_TICKS+" ticks (2.5 seconds); Gengar ground walk clip="+readClip(gengar)+"; measured sleep bob range="+gengarSleepBobMin+".."+gengarSleepBobMax+".\n");

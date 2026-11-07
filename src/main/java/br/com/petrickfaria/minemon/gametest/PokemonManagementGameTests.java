@@ -189,17 +189,24 @@ public final class PokemonManagementGameTests {
         ServerPlayer owner = player(h, h.absolutePos(new BlockPos(7, 1, 5)));
         MinemonCreature pokemon = h.spawn(ModEntities.SPECIES.get("bulbasaur").get(), new BlockPos(5, 1, 5));
         pokemon.tame(owner);
-        int[] levels={1,2,3,10};
-        double[] expected={15.0D,15.0D+10.0D/9.0D,15.0D+20.0D/9.0D,25.0D};
-        for(int i=0;i<levels.length;i++){
-            pokemon.setPokemonProgress(levels[i],0);
-            check(h,Math.abs(pokemon.combatRange()-expected[i])<1.0E-6D,
-                    "Companion target range must follow the linear level progression at level "+levels[i]);
+        net.minecraft.world.entity.animal.Cow rangeTarget=h.spawn(EntityType.COW,new BlockPos(10,1,5));
+        pokemon.setBlackListOverride(new net.minecraft.resources.ResourceLocation("minecraft","cow"),true);
+        for(int level=1;level<=10;level++){
+            pokemon.setPokemonProgress(level,0);
+            double expected=15.0D+(level-1)*(10.0D/9.0D);
+            check(h,Math.abs(pokemon.combatRange()-expected)<1.0E-6D,
+                    "Companion target range must follow the linear level progression at level "+level);
+            double targetY=pokemon.getY();
+            rangeTarget.setPos(pokemon.getX()+expected-0.1D,targetY,pokemon.getZ());
+            check(h,pokemon.canAttack(rangeTarget),"An authorized target inside the level "+level+" range must be acquirable");
+            rangeTarget.setPos(pokemon.getX()+expected+0.1D,targetY,pokemon.getZ());
+            check(h,!pokemon.canAttack(rangeTarget),"An authorized target outside the level "+level+" range must not be acquired");
         }
+        pokemon.setPokemonProgress(11,0);
+        check(h,Math.abs(pokemon.combatRange()-25.0D)<1.0E-6D,"Range must remain capped at 25 blocks after level 10");
         net.minecraft.world.entity.animal.Cow contact=h.spawn(EntityType.COW,new BlockPos(5,1,5));
         check(h,!pokemon.doHurtTarget(contact),"Pokémon must never deal melee damage, even on direct contact");
-        check(h,Math.abs(pokemon.combatRange()-25.0D)<1.0E-6D,"Range must stop growing after level 10");
-        pokemon.discard();contact.discard();owner.discard();h.succeed();
+        pokemon.discard();rangeTarget.discard();contact.discard();owner.discard();h.succeed();
     }
 
     @GameTest(template = "test_arena", timeoutTicks = 220)
