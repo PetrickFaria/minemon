@@ -209,7 +209,7 @@ public final class PokemonManagementGameTests {
         MinemonCreature pokemon = h.spawn(ModEntities.SPECIES.get("pikachu").get(), new BlockPos(5, 1, 5));
         pokemon.tame(owner);
         pokemon.setOrderedToSit(true);
-        net.minecraft.world.entity.monster.Zombie target = h.spawn(EntityType.ZOMBIE, new BlockPos(14, 1, 5));
+        net.minecraft.world.entity.animal.Cow target = h.spawn(EntityType.COW, new BlockPos(14, 1, 5));
         target.setNoAi(true);
         target.setHealth(200.0F);
         target.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).setBaseValue(200.0D);
