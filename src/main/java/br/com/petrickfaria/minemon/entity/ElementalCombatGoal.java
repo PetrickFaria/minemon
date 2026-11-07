@@ -83,8 +83,8 @@ final class ElementalCombatGoal extends Goal {
             double cos = Math.cos(angle), sin = Math.sin(angle);
             double dx = away.x * cos - away.z * sin;
             double dz = away.x * sin + away.z * cos;
-            BlockPos destination = BlockPos.containing(target.getX() + dx * desired,
-                    pokemon.getY(), target.getZ() + dz * desired);
+            BlockPos destination = new BlockPos((int)Math.floor(target.getX() + dx * desired),
+                    (int)Math.floor(pokemon.getY()), (int)Math.floor(target.getZ() + dz * desired));
             var path = navigation.createPath(destination, 0);
             if (path != null && path.canReach()) {
                 navigation.moveTo(path, 1.0D);

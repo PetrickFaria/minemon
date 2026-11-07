@@ -20,7 +20,7 @@ import java.util.Locale;
 public final class BreedingEggCountdownRenderer {
     @SubscribeEvent
     public static void renderLookedAtEgg(RenderLevelStageEvent event) {
-        if (event.getStage()!=RenderLevelStageEvent.Stage.AFTER_ENTITIES) return;
+        if (event.getStage()!=RenderLevelStageEvent.Stage.AFTER_PARTICLES) return;
         Minecraft mc=Minecraft.getInstance();
         if(mc.level==null||mc.player==null||!(mc.hitResult instanceof BlockHitResult hit)
                 ||hit.getType()!=HitResult.Type.BLOCK) return;
@@ -41,7 +41,7 @@ public final class BreedingEggCountdownRenderer {
         var buffers=mc.renderBuffers().bufferSource();
         float x=-mc.font.width(text)/2.0F;
         mc.font.drawInBatch(Component.literal(text),x,0.0F,0xFFFFFFFF,false,pose.last().pose(),buffers,
-                net.minecraft.client.gui.Font.DisplayMode.NORMAL,0x70000000,net.minecraft.client.renderer.LightTexture.FULL_BRIGHT);
+                false,0x70000000,net.minecraft.client.renderer.LightTexture.FULL_BRIGHT);
         buffers.endBatch();
         pose.popPose();
     }

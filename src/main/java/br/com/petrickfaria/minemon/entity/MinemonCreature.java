@@ -1174,7 +1174,6 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         this.getNavigation().stop();
     }
 
-    @Override
     /** Physical contact never deals Minemon combat damage; all combat uses projectiles. */
     @Override public boolean doHurtTarget(net.minecraft.world.entity.Entity target) { return false; }
     public boolean projectileReady(){return !isDefeated();}
