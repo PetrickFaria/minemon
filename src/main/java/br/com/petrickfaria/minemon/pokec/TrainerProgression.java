@@ -52,13 +52,17 @@ public final class TrainerProgression {
     }
 
     public static Progress add(Progress current, double award) {
+        return add(current, award, MinemonConfig.POKEMON_XP_PER_ZOMBIE.get());
+    }
+
+    public static Progress add(Progress current, double award, int zombieXp) {
         int level = Math.max(1, Math.min(MAX_LEVEL, current.level()));
         double xp = Double.isFinite(current.xpTowardNext()) ? Math.max(0.0D, current.xpTowardNext()) : 0.0D;
         if (!Double.isFinite(award) || award <= 0.0D || level >= MAX_LEVEL)
             return new Progress(level, level >= MAX_LEVEL ? 0.0D : xp);
         xp += award;
-        while (level < MAX_LEVEL && xp + 1.0E-9D >= xpToNext(level)) {
-            xp -= xpToNext(level);
+        while (level < MAX_LEVEL && xp + 1.0E-9D >= xpToNext(level, zombieXp)) {
+            xp -= xpToNext(level, zombieXp);
             level++;
         }
         return new Progress(level, level >= MAX_LEVEL ? 0.0D : Math.max(0.0D, xp));

@@ -21,16 +21,16 @@ public class TrainerProgressionTest {
     }
 
     @Test public void progressionPreservesFractionalRemainderAndSupportsMultipleLevels() {
-        var first = TrainerProgression.add(new TrainerProgression.Progress(1, 0.0D), 56.5D);
+        var first = TrainerProgression.add(new TrainerProgression.Progress(1, 0.0D), 56.5D, 5);
         assertEquals(2, first.level()); assertEquals(6.5D, first.xpTowardNext(), 0.0D);
-        var multiple = TrainerProgression.add(new TrainerProgression.Progress(1, 0.0D), 235.0D);
+        var multiple = TrainerProgression.add(new TrainerProgression.Progress(1, 0.0D), 235.0D, 5);
         assertEquals(4, multiple.level()); assertEquals(10.0D, multiple.xpTowardNext(), 0.0D);
-        var exact = TrainerProgression.add(new TrainerProgression.Progress(1, 0.0D), 125.0D);
+        var exact = TrainerProgression.add(new TrainerProgression.Progress(1, 0.0D), 125.0D, 5);
         assertEquals(3, exact.level()); assertEquals(0.0D, exact.xpTowardNext(), 0.0D);
     }
 
     @Test public void levelCapConsumesNoFurtherExperience() {
-        var capped = TrainerProgression.add(new TrainerProgression.Progress(1000, 12.0D), 1000.0D);
+        var capped = TrainerProgression.add(new TrainerProgression.Progress(1000, 12.0D), 1000.0D, 5);
         assertEquals(1000, capped.level()); assertEquals(0.0D, capped.xpTowardNext(), 0.0D);
     }
 }
