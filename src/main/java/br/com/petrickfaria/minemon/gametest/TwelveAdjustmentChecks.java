@@ -48,7 +48,7 @@ final class TwelveAdjustmentChecks {
   verifyRecipes(h,owner);
   verifyExactHatching(h);
   var pos=new BlockPos(0,1,0);var state=ModBlocks.BREEDING_EGG.get().defaultBlockState();
-  var egg=new BreedingEggBlockEntity(pos,state);egg.initialize("bulbasaur",owner.getUUID(),6000);
+  var egg=new BreedingEggBlockEntity(pos,state);egg.initialize("bulbasaur",owner.getUUID(),BreedingEggBlockEntity.INCUBATION_TICKS);
   for(int n=0;n<1234;n++)BreedingEggBlockEntity.serverTick(level,pos,state,egg);
   var restored=new BreedingEggBlockEntity(pos,state);restored.load(egg.saveWithoutMetadata());
   if(restored.remainingTicks()!=10766)h.fail("Egg timer lost effective tick progress");

@@ -178,12 +178,10 @@ public final class MinemonFlyingCreature extends MinemonCreature {
    // Correct only excursions outside the natural band; normal navigation remains
    // responsible for smooth altitude changes and collision avoidance.
    boolean combat=this.getTarget()!=null&&this.getTarget().isAlive();
-   if(combat&&altitude<0.6D){
-    // Preserve native melee pursuit: small fliers must approach a ground
-    // target without being pushed back into the normal patrol band.
-    // Match the travel safety floor: a 1.25-block lift plus the normal
-    // navigation stopping distance keeps Pidgey outside vanilla melee reach.
-    double lift=net.minecraft.util.Mth.clamp((0.6D-altitude)*0.1D,0.02D,0.10D);
+   if(combat&&altitude<flightMinimum()){
+    // Ranged combat never pulls a flyer down into melee range. Preserve its
+    // normal safe flight band while horizontal pathfinding finds a firing lane.
+    double lift=net.minecraft.util.Mth.clamp((flightMinimum()-altitude)*0.1D,0.02D,0.10D);
     this.setDeltaMovement(this.getDeltaMovement().x,Math.max(this.getDeltaMovement().y,lift),this.getDeltaMovement().z);
    }else if(!this.fixedFloater()&&!combat&&!this.followingObstacle()
        &&(this.naturalBehaviorActive()||this.isFollowingOwner())
