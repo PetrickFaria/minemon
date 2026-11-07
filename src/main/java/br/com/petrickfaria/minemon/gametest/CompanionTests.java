@@ -1,3 +1,6 @@
+Warning: truncated output (original token count: 12187)
+Total output lines: 668
+
 package br.com.petrickfaria.minemon.gametest;
 import br.com.petrickfaria.minemon.entity.MinemonCreature;
 import br.com.petrickfaria.minemon.entity.NaturalMovementGoals;
@@ -285,18 +288,7 @@ public final class CompanionTests {
   ServerPlayer owner=player(h);MinemonCreature pokemon=h.spawn(ModEntities.SPECIES.get("pikachu").get(),new BlockPos(8,1,8));
   pokemon.tame(owner);pokemon.setOwnerUUID(owner.getUUID());float pokemonHealth=pokemon.getHealth();
   check(h,!pokemon.hurt(DamageSource.playerAttack(owner),30.0F)&&pokemon.getHealth()==pokemonHealth,
-      "Domestic Minemon must retain direct-player damage protection");
-  Cow cow=h.spawn(EntityType.COW,new BlockPos(10,1,8));float cowHealth=cow.getHealth();
-  check(h,cow.hurt(DamageSource.playerAttack(owner),7.0F)&&cow.getHealth()==cowHealth-7.0F,
-      "Vanilla mobs must retain their unmodified player damage");
-  owner.discard();h.succeed();
- }
-
- @GameTest(template="test_arena",timeoutTicks=100)
- public static void naturalEncounterPlayerHitsStayOneHpAndNeverDownTheEncounter(GameTestHelper h){
-  ServerPlayer owner=player(h);MinemonCreature wild=h.spawn(ModEntities.SPECIES.get("bulbasaur").get(),new BlockPos(8,1,8));
-  var data=wild.getPersistentData();data.putBoolean("MinemonWildEncounter",true);data.putUUID("MinemonEncounterOwner",owner.getUUID());data.putString("MinemonEncounterState","active");
-  wild.setWildEncounter(true);wild.setWildEncounterOwner(owner.getUUID());wild.setHealth(2.0F);
+      "Domestic Minemon must retain direct-player damage protection");…187 tokens truncated…ild.setWildEncounter(true);wild.setWildEncounterOwner(owner.getUUID());wild.setHealth(2.0F);
   check(h,wild.hurt(DamageSource.playerAttack(owner),50.0F),"A direct hit must be accepted on a naturally managed wild encounter");
   check(h,wild.getHealth()==1.0F&&!br.com.petrickfaria.minemon.pokec.WildEncounterManager.isDowned(wild),
       "A player's capped hit must leave a natural encounter at one HP without triggering capture/downed state");
@@ -420,7 +412,7 @@ public final class CompanionTests {
     followOwner.setInvulnerable(true);followOwner.setNoGravity(true);
     BlockPos followPos=h.absolutePos(new BlockPos(13,1,5));
     followOwner.moveTo(followPos.getX()+0.5D,followPos.getY(),followPos.getZ()+0.5D,0,0);
-    bird.tame(followOwner);
+    bird.tame(followOwner);bird.setOwnerUUID(followOwner.getUUID());bird.setTarget(null);
     double horizontalBefore=bird.position().subtract(followOwner.position()).horizontalDistance();
     bird.setOrderedToSit(false);
     h.runAfterDelay(120,()->{
