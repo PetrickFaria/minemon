@@ -41,7 +41,7 @@ public final class CustomSoundTimerTests {
     }
 
     @GameTest(template = "test_arena", timeoutTicks = 30)
-    public static void customSoundIntervalsStayBetweenThreeAndFiveMinutes(GameTestHelper helper) {
+    public static void customSoundIntervalsStayBetweenOneAndFiveMinutes(GameTestHelper helper) {
         for (int x = 0; x < 16; x++) for (int z = 0; z < 16; z++) {
             helper.setBlock(new BlockPos(x, 3, z), Blocks.STONE);
             for (int y = 4; y <= 8; y++) helper.setBlock(new BlockPos(x, y, z), Blocks.AIR);
@@ -61,13 +61,13 @@ public final class CustomSoundTimerTests {
             first.setSleeping(true);
             first.resetCustomSoundTimerAndPlay();
             if (!first.isSleeping()) helper.fail("custom playback must not wake an already sleeping Pokémon");
-            if (!withinThreeToFiveMinutes(first.customSoundTicksForValidation()))
-                helper.fail("daytime click must cancel the dawn delay and choose 3600..6000 ticks");
+            if (!withinOneToFiveMinutes(first.customSoundTicksForValidation()))
+                helper.fail("daytime click must cancel the dawn delay and choose 1200..6000 ticks");
             second.setCustomSoundTicksForValidation(1);
             helper.runAfterDelay(2, () -> {
                 if (!withinIntervalAfterTwoTicks(first.customSoundTicksForValidation())
                         || !withinIntervalAfterTwoTicks(second.customSoundTicksForValidation()))
-                    helper.fail("automatic playback and interaction reset must leave timers in the 3600..6000 tick range");
+                    helper.fail("automatic playback and interaction reset must leave timers in the 1200..6000 tick range");
 
                 second.setCustomSoundTicksForValidation(1);
                 helper.runAfterDelay(2, () -> {
@@ -123,8 +123,8 @@ public final class CustomSoundTimerTests {
         var mainHand = new PlayerInteractEvent.EntityInteract(player, InteractionHand.MAIN_HAND, creature);
         MinecraftForge.EVENT_BUS.post(mainHand);
         int resetTicks = creature.customSoundTicksForValidation();
-        if (mainHand.isCanceled() || resetTicks < 3600 || resetTicks > 6000)
-            helper.fail("main-hand right-click must preserve interaction and reset an independent 3600..6000 tick interval");
+        if (mainHand.isCanceled() || resetTicks < 1200 || resetTicks > 6000)
+            helper.fail("main-hand right-click must preserve interaction and reset an independent 1200..6000 tick interval");
         if (creature.getHealth() != initialHealth)
             helper.fail("right-clicking to play a sound must not damage the Pokémon");
 
@@ -132,12 +132,12 @@ public final class CustomSoundTimerTests {
         helper.succeed();
     }
 
-    private static boolean withinThreeToFiveMinutes(int ticks) {
-        return ticks >= 3600 && ticks <= 6000;
+    private static boolean withinOneToFiveMinutes(int ticks) {
+        return ticks >= 1200 && ticks <= 6000;
     }
 
     private static boolean withinIntervalAfterTwoTicks(int ticks) {
-        return ticks >= 3598 && ticks <= 6000;
+        return ticks >= 1198 && ticks <= 6000;
     }
 
     private CustomSoundTimerTests() {}

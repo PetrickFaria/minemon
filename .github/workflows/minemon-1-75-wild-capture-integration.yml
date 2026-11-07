@@ -98,7 +98,7 @@ jobs:
           for shot in gastly-front gastly-no-tongue haunter-front-a haunter-front-b haunter-blink gengar-walk gengar-blink gengar-mouth-teeth-fixed gengar-sleep-half-sunk-a gengar-sleep-half-sunk-b; do
             test -f "run/screenshots/ghost-line-1.74-$shot.png"
           done
-          for shot in gastly-right gastly-back gastly-left gastly-10-block gastly-25-block gastly-50-block gastly-motion gastly-float; do
+          for shot in gastly-right gastly-back gastly-left gastly-top gastly-bottom gastly-10-block gastly-25-block gastly-50-block gastly-motion gastly-float; do
             test -f "run/screenshots/ghost-line-1.74-$shot.png"
           done
       - name: Reopen the saved Gastly world and verify aura visibility twice

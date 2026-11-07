@@ -43,7 +43,7 @@ final class TwelveAdjustmentChecks {
   var id=new net.minecraft.resources.ResourceLocation("minecraft","creeper");copy.setBlackListOverride(id,true);
   saved=copy.saveWithoutId(new CompoundTag());mob.load(saved);
   if(!mob.isBlackListTarget(creeper))h.fail("Explicit creeper choice did not persist");
-  creeper.setPos(mob.getX()+12,mob.getY(),mob.getZ());if(mob.canAttack(creeper))h.fail("Tamed attacker accepted target beyond ten blocks");
+  creeper.setPos(mob.getX()+20,mob.getY(),mob.getZ());if(mob.canAttack(creeper))h.fail("Tamed attacker accepted target beyond its level-scaled range");
   verifyCombat(h,owner);
   verifyRecipes(h,owner);
   verifyExactHatching(h);
@@ -51,7 +51,7 @@ final class TwelveAdjustmentChecks {
   var egg=new BreedingEggBlockEntity(pos,state);egg.initialize("bulbasaur",owner.getUUID(),6000);
   for(int n=0;n<1234;n++)BreedingEggBlockEntity.serverTick(level,pos,state,egg);
   var restored=new BreedingEggBlockEntity(pos,state);restored.load(egg.saveWithoutMetadata());
-  if(restored.remainingTicks()!=4766)h.fail("Egg timer lost effective tick progress");
+  if(restored.remainingTicks()!=10766)h.fail("Egg timer lost effective tick progress");
   var legacy=new BreedingEggBlockEntity(pos,state);legacy.initialize("bulbasaur",owner.getUUID(),12000);
   restored.load(legacy.saveWithoutMetadata());if(restored.remainingTicks()!=12000)h.fail("Existing egg progress was reset");
   }finally{owner.discard();}
@@ -61,27 +61,27 @@ final class TwelveAdjustmentChecks {
   var attacker=ModEntities.SPECIES.get("charmander").get().create(level);
   var point=h.absolutePos(new BlockPos(5,2,5));attacker.moveTo(point.getX()+.5,point.getY(),point.getZ()+.5,0,0);
   attacker.tame(owner);attacker.setOwnerUUID(owner.getUUID());attacker.setNoAi(true);
-  var cow=EntityType.COW.create(level);cow.moveTo(attacker.getX()+2,attacker.getY(),attacker.getZ(),0,0);
+  var cow=EntityType.COW.create(level);cow.moveTo(attacker.getX()+9,attacker.getY(),attacker.getZ(),0,0);
   cow.setNoAi(true);cow.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).setBaseValue(200);cow.setHealth(200);level.addFreshEntity(cow);
   try{
-   if(attacker.rangedCharges().charges()!=3)h.fail("New companion must have three ranged charges");
+   cow.setPos(attacker.getX()+9,attacker.getY(),attacker.getZ());
    for(int i=0;i<3;i++){
     cow.invulnerableTime=0;float before=cow.getHealth();attacker.focusPlayerTarget(cow);
-    if(!attacker.fireElementalProjectile(cow))h.fail("Charged ranged strike was cancelled");
-    if(attacker.fireElementalProjectile(cow)||attacker.doHurtTarget(cow))h.fail("Switching attack mode bypassed shared cooldown");
+    if(!attacker.fireElementalProjectile(cow))h.fail("A ranged strike at a valid seven-block-safe distance was cancelled");
+    if(attacker.fireElementalProjectile(cow)||attacker.doHurtTarget(cow))h.fail("Physical contact or a second shot bypassed ranged-only cooldown");
     var shots=level.getEntitiesOfClass(ElementalProjectile.class,attacker.getBoundingBox().inflate(12),shot->shot.getOwner()==attacker);
     if(shots.size()!=1)h.fail("Projectile absent or duplicated");var shot=shots.get(0);
     if(shot.color()!=EggAppearance.color("fire"))h.fail("Wrong first elemental color");
     for(int tick=0;tick<30&&!shot.isRemoved();tick++)shot.tick();
     float expected=(float)attacker.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE);
     if(Math.abs(before-cow.getHealth()-expected)>.001||cow.isOnFire())h.fail("Projectile damage changed or ignited target");
-    level.getServer().getWorldData().overworldData().setGameTime(level.getGameTime()+59);
-    if(attacker.combatReady())h.fail("Attack cooldown ended before 60 ticks");
+    level.getServer().getWorldData().overworldData().setGameTime(level.getGameTime()+99);
+    if(attacker.combatReady())h.fail("Attack cooldown ended before 100 ticks");
     level.getServer().getWorldData().overworldData().setGameTime(level.getGameTime()+1);
    }
-   if(attacker.projectileReady()||attacker.rangedCharges().charges()!=0)h.fail("Three shots must consume three charges");
+   if(!attacker.projectileReady()||attacker.rangedCharges().charges()!=3)h.fail("Ranged-only attacks must not be gated by or consume finite ammunition charges");
    cow.invulnerableTime=0;cow.setPos(attacker.getX()+.7,attacker.getY(),attacker.getZ());
-   if(!attacker.doHurtTarget(cow))h.fail("Empty companion failed to execute close melee");
+   if(attacker.doHurtTarget(cow))h.fail("A Pokémon must never deal melee damage at close range");
    cow.setPos(attacker.getX(),attacker.getY()+8,attacker.getZ());if(!attacker.canAttack(cow))h.fail("Target above eight blocks rejected");
    cow.setPos(attacker.getX(),attacker.getY()-8,attacker.getZ());if(!attacker.canAttack(cow))h.fail("Target below eight blocks rejected");
    cow.setPos(attacker.getX(),attacker.getY()+20,attacker.getZ());if(attacker.canAttack(cow))h.fail("Target beyond 3D radius accepted");
@@ -131,14 +131,14 @@ final class TwelveAdjustmentChecks {
   var state=ModBlocks.BREEDING_EGG.get().defaultBlockState();var owner=UUID.randomUUID();
   level.setBlock(pos.below(),net.minecraft.world.level.block.Blocks.STONE.defaultBlockState(),3);
   level.setBlock(pos,state,3);
-  var egg=(BreedingEggBlockEntity)level.getBlockEntity(pos);egg.initialize("caterpie",owner,6000);
+  var egg=(BreedingEggBlockEntity)level.getBlockEntity(pos);egg.initialize("caterpie",owner,BreedingEggBlockEntity.INCUBATION_TICKS);
   try{
-   for(int tick=0;tick<5999;tick++)BreedingEggBlockEntity.serverTick(level,pos,state,egg);
-   if(egg.remainingTicks()!=1 || level.getBlockEntity(pos)!=egg)h.fail("Egg hatched before 6000 ticks");
+   for(int tick=0;tick<11999;tick++)BreedingEggBlockEntity.serverTick(level,pos,state,egg);
+   if(egg.remainingTicks()!=1 || level.getBlockEntity(pos)!=egg)h.fail("Egg hatched before 12000 ticks");
    egg.load(egg.saveWithoutMetadata());
    BreedingEggBlockEntity.serverTick(level,pos,state,egg);
    var hatchlings=level.getEntitiesOfClass(MinemonCreature.class,new net.minecraft.world.phys.AABB(pos).inflate(4),m->owner.equals(m.getOwnerUUID()));
-   if(hatchlings.size()!=1 || !level.getBlockState(pos).isAir())h.fail("Egg did not hatch exactly once at tick 6000: remaining="+egg.remainingTicks()+" count="+hatchlings.size()+" block="+level.getBlockState(pos)+" data="+egg.saveWithoutMetadata());
+   if(hatchlings.size()!=1 || !level.getBlockState(pos).isAir())h.fail("Egg did not hatch exactly once at tick 12000: remaining="+egg.remainingTicks()+" count="+hatchlings.size()+" block="+level.getBlockState(pos)+" data="+egg.saveWithoutMetadata());
    BreedingEggBlockEntity.serverTick(level,pos,state,egg);
    if(level.getEntitiesOfClass(MinemonCreature.class,new net.minecraft.world.phys.AABB(pos).inflate(4),m->owner.equals(m.getOwnerUUID())).size()!=1)h.fail("Egg duplicated hatchling");
   }finally{

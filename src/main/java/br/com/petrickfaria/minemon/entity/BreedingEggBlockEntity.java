@@ -19,7 +19,7 @@ public final class BreedingEggBlockEntity extends BlockEntity {
     private UUID owner;
     private String elementType="normal";
     public String elementType(){return elementType;}
-    public static final int INCUBATION_TICKS = 6_000;
+    public static final int INCUBATION_TICKS = 12_000;
     private int remainingTicks = INCUBATION_TICKS;
     private boolean hatched;
 
@@ -47,6 +47,11 @@ public final class BreedingEggBlockEntity extends BlockEntity {
             if (egg.remainingTicks > 0) return;
         }
         egg.tryHatch(server, pos);
+    }
+    /** Client-only visual clock. The server remains authoritative for hatching and persistence. */
+    public static void clientTick(net.minecraft.world.level.Level level, BlockPos pos, BlockState state, BreedingEggBlockEntity egg) {
+        if (egg.species.isBlank() || egg.hatched || egg.remainingTicks <= 0) return;
+        egg.remainingTicks--;
     }
     private void tryHatch(ServerLevel level, BlockPos pos) {
         var registryType = ModEntities.SPECIES.get(species);

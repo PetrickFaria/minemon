@@ -279,7 +279,7 @@ public final class NightAndSwimmingTests {
     h.runAfterDelay(30,()->{
      mixed.forEach(m->check(h,m.naturalCycle().ticks()==clocks.get(m),"Night must preserve cycle progress: "+m.getSpeciesSlug()));
      air.forEach(m->check(h,m.position().subtract(positions.get(m)).horizontalDistanceSqr()<.001,"Sleeping hover must stop horizontal travel"));
-     var attacker=h.spawn(EntityType.COW,new BlockPos(4,1,3));attacker.setNoAi(true);float health=attacker.getHealth();
+     var attacker=h.spawn(EntityType.COW,new BlockPos(14,1,3));attacker.setNoAi(true);float health=attacker.getHealth();
      check(h,ground.hurt(DamageSource.mobAttack(attacker),1),"Attack must damage sleeping creature");
      check(h,!ground.isSleeping()&&ground.getTarget()==attacker,"Attack must wake and retain aggressor immediately");
      await(h,()->attacker.getHealth()<health,()->{
@@ -296,7 +296,7 @@ public final class NightAndSwimmingTests {
           +",lastHurt="+ground.getLastHurtByMob()+",pos="+ground.position()+",onGround="+ground.isOnGround()
           +",noAI="+ground.isNoAi()+",time="+level.getDayTime()+",wakeGrace="+ground.wakeGraceTicksForValidation()
           +",nightCombat="+ground.nightCombatTicksForValidation()+",nightRoutine="+ground.nightRoutineForValidation());
-     },150,"Woken creature must physically retaliate using melee AI");
+     },150,"Woken creature must retaliate with ranged damage from a safe distance");
     });
    },350,()->"Night must settle ground/mixed creatures on land and air-only creatures in a one-block hover; mixed="
        +mixed.stream().map(m->m.getSpeciesSlug()+"{sleep="+m.isSleeping()+",ground="+m.isOnGround()+",night="+m.isNightResting()+",pos="+m.position()+",nav="+m.getNavigation().getTargetPos()+"}").toList()
@@ -325,14 +325,14 @@ public final class NightAndSwimmingTests {
   if(index>=sleepers.size()){done.run();return;}
   var mob=sleepers.get(index);var origin=h.absolutePos(BlockPos.ZERO);
   int x=(int)Math.floor(mob.getX()-origin.getX()),z=(int)Math.floor(mob.getZ()-origin.getZ());
-  var attacker=h.spawn(EntityType.COW,new BlockPos(x+1,1,z));attacker.setNoAi(true);float health=attacker.getHealth();
+  var attacker=h.spawn(EntityType.COW,new BlockPos(x+9,1,z));attacker.setNoAi(true);float health=attacker.getHealth();
   check(h,mob.hurt(DamageSource.mobAttack(attacker),1)&&!mob.isSleeping()&&mob.getTarget()==attacker,
       mob.getSpeciesSlug()+" must wake and retain its attacker");
   await(h,()->attacker.getHealth()<health,()->{
    attacker.discard();
    await(h,mob::isSleeping,()->runEeveeLineCombat(h,sleepers,index+1,done),240,
        ()->mob.getSpeciesSlug()+" must return to sleep after combat while it is still night: pos="+mob.position()+" ground="+mob.isOnGround()+" night="+mob.isNightResting()+" target="+mob.getTarget()+" time="+h.getLevel().getDayTime()+" collision="+h.getLevel().noCollision(mob,mob.getBoundingBox()));
-  },180,mob.getSpeciesSlug()+" must retaliate with the existing combat AI");
+  },180,mob.getSpeciesSlug()+" must retaliate with ranged damage from a safe distance");
  }
  @GameTest(template="test_arena",batch="water_speed",timeoutTicks=240)
  public static void nonAquaticCreatureEscapesToReachableShore(GameTestHelper h){

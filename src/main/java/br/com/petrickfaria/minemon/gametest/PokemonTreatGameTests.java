@@ -66,6 +66,7 @@ public final class PokemonTreatGameTests {
         check(h, PokemonTreatTypes.accepts("charizard","fire")&&PokemonTreatTypes.accepts("charizard","flying"), "Both modern Charizard types must match");
         check(h, PokemonTreatTypes.accepts("gengar","ghost")&&PokemonTreatTypes.accepts("gengar","poison"), "Both Gengar types must match");
         check(h, PokemonTreatTypes.accepts("gyarados","water")&&PokemonTreatTypes.accepts("gyarados","flying"), "Both Gyarados types must match");
+        check(h, PokemonTreatTypes.accepts("pidgey","normal")&&PokemonTreatTypes.accepts("pidgey","flying"), "Pidgey must accept treats for both its Normal and Flying types");
         check(h, PokemonTreatTypes.accepts("clefairy","fairy")&&PokemonTreatTypes.accepts("jigglypuff","fairy")&&PokemonTreatTypes.accepts("mrmime","fairy"), "Modern Fairy types must match");
         check(h, PokemonTreatTypes.accepts("magnemite","steel")&&PokemonTreatTypes.accepts("magneton","steel"), "Modern Steel types must match");
         check(h, PokemonTreatTypes.accepts("bulbasaur","grass")&&PokemonTreatTypes.accepts("oddish","grass"), "Grass treats must match Grass Pokémon");
@@ -144,7 +145,7 @@ public final class PokemonTreatGameTests {
         String babySpecies=egg.species();
         check(h, babySpecies.equals("charmander")||babySpecies.equals("squirtle"),"Charizard and Blastoise must produce only their initial forms");
         check(h,owner.getUUID().equals(egg.owner()), "Incubating egg must preserve the parents' owner");
-        check(h,egg.remainingTicks()==6_000,"New breeding eggs must incubate for exactly 6000 effective ticks");
+        check(h,egg.remainingTicks()==12_000,"New breeding eggs must incubate for exactly 12000 effective ticks");
         List<MinemonCreature> babies=h.getLevel().getEntitiesOfClass(MinemonCreature.class, first.getBoundingBox().inflate(8), MinemonCreature::isBaby);
         check(h,babies.isEmpty(),"Breeding must not spawn a baby Pokémon alongside the egg");
         check(h, first.getAge()==6000&&second.getAge()==6000, "Adult cooldown should default to 6000 ticks");

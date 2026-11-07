@@ -79,6 +79,11 @@ public final class GastlyCoreRenderHook {
             }
         }
         for(var gastly:gastlys){
+            // The opaque cutout core is drawn over its own translucent smoke.
+            // Keep the world depth test active so walls still occlude the model,
+            // and restore depth writes in case a particle batch left them off.
+            com.mojang.blaze3d.systems.RenderSystem.enableDepthTest();
+            com.mojang.blaze3d.systems.RenderSystem.depthMask(true);
             dispatcher.render(gastly,gastly.getX()-camera.x,gastly.getY()-camera.y,gastly.getZ()-camera.z,
                     gastly.getYRot(),event.getPartialTick(),event.getPoseStack(),buffers,
                     dispatcher.getPackedLightCoords(gastly,event.getPartialTick()));

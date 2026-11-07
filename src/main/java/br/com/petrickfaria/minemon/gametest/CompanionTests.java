@@ -71,9 +71,9 @@ public final class CompanionTests {
  }
  @GameTest(template="test_arena",timeoutTicks=300)
  public static void wildRetaliatesAgainstCreature(GameTestHelper h) {
-  MinemonCreature b=spawn(h);Cow c=h.spawn(EntityType.COW,new BlockPos(8,1,5));c.setNoAi(true);float health=c.getHealth();
+  MinemonCreature b=spawn(h);Cow c=h.spawn(EntityType.COW,new BlockPos(14,1,5));c.setNoAi(true);float health=c.getHealth();
   b.hurt(DamageSource.mobAttack(c),1);
-  h.runAfterDelay(100,()->{check(h,c.getHealth()<health,"Melee AI must damage creature aggressor");h.succeed();});
+  h.runAfterDelay(120,()->{check(h,c.getHealth()<health,"Wild Pokémon must retaliate with a ranged projectile while maintaining safe distance");h.succeed();});
  }
  @GameTest(template="test_arena",timeoutTicks=100)
  public static void passiveUntilProvoked(GameTestHelper h) {
@@ -84,13 +84,13 @@ public final class CompanionTests {
  public static void ownerProtectedAndAssisted(GameTestHelper h) {
   MinemonCreature b=spawn(h);ServerPlayer p=player(h);b.tame(p);b.setOrderedToSit(false);
   b.setNoAi(true);h.runAfterDelay(80,()->{b.setNoAi(false);b.getNavigation().stop();b.hurt(DamageSource.playerAttack(p),1);check(h,b.getTarget()!=p,"Never retaliate against owner");
-  Cow c=h.spawn(EntityType.COW,new BlockPos(8,1,5));c.setNoAi(true);p.attack(c);check(h,p.getLastHurtMob()==c,"Owner attack must record its victim");float health=c.getHealth();
+  Cow c=h.spawn(EntityType.COW,new BlockPos(14,1,5));c.setNoAi(true);p.attack(c);check(h,p.getLastHurtMob()==c,"Owner attack must record its victim");float health=c.getHealth();
   h.runAfterDelay(100,()->{check(h,c.getHealth()<health,"Owner attack assistance must damage target"+state(b,c));p.discard();h.succeed();});});
  }
  @GameTest(template="test_arena",timeoutTicks=300)
  public static void ownerDefense(GameTestHelper h) {
   MinemonCreature b=spawn(h);ServerPlayer p=player(h);b.tame(p);b.setOrderedToSit(false);
-  Cow c=h.spawn(EntityType.COW,new BlockPos(8,1,5));c.setNoAi(true);float health=c.getHealth();b.setNoAi(true);h.runAfterDelay(80,()->{b.setNoAi(false);b.getNavigation().stop();check(h,p.hurt(DamageSource.mobAttack(c),1),"Owner must accept damage after spawn protection");
+  Cow c=h.spawn(EntityType.COW,new BlockPos(14,1,5));c.setNoAi(true);float health=c.getHealth();b.setNoAi(true);h.runAfterDelay(80,()->{b.setNoAi(false);b.getNavigation().stop();check(h,p.hurt(DamageSource.mobAttack(c),1),"Owner must accept damage after spawn protection");
   com.mojang.logging.LogUtils.getLogger().info("MINEMON DEFENSE AFTER HIT "+state(b,c)+" goalCanUse="+new net.minecraft.world.entity.ai.goal.target.OwnerHurtByTargetGoal(b).canUse()+" sight="+b.getSensing().hasLineOfSight(c)+" wants="+b.wantsToAttack(c,p));
   h.runAfterDelay(5,()->com.mojang.logging.LogUtils.getLogger().info("MINEMON DEFENSE AFTER 5 TICKS "+state(b,c)));
   h.runAfterDelay(100,()->{check(h,c.getHealth()<health,"Companion must defend attacked owner"+state(b,c));p.discard();h.succeed();});});
@@ -385,7 +385,9 @@ public final class CompanionTests {
     for(int i=0;i<birds.size();i++){
      var bird=birds.get(i);
      check(h,bird.isOrderedToSit()&&!bird.isSleeping(),"Commanded flyer must remain awake and sitting");
-     check(h,bird.position().distanceToSqr(anchors.get(i))<1.0E-6D,"Sentar must hold an airborne flyer at the command position");
+     double hover=bird.getY()-NaturalMovementGoals.surfaceBelow(h.getLevel(),bird.getX(),bird.getY(),bird.getZ());
+     check(h,Math.abs(hover-1.0D)<0.2D,"Sentar must hold an airborne flyer at one block above support");
+     check(h,bird.position().subtract(anchors.get(i)).horizontalDistanceSqr()<1.0E-6D,"Sentar must hold the flyer's horizontal position");
      bird.setOrderedToSit(false);
     }
     h.runAfterDelay(60,()->{
@@ -397,6 +399,31 @@ public final class CompanionTests {
   check(h,remaining>0,"Commanded flyers failed to remain at their sit position or resume flight");
   final boolean next=ordered;
   h.runAfterDelay(5,()->awaitCommandedLanding(h,birds,remaining-5,next));
+ }
+
+ @GameTest(template="test_arena",timeoutTicks=520)
+ public static void sittingFlyerSleepsAtNightAndFollowCommandWakesIt(GameTestHelper h){
+  floor(h);h.getLevel().setDayTime(1000);
+  MinemonCreature bird=h.spawn(ModEntities.SPECIES.get("pidgey").get(),new BlockPos(5,6,5));
+  ServerPlayer owner=player(h);owner.moveTo(h.absolutePos(new BlockPos(13,1,5)).getX()+.5D,1.0D,h.absolutePos(new BlockPos(13,1,5)).getZ()+.5D,0,0);
+  bird.tame(owner);bird.setOwnerUUID(owner.getUUID());bird.setOrderedToSit(true);
+  var horizontal=bird.position();
+  h.runAfterDelay(30,()->{
+   check(h,Math.abs(bird.getY()-NaturalMovementGoals.surfaceBelow(h.getLevel(),bird.getX(),bird.getY(),bird.getZ())-1.0D)<0.2D,
+       "A sitting Pidgey must hover one block above ground during daytime");
+   check(h,bird.position().subtract(horizontal).horizontalDistanceSqr()<1.0E-6D,"A sitting flyer must not drift horizontally");
+   h.getLevel().setDayTime(18000);
+   h.runAfterDelay(300,()->{
+    check(h,bird.isSleeping()&&bird.isOnGround(),"A sitting flyer must land and sleep during its natural night period");
+    var distanceBefore=bird.distanceTo(owner);
+    bird.setOrderedToSit(false);
+    h.runAfterDelay(120,()->{
+     check(h,!bird.isSleeping()&&!bird.isNightResting(),"The Follow order must wake the flyer and suppress automatic return to sleep");
+     check(h,bird.distanceTo(owner)<distanceBefore,"The woken Pidgey must follow its trainer");
+     bird.discard();owner.discard();h.succeed();
+    });
+   });
+  });
  }
 
  private static void awaitAwakeFlightBand(GameTestHelper h,MinemonCreature bird,int remaining,int stable){
@@ -425,7 +452,7 @@ public final class CompanionTests {
  private static void checkAirborneAttack(GameTestHelper h,MinemonCreature bird,Cow cow,float health,int elapsed) {
   check(h,!bird.isOnGround(),"An awake flying attacker must remain airborne");
   if(cow.getHealth()<health){h.succeed();return;}
-  if(elapsed>=240){h.fail("Flying melee AI must actually hit a terrestrial target;"+state(bird,cow));return;}
+  if(elapsed>=300){h.fail("Flying ranged AI must hit a terrestrial target while maintaining safe distance;"+state(bird,cow));return;}
   h.runAfterDelay(5,()->checkAirborneAttack(h,bird,cow,health,elapsed+5));
  }
 

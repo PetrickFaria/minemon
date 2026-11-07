@@ -100,12 +100,11 @@ public class MinemonRenderer extends GeoEntityRenderer<MinemonCreature> {
     pose.scale(1/wildScale,1/wildScale,1/wildScale);
     double top=br.com.petrickfaria.minemon.entity.ModelMetrics.top(entity.getSpeciesSlug(),wildScale);
     pose.translate(0,Math.max(0,top-entity.getBbHeight()),0);
-    boolean hasBall=hasEmptyPokeball();
-    super.renderNameTag(entity,Component.literal(hasBall?"[ CAPTURAR ]":"[ CAPTURAR ] sem Pokébola")
-        .withStyle(hasBall?net.minecraft.ChatFormatting.GREEN:net.minecraft.ChatFormatting.DARK_GRAY),pose,buffers,packedLight);
+    super.renderNameTag(entity,Component.literal("Capturar - Botão Direito")
+        .withStyle(net.minecraft.ChatFormatting.GREEN),pose,buffers,packedLight);
     pose.translate(0,-.22D,0);
-    super.renderNameTag(entity,Component.literal("[ SAQUEAR ] agachar + clique")
-        .withStyle(net.minecraft.ChatFormatting.GOLD),pose,buffers,packedLight);
+    super.renderNameTag(entity,Component.literal("Saquear - Botão Esquerdo")
+        .withStyle(net.minecraft.ChatFormatting.RED),pose,buffers,packedLight);
    }finally{pose.popPose();}
    return;
   }

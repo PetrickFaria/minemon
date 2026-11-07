@@ -183,6 +183,25 @@ public final class PokemonManagementGameTests {
         h.succeed();
     }
 
+    @GameTest(template = "test_arena", timeoutTicks = 80)
+    public static void companionRangeScalesLinearlyAndPhysicalAttacksAreDisabled(GameTestHelper h) {
+        floor(h);
+        ServerPlayer owner = player(h, h.absolutePos(new BlockPos(7, 1, 5)));
+        MinemonCreature pokemon = h.spawn(ModEntities.SPECIES.get("bulbasaur").get(), new BlockPos(5, 1, 5));
+        pokemon.tame(owner);
+        int[] levels={1,2,3,10};
+        double[] expected={15.0D,15.0D+10.0D/9.0D,15.0D+20.0D/9.0D,25.0D};
+        for(int i=0;i<levels.length;i++){
+            pokemon.setPokemonProgress(levels[i],0);
+            check(h,Math.abs(pokemon.combatRange()-expected[i])<1.0E-6D,
+                    "Companion target range must follow the linear level progression at level "+levels[i]);
+        }
+        net.minecraft.world.entity.animal.Cow contact=h.spawn(EntityType.COW,new BlockPos(5,1,5));
+        check(h,!pokemon.doHurtTarget(contact),"Pokémon must never deal melee damage, even on direct contact");
+        check(h,Math.abs(pokemon.combatRange()-25.0D)<1.0E-6D,"Range must stop growing after level 10");
+        pokemon.discard();contact.discard();owner.discard();h.succeed();
+    }
+
     @GameTest(template = "test_arena", timeoutTicks = 220)
     public static void sittingPokemonRetaliatesOnlyWithAuthorizationAndStaysAtItsAnchor(GameTestHelper h) {
         floor(h);
@@ -190,7 +209,7 @@ public final class PokemonManagementGameTests {
         MinemonCreature pokemon = h.spawn(ModEntities.SPECIES.get("pikachu").get(), new BlockPos(5, 1, 5));
         pokemon.tame(owner);
         pokemon.setOrderedToSit(true);
-        net.minecraft.world.entity.monster.Zombie target = h.spawn(EntityType.ZOMBIE, new BlockPos(10, 1, 5));
+        net.minecraft.world.entity.monster.Zombie target = h.spawn(EntityType.ZOMBIE, new BlockPos(14, 1, 5));
         target.setNoAi(true);
         target.setHealth(200.0F);
         target.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).setBaseValue(200.0D);
@@ -212,23 +231,22 @@ public final class PokemonManagementGameTests {
     }
 
     @GameTest(template = "test_arena", timeoutTicks = 140)
-    public static void sittingPokemonCanMeleeWithinReachWithoutSteppingForward(GameTestHelper h) {
+    public static void sittingPokemonUsesOnlyRangedAttacksWithoutSteppingForward(GameTestHelper h) {
         floor(h);
         ServerPlayer owner = player(h, h.absolutePos(new BlockPos(7, 1, 5)));
         MinemonCreature pokemon = h.spawn(ModEntities.SPECIES.get("rattata").get(), new BlockPos(5, 1, 5));
         pokemon.tame(owner);
-        for (int i = 0; i < br.com.petrickfaria.minemon.entity.CombatCharges.CAPACITY; i++) pokemon.rangedCharges().consume();
         pokemon.setOrderedToSit(true);
-        net.minecraft.world.entity.animal.Cow target = h.spawn(EntityType.COW, new BlockPos(5, 1, 5));
+        net.minecraft.world.entity.animal.Cow target = h.spawn(EntityType.COW, new BlockPos(14, 1, 5));
         target.setNoAi(true);
         target.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).setBaseValue(200.0D);
         target.setHealth(200.0F);
         pokemon.focusPlayerTarget(target);
         var anchor = pokemon.position();
         h.runAfterDelay(80, () -> {
-            check(h, target.getHealth() < 200.0F, "a seated Pokémon must use melee attacks against a target already in reach");
+            check(h, target.getHealth() < 200.0F, "a seated Pokémon must use a ranged attack at safe distance even with previous charge slots depleted");
             check(h, pokemon.isOrderedToSit() && pokemon.position().distanceToSqr(anchor) < 1.0E-6D,
-                    "a seated melee attacker must remain at its original position");
+                    "a seated ranged attacker must remain at its original position");
             pokemon.discard(); target.discard(); owner.discard();
             h.succeed();
         });
