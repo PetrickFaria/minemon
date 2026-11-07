@@ -134,16 +134,17 @@ public final class PokemonManagementGameTests {
 
         MinemonCreature otherCompanion = h.spawn(ModEntities.SPECIES.get("charmander").get(), new BlockPos(4, 1, 5));
         otherCompanion.tame(owner);
-        net.minecraft.world.entity.animal.Cow cow = h.spawn(EntityType.COW, new BlockPos(10, 1, 5));
+        MinemonCreature defeatedWild = h.spawn(ModEntities.SPECIES.get("rattata").get(), new BlockPos(10, 1, 5));
         br.com.petrickfaria.minemon.entity.ElementalProjectile shot =
-                new br.com.petrickfaria.minemon.entity.ElementalProjectile(pokemon, cow);
-        int cowReward = cow.getExperienceReward();
+                new br.com.petrickfaria.minemon.entity.ElementalProjectile(pokemon, defeatedWild);
+        int projectileRewardHalfUnits = br.com.petrickfaria.minemon.entity.PokemonProgression
+                .xpRewardHalfUnitsForWildRarity(defeatedWild.getPokemonRarity(), 5);
         br.com.petrickfaria.minemon.pokec.PokecEvents.companionExperience(
-                new LivingDeathEvent(cow, DamageSource.indirectMobAttack(shot, pokemon)));
-        check(h, pokemon.getPokemonExperienceHalfUnits() == afterXp * 2 + cowReward * 2
+                new LivingDeathEvent(defeatedWild, DamageSource.indirectMobAttack(shot, pokemon)));
+        check(h, pokemon.getPokemonExperienceHalfUnits() == afterXp * 2 + projectileRewardHalfUnits
                         && otherCompanion.getPokemonExperienceHalfUnits() == 0,
-                "a final elemental projectile must credit exactly its owning Pokémon for normal passive-mob XP");
-        otherCompanion.discard(); cow.discard();
+                "a final elemental projectile must credit exactly its owning Pokémon for wild Pokémon XP");
+        otherCompanion.discard(); defeatedWild.discard();
 
         pokemon.setPokemonProgress(1, 4);
         var saved = pokemon.saveWithoutId(new net.minecraft.nbt.CompoundTag());

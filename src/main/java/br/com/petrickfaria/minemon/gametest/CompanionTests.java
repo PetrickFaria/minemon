@@ -379,16 +379,14 @@ public final class CompanionTests {
 
  private static void awaitCommandedLanding(GameTestHelper h,java.util.List<MinemonCreature> birds,int remaining,boolean ordered){
   if(!ordered && birds.stream().allMatch(b->!b.isOnGround() && b.getY()-b.naturalSurface()>.6)){
+   var anchors=birds.stream().map(MinemonCreature::position).toList();
    for(var bird:birds){bird.setTame(true);bird.setOwnerUUID(UUID.randomUUID());bird.setOrderedToSit(true);}
-   ordered=true;
-  }
-  if(ordered && birds.stream().allMatch(b->b.isOnGround() && !b.isInWaterOrBubble())){
-   for(var bird:birds)check(h,bird.isOrderedToSit()&&!bird.isSleeping(),"Commanded flyer must land and remain awake/sitting");
-   var positions=birds.stream().map(MinemonCreature::position).toList();
    h.runAfterDelay(30,()->{
     for(int i=0;i<birds.size();i++){
-     check(h,birds.get(i).position().distanceTo(positions.get(i))<.3,"Seated flyer moved away from its landing place");
-     birds.get(i).setOrderedToSit(false);
+     var bird=birds.get(i);
+     check(h,bird.isOrderedToSit()&&!bird.isSleeping(),"Commanded flyer must remain awake and sitting");
+     check(h,bird.position().distanceToSqr(anchors.get(i))<1.0E-6D,"Sentar must hold an airborne flyer at the command position");
+     bird.setOrderedToSit(false);
     }
     h.runAfterDelay(60,()->{
      for(var bird:birds)check(h,!bird.isOrderedToSit()&&!bird.isOnGround(),"Following order must resume natural flight after sitting");
@@ -396,7 +394,7 @@ public final class CompanionTests {
     });
    });return;
   }
-  check(h,remaining>0,"Commanded flyers failed to take off or land safely");
+  check(h,remaining>0,"Commanded flyers failed to remain at their sit position or resume flight");
   final boolean next=ordered;
   h.runAfterDelay(5,()->awaitCommandedLanding(h,birds,remaining-5,next));
  }
