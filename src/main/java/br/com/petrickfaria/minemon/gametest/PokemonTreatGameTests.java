@@ -1,6 +1,3 @@
-Warning: truncated output (original token count: 3465)
-Total output lines: 185
-
 package br.com.petrickfaria.minemon.gametest;
 
 import br.com.petrickfaria.minemon.Minemon;
@@ -89,7 +86,33 @@ public final class PokemonTreatGameTests {
             bulbasaur.mobInteract(owner,InteractionHand.MAIN_HAND);
             check(h,!bulbasaur.isTame()&&bone.getCount()==2,"Bone must not tame or be consumed");
             var grass=ModItems.TREATS.get(PokemonTreatType.GRASS).get().getDefaultInstance();
-            owner.setItemInHand(InteractionHand.MA…465 tokens truncated…re first=spawn(h,"charizard",new BlockPos(5,1,5)); tame(first,owner);
+            owner.setItemInHand(InteractionHand.MAIN_HAND,grass);
+            bulbasaur.mobInteract(owner,InteractionHand.MAIN_HAND);
+            check(h,bulbasaur.isTame()&&owner.getUUID().equals(bulbasaur.getOwnerUUID()),"Compatible grass treat must tame and assign owner");
+            check(h,grass.isEmpty(),"Successful treat taming consumes one treat");
+        } finally { br.com.petrickfaria.minemon.config.MinemonConfig.TAME_CHANCE_PERCENT.set(previous); }
+        h.succeed();
+    }
+
+    @GameTest(template="test_arena", timeoutTicks=100)
+    public static void treatHealsOnlyCompatibleOwnedPokemonAndConsumesOne(GameTestHelper h) {
+        floor(h); ServerPlayer owner=player(h,new BlockPos(3,1,3),GameType.SURVIVAL);
+        MinemonCreature charizard=spawn(h,"charizard",new BlockPos(5,1,5)); tame(charizard,owner);
+        charizard.setHealth(10.0F);
+        var fire=ModItems.TREATS.get(PokemonTreatType.FIRE).get().getDefaultInstance(); owner.setItemInHand(InteractionHand.MAIN_HAND,fire);
+        charizard.mobInteract(owner,InteractionHand.MAIN_HAND);
+        check(h, charizard.getHealth()==14.0F, "Fire treat must restore 4 health");
+        check(h, fire.getCount()==0, "One valid survival use must consume one treat");
+        var water=ModItems.TREATS.get(PokemonTreatType.AQUATIC).get().getDefaultInstance(); owner.setItemInHand(InteractionHand.MAIN_HAND,water);
+        float health=charizard.getHealth(); charizard.mobInteract(owner,InteractionHand.MAIN_HAND);
+        check(h, charizard.getHealth()==health&&water.getCount()==1, "An incompatible treat must have no effect and not be consumed");
+        h.succeed();
+    }
+
+    @GameTest(template="test_arena", timeoutTicks=100)
+    public static void fullHealthTreatStartsBreedingWithoutConsumingInCreative(GameTestHelper h) {
+        floor(h); ServerPlayer owner=player(h,new BlockPos(3,1,3),GameType.CREATIVE);
+        MinemonCreature first=spawn(h,"charizard",new BlockPos(5,1,5)); tame(first,owner);
         var fire=ModItems.TREATS.get(PokemonTreatType.FIRE).get().getDefaultInstance(); owner.setItemInHand(InteractionHand.MAIN_HAND,fire);
         first.mobInteract(owner,InteractionHand.MAIN_HAND);
         check(h, first.isInLove(), "Compatible full-health adult should enter love mode");
