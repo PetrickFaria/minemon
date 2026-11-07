@@ -34,7 +34,6 @@ public final class ElementalProjectile extends ThrowableProjectile {
             +" targetDamage="+validationTargetDamage+" last="+validationLastCollision;}
     @Override protected void defineSynchedData(){entityData.define(COLOR,0xFFFFFF);}
     @Override protected float getGravity(){return 0;}
-    @Override protected float getInertia(){return 0.99F;}
     @Override protected boolean canHitEntity(net.minecraft.world.entity.Entity entity){
         // This shot is aimed at one authorized target. Creatures crossing its
         // path (including the attacker's allies) must not absorb and waste it.
@@ -58,7 +57,13 @@ public final class ElementalProjectile extends ThrowableProjectile {
         discard();
     }
     @Override protected void onHitBlock(BlockHitResult result){if(!level.isClientSide){validationBlockHits++;validationLastCollision="block:"+result.getBlockPos();discard();}}
-    @Override public void tick(){super.tick();if(!level.isClientSide && tickCount>40)discard();}
+    @Override public void tick(){
+        super.tick();
+        // ThrowableProjectile applies 0.8 water drag after each movement. Restore
+        // the normal 0.99 air retention so a straight shot keeps its intended range.
+        if(isInWater())setDeltaMovement(getDeltaMovement().scale(0.99D/0.8D));
+        if(!level.isClientSide && tickCount>40)discard();
+    }
     @Override protected void addAdditionalSaveData(CompoundTag tag){super.addAdditionalSaveData(tag);tag.putInt("ElementColor",color());tag.putFloat("Damage",damage);if(targetId!=null)tag.putUUID("Target",targetId);}
     @Override protected void readAdditionalSaveData(CompoundTag tag){super.readAdditionalSaveData(tag);entityData.set(COLOR,tag.getInt("ElementColor"));damage=tag.getFloat("Damage");targetId=tag.hasUUID("Target")?tag.getUUID("Target"):null;}
     @Override public net.minecraft.network.protocol.Packet<?> getAddEntityPacket(){return net.minecraftforge.network.NetworkHooks.getEntitySpawningPacket(this);}
