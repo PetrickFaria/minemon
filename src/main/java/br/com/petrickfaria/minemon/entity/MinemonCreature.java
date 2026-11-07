@@ -603,6 +603,10 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         // A companion joins a fight when its owner directly attacks or is attacked.
         this.targetSelector.addGoal(1, new OwnerHurtByTargetGoal(this));
         this.targetSelector.addGoal(2, new OwnerHurtTargetGoal(this));
+        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, net.minecraft.world.entity.Mob.class,
+                10, true, false, target -> MinemonCreature.this.isTame()
+                && !MinemonCreature.this.isOrderedToSit() && !(target instanceof MinemonCreature)
+                && MinemonCreature.this.isBlackListTarget((net.minecraft.world.entity.Mob) target)));
         this.targetSelector.addGoal(4, new HurtByTargetGoal(this) {
             @Override public boolean canUse() {
                 return (MinemonCreature.this.isTame() || MinemonCreature.this.wildAggressionTicks > 0) && super.canUse();
@@ -629,8 +633,12 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
             Entity owner=this.getOwner();
             boolean ownerTarget=owner instanceof LivingEntity living
                     && (living.getLastHurtMob()==target || living.getLastHurtByMob()==target);
-            if (!ownerTarget && this.getLastHurtByMob()!=target) return false;
+            boolean selectedHostile = target instanceof net.minecraft.world.entity.Mob mob
+                    && !(target instanceof MinemonCreature) && isBlackListTarget(mob);
+            if (!ownerTarget && this.getLastHurtByMob()!=target && !selectedHostile) return false;
         }
+        if (this.isTame() && this.isOrderedToSit()
+                && (playerFocusTarget == null || !playerFocusTarget.equals(target.getUUID()))) return false;
         if (playerFocusTarget != null && (target.level != this.level || !playerFocusTarget.equals(target.getUUID()))) return false;
         if (this.isTame() && !CombatGeometry.inRange(this,target,10)) return false;
         // Ordered sitting companions may defend themselves or their owner at close        // range, but must not start walking after a distant target.
