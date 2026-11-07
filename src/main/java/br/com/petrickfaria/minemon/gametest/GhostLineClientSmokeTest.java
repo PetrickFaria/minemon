@@ -448,6 +448,9 @@ final class GhostLineClientSmokeTest {
     if(reopenTicks>240)throw new IllegalStateException("Named Gastly was not restored after reopening the saved world");
     return;
    }
+   // The re-open runs in a fresh client process, so rebind the persisted
+   // entity UUID before core/framebuffer assertions that resolve it by ID.
+   gastlyId=gastly.getUUID();
    if(reopenTicks<30)return;
    if(!reopenPositioned){
     UUID playerId=mc.player.getUUID();
