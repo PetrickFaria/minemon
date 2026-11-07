@@ -1,298 +1,219 @@
-package br.com.petrickfaria.minemon.gametest;
+YªçŠx-®éÜj×¢ëiºÚ+Š§j[h‘éÜ¢éíïÍ4N‹Z–‹­¦ëeŠw¬ÕÁ…­…”‰È¹½´¹Á•ÑÉ¥­™…É¥„¹µ¥¹•µ½¸¹…µ•Ñ•ÍÐì()¥µÁ½ÉÐ‰È¹½´¹Á•ÑÉ¥­™…É¥„¹µ¥¹•µ½¸¹É•¥ÍÑÉä¹5½‘%Ñ•µÌì)¥µÁ½ÉÐ‰È¹½´¹Á•ÑÉ¥­™…É¥„¹µ¥¹•µ½¸¹µ•¹Ô¹A½­•5•¹Ôì)¥µÁ½ÉÐ‰È¹½´¹Á•ÑÉ¥­™…É¥„¹µ¥¹•µ½¸¹µ•¹Ô¹A½­•MÉ••¸ì)¥µÁ½ÉÐ¹•Ð¹µ¥¹•É…™Ð¹±¥•¹Ð¹5¥¹•É…™Ðì)¥µÁ½ÉÐ¹•Ð¹µ¥¹•É…™Ð¹±¥•¹Ð¹É•Í½ÕÉ•Ì¹µ½‘•°¹5½‘•±I•Í½ÕÉ•1½…Ñ¥½¸ì)¥µÁ½ÉÐ¹•Ð¹µ¥¹•É…™Ð¹½É”¹9½¹9Õ±±1¥ÍÐì)¥µÁ½ÉÐ¹•Ð¹µ¥¹•É…™Ð¹¹•ÑÝ½É¬¹¡…Ð¹½µÁ½¹•¹Ðì)¥µÁ½ÉÐ¹•Ð¹µ¥¹•É…™Ñ™½É”¹•Ù•¹Ð¹Q¥­Ù•¹Ðì((¼¨¨1½…‘Ì…±°ÑÉ•…Ð…¹A½¯¥½¥¸µ½‘•±Ì¥¸„É•…°5¥¹•É…™Ð±¥•¹Ð…¹Ù•É¥™¥•ÌÑ¡”É•…Ñ¥Ù”Ñ…ˆ¸€¨¼)ÁÕ‰±¥Œ™¥¹…°±…ÍÌA½­•µ½¹QÉ•…Ñ±¥•¹ÑMµ½­•Q•ÍÐì(€€€ÁÉ¥Ù…Ñ”ÍÑ…Ñ¥Œ¥¹Ð±¥•¹ÑQ¥­Ìì(€€€ÁÉ¥Ù…Ñ”ÍÑ…Ñ¥Œ‰½½±•…¸‘½¹”ì(€€€ÁÉ¥Ù…Ñ”ÍÑ…Ñ¥Œ‰½½±•…¸Ý½É±‘=Á•¹¥¹œì(€€€ÁÉ¥Ù…Ñ”ÍÑ…Ñ¥Œ‰½½±•…¸Á½­•U¥A¡…Í”ì(€€€ÁÉ¥Ù…Ñ”ÍÑ…Ñ¥Œ‰½½±•…¸Á½­•M•±•Ñ¥½¹A¡…Í”ì(€€€ÁÉ¥Ù…Ñ”ÍÑ…Ñ¥Œ‰½½±•…¸Á½­•U¹±½­•‘AÉ•Ù¥•ÝA¡…Í”ì(€€€ÁÉ¥Ù…Ñ”ÍÑ…Ñ¥Œ‰½½±•…¸Á½­•‰…±±A¡…Í”ì(€€€ÁÉ¥Ù…Ñ”ÍÑ…Ñ¥Œ‰½½±•…¸Á½­•‰…±±%¹Ñ•É…Ñ¥½¹M•¹Ðì(€€€ÁÉ¥Ù…Ñ”ÍÑ…Ñ¥ŒÙ½±…Ñ¥±”¥¹ÐÁ½­•‰…±±¥áÑÕÉ•¹Ñ¥Ñå%€ô€´Äì(€€€ÁÉ¥Ù…Ñ”ÍÑ…Ñ¥ŒÙ½±…Ñ¥±”‰½½±•…¸Á½­•‰…±±…ÁÑÕÉ•Y•É¥™¥•ì(€€€ÁÉ¥Ù…Ñ”ÍÑ…Ñ¥Œ¥¹ÐÝ½É±‘]…¥ÑQ¥­Ìì(€€€ÁÕ‰±¥ŒÍÑ…Ñ¥ŒÙ½¥Ñ¥¬¡Q¥­Ù•¹Ð¹±¥•¹ÑQ¥­Ù•¹Ð•Ù•¹Ð¤ì(€€€€€€€¥˜€¡‘½¹”ñð•Ù•¹Ð¹Á¡…Í”€„ôQ¥­Ù•¹Ð¹A¡…Í”¹9ñð€…	½½±•…¸¹•Ñ	½½±•…¸ ‰µ¥¹•µ½¸¹±¥•¹ÑMµ½­•Q•ÍÐˆ¤(€€€€€€€€€€€€€€€ñð€…	½½±•…¸¹•Ñ	½½±•…¸ ‰µ¥¹•µ½¸¹±¥•¹ÑMµ½­•QÉ•…ÑÌˆ¤¤É•ÑÕÉ¸ì(€€€€€€€5¥¹•É…™Ðµ¥¹•É…™Ðõ5¥¹•É…™Ð¹•Ñ%¹ÍÑ…¹” ¤ì(€€€€€€€¥˜€ ¬­±¥•¹ÑQ¥­Ì€ôô€Ä¤ì(€€€€€€€€€€€MåÍÑ•´¹½ÕÐ¹ÁÉ¥¹Ñ±¸ ‰mQIP1%9QtÑ¥¬¡…¹‘±•È…Ñ¥Ù”ìÍÉ••¸ôˆ(€€€€€€€€€€€€€€€€€€€€¬€¡µ¥¹•É…™Ð¹ÍÉ••¸€ôô¹Õ±°€ü€‰¹Õ±°ˆ€èµ¥¹•É…™Ð¹ÍÉ••¸¹•Ñ±…ÍÌ ¤¹•ÑM¥µÁ±•9…µ” ¤¤¤ì(€€€€€€€ô(€€€€€€€¥˜€¡Ý½É±‘=Á•¹¥¹œ¤ì(€€€€€€€€€€€¥˜€¡µ¥¹•É…™Ð¹Á±…å•È€„ô¹Õ±°€˜˜µ¥¹•É…™Ð¹±•Ù•°€„ô¹Õ±°¤ì(€€€€€€€€€€€€€€€Ý½É±‘=Á•¹¥¹œ€ô™…±Í”ì(€€€€€€€€€€€€€€€½Á•¹A½­•U¤¡µ¥¹•É…™Ð¤ì(€€€€€€€€€€€€€€€É•ÑÕÉ¸ì(€€€€€€€€€€€ô(€€€€€€€€€€€¥˜€ ¬­Ý½É±‘]…¥ÑQ¥­Ì€ø€ØÀÀ¤Ñ¡É½Ü¹•Ü%±±•…±MÑ…Ñ•á•ÁÑ¥½¸ ‰Q¥µ•½ÕÐ½Á•¹¥¹œÑ¡”ÁÉ•Á…É•A½¯¥±¥•¹ÐÝ½É±ˆ¤ì(€€€€€€€€€€€É•ÑÕÉ¸ì(€€€€€€€ô(€€€€€€€¥˜€¡±¥•¹ÑQ¥­Ì€ð€ÈÀ¤É•ÑÕÉ¸ì(€€€€€€€ÑÉäì(€€€€€€€€€€€¥˜€¡Á½­•‰…±±A¡…Í”¤ì(€€€€€€€€€€€€€€€Ù…ÈÍ•ÉÙ•È€ôµ¥¹•É…™Ð¹•ÑM¥¹±•Á±…å•ÉM•ÉÙ•È ¤ì(€€€€€€€€€€€€€€€¥˜€¡Í•ÉÙ•È€ôô¹Õ±°ñðµ¥¹•É…™Ð¹Á±…å•È€ôô¹Õ±°ñðµ¥¹•É…™Ð¹±•Ù•°€ôô¹Õ±°¤(€€€€€€€€€€€€€€€€€€€Ñ¡É½Ü¹•Ü%±±•…±MÑ…Ñ•á•ÁÑ¥½¸ ‰A½¯¥‰½±„¥¹Ñ•É…Ñ¥½¸Íµ½­”É•ÅÕ¥É•ÌÑ¡”¥¹Ñ•É…Ñ•±¥•¹ÐÝ½É±ˆ¤ì(€€€€€€€€€€€€€€€¥˜€¡Á½­•‰…±±¥áÑÕÉ•¹Ñ¥Ñå%€ð€À¤ì(€€€€€€€€€€€€€€€€€€€Á½­•‰…±±¥áÑÕÉ•¹Ñ¥Ñå%€ô€´Èì(€€€€€€€€€€€€€€€€€€€Í•ÉÙ•È¹•á•ÕÑ”  ¤€´øì(€€€€€€€€€€€€€€€€€€€€€€€Ù…È½Ý¹•È€ôÍ•ÉÙ•È¹•ÑA±…å•É1¥ÍÐ ¤¹•ÑA±…å•È¡µ¥¹•É…™Ð¹Á±…å•È¹•ÑUU% ¤¤ì(€€€€€€€€€€€€€€€€€€€€€€€Ù…È±•Ù•°€ôÍ•ÉÙ•È¹•Ñ1•Ù•°¡¹•Ð¹µ¥¹•É…™Ð¹Ý½É±¹±•Ù•°¹1•Ù•°¹=YI]=I1¤ì(€€€€€€€€€€€€€€€€€€€€€€€¥˜€¡½Ý¹•È€ôô¹Õ±°ñð±•Ù•°€ôô¹Õ±°¤É•ÑÕÉ¸ì(€€€€€€€€€€€€€€€€€€€€€€€±•Ù•°¹Í•Ñ…åQ¥µ” ØÀÀÁ0¤ì(€€€€€€€€€€€€€€€€€€€€€€€Ù…ÈÑåÁ”€ô‰È¹½´¹Á•ÑÉ¥­™…É¥„¹µ¥¹•µ½¸¹É•¥ÍÑÉä¹5½‘¹Ñ¥Ñ¥•Ì¹MA%L¹•Ð ‰Á¥­…¡Ôˆ¤ì(€€€€€€€€€€€€€€€€€€€€€€€Ù…ÈÉ•…ÑÕÉ”€ôÑåÁ”€ôô¹Õ±°€ü¹Õ±°€èÑåÁ”¹•Ð ¤¹É•…Ñ”¡±•Ù•°¤ì(€€€€€€€€€€€€€€€€€€€€€€€¥˜€¡É•…ÑÕÉ”€ôô¹Õ±°¤É•ÑÕÉ¸ì(€€€€€€€€€€€€€€€€€€€€€€€É•…ÑÕÉ”¹Ñ…µ”¡½Ý¹•È¤ì(€€€€€€€€€€€€€€€€€€€€€€€É•…ÑÕÉ”¹µ½Ù•Q¼¡½Ý¹•È¹•Ñ` ¤€¬€È¸Á°½Ý¹•È¹•Ñd ¤°½Ý¹•È¹•Ñh ¤°½Ý¹•È¹•ÑeI½Ð ¤°€À¸Á¤ì(€€€€€€€€€€€€€€€€€€€€€€€É•…ÑÕÉ”¹Í•Ñ=É‘•É•‘Q½M¥Ð¡ÑÉÕ”¤ì(€€€€€€€€€€€€€€€€€€€€€€€É•…ÑÕÉ”¹Í•Ñ9½¤¡ÑÉÕ”¤ì(€€€€€€€€€€€€€€€€€€€€€€€¥˜€¡±•Ù•°¹…‘‘É•Í¡¹Ñ¥Ñä¡É•…ÑÕÉ”¤¤ì(€€€€€€€€€€€€€€€€€€€€€€€€€€€½Ý¹•È¹Í•Ñ%Ñ•µ%¹!…¹¡¹•Ð¹µ¥¹•É…™Ð¹Ý½É±¹%¹Ñ•É…Ñ¥½¹!…¹¹5%9}!9°(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€¹•Ü¹•Ð¹µ¥¹•É…™Ð¹Ý½É±¹¥Ñ•´¹%Ñ•µMÑ…¬¡5½‘%Ñ•µÌ¹A=-	10¹•Ð ¤¤¤ì(€€€€€€€€€€€€€€€€€€€€€€€€€€€Á½­•‰…±±¥áÑÕÉ•¹Ñ¥Ñå%€ôÉ•…ÑÕÉ”¹•Ñ% ¤ì(€€€€€€€€€€€€€€€€€€€€€€€ô(€€€€€€€€€€€€€€€€€€€ô¤ì(€€€€€€€€€€€€€€€€€€€É•ÑÕÉ¸ì(€€€€€€€€€€€€€€€ô(€€€€€€€€€€€€€€€¥˜€¡Á½­•‰…±±¥áÑÕÉ•¹Ñ¥Ñå%€ôô€´È¤É•ÑÕÉ¸ì(€€€€€€€€€€€€€€€Ù…ÈÑ…É•Ð€ôµ¥¹•É…™Ð¹±•Ù•°¹•Ñ¹Ñ¥Ñä¡Á½­•‰…±±¥áÑÕÉ•¹Ñ¥Ñå%¤ì(€€€€€€€€€€€€€€€¥˜€ …Á½­•‰…±±%¹Ñ•É…Ñ¥½¹M•¹Ð€˜˜Ñ…É•Ð¥¹ÍÑ…¹•½˜‰È¹½´¹Á•ÑÉ¥­™…É¥„¹µ¥¹•µ½¸¹•¹Ñ¥Ñä¹5¥¹•µ½¹É•…ÑÕÉ”¤ì(€€€€€€€€€€€€€€€€€€€µ¥¹•É…™Ð¹Í•ÑMÉ••¸¡¹Õ±°¤ì(€€€€€€€€€€€€€€€€€€€µ¥¹•É…™Ð¹Á±…å•È¹Í•Ñ%Ñ•µ%¹!…¹¡¹•Ð¹µ¥¹•É…™Ð¹Ý½É±¹%¹Ñ•É…Ñ¥½¹!…¹¹5%9}!9°(€€€€€€€€€€€€€€€€€€€€€€€€€€€¹•Ü¹•Ð¹µ¥¹•É…™Ð¹Ý½É±¹¥Ñ•´¹%Ñ•µMÑ…¬¡5½‘%Ñ•µÌ¹A=-	10¹•Ð ¤¤¤ì(€€€€€€€€€€€€€€€€€€€µ¥¹•É…™Ð¹…µ•5½‘”¹¥¹Ñ•É…Ð¡µ¥¹•É…™Ð¹Á±…å•È°Ñ…É•Ð°¹•Ð¹µ¥¹•É…™Ð¹Ý½É±¹%¹Ñ•É…Ñ¥½¹!…¹¹5%9}!9¤ì(€€€€€€€€€€€€€€€€€€€Á½­•‰…±±%¹Ñ•É…Ñ¥½¹M•¹Ð€ôÑÉÕ”ì(€€€€€€€€€€€€€€€€€€€±¥•¹ÑQ¥­Ì€ô€Àì(€€€€€€€€€€€€€€€€€€€É•ÑÕÉ¸ì(€€€€€€€€€€€€€€€ô(€€€€€€€€€€€€€€€¥˜€¡Á½­•‰…±±…ÁÑÕÉ•Y•É¥™¥•¤ì(€€€€€€€€€€€€€€€€€€€Ù…È¡•±€ôµ¥¹•É…™Ð¹Á±…å•È¹•Ñ5…¥¹!…¹‘%Ñ•´ ¤ì(€€€€€€€€€€€€€€€€€€€¥˜€ …‰È¹½´¹Á•ÑÉ¥­™…É¥„¹µ¥¹•µ½¸¹¥Ñ•´¹A½­•‰…±±%Ñ•´¹¥Í=ÕÁ¥•¡¡•±¤¤É•ÑÕÉ¸ì(€€€€€€€€€€€€€€€€€€€©…Ù„¹¹¥¼¹™¥±”¹¥±•Ì¹ÝÉ¥Ñ•MÑÉ¥¹œ¡©…Ù„¹¹¥¼¹™¥±”¹A…Ñ ¹½˜ ‰±¥•¹ÐµÙ…±¥‘…Ñ¥½¸µÑÉ•…ÑÌ¹ÑáÐˆ¤°(€€€€€€€€€€€€€€€€€€€€€€€€€€€€‰mQIP1%9QtAMLèÉ…ÍÌÑÉ•…ÐÉ•Í½ÕÉ•Ì°A½¯¥±½­•½Õ¹±½­•ÁÉ•Ù¥•ÜÉÕ±•Ì°…¹±¥Ù”A½¯¥‰½±„•¹Ñ¥Ñä¥¹Ñ•É…Ñ¥½¸…ÁÑÕÉ•…¸½Ý¹•É•…ÑÕÉ•q¸ˆ(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€¬€‰A½¯¥½¥¸…¹A½¯¥‰½±„µ½‘•±Ì°ÑÉ…¹Í±…Ñ¥½¹Ì°Ñ•áÑÕÉ•Ì°…¹É•…Ñ¥Ù”•¹ÑÉ¥•Ì±½…‘•‘q¸ˆ¤ì(€€€€€€€€€€€€€€€€€€€‘½¹”€ôÑÉÕ”ì(€€€€€€€€€€€€€€€€€€€MåÍÑ•´¹½ÕÐ¹ÁÉ¥¹Ñ±¸ ‰mQIP1%9QtAMLèÉ•…°±¥•¹ÐÉ¥¡Ðµ±¥¬¥¹Ñ•É…Ñ¥½¸…ÁÑÕÉ•Ñ¡”½Ý¹•A¥­…¡Ô¥¹Ñ¼Ñ¡”A½¯¥‰½±„ˆ¤ì(€€€€€€€€€€€€€€€€€€€MåÍÑ•´¹½ÕÐ¹ÁÉ¥¹Ñ±¸ ‰A½¯¥½¥¸…¹A½¯¥‰½±„µ½‘•±Ì°ÑÉ…¹Í±…Ñ¥½¹Ì°Ñ•áÑÕÉ•Ì°…¹É•…Ñ¥Ù”•¹ÑÉ¥•Ì±½…‘•ˆ¤ì(€€€€€€€€€€€€€€€€€€€µ¥¹•É…™Ð¹•á•ÕÑ”¡µ¥¹•É…™ÐèéÍÑ½À¤ì(€€€€€€€€€€€€€€€€€€€É•ÑÕÉ¸ì(€€€€€€€€€€€€€€€ô(€€€€€€€€€€€€€€€¥˜€¡Á½­•‰…±±%¹Ñ•É…Ñ¥½¹M•¹Ð¤ì(€€€€€€€€€€€€€€€€€€€Í•ÉÙ•È¹•á•ÕÑ”  ¤€´øì(€€€€€€€€€€€€€€€€€€€€€€€Ù…È½Ý¹•È€ôÍ•ÉÙ•È¹•ÑA±…å•É1¥ÍÐ ¤¹•ÑA±…å•È¡µ¥¹•É…™Ð¹Á±…å•È¹•ÑUU% ¤¤ì(€€€€€€€€€€€€€€€€€€€€€€€Ù…È±•Ù•°€ôÍ•ÉÙ•È¹•Ñ1•Ù•°¡¹•Ð¹µ¥¹•É…™Ð¹Ý½É±¹±•Ù•°¹1•Ù•°¹=YI]=I1¤ì(€€€€€€€€€€€€€€€€€€€€€€€¥˜€¡½Ý¹•È€„ô¹Õ±°€˜˜±•Ù•°€„ô¹Õ±°€˜˜‰È¹½´¹Á•ÑÉ¥­™…É¥„¹µ¥¹•µ½¸¹¥Ñ•´¹A½­•‰…±±%Ñ•´¹¥Í=ÕÁ¥•¡½Ý¹•È¹•Ñ5…¥¹!…¹‘%Ñ•´ ¤¤(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€˜˜±•Ù•°¹•Ñ¹Ñ¥Ñä¡Á½­•‰…±±¥áÑÕÉ•¹Ñ¥Ñå%¤€ôô¹Õ±°¤Á½­•‰…±±…ÁÑÕÉ•Y•É¥™¥•€ôÑÉÕ”ì(€€€€€€€€€€€€€€€€€€€ô¤ì(€€€€€€€€€€€€€€€€€€€¥˜€¡±¥•¹ÑQ¥­Ì€ø€ÐÀÀ¤Ñ¡É½Ü¹•Ü%±±•…±MÑ…Ñ•á•ÁÑ¥½¸ ‰1¥Ù”±¥•¹ÐA½¯¥‰½±„¥¹Ñ•É…Ñ¥½¸‘¥¹½Ð…ÁÑÕÉ”Ñ¡”½Ý¹•A½¯¥µ½¸ˆ¤ì(€€€€€€€€€€€€€€€ô(€€€€€€€€€€€€€€€É•ÑÕÉ¸ì(€€€€€€€€€€€ô(€€€€€€€€€€€¥˜€¡Á½­•U¹±½­•‘AÉ•Ù¥•ÝA¡…Í”¤ì(€€€€€€€€€€€€€€€¥˜€ „¡µ¥¹•É…™Ð¹ÍÉ••¸¥¹ÍÑ…¹•½˜A½­•MÉ••¸ÍÉ••¸¤ñð€…ÍÉ••¸¹Í•±•Ñ•‘MÁ•¥•Í½ÉMµ½­•Q•ÍÐ ‰‰Õ±‰…Í…ÕÈˆ¤(€€€€€€€€€€€€€€€€€€€€€€€ñð€…ÍÉ••¸¹ÁÉ•Ù¥•Ýá¥ÍÑÍ½ÉMµ½­•Q•ÍÐ ‰‰Õ±‰…Í…ÕÈˆ¤¤(€€€€€€€€€€€€€€€€€€€Ñ¡É½Ü¹•Ü%±±•…±MÑ…Ñ•á•ÁÑ¥½¸ ‰U¹±½­•	Õ±‰…Í…ÕÈÁÉ•Ù¥•ÜÝ…Ì¹½Ð¥¹ÍÑ…¹Ñ¥…Ñ•…™Ñ•ÈÍ•±•Ñ¥½¸ˆ¤ì(€€€€€€€€€€€€€€€¹•Ð¹µ¥¹•É…™Ð¹±¥•¹Ð¹MÉ••¹Í¡½Ð¹É…ˆ¡µ¥¹•É…™Ð¹…µ•¥É•Ñ½Éä°‰Á½­•ŒµÕ¹±½­•¹Á¹œˆ±µ¥¹•É…™Ð¹•Ñ5…¥¹I•¹‘•ÉQ…É•Ð ¤±µ•ÍÍ…”´ùíô¤ì(€€€€€€€€€€€€€€€¥˜ …ÍÉ••¸¹‘É…AÉ•Ù¥•Ý½ÉMµ½­•Q•ÍÐ ¤¥Ñ¡É½Ü¹•Ü%±±•…±MÑ…Ñ•á•ÁÑ¥½¸ ‰A½­•Œ‘É…œ‘¥¹½ÐÉ½Ñ…Ñ”‰½Ñ …á•Ìˆ¤ì(€€€€€€€€€€€€€€€Á½­•‰…±±A¡…Í”€ôÑÉÕ”ì(€€€€€€€€€€€€€€€Á½­•‰…±±¥áÑÕÉ•¹Ñ¥Ñå%€ô€´Äì(€€€€€€€€€€€€€€€±¥•¹ÑQ¥­Ì€ô€Àì(€€€€€€€€€€€€€€€É•ÑÕÉ¸ì(€€€€€€€€€€€ô(€€€€€€€€€€€¥˜€¡Á½­•M•±•Ñ¥½¹A¡…Í”¤ì(€€€€€€€€€€€€€€€¥˜€ „¡µ¥¹•É…™Ð¹ÍÉ••¸¥¹ÍÑ…¹•½˜A½­•MÉ••¸ÍÉ••¸¤ñð€…ÍÉ••¸¹Í•±•Ñ•‘MÁ•¥•Í½ÉMµ½­•Q•ÍÐ ‰µ•Üˆ¤¤(€€€€€€€€€€€€€€€€€€€Ñ¡É½Ü¹•Ü%±±•…±MÑ…Ñ•á•ÁÑ¥½¸ ‰A½¯¥±¥ÍÐ±¥¬‘¥¹½ÐÍ•±•Ð5•Ü¥¸Ñ¡”‘•Ñ…¥°Á…¹•°ˆ¤ì(€€€€€€€€€€€€€€€¥˜€¡ÍÉ••¸¹ÍÁ•¥•ÍU¹±½­•‘½ÉMµ½­•Q•ÍÐ ‰µ•Üˆ¤€˜˜€…ÍÉ••¸¹ÁÉ•Ù¥•Ýá¥ÍÑÍ½ÉMµ½­•Q•ÍÐ ‰µ•Üˆ¤¤(€€€€€€€€€€€€€€€€€€€Ñ¡É½Ü¹•Ü%±±•…±MÑ…Ñ•á•ÁÑ¥½¸ ‰U¹±½­•5•ÜÁÉ•Ù¥•ÜÝ…Ì¹½ÐÉ•…Ñ•ˆ¤ì(€€€€€€€€€€€€€€€¥˜€ …ÍÉ••¸¹ÍÁ•¥•ÍU¹±½­•‘½ÉMµ½­•Q•ÍÐ ‰µ•Üˆ¤€˜˜ÍÉ••¸¹ÁÉ•Ù¥•Ýá¥ÍÑÍ½ÉMµ½­•Q•ÍÐ ‰µ•Üˆ¤¤(€€€€€€€€€€€€€€€€€€€Ñ¡É½Ü¹•Ü%±±•…±MÑ…Ñ•á•ÁÑ¥½¸ ‰1½­•5•ÜÁÉ•Ù¥•ÜµÕÍÐ¹½Ð‰”¥¹ÍÑ…¹Ñ¥…Ñ•ˆ¤ì(€€€€€€€€€€€€€€€¹•Ð¹µ¥¹•É…™Ð¹±¥•¹Ð¹MÉ••¹Í¡½Ð¹É…ˆ¡µ¥¹•É…™Ð¹…µ•¥É•Ñ½Éä°‰Á½­•Œµ±½­•¹Á¹œˆ±µ¥¹•É…™Ð¹•Ñ5…¥¹I•¹‘•ÉQ…É•Ð ¤±µ•ÍÍ…”´ùíô¤ì(€€€€€€€€€€€€€€€¥˜€ …ÍÉ••¸¹±¥­MÁ•¥•Í½ÉMµ½­•Q•ÍÐ ‰‰Õ±‰…Í…ÕÈˆ¤¤(€€€€€€€€€€€€€€€€€€€Ñ¡É½Ü¹•Ü%±±•…±MÑ…Ñ•á•ÁÑ¥½¸ ‰A½¯¥±¥ÍÐ½Õ±¹½ÐÉ•ÑÕÉ¸Ñ¼	Õ±‰…Í…ÕÈÑ¡É½Õ ¥ÑÌ±¥¬¡…¹‘±•Èˆ¤ì(€€€€€€€€€€€€€€€Á½­•U¹±½­•‘AÉ•Ù¥•ÝA¡…Í”€ôÑÉÕ”ì(€€€€€€€€€€€€€€€±¥•¹ÑQ¥­Ì€ô€Àì(€€€€€€€€€€€€€€€É•ÑÕÉ¸ì(€€€€€€€€€€€ô(€€€€€€€€€€€¥˜€¡Á½­•U¥A¡…Í”¤ì(€€€€€€€€€€€€€€€¥˜€ „¡µ¥¹•É…™Ð¹ÍÉ••¸¥¹ÍÑ…¹•½˜A½­•MÉ••¸ÍÉ••¸¤¤ì(€€€€€€€€€€€€€€€€€€€¥˜¡±¥•¹ÑQ¥­ÌðÈÀÀ¥É•ÑÕÉ¸ì(€€€€€€€€€€€€€€€€€€€Ñ¡É½Ü¹•Ü%±±•…±MÑ…Ñ•á•ÁÑ¥½¸ ‰A½¯¥Í•ÉÙ•Èµ•¹Ô‘¥¹½Ð½Á•¸‘ÕÉ¥¹œ™½ÕÍ•U$É•¹‘•È¡•¬ˆ¤ì(€€€€€€€€€€€€€€€ô(€€€€€€€€€€€€€€€¥˜€¡ÍÉ••¸¹…Ñ…±½M¥é•½ÉMµ½­•Q•ÍÐ ¤€„ô€ÄÔÄ¤(€€€€€€€€€€€€€€€€€€€Ñ¡É½Ü¹•Ü%±±•…±MÑ…Ñ•á•ÁÑ¥½¸ ‰A½¯¥U$‘¥¹½Ð±½…Ñ¡”½µÁ±•Ñ”€ÄÔÄµÍÁ•¥•Ì±¥ÍÐˆ¤ì(€€€€€€€€€€€€€€€¥˜€ …ÍÉ••¸¹½¹Ù•ÉÍ¥½¹A…¹•±¥ÑÍ‰½Ù•%¹Ù•¹Ñ½Éå½ÉMµ½­•Q•ÍÐ ¤¤(€€€€€€€€€€€€€€€€€€€Ñ¡É½Ü¹•Ü%±±•…±MÑ…Ñ•á•ÁÑ¥½¸ ‰A½¯¥½¹Ù•ÉÍ¥½¸Á…¹•°µÕÍÐÉ•µ…¥¸…‰½Ù”Ñ¡”Á±…å•È¥¹Ù•¹Ñ½Éäˆ¤ì(€€€€€€€€€€€€€€€¥˜€ …ÍÉ••¸¹¥¹Ù•¹Ñ½ÉåM±½ÑÍ½ÉMµ½­•Q•ÍÐ ¤¤(€€€€€€€€€€€€€€€€€€€Ñ¡É½Ü¹•Ü%±±•…±MÑ…Ñ•á•ÁÑ¥½¸ ‰A½¯¥µÕÍÐÍ¡½Ü…±°€ÈÜµ…¥¸¥¹Ù•¹Ñ½ÉäÍ±½ÑÌ…¹€ä¡½Ñ‰…ÈÍ±½ÑÌ¥¸Ù…¹¥±±„½É‘•Èˆ¤ì(€€€€€€€€€€€€€€€¥˜€¡ÍÉ••¸¹ÁÉ•Ù¥•ÝM…±•½ÉMµ½­•Q•ÍÐ ‰Á¥­…¡Ôˆ¤€ðôÍÉ••¸¹ÁÉ•Ù¥•ÝM…±•½ÉMµ½­•Q•ÍÐ ‰½¹¥àˆ¤¤(€€€€€€€€€€€€€€€€€€€Ñ¡É½Ü¹•Ü%±±•…±MÑ…Ñ•á•ÁÑ¥½¸ ‰A½¯¥ÁÉ•Ù¥•ÜÍ¡½Õ±Í…±”A¥­…¡Ô±…É•ÈÑ¡…¸¥…¹Ð=¹¥àˆ¤ì(€€€€€€€€€€€€€€€¥˜€ …ÍÉ••¸¹±¥­MÁ•¥•Í½ÉMµ½­•Q•ÍÐ ‰µ•Üˆ¤¤(€€€€€€€€€€€€€€€€€€€Ñ¡É½Ü¹•Ü%±±•…±MÑ…Ñ•á•ÁÑ¥½¸ ‰A½¯¥±¥ÍÐ½Õ±¹½ÐÍ•±•Ð5•ÜÑ¡É½Õ ¥ÑÌ±¥¬¡…¹‘±•Èˆ¤ì(€€€€€€€€€€€€€€€Á½­•M•±•Ñ¥½¹A¡…Í”€ôÑÉÕ”ì(€€€€€€€€€€€€€€€±¥•¹ÑQ¥­Ì€ô€Àì(€€€€€€€€€€€€€€€É•ÑÕÉ¸ì(€€€€€€€€€€€ô(€€€€€€€€€€€ÑÉä¡Ù…ÈÙ…¹¥±±„õµ¥¹•É…™Ð¹•ÑI•Í½ÕÉ•5…¹…•È ¤¹•ÑI•Í½ÕÉ”¡¹•Ü¹•Ð¹µ¥¹•É…™Ð¹É•Í½ÕÉ•Ì¹I•Í½ÕÉ•1½…Ñ¥½¸ ‰µ¥¹•É…™Ðˆ°‰Ñ•áÑÕÉ•Ì½¥Ñ•´½‰½¹”¹Á¹œˆ¤¤¹½É±Í•Q¡É½Ü ¤¹½Á•¸ ¤¤ì(€€€€€€€€€€€€€€€Ù…ÈÉ•™•É•¹”õ©…Ù…à¹¥µ…•¥¼¹%µ…•%<¹É•…¡©…Ù„¹¹¥¼¹™¥±”¹A…Ñ ¹½˜ ˆ¸¸½Ñ½½±Ì½É•™•É•¹”½µ¥¹•É…™Ð´Ä¸Ää¸Èµ‰½¹”¹Á¹œˆ¤¹Ñ½¥±” ¤¤ì(€€€€€€€€€€€€€€€Ù…È½É¥¥¹…°õ©…Ù…à¹¥µ…•¥¼¹%µ…•%<¹É•…¡Ù…¹¥±±„¤ì(€€€€€€€€€€€€€€€™½È¡¥¹ÐäôÀíäðÄØíä¬¬¥™½È¡¥¹ÐàôÀíàðÄØíà¬¬¥¥˜¡É•™•É•¹”¹•ÑI¡à±ä¤„õ½É¥¥¹…°¹•ÑI¡à±ä¤¥Ñ¡É½Ü¹•Ü%±±•…±MÑ…Ñ•á•ÁÑ¥½¸ ‰QÉ•…ÐÉ•™•É•¹”¥Ì¹½ÐÑ¡”•á…ÐÙ…¹¥±±„€Ä¸Ää¸È‰½¹”ˆ¤ì(€€€€€€€€€€€ô(€€€€€€€€€€€9½¹9Õ±±1¥ÍÐñ¹•Ð¹µ¥¹•É…™Ð¹Ý½É±¹¥Ñ•´¹%Ñ•µMÑ…¬øÑ…ˆõ9½¹9Õ±±1¥ÍÐ¹É•…Ñ” ¤ì(€€€€€€€€€€€5½‘%Ñ•µÌ¹5%95=9}Q¹™¥±±%Ñ•µ1¥ÍÐ¡Ñ…ˆ¤ì(€€€€€€€€€€€Ù…È•MÑ…¬õ5½‘%Ñ•µÌ¹	I%9}¹•Ð ¤¹•Ñ•™…Õ±Ñ%¹ÍÑ…¹” ¤ì(€€€€€€€€€€€Ù…È•5½‘•°õµ¥¹•É…™Ð¹•Ñ%Ñ•µI•¹‘•É•È ¤¹•Ñ5½‘•°¡•MÑ…¬±¹Õ±°±¹Õ±°°À¤ì(€€€€€€€€€€€¥˜¡•7Í4¶‰žËkºwµçH˜\ˆ[XYÙHH^\™HOH[È[ˆ˜]˜^š[XYÙZ[Ë’[XYÙRSËœ™XY
+^\™JNÂˆYˆ
+[XYÙHOH[[XYÙK™Ù]ÚY
 
-import br.com.petrickfaria.minemon.registry.ModItems;
-import br.com.petrickfaria.minemon.menu.PokecMenu;
-import br.com.petrickfaria.minemon.menu.PokecScreen;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.model.ModelResourceLocation;
-import net.minecraft.core.NonNullList;
-import net.minecraft.network.chat.Component;
-import net.minecraftforge.event.TickEvent;
+HOHMˆ[XYÙK™Ù]ZYÚ
 
-/** Loads all treat and PokÃ©Coin models in a real Minecraft client and verifies the creative tab. */
-public final class PokemonTreatClientSmokeTest {
-    private static int clientTicks;
-    private static boolean done;
-    private static boolean worldOpening;
-    private static boolean pokecUiPhase;
-    private static boolean pokecSelectionPhase;
-    private static boolean pokecUnlockedPreviewPhase;
-    private static boolean pokeballPhase;
-    private static boolean pokeballInteractionSent;
-    private static volatile int pokeballFixtureEntityId = -1;
-    private static volatile boolean pokeballCaptureVerified;
-    private static int worldWaitTicks;
-    public static void tick(TickEvent.ClientTickEvent event) {
-        if (done || event.phase != TickEvent.Phase.END || !Boolean.getBoolean("minemon.clientSmokeTest")
-                || !Boolean.getBoolean("minemon.clientSmokeTreats")) return;
-        Minecraft minecraft=Minecraft.getInstance();
-        if (++clientTicks == 1) {
-            System.out.println("[TREAT CLIENT] tick handler active; screen="
-                    + (minecraft.screen == null ? "null" : minecraft.screen.getClass().getSimpleName()));
-        }
-        if (worldOpening) {
-            if (minecraft.player != null && minecraft.level != null) {
-                worldOpening = false;
-                openPokecUi(minecraft);
-                return;
-            }
-            if (++worldWaitTicks > 600) throw new IllegalStateException("Timed out opening the prepared PokÃ©C client world");
-            return;
-        }
-        if (clientTicks < 20) return;
-        try {
-            if (pokeballPhase) {
-                var server = minecraft.getSingleplayerServer();
-                if (server == null || minecraft.player == null || minecraft.level == null)
-                    throw new IllegalStateException("PokÃ©bola interaction smoke requires the integrated client world");
-                if (pokeballFixtureEntityId < 0) {
-                    pokeballFixtureEntityId = -2;
-                    server.execute(() -> {
-                        var owner = server.getPlayerList().getPlayer(minecraft.player.getUUID());
-                        var level = server.getLevel(net.minecraft.world.level.Level.OVERWORLD);
-                        if (owner == null || level == null) return;
-                        level.setDayTime(6000L);
-                        var type = br.com.petrickfaria.minemon.registry.ModEntities.SPECIES.get("pikachu");
-                        var creature = type == null ? null : type.get().create(level);
-                        if (creature == null) return;
-                        creature.tame(owner);
-                        creature.setOrderedToSit(true);
-                        creature.setNoAi(true);
-                        creature.moveTo(owner.getX() + 2.0D, owner.getY(), owner.getZ(), owner.getYRot(), 0.0F);
-                        if (level.addFreshEntity(creature)) {
-                            owner.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,
-                                    new net.minecraft.world.item.ItemStack(ModItems.POKEBALL.get()));
-                            pokeballFixtureEntityId = creature.getId();
-                        }
-                    });
-                    return;
-                }
-                if (pokeballFixtureEntityId == -2) return;
-                var target = minecraft.level.getEntity(pokeballFixtureEntityId);
-                if (!pokeballInteractionSent && target instanceof br.com.petrickfaria.minemon.entity.MinemonCreature) {
-                    minecraft.setScreen(null);
-                    minecraft.player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,
-                            new net.minecraft.world.item.ItemStack(ModItems.POKEBALL.get()));
-                    minecraft.gameMode.interact(minecraft.player, target, net.minecraft.world.InteractionHand.MAIN_HAND);
-                    pokeballInteractionSent = true;
-                    clientTicks = 0;
-                    return;
-                }
-                if (pokeballCaptureVerified) {
-                    var held = minecraft.player.getMainHandItem();
-                    if (!br.com.petrickfaria.minemon.item.PokeballItem.isOccupied(held)) return;
-                    java.nio.file.Files.writeString(java.nio.file.Path.of("client-validation-treats.txt"),
-                            "[TREAT CLIENT] PASS: grass treat resources, PokÃ©C locked/unlocked preview rules, and live PokÃ©bola entity interaction captured an owned creature\n"
-                                    + "PokÃ©Coin and PokÃ©bola models, translations, textures, and creative entries loaded\n");
-                    done = true;
-                    System.out.println("[TREAT CLIENT] PASS: real client right-click interaction captured the owned Pikachu into the PokÃ©bola");
-                    System.out.println("PokÃ©Coin and PokÃ©bola models, translations, textures, and creative entries loaded");
-                    minecraft.execute(minecraft::stop);
-                    return;
-                }
-                if (pokeballInteractionSent) {
-                    server.execute(() -> {
-                        var owner = server.getPlayerList().getPlayer(minecraft.player.getUUID());
-                        var level = server.getLevel(net.minecraft.world.level.Level.OVERWORLD);
-                        if (owner != null && level != null && br.com.petrickfaria.minemon.item.PokeballItem.isOccupied(owner.getMainHandItem())
-                                && level.getEntity(pokeballFixtureEntityId) == null) pokeballCaptureVerified = true;
-                    });
-                    if (clientTicks > 400) throw new IllegalStateException("Live client PokÃ©bola interaction did not capture the owned PokÃ©mon");
-                }
-                return;
-            }
-            if (pokecUnlockedPreviewPhase) {
-                if (!(minecraft.screen instanceof PokecScreen screen) || !screen.selectedSpeciesForSmokeTest("bulbasaur")
-                        || !screen.previewExistsForSmokeTest("bulbasaur"))
-                    throw new IllegalStateException("Unlocked Bulbasaur preview was not instantiated after selection");
-                net.minecraft.client.Screenshot.grab(minecraft.gameDirectory,"pokec-unlocked.png",minecraft.getMainRenderTarget(),message->{});
-                if(!screen.dragPreviewForSmokeTest())throw new IllegalStateException("Pokec drag did not rotate both axes");
-                pokeballPhase = true;
-                pokeballFixtureEntityId = -1;
-                clientTicks = 0;
-                return;
-            }
-            if (pokecSelectionPhase) {
-                if (!(minecraft.screen instanceof PokecScreen screen) || !screen.selectedSpeciesForSmokeTest("mew"))
-                    throw new IllegalStateException("PokÃ©C list click did not select Mew in the detail panel");
-                if (screen.speciesUnlockedForSmokeTest("mew") && !screen.previewExistsForSmokeTest("mew"))
-                    throw new IllegalStateException("Unlocked Mew preview was not created");
-                if (!screen.speciesUnlockedForSmokeTest("mew") && screen.previewExistsForSmokeTest("mew"))
-                    throw new IllegalStateException("Locked Mew preview must not be instantiated");
-                net.minecraft.client.Screenshot.grab(minecraft.gameDirectory,"pokec-locked.png",minecraft.getMainRenderTarget(),message->{});
-                if (!screen.clickSpeciesForSmokeTest("bulbasaur"))
-                    throw new IllegalStateException("PokÃ©C list could not return to Bulbasaur through its click handler");
-                pokecUnlockedPreviewPhase = true;
-                clientTicks = 0;
-                return;
-            }
-            if (pokecUiPhase) {
-                if (!(minecraft.screen instanceof PokecScreen screen)) {
-                    if(clientTicks<200)return;
-                    throw new IllegalStateException("PokÃ©C server menu did not open during focused UI render check");
-                }
-                if (screen.catalogSizeForSmokeTest() != 151)
-                    throw new IllegalStateException("PokÃ©C UI did not load the complete 151-species list");
-                if (!screen.conversionPanelFitsAboveInventoryForSmokeTest())
-                    throw new IllegalStateException("PokÃ©C conversion panel must remain above the player inventory");
-                if (!screen.inventorySlotsForSmokeTest())
-                    throw new IllegalStateException("PokÃ©C must show all 27 main inventory slots and 9 hotbar slots in vanilla order");
-                if (screen.previewScaleForSmokeTest("pikachu") <= screen.previewScaleForSmokeTest("onix"))
-                    throw new IllegalStateException("PokÃ©C preview should scale Pikachu larger than giant Onix");
-                if (!screen.clickSpeciesForSmokeTest("mew"))
-                    throw new IllegalStateException("PokÃ©C list could not select Mew through its click handler");
-                pokecSelectionPhase = true;
-                clientTicks = 0;
-                return;
-            }
-            try(var vanilla=minecraft.getResourceManager().getResource(new net.minecraft.resources.ResourceLocation("minecraft","textures/item/bone.png")).orElseThrow().open()) {
-                var reference=javax.imageio.ImageIO.read(java.nio.file.Path.of("../tools/reference/minecraft-1.19.2-bone.png").toFile());
-                var original=javax.imageio.ImageIO.read(vanilla);
-                for(int y=0;y<16;y++)for(int x=0;x<16;x++)if(reference.getRGB(x,y)!=original.getRGB(x,y))throw new IllegalStateException("Treat reference is not the exact vanilla 1.19.2 bone");
-            }
-            NonNullList<net.minecraft.world.item.ItemStack> tab=NonNullList.create();
-            ModItems.MINEMON_TAB.fillItemList(tab);
-            var eggStack=ModItems.BREEDING_EGG.get().getDefaultInstance();
-            var eggModel=minecraft.getItemRenderer().getModel(eggStack,null,null,0);
-            if(eggModel==minecraft.getModelManager().getMissingModel()
-                    ||tab.stream().noneMatch(s->s.is(eggStack.getItem())))
-                throw new IllegalStateException("Breeding egg inventory model or creative entry missing");
-            var eggQuads=new java.util.ArrayList<net.minecraft.client.renderer.block.model.BakedQuad>();
-            eggQuads.addAll(eggModel.getQuads(null,null,net.minecraft.util.RandomSource.create(0)));
-            for(var side:net.minecraft.core.Direction.values())
-                eggQuads.addAll(eggModel.getQuads(null,side,net.minecraft.util.RandomSource.create(0)));
-            if(eggQuads.stream().noneMatch(q->q.getTintIndex()==0)
-                    ||eggQuads.stream().noneMatch(q->!q.isTinted()))
-                throw new IllegalStateException("Egg must separate elemental marks from untinted white shell");
-            for(String type:java.util.List.of("fire","flying")){
-                eggStack.getOrCreateTagElement("BlockEntityTag").putString("EggElement",type);
-                if(minecraft.getItemColors().getColor(eggStack,0)!=br.com.petrickfaria.minemon.entity.EggAppearance.color(type)
-                        ||minecraft.getItemColors().getColor(eggStack,1)!=0xFFFFFF)
-                    throw new IllegalStateException("Egg saved elemental tint did not reach the client: "+type);
-            }
-            System.out.println("[EGG CLIENT] PASS: baked egg, white shell, elemental marks and saved item tint");
-            long soulCount = tab.stream().filter(stack -> stack.getItem() instanceof br.com.petrickfaria.minemon.pokec.SoulItem).count();
-            if (soulCount != 18) throw new IllegalStateException("Creative tab must expose all 18 elemental souls, found " + soulCount);
-            for (var entry : ModItems.SOULS.entrySet()) {
-                var item = entry.getValue().get();
-                var id = net.minecraftforge.registries.ForgeRegistries.ITEMS.getKey(item);
-                if (id == null || minecraft.getModelManager().getModel(new ModelResourceLocation(id, "inventory")) == minecraft.getModelManager().getMissingModel())
-                    throw new IllegalStateException("Missing elemental soul inventory model: " + entry.getKey());
-                try (var texture = PokemonTreatClientSmokeTest.class.getResourceAsStream("/assets/minemon_gen1/textures/item/" + entry.getKey() + "_soul.png")) {
-                    var image = texture == null ? null : javax.imageio.ImageIO.read(texture);
-                    if (image == null || image.getWidth() != 256 || image.getHeight() != 256 || !image.getColorModel().hasAlpha())
-                        throw new IllegalStateException("Missing transparent soul texture: " + entry.getKey());
-                }
-            }
-            com.mojang.logging.LogUtils.getLogger().info("[SOUL CLIENT] PASS: all 18 elemental souls registered in creative tab with baked inventory models and transparent textures");
-            long treatCount=tab.stream().filter(stack->stack.getItem() instanceof br.com.petrickfaria.minemon.item.PokemonTreatItem).count();
-            if (treatCount != 18) throw new IllegalStateException("Creative tab exposes "+treatCount+" treats instead of 18");
-            for (var entry : ModItems.TREATS.entrySet()) {
-                var item=entry.getValue().get();
-                var id=net.minecraftforge.registries.ForgeRegistries.ITEMS.getKey(item);
-                if (id==null) throw new IllegalStateException("Treat has no registered ID: "+entry.getKey());
-                var modelId=new ModelResourceLocation(id,"inventory");
-                var model=minecraft.getModelManager().getModel(modelId);
-                if (model==minecraft.getModelManager().getMissingModel()) throw new IllegalStateException("Missing baked treat model: "+modelId);
-                var key="item.minemon."+entry.getKey().itemId();
-                if (net.minecraft.client.resources.language.I18n.get(key).equals(key)) throw new IllegalStateException("Missing translated treat name: "+key);
-            }
-            try (var texture=PokemonTreatClientSmokeTest.class.getResourceAsStream("/assets/minemon/textures/item/grass_treat.png")) {
-                var image=texture==null?null:javax.imageio.ImageIO.read(texture);
-                if (image==null || image.getWidth()!=16 || image.getHeight()!=16 || !image.getColorModel().hasAlpha())
-                    throw new IllegalStateException("Grass Treat needs a transparent 16x16 pixel texture");
-            }
-            var coin=ModItems.POKE_COIN.get();
-            var coinId=net.minecraftforge.registries.ForgeRegistries.ITEMS.getKey(coin);
-            if (coinId==null || !coinId.toString().equals("minemon:poke_coin"))
-                throw new IllegalStateException("PokÃ©Coin has wrong registry ID: "+coinId);
-            if (coin.getMaxStackSize()!=64) throw new IllegalStateException("PokÃ©Coin must stack to 64");
-            if (tab.stream().filter(stack->stack.getItem()==coin).count()!=1)
-                throw new IllegalStateException("PokÃ©Coin must appear exactly once in the Minemon creative tab");
-            var coinModelId=new ModelResourceLocation(coinId,"inventory");
-            if (minecraft.getModelManager().getModel(coinModelId)==minecraft.getModelManager().getMissingModel())
-                throw new IllegalStateException("Missing baked PokÃ©Coin model: "+coinModelId);
-            var coinName="item.minemon.poke_coin";
-            if (net.minecraft.client.resources.language.I18n.get(coinName).equals(coinName))
-                throw new IllegalStateException("Missing PokÃ©Coin translation: "+coinName);
-            try (var texture=PokemonTreatClientSmokeTest.class.getResourceAsStream("/assets/minemon/textures/item/poke_coin.png")) {
-                var image=texture==null?null:javax.imageio.ImageIO.read(texture);
-                if (image==null || image.getWidth()!=32 || image.getHeight()!=32 || !image.getColorModel().hasAlpha())
-                    throw new IllegalStateException("PokÃ©Coin texture must be a 32x32 transparent PNG");
-            }
-            var ball=ModItems.POKEBALL.get();
-            var ballId=net.minecraftforge.registries.ForgeRegistries.ITEMS.getKey(ball);
-            if(ballId==null||!ballId.toString().equals("minemon:pokeball"))throw new IllegalStateException("PokÃ©bola has wrong registry ID: "+ballId);
-            if(ball.getMaxStackSize()!=64)throw new IllegalStateException("Empty PokÃ©bolas must stack to 64");
-            var occupiedBall=new net.minecraft.world.item.ItemStack(ball);
-            var occupiedTag=new net.minecraft.nbt.CompoundTag();occupiedTag.put("MinemonStoredPokemon",new net.minecraft.nbt.CompoundTag());occupiedBall.setTag(occupiedTag);
-            if(ball.getMaxStackSize(occupiedBall)!=1)throw new IllegalStateException("Occupied PokÃ©bolas must be unstackable");
-            if(tab.stream().filter(stack->stack.getItem()==ball).count()!=1)throw new IllegalStateException("PokÃ©bola must appear exactly once in the Minemon creative tab");
-            var ballModelId=new ModelResourceLocation(ballId,"inventory");
-            if(minecraft.getModelManager().getModel(ballModelId)==minecraft.getModelManager().getMissingModel())throw new IllegalStateException("Missing baked PokÃ©bola model: "+ballModelId);
-            var ballName="item.minemon.pokeball";
-            if(net.minecraft.client.resources.language.I18n.get(ballName).equals(ballName))throw new IllegalStateException("Missing PokÃ©bola translation: "+ballName);
-            try(var texture=PokemonTreatClientSmokeTest.class.getResourceAsStream("/assets/minemon/textures/item/pokeball.png")){
-                var image=texture==null?null:javax.imageio.ImageIO.read(texture);
-                if(image==null||image.getWidth()!=16||image.getHeight()!=16||((image.getRGB(0,0)>>>24)&255)!=0)throw new IllegalStateException("PokÃ©bola texture must preserve the supplied 16x16 sprite with transparent corner pixels (image="+(image==null?"missing":image.getWidth()+"x"+image.getHeight()+", alpha="+image.getColorModel().hasAlpha()+", corner="+Integer.toHexString(image.getRGB(0,0)))+")");
-                int upper=image.getRGB(8,4),lower=image.getRGB(7,11),center=image.getRGB(5,10);
-                if(((upper>>16)&255)<150||((lower>>16)&255)<150||((lower>>8)&255)<150||((center>>16)&255)<180||((center>>8)&255)<180||((center)&255)<180)throw new IllegalStateException("PokÃ©bola texture is missing its red/white halves or white center button");
-            }
-            var masterBall=ModItems.MASTER_BALL.get();
-            var masterBallId=net.minecraftforge.registries.ForgeRegistries.ITEMS.getKey(masterBall);
-            if(masterBallId==null||!masterBallId.toString().equals("minemon:master_ball"))throw new IllegalStateException("Master Ball has wrong registry ID: "+masterBallId);
-            if(tab.stream().filter(stack->stack.getItem()==masterBall).count()!=1)throw new IllegalStateException("Master Ball must appear exactly once in the Minemon creative tab");
-            var masterBallModelId=new ModelResourceLocation(masterBallId,"inventory");
-            if(minecraft.getModelManager().getModel(masterBallModelId)==minecraft.getModelManager().getMissingModel())throw new IllegalStateException("Missing baked Master Ball model: "+masterBallModelId);
-            var masterBallName="item.minemon.master_ball";
-            if(net.minecraft.client.resources.language.I18n.get(masterBallName).equals(masterBallName))throw new IllegalStateException("Missing Master Ball translation: "+masterBallName);
-            try(var texture=PokemonTreatClientSmokeTest.class.getResourceAsStream("/assets/minemon/textures/item/master_ball.png")){
-                var image=texture==null?null:javax.imageio.ImageIO.read(texture);
-                if(image==null||image.getWidth()!=16||image.getHeight()!=16||!image.getColorModel().hasAlpha())throw new IllegalStateException("Master Ball needs its supplied transparent 16x16 sprite");
-            }
-            if (minecraft.player == null || minecraft.level == null) {
-                var dataFile = java.nio.file.Path.of("saves/minemon-validation/level.dat").toFile();
-                var tag = net.minecraft.nbt.NbtIo.readCompressed(dataFile);
-                tag.getCompound("Data").putBoolean("confirmedExperimentalSettings", true);
-                net.minecraft.nbt.NbtIo.writeCompressed(tag, dataFile);
-                Object flows = Minecraft.class.getMethod("createWorldOpenFlows").invoke(minecraft);
-                boolean invoked = false;
-                for (var method : flows.getClass().getMethods()) if (method.getName().equals("loadLevel")) {
-                    if (method.getParameterCount() == 2 && method.getParameterTypes()[1] == String.class) {
-                        method.invoke(flows, minecraft.screen, "minemon-validation"); invoked = true; break;
-                    }
-                    if (method.getParameterCount() == 1 && method.getParameterTypes()[0] == String.class) {
-                        method.invoke(flows, "minemon-validation"); invoked = true; break;
-                    }
-                }
-                if (!invoked) throw new IllegalStateException("Could not locate WorldOpenFlows.loadLevel for PokÃ©C UI validation");
-                worldOpening = true;
-                worldWaitTicks = 0;
-                return;
-            }
-            openPokecUi(minecraft);
-        } catch (Exception failure) {
-            throw new IllegalStateException("Treat client validation failed",failure);
-        }
-    }
-    private static void openPokecUi(Minecraft minecraft) {
-        pokecUiPhase = true;
-        clientTicks = 0;
-        var server=minecraft.getSingleplayerServer();
-        if(server==null)throw new IllegalStateException("Pokec UI smoke requires the prepared integrated server");
-        var uuid=minecraft.player.getUUID();
-        server.execute(()->{
-            var player=server.getPlayerList().getPlayer(uuid);
-            if(player==null)throw new IllegalStateException("Pokec test player not loaded on server");
-            player.getPersistentData().remove("minemon_gen1_pokec");
-            var pos=player.blockPosition().west(2);
-            var level=(net.minecraft.server.level.ServerLevel)player.level;
-            var state=br.com.petrickfaria.minemon.registry.ModBlocks.POKEC.get().defaultBlockState();
-            level.setBlock(pos,state,3);
-            level.setBlock(pos.above(),state.setValue(br.com.petrickfaria.minemon.block.PokecBlock.HALF,net.minecraft.world.level.block.state.properties.DoubleBlockHalf.UPPER),3);
-            state.use(level,player,net.minecraft.world.InteractionHand.MAIN_HAND,
-                new net.minecraft.world.phys.BlockHitResult(net.minecraft.world.phys.Vec3.atCenterOf(pos),net.minecraft.core.Direction.UP,pos,false));
-        });
-    }
-    private PokemonTreatClientSmokeTest() {}
-}
+HOHMˆZ[XYÙK™Ù]ÛÛÜ“[Ù[
+
+Kš\Ð[J
+JBˆ›ÝÈ™]È[YØ[Ý]Q^Ù\[ÛŠ“Z\ÜÚ[™È˜[œÜ\™[ÛÝ[^\™Nˆˆ
+È[žK™Ù]Ù^J
+JNÂˆBˆBˆÛÛK›[Ú˜[™Ë›ÙÙÚ[™Ë“ÙÕ][Ë™Ù]ÙÙÙ\Š
+Kš[™›Ê–ÔÓÕSÓQS•HTÔÎˆ[N[[Y[[ÛÝ[È™YÚ\Ý\™Y[ˆÜ™X]]™HXˆÚ]˜ZÙY[™[ÜžH[Ù[È[™˜[œÜ\™[^\™\ÈŠNÂˆÛ™È™X]ÛÝ[]X‹œÝ™X[J
+K™š[\ŠÝXÚËOœÝXÚË™Ù]][J
+H[œÝ[˜Ù[Ùˆœ‹˜ÛÛKœ]šXÚÙ˜\šXK›Z[™[[Û‹š][K”ÚÙ[[Û•™X]][JK˜ÛÝ[
+
+NÂˆYˆ
+™X]ÛÝ[OHN
+H›ÝÈ™]È[YØ[Ý]Q^Ù\[ÛŠÜ™X]]™HXˆ^ÜÙ\ÈŠÝ™X]ÛÝ[
+Èˆ™X]È[œÝXYÙˆNŠNÂˆ›Üˆ
+˜\ˆ[žHˆ[Ù][\Ë•‘PUË™[žTÙ]
+
+JHÂˆ˜\ˆ][OY[žK™Ù]˜[YJ
+K™Ù]
+
+NÂˆ˜\ˆY[™]›Z[™XÜ˜Y›Ü™ÙKœ™YÚ\ÝšY\Ë‘›Ü™ÙT™YÚ\ÝšY\Ë’USTË™Ù]Ù^J][JNÂˆYˆ
+YO[[
+H›ÝÈ™]È[YØ[Ý]Q^Ù\[ÛŠ•™X]\È›È™YÚ\Ý\™YQˆŠÙ[žK™Ù]Ù^J
+JNÂˆ˜\ˆ[Ù[Y[™]È[Ù[™\ÛÝ\˜ÙSØØ][ÛŠYš[™[ÜžHŠNÂˆ˜\ˆ[Ù[[Z[™XÜ˜Y™Ù][Ù[X[˜YÙ\Š
+K™Ù][Ù[
+[Ù[Y
+NÂˆYˆ
+[Ù[O[Z[™XÜ˜Y™Ù][Ù[X[˜YÙ\Š
+K™Ù]Z\ÜÚ[™Ó[Ù[
+
+JH›ÝÈ™]È[YØ[Ý]Q^Ù\[ÛŠ“Z\ÜÚ[™È˜ZÙY™X][Ù[ˆŠÛ[Ù[Y
+NÂˆ˜\ˆÙ^OHš][K›Z[™[[Û‹ˆŠÙ[žK™Ù]Ù^J
+Kš][RY
+
+NÂˆYˆ
+™]›Z[™XÜ˜Y˜ÛY[œ™\ÛÝ\˜Ù\Ë›[™ÝXYÙK’LN‹™Ù]
+Ù^JK™\]X[ÊÙ^JJH›ÝÈ™]È[YØ[Ý]Q^Ù\[ÛŠ“Z\ÜÚ[™È˜[œÛ]Y™X]˜[YNˆŠÚÙ^JNÂˆBˆžH
+˜\ˆ^\™OTÚÙ[[Û•™X]ÛY[Û[ÚÙU\Ý˜Û\ÜË™Ù]™\ÛÝ\˜ÙP\ÔÝ™X[J‹Ø\ÜÙ]ËÛZ[™[[Û‹Ý^\™\ËÚ][KÙÜ˜\Ü×Ý™X]œ™ÈŠJHÂˆ˜\ˆ[XYÙO]^\™OO[[Û[š˜]˜^š[XYÙZ[Ë’[XYÙRSËœ™XY
+^\™JNÂˆYˆ
+[XYÙOO[[[XYÙK™Ù]ÚY
+
+HOLMˆ[XYÙK™Ù]ZYÚ
+
+HOLMˆZ[XYÙK™Ù]ÛÛÜ“[Ù[
+
+Kš\Ð[J
+JBˆ›ÝÈ™]È[YØ[Ý]Q^Ù\[ÛŠ‘Ü˜\ÜÈ™X]™YYÈH˜[œÜ\™[MžMˆ^[^\™HŠNÂˆBˆ˜\ˆÛÚ[S[Ù][\Ë”ÒÑWÐÓÒS‹™Ù]
+
+NÂˆ˜\ˆÛÚ[’Y[™]›Z[™XÜ˜Y›Ü™ÙKœ™YÚ\ÝšY\Ë‘›Ü™ÙT™YÚ\ÝšY\Ë’USTË™Ù]Ù^JÛÚ[ŠNÂˆYˆ
+ÛÚ[’YO[[XÛÚ[’YÔÝš[™Ê
+K™\]X[Ê›Z[™[[ÛŽœÚÙWØÛÚ[ˆŠJBˆ›ÝÈ™]È[YØ[Ý]Q^Ù\[ÛŠ”ÚðêPÛÚ[ˆ\ÈÜ›Û™È™YÚ\ÝžHQˆŠØÛÚ[’Y
+NÂˆYˆ
+ÛÚ[‹™Ù]X^ÝXÚÔÚ^™J
+HOM
+H›ÝÈ™]È[YØ[Ý]Q^Ù\[ÛŠ”ÚðêPÛÚ[ˆ]\ÝÝXÚÈÈŠNÂˆYˆ
+X‹œÝ™X[J
+K™š[\ŠÝXÚËOœÝXÚË™Ù]][J
+OOXÛÚ[ŠK˜ÛÝ[
+
+HOLJBˆ›ÝÈ™]È[YØ[Ý]Q^Ù\[ÛŠ”ÚðêPÛÚ[ˆ]\Ý\X\ˆ^XÝHÛ˜ÙH[ˆHZ[™[[ÛˆÜ™X]]™HXˆŠNÂˆ˜\ˆÛÚ[“[Ù[Y[™]È[Ù[™\ÛÝ\˜ÙSØØ][ÛŠÛÚ[’Yš[™[ÜžHŠNÂˆYˆ
+Z[™XÜ˜Y™Ù][Ù[X[˜YÙ\Š
+K™Ù][Ù[
+ÛÚ[“[Ù[Y
+OO[Z[™XÜ˜Y™Ù][Ù[X[˜YÙ\Š
+K™Ù]Z\ÜÚ[™Ó[Ù[
+
+JBˆ›ÝÈ™]È[YØ[Ý]Q^Ù\[ÛŠ“Z\ÜÚ[™È˜ZÙYÚðêPÛÚ[ˆ[Ù[ˆŠØÛÚ[“[Ù[Y
+NÂˆ˜\ˆÛÚ[“˜[YOHš][K›Z[™[[Û‹œÚÙWØÛÚ[ˆŽÂˆYˆ
+™]›Z[™XÜ˜Y˜ÛY[œ™\ÛÝ\˜Ù\Ë›[™ÝXYÙK’LN‹™Ù]
+ÛÚ[“˜[YJK™\]X[ÊÛÚ[“˜[YJJBˆ›ÝÈ™]È[YØ[Ý]Q^Ù\[ÛŠ“Z\ÜÚ[™ÈÚðêPÛÚ[ˆ˜[œÛ][ÛŽˆŠØÛÚ[“˜[YJNÂˆžH
+˜\ˆ^\™OTÚÙ[[Û•™X]ÛY[Û[ÚÙU\Ý˜Û\ÜË™Ù]™\ÛÝ\˜ÙP\ÔÝ™X[J‹Ø\ÜÙ]ËÛZ[™[[Û‹Ý^\™\ËÚ][KÜÚÙWØÛÚ[‹œ™ÈŠJHÂˆ˜\ˆ[XYÙO]^\™OO[[Û[š˜]˜^š[XYÙZ[Ë’[XYÙRSËœ™XY
+^\™JNÂˆYˆ
+[XYÙOO[[[XYÙK™Ù]ÚY
+
+HOLÌˆ[XYÙK™Ù]ZYÚ
+
+HOLÌˆZ[XYÙK™Ù]ÛÛÜ“[Ù[
+
+Kš\Ð[J
+JBˆ›ÝÈ™]È[YØ[Ý]Q^Ù\[ÛŠ”ÚðêPÛÚ[ˆ^\™H]\Ý™HHÌžÌˆ˜[œÜ\™[‘ÈŠNÂˆBˆ˜\ˆ˜[S[Ù][\Ë”ÒÑPS™Ù]
+
+NÂˆ˜\ˆ˜[Y[™]›Z[™XÜ˜Y›Ü™ÙKœ™YÚ\ÝšY\Ë‘›Ü™ÙT™YÚ\ÝšY\Ë’USTË™Ù]Ù^J˜[
+NÂˆYŠ˜[YO[[X˜[YÔÝš[™Ê
+K™\]X[Ê›Z[™[[ÛŽœÚÙX˜[ŠJ]›ÝÈ™]È[YØ[Ý]Q^Ù\[ÛŠ”ÚðêX›ÛH\ÈÜ›Û™È™YÚ\ÝžHQˆŠØ˜[Y
+NÂˆYŠ˜[™Ù]X^ÝXÚÔÚ^™J
+HOM
+]›ÝÈ™]È[YØ[Ý]Q^Ù\[ÛŠ‘[\HÚðêX›Û\È]\ÝÝXÚÈÈŠNÂˆ˜\ˆØØÝ\YY˜[[™]È™]›Z[™XÜ˜YÛÜ›š][K’][TÝXÚÊ˜[
+NÂˆ˜\ˆØØÝ\YYYÏ[™]È™]›Z[™XÜ˜Y›˜ÛÛ\Ý[™YÊ
+NÛØØÝ\YYYËœ]
+“Z[™[[Û”ÝÜ™YÚÙ[[Ûˆ‹™]È™]›Z[™XÜ˜Y›˜ÛÛ\Ý[™YÊ
+JNÛØØÝ\YY˜[œÙ]YÊØØÝ\YYYÊNÂˆYŠ˜[™Ù]X^ÝXÚÔÚ^™JØØÝ\YY˜[
+HOLJ]›ÝÈ™]È[YØ[Ý]Q^Ù\[ÛŠ“ØØÝ\YYÚðêX›Û\È]\Ý™H[œÝXÚØX›HŠNÂˆYŠX‹œÝ™X[J
+K™š[\ŠÝXÚËOœÝXÚË™Ù]][J
+OOX˜[
+K˜ÛÝ[
+
+HOLJ]›ÝÈ™]È[YØ[Ý]Q^Ù\[ÛŠ”ÚðêX›ÛH]\Ý\X\ˆ^XÝHÛ˜ÙH[ˆHZ[™[[ÛˆÜ™X]]™HXˆŠNÂˆ˜\ˆ˜[[Ù[Y[™]È[Ù[™\ÛÝ\˜ÙSØØ][ÛŠ˜[Yš[™[ÜžHŠNÂˆYŠZ[™XÜ˜Y™Ù][Ù[X[˜YÙ\Š
+K™Ù][Ù[
+˜[[Ù[Y
+OO[Z[™XÜ˜Y™Ù][Ù[X[˜YÙ\Š
+K™Ù]Z\ÜÚ[™Ó[Ù[
+
+J]›ÝÈ™]È[YØ[Ý]Q^Ù\[ÛŠ“Z\ÜÚ[™È˜ZÙYÚðêX›ÛH[Ù[ˆŠØ˜[[Ù[Y
+NÂˆ˜\ˆ˜[˜[YOHš][K›Z[™[[Û‹œÚÙX˜[ŽÂˆYŠ™]›Z[™XÜ˜Y˜ÛY[œ™\ÛÝ\˜Ù\Ë›[™ÝXYÙK’LN‹™Ù]
+˜[˜[YJK™\]X[Ê˜[˜[YJJ]›ÝÈ™]È[YØ[Ý]Q^Ù\[ÛŠ“Z\ÜÚ[™ÈÚðêX›ÛH˜[œÛ][ÛŽˆŠØ˜[˜[YJNÂˆžJ˜\ˆ^\™OTÚÙ[[Û•™X]ÛY[Û[ÚÙU\Ý˜Û\ÜË™Ù]™\ÛÝ\˜ÙP\ÔÝ™X[J‹Ø\ÜÙ]ËÛZ[™[[Û‹Ý^\™\ËÚ][KÜÚÙX˜[œ™ÈŠJ^Âˆ˜\ˆ[XYÙO]^\™OO[[Û[š˜]˜^š[XYÙZ[Ë’[XYÙRSËœ™XY
+^\™JNÂˆYŠ[XYÙOO[[[XYÙK™Ù]ÚY
+
+HOLMŸ[XYÙK™Ù]ZYÚ
+
+HOLMŸ
+
+[XYÙK™Ù]‘ÐŠ
+OŒ
+IŒMJHOL
+]›ÝÈ™]È[YØ[Ý]Q^Ù\[ÛŠ”ÚðêX›ÛH^\™H]\Ý™\Ù\™HHÝ\YYMžMˆÜš]HÚ]˜[œÜ\™[ÛÜ›™\ˆ^[È
+[XYÙOHŠÊ[XYÙOO[[È›Z\ÜÚ[™ÈŽš[XYÙK™Ù]ÚY
+
+JÈžŠÚ[XYÙK™Ù]ZYÚ
+
+JÈ‹[OHŠÚ[XYÙK™Ù]ÛÛÜ“[Ù[
+
+Kš\Ð[J
+JÈ‹ÛÜ›™\HŠÒ[YÙ\‹Ò^Ýš[™Ê[XYÙK™Ù]‘ÐŠ
+JJJÈŠHŠNÂˆ[\\Z[XYÙK™Ù]‘ÐŠ
+KÝÙ\Z[XYÙK™Ù]‘ÐŠËLJKÙ[\Z[XYÙK™Ù]‘ÐŠKL
+NÂˆYŠ
+
+\\ŒMŠIŒMJOML
+
+ÝÙ\ŒMŠIŒMJOML
+
+ÝÙ\Ž
+IŒMJOML
+
+Ù[\ŒMŠIŒMJON
+
+Ù[\Ž
+IŒMJON
+
+Ù[\ŠIŒMJON
+]›ÝÈ™]È[YØ[Ý]Q^Ù\[ÛŠ”ÚðêX›ÛH^\™H\ÈZ\ÜÚ[™È]È™YÝÚ]H[™\ÈÜˆÚ]HÙ[\ˆ]ÛˆŠNÂˆBˆ˜\ˆX\Ý\˜[S[Ù][\Ë“PTÕT—ÐS™Ù]
+
+NÂˆ˜\ˆX\Ý\˜[Y[™]›Z[™XÜ˜Y›Ü™ÙKœ™YÚ\ÝšY\Ë‘›Ü™ÙT™YÚ\ÝšY\Ë’USTË™Ù]Ù^JX\Ý\˜[
+NÂˆYŠX\Ý\˜[YO[[[X\Ý\˜[YÔÝš[™Ê
+K™\]X[Ê›Z[™[[ÛŽ›X\Ý\—Ø˜[ŠJ]›ÝÈ™]È[YØ[Ý]Q^Ù\[ÛŠ“X\Ý\ˆ˜[\ÈÜ›Û™È™YÚ\ÝžHQˆŠÛX\Ý\˜[Y
+NÂˆYŠX‹œÝ™X[J
+K™š[\ŠÝXÚËOœÝXÚË™Ù]][J
+OO[X\Ý\˜[
+K˜ÛÝ[
+
+HOLJ]›ÝÈ™]È[YØ[Ý]Q^Ù\[ÛŠ“X\Ý\ˆ˜[]\Ý\X\ˆ^XÝHÛ˜ÙH[ˆHZ[™[[ÛˆÜ™X]]™HXˆŠNÂˆ˜\ˆX\Ý\˜[[Ù[Y[™]È[Ù[™\ÛÝ\˜ÙSØØ][ÛŠX\Ý\˜[Yš[™[ÜžHŠNÂˆYŠZ[™XÜ˜Y™Ù][Ù[X[˜YÙ\Š
+K™Ù][Ù[
+X\Ý\˜[[Ù[Y
+OO[Z[™XÜ˜Y™Ù][Ù[X[˜YÙ\Š
+K™Ù]Z\ÜÚ[™Ó[Ù[
+
+J]›ÝÈ™]È[YØ[Ý]Q^Ù\[ÛŠ“Z\ÜÚ[™È˜ZÙYX\Ý\ˆ˜[[Ù[ˆŠÛX\Ý\˜[[Ù[Y
+NÂˆ˜\ˆX\Ý\˜[˜[YOHš][K›Z[™[[Û‹›X\Ý\—Ø˜[ŽÂˆYŠ™]›Z[™XÜ˜Y˜ÛY[œ™\ÛÝ\˜Ù\Ë›[™ÝXYÙK’LN‹™Ù]
+X\Ý\˜[˜[YJK™\]X[ÊX\Ý\˜[˜[YJJ]›ÝÈ™]È[YØ[Ý]Q^Ù\[ÛŠ“Z\ÜÚ[™ÈX\Ý\ˆ˜[˜[œÛ][ÛŽˆŠÛX\Ý\˜[˜[YJNÂˆžJ˜\ˆ^\™OTÚÙ[[Û•™X]ÛY[Û[ÚÙU\Ý˜Û\ÜË™Ù]™\ÛÝ\˜ÙP\ÔÝ™X[J‹Ø\ÜÙ]ËÛZ[™[[Û‹Ý^\™\ËÚ][KÛX\Ý\—Ø˜[œ™ÈŠJ^Âˆ˜\ˆ[XYÙO]^\™OO[[Û[š˜]˜^š[XYÙZ[Ë’[XYÙRSËœ™XY
+^\™JNÂˆYŠ[XYÙOO[[[XYÙK™Ù]ÚY
+
+HOLMŸ[XYÙK™Ù]ZYÚ
+
+HOLMŸZ[XYÙK™Ù]ÛÛÜ“[Ù[
+
+Kš\Ð[J
+J]›ÝÈ™]È[YØ[Ý]Q^Ù\[ÛŠ“X\Ý\ˆ˜[™YYÈ]ÈÝ\YY˜[œÜ\™[MžMˆÜš]HŠNÂˆBˆYˆ
+Z[™XÜ˜Yœ^Y\ˆOH[Z[™XÜ˜Y›]™[OH[
+HÂˆ˜\ˆ]Qš[HH˜]˜K›š[Ë™š[K”]›ÙŠœØ]™\ËÛZ[™[[Û‹]˜[Y][Û‹Û]™[™]ŠKÑš[J
+NÂˆ˜\ˆYÈH™]›Z[™XÜ˜Y›˜“˜[Ëœ™XYÛÛ\™\ÜÙY
+]Qš[JNÂˆYË™Ù]ÛÛ\Ý[™
+‘]HŠKœ]›ÛÛX[Š˜ÛÛ™š\›YY^\š[Y[[Ù][™ÜÈ‹YJNÂˆ™]›Z[™XÜ˜Y›˜“˜[ËÜš]PÛÛ\™\ÜÙY
+YË]Qš[JNÂˆØš™XÝ›ÝÜÈHZ[™XÜ˜Y˜Û\ÜË™Ù]Y]Ù
+˜Ü™X]UÛÜ›Ü[‘›ÝÜÈŠKš[›ÚÙJZ[™XÜ˜Y
+NÂˆ›ÛÛX[ˆ[›ÚÙYH˜[ÙNÂˆ›Üˆ
+˜\ˆY]Ùˆ›ÝÜË™Ù]Û\ÜÊ
+K™Ù]Y]ÙÊ
+JHYˆ
+Y]Ù™Ù]˜[YJ
+K™\]X[Ê›ØY]™[ŠJHÂˆYˆ
+Y]Ù™Ù]\˜[Y]\ÛÝ[
+
+HOHˆ	‰ˆY]Ù™Ù]\˜[Y]\•\\Ê
+VÌWHOHÝš[™Ë˜Û\ÜÊHÂˆY]Ùš[›ÚÙJ›ÝÜËZ[™XÜ˜YœØÜ™Y[‹›Z[™[[Û‹]˜[Y][ÛˆŠNÈ[›ÚÙYHYNÈœ™XZÎÂˆBˆYˆ
+Y]Ù™Ù]\˜[Y]\ÛÝ[
+
+HOHH	‰ˆY]Ù™Ù]\˜[Y]\•\\Ê
+VÌHOHÝš[™Ë˜Û\ÜÊHÂˆY]Ùš[›ÚÙJ›ÝÜË›Z[™[[Û‹]˜[Y][ÛˆŠNÈ[›ÚÙYHYNÈœ™XZÎÂˆBˆBˆYˆ
+Z[›ÚÙY
+H›ÝÈ™]È[YØ[Ý]Q^Ù\[ÛŠÛÝ[›ÝØØ]HÛÜ›Ü[‘›ÝÜË›ØY]™[›ÜˆÚðêPÈRH˜[Y][ÛˆŠNÂˆÛÜ›Ü[š[™ÈHYNÂˆÛÜ›ØZ]XÚÜÈHÂˆ™]\›ŽÂˆBˆÜ[”ÚÙXÕZJZ[™XÜ˜Y
+NÂˆHØ]Ú
+^Ù\[Ûˆ˜Z[\™JHÂˆ›ÝÈ™]È[YØ[Ý]Q^Ù\[ÛŠ•™X]ÛY[˜[Y][Ûˆ˜Z[Y‹˜Z[\™JNÂˆBˆBˆš]˜]HÝ]XÈ›ÚYÜ[”ÚÙXÕZJZ[™XÜ˜YZ[™XÜ˜Y
+HÂˆÚÙXÕZT\ÙHHYNÂˆÛY[XÚÜÈHÂˆ˜\ˆÙ\™\[Z[™XÜ˜Y™Ù]Ú[™Û\^Y\”Ù\™\Š
+NÂˆYŠÙ\™\O[[
+]›ÝÈ™]È[YØ[Ý]Q^Ù\[ÛŠ”ÚÙXÈRHÛ[ÚÙH™\]Z\™\ÈH™\\™Y[YÜ˜]YÙ\™\ˆŠNÂˆ˜\ˆ]ZY[Z[™XÜ˜Yœ^Y\‹™Ù]URQ
+
+NÂˆÙ\™\‹™^XÝ]J
+
+KOžÂˆ˜\ˆ^Y\\Ù\™\‹™Ù]^Y\“\Ý
+
+K™Ù]^Y\Š]ZY
+NÂˆYŠ^Y\O[[
+]›ÝÈ™]È[YØ[Ý]Q^Ù\[ÛŠ”ÚÙXÈ\Ý^Y\ˆ›ÝØYYÛˆÙ\™\ˆŠNÂˆ^Y\‹™Ù]\œÚ\Ý[]J
+Kœ™[[Ý™J›Z[™[[Û—ÙÙ[ŒWÜÚÙXÈŠNÂˆ˜\ˆÜÏ\^Y\‹˜›ØÚÔÜÚ][ÛŠ
+KÙ\Ý
+ŠNÂˆ˜\ˆ]™[J™]›Z[™XÜ˜YœÙ\™\‹›]™[”Ù\™\“]™[
+\^Y\‹›]™[Âˆ˜\ˆÝ]OXœ‹˜ÛÛKœ]šXÚÙ˜\šXK›Z[™[[Û‹œ™YÚ\ÝžK“[Ù›ØÚÜË”ÒÑPË™Ù]
+
+K™Y˜][›ØÚÔÝ]J
+NÂˆ]™[œÙ]›ØÚÊÜËÝ]KÊNÂˆ]™[œÙ]›ØÚÊÜË˜X›Ý™J
+KÝ]KœÙ]˜[YJœ‹˜ÛÛKœ]šXÚÙ˜\šXK›Z[™[[Û‹˜›ØÚË”ÚÙXÐ›ØÚË’S‹™]›Z[™XÜ˜YÛÜ››]™[˜›ØÚËœÝ]Kœ›Ü\Y\Ë‘ÝX›P›ØÚÒ[‹•TTŠKÊNÂˆÝ]K\ÙJ]™[^Y\‹™]›Z[™XÜ˜YÛÜ›’[\˜XÝ[Û’[™“PRS—ÒS‘ˆ™]È™]›Z[™XÜ˜YÛÜ›œ\Ë›ØÚÒ]™\Ý[
+™]›Z[™XÜ˜YÛÜ›œ\Ë•™XÌË˜]Ù[\“ÙŠÜÊK™]›Z[™XÜ˜Y˜ÛÜ™K‘\™XÝ[Û‹•TÜË˜[ÙJJNÂˆJNÂˆBˆš]˜]HÚÙ[[Û•™X]ÛY[Û[ÚÙU\Ý
+
+HßBŸB
