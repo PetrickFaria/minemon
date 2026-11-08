@@ -91,6 +91,11 @@ public final class PokemonInfoScreen extends AbstractContainerScreen<PokemonInfo
         if (preservingMenuForBlackList) return;
         super.removed();
     }
+
+    @Override public void onClose() {
+        if (preservingMenuForBlackList) return;
+        super.onClose();
+    }
     public MinemonCreature pokemonForSmokeTest() { return menu.pokemon(); }
     public String headerForSmokeTest() {
         MinemonCreature pokemon = menu.pokemon();
