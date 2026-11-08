@@ -139,6 +139,13 @@ public final class RocketProfessionGameTests {
     @GameTest(template = "test_arena", batch = "rocket_removal", timeoutTicks = 1000)
     public static void removingRocketBlockReleasesTheVanillaJobSiteMemory(GameTestHelper helper) {
         floor(helper);
+        // Match the natural-claim fixture: keep random idle wandering inside
+        // the prepared POI arena until the villager acquires its workstation.
+        for (int x = 0; x < 16; x++) for (int z = 0; z < 16; z++) {
+            if (x == 0 || x == 15 || z == 0 || z == 15) {
+                for (int y = 1; y <= 3; y++) helper.setBlock(new BlockPos(x, y, z), Blocks.STONE);
+            }
+        }
         helper.getLevel().setDayTime(5000L);
         BlockPos workstation = new BlockPos(6, 1, 6);
         helper.setBlock(workstation, ModBlocks.ROCKET_BLOCK.get());
