@@ -241,7 +241,10 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         boolean wasOrderedToSit=isOrderedToSit();
         super.setOrderedToSit(orderedToSit);
         this.entityData.set(ORDERED_SIT, orderedToSit);
-        if (orderedToSit) this.entityData.set(FREE_MODE, false);
+        if (orderedToSit) {
+            this.entityData.set(FREE_MODE, false);
+            setFollowingOwner(false);
+        }
         if (orderedToSit) {
             sitAnchorX = getX(); sitAnchorY = getY(); sitAnchorZ = getZ();
             if(isFlyingSpecies()){

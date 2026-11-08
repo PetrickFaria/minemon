@@ -495,7 +495,14 @@ public final class CompanionTests {
    h.getLevel().setDayTime(18000);
    h.runAfterDelay(300,()->{
     boolean slept=bird.isSleeping()&&bird.isOnGround();
-    if(!slept){h.getLevel().setDayTime(originalDayTime);h.getLevel().getGameRules().getRule(net.minecraft.world.level.GameRules.RULE_DOMOBSPAWNING).set(previousMobSpawning,h.getLevel().getServer());h.fail("A sitting flyer must land and sleep during its natural night period");return;}
+    if(!slept){
+     String state=" sleeping="+bird.isSleeping()+" nightRest="+bird.isNightResting()+" grounded="+bird.isOnGround()
+         +" noGravity="+bird.isNoGravity()+" following="+bird.isFollowingOwner()+" y="+bird.getY()
+         +" surface="+bird.naturalSurface()+" target="+bird.getTarget()+" nav="+bird.getNavigation().getTargetPos()
+         +" landing="+bird.wantsNaturalLanding()+" sit="+bird.isOrderedToSit();
+     h.getLevel().setDayTime(originalDayTime);h.getLevel().getGameRules().getRule(net.minecraft.world.level.GameRules.RULE_DOMOBSPAWNING).set(previousMobSpawning,h.getLevel().getServer());
+     h.fail("A sitting flyer must land and sleep during its natural night period;"+state);return;
+    }
     ServerPlayer followOwner=player(h);
     followOwner.setInvulnerable(true);followOwner.setNoGravity(true);
     BlockPos followPos=h.absolutePos(new BlockPos(13,1,5));
