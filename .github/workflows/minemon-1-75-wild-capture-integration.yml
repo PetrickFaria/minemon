@@ -32,7 +32,7 @@ jobs:
       - name: Verify PokéCoin reference sprite and heart display rules
         run: |
           python3 tools/verify_poke_coin.py
-          test "$(python3 tools/minemon_version.py)" = '1.88'
+          test "$(python3 tools/minemon_version.py)" = '1.89'
       - name: Verify both source lines and Java 17 game target
         run: |
           set -euo pipefail
