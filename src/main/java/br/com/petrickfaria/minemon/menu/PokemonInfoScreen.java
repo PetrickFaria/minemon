@@ -36,6 +36,7 @@ public final class PokemonInfoScreen extends AbstractContainerScreen<PokemonInfo
 
     @Override protected void init() {
         super.init();
+        preservingMenuForBlackList = false;
         evolutionButtons.clear();
         int y = topPos + 174;
         followButton = addRenderableWidget(new Button(leftPos + 14, y, 70, 20, Component.literal(
@@ -87,10 +88,7 @@ public final class PokemonInfoScreen extends AbstractContainerScreen<PokemonInfo
     }
 
     @Override public void removed() {
-        if (preservingMenuForBlackList) {
-            preservingMenuForBlackList = false;
-            return;
-        }
+        if (preservingMenuForBlackList) return;
         super.removed();
     }
     public MinemonCreature pokemonForSmokeTest() { return menu.pokemon(); }
