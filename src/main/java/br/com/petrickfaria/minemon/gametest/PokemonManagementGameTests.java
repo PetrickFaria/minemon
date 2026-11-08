@@ -199,6 +199,15 @@ public final class PokemonManagementGameTests {
         pokemon.tame(owner);
         net.minecraft.world.entity.animal.Cow rangeTarget=h.spawn(EntityType.COW,new BlockPos(10,1,5));
         pokemon.setBlackListOverride(new net.minecraft.resources.ResourceLocation("minecraft","cow"),true);
+        // The upper range cases extend beyond this compact structure. Clear a
+        // narrow, level shot lane so this assertion measures projectile range,
+        // rather than the arena's perimeter wall or ceiling.
+        int laneY=net.minecraft.core.BlockPos.containing(pokemon.getX(),pokemon.getY(),pokemon.getZ()).getY();
+        int laneZ=net.minecraft.core.BlockPos.containing(pokemon.getX(),pokemon.getY(),pokemon.getZ()).getZ();
+        for(int x=net.minecraft.core.BlockPos.containing(pokemon.getX(),0,pokemon.getZ()).getX()+1;
+                x<=net.minecraft.core.BlockPos.containing(pokemon.getX()+21.0D,0,pokemon.getZ()).getX();x++)
+            for(int y=laneY;y<=laneY+3;y++)
+                h.getLevel().setBlockAndUpdate(new BlockPos(x,y,laneZ),net.minecraft.world.level.block.Blocks.AIR.defaultBlockState());
         for(int level=1;level<=10;level++){
             pokemon.setPokemonProgress(level,0);
             double expected=5.0D+(level-1)*(15.0D/9.0D);
