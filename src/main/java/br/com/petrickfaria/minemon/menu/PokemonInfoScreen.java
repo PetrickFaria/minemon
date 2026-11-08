@@ -24,7 +24,7 @@ public final class PokemonInfoScreen extends AbstractContainerScreen<PokemonInfo
     private Button followButton;
     private Button sitButton;
     private Button freeButton;
-    private boolean preservingMenuForBlackList;
+    private BlackListScreen blackListOverlay;
 
     public PokemonInfoScreen(PokemonInfoMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
@@ -36,7 +36,6 @@ public final class PokemonInfoScreen extends AbstractContainerScreen<PokemonInfo
 
     @Override protected void init() {
         super.init();
-        preservingMenuForBlackList = false;
         evolutionButtons.clear();
         int y = topPos + 174;
         followButton = addRenderableWidget(new Button(leftPos + 14, y, 70, 20, Component.literal(
@@ -71,6 +70,7 @@ public final class PokemonInfoScreen extends AbstractContainerScreen<PokemonInfo
                 evolutionButtons.add(addRenderableWidget(choice));
             }
         }
+        if (blackListOverlay != null) blackListOverlay.initializeOverlay(minecraft, width, height);
     }
 
     private void sendButton(int action) {
@@ -81,22 +81,22 @@ public final class PokemonInfoScreen extends AbstractContainerScreen<PokemonInfo
     }
 
     public void openBlackList(int entityId, java.util.UUID uuid, java.util.Map<String, Boolean> overrides) {
-        if (Minecraft.getInstance() != null) {
-            preservingMenuForBlackList = true;
-            Minecraft.getInstance().setScreen(new BlackListScreen(this, entityId, uuid, overrides));
-        }
+        if (blackListOverlay == null)
+            blackListOverlay = new BlackListScreen(this, entityId, uuid, overrides);
+        else
+            blackListOverlay.replaceOverrides(overrides);
+        blackListOverlay.initializeOverlay(minecraft, width, height);
     }
 
-    @Override public void removed() {
-        if (preservingMenuForBlackList) return;
-        super.removed();
+    public void closeBlackListOverlay(BlackListScreen overlay) {
+        if (blackListOverlay == overlay) blackListOverlay = null;
     }
 
-    @Override public void onClose() {
-        if (preservingMenuForBlackList) return;
-        super.onClose();
+    public void replaceBlackListOverrides(java.util.Map<String, Boolean> overrides) {
+        if (blackListOverlay != null) blackListOverlay.replaceOverrides(overrides);
     }
-    PokemonInfoMenu menuForBlackList() { return menu; }
+
+    public boolean hasBlackListOverlay() { return blackListOverlay != null; }
     public MinemonCreature pokemonForSmokeTest() { return menu.pokemon(); }
     public String headerForSmokeTest() {
         MinemonCreature pokemon = menu.pokemon();
@@ -202,5 +202,46 @@ public final class PokemonInfoScreen extends AbstractContainerScreen<PokemonInfo
         }
         super.render(pose, mouseX, mouseY, partialTick);
         renderTooltip(pose, mouseX, mouseY);
+        if (blackListOverlay != null) blackListOverlay.render(pose, mouseX, mouseY, partialTick);
+    }
+
+    @Override public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (blackListOverlay != null) {
+            blackListOverlay.mouseClicked(mouseX, mouseY, button);
+            return true;
+        }
+        return super.mouseClicked(mouseX, mouseY, button);
+    }
+
+    @Override public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+        if (blackListOverlay != null) {
+            blackListOverlay.mouseDragged(mouseX, mouseY, button, dragX, dragY);
+            return true;
+        }
+        return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
+    }
+
+    @Override public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        if (blackListOverlay != null) {
+            blackListOverlay.mouseReleased(mouseX, mouseY, button);
+            return true;
+        }
+        return super.mouseReleased(mouseX, mouseY, button);
+    }
+
+    @Override public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
+        if (blackListOverlay != null) {
+            blackListOverlay.mouseScrolled(mouseX, mouseY, delta);
+            return true;
+        }
+        return super.mouseScrolled(mouseX, mouseY, delta);
+    }
+
+    @Override public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (blackListOverlay != null) {
+            blackListOverlay.keyPressed(keyCode, scanCode, modifiers);
+            return true;
+        }
+        return super.keyPressed(keyCode, scanCode, modifiers);
     }
 }
