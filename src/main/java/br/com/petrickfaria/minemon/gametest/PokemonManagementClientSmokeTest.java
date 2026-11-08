@@ -208,18 +208,13 @@ public final class PokemonManagementClientSmokeTest {
                 return;
             }
             if (phase == 10) {
-                if (!(minecraft.screen instanceof BlackListScreen screen)) {
-                    if (minecraft.player != null
-                            && minecraft.player.containerMenu instanceof net.minecraft.world.inventory.InventoryMenu
-                            && blacklistParentForSmokeTest != null && blacklistEntityForSmokeTest >= 0) {
-                        blacklistParentForSmokeTest.openBlackList(blacklistEntityForSmokeTest,
-                                blacklistUuidForSmokeTest, blacklistOverridesForSmokeTest);
-                        return;
-                    }
-                    if (++ticks > 120) throw new IllegalStateException("Black List selector did not remain open; screen="
+                if (!(minecraft.screen instanceof PokemonInfoScreen parent) || !parent.hasBlackListOverlay()) {
+                    if (++ticks > 120) throw new IllegalStateException("Black List overlay did not remain open inside the status screen; screen="
                             + (minecraft.screen == null ? "null" : minecraft.screen.getClass().getSimpleName()));
                     return;
                 }
+                BlackListScreen screen = parent.blackListOverlayForSmokeTest();
+                if (screen == null) throw new IllegalStateException("Black List overlay reference was missing");
                 if (!(minecraft.player.containerMenu instanceof PokemonInfoMenu))
                     throw new IllegalStateException("Black List overlay closed the Pokémon status menu on the client: menu="
                             + minecraft.player.containerMenu.getClass().getSimpleName() + " screen="
