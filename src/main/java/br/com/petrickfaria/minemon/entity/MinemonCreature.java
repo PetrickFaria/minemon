@@ -907,6 +907,13 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         }
         if(!this.level.isClientSide&&!(Boolean.getBoolean("minemon.clientSmokeTest")&&this.getTags().contains("minemon-locomotion-fixture"))){if(!isDefeated())this.tickNightRest();}
         super.tick();
+        // A commanded flyer remains weightless while resting in daylight, but
+        // must regain gravity while its night routine is descending to land.
+        // Sleeping re-applies the species' normal gravity rule in setSleeping.
+        if (!level.isClientSide && isOrderedToSit() && commandLanding()
+                && isNightResting() && !isSleeping()) {
+            setNoGravity(false);
+        }
         if(!level.isClientSide&&isTame()){
             AttributeInstance followRange=getAttribute(Attributes.FOLLOW_RANGE);
             if(followRange!=null&&Math.abs(followRange.getBaseValue()-perceptionRange())>1.0E-4D)
