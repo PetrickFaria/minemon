@@ -487,6 +487,10 @@ public final class CompanionTests {
   MinemonCreature bird=h.spawn(ModEntities.SPECIES.get("pidgey").get(),new BlockPos(5,6,5));
   ServerPlayer owner=player(h);owner.moveTo(h.absolutePos(new BlockPos(13,1,5)).getX()+.5D,1.0D,h.absolutePos(new BlockPos(13,1,5)).getZ()+.5D,0,0);
   bird.tame(owner);bird.setOwnerUUID(owner.getUUID());bird.setOrderedToSit(true);
+  // GameTests share nearby chunks; remove hostile leftovers so this fixture
+  // verifies natural night rest rather than an unrelated defense response.
+  for(var mob:h.getLevel().getEntitiesOfClass(net.minecraft.world.entity.Mob.class,bird.getBoundingBox().inflate(32.0D)))
+   if(mob!=bird&&mob instanceof net.minecraft.world.entity.monster.Enemy)mob.discard();
   var horizontal=bird.position();
   h.runAfterDelay(30,()->{
    check(h,Math.abs(bird.getY()-NaturalMovementGoals.surfaceBelow(h.getLevel(),bird.getX(),bird.getY(),bird.getZ())-1.0D)<0.2D,
