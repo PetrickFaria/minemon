@@ -146,6 +146,9 @@ public final class BlackListScreen extends Screen {
 
     @Override public void onClose() { minecraft.setScreen(parent); }
 
+    /** Like the other inventory interfaces, this selector must not pause the integrated world. */
+    @Override public boolean isPauseScreen() { return false; }
+
     @Override public void render(PoseStack pose, int mouseX, int mouseY, float partialTick) {
         renderBackground(pose);
         MinemonGui.panel(pose, left, top, panelWidth, panelHeight);
