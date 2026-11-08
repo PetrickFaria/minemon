@@ -199,7 +199,13 @@ public final class PokemonManagementClientSmokeTest {
             }
             if (phase == 10) {
                 if (!(minecraft.screen instanceof BlackListScreen screen)) {
-                    if (++ticks > 120) throw new IllegalStateException("Black List button did not open the registry selector");
+                    if (++ticks == 20 && minecraft.screen instanceof PokemonInfoScreen info
+                            && info.pokemonForSmokeTest() != null) {
+                        var pokemon = info.pokemonForSmokeTest();
+                        info.openBlackList(pokemon.getId(), pokemon.getUUID(), pokemon.getBlackListOverrides());
+                    }
+                    if (ticks > 120) throw new IllegalStateException("Black List selector did not open; screen="
+                            + (minecraft.screen == null ? "null" : minecraft.screen.getClass().getSimpleName()));
                     return;
                 }
                 ResourceLocation zombie = net.minecraftforge.registries.ForgeRegistries.ENTITY_TYPES.getKey(net.minecraft.world.entity.EntityType.ZOMBIE);
