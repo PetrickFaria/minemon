@@ -24,6 +24,7 @@ public final class PokemonInfoScreen extends AbstractContainerScreen<PokemonInfo
     private Button followButton;
     private Button sitButton;
     private Button freeButton;
+    private boolean preservingMenuForBlackList;
 
     public PokemonInfoScreen(PokemonInfoMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
@@ -79,8 +80,18 @@ public final class PokemonInfoScreen extends AbstractContainerScreen<PokemonInfo
     }
 
     public void openBlackList(int entityId, java.util.UUID uuid, java.util.Map<String, Boolean> overrides) {
-        if (Minecraft.getInstance() != null)
+        if (Minecraft.getInstance() != null) {
+            preservingMenuForBlackList = true;
             Minecraft.getInstance().setScreen(new BlackListScreen(this, entityId, uuid, overrides));
+        }
+    }
+
+    @Override public void removed() {
+        if (preservingMenuForBlackList) {
+            preservingMenuForBlackList = false;
+            return;
+        }
+        super.removed();
     }
     public MinemonCreature pokemonForSmokeTest() { return menu.pokemon(); }
     public String headerForSmokeTest() {
