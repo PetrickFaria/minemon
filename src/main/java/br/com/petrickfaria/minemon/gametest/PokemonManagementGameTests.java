@@ -207,7 +207,11 @@ public final class PokemonManagementGameTests {
             double targetY=pokemon.getY();
             rangeTarget.setPos(pokemon.getX()+expected-0.1D,targetY,pokemon.getZ());
             check(h,pokemon.canAttack(rangeTarget)&&pokemon.canFireAt(rangeTarget),
-                    "An authorized target inside the level "+level+" projectile range must be hittable");
+                    "An authorized target inside the level "+level+" projectile range must be hittable"
+                            +" [canAttack="+pokemon.canAttack(rangeTarget)+", canFireAt="+pokemon.canFireAt(rangeTarget)
+                            +", range="+expected+", distance="+pokemon.distanceTo(rangeTarget)
+                            +", level="+pokemon.getPokemonLevel()+", targetPos="+rangeTarget.position()
+                            +", mobTarget="+pokemon.getTarget()+"]");
             rangeTarget.setPos(pokemon.getX()+expected+0.1D,targetY,pokemon.getZ());
             check(h,pokemon.canAttack(rangeTarget)&&!pokemon.canFireAt(rangeTarget),
                     "A perceived target beyond the level "+level+" projectile range must remain authorized but not be hittable");

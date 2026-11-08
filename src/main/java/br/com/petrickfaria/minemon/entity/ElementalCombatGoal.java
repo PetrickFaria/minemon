@@ -11,6 +11,7 @@ import net.minecraft.world.phys.Vec3;
 final class ElementalCombatGoal extends Goal {
     private final MinemonCreature pokemon;
     private int repositionCooldown;
+    private boolean retreating;
 
     ElementalCombatGoal(MinemonCreature pokemon) {
         this.pokemon = pokemon;
@@ -26,7 +27,7 @@ final class ElementalCombatGoal extends Goal {
     @Override public boolean canContinueToUse() { return canUse(); }
     @Override public boolean requiresUpdateEveryTick() { return true; }
 
-    @Override public void start() { repositionCooldown = 0; }
+    @Override public void start() { repositionCooldown = 0; retreating = false; }
 
     @Override public void tick() {
         LivingEntity target = target();
@@ -47,9 +48,12 @@ final class ElementalCombatGoal extends Goal {
         double distance = Math.sqrt(CombatGeometry.horizontalCenterDistanceSquared(pokemon, target));
         double safeDistance = Math.max(1.0D, Math.min(7.0D, pokemon.attackRange() - 1.0D));
         if (distance < safeDistance) {
+            if (!retreating) repositionCooldown = 0;
+            retreating = true;
             reposition(target, true);
             return;
         }
+        retreating = false;
 
         if (pokemon.combatReady() && pokemon.canFireAt(target)) {
             pokemon.getNavigation().stop();

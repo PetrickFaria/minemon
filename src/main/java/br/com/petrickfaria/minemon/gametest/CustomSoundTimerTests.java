@@ -137,6 +137,21 @@ public final class CustomSoundTimerTests {
         if (creature.getHealth() <= initialHealth - 1.0F || creature.customSoundTicksForValidation() != 1)
             helper.fail("a living Pokémon's healing treat must heal without forcing a manual sound");
 
+        creature.die(net.minecraft.world.damagesource.DamageSource.GENERIC);
+        if (!creature.isDefeated()) helper.fail("the recovery fixture must enter the defeated state");
+        player.setItemInHand(InteractionHand.MAIN_HAND,
+                new net.minecraft.world.item.ItemStack(
+                        br.com.petrickfaria.minemon.registry.ModItems.TREATS
+                                .get(br.com.petrickfaria.minemon.item.PokemonTreatType.GRASS).get(), 64));
+        int recoveryTreats = 0;
+        while (creature.isDefeated() && recoveryTreats++ < 64) {
+            creature.mobInteract(player, InteractionHand.MAIN_HAND);
+            if (creature.isDefeated() && creature.customSoundTicksForValidation() != 1)
+                helper.fail("recovery treats must not play sound before the Pokémon is revived");
+        }
+        if (creature.isDefeated() || !withinOneToFiveMinutes(creature.customSoundTicksForValidation()))
+            helper.fail("sound may be triggered only after recovery completes");
+
         player.discard();
         helper.succeed();
     }

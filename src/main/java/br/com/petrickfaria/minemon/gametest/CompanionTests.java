@@ -96,7 +96,7 @@ public final class CompanionTests {
   h.runAfterDelay(5,()->com.mojang.logging.LogUtils.getLogger().info("MINEMON DEFENSE AFTER 5 TICKS "+state(b,c)));
   h.runAfterDelay(100,()->{check(h,c.getHealth()<health,"Companion must defend attacked owner"+state(b,c));p.discard();h.succeed();});});
  }
- @GameTest(template="test_arena",timeoutTicks=180)
+ @GameTest(template="test_arena",timeoutTicks=300)
  public static void ownerDefenseReachesFollowingSittingFreeAndSleepingCompanions(GameTestHelper h) {
   ServerPlayer p=player(h);Cow aggressor=h.spawn(EntityType.COW,new BlockPos(14,1,5));aggressor.setNoAi(true);
   MinemonCreature[] team=new MinemonCreature[4];
@@ -108,17 +108,21 @@ public final class CompanionTests {
    if(i==3)team[i].setSleeping(true);
   }
   var sittingPosition=team[1].position();
-  check(h,p.hurt(DamageSource.mobAttack(aggressor),1),"Trainer must receive the fixture attack");
-  for(MinemonCreature companion:team)
-   check(h,companion.getTarget()==aggressor,"Every behavior mode must acquire the trainer's attacker: "+state(companion,aggressor));
-  check(h,!team[3].isSleeping(),"A sleeping companion must wake for trainer defense");
-  h.runAfterDelay(3,()->{
-   check(h,team[1].isOrderedToSit()&&team[1].isCombatPose(),"A sitting defender must retain Sentar and use its combat pose");
-   check(h,team[1].getX()==sittingPosition.x&&team[1].getZ()==sittingPosition.z,"A sitting defender must not pursue or retreat");
-   h.runAfterDelay(100,()->{
-    for(MinemonCreature companion:team)
-     check(h,companion.getTarget()==aggressor,"Defenders must retain focus through the attack cooldown: "+state(companion,aggressor));
-    p.discard();h.succeed();
+  h.runAfterDelay(80,()->{
+   p.setInvulnerable(false);
+   p.invulnerableTime=0;
+   check(h,p.hurt(DamageSource.mobAttack(aggressor),1),"Trainer must receive the fixture attack");
+   for(MinemonCreature companion:team)
+    check(h,companion.getTarget()==aggressor,"Every behavior mode must acquire the trainer's attacker: "+state(companion,aggressor));
+   check(h,!team[3].isSleeping(),"A sleeping companion must wake for trainer defense");
+   h.runAfterDelay(3,()->{
+    check(h,team[1].isOrderedToSit()&&team[1].isCombatPose(),"A sitting defender must retain Sentar and use its combat pose");
+    check(h,team[1].getX()==sittingPosition.x&&team[1].getZ()==sittingPosition.z,"A sitting defender must not pursue or retreat");
+    h.runAfterDelay(100,()->{
+     for(MinemonCreature companion:team)
+      check(h,companion.getTarget()==aggressor,"Defenders must retain focus through the attack cooldown: "+state(companion,aggressor));
+     p.discard();h.succeed();
+    });
    });
   });
  }
@@ -128,6 +132,40 @@ public final class CompanionTests {
   CompoundTag tag=new CompoundTag();b.saveWithoutId(tag);MinemonCreature restored=ModEntities.BULBASAUR.get().create(h.getLevel());restored.load(tag);
   check(h,restored.isTame()&&p.getUUID().equals(restored.getOwnerUUID())&&restored.isOrderedToSit()&&restored.isSleeping(),"Taming UUID, sit order and sleep state must survive NBT reload");
   h.runAfterDelay(20,()->{var start=b.position();h.runAfterDelay(30,()->{double dx=b.getX()-start.x,dz=b.getZ()-start.z;check(h,dx*dx+dz*dz<0.25,"Sitting creature must stay in place");p.discard();h.succeed();});});
+ }
+ @GameTest(template="test_arena",timeoutTicks=120)
+ public static void sittingAllowsGravityAndUsesTheLatestTeleportPosition(GameTestHelper h) {
+  floor(h);h.setBlock(new BlockPos(5,4,5),net.minecraft.world.level.block.Blocks.STONE);
+  MinemonCreature b=h.spawn(ModEntities.BULBASAUR.get(),new BlockPos(5,5,5));ServerPlayer p=player(h);
+  b.tame(p);b.setOrderedToSit(true);h.setBlock(new BlockPos(5,4,5),net.minecraft.world.level.block.Blocks.AIR);
+  h.runAfterDelay(60,()->{
+   check(h,b.getY()<1.1D&&b.getY()>0.9D&&b.isOnGround(),"A sitting grounded Pokémon must fall onto the lower floor");
+   check(h,b.isOrderedToSit(),"Falling must preserve the Sentar command");
+   BlockPos moved=h.absolutePos(new BlockPos(9,1,9));
+   b.moveTo(moved.getX()+0.5D,moved.getY(),moved.getZ()+0.5D,0.0F,0.0F);
+   h.runAfterDelay(5,()->{
+    check(h,b.isOrderedToSit()&&Math.abs(b.getX()-(moved.getX()+0.5D))<0.01D
+            &&Math.abs(b.getZ()-(moved.getZ()+0.5D))<0.01D,
+        "A sitting Pokémon must adopt a new teleport position instead of returning to its old anchor");
+    p.discard();h.succeed();
+   });
+  });
+ }
+ @GameTest(template="test_arena",timeoutTicks=120)
+ public static void rangedAttackCooldownIsExactlyOneHundredTicks(GameTestHelper h) {
+  floor(h);MinemonCreature b=h.spawn(ModEntities.BULBASAUR.get(),new BlockPos(5,1,5));
+  ServerPlayer p=player(h);Cow target=h.spawn(EntityType.COW,new BlockPos(8,1,5));target.setNoAi(true);
+  b.tame(p);b.setOrderedToSit(false);b.setNoAi(true);b.focusTrainerDefenseTarget(target);
+  check(h,b.combatReady()&&b.canFireAt(target),"Fixture must begin with a valid ready shot");
+  check(h,b.fireElementalProjectile(target),"A valid ranged shot must fire immediately");
+  h.runAfterDelay(99,()->{
+   check(h,!b.combatReady(),"The normal five-second cooldown must still be active at tick 99");
+   b.getNavigation().stop();
+   h.runAfterDelay(1,()->{
+    check(h,b.combatReady(),"The next shot must become available at exactly tick 100");
+    p.discard();h.succeed();
+   });
+  });
  }
  @GameTest(template="test_arena",timeoutTicks=100)
  public static void registeredSpeciesSpawnPersistAndHaveEggs(GameTestHelper h) {

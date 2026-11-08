@@ -270,6 +270,14 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         }
     }
 
+    @Override public void moveTo(double x, double y, double z, float yaw, float pitch) {
+        super.moveTo(x, y, z, yaw, pitch);
+        if (isOrderedToSit() && !loadingPokemonData) {
+            // Teleports, including a Pokéball release, establish the new stay point.
+            sitAnchorX = x; sitAnchorY = y; sitAnchorZ = z;
+        }
+    }
+
     public boolean isSleeping() { return this.entityData.get(SLEEPING); }
     public boolean isAttackAnimationActive() { return this.attackAnimationTicks > 0; }
     public int blinkEventsForValidation() { return blinkEventsForValidation; }
@@ -910,9 +918,16 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
             if (horizontalDistanceToSqr(sitAnchorX, sitAnchorZ) > 0.25D) {
                 sitAnchorX = getX(); sitAnchorZ = getZ();
             }
-            if (horizontalDistanceToSqr(sitAnchorX, sitAnchorZ) > 1.0E-8D)
-                setPos(sitAnchorX, getY(), sitAnchorZ);
-            setDeltaMovement(0.0D, isFlyingSpecies() ? 0.0D : getDeltaMovement().y, 0.0D);
+            if (isFlyingSpecies()) {
+                if (horizontalDistanceToSqr(sitAnchorX, sitAnchorZ) > 1.0E-8D
+                        || Math.abs(getY() - sitAnchorY) > 1.0E-8D)
+                    setPos(sitAnchorX, sitAnchorY, sitAnchorZ);
+                setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
+            } else {
+                if (horizontalDistanceToSqr(sitAnchorX, sitAnchorZ) > 1.0E-8D)
+                    setPos(sitAnchorX, getY(), sitAnchorZ);
+                setDeltaMovement(0.0D, getDeltaMovement().y, 0.0D);
+            }
             setSpeed(0); setXxa(0); setYya(0); setZza(0); setJumping(false);
         }
         if (!level.isClientSide && isTame() && !isDefeated()) tickNaturalHealing();
