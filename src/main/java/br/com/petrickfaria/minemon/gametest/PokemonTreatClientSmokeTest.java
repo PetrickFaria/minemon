@@ -46,7 +46,7 @@ public final class PokemonTreatClientSmokeTest {
             if (++worldWaitTicks > 600) throw new IllegalStateException("Timed out opening the prepared PokéC client world");
             return;
         }
-        if (clientTicks < 20) return;
+        if (clientTicks < 20 && !pokecPreviewSequence) return;
         try {
             if (pokeballPhase) {
                 var server = minecraft.getSingleplayerServer();
