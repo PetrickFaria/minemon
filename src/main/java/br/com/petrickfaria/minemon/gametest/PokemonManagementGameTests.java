@@ -259,6 +259,8 @@ public final class PokemonManagementGameTests {
         ServerPlayer owner = player(h, h.absolutePos(new BlockPos(7, 1, 5)));
         MinemonCreature companion = h.spawn(ModEntities.SPECIES.get("pikachu").get(), new BlockPos(5, 1, 5));
         companion.tame(owner);
+        companion.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).setBaseValue(200.0D);
+        companion.setHealth(200.0F);
         MinemonCreature wild = h.spawn(ModEntities.SPECIES.get("rattata").get(), new BlockPos(10, 1, 5));
         check(h, wild.hurt(DamageSource.mobAttack(companion), 1.0F), "The companion must be able to provoke a wild Pokémon");
         h.runAfterDelay(420, () -> {

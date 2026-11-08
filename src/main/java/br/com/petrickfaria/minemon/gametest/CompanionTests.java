@@ -416,6 +416,8 @@ public final class CompanionTests {
  @GameTest(template="test_arena",batch="minemon_flyer_sit_night",timeoutTicks=520)
  public static void sittingFlyerSleepsAtNightAndFollowCommandWakesIt(GameTestHelper h){
   floor(h);long originalDayTime=h.getLevel().getDayTime();h.getLevel().setDayTime(1000);
+  boolean previousMobSpawning=h.getLevel().getGameRules().getBoolean(net.minecraft.world.level.GameRules.RULE_DOMOBSPAWNING);
+  h.getLevel().getGameRules().getRule(net.minecraft.world.level.GameRules.RULE_DOMOBSPAWNING).set(false,h.getLevel().getServer());
   MinemonCreature bird=h.spawn(ModEntities.SPECIES.get("pidgey").get(),new BlockPos(5,6,5));
   ServerPlayer owner=player(h);owner.moveTo(h.absolutePos(new BlockPos(13,1,5)).getX()+.5D,1.0D,h.absolutePos(new BlockPos(13,1,5)).getZ()+.5D,0,0);
   bird.tame(owner);bird.setOwnerUUID(owner.getUUID());bird.setOrderedToSit(true);
@@ -424,8 +426,6 @@ public final class CompanionTests {
    check(h,Math.abs(bird.getY()-NaturalMovementGoals.surfaceBelow(h.getLevel(),bird.getX(),bird.getY(),bird.getZ())-1.0D)<0.2D,
        "A sitting Pidgey must hover one block above ground during daytime");
    check(h,bird.position().subtract(horizontal).horizontalDistanceSqr()<1.0E-6D,"A sitting flyer must not drift horizontally");
-   boolean previousMobSpawning=h.getLevel().getGameRules().getBoolean(net.minecraft.world.level.GameRules.RULE_DOMOBSPAWNING);
-   h.getLevel().getGameRules().getRule(net.minecraft.world.level.GameRules.RULE_DOMOBSPAWNING).set(false,h.getLevel().getServer());
    h.getLevel().setDayTime(18000);
    h.runAfterDelay(300,()->{
     boolean slept=bird.isSleeping()&&bird.isOnGround();

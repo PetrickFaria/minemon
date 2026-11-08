@@ -62,15 +62,15 @@ final class TwelveAdjustmentChecks {
   var attacker=ModEntities.SPECIES.get("charmander").get().create(level);
   var point=h.absolutePos(new BlockPos(5,2,5));attacker.moveTo(point.getX()+.5,point.getY(),point.getZ()+.5,0,0);
   attacker.tame(owner);attacker.setOwnerUUID(owner.getUUID());attacker.setNoAi(true);
-  var cow=EntityType.COW.create(level);cow.moveTo(attacker.getX()+9,attacker.getY(),attacker.getZ(),0,0);
+  var cow=EntityType.COW.create(level);cow.moveTo(attacker.getX()+4,attacker.getY(),attacker.getZ(),0,0);
   cow.setNoAi(true);cow.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).setBaseValue(200);cow.setHealth(200);level.addFreshEntity(cow);
   var blocker=EntityType.COW.create(level);blocker.moveTo(attacker.getX()+4.5D,attacker.getY(),attacker.getZ(),0,0);
   blocker.setNoAi(true);float blockerHealth=blocker.getHealth();level.addFreshEntity(blocker);
   try{
-   cow.setPos(attacker.getX()+9,attacker.getY(),attacker.getZ());
+   cow.setPos(attacker.getX()+4,attacker.getY(),attacker.getZ());
    for(int i=0;i<3;i++){
     cow.invulnerableTime=0;float before=cow.getHealth();attacker.focusPlayerTarget(cow);
-    if(!attacker.fireElementalProjectile(cow))h.fail("A ranged strike at a valid seven-block-safe distance was cancelled");
+    if(!attacker.fireElementalProjectile(cow))h.fail("A ranged strike inside the level-one projectile limit was cancelled");
     if(attacker.fireElementalProjectile(cow)||attacker.doHurtTarget(cow))h.fail("Physical contact or a second shot bypassed ranged-only cooldown");
     var shots=level.getEntitiesOfClass(ElementalProjectile.class,attacker.getBoundingBox().inflate(12),shot->shot.getOwner()==attacker);
     if(shots.size()!=1)h.fail("Projectile absent or duplicated");var shot=shots.get(0);
