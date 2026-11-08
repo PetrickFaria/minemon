@@ -217,8 +217,8 @@ public final class PokemonTreatClientSmokeTest {
                 throw new IllegalStateException("Missing PokéCoin translation: "+coinName);
             try (var texture=PokemonTreatClientSmokeTest.class.getResourceAsStream("/assets/minemon/textures/item/poke_coin.png")) {
                 var image=texture==null?null:javax.imageio.ImageIO.read(texture);
-                if (image==null || image.getWidth()!=32 || image.getHeight()!=32 || !image.getColorModel().hasAlpha())
-                    throw new IllegalStateException("PokéCoin texture must be a 32x32 transparent PNG");
+                if (image==null || image.getWidth()!=64 || image.getHeight()!=64 || !image.getColorModel().hasAlpha())
+                    throw new IllegalStateException("PokéCoin texture must preserve the supplied 64x64 transparent PNG");
             }
             var ball=ModItems.POKEBALL.get();
             var ballId=net.minecraftforge.registries.ForgeRegistries.ITEMS.getKey(ball);
