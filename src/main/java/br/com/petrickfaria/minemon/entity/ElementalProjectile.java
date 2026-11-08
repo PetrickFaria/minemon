@@ -15,10 +15,14 @@ public final class ElementalProjectile extends ThrowableProjectile {
     private static final EntityDataAccessor<Integer> COLOR=SynchedEntityData.defineId(ElementalProjectile.class,EntityDataSerializers.INT);
     private float damage;
     private java.util.UUID targetId;
+    private Vec3 launchPosition;
+    private double maxTravelDistance;
     public ElementalProjectile(EntityType<? extends ElementalProjectile> type,Level level){super(type,level);}
     public ElementalProjectile(MinemonCreature attacker,LivingEntity target){
         this(ModEntities.ELEMENTAL_PROJECTILE.get(),attacker.level);
         setOwner(attacker);setPos(attacker.getX(),attacker.getEyeY()-.1,attacker.getZ());
+        launchPosition=position();
+        maxTravelDistance=attacker.attackRange();
         damage=(float)attacker.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE);
         targetId=target.getUUID();
         var types=br.com.petrickfaria.minemon.pokec.PokemonTreatTypes.forSpecies(attacker.getSpeciesSlug());
@@ -55,9 +59,21 @@ public final class ElementalProjectile extends ThrowableProjectile {
         // ThrowableProjectile applies 0.8 water drag after each movement. Restore
         // the normal 0.99 air retention so a straight shot keeps its intended range.
         if(isInWater())setDeltaMovement(getDeltaMovement().scale(0.99D/0.8D));
+        if(!level.isClientSide && launchPosition!=null && maxTravelDistance>0.0D
+                && position().distanceToSqr(launchPosition)>maxTravelDistance*maxTravelDistance)discard();
         if(!level.isClientSide && tickCount>40)discard();
     }
-    @Override protected void addAdditionalSaveData(CompoundTag tag){super.addAdditionalSaveData(tag);tag.putInt("ElementColor",color());tag.putFloat("Damage",damage);if(targetId!=null)tag.putUUID("Target",targetId);}
-    @Override protected void readAdditionalSaveData(CompoundTag tag){super.readAdditionalSaveData(tag);entityData.set(COLOR,tag.getInt("ElementColor"));damage=tag.getFloat("Damage");targetId=tag.hasUUID("Target")?tag.getUUID("Target"):null;}
+    @Override protected void addAdditionalSaveData(CompoundTag tag){
+        super.addAdditionalSaveData(tag);tag.putInt("ElementColor",color());tag.putFloat("Damage",damage);
+        if(targetId!=null)tag.putUUID("Target",targetId);
+        if(launchPosition!=null){tag.putDouble("LaunchX",launchPosition.x);tag.putDouble("LaunchY",launchPosition.y);tag.putDouble("LaunchZ",launchPosition.z);}
+        tag.putDouble("MaxTravelDistance",maxTravelDistance);
+    }
+    @Override protected void readAdditionalSaveData(CompoundTag tag){
+        super.readAdditionalSaveData(tag);entityData.set(COLOR,tag.getInt("ElementColor"));damage=tag.getFloat("Damage");
+        targetId=tag.hasUUID("Target")?tag.getUUID("Target"):null;
+        launchPosition=tag.contains("LaunchX")?new Vec3(tag.getDouble("LaunchX"),tag.getDouble("LaunchY"),tag.getDouble("LaunchZ")):position();
+        maxTravelDistance=tag.contains("MaxTravelDistance")?tag.getDouble("MaxTravelDistance"):40.0D;
+    }
     @Override public net.minecraft.network.protocol.Packet<?> getAddEntityPacket(){return net.minecraftforge.network.NetworkHooks.getEntitySpawningPacket(this);}
 }
