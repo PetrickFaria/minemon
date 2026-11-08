@@ -36,7 +36,7 @@ public final class BlackListScreen extends AbstractContainerScreen<PokemonInfoMe
     private int scrollbarGrabOffset;
 
     public BlackListScreen(PokemonInfoScreen parent, int entityId, UUID pokemonUuid, Map<String, Boolean> overrides) {
-        super(parent.menu, Minecraft.getInstance().player.getInventory(), Component.literal("Black List"));
+        super(parent.menuForBlackList(), Minecraft.getInstance().player.getInventory(), Component.literal("Black List"));
         titleLabelX = -1000;
         inventoryLabelY = 1000;
         this.parent = parent;
