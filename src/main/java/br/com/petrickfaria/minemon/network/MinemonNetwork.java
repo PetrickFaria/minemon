@@ -126,10 +126,12 @@ public final class MinemonNetwork {
             context.enqueueWork(() -> net.minecraftforge.fml.DistExecutor.unsafeRunWhenOn(
                     net.minecraftforge.api.distmarker.Dist.CLIENT, () -> () -> {
                         var minecraft = net.minecraft.client.Minecraft.getInstance();
-                        if (m.open && minecraft.screen instanceof br.com.petrickfaria.minemon.menu.PokemonInfoScreen info)
-                            info.openBlackList(m.entityId, m.pokemon, m.overrides);
-                        else if (minecraft.screen instanceof br.com.petrickfaria.minemon.menu.BlackListScreen list)
+                        if (minecraft.screen instanceof br.com.petrickfaria.minemon.menu.PokemonInfoScreen info) {
+                            if (m.open) info.openBlackList(m.entityId, m.pokemon, m.overrides);
+                            else info.replaceBlackListOverrides(m.overrides);
+                        } else if (minecraft.screen instanceof br.com.petrickfaria.minemon.menu.BlackListScreen list) {
                             list.replaceOverrides(m.overrides);
+                        }
                     }));
             context.setPacketHandled(true);
         }
