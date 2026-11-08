@@ -37,10 +37,6 @@ public final class PokemonInfoScreen extends AbstractContainerScreen<PokemonInfo
     @Override protected void init() {
         super.init();
         preservingMenuForBlackList = false;
-        if (Boolean.getBoolean("minemon.clientSmokeTest"))
-            com.mojang.logging.LogUtils.getLogger().info("[BLACKLIST TRANSITION] parent init, menu={}, screen={}",
-                    minecraft.player == null ? "no-player" : minecraft.player.containerMenu.getClass().getSimpleName(),
-                    minecraft.screen == null ? "null" : minecraft.screen.getClass().getSimpleName());
         evolutionButtons.clear();
         int y = topPos + 174;
         followButton = addRenderableWidget(new Button(leftPos + 14, y, 70, 20, Component.literal(
@@ -86,33 +82,17 @@ public final class PokemonInfoScreen extends AbstractContainerScreen<PokemonInfo
 
     public void openBlackList(int entityId, java.util.UUID uuid, java.util.Map<String, Boolean> overrides) {
         if (Minecraft.getInstance() != null) {
-            if (Boolean.getBoolean("minemon.clientSmokeTest"))
-                com.mojang.logging.LogUtils.getLogger().info("[BLACKLIST TRANSITION] open before, preserve={}, menu={}, screen={}",
-                        preservingMenuForBlackList, minecraft.player == null ? "no-player" : minecraft.player.containerMenu.getClass().getSimpleName(),
-                        minecraft.screen == null ? "null" : minecraft.screen.getClass().getSimpleName());
             preservingMenuForBlackList = true;
             Minecraft.getInstance().setScreen(new BlackListScreen(this, entityId, uuid, overrides));
-            if (Boolean.getBoolean("minemon.clientSmokeTest"))
-                com.mojang.logging.LogUtils.getLogger().info("[BLACKLIST TRANSITION] open after, preserve={}, menu={}, screen={}",
-                        preservingMenuForBlackList, minecraft.player == null ? "no-player" : minecraft.player.containerMenu.getClass().getSimpleName(),
-                        minecraft.screen == null ? "null" : minecraft.screen.getClass().getSimpleName());
         }
     }
 
     @Override public void removed() {
-        if (Boolean.getBoolean("minemon.clientSmokeTest"))
-            com.mojang.logging.LogUtils.getLogger().info("[BLACKLIST TRANSITION] parent removed, preserve={}, menu={}, screen={}",
-                    preservingMenuForBlackList, minecraft.player == null ? "no-player" : minecraft.player.containerMenu.getClass().getSimpleName(),
-                    minecraft.screen == null ? "null" : minecraft.screen.getClass().getSimpleName());
         if (preservingMenuForBlackList) return;
         super.removed();
     }
 
     @Override public void onClose() {
-        if (Boolean.getBoolean("minemon.clientSmokeTest"))
-            com.mojang.logging.LogUtils.getLogger().info("[BLACKLIST TRANSITION] parent onClose, preserve={}, menu={}, screen={}",
-                    preservingMenuForBlackList, minecraft.player == null ? "no-player" : minecraft.player.containerMenu.getClass().getSimpleName(),
-                    minecraft.screen == null ? "null" : minecraft.screen.getClass().getSimpleName());
         if (preservingMenuForBlackList) return;
         super.onClose();
     }
