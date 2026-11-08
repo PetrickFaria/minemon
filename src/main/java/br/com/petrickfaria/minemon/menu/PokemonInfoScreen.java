@@ -97,6 +97,7 @@ public final class PokemonInfoScreen extends AbstractContainerScreen<PokemonInfo
     }
 
     public boolean hasBlackListOverlay() { return blackListOverlay != null; }
+    public BlackListScreen blackListOverlayForSmokeTest() { return blackListOverlay; }
     public MinemonCreature pokemonForSmokeTest() { return menu.pokemon(); }
     public String headerForSmokeTest() {
         MinemonCreature pokemon = menu.pokemon();
