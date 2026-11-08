@@ -5,8 +5,7 @@ import br.com.petrickfaria.minemon.network.MinemonNetwork;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
@@ -15,7 +14,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import java.util.*;
 
 /** Scrollable registry-backed target selector for one owned companion. */
-public final class BlackListScreen extends AbstractContainerScreen<PokemonInfoMenu> {
+public final class BlackListScreen extends Screen {
     private record Row(EntityType<?> type, ResourceLocation id, String name) { }
     private final PokemonInfoScreen parent;
     private final int entityId;
@@ -32,13 +31,10 @@ public final class BlackListScreen extends AbstractContainerScreen<PokemonInfoMe
     private int panelHeight;
     private int panelWidth;
     private boolean draggingScrollbar;
-    private boolean returningToParent;
     private int scrollbarGrabOffset;
 
     public BlackListScreen(PokemonInfoScreen parent, int entityId, UUID pokemonUuid, Map<String, Boolean> overrides) {
-        super(parent.menuForBlackList(), Minecraft.getInstance().player.getInventory(), Component.literal("Black List"));
-        titleLabelX = -1000;
-        inventoryLabelY = 1000;
+        super(Component.literal("Black List"));
         this.parent = parent;
         this.entityId = entityId;
         this.pokemonUuid = pokemonUuid;
@@ -75,8 +71,11 @@ public final class BlackListScreen extends AbstractContainerScreen<PokemonInfoMe
         return rows.stream().filter(row -> row.id().equals(id)).findFirst().map(this::selected).orElse(false);
     }
 
+    public void initializeOverlay(Minecraft minecraft, int width, int height) {
+        init(minecraft, width, height);
+    }
+
     @Override protected void init() {
-        super.init();
         panelWidth = Math.min(430, width - 12);
         left = (width - panelWidth) / 2;
         panelHeight = Math.min(390, height - 12);
@@ -150,23 +149,13 @@ public final class BlackListScreen extends AbstractContainerScreen<PokemonInfoMe
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
-    @Override public void onClose() {
-        returningToParent = true;
-        minecraft.setScreen(parent);
-    }
-
-    @Override public void removed() {
-        if (returningToParent) return;
-        super.removed();
-    }
-
-    @Override protected void renderBg(PoseStack pose, float partialTick, int mouseX, int mouseY) { }
+    @Override public void onClose() { parent.closeBlackListOverlay(this); }
 
     /** Like the other inventory interfaces, this selector must not pause the integrated world. */
     @Override public boolean isPauseScreen() { return false; }
 
     @Override public void render(PoseStack pose, int mouseX, int mouseY, float partialTick) {
-        super.render(pose, mouseX, mouseY, partialTick);
+        renderBackground(pose);
         MinemonGui.panel(pose, left, top, panelWidth, panelHeight);
         font.draw(pose, "Black List", left + 14, top + 14, 0xFF303030);
         String[] labels={"Pacíficos","Neutros","Agressivos"};
