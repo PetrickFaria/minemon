@@ -59,8 +59,13 @@ public final class ElementalProjectile extends ThrowableProjectile {
         // ThrowableProjectile applies 0.8 water drag after each movement. Restore
         // the normal 0.99 air retention so a straight shot keeps its intended range.
         if(isInWater())setDeltaMovement(getDeltaMovement().scale(0.99D/0.8D));
-        if(!level.isClientSide && launchPosition!=null && maxTravelDistance>0.0D
-                && position().distanceToSqr(launchPosition)>maxTravelDistance*maxTravelDistance)discard();
+        if(!level.isClientSide && launchPosition!=null && maxTravelDistance>0.0D){
+            Vec3 traveled=position().subtract(launchPosition);
+            if(traveled.lengthSqr()>maxTravelDistance*maxTravelDistance){
+                setPos(launchPosition.add(traveled.normalize().scale(maxTravelDistance)));
+                discard();
+            }
+        }
         if(!level.isClientSide && tickCount>40)discard();
     }
     @Override protected void addAdditionalSaveData(CompoundTag tag){

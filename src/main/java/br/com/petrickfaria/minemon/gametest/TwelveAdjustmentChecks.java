@@ -84,6 +84,12 @@ final class TwelveAdjustmentChecks {
     level.getServer().getWorldData().overworldData().setGameTime(level.getGameTime()+1);
    }
    if(!attacker.projectileReady()||attacker.rangedCharges().charges()!=3)h.fail("Ranged-only attacks must not be gated by or consume finite ammunition charges");
+   cow.setPos(attacker.getX()+20,attacker.getEyeY()-.1D,attacker.getZ());
+   ElementalProjectile rangeLimitedShot=new ElementalProjectile(attacker,cow);level.addFreshEntity(rangeLimitedShot);
+   var launchPoint=rangeLimitedShot.position();
+   for(int tick=0;tick<20&&!rangeLimitedShot.isRemoved();tick++)rangeLimitedShot.tick();
+   if(!rangeLimitedShot.isRemoved()||rangeLimitedShot.position().distanceToSqr(launchPoint)>attacker.attackRange()*attacker.attackRange()+1.0E-5D)
+    h.fail("A missed projectile must stop exactly at the attacker's maximum range");
    cow.invulnerableTime=0;cow.setPos(attacker.getX()+.7,attacker.getY(),attacker.getZ());
    if(attacker.doHurtTarget(cow))h.fail("A Pokémon must never deal melee damage at close range");
    cow.setPos(attacker.getX(),attacker.getY()+8,attacker.getZ());if(!attacker.canAttack(cow))h.fail("Target above eight blocks rejected");
