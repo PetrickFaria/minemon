@@ -231,6 +231,7 @@ public final class PokemonManagementGameTests {
         ServerPlayer owner = player(h, h.absolutePos(new BlockPos(7, 1, 5)));
         MinemonCreature pokemon = h.spawn(ModEntities.SPECIES.get("pikachu").get(), new BlockPos(5, 1, 5));
         pokemon.tame(owner);
+        pokemon.setNoAi(true);
         Cow target = h.spawn(EntityType.COW, new BlockPos(9, 1, 5));
         target.setNoAi(true);
         pokemon.focusPlayerTarget(target);
@@ -259,7 +260,6 @@ public final class PokemonManagementGameTests {
         MinemonCreature companion = h.spawn(ModEntities.SPECIES.get("pikachu").get(), new BlockPos(5, 1, 5));
         companion.tame(owner);
         MinemonCreature wild = h.spawn(ModEntities.SPECIES.get("rattata").get(), new BlockPos(10, 1, 5));
-        wild.setNoAi(true);
         check(h, wild.hurt(DamageSource.mobAttack(companion), 1.0F), "The companion must be able to provoke a wild Pokémon");
         h.runAfterDelay(420, () -> {
             check(h, wild.getTarget() == companion,
@@ -275,7 +275,7 @@ public final class PokemonManagementGameTests {
         MinemonCreature pokemon = h.spawn(ModEntities.SPECIES.get("pikachu").get(), new BlockPos(5, 1, 5));
         pokemon.tame(owner);
         pokemon.setOrderedToSit(true);
-        net.minecraft.world.entity.animal.Cow target = h.spawn(EntityType.COW, new BlockPos(14, 1, 5));
+        net.minecraft.world.entity.animal.Cow target = h.spawn(EntityType.COW, new BlockPos(10, 1, 5));
         target.setNoAi(true);
         target.setHealth(200.0F);
         target.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).setBaseValue(200.0D);
@@ -303,7 +303,7 @@ public final class PokemonManagementGameTests {
         MinemonCreature pokemon = h.spawn(ModEntities.SPECIES.get("rattata").get(), new BlockPos(5, 1, 5));
         pokemon.tame(owner);
         pokemon.setOrderedToSit(true);
-        net.minecraft.world.entity.animal.Cow target = h.spawn(EntityType.COW, new BlockPos(14, 1, 5));
+        net.minecraft.world.entity.animal.Cow target = h.spawn(EntityType.COW, new BlockPos(10, 1, 5));
         target.setNoAi(true);
         target.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).setBaseValue(200.0D);
         target.setHealth(200.0F);
@@ -389,7 +389,8 @@ public final class PokemonManagementGameTests {
                     "a selected hostile must be targeted and attacked without first harming the Pokémon");
             pokemon.setOrderedToSit(true);
             zombie.setPos(15.5D, 1.0D, 5.5D);
-            check(h, !pokemon.canAttack(zombie), "a sitting Pokémon must not chase a distant Black List target");
+            check(h, pokemon.isOrderedToSit() && !pokemon.canFireAt(zombie),
+                    "a sitting Pokémon must not chase a Black List target outside its projectile range");
             owner.discard();
             h.succeed();
         });

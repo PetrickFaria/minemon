@@ -1197,6 +1197,12 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
             this.wildUnreachableTicks = 0;
             return;
         }
+        if (this.getTarget() == null && this.getLastHurtByMob() instanceof MinemonCreature companion
+                && companion.isTame() && companion.isAlive() && !companion.isDefeated()) {
+            this.setTarget(companion);
+            this.wildAggressionTicks = WILD_AGGRESSION_DURATION_TICKS;
+            this.wildUnreachableTicks = 0;
+        }
         if (this.wildAggressionTicks <= 0) {
             // Target selection runs inside super.tick() before this timer is reconciled.
             // Never leave a wild target active after the aggression window has ended.

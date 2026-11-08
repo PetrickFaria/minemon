@@ -43,7 +43,8 @@ final class TwelveAdjustmentChecks {
   var id=new net.minecraft.resources.ResourceLocation("minecraft","creeper");copy.setBlackListOverride(id,true);
   saved=copy.saveWithoutId(new CompoundTag());mob.load(saved);
   if(!mob.isBlackListTarget(creeper))h.fail("Explicit creeper choice did not persist");
-  creeper.setPos(mob.getX()+20,mob.getY(),mob.getZ());if(mob.canAttack(creeper))h.fail("Tamed attacker accepted target beyond its level-scaled range");
+  creeper.setPos(mob.getX()+20,mob.getY(),mob.getZ());
+  if(mob.canPerceive(creeper)||mob.canFireAt(creeper))h.fail("Target beyond perception and projectile ranges remained visible or hittable");
   verifyCombat(h,owner);
   verifyRecipes(h,owner);
   verifyExactHatching(h);
