@@ -434,6 +434,9 @@ public final class CompanionTests {
     followOwner.setInvulnerable(true);followOwner.setNoGravity(true);
     BlockPos followPos=h.absolutePos(new BlockPos(13,1,5));
     followOwner.moveTo(followPos.getX()+0.5D,followPos.getY(),followPos.getZ()+0.5D,0,0);
+    // GameTests share nearby chunks; remove leftover vanilla monsters so this
+    // fixture measures the Follow command without unrelated prior combat.
+    for(var monster:h.getLevel().getEntitiesOfClass(net.minecraft.world.entity.monster.Monster.class,followOwner.getBoundingBox().inflate(32.0D)))monster.discard();
     bird.tame(followOwner);bird.setOwnerUUID(followOwner.getUUID());bird.setTarget(null);
     double horizontalBefore=bird.position().subtract(followOwner.position()).horizontalDistance();
     bird.setOrderedToSit(false);
