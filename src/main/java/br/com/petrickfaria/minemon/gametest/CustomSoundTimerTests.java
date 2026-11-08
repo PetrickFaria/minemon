@@ -99,7 +99,7 @@ public final class CustomSoundTimerTests {
     }
 
     @GameTest(template = "test_arena", timeoutTicks = 30)
-    public static void onlyMainHandRightClickTriggersCustomSound(GameTestHelper helper) {
+    public static void onlySuccessfulRecoveryOrBreedingCanTriggerManualSound(GameTestHelper helper) {
         helper.getLevel().setDayTime(1000);
         MinemonCreature creature = helper.spawn(ModEntities.BULBASAUR.get(), new BlockPos(5, 1, 5));
         float initialHealth = creature.getHealth();
@@ -123,10 +123,19 @@ public final class CustomSoundTimerTests {
         var mainHand = new PlayerInteractEvent.EntityInteract(player, InteractionHand.MAIN_HAND, creature);
         MinecraftForge.EVENT_BUS.post(mainHand);
         int resetTicks = creature.customSoundTicksForValidation();
-        if (mainHand.isCanceled() || resetTicks < 1200 || resetTicks > 6000)
-            helper.fail("main-hand right-click must preserve interaction and reset an independent 1200..6000 tick interval");
+        if (mainHand.isCanceled() || resetTicks != 1)
+            helper.fail("a generic main-hand interaction must not play a sound or reset the natural timer");
         if (creature.getHealth() != initialHealth)
-            helper.fail("right-clicking to play a sound must not damage the Pokémon");
+            helper.fail("right-clicking must not damage the Pokémon");
+
+        creature.tame(player);
+        creature.setHealth(initialHealth - 1.0F);
+        player.setItemInHand(InteractionHand.MAIN_HAND,
+                br.com.petrickfaria.minemon.registry.ModItems.TREATS
+                        .get(br.com.petrickfaria.minemon.item.PokemonTreatType.GRASS).get().getDefaultInstance());
+        creature.mobInteract(player, InteractionHand.MAIN_HAND);
+        if (creature.getHealth() <= initialHealth - 1.0F || creature.customSoundTicksForValidation() != 1)
+            helper.fail("a living Pokémon's healing treat must heal without forcing a manual sound");
 
         player.discard();
         helper.succeed();

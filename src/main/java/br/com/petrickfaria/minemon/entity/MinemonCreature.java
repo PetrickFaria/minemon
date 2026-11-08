@@ -75,6 +75,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     private long nextCombatTick;
     private static final EntityDataAccessor<Boolean> SLEEPING = SynchedEntityData.defineId(MinemonCreature.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> ORDERED_SIT = SynchedEntityData.defineId(MinemonCreature.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> SIT_COMBAT_POSE = SynchedEntityData.defineId(MinemonCreature.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> FREE_MODE = SynchedEntityData.defineId(MinemonCreature.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> NATURAL_FLIGHT = SynchedEntityData.defineId(MinemonCreature.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Integer> NATURAL_PHASE = SynchedEntityData.defineId(MinemonCreature.class, EntityDataSerializers.INT);
@@ -300,6 +301,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         this.entityData.define(NATURAL_SURFACE, SpeciesBehaviorProfiles.profile(this.getSpeciesSlug())==SpeciesBehaviorProfiles.Profile.AQUATIC_SURFACE);
         this.entityData.define(SLEEPING, false);
         this.entityData.define(ORDERED_SIT, false);
+        this.entityData.define(SIT_COMBAT_POSE, false);
         this.entityData.define(FREE_MODE, false);
         this.entityData.define(SPONTANEOUS_RUN, false);
         this.entityData.define(FOLLOWING_RUN, false);
@@ -381,9 +383,9 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         }
         this.aquaticSleepY=tag.contains("AquaticSleepAnchorY")?tag.getDouble("AquaticSleepAnchorY"):Double.NaN;
         if (isOrderedToSit()) {
-            sitAnchorX = tag.contains("MinemonSitAnchorX") ? tag.getDouble("MinemonSitAnchorX") : getX();
-            sitAnchorY = tag.contains("MinemonSitAnchorY") ? tag.getDouble("MinemonSitAnchorY") : getY();
-            sitAnchorZ = tag.contains("MinemonSitAnchorZ") ? tag.getDouble("MinemonSitAnchorZ") : getZ();
+            // A stored Pokémon may be released somewhere else; the old anchor
+            // belongs to the previous world position and must not pull it back.
+            sitAnchorX = getX(); sitAnchorY = getY(); sitAnchorZ = getZ();
         }
         this.refreshPokemonAttributes(0);
         if(tag.contains("Health"))this.setHealth(Math.min(this.getMaxHealth(),tag.getFloat("Health")));
@@ -819,19 +821,20 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
             if (this.getHealth() < maximum) {
                 float amount = Math.min((float)MinemonConfig.TREAT_HEAL_AMOUNT.get(), maximum - this.getHealth());
                 if (amount <= 0.0F) return InteractionResult.sidedSuccess(false);
+                boolean recoveringFromDefeat = isDefeated();
                 this.setHealth(this.getHealth() + amount);
                 if(isDefeated() && this.getHealth()>=this.getMaxHealth()){
                     this.entityData.set(DEFEATED,false);this.defeatTargetsCleared=false;this.setNoAi(aiBeforeDefeat);this.setSleeping(false);
                 }
                 consumeTreat(player, held);
-                this.level.broadcastEntityEvent(this, (byte)18);
+                if (recoveringFromDefeat && !isDefeated()) resetCustomSoundTimerAndPlay();
                 return InteractionResult.sidedSuccess(false);
             }
             if (!this.isInLove() && !this.isBaby() && this.getAge() == 0 && !this.isBreedingBusy()
                     && isBreedingPermitted(this.getSpeciesSlug()) && hasSafeBabyPosition((ServerLevel)this.level, this)) {
                 this.setInLove(player);
                 consumeTreat(player, held);
-                this.level.broadcastEntityEvent(this, (byte)18);
+                resetCustomSoundTimerAndPlay();
             }
             return InteractionResult.sidedSuccess(false);
         }
@@ -902,10 +905,14 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
                 followRange.setBaseValue(perceptionRange());
         }
         if (isOrderedToSit() && !isNightResting() && !isSleeping()
-                && Double.isFinite(sitAnchorX) && Double.isFinite(sitAnchorY) && Double.isFinite(sitAnchorZ)) {
+                && Double.isFinite(sitAnchorX) && Double.isFinite(sitAnchorZ)) {
             getNavigation().stop();
-            if (distanceToSqr(sitAnchorX, sitAnchorY, sitAnchorZ) > 1.0E-8D) setPos(sitAnchorX, sitAnchorY, sitAnchorZ);
-            setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
+            if (horizontalDistanceToSqr(sitAnchorX, sitAnchorZ) > 0.25D) {
+                sitAnchorX = getX(); sitAnchorZ = getZ();
+            }
+            if (horizontalDistanceToSqr(sitAnchorX, sitAnchorZ) > 1.0E-8D)
+                setPos(sitAnchorX, getY(), sitAnchorZ);
+            setDeltaMovement(0.0D, isFlyingSpecies() ? 0.0D : getDeltaMovement().y, 0.0D);
             setSpeed(0); setXxa(0); setYya(0); setZza(0); setJumping(false);
         }
         if (!level.isClientSide && isTame() && !isDefeated()) tickNaturalHealing();
@@ -923,6 +930,10 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         }
         if(!level.isClientSide)ShoreTraversal.tick(this);
         if(this.getTarget()!=null && !canAttack(this.getTarget())){this.setTarget(null);this.getNavigation().stop();}
+        if (!level.isClientSide) {
+            LivingEntity target = getTarget();
+            entityData.set(SIT_COMBAT_POSE, isOrderedToSit() && target != null && canAttack(target) && !isDefeated());
+        }
         if (!level.isClientSide && isTame() && playerFocusTarget == null && getTarget() != null
                 && canAttack(getTarget())) {
             playerFocusTarget = getTarget().getUUID();
@@ -1043,6 +1054,44 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         setTarget(target);
         if (isOrderedToSit()) getNavigation().stop();
         else getNavigation().moveTo(target, 1.0D);
+    }
+
+    /** Accepts a target delivered by the trainer's incoming damage event. */
+    public void focusTrainerDefenseTarget(LivingEntity target) {
+        if (level.isClientSide || !isTame() || isDefeated() || getOwnerUUID() == null
+                || target == null || !target.isAlive() || target.level != level || !canPerceive(target)
+                || target instanceof MinemonCreature pokemon && pokemon.isTame()) return;
+        UUID previousFocus = playerFocusTarget;
+        playerFocusTarget = target.getUUID();
+        boolean validTarget = canAttack(target);
+        playerFocusTarget = previousFocus;
+        if (!validTarget) return;
+        beginPlayerFocus(target);
+    }
+
+    private void beginPlayerFocus(LivingEntity target) {
+        if (playerFocusTarget == null) {
+            resumeSleepingAfterFocus = isSleeping();
+            resumeNightRestAfterFocus = isNightResting();
+            resumeSitAfterFocus = isOrderedToSit();
+        }
+        playerFocusTarget = target.getUUID();
+        focusOutsidePerceptionTicks = 0;
+        if (isSleeping()) setSleeping(false);
+        entityData.set(NIGHT_REST, false);
+        setTarget(target);
+        if (isOrderedToSit()) getNavigation().stop();
+        else getNavigation().moveTo(target, 1.0D);
+    }
+
+    private double horizontalDistanceToSqr(double x, double z) {
+        double dx = getX() - x, dz = getZ() - z;
+        return dx * dx + dz * dz;
+    }
+
+    /** Sitting changes the idle pose while retaining the stay command. */
+    public boolean isCombatPose() {
+        return isOrderedToSit() && this.entityData.get(SIT_COMBAT_POSE);
     }
 
     private void clearPlayerFocus() {
@@ -1361,7 +1410,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
             // Keep a real air pose while descending. A ground gait during the
             // landing path looks like Spearow/Fearow are walking in mid-air.
             clip = firstClip(slug, "air_idle", "air_fly");
-        } else if (this.isOrderedToSit()) {
+        } else if (this.isOrderedToSit() && !this.isCombatPose()) {
             clip = SpeciesAssetIndex.clip(slug, slug.equals("vaporeon") && this.isInWaterOrBubble() ? "awake_rest_water" : "awake_rest", "night_sleep");
         } else if (slug.equals("gengar") && this.isOnGround()) {
             clip=this.isMoving(event)?firstClip(slug,"ground_walk","ground_idle")
@@ -1491,6 +1540,15 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         boolean wet=this.isInWater();
         boolean flying=this.isFlyingSpecies();
         double altitude=flying?this.getY()-this.naturalSurface():0.0D;
+        if (flying && this.getTarget() != null && canAttack(this.getTarget())) {
+            double allowedAltitude = Math.min(1.0D, Math.max(0.0D, this.naturalCycle.minimumAltitude()));
+            double excess = altitude - allowedAltitude;
+            if (excess > 0.01D) {
+                double step = Math.min(0.08D, excess);
+                this.move(net.minecraft.world.entity.MoverType.SELF, new net.minecraft.world.phys.Vec3(0.0D, -step, 0.0D));
+                altitude = this.getY() - this.naturalSurface();
+            }
+        }
         boolean band=flying&&altitude>=this.naturalCycle.minimumAltitude()&&altitude<=this.naturalCycle.maximumAltitude();
         boolean submerged=wet&&this.level.getFluidState(new net.minecraft.core.BlockPos(this.getX(),this.getY()+this.getBbHeight()+0.1D,this.getZ())).is(net.minecraft.tags.FluidTags.WATER);
         double waterTop=wet&&this instanceof MinemonAquaticCreature water?water.waterSurface():this.getY();

@@ -32,8 +32,20 @@ public final class PokecEvents {
     }
 
     @SubscribeEvent public static void playerPokemonAttack(LivingAttackEvent event) {
-        if (event.getEntity().level.isClientSide
-                || !(event.getSource().getEntity() instanceof net.minecraft.server.level.ServerPlayer player)
+        if (event.getEntity().level.isClientSide) return;
+        // A trainer under attack calls every nearby active companion into defense,
+        // including companions whose normal mode is sit, free, or sleep.
+        if (event.getEntity() instanceof net.minecraft.server.level.ServerPlayer defending
+                && event.getSource().getEntity() instanceof net.minecraft.world.entity.LivingEntity attacker
+                && attacker != defending) {
+            var defenseArea = defending.getBoundingBox().inflate(16.0D);
+            for (MinemonCreature companion : defending.level.getEntitiesOfClass(MinemonCreature.class, defenseArea,
+                    pokemon -> pokemon.isTame() && defending.getUUID().equals(pokemon.getOwnerUUID())
+                            && !pokemon.isDefeated() && pokemon.isAlive())) {
+                companion.focusTrainerDefenseTarget(attacker);
+            }
+        }
+        if (!(event.getSource().getEntity() instanceof net.minecraft.server.level.ServerPlayer player)
                 || event.getSource().getDirectEntity() != player) return;
         if (event.getEntity() instanceof MinemonCreature target && target.isRocketSpecial()) return;
         if (event.getEntity() instanceof MinemonCreature wild && WildEncounterManager.isDowned(wild)) {
@@ -49,7 +61,7 @@ public final class PokecEvents {
         for (MinemonCreature companion : event.getEntity().level.getEntitiesOfClass(MinemonCreature.class, area,
                 pokemon -> pokemon.isTame() && player.getUUID().equals(pokemon.getOwnerUUID())
                         && !pokemon.isDefeated() && pokemon.isAlive())) {
-            companion.focusPlayerTarget(event.getEntity());
+            companion.focusTrainerDefenseTarget(event.getEntity());
         }
         if (!(event.getEntity() instanceof MinemonCreature wild)) return;
         // Owned Pokémon remain protected. MinemonCreature caps direct player melee

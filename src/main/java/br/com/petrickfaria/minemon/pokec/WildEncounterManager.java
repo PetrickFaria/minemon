@@ -133,20 +133,27 @@ public final class WildEncounterManager {
         WildEncounterData encounterData = WildEncounterData.get(level);
         int active = encounterData.count(player.getUUID(), "active");
         var pd = player.getPersistentData();
-        if (now - pd.getLong("MinemonWildSpawnAttempt") < CHECK_INTERVAL) return;
-        pd.putLong("MinemonWildSpawnAttempt", now);
-        if (active >= MAX_ACTIVE) return;
         List<PokecSpecies.Entry> candidates = PokecPlayerData.unlocked(player).stream()
                 .map(PokecSpecies::get).filter(java.util.Objects::nonNull)
                 .filter(entry -> ModEntities.SPECIES.containsKey(entry.slug()))
                 .filter(entry -> PokecPlayerData.spawnEnabled(player,entry.slug()))
                 .sorted(Comparator.comparingInt(PokecSpecies.Entry::number)).toList();
+        // This method runs on each online player tick. Advance only species that
+        // are currently unlocked and enabled in the normal spawn system.
+        if (active < MAX_ACTIVE) {
+            for (PokecSpecies.Entry candidate : candidates)
+                SpawnChanceProgression.tick(pd, candidate.slug());
+        }
+        if (now - pd.getLong("MinemonWildSpawnAttempt") < CHECK_INTERVAL) return;
+        pd.putLong("MinemonWildSpawnAttempt", now);
+        if (active >= MAX_ACTIVE) return;
         if (candidates.isEmpty()) return;
         // One probability roll represents this 30-second check. Position retries below
         // only look for a safe place; they must not multiply the species spawn chance.
         PokecSpecies.Entry species = candidates.get(player.getRandom().nextInt(candidates.size()));
-        double chance = speciesChances.getOrDefault(species.slug(), rarityChances.getOrDefault(
-                PokecEconomy.resolveRarity(species.rarity(), "common"), .05D));
+        double baseChance = configuredSpawnChance(player, species.slug());
+        double chance = SpawnChanceProgression.chance(baseChance,
+                SpawnChanceProgression.elapsedTicks(pd, species.slug()));
         if (player.getRandom().nextDouble() >= chance) return;
         for (int i = 0; i < 12; i++) {
             BlockPos pos = samplePosition(player, level, species);
@@ -162,7 +169,10 @@ public final class WildEncounterManager {
             pokemon.setWildEncounterOwner(player.getUUID());
             data.putLong(LAST_CHECK, now);
             data.putLong(LAST_IN_RANGE, now);
-            if (level.addFreshEntity(pokemon)) encounterData.put(player.getUUID(), pokemon.getUUID(), "active");
+            if (level.addFreshEntity(pokemon)) {
+                encounterData.put(player.getUUID(), pokemon.getUUID(), "active");
+                SpawnChanceProgression.reset(pd, species.slug());
+            }
             else pokemon.discard();
             return;
         }

@@ -96,6 +96,32 @@ public final class CompanionTests {
   h.runAfterDelay(5,()->com.mojang.logging.LogUtils.getLogger().info("MINEMON DEFENSE AFTER 5 TICKS "+state(b,c)));
   h.runAfterDelay(100,()->{check(h,c.getHealth()<health,"Companion must defend attacked owner"+state(b,c));p.discard();h.succeed();});});
  }
+ @GameTest(template="test_arena",timeoutTicks=180)
+ public static void ownerDefenseReachesFollowingSittingFreeAndSleepingCompanions(GameTestHelper h) {
+  ServerPlayer p=player(h);Cow aggressor=h.spawn(EntityType.COW,new BlockPos(14,1,5));aggressor.setNoAi(true);
+  MinemonCreature[] team=new MinemonCreature[4];
+  BlockPos[] positions={new BlockPos(6,1,3),new BlockPos(10,1,5),new BlockPos(6,1,7),new BlockPos(5,1,5)};
+  for(int i=0;i<team.length;i++){
+   team[i]=h.spawn(ModEntities.BULBASAUR.get(),positions[i]);team[i].tame(p);
+   if(i==1)team[i].setOrderedToSit(true);
+   if(i==2)team[i].setFreeMode(true);
+   if(i==3)team[i].setSleeping(true);
+  }
+  var sittingPosition=team[1].position();
+  check(h,p.hurt(DamageSource.mobAttack(aggressor),1),"Trainer must receive the fixture attack");
+  for(MinemonCreature companion:team)
+   check(h,companion.getTarget()==aggressor,"Every behavior mode must acquire the trainer's attacker: "+state(companion,aggressor));
+  check(h,!team[3].isSleeping(),"A sleeping companion must wake for trainer defense");
+  h.runAfterDelay(3,()->{
+   check(h,team[1].isOrderedToSit()&&team[1].isCombatPose(),"A sitting defender must retain Sentar and use its combat pose");
+   check(h,team[1].getX()==sittingPosition.x&&team[1].getZ()==sittingPosition.z,"A sitting defender must not pursue or retreat");
+   h.runAfterDelay(100,()->{
+    for(MinemonCreature companion:team)
+     check(h,companion.getTarget()==aggressor,"Defenders must retain focus through the attack cooldown: "+state(companion,aggressor));
+    p.discard();h.succeed();
+   });
+  });
+ }
  @GameTest(template="test_arena",timeoutTicks=100)
  public static void sitAndPersistence(GameTestHelper h) {
   MinemonCreature b=spawn(h);ServerPlayer p=player(h);b.tame(p);b.setOrderedToSit(true);b.setSleeping(true);
