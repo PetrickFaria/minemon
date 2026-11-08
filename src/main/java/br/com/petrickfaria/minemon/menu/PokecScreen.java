@@ -40,7 +40,9 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
     private final Map<net.minecraft.resources.ResourceLocation,net.minecraft.resources.ResourceLocation> ghostTextures=new HashMap<>();
     private float uiScale = 1.0F;
     private boolean draggingPreview;
-    private float previewYaw,previewPitch,targetPreviewYaw,targetPreviewPitch;
+    private boolean draggingListScrollbar;
+    private int listScrollbarGrabOffset;
+    private float previewYaw=23.0F,previewPitch=-4.0F,targetPreviewYaw=23.0F,targetPreviewPitch=-4.0F;
     private int scrollOffset;
     private String selectedSlug = "bulbasaur";
     private Map<String, MinemonCreature> previews = new HashMap<>();
@@ -103,7 +105,7 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         mouseDragged(x+20*uiScale,y+10*uiScale,0,20*uiScale,10*uiScale);
         mouseReleased(x,y,0);
         boolean moved=targetPreviewYaw!=0&&targetPreviewPitch!=0;
-        previewYaw=previewPitch=targetPreviewYaw=targetPreviewPitch=0;
+        previewYaw=targetPreviewYaw=23.0F;previewPitch=targetPreviewPitch=-4.0F;
         return moved&&!draggingPreview;
     }
     public boolean conversionPanelFitsAboveInventoryForSmokeTest() { return menu.slots.get(38).x > menu.slots.get(8).x && menu.slots.get(39).y + 18 <= imageHeight; }
@@ -123,6 +125,34 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
     public float previewScaleForSmokeTest(String slug) {
         var definition = SpeciesDefinitions.get(slug);
         return definition == null ? 0.0F : PreviewBounds.fit(slug, definition.scale()).scale();
+    }
+    public double previewNormalizedSizeForSmokeTest(String slug){
+        var definition=SpeciesDefinitions.get(slug);
+        return definition==null?0:PreviewBounds.normalizedLargestExtent(slug,definition.scale());
+    }
+    public String previewAnimationForSmokeTest(String slug) {
+        var entity=previews.get(slug);
+        return entity==null?null:entity.getSelectedAnimationForValidation();
+    }
+    public int listScrollOffsetForSmokeTest(){return scrollOffset;}
+    public int listScrollMaxForSmokeTest(){return Math.max(0,ordered.size()-visibleRows());}
+    public boolean scrollListForSmokeTest(double delta){
+        return mouseScrolled(leftPos+(LIST_X+20)*uiScale,topPos+(LIST_Y+25)*uiScale,delta);
+    }
+    public float[] previewOrientationForSmokeTest(){return new float[]{previewYaw,previewPitch};}
+    public boolean dragListScrollbarForSmokeTest(boolean clickTrack,boolean dragPastTrack){
+        int trackX=LIST_X+LIST_W-7,trackY=LIST_Y+13,trackHeight=visibleRows()*ROW_H;
+        int thumbHeight=listThumbHeight(),thumbY=listThumbTop(trackY,trackHeight,thumbHeight);
+        double x=leftPos+(trackX+1)*uiScale;
+        double y=topPos+(clickTrack?trackY+trackHeight-1:thumbY+Math.max(0,thumbHeight/2))*uiScale;
+        int before=scrollOffset;
+        boolean clicked=mouseClicked(x,y,0);
+        int afterClick=scrollOffset;
+        if(draggingListScrollbar)mouseDragged(x,topPos+(trackY+(dragPastTrack?-30:trackHeight+30))*uiScale,0,0,0);
+        boolean released=mouseReleased(x,y,0);
+        return clicked&&released&&!draggingListScrollbar&&scrollOffset>=0
+                &&scrollOffset<=Math.max(0,ordered.size()-visibleRows())
+                &&(ordered.size()<=visibleRows()||scrollOffset!=afterClick||scrollOffset!=before);
     }
 
     @Override protected void init() {
@@ -178,8 +208,8 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         int maxScroll = Math.max(0, ordered.size() - visible);
         int trackX = LIST_X + LIST_W - 8, trackY = LIST_Y + 13;
         GuiComponent.fill(pose, trackX, trackY, trackX + 2, trackY + visible * ROW_H, 0xFFC6C6C6);
-        int thumbHeight = Math.max(18, (visible * ROW_H * visible) / Math.max(1, ordered.size()));
-        int thumbY = trackY + (maxScroll == 0 ? 0 : (visible * ROW_H - thumbHeight) * scrollOffset / maxScroll);
+        int thumbHeight = listThumbHeight();
+        int thumbY = listThumbTop(trackY,visible*ROW_H,thumbHeight);
         GuiComponent.fill(pose, trackX, thumbY, trackX + 2, thumbY + thumbHeight, 0xFF404040);
         drawSelectedPanel(pose, partialTick, mouseX, mouseY);
         pose.popPose();
@@ -437,11 +467,14 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
             var type = ModEntities.SPECIES.get(slug);
             if (type == null) return null;
             MinemonCreature preview = type.get().create(mc.level);
-            if (preview != null) { preview.setNoAi(true); preview.setDeltaMovement(0, 0, 0); preview.tick(); preview.tickCount = 0; }
+            if (preview != null) {
+                preview.setNoAi(true);preview.setNoGravity(true);preview.setDeltaMovement(0,0,0);
+                preview.setPokecPreview(true);
+            }
             return preview;
         });
         if (entity == null) return;
-        entity.tickCount = (int) (System.currentTimeMillis() / 50L);
+        entity.tickCount = (int) mc.level.getGameTime();
         entity.setYRot(180.0F);
         entity.yRotO = entity.getYRot();
         entity.yBodyRot=entity.yBodyRotO=180;entity.yHeadRot=entity.yHeadRotO=180;
@@ -483,6 +516,14 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
     @Override public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (button != 0) return super.mouseClicked(mouseX, mouseY, button);
         int x = (int) ((mouseX - leftPos) / uiScale), y = (int) ((mouseY - topPos) / uiScale);
+        int trackX=LIST_X+LIST_W-7,trackY=LIST_Y+13,trackHeight=visibleRows()*ROW_H;
+        if(x>=trackX&&x<trackX+4&&y>=trackY&&y<trackY+trackHeight){
+            int thumbHeight=listThumbHeight(),thumbTop=listThumbTop(trackY,trackHeight,thumbHeight);
+            draggingListScrollbar=true;
+            listScrollbarGrabOffset=(y>=thumbTop&&y<thumbTop+thumbHeight)?y-thumbTop:thumbHeight/2;
+            updateListScrollFromMouse(y,trackY,trackHeight,thumbHeight);
+            return true;
+        }
         if (x >= LIST_X && x < LIST_X + LIST_W && y >= LIST_Y + 12 && y < LIST_Y + 12 + visibleRows() * ROW_H) {
             int index = scrollOffset + (y - (LIST_Y + 12)) / ROW_H;
             if (index >= 0 && index < ordered.size()) selectSpecies(ordered.get(index).slug());
@@ -508,12 +549,17 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
     private void selectSpecies(String slug) {
         if (slug.equals(selectedSlug)) return;
         selectedSlug = slug;
-        draggingPreview=false;previewYaw=previewPitch=targetPreviewYaw=targetPreviewPitch=0;
+        draggingPreview=false;previewYaw=targetPreviewYaw=23.0F;previewPitch=targetPreviewPitch=-4.0F;
         previews.clear();
         MinemonNetwork.performPokecAction(menu.pos(), slug, PokecTransactions.Action.SELECT);
     }
 
     @Override public boolean mouseDragged(double x,double y,int button,double dx,double dy) {
+        if(draggingListScrollbar&&button==0){
+            int trackY=LIST_Y+13,trackHeight=visibleRows()*ROW_H;
+            updateListScrollFromMouse((int)Math.floor((y-topPos)/uiScale),trackY,trackHeight,listThumbHeight());
+            return true;
+        }
         if(draggingPreview&&button==0){
             targetPreviewYaw=(targetPreviewYaw+(float)(dx/uiScale)*3.0F)%360.0F;
             targetPreviewPitch=net.minecraft.util.Mth.clamp(targetPreviewPitch+(float)(dy/uiScale)*1.5F,-40,40);
@@ -522,6 +568,7 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         return super.mouseDragged(x,y,button,dx,dy);
     }
     @Override public boolean mouseReleased(double x,double y,int button) {
+        if(button==0&&draggingListScrollbar){draggingListScrollbar=false;return true;}
         if(button==0&&draggingPreview){draggingPreview=false;return true;}
         return super.mouseReleased(x,y,button);
     }
@@ -533,6 +580,22 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
             return true;
         }
         return super.mouseScrolled(mouseX, mouseY, delta);
+    }
+
+    private int listThumbHeight(){
+        int trackHeight=visibleRows()*ROW_H;
+        return Math.min(trackHeight,Math.max(Math.min(18,trackHeight),
+                (trackHeight*visibleRows())/Math.max(1,ordered.size())));
+    }
+    private int listThumbTop(int trackY,int trackHeight,int thumbHeight){
+        int max=Math.max(0,ordered.size()-visibleRows()),travel=Math.max(0,trackHeight-thumbHeight);
+        return trackY+(max==0?0:travel*scrollOffset/max);
+    }
+    private void updateListScrollFromMouse(int mouseY,int trackY,int trackHeight,int thumbHeight){
+        int travel=Math.max(0,trackHeight-thumbHeight),max=Math.max(0,ordered.size()-visibleRows());
+        int thumbTop=net.minecraft.util.Mth.clamp(mouseY-trackY-listScrollbarGrabOffset,0,travel);
+        scrollOffset=travel==0?0:Math.round((float)thumbTop*max/travel);
+        scrollOffset=net.minecraft.util.Mth.clamp(scrollOffset,0,max);
     }
 
     @Override public void render(PoseStack pose, int mouseX, int mouseY, float partialTick) {

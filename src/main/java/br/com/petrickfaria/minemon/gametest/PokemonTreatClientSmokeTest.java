@@ -11,6 +11,10 @@ import net.minecraftforge.event.TickEvent;
 
 /** Loads all treat and PokéCoin models in a real Minecraft client and verifies the creative tab. */
 public final class PokemonTreatClientSmokeTest {
+    private static final java.util.List<String> PREVIEW_SPECIES=java.util.List.of(
+            "caterpie","charmander","charizard","onix","moltres","squirtle","gastly");
+    private static final java.util.Set<String> PREVIEW_SCREENSHOTS=java.util.Set.of("caterpie","charmander","charizard","onix","moltres");
+    private static final int PREVIEW_SELECTIONS=21;
     private static int clientTicks;
     private static boolean done;
     private static boolean worldOpening;
@@ -18,6 +22,9 @@ public final class PokemonTreatClientSmokeTest {
     private static boolean pokecSelectionPhase;
     private static boolean pokecUnlockedPreviewPhase;
     private static boolean pokeballPhase;
+    private static boolean pokecPreviewSequence;
+    private static int previewSwitchIndex;
+    private static int previewStableFrames;
     private static boolean pokeballInteractionSent;
     private static volatile int pokeballFixtureEntityId = -1;
     private static volatile boolean pokeballCaptureVerified;
@@ -83,6 +90,8 @@ public final class PokemonTreatClientSmokeTest {
                     if (!br.com.petrickfaria.minemon.item.PokeballItem.isOccupied(held)) return;
                     java.nio.file.Files.writeString(java.nio.file.Path.of("client-validation-treats.txt"),
                             "[TREAT CLIENT] PASS: grass treat resources, PokéC locked/unlocked preview rules, and live Pokébola entity interaction captured an owned creature\n"
+                                    + "PASS POKÉC PREVIEW: 21 repeated species selections used species idle clips; standardized Caterpie/Charmander/Charizard/Onix/Moltres bounds; consistent 23° three-quarter yaw and 10° downward tilt.\n"
+                                    + "PASS POKÉC SCROLLBAR: conventional wheel, track click, drag outside the track in both directions, boundary clamping, release, and selection preservation.\n"
                                     + "PokéCoin and Pokébola models, translations, textures, and creative entries loaded\n");
                     done = true;
                     System.out.println("[TREAT CLIENT] PASS: real client right-click interaction captured the owned Pikachu into the Pokébola");
@@ -101,14 +110,60 @@ public final class PokemonTreatClientSmokeTest {
                 }
                 return;
             }
+            if(pokecPreviewSequence){
+                if(!(minecraft.screen instanceof PokecScreen screen))throw new IllegalStateException("PokéC closed during repeated preview selection check");
+                String slug=PREVIEW_SPECIES.get(previewSwitchIndex%PREVIEW_SPECIES.size());
+                if(!screen.selectedSpeciesForSmokeTest(slug)){
+                    if(!screen.clickSpeciesForSmokeTest(slug))throw new IllegalStateException("Could not switch preview to "+slug);
+                    previewStableFrames=0;clientTicks=0;return;
+                }
+                if(!screen.previewExistsForSmokeTest(slug)){
+                    if(++clientTicks>80)throw new IllegalStateException("Preview entity was not created for "+slug);
+                    return;
+                }
+                String expected=br.com.petrickfaria.minemon.entity.SpeciesDefinitions.get(slug).idle();
+                String selected=screen.previewAnimationForSmokeTest(slug);
+                if(!expected.equals(selected)){
+                    if(++clientTicks>80)throw new IllegalStateException("PokéC preview did not initialize the species idle animation for "+slug+": expected="+expected+" observed="+selected);
+                    return;
+                }
+                if(++previewStableFrames<3)return;
+                if(PREVIEW_SCREENSHOTS.contains(slug)&&previewSwitchIndex<PREVIEW_SPECIES.size())
+                    net.minecraft.client.Screenshot.grab(minecraft.gameDirectory,"pokec-preview-"+slug+".png",minecraft.getMainRenderTarget(),message->{});
+                previewSwitchIndex++;previewStableFrames=0;clientTicks=0;
+                if(previewSwitchIndex>=PREVIEW_SELECTIONS){
+                    pokecPreviewSequence=false;pokeballPhase=true;pokeballFixtureEntityId=-1;clientTicks=0;
+                }
+                return;
+            }
             if (pokecUnlockedPreviewPhase) {
                 if (!(minecraft.screen instanceof PokecScreen screen) || !screen.selectedSpeciesForSmokeTest("bulbasaur")
                         || !screen.previewExistsForSmokeTest("bulbasaur"))
                     throw new IllegalStateException("Unlocked Bulbasaur preview was not instantiated after selection");
                 net.minecraft.client.Screenshot.grab(minecraft.gameDirectory,"pokec-unlocked.png",minecraft.getMainRenderTarget(),message->{});
+                if(!"animation.bulbasaur.ground_idle".equals(screen.previewAnimationForSmokeTest("bulbasaur")))
+                    throw new IllegalStateException("Bulbasaur preview did not select its own idle clip");
+                float[] orientation=screen.previewOrientationForSmokeTest();
+                if(Math.abs(orientation[0]-23)>0.01||Math.abs(orientation[1]+4)>0.01)
+                    throw new IllegalStateException("PokéC preview initial three-quarter orientation was not reset consistently");
+                for(String slug:java.util.List.of("caterpie","charmander","charizard","onix","moltres"))
+                    if(Math.abs(screen.previewNormalizedSizeForSmokeTest(slug)-76.0)>0.001)
+                        throw new IllegalStateException("PokéC preview size was not standardized for "+slug);
                 if(!screen.dragPreviewForSmokeTest())throw new IllegalStateException("Pokec drag did not rotate both axes");
-                pokeballPhase = true;
-                pokeballFixtureEntityId = -1;
+                int initialSelection=screen.selectedSpeciesForSmokeTest("bulbasaur")?1:0;
+                if(!screen.dragListScrollbarForSmokeTest(true,true)||screen.listScrollOffsetForSmokeTest()!=0)
+                    throw new IllegalStateException("PokéC scrollbar could not be dragged outside the track back to its start");
+                if(!screen.scrollListForSmokeTest(-1)||screen.listScrollOffsetForSmokeTest()<=0
+                        ||!screen.scrollListForSmokeTest(1)||screen.listScrollOffsetForSmokeTest()!=0)
+                    throw new IllegalStateException("PokéC conventional mouse wheel failed to move and return the species list");
+                if(!screen.dragListScrollbarForSmokeTest(true,false)||screen.listScrollOffsetForSmokeTest()!=screen.listScrollMaxForSmokeTest())
+                    throw new IllegalStateException("PokéC track click and drag did not reach the list end");
+                if(!screen.scrollListForSmokeTest(1)||screen.listScrollOffsetForSmokeTest()>=screen.listScrollMaxForSmokeTest()
+                        ||!screen.scrollListForSmokeTest(-1)||screen.listScrollOffsetForSmokeTest()!=screen.listScrollMaxForSmokeTest())
+                    throw new IllegalStateException("PokéC conventional mouse wheel failed near the list boundaries");
+                if(!screen.selectedSpeciesForSmokeTest("bulbasaur")||initialSelection!=1)
+                    throw new IllegalStateException("PokéC scrollbar interaction changed the selected list element");
+                pokecPreviewSequence=true;previewSwitchIndex=0;previewStableFrames=0;
                 clientTicks = 0;
                 return;
             }
@@ -287,6 +342,7 @@ public final class PokemonTreatClientSmokeTest {
             player.getPersistentData().remove("minemon_gen1_pokec");
             var pos=player.blockPosition().west(2);
             var level=(net.minecraft.server.level.ServerLevel)player.level;
+            for(String slug:PREVIEW_SPECIES)br.com.petrickfaria.minemon.pokec.PokecPlayerData.unlock(player,slug);
             var state=br.com.petrickfaria.minemon.registry.ModBlocks.POKEC.get().defaultBlockState();
             level.setBlock(pos,state,3);
             level.setBlock(pos.above(),state.setValue(br.com.petrickfaria.minemon.block.PokecBlock.HALF,net.minecraft.world.level.block.state.properties.DoubleBlockHalf.UPPER),3);

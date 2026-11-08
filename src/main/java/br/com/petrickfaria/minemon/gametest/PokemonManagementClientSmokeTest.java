@@ -223,9 +223,13 @@ public final class PokemonManagementClientSmokeTest {
                 }
                 if(all.size()!=screen.rowCountForSmokeTest() || !all.contains(cow) || !all.contains(zombie) || !all.contains(creeper))
                     throw new IllegalStateException("Blacklist tabs discarded registered mobs");
+                if(!screen.dragScrollbarForSmokeTest(true,true)||screen.firstRowForSmokeTest()!=0
+                        ||!screen.dragScrollbarForSmokeTest(true,false)||screen.firstRowForSmokeTest()!=screen.maxFirstRowForSmokeTest())
+                    throw new IllegalStateException("Blacklist scrollbar click-and-drag did not clamp and release correctly");
                 if(!screen.selectedForSmokeTest(zombie) || screen.selectedForSmokeTest(cow))throw new IllegalStateException("Filter changed selections");
                 Files.writeString(Path.of("client-validation-pokemon-management.txt"),
-                        "PASS: owned Pokémon status screen, Pokédex header, XP level sync, Seguir/Sentar controls, and registry-backed Black List defaults; all three filter tabs clicked, complete disjoint mob partition, scrolling, preserved selections and unselected Creeper\n");
+                        "PASS: owned Pokémon status screen, Pokédex header, XP level sync, Seguir/Sentar controls, and registry-backed Black List defaults; all three filter tabs clicked, complete disjoint mob partition, mouse wheel and scrollbar drag/track click, preserved selections and unselected Creeper\n"
+                                + "PASS BLACKLIST SCROLLBAR: dragging outside the track, clamped limits, release, and no accidental list toggle.\n");
                 nineFixtures(minecraft);phase=8;ticks=0;return;
             }
             if(phase==8){

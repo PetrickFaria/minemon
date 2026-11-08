@@ -83,6 +83,7 @@ jobs:
           python3 tools/prepare_client_world.py
           ALSOFT_DRIVERS=null timeout --kill-after=30s 600s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeRocketProfession
           grep -F 'PASS ROCKET CLIENT:' run/client-validation-rocket.txt
+          grep -F 'PASS ROCKET SCROLLBAR:' run/client-validation-rocket.txt
       - name: Validate treat and PokéCoin models on the real client
         run: |
           ALSOFT_DRIVERS=null timeout --kill-after=30s 600s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeTreats
@@ -92,6 +93,7 @@ jobs:
         run: |
           ALSOFT_DRIVERS=null timeout --kill-after=30s 600s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokePokemonManagement
           grep -F 'PASS: owned Pokémon status screen, Pokédex header, XP level sync, Seguir/Sentar controls, and registry-backed Black List defaults' run/client-validation-pokemon-management.txt
+          grep -F 'PASS BLACKLIST SCROLLBAR:' run/client-validation-pokemon-management.txt
       - name: Capture runtime API diagnostics
         if: always()
         run: python3 tools/collect_diagnostics.py

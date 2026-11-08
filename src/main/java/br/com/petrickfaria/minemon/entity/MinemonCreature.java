@@ -142,6 +142,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     private final RandomSource customSoundRandom = RandomSource.create();
     // Client-only diagnostic sample used by the automated locomotion smoke test.
     private String selectedAnimationForValidation;
+    private boolean pokecPreview;
     private String selectedTailFlameAnimationForValidation;
 
     public MinemonCreature(EntityType<? extends TamableAnimal> type, Level level) {
@@ -1396,7 +1397,11 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         var definition=SpeciesDefinitions.get(slug);
         String attack=SpeciesAssetIndex.clip(slug,"physical_attack","physical");
         if(attack==null) attack=SpeciesAssetIndex.clip(slug,"attack","attack");
-        if (this.isDefeated()) {
+        if (this.pokecPreview) {
+            // Keep the selector on this species' own idle clip even though its
+            // detached preview entity does not participate in normal world AI.
+            clip=definition.idle();
+        } else if (this.isDefeated()) {
             clip = SpeciesAssetIndex.clip(slug,"night_sleep","ground_idle");
         } else if (this.isDeadOrDying()) {
             clip = SpeciesAssetIndex.clip(slug, "faint", "ground_idle");
@@ -1603,6 +1608,14 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     }
 
     public String getSelectedAnimationForValidation() { return this.selectedAnimationForValidation; }
+    /** Enables a PokéC-only preview state without changing world entities. */
+    public void setPokecPreview(boolean preview) {
+        this.pokecPreview=preview;
+        if(preview){
+            setNoAi(true);setNoGravity(true);setDeltaMovement(0.0D,0.0D,0.0D);
+            setSleeping(false);setOrderedToSit(false);
+        }
+    }
     public int getSpontaneousRunCountForValidation() { return this.spontaneousRunCount; }
 
     public String getSelectedTailFlameAnimationForValidation() { return this.selectedTailFlameAnimationForValidation; }

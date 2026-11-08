@@ -13,6 +13,7 @@ public final class RocketTradeScreen extends AbstractContainerScreen<RocketTrade
     private static final int ROWS = 7, ROW_HEIGHT = 20;
     private int scroll;
     private boolean dragging;
+    private int dragGrabOffset;
 
     public RocketTradeScreen(RocketTradeMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
@@ -45,7 +46,7 @@ public final class RocketTradeScreen extends AbstractContainerScreen<RocketTrade
             font.draw(pose,"10 almas →",leftPos+10,y+6,0xFF404040);
         }
         int max=Math.max(0,menu.offerCount()-ROWS);
-        int thumbY=topPos+18+(max==0?0:113*scroll/max);
+        int thumbY=thumbTop(max);
         GuiComponent.fill(pose,leftPos+95,topPos+18,leftPos+101,topPos+158,0xFF777777);
         MinemonGui.panel(pose,leftPos+95,thumbY,6,27);
         renderVanillaExperienceBar(pose);
@@ -71,20 +72,26 @@ public final class RocketTradeScreen extends AbstractContainerScreen<RocketTrade
             return true;
         }
         if(button==0 && x>=leftPos+94 && x<leftPos+103 && y>=topPos+18 && y<topPos+158) {
-            dragging=true; setScroll(y); return true;
+            int thumbY=thumbTop(Math.max(0,menu.offerCount()-ROWS));
+            dragging=true;
+            dragGrabOffset=(y>=thumbY&&y<thumbY+27)?(int)y-thumbY:13;
+            setScroll(y); return true;
         }
         return super.mouseClicked(x,y,button);
     }
     private void setScroll(double y) {
         int max=Math.max(0,menu.offerCount()-ROWS);
-        scroll=Math.max(0,Math.min(max,(int)Math.round((y-topPos-31.5)*max/113.0)));
+        int thumbTop=net.minecraft.util.Mth.clamp((int)Math.round(y-topPos-18-dragGrabOffset),0,113);
+        scroll=Math.round((float)thumbTop*max/113.0F);
+        scroll=net.minecraft.util.Mth.clamp(scroll,0,max);
     }
     @Override public boolean mouseDragged(double x,double y,int button,double dx,double dy) {
         if(dragging){setScroll(y);return true;}
         return super.mouseDragged(x,y,button,dx,dy);
     }
     @Override public boolean mouseReleased(double x,double y,int button) {
-        dragging=false;return super.mouseReleased(x,y,button);
+        if(button==0&&dragging){dragging=false;return true;}
+        return super.mouseReleased(x,y,button);
     }
     @Override public boolean mouseScrolled(double x,double y,double delta) {
         if(x>=leftPos && x<leftPos+103 && y>=topPos && y<topPos+imageHeight) {
@@ -97,5 +104,16 @@ public final class RocketTradeScreen extends AbstractContainerScreen<RocketTrade
         int row=(mouseY-topPos-18)/ROW_HEIGHT,index=scroll+row;
         if(mouseX>=leftPos+5 && mouseX<leftPos+93 && mouseY>=topPos+18 && row<ROWS && index<menu.offerCount())
             renderTooltip(pose,menu.offerResult(index),mouseX,mouseY);
+    }
+    private int thumbTop(int max){return topPos+18+(max==0?0:113*scroll/max);}
+    public int scrollOffsetForSmokeTest(){return scroll;}
+    public boolean scrollWheelForSmokeTest(double delta){return mouseScrolled(leftPos+97,topPos+80,delta);}
+    public boolean dragScrollbarForSmokeTest(boolean clickTrack,boolean dragOutside){
+        int max=Math.max(0,menu.offerCount()-ROWS),before=scroll;
+        double x=leftPos+97,y=clickTrack?topPos+157:thumbTop(max)+13;
+        boolean clicked=mouseClicked(x,y,0);int afterClick=scroll;
+        if(dragging)mouseDragged(x,topPos+(dragOutside?-30:188),0,0,0);
+        boolean released=mouseReleased(x,y,0);
+        return clicked&&released&&!dragging&&scroll>=0&&scroll<=max&&(max==0||scroll!=before||scroll!=afterClick);
     }
 }

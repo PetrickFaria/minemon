@@ -161,6 +161,20 @@ final class RocketVillagerClientSmokeTest {
                             Files.writeString(Path.of("client-validation-rocket.txt"),
                                     "PASS ROCKET CLIENT: real vanilla Rocket villagers rendered for all seven 1.19.2 biome types; "
                                             + "Rocket challenge textures, red eye meshes, and smoke validated for all ten species; uniforms and profession translation loaded.\n");
+                            var tradeMenu=new br.com.petrickfaria.minemon.menu.RocketTradeMenu(0,minecraft.player.getInventory(),visible.get(0));
+                            var tradeScreen=new br.com.petrickfaria.minemon.menu.RocketTradeScreen(tradeMenu,minecraft.player.getInventory(),net.minecraft.network.chat.Component.empty());
+                            minecraft.setScreen(tradeScreen);
+                            tradeScreen.scrollWheelForSmokeTest(-1);
+                            if(tradeScreen.scrollOffsetForSmokeTest()!=1
+                                    ||!tradeScreen.dragScrollbarForSmokeTest(true,true)||tradeScreen.scrollOffsetForSmokeTest()!=0
+                                    ||!tradeScreen.dragScrollbarForSmokeTest(true,false)
+                                    ||tradeScreen.scrollOffsetForSmokeTest()!=tradeMenu.offerCount()-7
+                                    ||tradeMenu.selectedIndex()!=0)
+                                throw new IllegalStateException("Rocket offers wheel/drag/track click failed or selected an offer accidentally");
+                            minecraft.setScreen(null);
+                            Files.writeString(Path.of("client-validation-rocket.txt"),
+                                    "PASS ROCKET SCROLLBAR: track click, drag outside the track, top/bottom clamping, release, and no accidental offer selection.\n",
+                                    java.nio.file.StandardOpenOption.APPEND);
                             completed = true;
                             System.out.println("[ROCKET CLIENT] PASS marker written; stopping client");
                             minecraft.execute(minecraft::stop);

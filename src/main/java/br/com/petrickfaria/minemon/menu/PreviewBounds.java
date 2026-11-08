@@ -3,13 +3,11 @@ package br.com.petrickfaria.minemon.menu;
 import com.google.gson.JsonParser;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.Set;
 
 /** Mesh coordinates already include cube inflation and hierarchical bind rotations. */
 final class PreviewBounds {
     private static final com.google.gson.JsonObject BOUNDS=load("preview_bounds.json");
     private static final com.google.gson.JsonObject PIVOTS=load("preview_body_pivots.json");
-    private static final Set<String> APPROVED=Set.of("bulbasaur","pikachu","charmander","caterpie");
     private static com.google.gson.JsonObject load(String file){
         try(var in=PreviewBounds.class.getResourceAsStream("/data/minemon_gen1/"+file)){
             if(in==null)throw new IllegalStateException("Missing preview bounds");
@@ -24,15 +22,12 @@ final class PreviewBounds {
             double maxX=a.get(3).getAsDouble(),maxY=a.get(4).getAsDouble(),maxZ=a.get(5).getAsDouble();
             double w=maxX-minX,h=maxY-minY,d=maxZ-minZ;
             double projectedWidth,projectedHeight;
-            if(APPROVED.contains(slug)) {
-                // Preserve the already approved preview scale for these references.
-                projectedWidth=w+d*Math.sin(Math.toRadians(4));
-                projectedHeight=h*Math.cos(Math.toRadians(6))+d*Math.sin(Math.toRadians(6));
-            } else {
-                double[] extents=maximumRotatedExtents(w,h,d);
-                projectedWidth=extents[0];projectedHeight=extents[1];
-            }
-            float scale=(float)Math.min(100,Math.min(232/Math.max(.2,projectedWidth*modelScale*1.3),88/Math.max(.2,projectedHeight*modelScale*1.3)));
+            double[] extents=maximumRotatedExtents(w,h,d);
+            projectedWidth=extents[0];projectedHeight=extents[1];
+            // Match each model's largest projected dimension to the same visual
+            // target. The 12 px safety margin fits the 88 px preview height,
+            // including the full supported rotation range and idle articulation.
+            float scale=(float)(76.0/Math.max(.2,Math.max(projectedWidth,projectedHeight)*modelScale));
             var center=PIVOTS.getAsJsonObject(slug).getAsJsonArray("center");
             // GeoBuilder reflects X; fixed body yaw 180 avoids a second Z reflection.
             return new Fit(scale,-center.get(0).getAsDouble()*modelScale,center.get(1).getAsDouble()*modelScale,center.get(2).getAsDouble()*modelScale);
@@ -40,6 +35,14 @@ final class PreviewBounds {
     }
     static float rotationScale(String slug,float modelScale,float approvedScale,float yaw,float pitch) {
         return approvedScale;
+    }
+    static double normalizedLargestExtent(String slug,float modelScale){
+        var a=BOUNDS.getAsJsonArray(slug);
+        double width=a.get(3).getAsDouble()-a.get(0).getAsDouble();
+        double height=a.get(4).getAsDouble()-a.get(1).getAsDouble();
+        double depth=a.get(5).getAsDouble()-a.get(2).getAsDouble();
+        double[] extents=maximumRotatedExtents(width,height,depth);
+        return Math.max(extents[0],extents[1])*modelScale*fit(slug,modelScale).scale();
     }
     static double[] maximumRotatedExtents(double width,double height,double depth) {
         double maxWidth=0,maxHeight=0;
