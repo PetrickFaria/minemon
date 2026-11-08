@@ -30,7 +30,7 @@ def decode_rgba(path: Path):
             compressed.extend(chunk)
         elif kind == b"IEND":
             break
-    assert dimensions == (32, 32, 8, 6, 0), f"Expected a 32x32 RGBA PNG, got {dimensions}"
+    assert dimensions == (64, 64, 8, 6, 0), f"Expected the supplied 64x64 RGBA sprite, got {dimensions}"
     width, height = dimensions[:2]
     stride, bpp = width * 4, 4
     raw = zlib.decompress(compressed)
@@ -73,13 +73,12 @@ def verify():
 
     pixels = decode_rgba(ASSETS / "textures/item/poke_coin.png")
     opaque = [pixel for row in pixels for pixel in row if pixel[3] > 200]
-    red_upper = [p for y in range(7, 14) for p in pixels[y][6:26] if p[0] > 180 and p[1] < 90 and p[2] < 90 and p[3] > 200]
-    white_lower = [p for y in range(19, 27) for p in pixels[y][6:26] if min(p[:3]) > 180 and max(p[:3]) - min(p[:3]) < 45 and p[3] > 200]
-    dark_divider = [p for p in pixels[16][5:27] if max(p[:3]) < 70 and p[3] > 200]
-    assert 400 < len(opaque) < 950, "Coin must have a crisp round silhouette and transparent corners"
-    assert red_upper and white_lower and len(dark_divider) >= 4, "Poké Ball red/white halves and black divider must be visible"
-    assert pixels[16][16][3] > 200 and min(pixels[16][16][:3]) > 180, "Poké Ball center button must be white"
-    assert pixels[16][12][3] > 200 and max(pixels[16][12][:3]) < 70, "Poké Ball center button must have a black outline"
+    red_accents = [p for row in pixels for p in row if p[0] > 130 and p[1] < 100 and p[2] < 100 and p[3] > 200]
+    white_metal = [p for row in pixels for p in row if min(p[:3]) > 180 and p[3] > 200]
+    dark_outline = [p for row in pixels for p in row if max(p[:3]) < 70 and p[3] > 200]
+    assert 1200 < len(opaque) < 3000, "Coin must retain the supplied metallic emblem silhouette"
+    assert red_accents and white_metal and dark_outline, "Red stars, white metal, and dark outline must remain visible"
+    assert pixels[0][0][3] == 0 and pixels[0][63][3] == 0 and pixels[63][0][3] == 0 and pixels[63][63][3] == 0, "Sprite corners must remain transparent"
     assert not any(p[0] > 160 and p[1] > 120 and p[2] < 100 for row in pixels for p in row if p[3] > 200), "Gold/yellow pixels are not allowed"
 
     for locale in ("pt_br", "en_us"):
@@ -108,7 +107,7 @@ def verify():
             assert b"poke_coin" in class_bytes, "Compiled ModItems does not register PokéCoin"
             jar_translations = json.loads(archive.read("assets/minemon/lang/pt_br.json"))
             assert jar_translations.get("item.minemon.poke_coin") == "PokéCoin", "JAR is missing the PokéCoin translation"
-    print("PASS: minemon:poke_coin registration, 32x32 RGBA Poké Ball texture, translations, and JAR contents verified")
+    print("PASS: minemon:poke_coin registration, supplied 64x64 RGBA metallic emblem, translations, and JAR contents verified")
 
 
 if __name__ == "__main__":

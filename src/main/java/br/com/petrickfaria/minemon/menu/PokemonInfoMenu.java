@@ -37,12 +37,14 @@ public final class PokemonInfoMenu extends AbstractContainerMenu {
         }
         if (!(player instanceof ServerPlayer serverPlayer) || !stillValid(player) || pokemon == null) return false;
         if (button == 0) {
+            pokemon.setFreeMode(false);
             pokemon.setOrderedToSit(false);
             pokemon.setTarget(null);
             pokemon.getNavigation().stop();
             return true;
         }
         if (button == 1) {
+            pokemon.setFreeMode(false);
             pokemon.setOrderedToSit(true);
             pokemon.setTarget(null);
             pokemon.getNavigation().stop();
@@ -51,11 +53,16 @@ public final class PokemonInfoMenu extends AbstractContainerMenu {
             return true;
         }
         if (button == 2) {
+            pokemon.setOrderedToSit(false);
+            pokemon.setFreeMode(!pokemon.isFreeMode());
+            return true;
+        }
+        if (button == 3) {
             MinemonNetwork.openBlackList(serverPlayer, pokemon);
             return true;
         }
-        if (button >= 3) {
-            int option = button - 3;
+        if (button >= 4) {
+            int option = button - 4;
             var options = evolutionOptions();
             if (option < 0 || option >= options.size()
                     || pokemon.getPokemonLevel() < PokemonEvolutionRules.requiredLevel(pokemon.getSpeciesSlug())) return false;

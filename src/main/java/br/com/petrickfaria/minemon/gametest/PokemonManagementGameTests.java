@@ -112,6 +112,14 @@ public final class PokemonManagementGameTests {
         check(h, menu.pokemon() == pokemon, "the status interface must be tied to the clicked Pokémon");
         check(h, menu.clickMenuButton(owner, 0) && !pokemon.isOrderedToSit(), "Seguir must clear the sit command");
         check(h, menu.clickMenuButton(owner, 1) && pokemon.isOrderedToSit(), "Sentar must hold the Pokémon in place");
+        check(h, menu.clickMenuButton(owner, 2) && pokemon.isFreeMode() && !pokemon.isOrderedToSit(),
+                "Livre must release a sitting Pokémon into natural behavior");
+        var saved = pokemon.saveWithoutId(new net.minecraft.nbt.CompoundTag());
+        MinemonCreature restored = ModEntities.SPECIES.get("bulbasaur").get().create(h.getLevel());
+        restored.load(saved);
+        check(h, restored.isFreeMode(), "Livre mode must persist when the world is saved and reopened");
+        check(h, menu.clickMenuButton(owner, 0) && !pokemon.isFreeMode(), "Seguir must leave Livre mode");
+        restored.discard();
         owner.discard();
         h.succeed();
     }
@@ -193,20 +201,71 @@ public final class PokemonManagementGameTests {
         pokemon.setBlackListOverride(new net.minecraft.resources.ResourceLocation("minecraft","cow"),true);
         for(int level=1;level<=10;level++){
             pokemon.setPokemonProgress(level,0);
-            double expected=15.0D+(level-1)*(10.0D/9.0D);
-            check(h,Math.abs(pokemon.combatRange()-expected)<1.0E-6D,
-                    "Companion target range must follow the linear level progression at level "+level);
+            double expected=5.0D+(level-1)*(15.0D/9.0D);
+            check(h,Math.abs(pokemon.attackRange()-expected)<1.0E-6D,
+                    "Companion projectile range must follow the linear level progression at level "+level);
             double targetY=pokemon.getY();
             rangeTarget.setPos(pokemon.getX()+expected-0.1D,targetY,pokemon.getZ());
-            check(h,pokemon.canAttack(rangeTarget),"An authorized target inside the level "+level+" range must be acquirable");
+            check(h,pokemon.canAttack(rangeTarget)&&pokemon.canFireAt(rangeTarget),
+                    "An authorized target inside the level "+level+" projectile range must be hittable");
             rangeTarget.setPos(pokemon.getX()+expected+0.1D,targetY,pokemon.getZ());
-            check(h,!pokemon.canAttack(rangeTarget),"An authorized target outside the level "+level+" range must not be acquired");
+            check(h,pokemon.canAttack(rangeTarget)&&!pokemon.canFireAt(rangeTarget),
+                    "A perceived target beyond the level "+level+" projectile range must remain authorized but not be hittable");
+            rangeTarget.setPos(pokemon.getX()+14.9D,targetY,pokemon.getZ());
+            check(h,pokemon.canPerceive(rangeTarget),"Every domesticated Pokémon must perceive targets within 15 blocks");
+            rangeTarget.setPos(pokemon.getX()+15.1D,targetY,pokemon.getZ());
+            check(h,!pokemon.canPerceive(rangeTarget),"Domesticated perception must stop beyond 15 blocks");
         }
         pokemon.setPokemonProgress(11,0);
-        check(h,Math.abs(pokemon.combatRange()-25.0D)<1.0E-6D,"Range must remain capped at 25 blocks after level 10");
+        check(h,Math.abs(pokemon.attackRange()-20.0D)<1.0E-6D,"Attack range must remain capped at 20 blocks after level 10");
+        MinemonCreature wild=h.spawn(ModEntities.SPECIES.get("pikachu").get(),new BlockPos(11,1,11));
+        check(h,Math.abs(wild.attackRange()-10.0D)<1.0E-6D,"All wild Pokémon must use 10-block projectile range");
         net.minecraft.world.entity.animal.Cow contact=h.spawn(EntityType.COW,new BlockPos(5,1,5));
         check(h,!pokemon.doHurtTarget(contact),"Pokémon must never deal melee damage, even on direct contact");
-        pokemon.discard();rangeTarget.discard();contact.discard();owner.discard();h.succeed();
+        pokemon.discard();wild.discard();rangeTarget.discard();contact.discard();owner.discard();h.succeed();
+    }
+
+    @GameTest(template = "test_arena", timeoutTicks = 760)
+    public static void focusedTargetCanLeaveAndReenterPerceptionBeforeTheFifteenSecondTimeout(GameTestHelper h) {
+        floor(h);
+        ServerPlayer owner = player(h, h.absolutePos(new BlockPos(7, 1, 5)));
+        MinemonCreature pokemon = h.spawn(ModEntities.SPECIES.get("pikachu").get(), new BlockPos(5, 1, 5));
+        pokemon.tame(owner);
+        Cow target = h.spawn(EntityType.COW, new BlockPos(9, 1, 5));
+        target.setNoAi(true);
+        pokemon.focusPlayerTarget(target);
+        target.setPos(pokemon.getX() + 15.1D, pokemon.getY(), pokemon.getZ());
+        h.runAfterDelay(299, () -> {
+            check(h, pokemon.getTarget() == target, "A valid target must stay focused for the first 299 ticks outside perception");
+            target.setPos(pokemon.getX() + 14.9D, pokemon.getY(), pokemon.getZ());
+            h.runAfterDelay(2, () -> {
+                check(h, pokemon.getTarget() == target, "Reentering perception must preserve and reset the focus timeout");
+                target.setPos(pokemon.getX() + 15.1D, pokemon.getY(), pokemon.getZ());
+                h.runAfterDelay(299, () -> {
+                    check(h, pokemon.getTarget() == target, "The second continuous out-of-range interval must also allow 299 ticks");
+                    h.runAfterDelay(1, () -> {
+                        check(h, pokemon.getTarget() == null, "The focus must clear after 300 continuous ticks outside perception");
+                        target.discard(); pokemon.discard(); owner.discard(); h.succeed();
+                    });
+                });
+            });
+        });
+    }
+
+    @GameTest(template = "test_arena", timeoutTicks = 480)
+    public static void wildPokemonDoesNotAbandonACombatWithADomesticatedPokemon(GameTestHelper h) {
+        floor(h);
+        ServerPlayer owner = player(h, h.absolutePos(new BlockPos(7, 1, 5)));
+        MinemonCreature companion = h.spawn(ModEntities.SPECIES.get("pikachu").get(), new BlockPos(5, 1, 5));
+        companion.tame(owner);
+        MinemonCreature wild = h.spawn(ModEntities.SPECIES.get("rattata").get(), new BlockPos(10, 1, 5));
+        wild.setNoAi(true);
+        check(h, wild.hurt(DamageSource.mobAttack(companion), 1.0F), "The companion must be able to provoke a wild Pokémon");
+        h.runAfterDelay(420, () -> {
+            check(h, wild.getTarget() == companion,
+                    "A wild Pokémon must keep its domesticated opponent focused beyond the former aggression timeout");
+            wild.discard(); companion.discard(); owner.discard(); h.succeed();
+        });
     }
 
     @GameTest(template = "test_arena", timeoutTicks = 220)

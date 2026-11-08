@@ -75,6 +75,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     private long nextCombatTick;
     private static final EntityDataAccessor<Boolean> SLEEPING = SynchedEntityData.defineId(MinemonCreature.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> ORDERED_SIT = SynchedEntityData.defineId(MinemonCreature.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> FREE_MODE = SynchedEntityData.defineId(MinemonCreature.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> NATURAL_FLIGHT = SynchedEntityData.defineId(MinemonCreature.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Integer> NATURAL_PHASE = SynchedEntityData.defineId(MinemonCreature.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> NATURAL_SURFACE = SynchedEntityData.defineId(MinemonCreature.class, EntityDataSerializers.BOOLEAN);
@@ -126,6 +127,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     private double sitAnchorZ = Double.NaN;
     private int naturalHealTicks = 1200;
     private UUID playerFocusTarget;
+    private int focusOutsidePerceptionTicks;
     private boolean resumeSleepingAfterFocus;
     private boolean resumeNightRestAfterFocus;
     private boolean resumeSitAfterFocus;
@@ -199,7 +201,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     @Override public void tame(Player player){
         super.tame(player);
         AttributeInstance followRange=getAttribute(Attributes.FOLLOW_RANGE);
-        if(followRange!=null)followRange.setBaseValue(combatRange());
+        if(followRange!=null)followRange.setBaseValue(perceptionRange());
     }
     public boolean isFlyingSpecies() { return SpeciesBehaviorProfiles.isAirborne(this.getSpeciesSlug())
             &&!(this.isNightResting()&&SpeciesBehaviorProfiles.landsForNightRest(this.getSpeciesSlug()))
@@ -222,10 +224,23 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     }
 
     @Override public boolean isOrderedToSit() { return this.entityData.get(ORDERED_SIT); }
+    public boolean isFreeMode() { return this.entityData.get(FREE_MODE); }
+    public void setFreeMode(boolean free) {
+        if (free && isOrderedToSit()) setOrderedToSit(false);
+        entityData.set(FREE_MODE, free);
+        if (free) {
+            playerFocusTarget = null;
+            setTarget(null);
+            getNavigation().stop();
+            setSleeping(false);
+            entityData.set(NIGHT_REST, false);
+        }
+    }
     @Override public void setOrderedToSit(boolean orderedToSit) {
         boolean wasOrderedToSit=isOrderedToSit();
         super.setOrderedToSit(orderedToSit);
         this.entityData.set(ORDERED_SIT, orderedToSit);
+        if (orderedToSit) this.entityData.set(FREE_MODE, false);
         if (orderedToSit) {
             sitAnchorX = getX(); sitAnchorY = getY(); sitAnchorZ = getZ();
             if(isFlyingSpecies()){
@@ -285,6 +300,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         this.entityData.define(NATURAL_SURFACE, SpeciesBehaviorProfiles.profile(this.getSpeciesSlug())==SpeciesBehaviorProfiles.Profile.AQUATIC_SURFACE);
         this.entityData.define(SLEEPING, false);
         this.entityData.define(ORDERED_SIT, false);
+        this.entityData.define(FREE_MODE, false);
         this.entityData.define(SPONTANEOUS_RUN, false);
         this.entityData.define(FOLLOWING_RUN, false);
         this.entityData.define(FOLLOWING,false);
@@ -316,6 +332,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         if (this.getPersistentData().hasUUID("RocketVillager"))
             tag.putUUID("MinemonRocketVillager", this.getPersistentData().getUUID("RocketVillager"));
         tag.putBoolean("MinemonSleeping", this.isSleeping());
+        tag.putBoolean("MinemonFreeMode", this.isFreeMode());
         tag.putBoolean("NightRoutine",this.nightRoutine);
         if(Double.isFinite(this.aquaticSleepY))tag.putDouble("AquaticSleepAnchorY",this.aquaticSleepY);
         tag.putInt("WakeGraceTicks",this.wakeGraceTicks);
@@ -328,6 +345,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     @Override public void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
         this.entityData.set(ORDERED_SIT, super.isOrderedToSit());
+        this.entityData.set(FREE_MODE, tag.getBoolean("MinemonFreeMode"));
         this.loadingPokemonData=true;
         this.entityData.set(DEFEATED,tag.getBoolean("MinemonDefeated"));
         this.entityData.set(WILD_ENCOUNTER, this.getPersistentData().getBoolean("MinemonWildEncounter"));
@@ -431,7 +449,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(PokemonProgression.healthForRarity(rarity,this.getPokemonLevel()));
         this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(PokemonProgression.damageForRarity(rarity,this.getPokemonLevel()));
         AttributeInstance followRange=this.getAttribute(Attributes.FOLLOW_RANGE);
-        if(followRange!=null)followRange.setBaseValue(isTame()?combatRange():
+        if(followRange!=null)followRange.setBaseValue(isTame()?perceptionRange():
                 (SpeciesBehaviorProfiles.waterCapable(this.getSpeciesSlug())?128.0D:24.0D));
         this.setHealth(Math.min(this.getMaxHealth(),health));
     }
@@ -626,11 +644,24 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         // Wild creatures only acquire a target after being hurt. Tamed creatures also protect
         // their owner and assist against the owner's current target.
         // A companion joins a fight when its owner directly attacks or is attacked.
-        this.targetSelector.addGoal(1, new OwnerHurtByTargetGoal(this));
-        this.targetSelector.addGoal(2, new OwnerHurtTargetGoal(this));
+        this.targetSelector.addGoal(1, new OwnerHurtByTargetGoal(this) {
+            @Override public boolean canUse() {
+                if (!super.canUse()) return false;
+                Entity owner = MinemonCreature.this.getOwner();
+                return owner instanceof LivingEntity living && MinemonCreature.this.canPerceive(living.getLastHurtByMob());
+            }
+        });
+        this.targetSelector.addGoal(2, new OwnerHurtTargetGoal(this) {
+            @Override public boolean canUse() {
+                if (!super.canUse()) return false;
+                Entity owner = MinemonCreature.this.getOwner();
+                return owner instanceof LivingEntity living && MinemonCreature.this.canPerceive(living.getLastHurtMob());
+            }
+        });
         this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, net.minecraft.world.entity.Mob.class,
                 10, true, false, target -> MinemonCreature.this.isTame()
                 && !MinemonCreature.this.isOrderedToSit() && !(target instanceof MinemonCreature)
+                && MinemonCreature.this.canPerceive(target)
                 && MinemonCreature.this.isBlackListTarget((net.minecraft.world.entity.Mob) target)));
         this.targetSelector.addGoal(4, new HurtByTargetGoal(this) {
             @Override public boolean canUse() {
@@ -665,9 +696,8 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         if (this.isTame() && this.isOrderedToSit()
                 && (playerFocusTarget == null || !playerFocusTarget.equals(target.getUUID()))) return false;
         if (playerFocusTarget != null && (target.level != this.level || !playerFocusTarget.equals(target.getUUID()))) return false;
-        if (this.isTame() && CombatGeometry.centerDistanceSquared(this,target)>combatRange()*combatRange()) return false;
-        // A sitting companion may attack only a target that remains inside its normal range.
-        if (this.isTame() && this.isOrderedToSit() && CombatGeometry.centerDistanceSquared(this,target)>combatRange()*combatRange()) return false;
+        // Perception and projectile reach are separate: an authorized target can remain
+        // focused while the companion navigates into its actual firing range.
         if (target instanceof MinemonCreature other) {
             if(other.isDefeated())return false;
             UUID ownerId = this.getOwnerUUID();
@@ -682,12 +712,21 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         return ownerId != null && ownerId.equals(target.getUUID());
     }
 
-    /** Linear level-scaled acquisition and attack radius: level 1 = 15, level 10 = 25. */
-    public double combatRange() {
-        if (!isTame()) return 25.0D;
-        int level=Math.max(1,Math.min(10,getPokemonLevel()));
-        return 15.0D+(level-1)*(10.0D/9.0D);
+    /** Target acquisition radius is fixed for every domesticated Pokémon. */
+    public double perceptionRange() { return isTame() ? 15.0D : 24.0D; }
+    public boolean canPerceive(LivingEntity target) {
+        return target != null && target.isAlive() && target.level == level
+                && CombatGeometry.centerDistanceSquared(this, target) <= perceptionRange() * perceptionRange();
     }
+
+    /** Maximum projectile travel distance: tame levels 1..10 scale 5..20, wild is 10. */
+    public double attackRange() {
+        if (!isTame()) return 10.0D;
+        int level=Math.max(1,Math.min(10,getPokemonLevel()));
+        return 5.0D+(level-1)*(15.0D/9.0D);
+    }
+    /** Compatibility name retained for existing combat callers. */
+    public double combatRange() { return attackRange(); }
 
     private static final String BLACK_LIST_KEY = "MinemonBlackList";
     public boolean isBlackListTarget(net.minecraft.world.entity.Mob target) {
@@ -859,8 +898,8 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         super.tick();
         if(!level.isClientSide&&isTame()){
             AttributeInstance followRange=getAttribute(Attributes.FOLLOW_RANGE);
-            if(followRange!=null&&Math.abs(followRange.getBaseValue()-combatRange())>1.0E-4D)
-                followRange.setBaseValue(combatRange());
+            if(followRange!=null&&Math.abs(followRange.getBaseValue()-perceptionRange())>1.0E-4D)
+                followRange.setBaseValue(perceptionRange());
         }
         if (isOrderedToSit() && !isNightResting() && !isSleeping()
                 && Double.isFinite(sitAnchorX) && Double.isFinite(sitAnchorY) && Double.isFinite(sitAnchorZ)) {
@@ -884,13 +923,22 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         }
         if(!level.isClientSide)ShoreTraversal.tick(this);
         if(this.getTarget()!=null && !canAttack(this.getTarget())){this.setTarget(null);this.getNavigation().stop();}
+        if (!level.isClientSide && isTame() && playerFocusTarget == null && getTarget() != null
+                && canAttack(getTarget())) {
+            playerFocusTarget = getTarget().getUUID();
+            focusOutsidePerceptionTicks = 0;
+        }
         if (!level.isClientSide && playerFocusTarget != null) {
             Entity focused = level instanceof ServerLevel serverLevel ? serverLevel.getEntity(playerFocusTarget) : null;
             if (!(focused instanceof LivingEntity living) || !living.isAlive()
                     || focused.level != level || !canAttack(living)) {
                 clearPlayerFocus();
-            } else if (getTarget() != living) {
-                setTarget(living);
+            } else {
+                if (CombatGeometry.centerDistanceSquared(this, living) > perceptionRange() * perceptionRange())
+                    focusOutsidePerceptionTicks++;
+                else focusOutsidePerceptionTicks = 0;
+                if (focusOutsidePerceptionTicks >= 20 * 15) clearPlayerFocus();
+                else if (getTarget() != living) setTarget(living);
             }
         }
         if (!this.level.isClientSide) {
@@ -977,9 +1025,10 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
 
     public void focusPlayerTarget(LivingEntity target) {
         if (level.isClientSide || !isTame() || isDefeated() || getOwnerUUID() == null
-                || target == null || !target.isAlive() || target.level != level) return;
+                || target == null || !target.isAlive() || target.level != level || !canPerceive(target)) return;
         UUID previousFocus = playerFocusTarget;
         playerFocusTarget = target.getUUID();
+        focusOutsidePerceptionTicks = 0;
         boolean validTarget = canAttack(target);
         playerFocusTarget = previousFocus;
         if (!validTarget) return;
@@ -998,6 +1047,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
 
     private void clearPlayerFocus() {
         playerFocusTarget = null;
+        focusOutsidePerceptionTicks = 0;
         if (getTarget() != null) setTarget(null);
         getNavigation().stop();
         if (resumeSitAfterFocus) setOrderedToSit(true);
@@ -1155,9 +1205,17 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         }
 
         LivingEntity target = this.getTarget();
+        boolean pursuingCompanion = target instanceof MinemonCreature && ((MinemonCreature) target).isTame();
         if (target == null || !target.isAlive() || target.isRemoved()
-                || target.distanceToSqr(this) > (double) WILD_MAX_CHASE_DISTANCE * WILD_MAX_CHASE_DISTANCE) {
+                || target instanceof MinemonCreature && ((MinemonCreature) target).isDefeated()
+                || (!pursuingCompanion && target.distanceToSqr(this) > (double) WILD_MAX_CHASE_DISTANCE * WILD_MAX_CHASE_DISTANCE)) {
             this.endWildAggression();
+            return;
+        }
+
+        if (pursuingCompanion) {
+            this.wildAggressionTicks = WILD_AGGRESSION_DURATION_TICKS;
+            this.wildUnreachableTicks = 0;
             return;
         }
 
@@ -1184,8 +1242,8 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     @Override public boolean doHurtTarget(net.minecraft.world.entity.Entity target) { return false; }
     public boolean projectileReady(){return !isDefeated();}
     public boolean canFireAt(LivingEntity target){
-        if(!canAttack(target)||!target.isAlive()||CombatGeometry.centerDistanceSquared(this,target)>combatRange()*combatRange()
-                ||CombatGeometry.horizontalCenterDistanceSquared(this,target)<49.0D||!getSensing().hasLineOfSight(target))return false;
+        if(!canAttack(target)||!target.isAlive()||CombatGeometry.centerDistanceSquared(this,target)>attackRange()*attackRange()
+                ||!getSensing().hasLineOfSight(target))return false;
         var start=new net.minecraft.world.phys.Vec3(getX(),getEyeY()-.1,getZ());
         return level.clip(new net.minecraft.world.level.ClipContext(start,target.getBoundingBox().getCenter(),net.minecraft.world.level.ClipContext.Block.COLLIDER,net.minecraft.world.level.ClipContext.Fluid.NONE,this)).getType()==net.minecraft.world.phys.HitResult.Type.MISS;
     }
@@ -1399,7 +1457,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     public boolean naturalBehaviorActive(){
         return this.naturalStartDelay==0&&(!this.isInWater()||this.isAquaticSpecies())&&!this.isNightResting()&&!this.isSleeping()&&!this.isOrderedToSit()&&!this.isPassenger()&&!this.isNoAi()
             &&!this.isDeadOrDying()&&this.getTarget()==null&&this.attackAnimationTicks<=0
-            &&(this.getOwner()==null||this.distanceToSqr(this.getOwner())<100.0D)
+            &&(this.getOwner()==null||this.isFreeMode()||this.distanceToSqr(this.getOwner())<100.0D)
             &&this.goalSelector.getAvailableGoals().stream().noneMatch(goal->goal.isRunning()
                 &&goal.getGoal() instanceof NaturalFollowOwnerGoal);
     }

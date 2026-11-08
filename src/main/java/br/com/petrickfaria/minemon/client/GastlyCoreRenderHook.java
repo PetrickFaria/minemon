@@ -13,10 +13,12 @@ import java.util.Comparator;
 /** Redraws Gastly after translucent particles so smoke cannot cover its opaque core. */
 @Mod.EventBusSubscriber(modid=Minemon.MOD_ID,bus=Mod.EventBusSubscriber.Bus.FORGE,value=Dist.CLIENT)
 public final class GastlyCoreRenderHook {
+    private static boolean redrawingCore;
     private static int redraws;
     private static double maxCameraDistanceForValidation;
     public static int redrawsForValidation(){return redraws;}
     public static double maxCameraDistanceForValidation(){return maxCameraDistanceForValidation;}
+    public static boolean isRedrawingCore(){return redrawingCore;}
 
     @SubscribeEvent
     public static void renderCoreAfterParticles(RenderLevelStageEvent event){
@@ -33,6 +35,13 @@ public final class GastlyCoreRenderHook {
             gastlys.add(gastly);
             maxCameraDistanceForValidation=Math.max(maxCameraDistanceForValidation,
                     Math.sqrt(gastly.distanceToSqr(camera.x,camera.y,camera.z)));
+            var bounds=gastly.getBoundingBox();
+            double dx=Math.max(0.0D,Math.max(bounds.minX-camera.x,camera.x-bounds.maxX));
+            double dy=Math.max(0.0D,Math.max(bounds.minY-camera.y,camera.y-bounds.maxY));
+            double dz=Math.max(0.0D,Math.max(bounds.minZ-camera.z,camera.z-bounds.maxZ));
+            double distanceToBodySqr=dx*dx+dy*dy+dz*dz;
+            if(distanceToBodySqr>br.com.petrickfaria.minemon.entity.GastlyAura.MAX_RENDER_DISTANCE
+                    *br.com.petrickfaria.minemon.entity.GastlyAura.MAX_RENDER_DISTANCE)gastlys.remove(gastly);
         }
         if(gastlys.isEmpty())return;
         if(br.com.petrickfaria.minemon.client.GastlySmokeParticle.auraSpritesReady()){
@@ -84,9 +93,12 @@ public final class GastlyCoreRenderHook {
             // and restore depth writes in case a particle batch left them off.
             com.mojang.blaze3d.systems.RenderSystem.enableDepthTest();
             com.mojang.blaze3d.systems.RenderSystem.depthMask(true);
-            dispatcher.render(gastly,gastly.getX()-camera.x,gastly.getY()-camera.y,gastly.getZ()-camera.z,
-                    gastly.getYRot(),event.getPartialTick(),event.getPoseStack(),buffers,
-                    dispatcher.getPackedLightCoords(gastly,event.getPartialTick()));
+            redrawingCore=true;
+            try{
+                dispatcher.render(gastly,gastly.getX()-camera.x,gastly.getY()-camera.y,gastly.getZ()-camera.z,
+                        gastly.getYRot(),event.getPartialTick(),event.getPoseStack(),buffers,
+                        dispatcher.getPackedLightCoords(gastly,event.getPartialTick()));
+            }finally{redrawingCore=false;}
         }
         if(!gastlys.isEmpty()){
             buffers.endBatch();

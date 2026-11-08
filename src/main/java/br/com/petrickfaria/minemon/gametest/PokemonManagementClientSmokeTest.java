@@ -187,6 +187,17 @@ public final class PokemonManagementClientSmokeTest {
                 return;
             }
             if (phase == 7) {
+                if (!(minecraft.screen instanceof PokemonInfoScreen screen)
+                        || screen.pokemonForSmokeTest() == null || !screen.pokemonForSmokeTest().isFreeMode()) {
+                    if (++ticks > 120) throw new IllegalStateException("Livre button did not activate free mode");
+                    return;
+                }
+                minecraft.gameMode.handleInventoryButtonClick(minecraft.player.containerMenu.containerId, 3);
+                phase = 10;
+                ticks = 0;
+                return;
+            }
+            if (phase == 10) {
                 if (!(minecraft.screen instanceof BlackListScreen screen)) {
                     if (++ticks > 120) throw new IllegalStateException("Black List button did not open the registry selector");
                     return;

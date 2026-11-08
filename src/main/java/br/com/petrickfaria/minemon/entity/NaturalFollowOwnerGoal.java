@@ -36,8 +36,13 @@ final class NaturalFollowOwnerGoal extends Goal {
         return false;
     }
 
-    @Override public boolean canUse() { return eligible(); }
-    @Override public boolean canContinueToUse() { return eligible() && owner == mob.getOwner(); }
+    @Override public boolean canUse() {
+        return eligible() && (!mob.isFreeMode() || mob.distanceToSqr(mob.getOwner()) > 25.0D * 25.0D);
+    }
+    @Override public boolean canContinueToUse() {
+        return eligible() && owner == mob.getOwner()
+                && (!mob.isFreeMode() || mob.distanceToSqr(owner) > 24.0D * 24.0D);
+    }
     @Override public void start() { owner = mob.getOwner(); mob.setFollowingOwner(true); mob.stopSpontaneousRun(); running = false; moving = mob.distanceToSqr(owner) > 25.0D; speed = 0.8D; recalculate = 0; }
     @Override public boolean requiresUpdateEveryTick() { return true; }
     @Override public void tick() {

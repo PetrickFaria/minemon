@@ -9,7 +9,6 @@ import net.minecraft.world.phys.Vec3;
 
 /** Ranged-only combat with pathfinding to a safe firing position. */
 final class ElementalCombatGoal extends Goal {
-    private static final double MIN_DISTANCE = 7.0D;
     private final MinemonCreature pokemon;
     private int repositionCooldown;
 
@@ -46,7 +45,8 @@ final class ElementalCombatGoal extends Goal {
         }
 
         double distance = Math.sqrt(CombatGeometry.horizontalCenterDistanceSquared(pokemon, target));
-        if (distance < MIN_DISTANCE) {
+        double safeDistance = Math.max(1.0D, Math.min(7.0D, pokemon.attackRange() - 1.0D));
+        if (distance < safeDistance) {
             reposition(target, true);
             return;
         }
@@ -59,14 +59,14 @@ final class ElementalCombatGoal extends Goal {
 
         // Hold position throughout the cooldown when the target remains in a
         // valid firing lane. Reposition only for range or line-of-sight loss.
-        if (distance > pokemon.combatRange() || !pokemon.getSensing().hasLineOfSight(target)) {
+        if (distance > pokemon.attackRange() || !pokemon.getSensing().hasLineOfSight(target)) {
             reposition(target, false);
         } else {
             pokemon.getNavigation().stop();
         }
     }
 
-    private boolean keepsSafeDistance(net.minecraft.world.level.pathfinder.Path path, LivingEntity target) {
+    private boolean keepsSafeDistance(net.minecraft.world.level.pathfinder.Path path, LivingEntity target, double minimumDistance) {
         Vec3 targetCenter = target.getBoundingBox().getCenter();
         double previousDistance = horizontalDistance(pokemon.position(), targetCenter);
         for (int i = 0; i < path.getNodeCount(); i++) {
@@ -78,8 +78,8 @@ final class ElementalCombatGoal extends Goal {
             for (int sample = 1; sample <= samples; sample++) {
                 Vec3 point = start.lerp(end, sample / (double)samples);
                 double distance = horizontalDistance(point, targetCenter);
-                if (distance < MIN_DISTANCE && !(previousDistance < MIN_DISTANCE && distance > previousDistance)) return false;
-                if (previousDistance < MIN_DISTANCE && distance < previousDistance) return false;
+                if (distance < minimumDistance && !(previousDistance < minimumDistance && distance > previousDistance)) return false;
+                if (previousDistance < minimumDistance && distance < previousDistance) return false;
                 previousDistance = distance;
             }
         }
@@ -94,7 +94,8 @@ final class ElementalCombatGoal extends Goal {
         if (away.lengthSqr() < 1.0E-6D) away = new Vec3(1.0D, 0.0D, 0.0D);
         away = away.normalize();
 
-        double desired = retreat ? MIN_DISTANCE + 1.5D : Math.min(pokemon.combatRange() - 1.0D, 12.0D);
+        double safeDistance = Math.max(1.0D, Math.min(7.0D, pokemon.attackRange() - 1.0D));
+        double desired = retreat ? safeDistance + 1.0D : Math.min(pokemon.attackRange() - 1.0D, 12.0D);
         // Prefer the nearest safe point on the desired radius, then try both
         // sides of it so ordinary pathfinding can work around obstacles.
         double[] angles = {0.0D, 0.65D, -0.65D, 1.3D, -1.3D, Math.PI};
@@ -111,7 +112,7 @@ final class ElementalCombatGoal extends Goal {
             BlockPos destination = new BlockPos((int)Math.floor(destinationX),
                     (int)Math.floor(pokemon.getY()), (int)Math.floor(destinationZ));
             var path = navigation.createPath(destination, 0);
-            if (path != null && path.canReach() && keepsSafeDistance(path, target)) {
+            if (path != null && path.canReach() && keepsSafeDistance(path, target, safeDistance)) {
                 navigation.moveTo(path, 1.0D);
                 return;
             }

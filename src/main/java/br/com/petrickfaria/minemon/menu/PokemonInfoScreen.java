@@ -23,6 +23,7 @@ public final class PokemonInfoScreen extends AbstractContainerScreen<PokemonInfo
     private final List<Button> evolutionButtons = new ArrayList<>();
     private Button followButton;
     private Button sitButton;
+    private Button freeButton;
 
     public PokemonInfoScreen(PokemonInfoMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
@@ -42,25 +43,28 @@ public final class PokemonInfoScreen extends AbstractContainerScreen<PokemonInfo
         sitButton = addRenderableWidget(new Button(leftPos + 93, y, 70, 20, Component.literal(
                 menu.pokemon() != null && menu.pokemon().isOrderedToSit() ? "Sentado" : "Sentar"),
                 button -> sendButton(1)));
-        addRenderableWidget(new Button(leftPos + 172, y, 70, 20, Component.literal("Black List"),
+        freeButton = addRenderableWidget(new Button(leftPos + 172, y, 70, 20,
+                Component.literal(menu.pokemon() != null && menu.pokemon().isFreeMode() ? "Livre ✓" : "Livre"),
                 button -> sendButton(2)));
+        addRenderableWidget(new Button(leftPos + 93, topPos + 198, 70, 18, Component.literal("Black List"),
+                button -> sendButton(3)));
         MinemonCreature pokemon = menu.pokemon();
         List<PokecSpecies.Entry> options = menu.evolutionOptions();
         boolean ready = pokemon != null && !options.isEmpty()
                 && pokemon.getPokemonLevel() >= PokemonEvolutionRules.requiredLevel(pokemon.getSpeciesSlug());
         if (ready) {
-            addRenderableWidget(new Button(leftPos + 83, topPos + 198, 90, 18, Component.literal("Evoluir"), button -> {
-                if (options.size() == 1) sendButton(3);
+            addRenderableWidget(new Button(leftPos + 83, topPos + 220, 90, 18, Component.literal("Evoluir"), button -> {
+                if (options.size() == 1) sendButton(4);
                 else {
                     choosingEvolution = !choosingEvolution;
                     evolutionButtons.forEach(option -> option.visible = choosingEvolution);
                 }
             }));
-            int optionY = topPos + 221;
+            int optionY = topPos + 240;
             for (int i = 0; i < options.size(); i++) {
                 final int index = i;
                 Button choice = new Button(leftPos + 8 + i * 80, optionY, 78, 18,
-                        Component.literal(options.get(i).name()), button -> sendButton(3 + index));
+                        Component.literal(options.get(i).name()), button -> sendButton(4 + index));
                 choice.visible = false;
                 evolutionButtons.add(addRenderableWidget(choice));
             }
@@ -100,20 +104,19 @@ public final class PokemonInfoScreen extends AbstractContainerScreen<PokemonInfo
         String title = String.format(java.util.Locale.ROOT, "%03d - %s", species.number(), species.name());
         font.draw(pose, title, leftPos + (imageWidth - font.width(title)) / 2.0F, topPos + 17, 0xFF303030);
         float maxHealth = pokemon.getMaxHealth();
-        double attack = pokemon.getAttribute(Attributes.ATTACK_DAMAGE) == null ? 0.0D
-                : pokemon.getAttribute(Attributes.ATTACK_DAMAGE).getValue();
         font.draw(pose, "Vida:", leftPos + 18, topPos + 44, 0xFF404040);
         float healthHeight=drawHeartValue(pose,leftPos+54,topPos+41,pokemon.getHealth(),maxHealth,false,188);
         int damageY=topPos+Math.max(58,(int)Math.ceil(41+healthHeight+5));
         font.draw(pose, "Dano:", leftPos + 18, damageY+2, 0xFF404040);
         float damageHeight=drawHeartValue(pose,leftPos+53,damageY,pokemon.getAttributeValue(Attributes.ATTACK_DAMAGE),
                 pokemon.getAttributeValue(Attributes.ATTACK_DAMAGE),true,91);
-        font.draw(pose, "Alcance: " + formatRange(pokemon.combatRange()), leftPos + 151, damageY+2, 0xFF404040);
+        font.draw(pose, "Ataque: " + formatRange(pokemon.attackRange()), leftPos + 151, damageY+2, 0xFF404040);
         int detailsY=damageY+Math.max(13,(int)Math.ceil(damageHeight))+4;
         font.draw(pose, "Estágio: " + evolutionStage(pokemon.getSpeciesSlug()), leftPos + 18, detailsY, 0xFF404040);
         font.draw(pose, "Raridade: " + Component.translatable("rarity.minemon_gen1."+br.com.petrickfaria.minemon.entity.PokemonProgression.rarityKey(pokemon.getPokemonRarity())).getString(), leftPos + 151, detailsY, 0xFF404040);
+        font.draw(pose, "Percepção: " + formatRange(pokemon.perceptionRange()), leftPos + 18, detailsY + 10, 0xFF404040);
 
-        int barX = leftPos + 37, barY = topPos + Math.max(119,detailsY-topPos+22);
+        int barX = leftPos + 37, barY = topPos + Math.max(134,detailsY-topPos+31);
         int needed = pokemon.getPokemonXpToNextLevel();
         float progress = needed == 0 ? 1.0F : Math.min(1.0F, (float)(pokemon.getPokemonExperienceExact() / needed));
         RenderSystem.setShaderTexture(0, ICONS);
@@ -141,7 +144,7 @@ public final class PokemonInfoScreen extends AbstractContainerScreen<PokemonInfo
         RenderSystem.setShaderColor(black?0.03F:1.0F,black?0.03F:1.0F,black?0.03F:1.0F,1.0F);
         for(int i=0;i<count;i++){
             double hp=current-i*2.0D;
-            int u=hp>=2.0D?16:hp>=1.0D?25:52;
+            int u=heartSpriteU(hp);
             int row=i/perRow,column=i%perRow;
             pose.pushPose();pose.translate(x+column*9.0F*scale,y+row*9.0F*scale,0);pose.scale(scale,scale,1.0F);
             GuiComponent.blit(pose,0,0,u,0,9,9,256,256);
@@ -149,6 +152,12 @@ public final class PokemonInfoScreen extends AbstractContainerScreen<PokemonInfo
         }
         RenderSystem.setShaderColor(1,1,1,1);
         return rows*9.0F*scale;
+    }
+
+    static int heartSpriteU(double remainingHealthPoints) {
+        if (remainingHealthPoints >= 2.0D) return 52; // full heart
+        if (remainingHealthPoints >= 1.0D) return 61; // half heart
+        return 16; // empty outline
     }
 
     private static String formatRange(double range){
@@ -174,6 +183,7 @@ public final class PokemonInfoScreen extends AbstractContainerScreen<PokemonInfo
         if (pokemon != null) {
             if (followButton != null) followButton.setMessage(Component.literal(pokemon.isOrderedToSit() ? "Seguir" : "Seguindo"));
             if (sitButton != null) sitButton.setMessage(Component.literal(pokemon.isOrderedToSit() ? "Sentado" : "Sentar"));
+            if (freeButton != null) freeButton.setMessage(Component.literal(pokemon.isFreeMode() ? "Livre ✓" : "Livre"));
         }
         super.render(pose, mouseX, mouseY, partialTick);
         renderTooltip(pose, mouseX, mouseY);
