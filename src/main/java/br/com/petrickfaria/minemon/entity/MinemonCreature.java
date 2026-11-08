@@ -1587,7 +1587,18 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         this.naturalCycle.tick(new BehaviorCycle.Observation(this.naturalBehaviorActive(),
             dryGround,
             band,wet,submerged,surface,dryGround,canDive));
-        if(previousPhase!=this.naturalCycle.phase()||previousStage!=this.naturalCycle.stage())this.getNavigation().stop();
+        if(previousPhase!=this.naturalCycle.phase()||previousStage!=this.naturalCycle.stage()){
+            this.getNavigation().stop();
+            // Alakazam's natural AIR phase is a stationary meditation hover.
+            // Remove residual ground-wander momentum when takeoff completes;
+            // keep its vertical lift untouched.
+            if(this.getSpeciesSlug().equals("alakazam")
+                    &&this.naturalCycle.phase()==BehaviorCycle.Phase.AIR
+                    &&previousPhase!=BehaviorCycle.Phase.AIR){
+                var velocity=this.getDeltaMovement();
+                this.setDeltaMovement(0.0D,velocity.y,0.0D);
+            }
+        }
         this.syncNaturalState();
     }
 
