@@ -94,7 +94,7 @@ final class TwelveAdjustmentChecks {
    if(attacker.doHurtTarget(cow))h.fail("A Pokémon must never deal melee damage at close range");
    cow.setPos(attacker.getX(),attacker.getY()+8,attacker.getZ());if(!attacker.canAttack(cow))h.fail("Target above eight blocks rejected");
    cow.setPos(attacker.getX(),attacker.getY()-8,attacker.getZ());if(!attacker.canAttack(cow))h.fail("Target below eight blocks rejected");
-   cow.setPos(attacker.getX(),attacker.getY()+20,attacker.getZ());if(attacker.canAttack(cow))h.fail("Target beyond 3D radius accepted");
+   cow.setPos(attacker.getX(),attacker.getY()+20,attacker.getZ());if(!attacker.canAttack(cow)||attacker.canFireAt(cow))h.fail("A focused target must remain authorized outside perception while staying beyond projectile range");
   }finally{
    for(var shot:level.getEntitiesOfClass(ElementalProjectile.class,attacker.getBoundingBox().inflate(16),shot->shot.getOwner()==attacker))shot.discard();
    cow.discard();blocker.discard();level.getServer().getWorldData().overworldData().setGameTime(originalTime);
