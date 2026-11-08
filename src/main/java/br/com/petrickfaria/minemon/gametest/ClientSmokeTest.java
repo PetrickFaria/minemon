@@ -700,12 +700,10 @@ public final class ClientSmokeTest {
     boolean aquatic=fixtureWater(slug);
     // Still, contained water is required for an actual zero-input idle:
     // exposed sources above the platform push large entities like Gyarados.
-    // Centered at z=4, Lapras extends to z=2.8 (width 2.4). The old
-    // z=3..5 pool intersected its hitbox with the solid rim at z=2,
-    // allowing collision step-up to select ground_idle during final rest.
-    // Leave clearance for the complete roster, not just the entity center.
-    for(int x=-9;x<=9;x++)for(int z=1;z<=7;z++){
-     boolean pool=aquatic&&x>=-8&&x<=8&&z>=2&&z<=6;
+    // The z=2..6 pool was only wide enough for Lapras; larger swimmers could
+    // hit the rim and step onto the platform, so leave a wider submerged lane.
+    for(int x=-9;x<=9;x++)for(int z=-2;z<=10;z++){
+     boolean pool=aquatic&&x>=-8&&x<=8&&z>=-1&&z<=9;
      level.setBlockAndUpdate(new BlockPos(x,96,z),Blocks.STONE.defaultBlockState());
      for(int y=97;y<=100;y++)level.setBlockAndUpdate(new BlockPos(x,y,z),(pool?Blocks.WATER:Blocks.STONE).defaultBlockState());
      level.setBlockAndUpdate(new BlockPos(x,101,z),Blocks.AIR.defaultBlockState());
