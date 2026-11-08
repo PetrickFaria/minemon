@@ -96,6 +96,18 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         double y = topPos + (LIST_Y + 13 + row * ROW_H + 2) * uiScale;
         return mouseClicked(x, y, 0) && selectedSlug.equals(slug);
     }
+    /** Changes only the preview selection for stress testing repeated model/controller initialization. */
+    public boolean selectPreviewSpeciesForSmokeTest(String slug) {
+        if (PokecSpecies.get(slug) == null) return false;
+        if (!slug.equals(selectedSlug)) {
+            selectedSlug = slug;
+            draggingPreview = false;
+            previewYaw = targetPreviewYaw = 23.0F;
+            previewPitch = targetPreviewPitch = -4.0F;
+            previews.clear();
+        }
+        return true;
+    }
     public boolean selectedSpeciesForSmokeTest(String slug) { return selectedSlug.equals(slug); }
     public boolean previewExistsForSmokeTest(String slug) { return previews.containsKey(slug); }
     public boolean speciesUnlockedForSmokeTest(String slug) { return syncedUnlocked.contains(slug); }

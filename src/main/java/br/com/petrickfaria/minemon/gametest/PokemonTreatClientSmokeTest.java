@@ -114,7 +114,7 @@ public final class PokemonTreatClientSmokeTest {
                 if(!(minecraft.screen instanceof PokecScreen screen))throw new IllegalStateException("PokéC closed during repeated preview selection check");
                 String slug=PREVIEW_SPECIES.get(previewSwitchIndex%PREVIEW_SPECIES.size());
                 if(!screen.selectedSpeciesForSmokeTest(slug)){
-                    if(!screen.clickSpeciesForSmokeTest(slug))throw new IllegalStateException("Could not switch preview to "+slug);
+                    if(!screen.selectPreviewSpeciesForSmokeTest(slug))throw new IllegalStateException("Could not switch preview to "+slug);
                     previewStableFrames=0;clientTicks=0;return;
                 }
                 if(!screen.previewExistsForSmokeTest(slug)){
