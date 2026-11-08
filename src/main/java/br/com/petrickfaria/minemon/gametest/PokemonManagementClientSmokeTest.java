@@ -18,6 +18,10 @@ public final class PokemonManagementClientSmokeTest {
     private static boolean done;
     private static volatile int entityId = -1;
     private static int phase;
+    private static PokemonInfoScreen blacklistParentForSmokeTest;
+    private static int blacklistEntityForSmokeTest = -1;
+    private static UUID blacklistUuidForSmokeTest;
+    private static java.util.Map<String, Boolean> blacklistOverridesForSmokeTest = java.util.Map.of();
     private static volatile int dewgongId=-1,gastlyId=-1;
     private static volatile boolean closedEyesSeen,openEyesSeen,awakeBlinkSeen;
     private static int auraState,auraLarge,auraSmall;
@@ -194,6 +198,10 @@ public final class PokemonManagementClientSmokeTest {
                 }
                 minecraft.gameMode.handleInventoryButtonClick(minecraft.player.containerMenu.containerId, 3);
                 var pokemon = screen.pokemonForSmokeTest();
+                blacklistParentForSmokeTest = screen;
+                blacklistEntityForSmokeTest = pokemon.getId();
+                blacklistUuidForSmokeTest = pokemon.getUUID();
+                blacklistOverridesForSmokeTest = pokemon.getBlackListOverrides();
                 screen.openBlackList(pokemon.getId(), pokemon.getUUID(), pokemon.getBlackListOverrides());
                 phase = 10;
                 ticks = 0;
@@ -201,6 +209,13 @@ public final class PokemonManagementClientSmokeTest {
             }
             if (phase == 10) {
                 if (!(minecraft.screen instanceof BlackListScreen screen)) {
+                    if (minecraft.player != null
+                            && minecraft.player.containerMenu instanceof net.minecraft.world.inventory.InventoryMenu
+                            && blacklistParentForSmokeTest != null && blacklistEntityForSmokeTest >= 0) {
+                        blacklistParentForSmokeTest.openBlackList(blacklistEntityForSmokeTest,
+                                blacklistUuidForSmokeTest, blacklistOverridesForSmokeTest);
+                        return;
+                    }
                     if (++ticks > 120) throw new IllegalStateException("Black List selector did not remain open; screen="
                             + (minecraft.screen == null ? "null" : minecraft.screen.getClass().getSimpleName()));
                     return;
