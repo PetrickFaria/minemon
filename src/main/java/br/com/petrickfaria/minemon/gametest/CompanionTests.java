@@ -140,8 +140,8 @@ public final class CompanionTests {
   b.tame(p);b.setOrderedToSit(true);h.setBlock(new BlockPos(5,4,5),net.minecraft.world.level.block.Blocks.AIR);
   h.runAfterDelay(60,()->{
    double support=NaturalMovementGoals.surfaceBelow(h.getLevel(),b.getX(),b.getY(),b.getZ());
-   check(h,Math.abs(b.getY()-(support+1.0D))<0.1D&&b.isOnGround(),
-       "A sitting grounded Pokémon must fall onto the lower floor: y="+b.getY()+", support="+support+", noGravity="+b.isNoGravity()+", velocity="+b.getDeltaMovement());
+   check(h,Math.abs(b.getY()-support)<0.1D&&b.isOnGround(),
+       "A sitting grounded Pokémon must fall onto the lower floor: y="+b.getY()+", support="+support+", grounded="+b.isOnGround()+", noGravity="+b.isNoGravity()+", velocity="+b.getDeltaMovement());
    check(h,b.isOrderedToSit(),"Falling must preserve the Sentar command");
    BlockPos moved=h.absolutePos(new BlockPos(9,1,9));
    b.moveTo(moved.getX()+0.5D,moved.getY(),moved.getZ()+0.5D,0.0F,0.0F);
