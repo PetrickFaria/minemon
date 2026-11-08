@@ -221,7 +221,9 @@ public final class PokemonManagementClientSmokeTest {
                     return;
                 }
                 if (!(minecraft.player.containerMenu instanceof PokemonInfoMenu))
-                    throw new IllegalStateException("Black List overlay closed the Pokémon status menu on the server");
+                    throw new IllegalStateException("Black List overlay closed the Pokémon status menu on the client: menu="
+                            + minecraft.player.containerMenu.getClass().getSimpleName() + " screen="
+                            + minecraft.screen.getClass().getSimpleName());
                 ResourceLocation zombie = net.minecraftforge.registries.ForgeRegistries.ENTITY_TYPES.getKey(net.minecraft.world.entity.EntityType.ZOMBIE);
                 ResourceLocation cow = net.minecraftforge.registries.ForgeRegistries.ENTITY_TYPES.getKey(net.minecraft.world.entity.EntityType.COW);
                 if (screen.rowCountForSmokeTest() == 0 || !screen.containsTypeForSmokeTest(zombie)
