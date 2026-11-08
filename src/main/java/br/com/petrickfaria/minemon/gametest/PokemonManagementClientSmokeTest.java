@@ -193,18 +193,15 @@ public final class PokemonManagementClientSmokeTest {
                     return;
                 }
                 minecraft.gameMode.handleInventoryButtonClick(minecraft.player.containerMenu.containerId, 3);
+                var pokemon = screen.pokemonForSmokeTest();
+                screen.openBlackList(pokemon.getId(), pokemon.getUUID(), pokemon.getBlackListOverrides());
                 phase = 10;
                 ticks = 0;
                 return;
             }
             if (phase == 10) {
                 if (!(minecraft.screen instanceof BlackListScreen screen)) {
-                    if (++ticks == 20 && minecraft.screen instanceof PokemonInfoScreen info
-                            && info.pokemonForSmokeTest() != null) {
-                        var pokemon = info.pokemonForSmokeTest();
-                        info.openBlackList(pokemon.getId(), pokemon.getUUID(), pokemon.getBlackListOverrides());
-                    }
-                    if (ticks > 120) throw new IllegalStateException("Black List selector did not open; screen="
+                    if (++ticks > 120) throw new IllegalStateException("Black List selector did not remain open; screen="
                             + (minecraft.screen == null ? "null" : minecraft.screen.getClass().getSimpleName()));
                     return;
                 }
