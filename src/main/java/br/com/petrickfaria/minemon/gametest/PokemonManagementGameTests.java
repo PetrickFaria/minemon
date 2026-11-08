@@ -202,10 +202,10 @@ public final class PokemonManagementGameTests {
         // The upper range cases extend beyond this compact structure. Clear a
         // narrow, level shot lane so this assertion measures projectile range,
         // rather than the arena's perimeter wall or ceiling.
-        int laneY=net.minecraft.core.BlockPos.containing(pokemon.getX(),pokemon.getY(),pokemon.getZ()).getY();
-        int laneZ=net.minecraft.core.BlockPos.containing(pokemon.getX(),pokemon.getY(),pokemon.getZ()).getZ();
-        for(int x=net.minecraft.core.BlockPos.containing(pokemon.getX(),0,pokemon.getZ()).getX()+1;
-                x<=net.minecraft.core.BlockPos.containing(pokemon.getX()+21.0D,0,pokemon.getZ()).getX();x++)
+        int laneY=new BlockPos(pokemon.getX(),pokemon.getY(),pokemon.getZ()).getY();
+        int laneZ=new BlockPos(pokemon.getX(),pokemon.getY(),pokemon.getZ()).getZ();
+        for(int x=new BlockPos(pokemon.getX(),0,pokemon.getZ()).getX()+1;
+                x<=new BlockPos(pokemon.getX()+21.0D,0,pokemon.getZ()).getX();x++)
             for(int y=laneY;y<=laneY+3;y++)
                 h.getLevel().setBlockAndUpdate(new BlockPos(x,y,laneZ),net.minecraft.world.level.block.Blocks.AIR.defaultBlockState());
         for(int level=1;level<=10;level++){
