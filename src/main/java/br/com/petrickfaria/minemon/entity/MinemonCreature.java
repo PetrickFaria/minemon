@@ -1396,7 +1396,10 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
 
     @Override
     public void registerControllers(AnimationData data) {
-        data.addAnimationController(new AnimationController<>(this, "movement", 4, this::animationPredicate));
+        // A detached preview starts directly in its species idle; there is no
+        // previous world pose to blend from. A four-tick startup transition can
+        // keep its mesh-measurement gate waiting on the shared renderer clock.
+        data.addAnimationController(new AnimationController<>(this, "movement", pokecPreview ? 0 : 4, this::animationPredicate));
         data.addAnimationController(new AnimationController<>(this, "blink", 0, this::blinkPredicate));
         data.addAnimationController(new AnimationController<>(this, "tail_flame", 0, this::tailFlamePredicate));
     }
