@@ -133,6 +133,14 @@ jobs:
           for shot in gastly-front gastly-right gastly-back gastly-left gastly-top gastly-bottom; do
             test -f "run/screenshots/ghost-line-1.74-${shot}.png"
           done
+      - name: Reopen saved Gastly world and validate aura twice
+        if: ${{ success() && github.event_name == 'push' && github.ref == 'refs/heads/fix/minemon-pending-eight-corrections' }}
+        run: |
+          for index in 1 2; do
+            python3 tools/prepare_client_world.py --reuse-world --ghost-line
+            ALSOFT_DRIVERS=null timeout --kill-after=30s 900s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeGhostLinePersistence -PgastlyReopenIndex="$index"
+            grep -F "PASS GASTLY PERSISTENCE REOPEN $index:" "run/gastly-persistence-reopen-$index.txt"
+          done
       - name: Capture runtime API diagnostics
         if: always()
         run: python3 tools/collect_diagnostics.py
