@@ -207,7 +207,7 @@ public final class CompanionTests {
   BlockPos ownerPosition=h.absolutePos(new BlockPos(1,1,1));
   owner.moveTo(ownerPosition.getX()+.5D,ownerPosition.getY(),ownerPosition.getZ()+.5D,0,0);
   MinemonCreature pokemon=h.spawn(ModEntities.SPECIES.get(airborne?"pidgey":"pikachu").get(),new BlockPos(5,airborne?2:1,4));
-  pokemon.tame(owner);pokemon.setPokemonLevel(10);pokemon.setNoAi(true);
+  pokemon.tame(owner);pokemon.setPokemonLevel(10);if(airborne)pokemon.setNoAi(true);
   pokemon.setBlackListOverride(new net.minecraft.resources.ResourceLocation("minecraft","zombie"),false);
   Cow target=h.spawn(EntityType.COW,new BlockPos(3,1,4));
   target.setNoAi(true);target.setNoGravity(true);keepCombatTargetAlive(target);
@@ -218,6 +218,7 @@ public final class CompanionTests {
       new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.LEATHER_HELMET));
   reference.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED).setBaseValue(.23D);
   h.runAfterDelay(5,()->{
+   if(airborne){
    // Both subjects start at rest facing the measured +X direction. Without
    // this, the companion follows its owner during setup and the flying turn
    // controller spends the measurement reversing inherited momentum, while
@@ -227,6 +228,7 @@ public final class CompanionTests {
    pokemon.setYRot(-90);pokemon.yRotO=-90;pokemon.yBodyRot=pokemon.yBodyRotO=-90;
    reference.setYRot(-90);reference.yRotO=-90;reference.yBodyRot=reference.yBodyRotO=-90;
    pokemon.setNoAi(false);
+   }
    pokemon.focusTrainerDefenseTarget(target);
    var pokemonStart=pokemon.position();var zombieStart=reference.position();
    reference.getNavigation().moveTo(reference.getX()+8.0D,reference.getY(),reference.getZ(),1.0D);

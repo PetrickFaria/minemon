@@ -118,14 +118,14 @@ jobs:
             test -f "run/screenshots/pokec-preview-${species}.png"
           done
       - name: Validate Pidgey and bird flight visuals on the real client
-        if: ${{ !cancelled() && steps.compile.outcome == 'success' && ((github.event_name == 'workflow_dispatch' && inputs.full_suite) || (github.event_name == 'push' && github.ref == 'refs/heads/fix/minemon-pending-eight-corrections')) }}
+        if: ${{ !cancelled() && steps.compile.outcome == 'success' && ((github.event_name == 'workflow_dispatch' && inputs.full_suite) || (github.event_name == 'push' && (github.ref == 'refs/heads/fix/minemon-pending-eight-corrections' || github.ref == 'refs/heads/fix/minemon-eight-corrections-validation'))) }}
         run: |
           python3 tools/prepare_client_world.py
           ALSOFT_DRIVERS=null timeout --kill-after=30s 600s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeAir -PclientSmokeSpecies=pidgey,spearow,fearow,gastly,haunter,gengar
           grep -F 'PASS ROSTER' run/client-validation.txt
           grep -F 'ARTICULATION PROFILES:' run/client-validation.txt
       - name: Validate Gastly core and aura occlusion on the real client
-        if: ${{ !cancelled() && steps.compile.outcome == 'success' && github.event_name == 'push' && github.ref == 'refs/heads/fix/minemon-pending-eight-corrections' }}
+        if: ${{ !cancelled() && steps.compile.outcome == 'success' && github.event_name == 'push' && (github.ref == 'refs/heads/fix/minemon-pending-eight-corrections' || github.ref == 'refs/heads/fix/minemon-eight-corrections-validation') }}
         run: |
           python3 tools/prepare_client_world.py --ghost-line
           ALSOFT_DRIVERS=null timeout --kill-after=30s 900s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeGhostLine
@@ -134,7 +134,7 @@ jobs:
             test -f "run/screenshots/ghost-line-1.74-${shot}.png"
           done
       - name: Reopen saved Gastly world and validate aura twice
-        if: ${{ !cancelled() && github.event_name == 'push' && github.ref == 'refs/heads/fix/minemon-pending-eight-corrections' }}
+        if: ${{ !cancelled() && github.event_name == 'push' && (github.ref == 'refs/heads/fix/minemon-pending-eight-corrections' || github.ref == 'refs/heads/fix/minemon-eight-corrections-validation') }}
         run: |
           for index in 1 2; do
             python3 tools/prepare_client_world.py --reuse-world --ghost-line

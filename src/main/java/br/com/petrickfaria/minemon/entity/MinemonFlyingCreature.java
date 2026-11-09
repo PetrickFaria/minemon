@@ -23,20 +23,9 @@ public final class MinemonFlyingCreature extends MinemonCreature {
  private int recoveryNotLandingSamples;
  private int recoveryBelowMinimumSamples;
  private boolean defensiveTravel;
- private boolean defensiveAirRetreat;
  private float defensiveAcceleration;
  @Override public void moveRelative(float acceleration,net.minecraft.world.phys.Vec3 input){
   super.moveRelative(defensiveTravel?defensiveAcceleration:acceleration,input);
- }
- @Override public void move(net.minecraft.world.entity.MoverType type,net.minecraft.world.phys.Vec3 movement){
-  if(defensiveAirRetreat&&type==net.minecraft.world.entity.MoverType.SELF){
-   double horizontalSpeed=Math.sqrt(movement.x*movement.x+movement.z*movement.z);
-   // The flight controller applies another deceleration after this movement
-   // vector; 0.206 matches the zombie's measured 20-tick displacement.
-   double zombiePace=0.206D;
-   if(horizontalSpeed>zombiePace){double scale=zombiePace/horizontalSpeed;movement=new net.minecraft.world.phys.Vec3(movement.x*scale,movement.y,movement.z*scale);}
-  }
-  super.move(type,movement);
  }
  private boolean fixedFloater(){
   return java.util.Set.of("abra","porygon","kakuna","metapod","geodude").contains(this.getSpeciesSlug());
@@ -148,23 +137,19 @@ public final class MinemonFlyingCreature extends MinemonCreature {
    // Copy that 0.23 reference and the support friction, rather than multiplying
    // a flying-speed attribute through air's much smaller 0.02 acceleration.
    defensiveAcceleration=.23F*(.21600002F/(groundFriction*groundFriction*groundFriction));
-   if(!wasGrounded){
-    // Latest server GameTest measured 1.653 blocks in 20 ticks versus the
-    // zombie's 2.146. Scale the movement input by their measured ratio so the
-    // effective displacement, rather than only the configured attribute,
-    // matches the vanilla reference.
-    defensiveAcceleration*=.952F;
-   }
+   // Match vanilla walking's speed-scaled forward input and its 0.98
+   // damping. The acceleration above supplies the independent speed term.
    var horizontal=new net.minecraft.world.phys.Vec3(input.x,0,input.z);
-   // Keep this as a direction vector. defensiveAcceleration already supplies
-   // the zombie's 0.23 movement speed; scaling the vector by 0.23 as well
-   // applies that speed twice and cuts the measured retreat distance roughly
-   // in half.
-   if(horizontal.lengthSqr()>1.0E-8D)input=horizontal.normalize();
+   if(horizontal.lengthSqr()>1.0E-8D)input=horizontal.normalize().scale(.23D*.98D);
   }
   defensiveTravel=retreat;
-  defensiveAirRetreat=retreat&&!wasGrounded;
-  try{super.travel(input);}finally{defensiveTravel=false;defensiveAirRetreat=false;}
+  try{super.travel(input);}finally{defensiveTravel=false;}
+  if(retreat&&!wasGrounded){
+   // Air travel has already applied 0.91 drag. Supply only the missing
+   // support friction to match vanilla's 0.91 * friction walking momentum.
+   var velocity=this.getDeltaMovement();
+   this.setDeltaMovement(velocity.x*groundFriction,velocity.y,velocity.z*groundFriction);
+  }
   // FlyingMoveControl can replace the pre-travel lift with a downward input
   // while an entity is waking from a landed sleep pose. Reassert the active
   // cycle's floor after travel so the entity actually resumes its flight band.
