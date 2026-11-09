@@ -1415,10 +1415,14 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         String attack=SpeciesAssetIndex.clip(slug,"physical_attack","physical");
         if(attack==null) attack=SpeciesAssetIndex.clip(slug,"attack","attack");
         if (this.pokecPreview) {
-            this.pokecIdleReady=controller.getAnimationState()==AnimationState.Running;
             // Keep the selector on this species' own idle clip even though its
             // detached preview entity does not participate in normal world AI.
             clip=definition.idle();
+            // The preview smoke test verifies the selected idle clip directly.
+            // GeckoLib can report Stopped between render updates even while
+            // that loop is selected, so controller state is not a reliable
+            // readiness gate for measuring the rendered mesh.
+            this.pokecIdleReady=clip!=null;
         } else if (this.isDefeated()) {
             clip = SpeciesAssetIndex.clip(slug,"night_sleep","ground_idle");
         } else if (this.isDeadOrDying()) {
@@ -1629,6 +1633,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     /** Enables a PokéC-only preview state without changing world entities. */
     public void setPokecPreview(boolean preview) {
         this.pokecPreview=preview;
+        this.pokecIdleReady=false;
         if(preview){
             setNoAi(true);setNoGravity(true);setDeltaMovement(0.0D,0.0D,0.0D);
             setSleeping(false);setOrderedToSit(false);
