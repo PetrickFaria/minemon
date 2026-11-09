@@ -40,6 +40,9 @@ public final class PreviewMeshBounds {
     }
     public static void begin(PreviewMeshBounds sample){active=sample;}
     public static void end(){active=null;}
+    public String diagnostic(){
+        return "vertices="+points.size()+",bounds="+minX+","+minY+","+minZ+".."+maxX+","+maxY+","+maxZ;
+    }
     public static VertexConsumer wrap(VertexConsumer target){
         var sample=active;
         if(sample==null)return target;

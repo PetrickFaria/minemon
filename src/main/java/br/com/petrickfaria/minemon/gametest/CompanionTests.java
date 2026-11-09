@@ -608,8 +608,8 @@ public final class CompanionTests {
      var bird=birds.get(i);
      check(h,bird.isOrderedToSit()&&!bird.isSleeping(),"Commanded flyer must remain awake and sitting");
      double hover=bird.getY()-NaturalMovementGoals.surfaceBelow(h.getLevel(),bird.getX(),bird.getY(),bird.getZ());
-     check(h,Math.abs(hover-1.0D)<0.2D,"Sentar must hold an airborne flyer at one block above support");
-     check(h,bird.position().subtract(anchors.get(i)).horizontalDistanceSqr()<1.0E-6D,"Sentar must hold the flyer's horizontal position");
+     check(h,Math.abs(hover-1.0D)<0.2D,bird.getSpeciesSlug()+" must hold an airborne flyer at one block above support; altitude="+hover+", position="+bird.position());
+     check(h,bird.position().subtract(anchors.get(i)).lengthSqr()<1.0E-6D,bird.getSpeciesSlug()+" must hold the flyer's full 3D position; start="+anchors.get(i)+", now="+bird.position());
      bird.setOrderedToSit(false);
     }
     h.runAfterDelay(60,()->{

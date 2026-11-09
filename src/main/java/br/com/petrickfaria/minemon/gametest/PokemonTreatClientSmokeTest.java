@@ -159,7 +159,8 @@ public final class PokemonTreatClientSmokeTest {
                     return;
                 }
                 if(!screen.previewCalibratedForSmokeTest(slug)){
-                    if(++clientTicks>80)throw new IllegalStateException("Visible idle mesh did not calibrate for "+slug);
+                    if(++clientTicks>80)throw new IllegalStateException("Visible idle mesh did not calibrate for "+slug+": "
+                            +screen.previewCalibrationDiagnosticsForSmokeTest(slug));
                     return;
                 }
                 if(++previewStableFrames<3)return;

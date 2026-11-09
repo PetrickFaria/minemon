@@ -928,8 +928,11 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
                 sitAnchorX = getX(); sitAnchorZ = getZ();
             }
             if (isFlyingSpecies()) {
-                double anchorY=getTarget()!=null&&getTarget().isAlive()&&canAttack(getTarget())
-                        ?naturalSurface()+combatFlightHeight():sitAnchorY;
+                // Sitting is a position lock even when combat has a selected
+                // target. setOrderedToSit establishes a safe one-block hover;
+                // combat must not pull the seated Pokémon down to its combat
+                // flight band or otherwise move it from that anchor.
+                double anchorY=sitAnchorY;
                 if (horizontalDistanceToSqr(sitAnchorX, sitAnchorZ) > 1.0E-8D
                         || Math.abs(getY() - anchorY) > 1.0E-8D)
                     setPos(sitAnchorX, anchorY, sitAnchorZ);

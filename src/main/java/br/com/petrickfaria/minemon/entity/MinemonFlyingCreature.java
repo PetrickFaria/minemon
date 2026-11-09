@@ -152,7 +152,11 @@ public final class MinemonFlyingCreature extends MinemonCreature {
     // Calibrated against the 20-tick vanilla zombie displacement GameTest.
     // With equal input, the airborne move controller covered 2.93 blocks
     // versus 2.15 for the zombie; compensate for that travel path's lower drag.
-    defensiveAcceleration*=.733F;
+    // Latest server GameTest measured 1.653 blocks in 20 ticks versus the
+    // zombie's 2.146. Scale the movement input by their measured ratio so the
+    // effective displacement, rather than only the configured attribute,
+    // matches the vanilla reference.
+    defensiveAcceleration*=.952F;
    }
    var horizontal=new net.minecraft.world.phys.Vec3(input.x,0,input.z);
    // Keep this as a direction vector. defensiveAcceleration already supplies

@@ -46,9 +46,13 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
     private final java.util.Map<String,Integer> previewMeshFrames=new java.util.HashMap<>();
     private final java.util.Set<String> calibratedPreviews=new java.util.HashSet<>();
     private final java.util.Set<String> rasterFramedPreviews=new java.util.HashSet<>();
+    private final java.util.Map<String,String> previewCalibrationDiagnostics=new java.util.HashMap<>();
     private boolean lastPreviewFrameWithinTarget;
     private boolean lastPreviewFrameOutsideTarget;
     public boolean previewCalibratedForSmokeTest(String slug){return rasterFramedPreviews.contains(slug);}
+    public String previewCalibrationDiagnosticsForSmokeTest(String slug){
+        return previewCalibrationDiagnostics.getOrDefault(slug,"no idle mesh measurement recorded");
+    }
     private PreviewBounds.Fit frameVisiblePixels(PreviewBounds.Fit current){
         lastPreviewFrameWithinTarget=false;
         lastPreviewFrameOutsideTarget=false;
@@ -537,7 +541,7 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
             return;
         }
         MinemonCreature entity = previews.computeIfAbsent(species.slug(), slug -> {
-            calibratedPreviews.remove(slug);rasterFramedPreviews.remove(slug);previewMeshFrames.remove(slug);previewFits.remove(slug);
+            calibratedPreviews.remove(slug);rasterFramedPreviews.remove(slug);previewMeshFrames.remove(slug);previewFits.remove(slug);previewCalibrationDiagnostics.remove(slug);
             var type = ModEntities.SPECIES.get(slug);
             if (type == null) return null;
             MinemonCreature preview = type.get().create(mc.level);
@@ -595,8 +599,12 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
                     else if(lastPreviewFrameWithinTarget)rasterFramedPreviews.add(species.slug());
                 }
             }
-            if(entity.isPokecIdleReady()&&!calibratedPreviews.contains(species.slug())&&previewMeshFrames.merge(species.slug(),1,Integer::sum)>=8){
-                var calibrated=measured.fit();
+            if(entity.isPokecIdleReady()&&!calibratedPreviews.contains(species.slug())){
+                int frames=previewMeshFrames.merge(species.slug(),1,Integer::sum);
+                var calibrated=frames>=8?measured.fit():null;
+                previewCalibrationDiagnostics.put(species.slug(),"idleReady=true,frames="+frames+","+measured.diagnostic()
+                        +",fit="+calibrated+",rasterFramed="+rasterFramedPreviews.contains(species.slug())
+                        +",lastRasterWithin="+lastPreviewFrameWithinTarget+",lastRasterOutside="+lastPreviewFrameOutsideTarget);
                 if(calibrated!=null){
                     previewFits.put(species.slug(),calibrated);calibratedPreviews.add(species.slug());
                     if(Boolean.getBoolean("minemon.clientSmokeTest"))System.out.println("[POKEC MESH] "+species.slug()+" "+calibrated);
