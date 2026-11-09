@@ -132,8 +132,12 @@ public final class GastlySmokeParticle extends TextureSheetParticle {
         public void begin(com.mojang.blaze3d.vertex.BufferBuilder buffer,
                           net.minecraft.client.renderer.texture.TextureManager textureManager) {
             ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT.begin(buffer, textureManager);
-            // Keep the normal depth test, but let the opaque Gastly core redraw over its aura.
-            com.mojang.blaze3d.systems.RenderSystem.depthMask(false);
+            // Gastly's opaque cutout entity has already populated the depth
+            // buffer. Keep depth writes on for this overlay so aura quads behind
+            // the nucleus fail the depth test; the nucleus itself is rendered
+            // once by the normal entity pass.
+            com.mojang.blaze3d.systems.RenderSystem.enableDepthTest();
+            com.mojang.blaze3d.systems.RenderSystem.depthMask(true);
         }
 
         @Override

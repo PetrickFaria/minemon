@@ -10,24 +10,20 @@ import net.minecraftforge.fml.common.Mod;
 import java.util.ArrayList;
 import java.util.Comparator;
 
-/** Redraws Gastly after translucent particles so smoke cannot cover its opaque core. */
+/** Draws Gastly's aura against the existing opaque core depth without redrawing the body. */
 @Mod.EventBusSubscriber(modid=Minemon.MOD_ID,bus=Mod.EventBusSubscriber.Bus.FORGE,value=Dist.CLIENT)
 public final class GastlyCoreRenderHook {
-    private static boolean redrawingCore;
-    private static int redraws;
+    private static int auraFrames;
     private static double maxCameraDistanceForValidation;
-    public static int redrawsForValidation(){return redraws;}
+    public static int auraFramesForValidation(){return auraFrames;}
     public static double maxCameraDistanceForValidation(){return maxCameraDistanceForValidation;}
-    public static boolean isRedrawingCore(){return redrawingCore;}
 
     @SubscribeEvent
     public static void renderCoreAfterParticles(RenderLevelStageEvent event){
         if(event.getStage()!=RenderLevelStageEvent.Stage.AFTER_PARTICLES)return;
         Minecraft mc=Minecraft.getInstance();
         if(mc.level==null||mc.player==null)return;
-        var dispatcher=mc.getEntityRenderDispatcher();
         var camera=event.getCamera().getPosition();
-        var buffers=mc.renderBuffers().bufferSource();
         var gastlys=new ArrayList<MinemonCreature>();
         for(var entity:mc.level.entitiesForRendering()){
             if(!(entity instanceof MinemonCreature gastly)||!gastly.getSpeciesSlug().equals("gastly")
@@ -85,24 +81,8 @@ public final class GastlyCoreRenderHook {
                         com.mojang.blaze3d.systems.RenderSystem.applyModelViewMatrix();
                     }
                 }
+                if(Boolean.getBoolean("minemon.clientSmokeTest"))auraFrames++;
             }
-        }
-        for(var gastly:gastlys){
-            // The opaque cutout core is drawn over its own translucent smoke.
-            // Keep the world depth test active so walls still occlude the model,
-            // and restore depth writes in case a particle batch left them off.
-            com.mojang.blaze3d.systems.RenderSystem.enableDepthTest();
-            com.mojang.blaze3d.systems.RenderSystem.depthMask(true);
-            redrawingCore=true;
-            try{
-                dispatcher.render(gastly,gastly.getX()-camera.x,gastly.getY()-camera.y,gastly.getZ()-camera.z,
-                        gastly.getYRot(),event.getPartialTick(),event.getPoseStack(),buffers,
-                        dispatcher.getPackedLightCoords(gastly,event.getPartialTick()));
-            }finally{redrawingCore=false;}
-        }
-        if(!gastlys.isEmpty()){
-            buffers.endBatch();
-            if(Boolean.getBoolean("minemon.clientSmokeTest"))redraws++;
         }
     }
     private static void addDraw(ArrayList<AuraDraw> draws,MinemonCreature owner,int slot,boolean small,

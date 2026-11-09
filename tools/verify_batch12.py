@@ -2,7 +2,7 @@
 """Verify native Cobblemon batch 12 and exact cumulative preservation through #110."""
 import argparse,json,math,struct,subprocess,zipfile
 from pathlib import Path
-from verify_approved_asset_delta import is_approved_prior_asset_delta, pokec_resource_paths
+from verify_approved_asset_delta import approved_prior_articulation_profile, is_approved_prior_asset_delta, pokec_resource_paths
 
 ROOT=Path(__file__).resolve().parents[1];BASE='0816533addee80e9e17a684c94bed399f4a9488f'
 R=ROOT/'src/main/resources';MP='data/minemon_gen1/runtime_species.json';VP='data/minemon_gen1/animation_validation_profiles.json'
@@ -72,6 +72,7 @@ for slug,old_profile in old_profiles.items():
  if slug=='alakazam':
   expected_profile=dict(old_profile)
   expected_profile['idle']=['foot_left','foot_right','left_lower_leg','right_lower_leg','hand_left','hand_right']
+ expected_profile=approved_prior_articulation_profile(slug,expected_profile)
  assert profiles.get(slug)==expected_profile,'Earlier articulation profile changed: '+slug
 assert set(profiles)==set(old_profiles)|set(EXPECTED)|set(BATCH13)|set(BATCH14)|set(BATCH15)|set(BATCH16),'Unexpected or missing articulation profile'
 report=json.loads((ROOT/'docs/animation-audit/minemon-gen1-batch12-source-evidence.json').read_text())

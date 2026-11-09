@@ -12,9 +12,10 @@ import net.minecraftforge.event.TickEvent;
 /** Loads all treat and PokéCoin models in a real Minecraft client and verifies the creative tab. */
 public final class PokemonTreatClientSmokeTest {
     private static final java.util.List<String> PREVIEW_SPECIES=java.util.List.of(
-            "caterpie","charmander","charizard","onix","moltres","squirtle","gastly");
-    private static final java.util.Set<String> PREVIEW_SCREENSHOTS=java.util.Set.of("caterpie","charmander","charizard","onix","moltres");
-    private static final int PREVIEW_SELECTIONS=21;
+            "caterpie","charmander","charizard","onix","moltres","squirtle","gastly","bulbasaur");
+    private static final java.util.Set<String> PREVIEW_SCREENSHOTS=java.util.Set.of(
+            "caterpie","charmander","charizard","onix","moltres","squirtle","bulbasaur");
+    private static final int PREVIEW_SELECTIONS=24;
     private static int clientTicks;
     private static boolean done;
     private static boolean worldOpening;
@@ -90,7 +91,7 @@ public final class PokemonTreatClientSmokeTest {
                     if (!br.com.petrickfaria.minemon.item.PokeballItem.isOccupied(held)) return;
                     java.nio.file.Files.writeString(java.nio.file.Path.of("client-validation-treats.txt"),
                             "[TREAT CLIENT] PASS: grass treat resources, PokéC locked/unlocked preview rules, and live Pokébola entity interaction captured an owned creature\n"
-                                    + "PASS POKÉC PREVIEW: 21 repeated species selections used species idle clips; standardized Caterpie/Charmander/Charizard/Onix/Moltres bounds; consistent 23° three-quarter yaw and 10° downward tilt.\n"
+                                    + "PASS POKÉC PREVIEW: 24 repeated species selections used species idle clips; standardized Squirtle/Bulbasaur/Charmander and large-species bounds; consistent 23° three-quarter yaw and 10° downward tilt.\n"
                                     + "PASS POKÉC SCROLLBAR: conventional wheel, track click, drag outside the track in both directions, boundary clamping, release, and selection preservation.\n"
                                     + "PokéCoin and Pokébola models, translations, textures, and creative entries loaded\n");
                     done = true;
@@ -146,7 +147,7 @@ public final class PokemonTreatClientSmokeTest {
                 float[] orientation=screen.previewOrientationForSmokeTest();
                 if(Math.abs(orientation[0]-23)>0.01||Math.abs(orientation[1]+4)>0.01)
                     throw new IllegalStateException("PokéC preview initial three-quarter orientation was not reset consistently");
-                for(String slug:java.util.List.of("caterpie","charmander","charizard","onix","moltres"))
+                for(String slug:java.util.List.of("caterpie","charmander","charizard","onix","moltres","squirtle","bulbasaur"))
                     if(Math.abs(screen.previewNormalizedSizeForSmokeTest(slug)-76.0)>0.001)
                         throw new IllegalStateException("PokéC preview size was not standardized for "+slug);
                 if(!screen.dragPreviewForSmokeTest())throw new IllegalStateException("Pokec drag did not rotate both axes");

@@ -94,6 +94,28 @@ jobs:
           ALSOFT_DRIVERS=null timeout --kill-after=30s 600s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokePokemonManagement
           grep -F 'PASS: owned Pokémon status screen, Pokédex header, XP level sync, Seguir/Sentar controls, and registry-backed Black List defaults' run/client-validation-pokemon-management.txt
           grep -F 'PASS BLACKLIST SCROLLBAR:' run/client-validation-pokemon-management.txt
+      - name: Validate PokéC preview orientation and species framing on the real client
+        run: |
+          grep -F 'PASS POKÉC PREVIEW:' run/client-validation-treats.txt
+          for species in squirtle bulbasaur charmander; do
+            test -f "run/screenshots/pokec-preview-${species}.png"
+          done
+      - name: Validate Pidgey and bird flight visuals on the real client
+        if: ${{ (github.event_name == 'workflow_dispatch' && inputs.full_suite) || (github.event_name == 'push' && github.ref == 'refs/heads/fix/minemon-pending-eight-corrections') }}
+        run: |
+          python3 tools/prepare_client_world.py
+          ALSOFT_DRIVERS=null timeout --kill-after=30s 600s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeAir -PclientSmokeSpecies=pidgey,spearow,fearow,gastly,haunter,gengar
+          grep -F 'PASS ROSTER' run/client-validation.txt
+          grep -F 'ARTICULATION PROFILES:' run/client-validation.txt
+      - name: Validate Gastly core and aura occlusion on the real client
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/fix/minemon-pending-eight-corrections' }}
+        run: |
+          python3 tools/prepare_client_world.py --ghost-line
+          ALSOFT_DRIVERS=null timeout --kill-after=30s 900s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeGhostLine
+          grep -F 'PASS GHOST LINE CLIENT:' run/client-validation-ghost-line.txt
+          for shot in gastly-front gastly-right gastly-back gastly-left gastly-top gastly-bottom; do
+            test -f "run/screenshots/ghost-line-1.74-${shot}.png"
+          done
       - name: Capture runtime API diagnostics
         if: always()
         run: python3 tools/collect_diagnostics.py

@@ -2,7 +2,7 @@
 """Verify Batch 10 assets and preservation on later cumulative batch branches."""
 import argparse,json,math,struct,subprocess,zipfile
 from pathlib import Path
-from verify_approved_asset_delta import is_approved_prior_asset_delta, pokec_resource_paths
+from verify_approved_asset_delta import approved_prior_articulation_profile, is_approved_prior_asset_delta, pokec_resource_paths
 
 ROOT=Path(__file__).resolve().parents[1]
 BASE='b7b81592f4e2e0097a32f9342e3890f7257182e5'
@@ -86,6 +86,7 @@ for slug,old_profile in old_profiles.items():
  if slug=='alakazam':
   expected_profile=dict(old_profile)
   expected_profile['idle']=['foot_left','foot_right','left_lower_leg','right_lower_leg','hand_left','hand_right']
+ expected_profile=approved_prior_articulation_profile(slug,expected_profile)
  assert profiles.get(slug)==expected_profile,'An earlier profile changed: '+slug
 assert json.loads(base_file('src/main/resources/'+VP))==old_profiles
 

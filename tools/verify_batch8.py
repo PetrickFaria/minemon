@@ -2,7 +2,7 @@
 """Verify exclusive batch 8 resources, cumulative preservation, and the packaged JAR."""
 import argparse, json, math, re, struct, subprocess, sys, zipfile
 from pathlib import Path
-from verify_approved_asset_delta import is_approved_prior_asset_delta, pokec_resource_paths
+from verify_approved_asset_delta import approved_prior_articulation_profile, is_approved_prior_asset_delta, pokec_resource_paths
 
 ROOT=Path(__file__).resolve().parents[1]
 BASE='b77eac9c38aa0d6a1d35c3cfab36a707ac6cab24'
@@ -81,6 +81,7 @@ for slug,old_profile in old_profiles.items():
  if slug=='alakazam':
   expected_profile=dict(old_profile)
   expected_profile['idle']=['foot_left','foot_right','left_lower_leg','right_lower_leg','hand_left','hand_right']
+ expected_profile=approved_prior_articulation_profile(slug,expected_profile)
  assert profiles.get(slug)==expected_profile,'Earlier articulation profile changed: '+slug
 assert set(profiles)==set(old_profiles)|set(EXPECTED[:end-70])|{s for s in BATCH9+BATCH10+BATCH11+BATCH12+BATCH13+BATCH14+BATCH15+BATCH16 if s in profiles},'Unexpected articulation profile set'
 
@@ -177,6 +178,10 @@ source_fire_frames={f'src/main/resources/assets/minemon/textures/pokemon/{slug}_
 allowed_paths.update(source_fire_frames)
 allowed_paths.update({
  'src/main/resources/assets/minemon/animations/alakazam_cobblemon_1_8_2/alakazam.animation.json',
+ # Existing, separately validated feature assets carried by this line:
+ # Gengar's requested ground-walk clip and the reviewed 3-D capture-ball item.
+ 'src/main/resources/assets/minemon/animations/gengar/gengar.animation.json',
+ 'src/main/resources/assets/minemon/models/item/pokeball_3d.json',
  'src/main/resources/assets/minemon/geo/seaking/seaking_female.geo.json',
  'src/main/resources/assets/minemon/geo/seaking/seaking_male.geo.json',
 })

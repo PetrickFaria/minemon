@@ -2,7 +2,7 @@
 """Verify Cobblemon 1.8.2 Batch 15 and exact preservation of approved #001–#140."""
 import argparse, json, math, struct, subprocess, zipfile
 from pathlib import Path
-from verify_approved_asset_delta import is_approved_prior_asset_delta, pokec_resource_paths
+from verify_approved_asset_delta import approved_prior_articulation_profile, is_approved_prior_asset_delta, pokec_resource_paths
 
 ROOT=Path(__file__).resolve().parents[1]
 BASE='76fcb3074cc65c62dea6b94c291de90925494e95'
@@ -69,6 +69,7 @@ assert set(profiles)==set(old_profiles)|set(EXPECTED)|{'mew'},'Unexpected or mis
 for slug,profile in old_profiles.items():
  expected_profile=dict(profile)
  if slug=='rapidash':expected_profile['run']=[*profile['run'],'fire_mane_head_flame']
+ expected_profile=approved_prior_articulation_profile(slug,expected_profile)
  assert profiles[slug]==expected_profile,'Earlier profile changed: '+slug
 report=json.loads((ROOT/'docs/animation-audit/minemon-gen1-batch15-source-evidence.json').read_text())
 assert report['batch']==15 and report['range']==[141,150]

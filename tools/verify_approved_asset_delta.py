@@ -98,6 +98,10 @@ TREAT_RESOURCES = frozenset(
 # Exact previously reviewed source blobs. The legacy batch baseline predates these
 # approved changes; byte-specific entries keep future edits subject to the audit.
 APPROVED_PRIOR_ASSET_BLOBS = {
+    # Gengar ground-walk clip added for the approved leg-driven walk behavior.
+    "assets/minemon/animations/gengar/gengar.animation.json": "8505b740e8e810be3bf171d370a304dc82497e65",
+    # Reviewed low-poly 3-D Pokébola inventory model.
+    "assets/minemon/models/item/pokeball_3d.json": "72dac857c9fb4bd22249aabdc7e02d3f69e16c71",
     # Minemon 1.71 pose approved in commit 00a3bb54338036885b02e58dcf83c42b26020041.
     "assets/minemon/animations/alakazam_cobblemon_1_8_2/alakazam.animation.json": "b170a8296d7b5ed065c6d699294649e2f5401752",
     # Gengar ground-walk clip added and client-validated in Minemon 1.73 commit 4595aa4d9053201afcc3a2bd9db77c5ef15591de.
@@ -123,6 +127,15 @@ def is_approved_prior_asset_delta(path, content):
         return False
     blob_header = b"blob " + str(len(content)).encode("ascii") + bytes([0])
     return hashlib.sha1(blob_header + content).hexdigest() == expected_blob
+
+
+def approved_prior_articulation_profile(slug, profile):
+    """Apply only the separately approved native Poliwrath water transition profile."""
+    if slug != "poliwrath":
+        return profile
+    approved = dict(profile)
+    approved["water_pose_transition"] = ["body"]
+    return approved
 
 
 def pokec_resource_paths():

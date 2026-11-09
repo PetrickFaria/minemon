@@ -269,12 +269,12 @@ public final class PokemonManagementClientSmokeTest {
                 if(ticks==32){
                     auraLarge=br.com.petrickfaria.minemon.client.GastlySmokeParticle.largeSpawnsForValidation();
                     auraSmall=br.com.petrickfaria.minemon.client.GastlySmokeParticle.smallSpawnsForValidation();
-                    auraFrames=br.com.petrickfaria.minemon.client.GastlyCoreRenderHook.redrawsForValidation();
+                    auraFrames=br.com.petrickfaria.minemon.client.GastlyCoreRenderHook.auraFramesForValidation();
                 }
                 if(ticks==64){
                     int large=br.com.petrickfaria.minemon.client.GastlySmokeParticle.largeSpawnsForValidation()-auraLarge;
                     int small=br.com.petrickfaria.minemon.client.GastlySmokeParticle.smallSpawnsForValidation()-auraSmall;
-                    int frames=br.com.petrickfaria.minemon.client.GastlyCoreRenderHook.redrawsForValidation()-auraFrames;
+                    int frames=br.com.petrickfaria.minemon.client.GastlyCoreRenderHook.auraFramesForValidation()-auraFrames;
                     if(frames<=0||large!=frames*5||small!=frames*7)
                         throw new IllegalStateException("Gastly real-client aura render rate mismatch in state "+auraState
                                 +": frames="+frames+" large="+large+" small="+small);
