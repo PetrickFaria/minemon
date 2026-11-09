@@ -75,8 +75,6 @@ public final class PokemonInfoScreen extends AbstractContainerScreen<PokemonInfo
     }
 
     private void sendButton(int action) {
-        if (Boolean.getBoolean("minemon.clientSmokeTest"))
-            com.mojang.logging.LogUtils.getLogger().info("[POKEMON SCREEN BUTTON] action={} container={}", action, menu.containerId);
         if (action == 3) {
             MinemonNetwork.requestBlackList(menu.pokemon());
             return;
@@ -91,26 +89,6 @@ public final class PokemonInfoScreen extends AbstractContainerScreen<PokemonInfo
         else
             blackListOverlay.replaceOverrides(overrides);
         blackListOverlay.initializeOverlay(minecraft, width, height);
-    }
-
-    private void logBlackListLifecycle(String callback) {
-        if (!Boolean.getBoolean("minemon.clientSmokeTest")) return;
-        com.mojang.logging.LogUtils.getLogger().info("[STATUS SCREEN LIFECYCLE] callback={} screen={} menu={} overlay={}",
-                callback, minecraft.screen == null ? "null" : minecraft.screen.getClass().getSimpleName(),
-                minecraft.player == null ? "no-player" : minecraft.player.containerMenu.getClass().getSimpleName(),
-                blackListOverlay != null);
-    }
-
-    @Override public void removed() {
-        logBlackListLifecycle("removed");
-        if (Boolean.getBoolean("minemon.clientSmokeTest"))
-            new Exception("[STATUS SCREEN REMOVED CALLER]").printStackTrace();
-        super.removed();
-    }
-
-    @Override public void onClose() {
-        logBlackListLifecycle("onClose");
-        super.onClose();
     }
 
     public void closeBlackListOverlay(BlackListScreen overlay) {

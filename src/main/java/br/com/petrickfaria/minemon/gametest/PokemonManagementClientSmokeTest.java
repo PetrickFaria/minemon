@@ -208,11 +208,11 @@ public final class PokemonManagementClientSmokeTest {
                     return;
                 }
                 screen.mouseClicked(screen.getGuiLeft() + 128, screen.getGuiTop() + 207, 0);
-                phase = 10;
+                phase = 11;
                 ticks = 0;
                 return;
             }
-            if (phase == 10) {
+            if (phase == 11) {
                 if (!(minecraft.screen instanceof PokemonInfoScreen parent) || !parent.hasBlackListOverlay()) {
                     if (++ticks > 120) throw new IllegalStateException("Black List overlay did not remain open inside the status screen; screen="
                             + (minecraft.screen == null ? "null" : minecraft.screen.getClass().getSimpleName()));

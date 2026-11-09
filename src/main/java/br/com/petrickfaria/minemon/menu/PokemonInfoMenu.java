@@ -14,7 +14,6 @@ import net.minecraft.world.item.ItemStack;
 /** Owner-only, server-authoritative status and command menu for one companion. */
 public final class PokemonInfoMenu extends AbstractContainerMenu {
     private final MinemonCreature pokemon;
-    private boolean validationFailureLogged;
 
     public PokemonInfoMenu(int id, Inventory inventory, FriendlyByteBuf data) {
         this(id, inventory, inventory.player.level.getEntity(data.readVarInt()) instanceof MinemonCreature found ? found : null);
@@ -31,11 +30,6 @@ public final class PokemonInfoMenu extends AbstractContainerMenu {
     }
 
     @Override public boolean clickMenuButton(Player player, int button) {
-        if (Boolean.getBoolean("minemon.clientSmokeTest")) {
-            com.mojang.logging.LogUtils.getLogger().info("[POKEMON MENU CLICK] side={} button={} pokemon={} sit={} valid={} player={}",
-                    player.level.isClientSide ? "client" : "server", button, pokemon == null ? "null" : pokemon.getId(),
-                    pokemon != null && pokemon.isOrderedToSit(), pokemon != null && stillValid(player), player.getUUID());
-        }
         if (!(player instanceof ServerPlayer serverPlayer) || !stillValid(player) || pokemon == null) return false;
         if (button == 0) {
             pokemon.setFreeMode(false);
@@ -49,8 +43,6 @@ public final class PokemonInfoMenu extends AbstractContainerMenu {
             pokemon.setOrderedToSit(true);
             pokemon.setTarget(null);
             pokemon.getNavigation().stop();
-            if (Boolean.getBoolean("minemon.clientSmokeTest"))
-                com.mojang.logging.LogUtils.getLogger().info("[POKEMON MENU CLICK] server sit-after=true pokemon={}", pokemon.getId());
             return true;
         }
         if (button == 2) {
@@ -75,31 +67,12 @@ public final class PokemonInfoMenu extends AbstractContainerMenu {
         return false;
     }
 
-    @Override public void removed(Player player) {
-        if (Boolean.getBoolean("minemon.clientSmokeTest"))
-            com.mojang.logging.LogUtils.getLogger().info("[POKEMON MENU REMOVED] side={} menu={} screen={} distanceSquared={}",
-                    player.level.isClientSide ? "client" : "server", getClass().getSimpleName(),
-                    net.minecraft.client.Minecraft.getInstance().screen == null ? "null"
-                            : net.minecraft.client.Minecraft.getInstance().screen.getClass().getSimpleName(),
-                    pokemon == null ? -1.0D : player.distanceToSqr(pokemon));
-        if (Boolean.getBoolean("minemon.clientSmokeTest"))
-            new Exception("[POKEMON MENU REMOVED CALLER]").printStackTrace();
-        super.removed(player);
-    }
+    @Override public void removed(Player player) { super.removed(player); }
 
     @Override public ItemStack quickMoveStack(Player player, int slot) { return ItemStack.EMPTY; }
     @Override public boolean stillValid(Player player) {
         boolean valid = pokemon != null && pokemon.isAlive() && !pokemon.isRemoved() && pokemon.isTame()
                 && pokemon.isOwnedBy(player) && pokemon.level == player.level && player.distanceToSqr(pokemon) <= 64.0D;
-        if (!valid && !validationFailureLogged && Boolean.getBoolean("minemon.clientSmokeTest")) {
-            validationFailureLogged = true;
-            com.mojang.logging.LogUtils.getLogger().info("[POKEMON MENU INVALID] side={} pokemon={} alive={} removed={} tame={} owned={} sameLevel={} distanceSquared={}",
-                    player.level.isClientSide ? "client" : "server", pokemon == null ? "null" : pokemon.getId(),
-                    pokemon != null && pokemon.isAlive(), pokemon == null || pokemon.isRemoved(),
-                    pokemon != null && pokemon.isTame(), pokemon != null && pokemon.isOwnedBy(player),
-                    pokemon != null && pokemon.level == player.level,
-                    pokemon == null ? -1.0D : player.distanceToSqr(pokemon));
-        }
         return valid;
     }
 }
