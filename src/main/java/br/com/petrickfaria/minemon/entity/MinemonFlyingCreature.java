@@ -138,7 +138,11 @@ public final class MinemonFlyingCreature extends MinemonCreature {
    // a flying-speed attribute through air's much smaller 0.02 acceleration.
    defensiveAcceleration=.23F*(.21600002F/(groundFriction*groundFriction*groundFriction));
    var horizontal=new net.minecraft.world.phys.Vec3(input.x,0,input.z);
-   if(horizontal.lengthSqr()>1.0E-8D)input=horizontal.normalize().scale(.23D*.98D);
+   // Keep this as a direction vector. defensiveAcceleration already supplies
+   // the zombie's 0.23 movement speed; scaling the vector by 0.23 as well
+   // applies that speed twice and cuts the measured retreat distance roughly
+   // in half.
+   if(horizontal.lengthSqr()>1.0E-8D)input=horizontal.normalize();
   }
   defensiveTravel=retreat;
   try{super.travel(input);}finally{defensiveTravel=false;}
