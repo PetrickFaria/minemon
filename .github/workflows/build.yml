@@ -86,11 +86,13 @@ jobs:
           grep -F 'PASS ROCKET SCROLLBAR:' run/client-validation-rocket.txt
       - name: Validate treat and PokéCoin models on the real client
         run: |
+          python3 tools/prepare_client_world.py
           ALSOFT_DRIVERS=null timeout --kill-after=30s 600s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeTreats
           grep -F '[TREAT CLIENT] PASS:' run/client-validation-treats.txt
           grep -F 'PokéCoin and Pokébola models, translations, textures, and creative entries loaded' run/client-validation-treats.txt
       - name: Validate Pokémon management screens on the real client
         run: |
+          python3 tools/prepare_client_world.py
           ALSOFT_DRIVERS=null timeout --kill-after=30s 600s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokePokemonManagement
           grep -F 'PASS: owned Pokémon status screen, Pokédex header, XP level sync, Seguir/Sentar controls, and registry-backed Black List defaults' run/client-validation-pokemon-management.txt
           grep -F 'PASS BLACKLIST SCROLLBAR:' run/client-validation-pokemon-management.txt

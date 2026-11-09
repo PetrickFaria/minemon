@@ -53,7 +53,9 @@ public final class PokemonTreatClientSmokeTest {
                 var server = minecraft.getSingleplayerServer();
                 if (server == null || minecraft.player == null || minecraft.level == null)
                     throw new IllegalStateException("Pokébola interaction smoke requires the integrated client world");
-                if (pokeballFixtureEntityId < 0) {
+                if (pokeballFixtureEntityId == -1) {
+                    minecraft.player.closeContainer();
+                    minecraft.setScreen(null);
                     pokeballFixtureEntityId = -2;
                     server.execute(() -> {
                         var owner = server.getPlayerList().getPlayer(minecraft.player.getUUID());
@@ -77,10 +79,12 @@ public final class PokemonTreatClientSmokeTest {
                 }
                 if (pokeballFixtureEntityId == -2) return;
                 var target = minecraft.level.getEntity(pokeballFixtureEntityId);
-                if (!pokeballInteractionSent && target instanceof br.com.petrickfaria.minemon.entity.MinemonCreature) {
-                    minecraft.setScreen(null);
-                    minecraft.player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,
-                            new net.minecraft.world.item.ItemStack(ModItems.POKEBALL.get()));
+                if(!pokeballInteractionSent&&clientTicks>400)
+                    throw new IllegalStateException("Capture fixture did not synchronize to the client: entity="+target
+                            +", held="+minecraft.player.getMainHandItem());
+                if (!pokeballInteractionSent && target instanceof br.com.petrickfaria.minemon.entity.MinemonCreature
+                        && minecraft.player.getMainHandItem().getItem()==ModItems.POKEBALL.get()
+                        && !br.com.petrickfaria.minemon.item.PokeballItem.isOccupied(minecraft.player.getMainHandItem())) {
                     minecraft.gameMode.interact(minecraft.player, target, net.minecraft.world.InteractionHand.MAIN_HAND);
                     pokeballInteractionSent = true;
                     clientTicks = 0;
@@ -104,6 +108,11 @@ public final class PokemonTreatClientSmokeTest {
                     server.execute(() -> {
                         var owner = server.getPlayerList().getPlayer(minecraft.player.getUUID());
                         var level = server.getLevel(net.minecraft.world.level.Level.OVERWORLD);
+                        if(clientTicks%100==0&&owner!=null&&level!=null){
+                            var fixture=level.getEntity(pokeballFixtureEntityId);
+                            System.out.println("[TREAT CLIENT] capture state: held="+owner.getMainHandItem()+", fixture="+fixture
+                                    +", target="+(fixture instanceof br.com.petrickfaria.minemon.entity.MinemonCreature p?p.getTarget():null));
+                        }
                         if (owner != null && level != null && br.com.petrickfaria.minemon.item.PokeballItem.isOccupied(owner.getMainHandItem())
                                 && level.getEntity(pokeballFixtureEntityId) == null) pokeballCaptureVerified = true;
                     });
