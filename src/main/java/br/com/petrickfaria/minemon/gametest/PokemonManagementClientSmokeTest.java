@@ -22,6 +22,7 @@ public final class PokemonManagementClientSmokeTest {
     private static int blacklistEntityForSmokeTest = -1;
     private static UUID blacklistUuidForSmokeTest;
     private static java.util.Map<String, Boolean> blacklistOverridesForSmokeTest = java.util.Map.of();
+    private static boolean blacklistPreparationRequested;
     private static volatile int dewgongId=-1,gastlyId=-1;
     private static volatile boolean closedEyesSeen,openEyesSeen,awakeBlinkSeen;
     private static int auraState,auraLarge,auraSmall;
@@ -191,13 +192,26 @@ public final class PokemonManagementClientSmokeTest {
                 return;
             }
             if (phase == 7) {
-                if (!(minecraft.screen instanceof PokemonInfoScreen screen)
-                        || screen.pokemonForSmokeTest() == null || !screen.pokemonForSmokeTest().isFreeMode()) {
-                    if (++ticks > 120) throw new IllegalStateException("Livre button did not activate free mode");
+                if (!(minecraft.screen instanceof PokemonInfoScreen screen) || screen.pokemonForSmokeTest() == null) {
+                    if (++ticks > 120) throw new IllegalStateException("Pokémon status screen closed before Black List validation");
+                    return;
+                }
+                var pokemon = screen.pokemonForSmokeTest();
+                if (!blacklistPreparationRequested) {
+                    if (!pokemon.isFreeMode()) {
+                        if (++ticks > 120) throw new IllegalStateException("Livre button did not activate free mode");
+                        return;
+                    }
+                    minecraft.gameMode.handleInventoryButtonClick(minecraft.player.containerMenu.containerId, 1);
+                    blacklistPreparationRequested = true;
+                    ticks = 0;
+                    return;
+                }
+                if (!pokemon.isOrderedToSit()) {
+                    if (++ticks > 120) throw new IllegalStateException("Pokémon did not sit before Black List validation");
                     return;
                 }
                 minecraft.gameMode.handleInventoryButtonClick(minecraft.player.containerMenu.containerId, 3);
-                var pokemon = screen.pokemonForSmokeTest();
                 blacklistParentForSmokeTest = screen;
                 blacklistEntityForSmokeTest = pokemon.getId();
                 blacklistUuidForSmokeTest = pokemon.getUUID();
