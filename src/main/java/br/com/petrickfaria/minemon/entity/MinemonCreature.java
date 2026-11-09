@@ -1585,7 +1585,9 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         boolean wet=this.isInWater();
         boolean flying=this.isFlyingSpecies();
         double altitude=flying?this.getY()-this.naturalSurface():0.0D;
-        if (flying && this.getTarget() != null && canAttack(this.getTarget())) {
+        // The sitting anchor already enforces its safe hover. Combat descent
+        // must not move an ordered sitter after the position-lock step.
+        if (flying && !this.isOrderedToSit() && this.getTarget() != null && canAttack(this.getTarget())) {
             double allowedAltitude = combatFlightHeight();
             double excess = altitude - allowedAltitude;
             if (excess > 0.01D) {
