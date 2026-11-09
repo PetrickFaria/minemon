@@ -31,7 +31,7 @@ public final class CompanionTests {
   for(ServerPlayer p:TEST_PLAYERS)p.doTick();
  }
  private static void check(GameTestHelper h,boolean condition,String message) { if (!condition) h.fail(message); }
- private static void keepCombatTargetAlive(Cow target) {
+ private static void keepCombatTargetAlive(net.minecraft.world.entity.LivingEntity target) {
   target.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).setBaseValue(100.0D);
   target.setHealth(100.0F);
  }
