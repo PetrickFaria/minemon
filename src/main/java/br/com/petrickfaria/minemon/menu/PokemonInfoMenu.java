@@ -82,6 +82,8 @@ public final class PokemonInfoMenu extends AbstractContainerMenu {
                     net.minecraft.client.Minecraft.getInstance().screen == null ? "null"
                             : net.minecraft.client.Minecraft.getInstance().screen.getClass().getSimpleName(),
                     pokemon == null ? -1.0D : player.distanceToSqr(pokemon));
+        if (Boolean.getBoolean("minemon.clientSmokeTest"))
+            new Exception("[POKEMON MENU REMOVED CALLER]").printStackTrace();
         super.removed(player);
     }
 

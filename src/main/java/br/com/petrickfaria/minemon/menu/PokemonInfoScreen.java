@@ -103,6 +103,8 @@ public final class PokemonInfoScreen extends AbstractContainerScreen<PokemonInfo
 
     @Override public void removed() {
         logBlackListLifecycle("removed");
+        if (Boolean.getBoolean("minemon.clientSmokeTest"))
+            new Exception("[STATUS SCREEN REMOVED CALLER]").printStackTrace();
         super.removed();
     }
 

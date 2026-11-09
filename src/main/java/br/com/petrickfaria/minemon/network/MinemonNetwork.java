@@ -100,6 +100,9 @@ public final class MinemonNetwork {
             context.enqueueWork(() -> {
                 if (player == null || !validPokemonMenu(player, m.entityId, m.pokemon)) return;
                 MinemonCreature pokemon = ((PokemonInfoMenu) player.containerMenu).pokemon();
+                if (Boolean.getBoolean("minemon.clientSmokeTest"))
+                    com.mojang.logging.LogUtils.getLogger().info("[BLACK LIST OPEN REQUEST] accepted container={} entity={}",
+                            player.containerMenu.containerId, pokemon.getId());
                 syncBlackList(player, pokemon, true);
             });
             context.setPacketHandled(true);
