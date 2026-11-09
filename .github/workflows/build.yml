@@ -79,38 +79,42 @@ jobs:
           python3 tools/prepare_gametest_world.py
           timeout 600s ./gradlew --no-daemon runGameTestServer
       - name: Validate Rocket villager profession and uniform on the real client
+        if: ${{ !cancelled() && steps.compile.outcome == 'success' }}
         run: |
           python3 tools/prepare_client_world.py
           ALSOFT_DRIVERS=null timeout --kill-after=30s 600s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeRocketProfession
           grep -F 'PASS ROCKET CLIENT:' run/client-validation-rocket.txt
           grep -F 'PASS ROCKET SCROLLBAR:' run/client-validation-rocket.txt
       - name: Validate treat and PokéCoin models on the real client
+        if: ${{ !cancelled() && steps.compile.outcome == 'success' }}
         run: |
           python3 tools/prepare_client_world.py
           ALSOFT_DRIVERS=null timeout --kill-after=30s 600s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeTreats
           grep -F '[TREAT CLIENT] PASS:' run/client-validation-treats.txt
           grep -F 'PokéCoin and Pokébola models, translations, textures, and creative entries loaded' run/client-validation-treats.txt
       - name: Validate Pokémon management screens on the real client
+        if: ${{ !cancelled() && steps.compile.outcome == 'success' }}
         run: |
           python3 tools/prepare_client_world.py
           ALSOFT_DRIVERS=null timeout --kill-after=30s 600s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokePokemonManagement
           grep -F 'PASS: owned Pokémon status screen, Pokédex header, XP level sync, Seguir/Sentar controls, and registry-backed Black List defaults' run/client-validation-pokemon-management.txt
           grep -F 'PASS BLACKLIST SCROLLBAR:' run/client-validation-pokemon-management.txt
       - name: Validate PokéC preview orientation and species framing on the real client
+        if: ${{ !cancelled() && steps.compile.outcome == 'success' }}
         run: |
           grep -F 'PASS POKÉC PREVIEW:' run/client-validation-treats.txt
           for species in squirtle bulbasaur charmander; do
             test -f "run/screenshots/pokec-preview-${species}.png"
           done
       - name: Validate Pidgey and bird flight visuals on the real client
-        if: ${{ (github.event_name == 'workflow_dispatch' && inputs.full_suite) || (github.event_name == 'push' && github.ref == 'refs/heads/fix/minemon-pending-eight-corrections') }}
+        if: ${{ !cancelled() && steps.compile.outcome == 'success' && ((github.event_name == 'workflow_dispatch' && inputs.full_suite) || (github.event_name == 'push' && github.ref == 'refs/heads/fix/minemon-pending-eight-corrections')) }}
         run: |
           python3 tools/prepare_client_world.py
           ALSOFT_DRIVERS=null timeout --kill-after=30s 600s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeAir -PclientSmokeSpecies=pidgey,spearow,fearow,gastly,haunter,gengar
           grep -F 'PASS ROSTER' run/client-validation.txt
           grep -F 'ARTICULATION PROFILES:' run/client-validation.txt
       - name: Validate Gastly core and aura occlusion on the real client
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/fix/minemon-pending-eight-corrections' }}
+        if: ${{ !cancelled() && steps.compile.outcome == 'success' && github.event_name == 'push' && github.ref == 'refs/heads/fix/minemon-pending-eight-corrections' }}
         run: |
           python3 tools/prepare_client_world.py --ghost-line
           ALSOFT_DRIVERS=null timeout --kill-after=30s 900s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeGhostLine
