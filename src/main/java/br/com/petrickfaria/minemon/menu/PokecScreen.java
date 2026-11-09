@@ -47,7 +47,7 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
     private final java.util.Set<String> calibratedPreviews=new java.util.HashSet<>();
     private final java.util.Set<String> rasterFramedPreviews=new java.util.HashSet<>();
     private boolean lastPreviewFrameWithinTarget;
-    private boolean lastPreviewFrameOversized;
+    private boolean lastPreviewFrameOutsideTarget;
     public boolean previewCalibratedForSmokeTest(String slug){return rasterFramedPreviews.contains(slug);}
     private PreviewBounds.Fit frameVisiblePixels(PreviewBounds.Fit current){
         lastPreviewFrameWithinTarget=false;
@@ -69,9 +69,9 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
             double target=48*pixels;
             double dx=(minX+maxX)*.5-(leftPos+268*uiScale)*mc.getWindow().getGuiScale();
             double dy=(minY+maxY)*.5-(topPos+88*uiScale)*mc.getWindow().getGuiScale();
-            lastPreviewFrameOversized=extent>target*1.30||Math.abs(dx)>target*.25||Math.abs(dy)>target*.25;
             lastPreviewFrameWithinTarget=extent>=target*.65&&extent<=target*1.30
                     &&Math.abs(dx)<=target*.25&&Math.abs(dy)<=target*.25;
+            lastPreviewFrameOutsideTarget=!lastPreviewFrameWithinTarget;
             double rx=dx/(pixels*current.scale()),ry=-dy/(pixels*current.scale());
             double yaw=Math.toRadians(previewYaw),pitch=Math.toRadians(previewPitch-6);
             double y=Math.cos(pitch)*ry,z=-Math.sin(pitch)*ry;
@@ -590,8 +590,8 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
                 var framed=frameVisiblePixels(fit);
                 if(framed!=null){
                     boolean alreadyFramed=rasterFramedPreviews.contains(species.slug());
-                    if(!alreadyFramed||lastPreviewFrameOversized)previewFits.put(species.slug(),framed);
-                    if(lastPreviewFrameOversized)rasterFramedPreviews.remove(species.slug());
+                    if(!alreadyFramed||lastPreviewFrameOutsideTarget)previewFits.put(species.slug(),framed);
+                    if(lastPreviewFrameOutsideTarget)rasterFramedPreviews.remove(species.slug());
                     else if(lastPreviewFrameWithinTarget)rasterFramedPreviews.add(species.slug());
                 }
             }
