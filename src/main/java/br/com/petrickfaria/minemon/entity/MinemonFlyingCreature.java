@@ -149,9 +149,6 @@ public final class MinemonFlyingCreature extends MinemonCreature {
    // a flying-speed attribute through air's much smaller 0.02 acceleration.
    defensiveAcceleration=.23F*(.21600002F/(groundFriction*groundFriction*groundFriction));
    if(!wasGrounded){
-    // Calibrated against the 20-tick vanilla zombie displacement GameTest.
-    // With equal input, the airborne move controller covered 2.93 blocks
-    // versus 2.15 for the zombie; compensate for that travel path's lower drag.
     // Latest server GameTest measured 1.653 blocks in 20 ticks versus the
     // zombie's 2.146. Scale the movement input by their measured ratio so the
     // effective displacement, rather than only the configured attribute,
