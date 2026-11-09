@@ -46,8 +46,10 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
     private final java.util.Map<String,Integer> previewMeshFrames=new java.util.HashMap<>();
     private final java.util.Set<String> calibratedPreviews=new java.util.HashSet<>();
     private final java.util.Set<String> rasterFramedPreviews=new java.util.HashSet<>();
+    private boolean lastPreviewFrameWithinTarget;
     public boolean previewCalibratedForSmokeTest(String slug){return rasterFramedPreviews.contains(slug);}
     private PreviewBounds.Fit frameVisiblePixels(PreviewBounds.Fit current){
+        lastPreviewFrameWithinTarget=false;
         var mc=Minecraft.getInstance();double pixels=uiScale*mc.getWindow().getGuiScale();
         int left=(int)((leftPos+155*uiScale)*mc.getWindow().getGuiScale());
         int top=(int)((topPos+46*uiScale)*mc.getWindow().getGuiScale());
@@ -62,8 +64,11 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
             }
             double extent=Math.max(maxX-minX,maxY-minY);
             if(count<10||extent<1)return null;
+            double target=48*pixels;
             double dx=(minX+maxX)*.5-(leftPos+268*uiScale)*mc.getWindow().getGuiScale();
             double dy=(minY+maxY)*.5-(topPos+88*uiScale)*mc.getWindow().getGuiScale();
+            lastPreviewFrameWithinTarget=extent>=target*.65&&extent<=target*1.30
+                    &&Math.abs(dx)<=target*.25&&Math.abs(dy)<=target*.25;
             double rx=dx/(pixels*current.scale()),ry=-dy/(pixels*current.scale());
             double yaw=Math.toRadians(previewYaw),pitch=Math.toRadians(previewPitch-6);
             double y=Math.cos(pitch)*ry,z=-Math.sin(pitch)*ry;
@@ -576,10 +581,14 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
             mc.renderBuffers().bufferSource().endBatch();
             // Transparent texture regions and folded alternate meshes can make
             // geometric bounds larger than what the player actually sees. Refine
-            // once from the rendered silhouette; never resize the world model.
+            // the rendered silhouette until its measured frame is within target;
+            // never resize the world model.
             if(visible&&!rasterFramedPreviews.contains(species.slug())){
                 var framed=frameVisiblePixels(fit);
-                if(framed!=null){previewFits.put(species.slug(),framed);rasterFramedPreviews.add(species.slug());}
+                if(framed!=null){
+                    previewFits.put(species.slug(),framed);
+                    if(lastPreviewFrameWithinTarget)rasterFramedPreviews.add(species.slug());
+                }
             }
             if(entity.isPokecIdleReady()&&!calibratedPreviews.contains(species.slug())&&previewMeshFrames.merge(species.slug(),1,Integer::sum)>=8){
                 var calibrated=measured.fit();
