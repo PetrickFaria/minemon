@@ -93,8 +93,16 @@ public final class MinemonFlyingCreature extends MinemonCreature {
    }
    double floor=combat?0.15D:Math.max(0.15D,this.flightMinimum());
    double allowedDrop=Math.max(0.0D,clearance-floor);
-   double vertical=Math.max(this.getDeltaMovement().y,-allowedDrop);
-   if(clearance<floor)vertical=Math.max(vertical,0.06D);
+   double vertical;
+   if(combat&&allowedDrop>0.0D){
+    // Flyers have no gravity. Clamp alone never makes a stationary flyer
+    // descend, so actively ease toward the combat floor without crossing it.
+    double descent=Math.min(0.12D,allowedDrop);
+    vertical=net.minecraft.util.Mth.clamp(this.getDeltaMovement().y,-allowedDrop,-descent);
+   }else{
+    vertical=Math.max(this.getDeltaMovement().y,-allowedDrop);
+    if(clearance<floor)vertical=Math.max(vertical,0.06D);
+   }
    this.setDeltaMovement(this.getDeltaMovement().x,vertical,this.getDeltaMovement().z);
   }
   boolean fixed=this.fixedFloater()&&!this.wantsNaturalLanding()&&!this.isSleeping()

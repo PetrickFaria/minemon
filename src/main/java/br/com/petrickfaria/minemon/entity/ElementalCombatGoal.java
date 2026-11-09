@@ -27,7 +27,12 @@ final class ElementalCombatGoal extends Goal {
     @Override public boolean canContinueToUse() { return canUse(); }
     @Override public boolean requiresUpdateEveryTick() { return true; }
 
-    @Override public void start() { repositionCooldown = 0; retreating = false; }
+    @Override public void start() {
+        repositionCooldown = 0;
+        retreating = false;
+        // Clear a follow-owner route before combat chooses its own firing point.
+        pokemon.getNavigation().stop();
+    }
 
     @Override public void tick() {
         LivingEntity target = target();
@@ -105,26 +110,29 @@ final class ElementalCombatGoal extends Goal {
         // sides of it so ordinary pathfinding can work around obstacles.
         double[] angles = {0.0D, 0.65D, -0.65D, 1.3D, -1.3D, Math.PI};
         PathNavigation navigation = pokemon.getNavigation();
-        for (double angle : angles) {
-            double cos = Math.cos(angle), sin = Math.sin(angle);
-            double dx = away.x * cos - away.z * sin;
-            double dz = away.x * sin + away.z * cos;
-            // Treat desired as a target-centered firing radius. Adding it to
-            // the Pokémon's current position overshoots by the current gap and
-            // can push a retreat goal against the arena edge before it can fire.
-            double destinationX = target.getX() + dx * desired;
-            double destinationZ = target.getZ() + dz * desired;
-            BlockPos destination = new BlockPos((int)Math.floor(destinationX),
-                    (int)Math.floor(pokemon.getY()), (int)Math.floor(destinationZ));
-            var path = navigation.createPath(destination, 0);
-            if (path != null && path.canReach() && keepsSafeDistance(path, target, safeDistance)) {
-                // Navigation speed scales with the creature's movement attribute.
-                // A vanilla zombie uses 0.23; normalize defensive retreat to
-                // that reference without permanently changing natural movement.
-                double actualSpeed = pokemon.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED);
-                double speedModifier = retreat ? 0.23D / Math.max(0.01D, actualSpeed) : 1.0D;
-                navigation.moveTo(path, speedModifier);
-                return;
+        double nearestSafeRadius = retreat ? safeDistance : desired;
+        for (double radius = desired; radius + 1.0E-6D >= nearestSafeRadius; radius -= 0.5D) {
+            for (double angle : angles) {
+                double cos = Math.cos(angle), sin = Math.sin(angle);
+                double dx = away.x * cos - away.z * sin;
+                double dz = away.x * sin + away.z * cos;
+                // Treat desired as a target-centered firing radius. Adding it to
+                // the Pokémon's current position overshoots by the current gap and
+                // can push a retreat goal against the arena edge before it can fire.
+                double destinationX = target.getX() + dx * radius;
+                double destinationZ = target.getZ() + dz * radius;
+                BlockPos destination = new BlockPos((int)Math.floor(destinationX),
+                        (int)Math.floor(pokemon.getY()), (int)Math.floor(destinationZ));
+                var path = navigation.createPath(destination, 0);
+                if (path != null && path.canReach() && keepsSafeDistance(path, target, safeDistance)) {
+                    // Navigation speed scales with the creature's movement attribute.
+                    // A vanilla zombie uses 0.23; normalize defensive retreat to
+                    // that reference without permanently changing natural movement.
+                    double actualSpeed = pokemon.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED);
+                    double speedModifier = retreat ? 0.23D / Math.max(0.01D, actualSpeed) : 1.0D;
+                    navigation.moveTo(path, speedModifier);
+                    return;
+                }
             }
         }
         // Do not cancel an already valid retreat path just because a fresh
