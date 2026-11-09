@@ -137,6 +137,12 @@ public final class MinemonFlyingCreature extends MinemonCreature {
    // Copy that 0.23 reference and the support friction, rather than multiplying
    // a flying-speed attribute through air's much smaller 0.02 acceleration.
    defensiveAcceleration=.23F*(.21600002F/(groundFriction*groundFriction*groundFriction));
+   if(!wasGrounded){
+    // Calibrated against the 20-tick vanilla zombie displacement GameTest.
+    // With equal input, the airborne move controller covered 2.93 blocks
+    // versus 2.15 for the zombie; compensate for that travel path's lower drag.
+    defensiveAcceleration*=.733F;
+   }
    var horizontal=new net.minecraft.world.phys.Vec3(input.x,0,input.z);
    // Keep this as a direction vector. defensiveAcceleration already supplies
    // the zombie's 0.23 movement speed; scaling the vector by 0.23 as well
