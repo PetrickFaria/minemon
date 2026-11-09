@@ -23,9 +23,18 @@ public final class MinemonFlyingCreature extends MinemonCreature {
  private int recoveryNotLandingSamples;
  private int recoveryBelowMinimumSamples;
  private boolean defensiveTravel;
+ private boolean defensiveAirRetreat;
  private float defensiveAcceleration;
  @Override public void moveRelative(float acceleration,net.minecraft.world.phys.Vec3 input){
   super.moveRelative(defensiveTravel?defensiveAcceleration:acceleration,input);
+ }
+ @Override public void move(net.minecraft.world.entity.MoverType type,net.minecraft.world.phys.Vec3 movement){
+  if(defensiveAirRetreat&&type==net.minecraft.world.entity.MoverType.SELF){
+   double horizontalSpeed=Math.sqrt(movement.x*movement.x+movement.z*movement.z);
+   double zombiePace=0.1073D;
+   if(horizontalSpeed>zombiePace){double scale=zombiePace/horizontalSpeed;movement=new net.minecraft.world.phys.Vec3(movement.x*scale,movement.y,movement.z*scale);}
+  }
+  super.move(type,movement);
  }
  private boolean fixedFloater(){
   return java.util.Set.of("abra","porygon","kakuna","metapod","geodude").contains(this.getSpeciesSlug());
@@ -151,17 +160,8 @@ public final class MinemonFlyingCreature extends MinemonCreature {
    if(horizontal.lengthSqr()>1.0E-8D)input=horizontal.normalize();
   }
   defensiveTravel=retreat;
-  try{super.travel(input);}finally{defensiveTravel=false;}
-  if(retreat&&!wasGrounded){
-   var velocity=this.getDeltaMovement();
-   double horizontalSpeed=Math.sqrt(velocity.x*velocity.x+velocity.z*velocity.z);
-   // FlyingMoveControl applies the movement attribute differently from the
-   // ground navigator. Cap only defensive airborne travel to the measured
-   // 20-tick vanilla-zombie pace; natural flight and ground retreat are intact.
-   double zombiePace=0.1073D;
-   double scale=horizontalSpeed>zombiePace?zombiePace/horizontalSpeed:1.0D;
-   this.setDeltaMovement(velocity.x*groundFriction*scale,velocity.y,velocity.z*groundFriction*scale);
-  }
+  defensiveAirRetreat=retreat&&!wasGrounded;
+  try{super.travel(input);}finally{defensiveTravel=false;defensiveAirRetreat=false;}
   // FlyingMoveControl can replace the pre-travel lift with a downward input
   // while an entity is waking from a landed sleep pose. Reassert the active
   // cycle's floor after travel so the entity actually resumes its flight band.
