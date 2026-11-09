@@ -242,6 +242,9 @@ public final class PokemonManagementGameTests {
     public static void focusedTargetCanLeaveAndReenterPerceptionBeforeTheFifteenSecondTimeout(GameTestHelper h) {
         floor(h);
         ServerPlayer owner = player(h, h.absolutePos(new BlockPos(7, 1, 5)));
+        // This test measures focus expiry, not trainer damage. A stray hostile
+        // from a neighboring arena must not replace its focus via trainer defense.
+        owner.setGameMode(GameType.CREATIVE);
         MinemonCreature pokemon = h.spawn(ModEntities.SPECIES.get("pikachu").get(), new BlockPos(5, 1, 5));
         pokemon.tame(owner);
         pokemon.setNoAi(true);

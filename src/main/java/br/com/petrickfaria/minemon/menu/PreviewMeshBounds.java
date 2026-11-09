@@ -20,6 +20,7 @@ public final class PreviewMeshBounds {
     public static VertexConsumer sink(){return SINK;}
     private static PreviewMeshBounds active;
     private final double[] origin=new double[3],inverse=new double[9];
+    private final java.util.List<float[]> points=new java.util.ArrayList<>();
     private double minX=Double.POSITIVE_INFINITY,minY=minX,minZ=minX;
     private double maxX=Double.NEGATIVE_INFINITY,maxY=maxX,maxZ=maxX;
     public PreviewMeshBounds(Matrix4f transform){
@@ -58,6 +59,7 @@ public final class PreviewMeshBounds {
                     // Alternate rigs collapsed by scale=0 submit degenerate
                     // quads. Their distant pivots must not shrink the preview.
                     if(cx*cx+cy*cy+cz*cz>1.0E-10)for(var v:quad){
+                        sample.points.add(v);
                         sample.minX=Math.min(sample.minX,v[0]);sample.maxX=Math.max(sample.maxX,v[0]);
                         sample.minY=Math.min(sample.minY,v[1]);sample.maxY=Math.max(sample.maxY,v[1]);
                         sample.minZ=Math.min(sample.minZ,v[2]);sample.maxZ=Math.max(sample.maxZ,v[2]);
@@ -77,12 +79,35 @@ public final class PreviewMeshBounds {
     }
     PreviewBounds.Fit fit(){
         if(!Double.isFinite(minX)||maxX-minX<.001||maxY-minY<.001)return null;
-        double w=maxX-minX,h=maxY-minY,d=maxZ-minZ;
-        double yaw=Math.toRadians(23),pitch=Math.toRadians(10);
-        double width=Math.cos(yaw)*w+Math.sin(yaw)*d;
-        double height=Math.cos(pitch)*h+Math.sin(pitch)*(Math.sin(yaw)*w+Math.cos(yaw)*d);
-        double[] maximum=PreviewBounds.maximumRotatedExtents(w,h,d);
-        float scale=(float)Math.min(48.0/Math.max(width,height),Math.min(76.0/maximum[1],220.0/maximum[0]));
-        return new PreviewBounds.Fit(scale,(minX+maxX)/2,(minY+maxY)/2,(minZ+maxZ)/2);
+        var initial=project(23,-10);
+        double width=initial[3]-initial[0],height=initial[4]-initial[1];
+        double maximumWidth=0,maximumHeight=0;
+        // Project actual posed vertices. A rotated enclosing box contains empty
+        // corners and can badly underestimate visible Charizard/body size.
+        for(int yaw=0;yaw<360;yaw+=15)for(int pitch=-46;pitch<=34;pitch+=10){
+            var bounds=project(yaw,pitch);
+            maximumWidth=Math.max(maximumWidth,bounds[3]-bounds[0]);
+            maximumHeight=Math.max(maximumHeight,bounds[4]-bounds[1]);
+        }
+        float scale=(float)Math.min(48.0/Math.max(width,height),Math.min(76.0/(maximumHeight*1.03),220.0/(maximumWidth*1.03)));
+        double rx=(initial[0]+initial[3])/2,ry=(initial[1]+initial[4])/2,rz=(initial[2]+initial[5])/2;
+        double yaw=Math.toRadians(23),pitch=Math.toRadians(-10);
+        double y=Math.cos(pitch)*ry+Math.sin(pitch)*rz;
+        double z=-Math.sin(pitch)*ry+Math.cos(pitch)*rz;
+        return new PreviewBounds.Fit(scale,Math.cos(yaw)*rx-Math.sin(yaw)*z,y,Math.sin(yaw)*rx+Math.cos(yaw)*z);
+    }
+    private double[] project(double yawDegrees,double pitchDegrees){
+        double yaw=Math.toRadians(yawDegrees),pitch=Math.toRadians(pitchDegrees);
+        double cy=Math.cos(yaw),sy=Math.sin(yaw),cp=Math.cos(pitch),sp=Math.sin(pitch);
+        double[] bounds={Double.POSITIVE_INFINITY,Double.POSITIVE_INFINITY,Double.POSITIVE_INFINITY,
+                Double.NEGATIVE_INFINITY,Double.NEGATIVE_INFINITY,Double.NEGATIVE_INFINITY};
+        for(var p:points){
+            double x=cy*p[0]+sy*p[2],z=-sy*p[0]+cy*p[2];
+            double y=cp*p[1]-sp*z;z=sp*p[1]+cp*z;
+            bounds[0]=Math.min(bounds[0],x);bounds[3]=Math.max(bounds[3],x);
+            bounds[1]=Math.min(bounds[1],y);bounds[4]=Math.max(bounds[4],y);
+            bounds[2]=Math.min(bounds[2],z);bounds[5]=Math.max(bounds[5],z);
+        }
+        return bounds;
     }
 }

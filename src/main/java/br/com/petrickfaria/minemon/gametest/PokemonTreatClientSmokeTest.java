@@ -16,6 +16,9 @@ public final class PokemonTreatClientSmokeTest {
     private static final java.util.Set<String> PREVIEW_SCREENSHOTS=java.util.Set.of(
             "caterpie","charmander","charizard","onix","moltres","squirtle","bulbasaur");
     private static final int PREVIEW_SELECTIONS=24;
+    private static final java.util.List<String> CATALOG_PREVIEWS=br.com.petrickfaria.minemon.pokec.PokecSpecies.ordered().stream().map(br.com.petrickfaria.minemon.pokec.PokecSpecies.Entry::slug).toList();
+    private static boolean catalogUnlockRequested;
+    private static final java.util.Set<String> validatedCatalog=new java.util.HashSet<>();
     private static int clientTicks;
     private static boolean done;
     private static boolean worldOpening;
@@ -95,7 +98,7 @@ public final class PokemonTreatClientSmokeTest {
                     if (!br.com.petrickfaria.minemon.item.PokeballItem.isOccupied(held)) return;
                     java.nio.file.Files.writeString(java.nio.file.Path.of("client-validation-treats.txt"),
                             "[TREAT CLIENT] PASS: grass treat resources, PokéC locked/unlocked preview rules, and live Pokébola entity interaction captured an owned creature\n"
-                                    + "PASS POKÉC PREVIEW: 24 repeated species selections used species idle clips; standardized Squirtle/Bulbasaur/Charmander and large-species bounds; consistent 23° three-quarter yaw and 10° downward tilt.\n"
+                                    + "PASS POKÉC PREVIEW: 24 repeated selections plus all 151 species rendered in settled idle with framebuffer size and centering checks; consistent 23° three-quarter yaw and 10° downward tilt.\n"
                                     + "PASS POKÉC SCROLLBAR: conventional wheel, track click, drag outside the track in both directions, boundary clamping, release, and selection preservation.\n"
                                     + "PokéCoin and Pokébola models, translations, textures, and creative entries loaded\n");
                     done = true;
@@ -122,7 +125,24 @@ public final class PokemonTreatClientSmokeTest {
             }
             if(pokecPreviewSequence){
                 if(!(minecraft.screen instanceof PokecScreen screen))throw new IllegalStateException("PokéC closed during repeated preview selection check");
-                String slug=PREVIEW_SPECIES.get(previewSwitchIndex%PREVIEW_SPECIES.size());
+                if(previewSwitchIndex>=PREVIEW_SELECTIONS){
+                    if(!catalogUnlockRequested){
+                        catalogUnlockRequested=true;
+                        var uuid=minecraft.player.getUUID();
+                        minecraft.getSingleplayerServer().execute(()->{
+                            var owner=minecraft.getSingleplayerServer().getPlayerList().getPlayer(uuid);
+                            if(owner==null)throw new IllegalStateException("Catalog preview test owner missing");
+                            for(String species:CATALOG_PREVIEWS)br.com.petrickfaria.minemon.pokec.PokecPlayerData.unlock(owner,species);
+                        });
+                        return;
+                    }
+                    if(!CATALOG_PREVIEWS.stream().allMatch(screen::speciesUnlockedForSmokeTest)){
+                        if(++clientTicks>80)throw new IllegalStateException("All 151 preview unlocks did not synchronize");
+                        return;
+                    }
+                }
+                String slug=previewSwitchIndex<PREVIEW_SELECTIONS?PREVIEW_SPECIES.get(previewSwitchIndex%PREVIEW_SPECIES.size())
+                        :CATALOG_PREVIEWS.get(previewSwitchIndex-PREVIEW_SELECTIONS);
                 if(!screen.selectedSpeciesForSmokeTest(slug)){
                     if(!screen.selectPreviewSpeciesForSmokeTest(slug))throw new IllegalStateException("Could not switch preview to "+slug);
                     previewStableFrames=0;clientTicks=0;return;
@@ -143,10 +163,12 @@ public final class PokemonTreatClientSmokeTest {
                 }
                 if(++previewStableFrames<3)return;
                 screen.verifyVisiblePreviewForSmokeTest(slug);
-                if(PREVIEW_SCREENSHOTS.contains(slug)&&previewSwitchIndex<PREVIEW_SPECIES.size())
+                if(previewSwitchIndex>=PREVIEW_SELECTIONS)validatedCatalog.add(slug);
+                if(previewSwitchIndex>=PREVIEW_SELECTIONS||(PREVIEW_SCREENSHOTS.contains(slug)&&previewSwitchIndex<PREVIEW_SPECIES.size()))
                     net.minecraft.client.Screenshot.grab(minecraft.gameDirectory,"pokec-preview-"+slug+".png",minecraft.getMainRenderTarget(),message->{});
                 previewSwitchIndex++;previewStableFrames=0;clientTicks=0;
-                if(previewSwitchIndex>=PREVIEW_SELECTIONS){
+                if(previewSwitchIndex>=PREVIEW_SELECTIONS+CATALOG_PREVIEWS.size()){
+                    if(validatedCatalog.size()!=151)throw new IllegalStateException("Only "+validatedCatalog.size()+" catalog previews were validated");
                     pokecPreviewSequence=false;pokeballPhase=true;pokeballFixtureEntityId=-1;clientTicks=0;
                 }
                 return;
