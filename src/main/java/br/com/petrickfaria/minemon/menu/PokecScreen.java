@@ -1,6 +1,3 @@
-Warning: truncated output (original token count: 10914)
-Total output lines: 708
-
 package br.com.petrickfaria.minemon.menu;
 
 import br.com.petrickfaria.minemon.entity.MinemonCreature;
@@ -324,7 +321,59 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
             drawCentered(pose, "?", 268, 61, 0xFF404040);
             drawCentered(pose, "ESPÉCIE BLOQUEADA", 268, 105, 0xFF404040);
         }
-        // Retire the preview's depth before text render ty…914 tokens truncated…tHints(PoseStack pose){
+        // Retire the preview's depth before text render types enable depth testing again.
+        com.mojang.blaze3d.systems.RenderSystem.clear(org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT, Minecraft.ON_OSX);
+        com.mojang.blaze3d.systems.RenderSystem.disableDepthTest();
+        pose.pushPose();
+        pose.translate(0,0,300);
+        GuiComponent.fill(pose, 154, 136, 382, 137, 0xFFC6C6C6);
+        font.draw(pose, "VIDA", 191, 139, 0xFF404040);
+        font.draw(pose, "DANO", 316, 139, 0xFF404040);
+        String rarity=PokecEconomy.get().rarity(species.slug());
+        int level=1;
+        drawHealthHearts(pose,(int)Math.ceil(br.com.petrickfaria.minemon.entity.PokemonProgression.healthForRarity(rarity,level)),191,149);
+        drawDamageHearts(pose,br.com.petrickfaria.minemon.entity.PokemonProgression.damageForRarity(rarity,level),316,149);
+        font.draw(pose,"Estágio: "+evolutionStage(species),154,176,0xFF404040);
+        font.draw(pose,"Nível: "+level,302,176,0xFF404040);
+        font.draw(pose,"Raridade: "+rarityLabel(rarity),154,188,0xFF404040);
+        String types=species.types().stream().map(type->{var soul=SoulType.fromSpeciesType(type);return soul==null?type:soulTypeLabel(soul.name());}).collect(java.util.stream.Collectors.joining(" / "));
+        font.draw(pose,fitText("Tipo: "+types,234),154,197,0xFF404040);
+        drawAcquisitionPanel(pose, species, unlocked, species.isEvolution() && !unlocked, mouseX, mouseY);
+        drawCompactConversion(pose);
+        pose.popPose();
+    }
+
+    private void drawAcquisitionPanel(PoseStack pose,PokecSpecies.Entry species,boolean unlocked,boolean evolution,int mouseX,int mouseY){
+        font.draw(pose,unlocked?"COMPRA":"DESBLOQUEIO",420,29,0xFF404040);
+        if(evolution){font.draw(pose,"Libere por evolução",420,47,0xFF404040);return;}
+        font.draw(pose,"Valor",420,43,0xFF404040);
+        if(unlocked){
+            font.draw(pose,"→",503,59,0xFF202020);
+            drawButton(pose,420,87,95,19,"Comprar",true,mouseX,mouseY);
+            boolean enabled=menu.terminal.spawnEnabled();
+            drawButton(pose,420,114,63,19,"Spawn",true,mouseX,mouseY);
+            GuiComponent.fill(pose,423,117,480,130,enabled?0xFF398348:0xFFAB3939);
+            drawCentered(pose,"Spawn",451,120,0xFFFFFFFF);
+            font.draw(pose,String.format(Locale.ROOT,"%.2f%%",enabled?menu.terminal.spawnChance()*100:0),491,120,0xFF404040);
+        }else drawButton(pose,420,87,116,19,"Desbloquear",menu.terminal.payment().getCount()>0,mouseX,mouseY);
+    }
+    private void drawCompactConversion(PoseStack pose){
+        font.draw(pose,"LIBERAÇÃO",420,152,0xFF404040);
+        var stored=br.com.petrickfaria.minemon.item.PokeballItem.readStored(menu.terminal.ball());
+        if(stored!=null){
+            var species=PokecSpecies.get(stored.species());
+            String rarity=PokecEconomy.get().rarity(stored.species());
+            font.draw(pose,fitText(species==null?stored.species():species.name(),195),420,166,0xFF404040);
+            font.draw(pose,"Vida:",420,180,0xFF404040);
+            drawHealthHearts(pose,(int)Math.ceil(stored.health()),454,178);
+            font.draw(pose,"Dano:",420,205,0xFF404040);
+            drawDamageHearts(pose,br.com.petrickfaria.minemon.entity.PokemonProgression.damageForRarity(rarity,stored.level()),454,203);
+            font.draw(pose,"Nível: "+stored.level()+"  "+rarityLabel(rarity),420,230,0xFF404040);
+        }else font.draw(pose,"Insira uma bola com Pokémon",420,174,0xFF666666);
+        font.draw(pose,"→",503,249,0xFF202020);
+        drawButton(pose,420,279,116,19,"Liberar",stored!=null&&menu.slots.get(39).getItem().isEmpty(),-1,-1);
+    }
+    private void drawGhostHints(PoseStack pose){
         var species=PokecSpecies.get(selectedSlug);if(species==null)return;
         boolean unlocked=syncedUnlocked.contains(selectedSlug);
         net.minecraft.world.item.Item item=null;
