@@ -18,6 +18,8 @@ import java.util.*;
 /** Real-client visual and timing smoke test for the Gastly evolution line. */
 final class GhostLineClientSmokeTest {
  private static boolean opened,setup,sleepStarted,blinkChecked,validationComplete;
+ private static volatile boolean setupComplete;
+ private static int fixtureWaitTicks;
  private static int cameraMatrixIndex=-1,cameraMatrixDelay,cameraMatrixPasses;
  private static boolean cameraMatrixComplete;
  private static int gengarWalkStartTick=-1;
@@ -154,6 +156,7 @@ final class GhostLineClientSmokeTest {
  static void tick(TickEvent.ClientTickEvent event){
   if(event.phase!=TickEvent.Phase.END)return;
   Minecraft mc=Minecraft.getInstance();
+  if(setupComplete&&mc.level!=null)mc.level.setDayTime(6000L);
   try{
    if(pendingScreenshot!=null){
     if(pendingScreenshotDelay>0)pendingScreenshotDelay--;
@@ -227,13 +230,22 @@ final class GhostLineClientSmokeTest {
      gastlyId=gastly.getUUID();secondGastlyId=secondGastly.getUUID();haunterId=haunter.getUUID();gengarId=gengar.getUUID();
      var player=level.getServer().getPlayerList().getPlayers().get(0);
      player.setGameMode(GameType.SPECTATOR);player.teleportTo(level,0,101,3,0,0);
+     mc.execute(()->{if(mc.level!=null)mc.level.setDayTime(6000L);setupComplete=true;});
     });
     MinemonRenderer.validationInput=null;
     return;
    }
-   ticks++;
+   if(!setupComplete)return;
    MinemonCreature gastly=find(mc,gastlyId),secondGastly=find(mc,secondGastlyId),haunter=find(mc,haunterId),gengar=find(mc,gengarId);
-   if(gastly==null||secondGastly==null||haunter==null||gengar==null)return;
+   if(gastly==null||secondGastly==null||haunter==null||gengar==null
+       ||mc.level.getSkyDarken()>3||mc.level.getBrightness(net.minecraft.world.level.LightLayer.SKY,gastly.blockPosition().above())<14
+       ||br.com.petrickfaria.minemon.client.GastlyCoreRenderHook.auraFramesForValidation()==0
+       ||br.com.petrickfaria.minemon.client.GastlyCoreMask.verifiedPixelsForValidation()==0){
+    if(++fixtureWaitTicks>800)throw new IllegalStateException("Ghost render fixtures did not become ready: daylight="+mc.level.getDayTime()
+        +", skyDarken="+mc.level.getSkyDarken()+", gastly="+gastly+", second="+secondGastly+", haunter="+haunter+", gengar="+gengar);
+    return;
+   }
+   ticks++;
    if(ticks>=50&&cameraMatrixIndex<0&&writtenScreenshots.contains("gastly-50-block"))cameraMatrixIndex=0;
    if(cameraMatrixActive()){
     if(cameraMatrixDelay==0){
