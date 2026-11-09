@@ -51,7 +51,7 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
     public boolean previewCalibratedForSmokeTest(String slug){return rasterFramedPreviews.contains(slug);}
     private PreviewBounds.Fit frameVisiblePixels(PreviewBounds.Fit current){
         lastPreviewFrameWithinTarget=false;
-        lastPreviewFrameOversized=false;
+        lastPreviewFrameOutsideTarget=false;
         var mc=Minecraft.getInstance();double pixels=uiScale*mc.getWindow().getGuiScale();
         int left=(int)((leftPos+155*uiScale)*mc.getWindow().getGuiScale());
         int top=(int)((topPos+46*uiScale)*mc.getWindow().getGuiScale());
