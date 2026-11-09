@@ -134,7 +134,7 @@ jobs:
             test -f "run/screenshots/ghost-line-1.74-${shot}.png"
           done
       - name: Reopen saved Gastly world and validate aura twice
-        if: ${{ success() && github.event_name == 'push' && github.ref == 'refs/heads/fix/minemon-pending-eight-corrections' }}
+        if: ${{ !cancelled() && github.event_name == 'push' && github.ref == 'refs/heads/fix/minemon-pending-eight-corrections' }}
         run: |
           for index in 1 2; do
             python3 tools/prepare_client_world.py --reuse-world --ghost-line
