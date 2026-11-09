@@ -127,6 +127,12 @@ public final class ClientSmokeTest {
   return first!=null&&last!=null&&last-first>=(slug.equals("gengar")?120:40);
  }
  private static boolean finalIdleObserved(String slug) {
+  // Generated Haunter air_idle has a 0.14 Hz hand/tail cycle (143 ticks).
+  // Sample a complete cycle before checking its bounded animated channels.
+  if(slug.equals("haunter")&&fixtureAir(slug)){
+   Integer first=finalIdleFirstTick.get(slug),last=lastRenderedEntityTick.get(slug);
+   return first!=null&&last!=null&&last-first>=160;
+  }
   if(sourceStaticIdle(slug)||sourcePoseTransition(slug)||slug.equals("fearow"))return true;
   var definition=SpeciesDefinitions.get(slug);
   if(definition!=null&&"static".equals(definition.movementFallback()))return true;
@@ -1022,11 +1028,23 @@ public final class ClientSmokeTest {
     for(int axis=0;axis<6;axis++) {
      if(!Float.isFinite(range[axis])||!Float.isFinite(range[axis+6])||range[axis+6]<range[axis])
       throw new IllegalStateException("Invalid static idle sample for "+slug+":"+joint);
-     // The approved 1.74 Haunter hand lag intentionally animates local Z.
-     // Require that motion; retain stability checks for every other channel.
-     if(slug.equals("haunter")&&java.util.Set.of("hand_left1","hand_right1").contains(joint)&&axis==2){
-      if(range[axis+6]-range[axis]<=0.02F)
-       throw new IllegalStateException("Approved Haunter hand sway was not observed: "+joint);
+     // Runtime preparation derives air_idle from the static source pose,
+     // adding Z sway to BOTH hand segments and Y sway to all three tails.
+     // Validate those authored amplitudes; every other channel stays static.
+     double permittedSway=0;
+     if(slug.equals("haunter")&&fixtureAir(slug)){
+      if(axis==2&&java.util.Set.of("hand_left1","hand_right1").contains(joint))
+       permittedSway=2*(Math.toRadians(2.2)+.055);
+      else if(axis==2&&java.util.Set.of("hand_left2","hand_right2").contains(joint))
+       permittedSway=2*Math.toRadians(2.2*.55);
+      else if(axis==1&&java.util.Set.of("tail1","tail2","tail3").contains(joint))
+       permittedSway=2*Math.toRadians(2.5*(joint.equals("tail1")?1:joint.equals("tail2")?.65:.4));
+     }
+     if(permittedSway>0){
+      float observed=range[axis+6]-range[axis];
+      if(observed<=.02F||observed>permittedSway+.005)
+       throw new IllegalStateException("Haunter authored idle sway out of bounds: "+joint+" axis="+axis
+           +" observed="+observed+" maximum="+permittedSway);
       continue;
      }
      if(range[axis+6]-range[axis]>(axis<3?0.02F:0.05F))
