@@ -14,6 +14,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.Cow;
 import net.minecraft.world.entity.monster.Zombie;
+import net.minecraft.world.entity.monster.Spider;
 import net.minecraft.world.level.GameType;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraft.server.level.ServerPlayer;
@@ -96,7 +97,7 @@ public final class CompanionTests {
  @GameTest(template="test_arena",timeoutTicks=300)
  public static void ownerDefense(GameTestHelper h) {
   MinemonCreature b=spawn(h);ServerPlayer p=player(h);b.tame(p);b.setOrderedToSit(false);
-  Cow c=h.spawn(EntityType.COW,new BlockPos(14,1,5));c.setNoAi(true);float health=c.getHealth();b.setNoAi(true);h.runAfterDelay(80,()->{b.setNoAi(false);b.getNavigation().stop();check(h,p.hurt(DamageSource.mobAttack(c),1),"Owner must accept damage after spawn protection");
+  Cow c=h.spawn(EntityType.COW,new BlockPos(14,1,5));c.setNoAi(true);float health=c.getHealth();b.setNoAi(true);h.runAfterDelay(80,()->{b.setNoAi(false);b.getNavigation().stop();check(h,p.hurt(DamageSource.mobAttack(c),1),"Owner must accept damage after spawn protection");p.setInvulnerable(true);
   com.mojang.logging.LogUtils.getLogger().info("MINEMON DEFENSE AFTER HIT "+state(b,c)+" goalCanUse="+new net.minecraft.world.entity.ai.goal.target.OwnerHurtByTargetGoal(b).canUse()+" sight="+b.getSensing().hasLineOfSight(c)+" wants="+b.wantsToAttack(c,p));
   h.runAfterDelay(5,()->com.mojang.logging.LogUtils.getLogger().info("MINEMON DEFENSE AFTER 5 TICKS "+state(b,c)));
   h.runAfterDelay(100,()->{check(h,c.getHealth()<health,"Companion must defend attacked owner"+state(b,c));p.discard();h.succeed();});});
@@ -193,6 +194,24 @@ public final class CompanionTests {
    });
   });
  }
+ @GameTest(template="test_arena",timeoutTicks=160)
+ public static void rangedCompanionAttacksAuthorizedSpiderWithinRange(GameTestHelper h) {
+  floor(h);ServerPlayer owner=player(h);owner.setGameMode(GameType.CREATIVE);
+  BlockPos ownerPosition=h.absolutePos(new BlockPos(1,1,1));
+  owner.moveTo(ownerPosition.getX()+.5D,ownerPosition.getY(),ownerPosition.getZ()+.5D,0,0);
+  MinemonCreature pokemon=h.spawn(ModEntities.SPECIES.get("pikachu").get(),new BlockPos(5,1,5));
+  pokemon.tame(owner);pokemon.setPokemonLevel(10);
+  pokemon.setBlackListOverride(new net.minecraft.resources.ResourceLocation("minecraft","spider"),false);
+  Spider target=h.spawn(EntityType.SPIDER,new BlockPos(14,1,5));target.setNoAi(true);target.setNoGravity(true);keepCombatTargetAlive(target);
+  float startingHealth=target.getHealth();pokemon.focusTrainerDefenseTarget(target);
+  h.runAfterDelay(120,()->{
+   check(h,pokemon.getTarget()==target&&pokemon.canAttack(target),
+       "A domesticated Pokémon must retain an authorized spider target within its attack range");
+   check(h,target.getHealth()<startingHealth,
+       "A domesticated Pokémon must damage a spider from inside maximum range; health="+target.getHealth());
+   owner.discard();h.succeed();
+  });
+ }
  @GameTest(template="test_arena",timeoutTicks=100)
  public static void retreatCoversTheSameDistanceAsVanillaZombie(GameTestHelper h) {
   compareRetreatToZombie(h,false);
@@ -228,9 +247,23 @@ public final class CompanionTests {
    reference.setYRot(-90);reference.yRotO=-90;reference.yBodyRot=reference.yBodyRotO=-90;
    pokemon.setNoAi(false);
    pokemon.focusTrainerDefenseTarget(target);
-   var pokemonStart=pokemon.position();var zombieStart=reference.position();
-   reference.getNavigation().moveTo(reference.getX()+8.0D,reference.getY(),reference.getZ(),1.0D);
-   h.runAfterDelay(20,()->{
+   awaitRetreatPath(h,pokemon,target,reference,owner,airborne,0);
+  });
+ }
+ private static void awaitRetreatPath(GameTestHelper h,MinemonCreature pokemon,Cow target,Zombie reference,
+                                      ServerPlayer owner,boolean airborne,int elapsed) {
+  if((pokemon.getTarget()!=target||pokemon.getNavigation().isDone())&&elapsed<40){
+   h.runAfterDelay(1,()->awaitRetreatPath(h,pokemon,target,reference,owner,airborne,elapsed+1));return;
+  }
+  if(pokemon.getTarget()!=target||pokemon.getNavigation().isDone()){
+   h.fail("Companion did not enter an active retreat path before speed measurement; target="+pokemon.getTarget()+" navTarget="+pokemon.getNavigation().getTargetPos());
+   owner.discard();reference.discard();return;
+  }
+  pokemon.setDeltaMovement(0,0,0);
+  pokemon.setYRot(-90);pokemon.yRotO=-90;pokemon.yBodyRot=pokemon.yBodyRotO=-90;
+  var pokemonStart=pokemon.position();var zombieStart=reference.position();
+  reference.getNavigation().moveTo(reference.getX()+8.0D,reference.getY(),reference.getZ(),1.0D);
+  h.runAfterDelay(20,()->{
     double retreat=pokemon.position().subtract(pokemonStart).horizontalDistance();
     double zombie=reference.position().subtract(zombieStart).horizontalDistance();
     String measured="; species="+pokemon.getSpeciesSlug()+"; 20 ticks: companion="+retreat+" blocks, zombie="+zombie+" blocks";
@@ -241,7 +274,6 @@ public final class CompanionTests {
         "Flying retreat must retain its capped combat flight band"+measured);
     com.mojang.logging.LogUtils.getLogger().info("MINEMON RETREAT SPEED"+measured);
     owner.discard();reference.discard();h.succeed();
-   });
   });
  }
  @GameTest(template="test_arena",timeoutTicks=120)

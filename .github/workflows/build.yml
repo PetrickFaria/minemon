@@ -141,6 +141,17 @@ jobs:
             ALSOFT_DRIVERS=null timeout --kill-after=30s 900s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeGhostLinePersistence -PgastlyReopenIndex="$index"
             grep -F "PASS GASTLY PERSISTENCE REOPEN $index:" "run/gastly-persistence-reopen-$index.txt"
           done
+      - name: Upload Gastly visual and persistence evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: minemon-gastly-visual-evidence
+          path: |
+            run/screenshots/ghost-line-1.74-*.png
+            run/gastly-persistence-reopen-1.txt
+            run/gastly-persistence-reopen-2.txt
+          if-no-files-found: warn
+          retention-days: 7
       - name: Capture runtime API diagnostics
         if: always()
         run: python3 tools/collect_diagnostics.py
