@@ -18,10 +18,6 @@ public final class PokemonManagementClientSmokeTest {
     private static boolean done;
     private static volatile int entityId = -1;
     private static int phase;
-    private static PokemonInfoScreen blacklistParentForSmokeTest;
-    private static int blacklistEntityForSmokeTest = -1;
-    private static UUID blacklistUuidForSmokeTest;
-    private static java.util.Map<String, Boolean> blacklistOverridesForSmokeTest = java.util.Map.of();
     private static boolean blacklistPreparationRequested;
     private static volatile int dewgongId=-1,gastlyId=-1;
     private static volatile boolean closedEyesSeen,openEyesSeen,awakeBlinkSeen;
@@ -211,12 +207,7 @@ public final class PokemonManagementClientSmokeTest {
                     if (++ticks > 120) throw new IllegalStateException("Pokémon did not sit before Black List validation");
                     return;
                 }
-                minecraft.gameMode.handleInventoryButtonClick(minecraft.player.containerMenu.containerId, 3);
-                blacklistParentForSmokeTest = screen;
-                blacklistEntityForSmokeTest = pokemon.getId();
-                blacklistUuidForSmokeTest = pokemon.getUUID();
-                blacklistOverridesForSmokeTest = pokemon.getBlackListOverrides();
-                screen.openBlackList(pokemon.getId(), pokemon.getUUID(), pokemon.getBlackListOverrides());
+                screen.mouseClicked(screen.getGuiLeft() + 128, screen.getGuiTop() + 207, 0);
                 phase = 10;
                 ticks = 0;
                 return;

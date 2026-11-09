@@ -33,6 +33,7 @@ public final class MinemonNetwork {
         CHANNEL.messageBuilder(BlackListAction.class,4).encoder(BlackListAction::encode).decoder(BlackListAction::decode).consumerMainThread(BlackListAction::handle).add();
         CHANNEL.messageBuilder(BlackListState.class,5).encoder(BlackListState::encode).decoder(BlackListState::decode).consumerMainThread(BlackListState::handle).add();
         CHANNEL.messageBuilder(TrainerState.class,6).encoder(TrainerState::encode).decoder(TrainerState::decode).consumerMainThread(TrainerState::handle).add();
+        CHANNEL.messageBuilder(BlackListOpenRequest.class,7).encoder(BlackListOpenRequest::encode).decoder(BlackListOpenRequest::decode).consumerMainThread(BlackListOpenRequest::handle).add();
     }
 
     public static void syncTrainer(ServerPlayer player) {
@@ -73,6 +74,9 @@ public final class MinemonNetwork {
         CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), new BlackListState(
                 pokemon.getId(), pokemon.getUUID(), pokemon.getBlackListOverrides(), true));
     }
+    public static void requestBlackList(MinemonCreature pokemon) {
+        if (pokemon != null) CHANNEL.sendToServer(new BlackListOpenRequest(pokemon.getId(), pokemon.getUUID()));
+    }
     public static void setBlackListTarget(int entityId, UUID uuid, ResourceLocation type, boolean selected) {
         CHANNEL.sendToServer(new BlackListAction(entityId, uuid, type, selected));
     }
@@ -85,6 +89,21 @@ public final class MinemonNetwork {
     private static void syncBlackList(ServerPlayer player, MinemonCreature pokemon, boolean open) {
         CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), new BlackListState(
                 pokemon.getId(), pokemon.getUUID(), pokemon.getBlackListOverrides(), open));
+    }
+
+    private record BlackListOpenRequest(int entityId, UUID pokemon) {
+        static void encode(BlackListOpenRequest m, FriendlyByteBuf b) { b.writeVarInt(m.entityId); b.writeUUID(m.pokemon); }
+        static BlackListOpenRequest decode(FriendlyByteBuf b) { return new BlackListOpenRequest(b.readVarInt(), b.readUUID()); }
+        static void handle(BlackListOpenRequest m, Supplier<NetworkEvent.Context> supplier) {
+            NetworkEvent.Context context = supplier.get();
+            ServerPlayer player = context.getSender();
+            context.enqueueWork(() -> {
+                if (player == null || !validPokemonMenu(player, m.entityId, m.pokemon)) return;
+                MinemonCreature pokemon = ((PokemonInfoMenu) player.containerMenu).pokemon();
+                syncBlackList(player, pokemon, true);
+            });
+            context.setPacketHandled(true);
+        }
     }
 
     private record BlackListAction(int entityId, UUID pokemon, ResourceLocation type, boolean selected) {
