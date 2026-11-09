@@ -157,7 +157,7 @@ public final class ClientSmokeTest {
     index,species.size(),dex,slug,phase,completedSpeciesWindows,species.size(),elapsed,lastApprovedCheck);
   System.out.flush();
  }
- private static final int SPECIES_TEST_WINDOW=Boolean.getBoolean("minemon.clientSmokeAlakazamPose")?360:80;
+ private static final int SPECIES_TEST_WINDOW=Boolean.getBoolean("minemon.clientSmokeAlakazamPose")?360:Boolean.getBoolean("minemon.clientSmokeAir")?200:80;
  private static final int BULBASAUR_VALIDATION_TICK=430;
  private static final int COMBAT_VALIDATION_TICK=BULBASAUR_VALIDATION_TICK+100;
  private static final int SPECIES_START_TICK=COMBAT_VALIDATION_TICK+10;
