@@ -75,6 +75,16 @@ public final class PokemonInfoMenu extends AbstractContainerMenu {
         return false;
     }
 
+    @Override public void removed(Player player) {
+        if (Boolean.getBoolean("minemon.clientSmokeTest"))
+            com.mojang.logging.LogUtils.getLogger().info("[POKEMON MENU REMOVED] side={} menu={} screen={} distanceSquared={}",
+                    player.level.isClientSide ? "client" : "server", getClass().getSimpleName(),
+                    net.minecraft.client.Minecraft.getInstance().screen == null ? "null"
+                            : net.minecraft.client.Minecraft.getInstance().screen.getClass().getSimpleName(),
+                    pokemon == null ? -1.0D : player.distanceToSqr(pokemon));
+        super.removed(player);
+    }
+
     @Override public ItemStack quickMoveStack(Player player, int slot) { return ItemStack.EMPTY; }
     @Override public boolean stillValid(Player player) {
         boolean valid = pokemon != null && pokemon.isAlive() && !pokemon.isRemoved() && pokemon.isTame()
