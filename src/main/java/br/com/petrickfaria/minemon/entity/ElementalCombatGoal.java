@@ -88,8 +88,11 @@ final class ElementalCombatGoal extends Goal {
             for (int sample = 1; sample <= samples; sample++) {
                 Vec3 point = start.lerp(end, sample / (double)samples);
                 double distance = horizontalDistance(point, targetCenter);
-                if (distance < minimumDistance && !(previousDistance < minimumDistance && distance > previousDistance)) return false;
-                if (previousDistance < minimumDistance && distance < previousDistance) return false;
+                // A path's first node can be the block center already occupied
+                // by the creature. Equal-distance samples are harmless; rejecting
+                // them discards every valid escape before its first actual step.
+                if (distance + 1.0E-6D < minimumDistance
+                        && (previousDistance >= minimumDistance || distance + 1.0E-6D < previousDistance)) return false;
                 previousDistance = distance;
             }
         }
