@@ -204,8 +204,8 @@ public final class CompanionTests {
   Cow target=h.spawn(EntityType.COW,new BlockPos(3,1,4));
   target.setNoAi(true);target.setNoGravity(true);keepCombatTargetAlive(target);
   var reference=h.spawn(EntityType.ZOMBIE,new BlockPos(5,1,12));
-  reference.goalSelector.removeAllGoals(goal->true);
-  reference.targetSelector.removeAllGoals(goal->true);
+  reference.goalSelector.removeAllGoals();
+  reference.targetSelector.removeAllGoals();
   reference.setItemSlot(net.minecraft.world.entity.EquipmentSlot.HEAD,
       new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.LEATHER_HELMET));
   reference.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED).setBaseValue(.23D);
