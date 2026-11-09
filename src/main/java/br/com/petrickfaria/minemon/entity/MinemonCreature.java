@@ -1389,6 +1389,8 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         data.addAnimationController(new AnimationController<>(this, "tail_flame", 0, this::tailFlamePredicate));
     }
 
+    private boolean pokecIdleReady;
+    public boolean isPokecIdleReady(){return pokecPreview&&pokecIdleReady;}
     private <E extends IAnimatable> PlayState animationPredicate(AnimationEvent<E> event) {
         AnimationController<?> controller = event.getController();
         String slug = this.getSpeciesSlug();
@@ -1398,6 +1400,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         String attack=SpeciesAssetIndex.clip(slug,"physical_attack","physical");
         if(attack==null) attack=SpeciesAssetIndex.clip(slug,"attack","attack");
         if (this.pokecPreview) {
+            this.pokecIdleReady=controller.getAnimationState()==AnimationState.Running;
             // Keep the selector on this species' own idle clip even though its
             // detached preview entity does not participate in normal world AI.
             clip=definition.idle();

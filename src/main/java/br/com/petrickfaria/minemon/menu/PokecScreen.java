@@ -503,6 +503,7 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
             return;
         }
         MinemonCreature entity = previews.computeIfAbsent(species.slug(), slug -> {
+            calibratedPreviews.remove(slug);previewMeshFrames.remove(slug);previewFits.remove(slug);
             var type = ModEntities.SPECIES.get(slug);
             if (type == null) return null;
             MinemonCreature preview = type.get().create(mc.level);
@@ -541,11 +542,13 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         dispatcher.setRenderShadow(false);
         try {
             br.com.petrickfaria.minemon.client.MinemonRenderer.previewRendering=true;
-            if(!calibratedPreviews.contains(species.slug()))PreviewMeshBounds.begin(measured);
-            net.minecraft.client.renderer.MultiBufferSource previewBuffers=type->PreviewMeshBounds.wrap(mc.renderBuffers().bufferSource().getBuffer(type));
+            if(entity.isPokecIdleReady()&&!calibratedPreviews.contains(species.slug()))PreviewMeshBounds.begin(measured);
+            boolean visible=entity.isPokecIdleReady()&&calibratedPreviews.contains(species.slug());
+            net.minecraft.client.renderer.MultiBufferSource previewBuffers=type->PreviewMeshBounds.wrap(visible
+                    ?mc.renderBuffers().bufferSource().getBuffer(type):PreviewMeshBounds.sink());
             dispatcher.render(entity, 0, 0, 0, 0, partialTick, pose, previewBuffers, 15728880);
             mc.renderBuffers().bufferSource().endBatch();
-            if(!calibratedPreviews.contains(species.slug())&&previewMeshFrames.merge(species.slug(),1,Integer::sum)>=8){
+            if(entity.isPokecIdleReady()&&!calibratedPreviews.contains(species.slug())&&previewMeshFrames.merge(species.slug(),1,Integer::sum)>=8){
                 var calibrated=measured.fit();
                 if(calibrated!=null){
                     previewFits.put(species.slug(),calibrated);calibratedPreviews.add(species.slug());

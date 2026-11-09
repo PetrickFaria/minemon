@@ -209,6 +209,10 @@ final class GhostLineClientSmokeTest {
     setup=true;
     mc.getSingleplayerServer().execute(()->{
      var level=mc.getSingleplayerServer().overworld();
+     // Pixel color assertions need controlled daylight, rather than inheriting
+     // the final nighttime GameTest batch's saved lighting conditions.
+     level.setDayTime(6000L);
+     level.getGameRules().getRule(net.minecraft.world.level.GameRules.RULE_DAYLIGHT).set(false,level.getServer());
       // Keep the second provider fixture slightly beyond the 50-block aura cutoff
       // during primary screenshots while remaining within client tracking range.
       for(int x=-72;x<=72;x++)for(int z=-48;z<=64;z++){

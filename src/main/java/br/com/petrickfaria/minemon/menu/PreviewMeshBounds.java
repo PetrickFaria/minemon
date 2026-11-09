@@ -6,6 +6,18 @@ import com.mojang.math.Vector4f;
 
 /** Measures only vertices actually submitted by the species' animated idle pose. */
 public final class PreviewMeshBounds {
+    private static final VertexConsumer SINK=new VertexConsumer(){
+        public VertexConsumer vertex(double x,double y,double z){return this;}
+        public VertexConsumer color(int r,int g,int b,int a){return this;}
+        public VertexConsumer uv(float u,float v){return this;}
+        public VertexConsumer overlayCoords(int u,int v){return this;}
+        public VertexConsumer uv2(int u,int v){return this;}
+        public VertexConsumer normal(float x,float y,float z){return this;}
+        public void endVertex(){}
+        public void defaultColor(int r,int g,int b,int a){}
+        public void unsetDefaultColor(){}
+    };
+    public static VertexConsumer sink(){return SINK;}
     private static PreviewMeshBounds active;
     private final double[] origin=new double[3],inverse=new double[9];
     private double minX=Double.POSITIVE_INFINITY,minY=minX,minZ=minX;
