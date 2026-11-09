@@ -45,7 +45,33 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
     private float previewYaw=23.0F,previewPitch=-4.0F,targetPreviewYaw=23.0F,targetPreviewPitch=-4.0F;
     private final java.util.Map<String,Integer> previewMeshFrames=new java.util.HashMap<>();
     private final java.util.Set<String> calibratedPreviews=new java.util.HashSet<>();
-    public boolean previewCalibratedForSmokeTest(String slug){return calibratedPreviews.contains(slug);}
+    private final java.util.Set<String> rasterFramedPreviews=new java.util.HashSet<>();
+    public boolean previewCalibratedForSmokeTest(String slug){return rasterFramedPreviews.contains(slug);}
+    private PreviewBounds.Fit frameVisiblePixels(PreviewBounds.Fit current){
+        var mc=Minecraft.getInstance();double pixels=uiScale*mc.getWindow().getGuiScale();
+        int left=(int)((leftPos+155*uiScale)*mc.getWindow().getGuiScale());
+        int top=(int)((topPos+46*uiScale)*mc.getWindow().getGuiScale());
+        int right=(int)(left+226*pixels),bottom=(int)(top+84*pixels);
+        try(var frame=net.minecraft.client.Screenshot.takeScreenshot(mc.getMainRenderTarget())){
+            int bg=frame.getPixelRGBA(left,top),minX=right,minY=bottom,maxX=left,maxY=top,count=0;
+            for(int py=top;py<bottom;py++)for(int px=left;px<right;px++){
+                int c=frame.getPixelRGBA(px,py);
+                int difference=Math.max(Math.abs((c&255)-(bg&255)),Math.max(Math.abs(((c>>>8)&255)-((bg>>>8)&255)),Math.abs(((c>>>16)&255)-((bg>>>16)&255))));
+                if(difference<18)continue;
+                minX=Math.min(minX,px);maxX=Math.max(maxX,px);minY=Math.min(minY,py);maxY=Math.max(maxY,py);count++;
+            }
+            double extent=Math.max(maxX-minX,maxY-minY);
+            if(count<10||extent<1)return null;
+            double dx=(minX+maxX)*.5-(leftPos+268*uiScale)*mc.getWindow().getGuiScale();
+            double dy=(minY+maxY)*.5-(topPos+88*uiScale)*mc.getWindow().getGuiScale();
+            double rx=dx/(pixels*current.scale()),ry=-dy/(pixels*current.scale());
+            double yaw=Math.toRadians(previewYaw),pitch=Math.toRadians(previewPitch-6);
+            double y=Math.cos(pitch)*ry,z=-Math.sin(pitch)*ry;
+            return new PreviewBounds.Fit((float)(current.scale()*48*pixels/extent),
+                    current.x()+Math.cos(yaw)*rx-Math.sin(yaw)*z,current.y()+y,
+                    current.z()+Math.sin(yaw)*rx+Math.cos(yaw)*z);
+        }
+    }
     public void verifyVisiblePreviewForSmokeTest(String slug){
         if(!calibratedPreviews.contains(slug))throw new IllegalStateException("Preview not calibrated: "+slug);
         var mc=Minecraft.getInstance();double pixels=uiScale*mc.getWindow().getGuiScale();
@@ -503,7 +529,7 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
             return;
         }
         MinemonCreature entity = previews.computeIfAbsent(species.slug(), slug -> {
-            calibratedPreviews.remove(slug);previewMeshFrames.remove(slug);previewFits.remove(slug);
+            calibratedPreviews.remove(slug);rasterFramedPreviews.remove(slug);previewMeshFrames.remove(slug);previewFits.remove(slug);
             var type = ModEntities.SPECIES.get(slug);
             if (type == null) return null;
             MinemonCreature preview = type.get().create(mc.level);
@@ -548,6 +574,13 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
                     ?mc.renderBuffers().bufferSource().getBuffer(type):PreviewMeshBounds.sink());
             dispatcher.render(entity, 0, 0, 0, 0, partialTick, pose, previewBuffers, 15728880);
             mc.renderBuffers().bufferSource().endBatch();
+            // Transparent texture regions and folded alternate meshes can make
+            // geometric bounds larger than what the player actually sees. Refine
+            // once from the rendered silhouette; never resize the world model.
+            if(visible&&!rasterFramedPreviews.contains(species.slug())){
+                var framed=frameVisiblePixels(fit);
+                if(framed!=null){previewFits.put(species.slug(),framed);rasterFramedPreviews.add(species.slug());}
+            }
             if(entity.isPokecIdleReady()&&!calibratedPreviews.contains(species.slug())&&previewMeshFrames.merge(species.slug(),1,Integer::sum)>=8){
                 var calibrated=measured.fit();
                 if(calibrated!=null){
