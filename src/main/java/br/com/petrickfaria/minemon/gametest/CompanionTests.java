@@ -1,6 +1,3 @@
-Warning: truncated output (original token count: 16561)
-Total output lines: 910
-
 package br.com.petrickfaria.minemon.gametest;
 import br.com.petrickfaria.minemon.entity.MinemonCreature;
 import br.com.petrickfaria.minemon.entity.CombatGeometry;
@@ -267,7 +264,353 @@ public final class CompanionTests {
    check(h,pidgey.getTarget()==target&&target.getHealth()<initialHealth,
        "Pidgey must damage a zombie while retaining focus; target="+pidgey.getTarget()+" health="+target.getHealth()+" position="+pidgey.position());
    check(h,altitude<=1.1D,"A flying combatant must descend to at most one block above its natural surface after 40 combat ticks; altitude="+altitude+" target="+pidgey.getTarget()+" navDone="+pidgey.getNavigation().isDone());
-   check(h,distance>initialDistance&&!pidgey.combatReady(),"Pidgey must retreat from the zombie while recharging; initialDistanceSquared="+ini…6561 tokens truncated…+", now="+bird.position());
+   check(h,distance>initialDistance&&!pidgey.combatReady(),"Pidgey must retreat from the zombie while recharging; initialDistanceSquared="+initialDistance+", currentDistanceSquared="+distance);
+   owner.discard();h.succeed();
+  });
+ }
+ @GameTest(template="test_arena",timeoutTicks=100)
+ public static void sitAndPersistence(GameTestHelper h) {
+  MinemonCreature b=spawn(h);ServerPlayer p=player(h);b.tame(p);b.setOrderedToSit(true);b.setSleeping(true);
+  CompoundTag tag=new CompoundTag();b.saveWithoutId(tag);MinemonCreature restored=ModEntities.BULBASAUR.get().create(h.getLevel());restored.load(tag);
+  check(h,restored.isTame()&&p.getUUID().equals(restored.getOwnerUUID())&&restored.isOrderedToSit()&&restored.isSleeping(),"Taming UUID, sit order and sleep state must survive NBT reload");
+  h.runAfterDelay(20,()->{var start=b.position();h.runAfterDelay(30,()->{double dx=b.getX()-start.x,dz=b.getZ()-start.z;check(h,dx*dx+dz*dz<0.25,"Sitting creature must stay in place");p.discard();h.succeed();});});
+ }
+ @GameTest(template="test_arena",timeoutTicks=120)
+ public static void sittingAllowsGravityAndUsesTheLatestTeleportPosition(GameTestHelper h) {
+  floor(h);h.setBlock(new BlockPos(5,4,5),net.minecraft.world.level.block.Blocks.STONE);
+  MinemonCreature b=h.spawn(ModEntities.BULBASAUR.get(),new BlockPos(5,5,5));ServerPlayer p=player(h);
+  b.tame(p);b.setOrderedToSit(true);h.setBlock(new BlockPos(5,4,5),net.minecraft.world.level.block.Blocks.AIR);
+  h.runAfterDelay(60,()->{
+   double support=NaturalMovementGoals.surfaceBelow(h.getLevel(),b.getX(),b.getY(),b.getZ());
+   check(h,Math.abs(b.getY()-support)<0.1D&&b.isOnGround(),
+       "A sitting grounded Pokémon must fall onto the lower floor: y="+b.getY()+", support="+support+", grounded="+b.isOnGround()+", noGravity="+b.isNoGravity()+", velocity="+b.getDeltaMovement());
+   check(h,b.isOrderedToSit(),"Falling must preserve the Sentar command");
+   BlockPos moved=h.absolutePos(new BlockPos(9,1,9));
+   b.moveTo(moved.getX()+0.5D,moved.getY(),moved.getZ()+0.5D,0.0F,0.0F);
+   h.runAfterDelay(5,()->{
+    check(h,b.isOrderedToSit()&&Math.abs(b.getX()-(moved.getX()+0.5D))<0.01D
+            &&Math.abs(b.getZ()-(moved.getZ()+0.5D))<0.01D,
+        "A sitting Pokémon must adopt a new teleport position instead of returning to its old anchor");
+    p.discard();h.succeed();
+   });
+  });
+ }
+ @GameTest(template="test_arena",timeoutTicks=120)
+ public static void rangedAttackCooldownIsExactlyOneHundredTicks(GameTestHelper h) {
+  floor(h);MinemonCreature b=h.spawn(ModEntities.BULBASAUR.get(),new BlockPos(5,1,5));
+  ServerPlayer p=player(h);Cow target=h.spawn(EntityType.COW,new BlockPos(8,1,5));target.setNoAi(true);
+  b.tame(p);b.setOrderedToSit(false);b.setNoAi(true);b.focusTrainerDefenseTarget(target);
+  check(h,b.combatReady()&&b.canFireAt(target),"Fixture must begin with a valid ready shot");
+  check(h,b.fireElementalProjectile(target),"A valid ranged shot must fire immediately");
+  h.runAfterDelay(99,()->{
+   check(h,!b.combatReady(),"The normal five-second cooldown must still be active at tick 99");
+   b.getNavigation().stop();
+   h.runAfterDelay(1,()->{
+    check(h,b.combatReady(),"The next shot must become available at exactly tick 100");
+    p.discard();h.succeed();
+   });
+  });
+ }
+ @GameTest(template="test_arena",timeoutTicks=100)
+ public static void registeredSpeciesSpawnPersistAndHaveEggs(GameTestHelper h) {
+  for(var entry:ModEntities.SPECIES.entrySet()) {
+   MinemonCreature b=entry.getValue().get().create(h.getLevel());
+   check(h,b!=null,"Entity creation failed: "+entry.getKey());
+   var egg=(net.minecraft.world.item.SpawnEggItem)br.com.petrickfaria.minemon.registry.ModItems.EGGS.get(entry.getKey()).get();
+   check(h,egg.getType(null)==entry.getValue().get(),"Wrong spawn egg mapping: "+entry.getKey());
+   b.setOwnerUUID(UUID.randomUUID());b.setTame(true);b.setOrderedToSit(true);b.setSleeping(true);CompoundTag tag=new CompoundTag();b.saveWithoutId(tag);
+   MinemonCreature restored=entry.getValue().get().create(h.getLevel());restored.load(tag);
+   check(h,restored.isTame()&&restored.isOrderedToSit()&&restored.isSleeping()&&b.getOwnerUUID().equals(restored.getOwnerUUID()),"Persistence failed: "+entry.getKey());
+  }
+  h.succeed();
+ }
+
+ @GameTest(template="test_arena",batch="taming_bone",timeoutTicks=100)
+ public static void boneTamingAndSitCommands(GameTestHelper h) {
+  MinemonCreature b=spawn(h);ServerPlayer p=player(h);
+  int previous=br.com.petrickfaria.minemon.config.MinemonConfig.TAME_CHANCE_PERCENT.get();
+  try {
+   br.com.petrickfaria.minemon.config.MinemonConfig.TAME_CHANCE_PERCENT.set(100);
+   p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.BONE,2));
+   b.mobInteract(p,net.minecraft.world.InteractionHand.MAIN_HAND);
+   check(h,!b.isTame(),"Bone interaction must never tame a Minemon");
+   check(h,p.getMainHandItem().getCount()==2,"Bone interaction must preserve the bone stack");
+   var treat=br.com.petrickfaria.minemon.registry.ModItems.TREATS.get(br.com.petrickfaria.minemon.item.PokemonTreatType.GRASS).get().getDefaultInstance();
+   p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,treat);
+   b.mobInteract(p,net.minecraft.world.InteractionHand.MAIN_HAND);
+   check(h,b.isTame()&&p.getUUID().equals(b.getOwnerUUID())&&b.isOrderedToSit(),"Compatible Grass Treat must tame, assign owner and sit");
+   check(h,treat.isEmpty(),"Successful survival treat taming must consume one treat");
+   p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,net.minecraft.world.item.ItemStack.EMPTY);
+   b.mobInteract(p,net.minecraft.world.InteractionHand.MAIN_HAND);
+   check(h,p.containerMenu instanceof br.com.petrickfaria.minemon.menu.PokemonInfoMenu,"Owned Pokémon interaction must open its management interface");
+   var menu=(br.com.petrickfaria.minemon.menu.PokemonInfoMenu)p.containerMenu;
+   check(h,menu.clickMenuButton(p,0)&&!b.isOrderedToSit(),"Seguir must be able to order standing");
+   check(h,menu.clickMenuButton(p,1)&&b.isOrderedToSit(),"Sentar must be able to order sitting");
+  }finally {br.com.petrickfaria.minemon.config.MinemonConfig.TAME_CHANCE_PERCENT.set(previous);p.discard();}
+  h.succeed();
+ }
+ @GameTest(template="test_arena",timeoutTicks=300)
+ public static void followsOwner(GameTestHelper h) {
+  MinemonCreature b=h.spawn(ModEntities.BULBASAUR.get(),new BlockPos(2,1,5));ServerPlayer p=player(h);
+  BlockPos pos=h.absolutePos(new BlockPos(14,1,5));p.moveTo(pos.getX()+.5,pos.getY(),pos.getZ()+.5,0,0);b.tame(p);b.setOrderedToSit(false);
+  b.setBlackListOverride(net.minecraftforge.registries.ForgeRegistries.ENTITY_TYPES.getKey(net.minecraft.world.entity.EntityType.ZOMBIE),false);
+  float initial=b.distanceTo(p);
+  h.runAfterDelay(100,()->{check(h,b.distanceTo(p)<initial-2,"Companion must approach its owner"+state(b,p));p.discard();h.succeed();});
+ }
+
+ @GameTest(template="test_arena",timeoutTicks=100)
+ public static void creativePlayersRemainProtected(GameTestHelper h) {
+  MinemonCreature b=spawn(h);ServerPlayer p=player(h);p.setGameMode(GameType.CREATIVE);
+  check(h,!b.canAttack(p),"Creative player must retain vanilla target protection");b.hurt(DamageSource.playerAttack(p),1);
+  h.runAfterDelay(40,()->{check(h,b.getTarget()==null,"Creative aggressor must not create a combat target");p.discard();h.succeed();});
+ }
+ @GameTest(template="test_arena",timeoutTicks=180)
+ public static void wildRetaliatesAgainstAnotherMinemon(GameTestHelper h) {
+  floor(h);MinemonCreature b=h.spawn(ModEntities.BULBASAUR.get(),new BlockPos(10,1,5));
+  MinemonCreature attacker=h.spawn(ModEntities.BULBASAUR.get(),new BlockPos(4,1,5));attacker.setNoAi(true);float health=attacker.getHealth();
+  check(h,b.hurt(DamageSource.mobAttack(attacker),1)&&b.getTarget()==attacker,
+      "A damaging Minemon hit must acquire the attacker before ranged repositioning; "+state(b,attacker));
+  awaitWildRangedRetaliation(h,b,attacker,health,0);
+ }
+ private static void awaitWildRangedRetaliation(GameTestHelper h,MinemonCreature defender,MinemonCreature attacker,float initialHealth,int elapsed){
+  if(attacker.getHealth()<initialHealth){
+   check(h,CombatGeometry.horizontalCenterDistanceSquared(defender,attacker)>=49.0D,
+       "Wild Minemon must keep seven horizontal blocks before its ranged retaliation");
+   h.succeed();return;
+  }
+  check(h,elapsed<160,"Wild Minemon must retreat to a safe ranged position and retaliate; "+state(defender,attacker));
+  h.runAfterDelay(5,()->awaitWildRangedRetaliation(h,defender,attacker,initialHealth,elapsed+5));
+ }
+ @GameTest(template="test_arena",timeoutTicks=460)
+ public static void wildAggressionActuallyExpires(GameTestHelper h) {
+  MinemonCreature b=spawn(h);b.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED).setBaseValue(0);
+  Cow c=h.spawn(EntityType.COW,new BlockPos(11,1,5));c.setNoAi(true);b.hurt(DamageSource.mobAttack(c),1);
+  check(h,b.getTarget()==c,"Initial provocation must acquire target");
+  h.runAfterDelay(430,()->{check(h,b.getTarget()==null,"Expired aggression must not be reacquired by HurtByTargetGoal"+state(b,c));h.succeed();});
+ }
+
+ @GameTest(template="test_arena",timeoutTicks=100)
+ public static void everySpawnEggCreatesItsEntity(GameTestHelper h) {
+  ServerPlayer p=player(h);BlockPos floorPos=h.absolutePos(new BlockPos(8,0,8));
+  for(var entry:ModEntities.SPECIES.entrySet()) {
+   var egg=br.com.petrickfaria.minemon.registry.ModItems.EGGS.get(entry.getKey()).get();p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,new net.minecraft.world.item.ItemStack(egg));
+   var hit=new net.minecraft.world.phys.BlockHitResult(net.minecraft.world.phys.Vec3.atCenterOf(floorPos),net.minecraft.core.Direction.UP,floorPos,false);
+   var result=egg.useOn(new net.minecraft.world.item.context.UseOnContext(p,net.minecraft.world.InteractionHand.MAIN_HAND,hit));
+   check(h,result.consumesAction(),"Egg use failed: "+entry.getKey());
+   var created=h.getLevel().getEntitiesOfClass(MinemonCreature.class,new net.minecraft.world.phys.AABB(floorPos).inflate(5),e->e.getType()==entry.getValue().get());
+   check(h,!created.isEmpty(),"Egg did not spawn its entity: "+entry.getKey());
+   check(h,created.stream().noneMatch(MinemonCreature::isTame),"Spawn eggs must create wild Pokémon: "+entry.getKey());
+   check(h,created.stream().allMatch(pokemon->br.com.petrickfaria.minemon.pokec.WildEncounterManager.isEncounter(pokemon)
+       &&p.getUUID().equals(br.com.petrickfaria.minemon.pokec.WildEncounterManager.owner(pokemon))),
+       "Spawn eggs must register capture encounters without assigning Pokémon ownership: "+entry.getKey());
+   created.forEach(net.minecraft.world.entity.Entity::discard);
+  }
+  var ownedTemplate=br.com.petrickfaria.minemon.registry.ModItems.EGGS.get("charmander").get();
+  var ownedStack=br.com.petrickfaria.minemon.item.PokecOwnedSpawnEggItem.ownedStack(new net.minecraft.world.item.ItemStack(ownedTemplate),p.getUUID(),p.getGameProfile().getName());
+  p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,ownedStack);
+  var ownedHit=new net.minecraft.world.phys.BlockHitResult(net.minecraft.world.phys.Vec3.atCenterOf(floorPos),net.minecraft.core.Direction.UP,floorPos,false);
+  check(h,ownedTemplate.useOn(new net.minecraft.world.item.context.UseOnContext(p,net.minecraft.world.InteractionHand.MAIN_HAND,ownedHit)).consumesAction(),"Owner-tagged eggs should still spawn without slot gating");
+  var createdOwned=h.getLevel().getEntitiesOfClass(MinemonCreature.class,new net.minecraft.world.phys.AABB(floorPos).inflate(5),e->e.getSpeciesSlug().equals("charmander"));
+  check(h,!createdOwned.isEmpty()&&createdOwned.stream().noneMatch(MinemonCreature::isTame),"Purchased spawn egg must not assign ownership or active slots");
+  createdOwned.forEach(net.minecraft.world.entity.Entity::discard);
+  p.discard();h.succeed();
+ }
+
+ @GameTest(template="test_arena",timeoutTicks=100)
+ public static void eggSpawnedWildPokemonDownsAndPersistsInsteadOfDying(GameTestHelper h){
+  ServerPlayer owner=player(h);var egg=br.com.petrickfaria.minemon.registry.ModItems.EGGS.get("bulbasaur").get();
+  BlockPos floor=h.absolutePos(new BlockPos(8,0,8));owner.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,
+      new net.minecraft.world.item.ItemStack(egg));
+  var hit=new net.minecraft.world.phys.BlockHitResult(net.minecraft.world.phys.Vec3.atCenterOf(floor),
+      net.minecraft.core.Direction.UP,floor,false);
+  check(h,egg.useOn(new net.minecraft.world.item.context.UseOnContext(owner,net.minecraft.world.InteractionHand.MAIN_HAND,hit)).consumesAction(),
+      "Bulbasaur spawn egg must create the test wild");
+  var found=h.getLevel().getEntitiesOfClass(MinemonCreature.class,new net.minecraft.world.phys.AABB(floor).inflate(4),
+      pokemon->pokemon.getSpeciesSlug().equals("bulbasaur")&&!pokemon.isTame());
+  check(h,!found.isEmpty(),"Spawn-egg Bulbasaur must remain wild");
+  MinemonCreature wild=found.get(0);
+  check(h,br.com.petrickfaria.minemon.pokec.WildEncounterManager.isEncounter(wild)
+      &&owner.getUUID().equals(br.com.petrickfaria.minemon.pokec.WildEncounterManager.owner(wild))
+      &&wild.getOwnerUUID()==null,"Capture attribution must not domesticate or assign the Pokémon owner");
+  check(h,br.com.petrickfaria.minemon.pokec.ActivePokemonData.get(h.getLevel()).count(owner.getUUID())==0,
+      "An egg-spawned wild encounter must not occupy a domesticated Pokémon slot");
+  MinemonCreature ally=h.spawn(ModEntities.SPECIES.get("charizard").get(),new BlockPos(7,1,7));
+  ally.tame(owner);ally.setOwnerUUID(owner.getUUID());wild.setHealth(2.0F);
+  check(h,br.com.petrickfaria.minemon.pokec.WildEncounterManager.canDefeat(wild,ally),
+      "A same-level owner and its active companion must be authorized to defeat this wild encounter");
+  check(h,wild.hurt(DamageSource.mobAttack(ally),20.0F),"Owned Pokémon must be able to defeat its egg-spawned wild target");
+  check(h,br.com.petrickfaria.minemon.pokec.WildEncounterManager.isDowned(wild)&&wild.getHealth()==1.0F
+      &&!wild.isRemoved()&&wild.isAlive(),"Defeated egg-spawned Pokémon must enter the capture-ready state instead of dying");
+  CompoundTag saved=new CompoundTag();wild.saveWithoutId(saved);wild.discard();
+  MinemonCreature restored=ModEntities.SPECIES.get("bulbasaur").get().create(h.getLevel());restored.load(saved);
+  check(h,h.getLevel().addFreshEntity(restored),"Downed egg encounter must reload into the test world");
+  check(h,br.com.petrickfaria.minemon.pokec.WildEncounterManager.isEncounter(restored)
+      &&br.com.petrickfaria.minemon.pokec.WildEncounterManager.isDowned(restored)
+      &&owner.getUUID().equals(br.com.petrickfaria.minemon.pokec.WildEncounterManager.owner(restored))
+      &&!restored.isTame()&&!restored.isRemoved(),"Downed state and wild status must survive entity persistence");
+  h.succeed();
+ }
+
+ @GameTest(template="test_arena",timeoutTicks=100)
+ public static void directPlayerHitsCommandOwnedPokemonToFocusWildTarget(GameTestHelper h){
+  ServerPlayer owner=player(h);var egg=br.com.petrickfaria.minemon.registry.ModItems.EGGS.get("geodude").get();
+  BlockPos eggFloor=h.absolutePos(new BlockPos(8,0,8));
+  owner.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,new net.minecraft.world.item.ItemStack(egg));
+  var eggHit=new net.minecraft.world.phys.BlockHitResult(net.minecraft.world.phys.Vec3.atCenterOf(eggFloor),net.minecraft.core.Direction.UP,eggFloor,false);
+  check(h,egg.useOn(new net.minecraft.world.item.context.UseOnContext(owner,net.minecraft.world.InteractionHand.MAIN_HAND,eggHit)).consumesAction(),"Geodude spawn egg must create the wild target");
+  var spawned=h.getLevel().getEntitiesOfClass(MinemonCreature.class,new net.minecraft.world.phys.AABB(eggFloor).inflate(4),m->m.getSpeciesSlug().equals("geodude")&&!m.isTame());
+  check(h,!spawned.isEmpty(),"Spawn-egg Geodude must be a wild Pokémon");
+  MinemonCreature wild=spawned.get(0);
+  MinemonCreature[] team=new MinemonCreature[3];String[] species={"charizard","jolteon","gengar"};
+  for(int i=0;i<team.length;i++){
+   team[i]=h.spawn(ModEntities.SPECIES.get(species[i]).get(),new BlockPos(7+i,1,7));team[i].tame(owner);team[i].setOwnerUUID(owner.getUUID());
+  }
+  team[0].setSleeping(true);team[2].setOrderedToSit(true);float hp=wild.getHealth();
+  owner.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.NETHERITE_SWORD));
+  owner.attack(wild);
+  check(h,wild.getHealth()==hp-1.0F,"A Netherite sword hit against a spawn-egg Pokémon must cause exactly one HP of damage");
+  check(h,team[0].getTarget()==wild&&team[1].getTarget()==wild&&team[2].getTarget()==wild,"Every loaded companion must focus the exact wild Pokémon hit");
+  check(h,!team[0].isSleeping(),"A sleeping companion must wake immediately for the focused attack");
+  float companionHealth=team[1].getHealth();
+  check(h,!team[1].hurt(DamageSource.playerAttack(owner),20.0F)&&team[1].getHealth()==companionHealth,
+      "Direct player damage must remain blocked against the owner's domesticated Pokémon");
+  wild.discard();
+  h.runAfterDelay(1,()->{
+   check(h,team[0].isSleeping(),"A companion that was asleep before combat must resume sleep when its focus target disappears");
+   check(h,team[2].isOrderedToSit(),"The sit command must be restored after a temporary focused attack");
+   owner.discard();h.succeed();
+  });
+ }
+
+ @GameTest(template="test_arena",timeoutTicks=100)
+ public static void playerDamageCapIgnoresWeaponAndAttributeDamage(GameTestHelper h){
+  ServerPlayer owner=player(h);String[] species={"bulbasaur","charmander","squirtle","pikachu","geodude","gastly"};
+  net.minecraft.world.item.Item[] weapons={net.minecraft.world.item.Items.AIR,net.minecraft.world.item.Items.WOODEN_SWORD,
+      net.minecraft.world.item.Items.IRON_SWORD,net.minecraft.world.item.Items.DIAMOND_SWORD,
+      net.minecraft.world.item.Items.NETHERITE_SWORD,net.minecraft.world.item.Items.NETHERITE_AXE};
+  float[] incoming={1.0F,3.0F,6.0F,8.0F,15.0F,40.0F};
+  for(int i=0;i<species.length;i++){
+   MinemonCreature wild=h.spawn(ModEntities.SPECIES.get(species[i]).get(),new BlockPos(3+i,1,10));
+   float health=wild.getHealth();owner.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,new net.minecraft.world.item.ItemStack(weapons[i]));
+   check(h,wild.hurt(DamageSource.playerAttack(owner),incoming[i]),"Direct player melee must be accepted for weapon fixture "+weapons[i]);
+   check(h,wild.getHealth()==health-1.0F,"Player melee must be capped at one HP for "+weapons[i]+" even when incoming damage is "+incoming[i]);
+   wild.hurt(DamageSource.playerAttack(owner),incoming[i]);
+   check(h,wild.getHealth()==health-1.0F,"Repeated calls inside the vanilla hurt window must not add damage for "+weapons[i]);
+  }
+  owner.discard();h.succeed();
+ }
+
+ @GameTest(template="test_arena",timeoutTicks=100)
+ public static void playerDamageRulesDoNotChangeForVanillaMobsOrOwnedPokemon(GameTestHelper h){
+  ServerPlayer owner=player(h);MinemonCreature pokemon=h.spawn(ModEntities.SPECIES.get("pikachu").get(),new BlockPos(8,1,8));
+  pokemon.tame(owner);pokemon.setOwnerUUID(owner.getUUID());float pokemonHealth=pokemon.getHealth();
+  check(h,!pokemon.hurt(DamageSource.playerAttack(owner),30.0F)&&pokemon.getHealth()==pokemonHealth,
+      "Domestic Minemon must retain direct-player damage protection");
+  Cow cow=h.spawn(EntityType.COW,new BlockPos(10,1,8));float cowHealth=cow.getHealth();
+  check(h,cow.hurt(DamageSource.playerAttack(owner),7.0F)&&cow.getHealth()==cowHealth-7.0F,
+      "Vanilla mobs must retain their unmodified player damage");
+  owner.discard();h.succeed();
+ }
+
+ @GameTest(template="test_arena",timeoutTicks=100)
+ public static void naturalEncounterPlayerHitsStayOneHpAndNeverDownTheEncounter(GameTestHelper h){
+  ServerPlayer owner=player(h);MinemonCreature wild=h.spawn(ModEntities.SPECIES.get("bulbasaur").get(),new BlockPos(8,1,8));
+  var data=wild.getPersistentData();data.putBoolean("MinemonWildEncounter",true);data.putUUID("MinemonEncounterOwner",owner.getUUID());data.putString("MinemonEncounterState","active");
+  wild.setWildEncounter(true);wild.setWildEncounterOwner(owner.getUUID());wild.setHealth(2.0F);
+  check(h,wild.hurt(DamageSource.playerAttack(owner),50.0F),"A direct hit must be accepted on a naturally managed wild encounter");
+  check(h,wild.getHealth()==1.0F&&!br.com.petrickfaria.minemon.pokec.WildEncounterManager.isDowned(wild),
+      "A player's capped hit must leave a natural encounter at one HP without triggering capture/downed state");
+  wild.invulnerableTime=0;
+  wild.hurt(DamageSource.playerAttack(owner),50.0F);
+  check(h,wild.getHealth()==1.0F&&!br.com.petrickfaria.minemon.pokec.WildEncounterManager.isDowned(wild),
+      "A player's next hit must not kill or down a natural encounter");
+  owner.discard();h.succeed();
+ }
+
+ @GameTest(template="test_arena",timeoutTicks=1240)
+ public static void domesticatedPokemonRegeneratesOneHealthAfter1200Ticks(GameTestHelper h){
+  ServerPlayer owner=player(h);MinemonCreature pokemon=h.spawn(ModEntities.SPECIES.get("charmander").get(),new BlockPos(6,1,6));
+  pokemon.tame(owner);pokemon.setOwnerUUID(owner.getUUID());pokemon.setNoAi(true);pokemon.setSleeping(true);pokemon.setHealth(pokemon.getMaxHealth()-3.0F);float initial=pokemon.getHealth();
+  MinemonCreature wild=h.spawn(ModEntities.SPECIES.get("charmander").get(),new BlockPos(9,1,6));wild.setNoAi(true);wild.setHealth(wild.getMaxHealth()-3.0F);float wildInitial=wild.getHealth();
+  h.runAfterDelay(1199,()->{
+   check(h,pokemon.getHealth()==initial,"Natural healing must not occur before the full 1200-tick interval");
+   check(h,wild.getHealth()==wildInitial,"The automatic recovery timer must not heal wild Pokémon");
+   h.runAfterDelay(1,()->{
+    check(h,pokemon.getHealth()==initial+1.0F,"A domesticated Pokémon must recover exactly one health point at 1200 ticks");
+    check(h,wild.getHealth()==wildInitial,"The automatic recovery timer must exclude wild Pokémon");
+    check(h,pokemon.getHealth()<=pokemon.getMaxHealth(),"Natural healing must respect species maximum health");owner.discard();h.succeed();
+   });
+  });
+ }
+
+ @GameTest(template="test_arena",timeoutTicks=420)
+ public static void airborneSpeciesStayAboveSurfaceAndLandOnlyToSleep(GameTestHelper h) {
+  floor(h);
+  // Magnemite is a flyer that intentionally rests in a safe hover; Spearow,
+  // Fearow and the legendary birds are covered by the grounded night-rest test.
+  MinemonCreature bird=h.spawn(ModEntities.SPECIES.get("magnemite").get(),new BlockPos(5,1,5));
+  traceMovement(h,"natural-flight",bird,0,300);
+  h.runAfterDelay(100,()->{
+   double altitude=bird.getY()-NaturalMovementGoals.surfaceBelow(h.getLevel(),bird.getX(),bird.getY(),bird.getZ());
+   check(h,altitude>=0.9D&&altitude<=9.1D,"Airborne species must maintain the active 1..3 or 4..9 block altitude band; got "+altitude);
+   bird.setSleeping(true);
+   check(h,bird.isNoGravity(),"Air-only sleeping species must retain hover gravity control");
+   h.runAfterDelay(100,()->{
+    double surface=NaturalMovementGoals.surfaceBelow(h.getLevel(),bird.getX(),bird.getY(),bird.getZ());
+    check(h,Math.abs(bird.getY()-surface-1.0D)<0.2D&&!bird.isOnGround(),"Air-only sleeping species must hover one block above support");
+    bird.setSleeping(false);
+    check(h,bird.isNoGravity(),"Awake airborne species must resume flight");
+    awaitAwakeFlightBand(h,bird,180,0);
+   });
+  });
+ }
+
+ @GameTest(template="test_arena",batch="night_landing",timeoutTicks=1200)
+ public static void requestedBirdsLandAndHoldTheirFoldedSleepPose(GameTestHelper h) {
+  floor(h);h.getLevel().setDayTime(18000);
+  var slugs=java.util.List.of("spearow","fearow","articuno","zapdos","moltres");
+  int[][] positions={{2,3},{8,3},{14,3},{5,11},{11,11}};
+  var birds=new java.util.ArrayList<MinemonCreature>();
+  for(int i=0;i<slugs.size();i++){
+   var bird=h.spawn(ModEntities.SPECIES.get(slugs.get(i)).get(),new BlockPos(positions[i][0],8,positions[i][1]));
+   bird.setNoGravity(true);
+   bird.setDeltaMovement(0,0,0);
+   birds.add(bird);
+  }
+  awaitRequestedBirdLanding(h,birds,480);
+ }
+
+ private static void awaitRequestedBirdLanding(GameTestHelper h,java.util.List<MinemonCreature> birds,int remaining) {
+  if(birds.stream().allMatch(b->b.isSleeping()&&b.isNightResting()&&b.isOnGround()&&!b.isNoGravity())){
+   h.getLevel().setDayTime(1000);
+   h.runAfterDelay(3,()->{
+    for(var bird:birds)check(h,!bird.isSleeping()&&!bird.isNightResting(),bird.getSpeciesSlug()+" must wake at dawn");
+    awaitCommandedLanding(h,birds,500,false);
+   });
+   return;
+  }
+  if(remaining<=0){
+   var states=birds.stream().map(b->b.getSpeciesSlug()+"{sleep="+b.isSleeping()+",night="+b.isNightResting()+",ground="+b.isOnGround()+",gravity="+b.isNoGravity()+",pos="+b.position()+",nav="+b.getNavigation().getTargetPos()+"}").toList();
+   h.fail("Requested flyers must land and sleep on dry ground before dawn: "+states);
+   return;
+  }
+  h.runAfterDelay(5,()->awaitRequestedBirdLanding(h,birds,remaining-5));
+ }
+
+ private static void awaitCommandedLanding(GameTestHelper h,java.util.List<MinemonCreature> birds,int remaining,boolean ordered){
+  if(!ordered && birds.stream().allMatch(b->!b.isOnGround() && b.getY()-b.naturalSurface()>.6)){
+   var anchors=birds.stream().map(MinemonCreature::position).toList();
+   // Seguir requires an actual owner. Random, unresolvable owner UUIDs leave
+   // the follow command active without any follow goal able to guide takeoff.
+   ServerPlayer owner=player(h);owner.setGameMode(GameType.CREATIVE);
+   for(var bird:birds){bird.tame(owner);bird.setOrderedToSit(true);}
+   h.runAfterDelay(30,()->{
+    for(int i=0;i<birds.size();i++){
+     var bird=birds.get(i);
+     check(h,bird.isOrderedToSit()&&!bird.isSleeping(),"Commanded flyer must remain awake and sitting");
+     double hover=bird.getY()-NaturalMovementGoals.surfaceBelow(h.getLevel(),bird.getX(),bird.getY(),bird.getZ());
+     check(h,Math.abs(hover-1.0D)<0.2D,bird.getSpeciesSlug()+" must hold an airborne flyer at one block above support; altitude="+hover+", position="+bird.position());
+     check(h,bird.position().subtract(anchors.get(i)).lengthSqr()<1.0E-6D,bird.getSpeciesSlug()+" must hold the flyer's full 3D position; start="+anchors.get(i)+", now="+bird.position());
      bird.setOrderedToSit(false);
     }
     h.runAfterDelay(60,()->{
