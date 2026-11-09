@@ -189,6 +189,11 @@ public final class MinemonFlyingCreature extends MinemonCreature {
  @Override public void tick(){
   super.tick();
   if(isDefeated()){this.setNoGravity(true);return;}
+  // The superclass has restored the awake sitting anchor. Night landing
+  // must not re-enable gravity or add descent after that position lock.
+  if(this.isOrderedToSit()&&!this.isSleeping()&&!this.isNightResting()&&this.isFlyingSpecies()){
+   this.setNoGravity(true);this.setDeltaMovement(0,0,0);this.fallDistance=0;return;
+  }
   this.updateLocomotion();
   if(!this.isFlyingSpecies() && !this.wantsNaturalLanding()){return;}
   if(!this.level.isClientSide){

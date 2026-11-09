@@ -600,11 +600,12 @@ public final class CompanionTests {
 
  private static void awaitCommandedLanding(GameTestHelper h,java.util.List<MinemonCreature> birds,int remaining,boolean ordered){
   if(!ordered && birds.stream().allMatch(b->!b.isOnGround() && b.getY()-b.naturalSurface()>.6)){
-   var anchors=birds.stream().map(MinemonCreature::position).toList();
    // Seguir requires an actual owner. Random, unresolvable owner UUIDs leave
    // the follow command active without any follow goal able to guide takeoff.
    ServerPlayer owner=player(h);owner.setGameMode(GameType.CREATIVE);
    for(var bird:birds){bird.tame(owner);bird.setOrderedToSit(true);}
+   // Establish the reference after the command selects its safe hover height.
+   var anchors=birds.stream().map(MinemonCreature::position).toList();
    h.runAfterDelay(30,()->{
     for(int i=0;i<birds.size();i++){
      var bird=birds.get(i);

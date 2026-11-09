@@ -256,7 +256,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         if (orderedToSit) {
             sitAnchorX = getX(); sitAnchorY = getY(); sitAnchorZ = getZ();
             if(isFlyingSpecies()){
-                double hoverY=naturalSurface()+1.0D;
+                double hoverY=naturalSurface()+Math.min(1.0D,Math.max(0.0D,naturalCycle.minimumAltitude()));
                 var destination=getBoundingBox().move(0.0D,hoverY-getY(),0.0D);
                 if(level.noCollision(this,destination)){sitAnchorY=hoverY;setPos(getX(),hoverY,getZ());}
                 setNoGravity(true);
