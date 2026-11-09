@@ -250,7 +250,10 @@ public final class PokemonManagementGameTests {
         pokemon.focusPlayerTarget(target);
         target.setPos(pokemon.getX() + 15.1D, pokemon.getY(), pokemon.getZ());
         h.runAfterDelay(299, () -> {
-            check(h, pokemon.getTarget() == target, "A valid target must stay focused for the first 299 ticks outside perception");
+            check(h, pokemon.getTarget() == target, "A valid target must stay focused for the first 299 ticks outside perception; target="
+                    + pokemon.getTarget() + " canAttack=" + pokemon.canAttack(target) + " canPerceive=" + pokemon.canPerceive(target)
+                    + " alive=" + target.isAlive() + " distance=" + pokemon.distanceTo(target) + " noAI=" + pokemon.isNoAi()
+                    + " sleeping=" + pokemon.isSleeping() + " owner=" + pokemon.getOwner());
             target.setPos(pokemon.getX() + 14.9D, pokemon.getY(), pokemon.getZ());
             h.runAfterDelay(2, () -> {
                 check(h, pokemon.getTarget() == target, "Reentering perception must preserve and reset the focus timeout");
