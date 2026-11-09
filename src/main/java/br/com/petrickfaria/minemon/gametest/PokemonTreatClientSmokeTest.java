@@ -137,7 +137,12 @@ public final class PokemonTreatClientSmokeTest {
                     if(++clientTicks>80)throw new IllegalStateException("PokéC preview did not initialize the species idle animation for "+slug+": expected="+expected+" observed="+selected);
                     return;
                 }
+                if(!screen.previewCalibratedForSmokeTest(slug)){
+                    if(++clientTicks>80)throw new IllegalStateException("Visible idle mesh did not calibrate for "+slug);
+                    return;
+                }
                 if(++previewStableFrames<3)return;
+                screen.verifyVisiblePreviewForSmokeTest(slug);
                 if(PREVIEW_SCREENSHOTS.contains(slug)&&previewSwitchIndex<PREVIEW_SPECIES.size())
                     net.minecraft.client.Screenshot.grab(minecraft.gameDirectory,"pokec-preview-"+slug+".png",minecraft.getMainRenderTarget(),message->{});
                 previewSwitchIndex++;previewStableFrames=0;clientTicks=0;
@@ -156,9 +161,6 @@ public final class PokemonTreatClientSmokeTest {
                 float[] orientation=screen.previewOrientationForSmokeTest();
                 if(Math.abs(orientation[0]-23)>0.01||Math.abs(orientation[1]+4)>0.01)
                     throw new IllegalStateException("PokéC preview initial three-quarter orientation was not reset consistently");
-                for(String slug:java.util.List.of("caterpie","charmander","charizard","onix","moltres","squirtle","bulbasaur"))
-                    if(Math.abs(screen.previewNormalizedSizeForSmokeTest(slug)-76.0)>0.001)
-                        throw new IllegalStateException("PokéC preview size was not standardized for "+slug);
                 if(!screen.dragPreviewForSmokeTest())throw new IllegalStateException("Pokec drag did not rotate both axes");
                 int initialSelection=screen.selectedSpeciesForSmokeTest("bulbasaur")?1:0;
                 if(!screen.dragListScrollbarForSmokeTest(true,true)||screen.listScrollOffsetForSmokeTest()!=0)

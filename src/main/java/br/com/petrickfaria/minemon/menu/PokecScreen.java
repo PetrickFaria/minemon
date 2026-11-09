@@ -43,6 +43,33 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
     private boolean draggingListScrollbar;
     private int listScrollbarGrabOffset;
     private float previewYaw=23.0F,previewPitch=-4.0F,targetPreviewYaw=23.0F,targetPreviewPitch=-4.0F;
+    private final java.util.Map<String,Integer> previewMeshFrames=new java.util.HashMap<>();
+    private final java.util.Set<String> calibratedPreviews=new java.util.HashSet<>();
+    public boolean previewCalibratedForSmokeTest(String slug){return calibratedPreviews.contains(slug);}
+    public void verifyVisiblePreviewForSmokeTest(String slug){
+        if(!calibratedPreviews.contains(slug))throw new IllegalStateException("Preview not calibrated: "+slug);
+        var mc=Minecraft.getInstance();double pixels=uiScale*mc.getWindow().getGuiScale();
+        int left=(int)((leftPos+155*uiScale)*mc.getWindow().getGuiScale());
+        int top=(int)((topPos+46*uiScale)*mc.getWindow().getGuiScale());
+        int right=(int)(left+226*pixels),bottom=(int)(top+84*pixels);
+        try(var frame=net.minecraft.client.Screenshot.takeScreenshot(mc.getMainRenderTarget())){
+            int bg=frame.getPixelRGBA(left,top),minX=right,minY=bottom,maxX=left,maxY=top,count=0;
+            for(int py=top;py<bottom;py++)for(int px=left;px<right;px++){
+                int c=frame.getPixelRGBA(px,py);
+                int difference=Math.max(Math.abs((c&255)-(bg&255)),Math.max(Math.abs(((c>>>8)&255)-((bg>>>8)&255)),Math.abs(((c>>>16)&255)-((bg>>>16)&255))));
+                if(difference<18)continue;
+                minX=Math.min(minX,px);maxX=Math.max(maxX,px);minY=Math.min(minY,py);maxY=Math.max(maxY,py);count++;
+            }
+            double extent=Math.max(maxX-minX,maxY-minY),target=48*pixels;
+            double centerX=(leftPos+268*uiScale)*mc.getWindow().getGuiScale();
+            double centerY=(topPos+88*uiScale)*mc.getWindow().getGuiScale();
+            if(count<10||extent<target*.65||extent>target*1.30
+                    ||Math.abs((minX+maxX)*.5-centerX)>target*.25
+                    ||Math.abs((minY+maxY)*.5-centerY)>target*.25)
+                throw new IllegalStateException("Visible preview framing failed: "+slug+" extent="+extent+" target="+target
+                        +" bounds="+minX+","+minY+".."+maxX+","+maxY+" center="+centerX+","+centerY);
+        }
+    }
     private int scrollOffset;
     private String selectedSlug = "bulbasaur";
     private Map<String, MinemonCreature> previews = new HashMap<>();
@@ -487,9 +514,9 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         });
         if (entity == null) return;
         entity.tickCount = (int) mc.level.getGameTime();
-        entity.setYRot(180.0F);
+        entity.setYRot(0.0F);
         entity.yRotO = entity.getYRot();
-        entity.yBodyRot=entity.yBodyRotO=180;entity.yHeadRot=entity.yHeadRotO=180;
+        entity.yBodyRot=entity.yBodyRotO=0;entity.yHeadRot=entity.yHeadRotO=0;
         var def = SpeciesDefinitions.get(species.slug());
         var fit = previewFits.computeIfAbsent(species.slug(),slug->PreviewBounds.fit(slug,def.scale()));
         previewYaw += net.minecraft.util.Mth.wrapDegrees(targetPreviewYaw-previewYaw)*.25F;
@@ -509,15 +536,22 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         pose.mulPose(Vector3f.XP.rotationDegrees(previewPitch-6));
         pose.mulPose(Vector3f.YP.rotationDegrees(previewYaw));
         pose.translate(-fit.x(), -fit.y(), -fit.z());
+        var measured=new PreviewMeshBounds(pose.last().pose());
         var dispatcher = mc.getEntityRenderDispatcher();
         dispatcher.setRenderShadow(false);
         try {
             br.com.petrickfaria.minemon.client.MinemonRenderer.previewRendering=true;
+            if(!calibratedPreviews.contains(species.slug()))PreviewMeshBounds.begin(measured);
             dispatcher.render(entity, 0, 0, 0, 0, partialTick, pose, mc.renderBuffers().bufferSource(), 15728880);
             mc.renderBuffers().bufferSource().endBatch();
+            if(!calibratedPreviews.contains(species.slug())&&previewMeshFrames.merge(species.slug(),1,Integer::sum)>=8){
+                var calibrated=measured.fit();
+                if(calibrated!=null){previewFits.put(species.slug(),calibrated);calibratedPreviews.add(species.slug());}
+            }
         } catch (RuntimeException ex) {
             if (Boolean.getBoolean("minemon.clientSmokeTest")) throw ex;
         } finally {
+            PreviewMeshBounds.end();
             br.com.petrickfaria.minemon.client.MinemonRenderer.previewRendering=false;
             com.mojang.blaze3d.systems.RenderSystem.disableScissor();
             dispatcher.setRenderShadow(true);
