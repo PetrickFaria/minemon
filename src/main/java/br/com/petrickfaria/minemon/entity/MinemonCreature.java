@@ -674,7 +674,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         });
         this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, net.minecraft.world.entity.Mob.class,
                 10, true, false, target -> MinemonCreature.this.isTame()
-                && !MinemonCreature.this.isOrderedToSit() && !(target instanceof MinemonCreature)
+                && !(target instanceof MinemonCreature)
                 && MinemonCreature.this.canPerceive(target)
                 && MinemonCreature.this.isBlackListTarget((net.minecraft.world.entity.Mob) target)));
         this.targetSelector.addGoal(4, new HurtByTargetGoal(this) {
@@ -707,8 +707,6 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
                     && !(target instanceof MinemonCreature) && isBlackListTarget(mob);
             if (!ownerTarget && this.getLastHurtByMob()!=target && !selectedHostile) return false;
         }
-        if (this.isTame() && this.isOrderedToSit()
-                && (playerFocusTarget == null || !playerFocusTarget.equals(target.getUUID()))) return false;
         if (playerFocusTarget != null && (target.level != this.level || !playerFocusTarget.equals(target.getUUID()))) return false;
         // Perception and projectile reach are separate: an authorized target can remain
         // focused while the companion navigates into its actual firing range.
