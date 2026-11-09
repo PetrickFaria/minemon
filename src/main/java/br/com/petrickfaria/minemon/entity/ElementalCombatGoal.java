@@ -47,6 +47,15 @@ final class ElementalCombatGoal extends Goal {
 
         double distance = Math.sqrt(CombatGeometry.horizontalCenterDistanceSquared(pokemon, target));
         double safeDistance = Math.max(1.0D, Math.min(7.0D, pokemon.attackRange() - 1.0D));
+
+        // Projectile eligibility is independent of the preferred defensive distance.
+        // Never suppress a ready shot merely because the target entered the danger zone.
+        if (pokemon.combatReady() && pokemon.canFireAt(target)) {
+            pokemon.fireElementalProjectile(target);
+        }
+
+        // Movement is independent of the attack cooldown. Retreat first even while
+        // recharging, then resume normal positioning once the threat is far enough.
         if (distance < safeDistance) {
             if (!retreating) repositionCooldown = 0;
             retreating = true;
@@ -55,17 +64,9 @@ final class ElementalCombatGoal extends Goal {
         }
         retreating = false;
 
-        if (pokemon.combatReady() && pokemon.canFireAt(target)) {
-            pokemon.getNavigation().stop();
-            pokemon.fireElementalProjectile(target);
-            return;
-        }
-
-        // Hold position throughout the cooldown when the target remains in a
-        // valid firing lane. Reposition only for range or line-of-sight loss.
         if (distance > pokemon.attackRange() || !pokemon.getSensing().hasLineOfSight(target)) {
             reposition(target, false);
-        } else {
+        } else if (pokemon.getNavigation().isDone()) {
             pokemon.getNavigation().stop();
         }
     }
@@ -117,11 +118,18 @@ final class ElementalCombatGoal extends Goal {
                     (int)Math.floor(pokemon.getY()), (int)Math.floor(destinationZ));
             var path = navigation.createPath(destination, 0);
             if (path != null && path.canReach() && keepsSafeDistance(path, target, safeDistance)) {
-                navigation.moveTo(path, 1.0D);
+                // Navigation speed scales with the creature's movement attribute.
+                // A vanilla zombie uses 0.23; normalize defensive retreat to
+                // that reference without permanently changing natural movement.
+                double actualSpeed = pokemon.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED);
+                double speedModifier = retreat ? 0.23D / Math.max(0.01D, actualSpeed) : 1.0D;
+                navigation.moveTo(path, speedModifier);
                 return;
             }
         }
-        navigation.stop();
+        // Do not cancel an already valid retreat path just because a fresh
+        // navigation candidate could not be computed on this tick.
+        if (navigation.isDone()) navigation.stop();
     }
 
     private static double horizontalDistance(Vec3 first, Vec3 second) {
