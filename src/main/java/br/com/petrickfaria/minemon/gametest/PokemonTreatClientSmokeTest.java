@@ -133,6 +133,7 @@ public final class PokemonTreatClientSmokeTest {
                             var owner=minecraft.getSingleplayerServer().getPlayerList().getPlayer(uuid);
                             if(owner==null)throw new IllegalStateException("Catalog preview test owner missing");
                             for(String species:CATALOG_PREVIEWS)br.com.petrickfaria.minemon.pokec.PokecPlayerData.unlock(owner,species);
+                            br.com.petrickfaria.minemon.network.MinemonNetwork.refreshPokec(owner);
                         });
                         return;
                     }
