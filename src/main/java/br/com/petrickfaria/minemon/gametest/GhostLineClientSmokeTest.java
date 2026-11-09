@@ -170,14 +170,16 @@ final class GhostLineClientSmokeTest {
      if(Set.of("gastly-front","gastly-right","gastly-back","gastly-left","gastly-top").contains(view))
       verifyVisibleCore(mc,view);
      else if(view.equals("gastly-bottom"))verifyVisibleAura(mc,view);
-     if(view.equals("haunter-blink")){
-      var mob=find(mc,haunterId);
-      if(mob==null||!mob.isBlinkingForRender())
-       throw new IllegalStateException("Haunter blink ended before its closed-eye screenshot was captured");
-     }else if(view.equals("gengar-blink")){
-      var mob=find(mc,gengarId);
-      if(mob==null||!mob.isBlinkingForRender())
-       throw new IllegalStateException("Gengar blink ended before its closed-eye screenshot was captured");
+     if(view.equals("haunter-blink")||view.equals("gengar-blink")){
+      var mob=find(mc,view.equals("haunter-blink")?haunterId:gengarId);
+      if(mob==null)throw new IllegalStateException("Ghost disappeared before its blink screenshot: "+view);
+      // Selection happens on one client tick and capture on the next. A
+      // natural blink can end between them. Retry the next natural event;
+      // the existing deadline and mandatory screenshot checks still apply.
+      if(!mob.isBlinkingForRender()||!MinemonModel.ghostEyesClosedForValidation(mob)){
+       captures.remove(view);
+       return;
+      }
      }
      if(Set.of("gastly-10-block","gastly-motion","gastly-float").contains(view))verifyVisibleAura(mc,view);
      Screenshot.grab(mc.gameDirectory,"ghost-line-1.74-"+view+".png",mc.getMainRenderTarget(),m->{screenshotInFlight=false;writtenScreenshots.add(view);System.out.println("[GHOST LINE] screenshot "+view+": "+m);});
