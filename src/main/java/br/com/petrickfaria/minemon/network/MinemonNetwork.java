@@ -129,8 +129,6 @@ public final class MinemonNetwork {
                         if (minecraft.screen instanceof br.com.petrickfaria.minemon.menu.PokemonInfoScreen info) {
                             if (m.open) info.openBlackList(m.entityId, m.pokemon, m.overrides);
                             else info.replaceBlackListOverrides(m.overrides);
-                        } else if (minecraft.screen instanceof br.com.petrickfaria.minemon.menu.BlackListScreen list) {
-                            list.replaceOverrides(m.overrides);
                         }
                     }));
             context.setPacketHandled(true);
