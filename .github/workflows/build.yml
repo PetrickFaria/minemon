@@ -92,6 +92,17 @@ jobs:
           ALSOFT_DRIVERS=null timeout --kill-after=30s 600s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeTreats
           grep -F '[TREAT CLIENT] PASS:' run/client-validation-treats.txt
           grep -F 'PokéCoin and Pokébola models, translations, textures, and creative entries loaded' run/client-validation-treats.txt
+      - name: Upload PokéC client evidence
+        if: ${{ !cancelled() && steps.compile.outcome == 'success' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: minemon-pokec-client-evidence
+          path: |
+            run/screenshots/pokec*.png
+            run/logs/
+            run/client-validation-treats.txt
+          if-no-files-found: warn
+          retention-days: 7
       - name: Validate Pokémon management screens on the real client
         if: ${{ !cancelled() && steps.compile.outcome == 'success' }}
         run: |
@@ -218,8 +229,13 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          jar_file="$(find build/libs -maxdepth 1 -type f -name 'Minemon-1.19.2-*-all.jar' -print -quit)"
-          test -n "$jar_file"
+          MINEMON_VERSION="$(python3 tools/minemon_version.py)"
+          echo "MINEMON_VERSION=${MINEMON_VERSION}" >> "$GITHUB_ENV"
+          jar_file="build/libs/minemon-${MINEMON_VERSION}.jar"
+          test -f "$jar_file"
+          unzip -t "$jar_file"
+          unzip -p "$jar_file" META-INF/mods.toml | grep -F "version=\"${MINEMON_VERSION}\""
+          unzip -p "$jar_file" META-INF/MANIFEST.MF | grep -F "Implementation-Version: ${MINEMON_VERSION}"
           python3 tools/verify_treats.py "$jar_file"
           jar tf "$jar_file" | grep -Fx 'data/minemon_gen1/model_metrics.json'
           jar tf "$jar_file" | grep -Fx 'assets/minemon_gen1/models/item/breeding_egg.json'
@@ -302,8 +318,8 @@ jobs:
       - name: Upload Minemon JAR
         uses: actions/upload-artifact@v4
         with:
-          name: Minemon-1.19.2-2.1.0-gen1
-          path: build/libs/Minemon-1.19.2-*-all.jar
+          name: minemon-${{ env.MINEMON_VERSION }}
+          path: build/libs/minemon-${{ env.MINEMON_VERSION }}.jar
           if-no-files-found: error
           retention-days: 14
       - name: Collect diagnostics

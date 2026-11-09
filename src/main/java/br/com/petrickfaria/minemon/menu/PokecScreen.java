@@ -542,11 +542,15 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         try {
             br.com.petrickfaria.minemon.client.MinemonRenderer.previewRendering=true;
             if(!calibratedPreviews.contains(species.slug()))PreviewMeshBounds.begin(measured);
-            dispatcher.render(entity, 0, 0, 0, 0, partialTick, pose, mc.renderBuffers().bufferSource(), 15728880);
+            net.minecraft.client.renderer.MultiBufferSource previewBuffers=type->PreviewMeshBounds.wrap(mc.renderBuffers().bufferSource().getBuffer(type));
+            dispatcher.render(entity, 0, 0, 0, 0, partialTick, pose, previewBuffers, 15728880);
             mc.renderBuffers().bufferSource().endBatch();
             if(!calibratedPreviews.contains(species.slug())&&previewMeshFrames.merge(species.slug(),1,Integer::sum)>=8){
                 var calibrated=measured.fit();
-                if(calibrated!=null){previewFits.put(species.slug(),calibrated);calibratedPreviews.add(species.slug());}
+                if(calibrated!=null){
+                    previewFits.put(species.slug(),calibrated);calibratedPreviews.add(species.slug());
+                    if(Boolean.getBoolean("minemon.clientSmokeTest"))System.out.println("[POKEC MESH] "+species.slug()+" "+calibrated);
+                }
             }
         } catch (RuntimeException ex) {
             if (Boolean.getBoolean("minemon.clientSmokeTest")) throw ex;

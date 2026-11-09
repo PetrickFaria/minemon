@@ -149,7 +149,7 @@ public class MinemonRenderer extends GeoEntityRenderer<MinemonCreature> {
    if(java.util.Arrays.stream(cube.quads).anyMatch(java.util.Objects::nonNull))
     drawnFireBones.computeIfAbsent(activeFireSpecies,k->java.util.concurrent.ConcurrentHashMap.newKeySet()).add(activeBone);
   }
-  super.renderCube(cube,pose,previewRendering?br.com.petrickfaria.minemon.menu.PreviewMeshBounds.wrap(buffer):buffer,light,overlay,red,green,blue,alpha);
+  super.renderCube(cube,pose,buffer,light,overlay,red,green,blue,alpha);
  }
 
  /** Full-bright overlays use transparent flame masks on fire-bearing bones only. */
