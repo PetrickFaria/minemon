@@ -374,9 +374,18 @@ public final class PokemonTreatClientSmokeTest {
         server.execute(()->{
             var player=server.getPlayerList().getPlayer(uuid);
             if(player==null)throw new IllegalStateException("Pokec test player not loaded on server");
+            // This world is copied from the preceding GameTest run. Its hostile
+            // fixtures can otherwise kill the survival-mode test player while
+            // the real client iterates all 151 previews, closing the screen and
+            // aborting the render assertions before they finish.
+            player.setGameMode(net.minecraft.world.level.GameType.CREATIVE);
+            player.setHealth(player.getMaxHealth());
+            var level=(net.minecraft.server.level.ServerLevel)player.level;
+            var validationArea=new net.minecraft.world.phys.AABB(player.blockPosition()).inflate(96.0D);
+            level.getEntitiesOfClass(net.minecraft.world.entity.monster.Monster.class,validationArea)
+                    .forEach(net.minecraft.world.entity.Entity::discard);
             player.getPersistentData().remove("minemon_gen1_pokec");
             var pos=player.blockPosition().west(2);
-            var level=(net.minecraft.server.level.ServerLevel)player.level;
             for(String slug:PREVIEW_SPECIES)br.com.petrickfaria.minemon.pokec.PokecPlayerData.unlock(player,slug);
             var state=br.com.petrickfaria.minemon.registry.ModBlocks.POKEC.get().defaultBlockState();
             level.setBlock(pos,state,3);
