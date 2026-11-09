@@ -156,7 +156,7 @@ final class RocketVillagerClientSmokeTest {
             screenshotRequested = true;
             System.out.println("[ROCKET CLIENT] requesting screenshot callback");
             Screenshot.grab(minecraft.gameDirectory, "rocket-profession-biome-variants.png",
-                    minecraft.getMainRenderTarget(), message -> {
+                    minecraft.getMainRenderTarget(), message -> minecraft.execute(() -> {
                         try {
                             Files.writeString(Path.of("client-validation-rocket.txt"),
                                     "PASS ROCKET CLIENT: real vanilla Rocket villagers rendered for all seven 1.19.2 biome types; "
@@ -181,7 +181,7 @@ final class RocketVillagerClientSmokeTest {
                         } catch (Exception failure) {
                             throw new IllegalStateException("Could not write Rocket client smoke result", failure);
                         }
-                    });
+                    }));
         } catch (Exception failure) {
             throw new IllegalStateException("Rocket villager client validation failed", failure);
         }
