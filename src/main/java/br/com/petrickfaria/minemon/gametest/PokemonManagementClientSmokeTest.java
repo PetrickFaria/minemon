@@ -21,7 +21,7 @@ public final class PokemonManagementClientSmokeTest {
     private static boolean blacklistPreparationRequested;
     private static volatile int dewgongId=-1,gastlyId=-1;
     private static volatile boolean closedEyesSeen,openEyesSeen,awakeBlinkSeen;
-    private static int auraState,auraLarge,auraSmall;
+    private static int auraState,auraLarge,auraSmall,auraFrames;
     private static void nineFixtures(Minecraft minecraft){
         minecraft.player.closeContainer();minecraft.setScreen(null);minecraft.player.setYRot(0);minecraft.player.setXRot(10);
         br.com.petrickfaria.minemon.client.MinemonRenderer.validationObserver=(entity,model)->{
@@ -269,14 +269,18 @@ public final class PokemonManagementClientSmokeTest {
                 if(ticks==32){
                     auraLarge=br.com.petrickfaria.minemon.client.GastlySmokeParticle.largeSpawnsForValidation();
                     auraSmall=br.com.petrickfaria.minemon.client.GastlySmokeParticle.smallSpawnsForValidation();
+                    auraFrames=br.com.petrickfaria.minemon.client.GastlyCoreRenderHook.redrawsForValidation();
                 }
                 if(ticks==64){
                     int large=br.com.petrickfaria.minemon.client.GastlySmokeParticle.largeSpawnsForValidation()-auraLarge;
                     int small=br.com.petrickfaria.minemon.client.GastlySmokeParticle.smallSpawnsForValidation()-auraSmall;
-                    if(large!=10||small!=14)throw new IllegalStateException("Gastly real-client aura rate mismatch in state "+auraState+": large="+large+" small="+small);
+                    int frames=br.com.petrickfaria.minemon.client.GastlyCoreRenderHook.redrawsForValidation()-auraFrames;
+                    if(frames<=0||large!=frames*5||small!=frames*7)
+                        throw new IllegalStateException("Gastly real-client aura render rate mismatch in state "+auraState
+                                +": frames="+frames+" large="+large+" small="+small);
                     auraState++;ticks=0;
                     if(auraState<4){changeAuraState(minecraft,auraState);return;}
-                    Files.writeString(Path.of("client-validation-pokemon-management.txt"),"PASS NINE VISUAL CONTRACTS: rendered Dewgong eyes closed asleep, open and blinking awake; real Gastly particle providers emitted five large and seven small per16ticks while awake, sleeping, sitting and defeated. Aesthetic comparison with the historical reference remains manual.\n",java.nio.file.StandardOpenOption.APPEND);
+                    Files.writeString(Path.of("client-validation-pokemon-management.txt"),"PASS NINE VISUAL CONTRACTS: rendered Dewgong eyes closed asleep, open and blinking awake; real Gastly aura rendered exactly five large and seven small particles per rendered frame while awake, sleeping, sitting and defeated. Aesthetic comparison with the historical reference remains manual.\n",java.nio.file.StandardOpenOption.APPEND);
                     br.com.petrickfaria.minemon.client.MinemonRenderer.validationObserver=null;
                     done=true;System.out.println("[POKEMON MANAGEMENT CLIENT] PASS: status, filters, rendered Dewgong eyes, and restored Gastly smoke");minecraft.execute(minecraft::stop);
                 }
