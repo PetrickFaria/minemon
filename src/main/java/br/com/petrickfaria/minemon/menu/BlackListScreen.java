@@ -5,7 +5,7 @@ import br.com.petrickfaria.minemon.network.MinemonNetwork;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
@@ -14,9 +14,13 @@ import net.minecraftforge.registries.ForgeRegistries;
 import java.util.*;
 
 /** Scrollable registry-backed target selector for one owned companion. */
-public final class BlackListScreen extends Screen {
+public final class BlackListScreen {
     private record Row(EntityType<?> type, ResourceLocation id, String name) { }
     private final PokemonInfoScreen parent;
+    private Minecraft minecraft;
+    private Font font;
+    private int width;
+    private int height;
     private final int entityId;
     private final UUID pokemonUuid;
     private final List<Row> rows;
@@ -34,7 +38,6 @@ public final class BlackListScreen extends Screen {
     private int scrollbarGrabOffset;
 
     public BlackListScreen(PokemonInfoScreen parent, int entityId, UUID pokemonUuid, Map<String, Boolean> overrides) {
-        super(Component.literal("Black List"));
         this.parent = parent;
         this.entityId = entityId;
         this.pokemonUuid = pokemonUuid;
@@ -72,10 +75,14 @@ public final class BlackListScreen extends Screen {
     }
 
     public void initializeOverlay(Minecraft minecraft, int width, int height) {
-        init(minecraft, width, height);
+        this.minecraft = minecraft;
+        this.font = minecraft.font;
+        this.width = width;
+        this.height = height;
+        init();
     }
 
-    @Override protected void init() {
+    private void init() {
         panelWidth = Math.min(430, width - 12);
         left = (width - panelWidth) / 2;
         panelHeight = Math.min(390, height - 12);
@@ -88,12 +95,12 @@ public final class BlackListScreen extends Screen {
         return overrides.getOrDefault(row.id().toString(), br.com.petrickfaria.minemon.entity.MobTargetCategories.defaultSelected(row.type()));
     }
 
-    @Override public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
         firstRow = Math.max(0, Math.min(Math.max(0, visible().size() - visibleRows), firstRow + (delta < 0 ? 3 : -3)));
         return true;
     }
 
-    @Override public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
         int trackTop=top+52,trackHeight=visibleRows*ROW_HEIGHT,trackX=left+panelWidth-10;
         if(button==0&&mouseX>=trackX&&mouseX<left+panelWidth-3&&mouseY>=trackTop&&mouseY<trackTop+trackHeight){
             int thumbHeight=thumbHeight(),thumbTop=thumbTop(trackTop,trackHeight,thumbHeight);
@@ -117,19 +124,19 @@ public final class BlackListScreen extends Screen {
                 return true;
             }
         }
-        return super.mouseClicked(mouseX, mouseY, button);
+        return false;
     }
 
-    @Override public boolean mouseDragged(double mouseX,double mouseY,int button,double dragX,double dragY){
+    public boolean mouseDragged(double mouseX,double mouseY,int button,double dragX,double dragY){
         if(draggingScrollbar&&button==0){
             int trackTop=top+52,trackHeight=visibleRows*ROW_HEIGHT;
             updateScrollFromMouse((int)mouseY,trackTop,trackHeight,thumbHeight());return true;
         }
-        return super.mouseDragged(mouseX,mouseY,button,dragX,dragY);
+        return false;
     }
-    @Override public boolean mouseReleased(double mouseX,double mouseY,int button){
+    public boolean mouseReleased(double mouseX,double mouseY,int button){
         if(button==0&&draggingScrollbar){draggingScrollbar=false;return true;}
-        return super.mouseReleased(mouseX,mouseY,button);
+        return false;
     }
 
     private int thumbHeight(){int trackHeight=visibleRows*ROW_HEIGHT;return Math.min(trackHeight,Math.max(Math.min(18,trackHeight),(trackHeight*visibleRows)/Math.max(visibleRows,visible().size())));}
@@ -144,18 +151,18 @@ public final class BlackListScreen extends Screen {
         firstRow=net.minecraft.util.Mth.clamp(firstRow,0,max);
     }
 
-    @Override public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (keyCode == 256) { onClose(); return true; }
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return false;
     }
 
-    @Override public void onClose() { parent.closeBlackListOverlay(this); }
+    public void onClose() { parent.closeBlackListOverlay(this); }
 
     /** Like the other inventory interfaces, this selector must not pause the integrated world. */
-    @Override public boolean isPauseScreen() { return false; }
+    public boolean isPauseScreen() { return false; }
 
-    @Override public void render(PoseStack pose, int mouseX, int mouseY, float partialTick) {
-        renderBackground(pose);
+    public void render(PoseStack pose, int mouseX, int mouseY, float partialTick) {
+        GuiComponent.fill(pose, 0, 0, width, height, 0xA0000000);
         MinemonGui.panel(pose, left, top, panelWidth, panelHeight);
         font.draw(pose, "Black List", left + 14, top + 14, 0xFF303030);
         String[] labels={"Pacíficos","Neutros","Agressivos"};
