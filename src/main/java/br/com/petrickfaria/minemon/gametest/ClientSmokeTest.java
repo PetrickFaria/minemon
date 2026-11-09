@@ -1019,10 +1019,19 @@ public final class ClientSmokeTest {
    for(String joint:profileJoints(slug,"IDLE_FINAL")) {
     float[] range=articulationRanges.getOrDefault(slug,java.util.Map.of()).get("IDLE_FINAL:"+joint);
     if(range==null)throw new IllegalStateException("Missing static idle pose "+slug+":"+joint);
-    for(int axis=0;axis<6;axis++)
-     if(!Float.isFinite(range[axis])||!Float.isFinite(range[axis+6])||range[axis+6]<range[axis]
-        ||range[axis+6]-range[axis]>(axis<3?0.02F:0.05F))
+    for(int axis=0;axis<6;axis++) {
+     if(!Float.isFinite(range[axis])||!Float.isFinite(range[axis+6])||range[axis+6]<range[axis])
+      throw new IllegalStateException("Invalid static idle sample for "+slug+":"+joint);
+     // The approved 1.74 Haunter hand lag intentionally animates local Z.
+     // Require that motion; retain stability checks for every other channel.
+     if(slug.equals("haunter")&&java.util.Set.of("hand_left1","hand_right1").contains(joint)&&axis==2){
+      if(range[axis+6]-range[axis]<=0.02F)
+       throw new IllegalStateException("Approved Haunter hand sway was not observed: "+joint);
+      continue;
+     }
+     if(range[axis+6]-range[axis]>(axis<3?0.02F:0.05F))
       throw new IllegalStateException("Native static idle pose was not stable for "+slug+":"+joint);
+    }
    }
   }
   private static void validateArticulationProfiles() throws java.io.IOException {

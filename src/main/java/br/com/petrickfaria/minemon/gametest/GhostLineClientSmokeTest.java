@@ -280,7 +280,8 @@ final class GhostLineClientSmokeTest {
      double cameraDistance=mc.gameRenderer.getMainCamera().getPosition().distanceTo(gastly.position());
      double renderedCameraDistance=br.com.petrickfaria.minemon.client.GastlyCoreRenderHook.maxCameraDistanceForValidation();
      double cameraAlignment=pointCameraAt(mc,gastly);
-     if(playerDistance>=49.0D&&cameraDistance>=49.0D&&renderedCameraDistance>=49.0D&&cameraAlignment>=0.98D){
+     if(playerDistance>=49.0D&&cameraDistance>=49.0D&&cameraDistance<=50.1D&&renderedCameraDistance>=49.0D
+         &&br.com.petrickfaria.minemon.client.GastlySmokeParticle.maxRenderDistanceForValidation()>=49.0D&&cameraAlignment>=0.98D){
       System.out.println("[GHOST LINE] 50-block setup player="+mc.player.position()+" gastly="+gastly.position()
           +" playerDistance="+playerDistance+" cameraDistance="+cameraDistance
           +" renderedCameraDistance="+renderedCameraDistance+" cameraAlignment="+cameraAlignment);
@@ -299,7 +300,8 @@ final class GhostLineClientSmokeTest {
     var moving=mc.getSingleplayerServer().overworld().getEntity(secondGastlyId);
     if(moving instanceof MinemonCreature g)g.moveTo(g.getX()+.12D,g.getY(),g.getZ(),g.getYRot(),g.getXRot());
    });
-   if(ticks>=50&&!cameraMatrixActive()&&screenshotSlotAvailable()&&!captures.contains("gastly-motion")){
+   boolean farCameraComplete=!farViewRequested||writtenScreenshots.contains("gastly-50-block");
+   if(ticks>=50&&farCameraComplete&&!cameraMatrixActive()&&screenshotSlotAvailable()&&!captures.contains("gastly-motion")){
     if(secondGastly.getX()<movingGastlyStartX+.35D)
      throw new IllegalStateException("The spawn-egg Gastly fixture did not move far enough for the attachment check");
     face(mc,secondGastly);snap(mc,"gastly-motion");
@@ -309,19 +311,19 @@ final class GhostLineClientSmokeTest {
     var moving=mc.getSingleplayerServer().overworld().getEntity(secondGastlyId);
     if(moving instanceof MinemonCreature g)g.moveTo(g.getX(),g.getY()+.1D,g.getZ(),g.getYRot(),g.getXRot());
    });
-   if(ticks>=66&&!cameraMatrixActive()&&screenshotSlotAvailable()&&!captures.contains("gastly-float")){
+   if(ticks>=66&&farCameraComplete&&!cameraMatrixActive()&&screenshotSlotAvailable()&&!captures.contains("gastly-float")){
     if(secondGastly.getY()<floatingGastlyStartY+.35D)
      throw new IllegalStateException("The spawn-egg Gastly fixture did not float far enough for the attachment check");
     face(mc,secondGastly);snap(mc,"gastly-float");
    }
-   if(ticks>=25&&!cameraMatrixActive()&&!captures.contains("haunter-front-a")){face(mc,haunter);snap(mc,"haunter-front-a");}
-   if(ticks>=75&&!cameraMatrixActive()&&!captures.contains("haunter-front-b")){face(mc,haunter);snap(mc,"haunter-front-b");}
+   if(ticks>=25&&farCameraComplete&&!cameraMatrixActive()&&!captures.contains("haunter-front-a")){face(mc,haunter);snap(mc,"haunter-front-a");}
+   if(ticks>=75&&farCameraComplete&&!cameraMatrixActive()&&!captures.contains("haunter-front-b")){face(mc,haunter);snap(mc,"haunter-front-b");}
    if(ticks>=100&&haunter.isBlinkingForRender()&&MinemonModel.ghostEyesClosedForValidation(haunter)
-       &&!cameraMatrixActive()&&screenshotSlotAvailable()&&!captures.contains("haunter-blink")){
+       &&farCameraComplete&&!cameraMatrixActive()&&screenshotSlotAvailable()&&!captures.contains("haunter-blink")){
     face(mc,haunter);snapNow(mc,"haunter-blink");
    }
    if(ticks>=100&&gengar.isBlinkingForRender()&&MinemonModel.ghostEyesClosedForValidation(gengar)
-       &&!cameraMatrixActive()&&screenshotSlotAvailable()&&!captures.contains("gengar-blink")){
+       &&farCameraComplete&&!cameraMatrixActive()&&screenshotSlotAvailable()&&!captures.contains("gengar-blink")){
     face(mc,gengar);snapNow(mc,"gengar-blink");
    }
    // The 24-view GAS-02 camera sweep can finish after this client test's
