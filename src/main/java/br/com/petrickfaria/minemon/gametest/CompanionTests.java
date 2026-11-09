@@ -128,26 +128,29 @@ public final class CompanionTests {
  }
  @GameTest(template="test_arena",timeoutTicks=180)
  public static void sittingCompanionAttacksAuthorizedTargetWithoutMoving(GameTestHelper h) {
-  floor(h);
+  floor(h);h.getLevel().setDayTime(1000L);
   ServerPlayer owner=player(h);
   BlockPos ownerPosition=h.absolutePos(new BlockPos(1,1,1));
   owner.moveTo(ownerPosition.getX()+.5D,ownerPosition.getY(),ownerPosition.getZ()+.5D,0,0);
   MinemonCreature pokemon=h.spawn(ModEntities.SPECIES.get("pikachu").get(),new BlockPos(8,1,5));
   pokemon.tame(owner);pokemon.setPokemonLevel(10);pokemon.setOrderedToSit(true);
   pokemon.setBlackListOverride(new net.minecraft.resources.ResourceLocation("minecraft","cow"),true);
-  Cow target=h.spawn(EntityType.COW,new BlockPos(7,1,5));target.setNoAi(true);
+  Cow target=h.spawn(EntityType.COW,new BlockPos(5,1,5));target.setNoAi(true);
   var startingPosition=pokemon.position();float startingHealth=target.getHealth();
   h.runAfterDelay(120,()->{
-   check(h,pokemon.getTarget()==target,"A sitting Pokémon must acquire its authorized nearby target");
-   check(h,target.getHealth()<startingHealth,"A sitting Pokémon must fire at the authorized target");
-   check(h,pokemon.isOrderedToSit()&&pokemon.isCombatPose(),"Attacking must preserve the Sentar order and idle combat pose");
-   check(h,pokemon.position().distanceTo(startingPosition)<.05D,"A sitting attacker must not chase or retreat");
+   String state=" target="+pokemon.getTarget()+" canAttack="+pokemon.canAttack(target)+" canFire="+pokemon.canFireAt(target)
+       +" sleeping="+pokemon.isSleeping()+" orderedSit="+pokemon.isOrderedToSit()+" pose="+pokemon.isCombatPose()
+       +" targetHealth="+target.getHealth()+" position="+pokemon.position()+" targetPosition="+target.position();
+   check(h,pokemon.getTarget()==target,"A sitting Pokémon must acquire its authorized nearby target:"+state);
+   check(h,target.getHealth()<startingHealth,"A sitting Pokémon must fire at the authorized target:"+state);
+   check(h,pokemon.isOrderedToSit()&&pokemon.isCombatPose(),"Attacking must preserve the Sentar order and idle combat pose:"+state);
+   check(h,pokemon.position().distanceTo(startingPosition)<.05D,"A sitting attacker must not chase or retreat:"+state);
    owner.discard();h.succeed();
   });
  }
  @GameTest(template="test_arena",timeoutTicks=140)
  public static void pidgeyAttacksAndDescendsToItsCombatFlightLimit(GameTestHelper h) {
-  floor(h);
+  floor(h);h.getLevel().setDayTime(1000L);
   ServerPlayer owner=player(h);
   BlockPos ownerPosition=h.absolutePos(new BlockPos(1,1,1));
   owner.moveTo(ownerPosition.getX()+.5D,ownerPosition.getY(),ownerPosition.getZ()+.5D,0,0);
@@ -155,26 +158,28 @@ public final class CompanionTests {
   pidgey.tame(owner);pidgey.setPokemonLevel(10);
   check(h,pidgey.isFlyingSpecies(),"Pidgey must use the flying behavior profile");
   pidgey.setBlackListOverride(new net.minecraft.resources.ResourceLocation("minecraft","cow"),true);
-  Cow target=h.spawn(EntityType.COW,new BlockPos(12,1,5));target.setNoAi(true);
+  Cow target=h.spawn(EntityType.COW,new BlockPos(9,1,5));target.setNoAi(true);
   double surface=pidgey.naturalSurface();pidgey.setPos(pidgey.getX(),surface+3.0D,pidgey.getZ());
   float startingHealth=target.getHealth();
   h.runAfterDelay(80,()->{
    double combatAltitude=pidgey.getY()-pidgey.naturalSurface();
    check(h,pidgey.getTarget()==target&&target.getHealth()<startingHealth,
-       "Pidgey must acquire and damage an authorized target during combat");
+       "Pidgey must acquire and damage an authorized target during combat; target="+pidgey.getTarget()
+           +" canAttack="+pidgey.canAttack(target)+" canFire="+pidgey.canFireAt(target)+" sleeping="+pidgey.isSleeping()
+           +" targetHealth="+target.getHealth()+" position="+pidgey.position()+" targetPosition="+target.position());
    check(h,combatAltitude<=1.1D,"A flying combatant must descend to at most one block above its natural surface; altitude="+combatAltitude);
    owner.discard();h.succeed();
   });
  }
  @GameTest(template="test_arena",timeoutTicks=150)
  public static void rangedCompanionRepositionsDuringCooldownAndFiresAgainInRange(GameTestHelper h) {
-  floor(h);
+  floor(h);h.getLevel().setDayTime(1000L);
   ServerPlayer owner=player(h);
   BlockPos ownerPosition=h.absolutePos(new BlockPos(1,1,1));
   owner.moveTo(ownerPosition.getX()+.5D,ownerPosition.getY(),ownerPosition.getZ()+.5D,0,0);
   MinemonCreature pokemon=h.spawn(ModEntities.SPECIES.get("pikachu").get(),new BlockPos(9,1,5));
   pokemon.tame(owner);pokemon.setPokemonLevel(10);pokemon.setNoAi(true);
-  Cow target=h.spawn(EntityType.COW,new BlockPos(7,1,5));target.setNoAi(true);
+  Cow target=h.spawn(EntityType.COW,new BlockPos(5,1,5));target.setNoAi(true);target.setNoGravity(true);
   pokemon.focusTrainerDefenseTarget(target);
   check(h,pokemon.fireElementalProjectile(target),"The close-range fixture shot must fire and start the cooldown");
   var start=pokemon.position();double startingDistance=pokemon.distanceTo(target);float initialHealth=target.getHealth();
@@ -182,8 +187,9 @@ public final class CompanionTests {
   h.runAfterDelay(30,()->{
    check(h,!pokemon.combatReady(),"The defensive reposition must still occur during the shot cooldown");
    check(h,target.getHealth()<initialHealth,"The initial fixture shot must hit before the cooldown comparison");
-   check(h,pokemon.distanceTo(target)>startingDistance+1.0D,
-       "The companion must retreat while its next shot recharges; start="+startingDistance+", now="+pokemon.distanceTo(target)+", displacement="+pokemon.position().distanceTo(start));
+   double movedAway= pokemon.position().subtract(start).dot(start.subtract(target.position()).normalize());
+   check(h,movedAway>1.0D&&pokemon.distanceTo(target)>startingDistance,
+       "The companion must retreat while its next shot recharges; start="+startingDistance+", now="+pokemon.distanceTo(target)+", movedAway="+movedAway+", displacement="+pokemon.position().distanceTo(start)+", target="+target.position());
    float healthDuringCooldown=target.getHealth();
    h.runAfterDelay(85,()->{
     check(h,target.getHealth()<healthDuringCooldown,
