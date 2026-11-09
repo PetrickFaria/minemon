@@ -111,8 +111,7 @@ public final class GastlySmokeParticle extends TextureSheetParticle {
         if(owner==null)return;
         float scale=SpeciesDefinitions.get("gastly").scale();
         double angle=slot*2.3999632297+owner.tickCount*.012;
-        // Contract the original radial orbit uniformly. The cutout core pass and the
-        // post-particle redraw provide the same depth rule wherever a billboard crosses it.
+        // Keep the approved orbit; the normal core pass records its opaque silhouette.
         double bodyWidth=br.com.petrickfaria.minemon.entity.ModelMetrics.bodyWidth("gastly")*scale;
         double radius=br.com.petrickfaria.minemon.entity.GastlyAura.particleOrbitRadius(bodyWidth);
         double center=br.com.petrickfaria.minemon.entity.ModelMetrics.bodyCenterY("gastly")*scale;
@@ -132,12 +131,11 @@ public final class GastlySmokeParticle extends TextureSheetParticle {
         public void begin(com.mojang.blaze3d.vertex.BufferBuilder buffer,
                           net.minecraft.client.renderer.texture.TextureManager textureManager) {
             ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT.begin(buffer, textureManager);
-            // Gastly's opaque cutout entity has already populated the depth
-            // buffer. Keep depth writes on for this overlay so aura quads behind
-            // the nucleus fail the depth test; the nucleus itself is rendered
-            // once by the normal entity pass.
+            // Depth alone rejects only smoke behind the core. The stencil made
+            // during the normal core draw also rejects smoke in front of it.
             com.mojang.blaze3d.systems.RenderSystem.enableDepthTest();
-            com.mojang.blaze3d.systems.RenderSystem.depthMask(true);
+            com.mojang.blaze3d.systems.RenderSystem.depthMask(false);
+            GastlyCoreMask.beginAura();
         }
 
         @Override
@@ -145,6 +143,7 @@ public final class GastlySmokeParticle extends TextureSheetParticle {
             try {
                 ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT.end(tesselator);
             } finally {
+                GastlyCoreMask.endAura();
                 com.mojang.blaze3d.systems.RenderSystem.depthMask(true);
             }
         }

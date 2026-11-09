@@ -388,6 +388,8 @@ final class GhostLineClientSmokeTest {
      throw new IllegalStateException("Gastly camera acceptance matrix incomplete: "+cameraMatrixPasses+"/24 views");
     if(br.com.petrickfaria.minemon.client.GastlyCoreRenderHook.auraFramesForValidation()==0)
      throw new IllegalStateException("Gastly aura was never submitted with nucleus depth occlusion during the real-client test");
+    if(br.com.petrickfaria.minemon.client.GastlyCoreMask.verifiedPixelsForValidation()==0)
+     throw new IllegalStateException("No opaque Gastly core pixels were compared before and after the aura pass");
     if(br.com.petrickfaria.minemon.client.GastlySmokeParticle.largeSpawnsForValidation()==0
         ||br.com.petrickfaria.minemon.client.GastlySmokeParticle.smallSpawnsForValidation()==0)
      throw new IllegalStateException("Gastly's large and small particles were not both rendered during camera-angle validation");

@@ -193,6 +193,38 @@ public final class CompanionTests {
    });
   });
  }
+ @GameTest(template="test_arena",timeoutTicks=100)
+ public static void retreatCoversTheSameDistanceAsVanillaZombie(GameTestHelper h) {
+  floor(h);ServerPlayer owner=player(h);
+  BlockPos ownerPosition=h.absolutePos(new BlockPos(1,1,1));
+  owner.moveTo(ownerPosition.getX()+.5D,ownerPosition.getY(),ownerPosition.getZ()+.5D,0,0);
+  MinemonCreature pokemon=h.spawn(ModEntities.SPECIES.get("pikachu").get(),new BlockPos(5,1,4));
+  pokemon.tame(owner);pokemon.setPokemonLevel(10);
+  pokemon.setBlackListOverride(new net.minecraft.resources.ResourceLocation("minecraft","zombie"),false);
+  Cow target=h.spawn(EntityType.COW,new BlockPos(3,1,4));
+  target.setNoAi(true);target.setNoGravity(true);keepCombatTargetAlive(target);
+  var reference=h.spawn(EntityType.ZOMBIE,new BlockPos(5,1,12));
+  reference.goalSelector.removeAllGoals(goal->true);
+  reference.targetSelector.removeAllGoals(goal->true);
+  reference.setItemSlot(net.minecraft.world.entity.EquipmentSlot.HEAD,
+      new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.LEATHER_HELMET));
+  reference.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED).setBaseValue(.23D);
+  h.runAfterDelay(5,()->{
+   pokemon.focusTrainerDefenseTarget(target);
+   var pokemonStart=pokemon.position();var zombieStart=reference.position();
+   reference.getNavigation().moveTo(reference.getX()+8.0D,reference.getY(),reference.getZ(),1.0D);
+   h.runAfterDelay(20,()->{
+    double retreat=pokemon.position().subtract(pokemonStart).horizontalDistance();
+    double zombie=reference.position().subtract(zombieStart).horizontalDistance();
+    String measured="; 20 ticks: companion="+retreat+" blocks, zombie="+zombie+" blocks";
+    check(h,zombie>1.0D,"The reference zombie must actually walk"+measured);
+    check(h,retreat>=zombie*.85D&&retreat<=zombie*1.15D,
+        "Defensive retreat must match vanilla zombie displacement within 15%"+measured);
+    com.mojang.logging.LogUtils.getLogger().info("MINEMON RETREAT SPEED"+measured);
+    owner.discard();reference.discard();h.succeed();
+   });
+  });
+ }
  private static void awaitPidgeyCombat(GameTestHelper h,MinemonCreature pidgey,ServerPlayer owner,Cow target,float initialHealth,int elapsed){
   if(pidgey.getTarget()!=target&&elapsed<100){h.runAfterDelay(5,()->awaitPidgeyCombat(h,pidgey,owner,target,initialHealth,elapsed+5));return;}
   if(pidgey.getTarget()!=target){h.fail("Pidgey failed to acquire its authorized target within 100 ticks; target="+pidgey.getTarget()+" canAttack="+pidgey.canAttack(target)+" distance="+pidgey.distanceTo(target));owner.discard();return;}

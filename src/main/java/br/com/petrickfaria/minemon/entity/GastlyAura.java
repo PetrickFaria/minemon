@@ -14,7 +14,7 @@ public final class GastlyAura {
   double width=Math.max(0.0D,bodyWidth),quad=Math.max(0.0D,quadSize);
   return Math.max(CORE_RADIUS_SCALE*width,width*.5D+quad*.72D);
  }
- /** Center the entire aura just outside the core; quad overlap is hidden by the core redraw. */
+ /** Approved orbit; overlapping quads are masked by the normal core silhouette. */
  public static double particleOrbitRadius(double bodyWidth){
   return Math.max(0.0D,bodyWidth)*PARTICLE_ORBIT_BODY_SCALE;
  }

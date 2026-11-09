@@ -68,6 +68,7 @@ public final class GastlyCoreRenderHook {
                 com.mojang.blaze3d.systems.RenderSystem.enableDepthTest();
                 com.mojang.blaze3d.systems.RenderSystem.setShader(net.minecraft.client.renderer.GameRenderer::getParticleShader);
                 com.mojang.blaze3d.systems.RenderSystem.setShaderColor(1.0F,1.0F,1.0F,1.0F);
+                var coreSnapshot=GastlyCoreMask.captureForValidation(auraFrames);
                 GastlySmokeParticle.beginAuraFrame(builder,mc.getTextureManager());
                 try{
                     draws.sort(Comparator.comparingDouble(AuraDraw::distanceSqr).reversed());
@@ -80,6 +81,9 @@ public final class GastlyCoreRenderHook {
                         modelView.popPose();
                         com.mojang.blaze3d.systems.RenderSystem.applyModelViewMatrix();
                     }
+                }
+                if(coreSnapshot!=null){
+                    try{coreSnapshot.verify();}finally{coreSnapshot.close();}
                 }
                 if(Boolean.getBoolean("minemon.clientSmokeTest"))auraFrames++;
             }

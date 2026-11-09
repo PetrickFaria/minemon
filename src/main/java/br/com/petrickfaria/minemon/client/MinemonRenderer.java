@@ -32,6 +32,12 @@ public class MinemonRenderer extends GeoEntityRenderer<MinemonCreature> {
  public static java.util.Map<String,java.util.Set<String>> fireOverlayBoneSamples(){return java.util.Map.copyOf(fireOverlayBones);}
  public MinemonRenderer(EntityRendererProvider.Context context){this(context,new MinemonModel());}
  private MinemonRenderer(EntityRendererProvider.Context context,MinemonModel model){super(context,model);this.minemonModel=model;this.shadowRadius=.45F;this.addLayer(new FireOverlayLayer(this));}
+ @Override public net.minecraft.client.renderer.RenderType getRenderType(MinemonCreature entity,float partialTick,
+      com.mojang.blaze3d.vertex.PoseStack pose,net.minecraft.client.renderer.MultiBufferSource buffers,
+      com.mojang.blaze3d.vertex.VertexConsumer buffer,int light,net.minecraft.resources.ResourceLocation texture){
+  if(entity.getSpeciesSlug().equals("gastly")&&!previewRendering)return GastlyCoreMask.core(texture);
+  return net.minecraft.client.renderer.RenderType.entityCutout(texture);
+ }
  @Override public void render(MinemonCreature entity,float yaw,float partialTick,com.mojang.blaze3d.vertex.PoseStack pose,net.minecraft.client.renderer.MultiBufferSource buffers,int light){
   if(Boolean.getBoolean("minemon.clientSmokeTest") && validationInput!=null)validationInput.accept(entity);
   var d=SpeciesDefinitions.get(entity.getSpeciesSlug());
