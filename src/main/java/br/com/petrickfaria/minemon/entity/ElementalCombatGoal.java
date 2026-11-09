@@ -128,11 +128,13 @@ final class ElementalCombatGoal extends Goal {
                         (int)Math.floor(pokemon.getY()), (int)Math.floor(destinationZ));
                 var path = navigation.createPath(destination, 0);
                 if (path != null && path.canReach() && keepsSafeDistance(path, target, safeDistance)) {
-                    // Navigation speed scales with the creature's movement attribute.
-                    // A vanilla zombie uses 0.23; normalize defensive retreat to
-                    // that reference without permanently changing natural movement.
+                    // The custom companion navigation applies its movement attribute
+                    // again after the path speed modifier. Calibrate the modifier
+                    // against the measured 20-tick retreat (0.891 blocks at 0.23
+                    // versus 2.069 for a vanilla zombie) without changing natural
+                    // movement outside combat.
                     double actualSpeed = pokemon.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED);
-                    double speedModifier = retreat ? 0.23D / Math.max(0.01D, actualSpeed) : 1.0D;
+                    double speedModifier = retreat ? 0.534D / Math.max(0.01D, actualSpeed) : 1.0D;
                     navigation.moveTo(path, speedModifier);
                     return;
                 }

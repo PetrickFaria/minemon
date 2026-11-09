@@ -31,9 +31,11 @@ public final class MinemonFlyingCreature extends MinemonCreature {
  @Override public void move(net.minecraft.world.entity.MoverType type,net.minecraft.world.phys.Vec3 movement){
   if(defensiveAirRetreat&&type==net.minecraft.world.entity.MoverType.SELF){
    double horizontalSpeed=Math.sqrt(movement.x*movement.x+movement.z*movement.z);
-   // The flight controller applies another deceleration after this movement
-   // vector; 0.206 matches the zombie's measured 20-tick displacement.
-   double zombiePace=0.206D;
+   // A vanilla zombie displaces about 0.103 blocks per tick on the measured
+   // 20-tick path. The flight controller otherwise sustains roughly twice
+   // that horizontal pace, so cap actual movement here rather than relying
+   // on the flying-speed attribute alone.
+   double zombiePace=0.1035D;
    if(horizontalSpeed>zombiePace){double scale=zombiePace/horizontalSpeed;movement=new net.minecraft.world.phys.Vec3(movement.x*scale,movement.y,movement.z*scale);}
   }
   super.move(type,movement);
