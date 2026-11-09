@@ -30,6 +30,10 @@ public final class CompanionTests {
   for(ServerPlayer p:TEST_PLAYERS)p.doTick();
  }
  private static void check(GameTestHelper h,boolean condition,String message) { if (!condition) h.fail(message); }
+ private static void keepCombatTargetAlive(Cow target) {
+  target.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).setBaseValue(100.0D);
+  target.setHealth(100.0F);
+ }
  private static String state(MinemonCreature b, net.minecraft.world.entity.LivingEntity target) { return " bAlive="+b.isAlive()+" bRemoved="+b.isRemoved()+" target="+b.getTarget()+" canAttack="+b.canAttack(target)+" dist="+b.distanceTo(target)+" pos="+b.position()+" targetPos="+target.position()+" alive="+target.isAlive()+" health="+target.getHealth()+" owner="+b.getOwner()+" ownerVictim="+(b.getOwner()==null?null:b.getOwner().getLastHurtMob())+" ownerAttacker="+(b.getOwner()==null?null:b.getOwner().getLastHurtByMob())+" ownerStamp="+(b.getOwner()==null?-1:b.getOwner().getLastHurtByMobTimestamp())+" orderedSit="+b.isOrderedToSit()+" sit="+b.isInSittingPose()+" navDone="+b.getNavigation().isDone(); }
  private static void traceMovement(GameTestHelper h,String label,MinemonCreature b,int elapsed,int until) {
   com.mojang.logging.LogUtils.getLogger().info("MINEMON MOVEMENT TRACE "+label+" sample="+elapsed
@@ -128,14 +132,14 @@ public final class CompanionTests {
  }
  @GameTest(template="test_arena",timeoutTicks=180)
  public static void sittingCompanionAttacksAuthorizedTargetWithoutMoving(GameTestHelper h) {
-  floor(h);h.getLevel().setDayTime(1000L);
+  floor(h);
   ServerPlayer owner=player(h);
   BlockPos ownerPosition=h.absolutePos(new BlockPos(1,1,1));
   owner.moveTo(ownerPosition.getX()+.5D,ownerPosition.getY(),ownerPosition.getZ()+.5D,0,0);
   MinemonCreature pokemon=h.spawn(ModEntities.SPECIES.get("pikachu").get(),new BlockPos(8,1,5));
   pokemon.tame(owner);pokemon.setPokemonLevel(10);pokemon.setOrderedToSit(true);
   pokemon.setBlackListOverride(new net.minecraft.resources.ResourceLocation("minecraft","cow"),true);
-  Cow target=h.spawn(EntityType.COW,new BlockPos(5,1,5));target.setNoAi(true);
+  Cow target=h.spawn(EntityType.COW,new BlockPos(5,1,5));target.setNoAi(true);keepCombatTargetAlive(target);
   var startingPosition=pokemon.position();float startingHealth=target.getHealth();
   h.runAfterDelay(120,()->{
    String state=" target="+pokemon.getTarget()+" canAttack="+pokemon.canAttack(target)+" canFire="+pokemon.canFireAt(target)
@@ -150,7 +154,7 @@ public final class CompanionTests {
  }
  @GameTest(template="test_arena",timeoutTicks=140)
  public static void pidgeyAttacksAndDescendsToItsCombatFlightLimit(GameTestHelper h) {
-  floor(h);h.getLevel().setDayTime(1000L);
+  floor(h);
   ServerPlayer owner=player(h);
   BlockPos ownerPosition=h.absolutePos(new BlockPos(1,1,1));
   owner.moveTo(ownerPosition.getX()+.5D,ownerPosition.getY(),ownerPosition.getZ()+.5D,0,0);
@@ -158,7 +162,7 @@ public final class CompanionTests {
   pidgey.tame(owner);pidgey.setPokemonLevel(10);
   check(h,pidgey.isFlyingSpecies(),"Pidgey must use the flying behavior profile");
   pidgey.setBlackListOverride(new net.minecraft.resources.ResourceLocation("minecraft","cow"),true);
-  Cow target=h.spawn(EntityType.COW,new BlockPos(9,1,5));target.setNoAi(true);
+  Cow target=h.spawn(EntityType.COW,new BlockPos(9,1,5));target.setNoAi(true);keepCombatTargetAlive(target);
   double surface=pidgey.naturalSurface();pidgey.setPos(pidgey.getX(),surface+3.0D,pidgey.getZ());
   float startingHealth=target.getHealth();
   h.runAfterDelay(80,()->{
@@ -173,13 +177,13 @@ public final class CompanionTests {
  }
  @GameTest(template="test_arena",timeoutTicks=150)
  public static void rangedCompanionRepositionsDuringCooldownAndFiresAgainInRange(GameTestHelper h) {
-  floor(h);h.getLevel().setDayTime(1000L);
+  floor(h);
   ServerPlayer owner=player(h);
   BlockPos ownerPosition=h.absolutePos(new BlockPos(1,1,1));
   owner.moveTo(ownerPosition.getX()+.5D,ownerPosition.getY(),ownerPosition.getZ()+.5D,0,0);
   MinemonCreature pokemon=h.spawn(ModEntities.SPECIES.get("pikachu").get(),new BlockPos(9,1,5));
   pokemon.tame(owner);pokemon.setPokemonLevel(10);pokemon.setNoAi(true);
-  Cow target=h.spawn(EntityType.COW,new BlockPos(5,1,5));target.setNoAi(true);target.setNoGravity(true);
+  Cow target=h.spawn(EntityType.COW,new BlockPos(5,1,5));target.setNoAi(true);target.setNoGravity(true);keepCombatTargetAlive(target);
   pokemon.focusTrainerDefenseTarget(target);
   check(h,pokemon.fireElementalProjectile(target),"The close-range fixture shot must fire and start the cooldown");
   var start=pokemon.position();double startingDistance=pokemon.distanceTo(target);float initialHealth=target.getHealth();
