@@ -214,7 +214,13 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     public double followAltitude(){return new BehaviorCycle(SpeciesBehaviorProfiles.profile(getSpeciesSlug()),getSpeciesSlug()).minimumAltitude();}
     public double flightMinimum(){return isFollowingOwner()?followAltitude():naturalCycle.minimumAltitude();}
     public double flightMaximum(){return isFollowingOwner()?followAltitude():naturalCycle.maximumAltitude();}
-    public double combatFlightHeight(){return Math.min(1.0D,Math.max(0.0D,this.naturalCycle.minimumAltitude()));}
+    public double combatFlightHeight(){
+        double naturalHeight=Math.max(0.0D,this.naturalCycle.minimumAltitude());
+        // Keep species with a naturally lower hover at their established height.
+        // Give flyers whose normal band begins at or above one block enough
+        // settling room to stay within the one-block combat ceiling.
+        return naturalHeight>=1.0D?0.75D:naturalHeight;
+    }
     void setFollowingRun(boolean value) { this.entityData.set(FOLLOWING_RUN, value); }
     public boolean isFollowingRun() { return this.entityData.get(FOLLOWING_RUN); }
     public boolean isSpontaneouslyRunning() { return this.entityData.get(SPONTANEOUS_RUN); }
