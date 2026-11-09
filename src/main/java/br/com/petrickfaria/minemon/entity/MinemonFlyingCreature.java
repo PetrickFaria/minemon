@@ -154,7 +154,13 @@ public final class MinemonFlyingCreature extends MinemonCreature {
   try{super.travel(input);}finally{defensiveTravel=false;}
   if(retreat&&!wasGrounded){
    var velocity=this.getDeltaMovement();
-   this.setDeltaMovement(velocity.x*groundFriction,velocity.y,velocity.z*groundFriction);
+   double horizontalSpeed=Math.sqrt(velocity.x*velocity.x+velocity.z*velocity.z);
+   // FlyingMoveControl applies the movement attribute differently from the
+   // ground navigator. Cap only defensive airborne travel to the measured
+   // 20-tick vanilla-zombie pace; natural flight and ground retreat are intact.
+   double zombiePace=0.1073D;
+   double scale=horizontalSpeed>zombiePace?zombiePace/horizontalSpeed:1.0D;
+   this.setDeltaMovement(velocity.x*groundFriction*scale,velocity.y,velocity.z*groundFriction*scale);
   }
   // FlyingMoveControl can replace the pre-travel lift with a downward input
   // while an entity is waking from a landed sleep pose. Reassert the active
