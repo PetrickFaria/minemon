@@ -22,6 +22,11 @@ public final class MinemonFlyingCreature extends MinemonCreature {
  private int recoveryTargetFreeSamples;
  private int recoveryNotLandingSamples;
  private int recoveryBelowMinimumSamples;
+ private boolean defensiveTravel;
+ private float defensiveAcceleration;
+ @Override public void moveRelative(float acceleration,net.minecraft.world.phys.Vec3 input){
+  super.moveRelative(defensiveTravel?defensiveAcceleration:acceleration,input);
+ }
  private boolean fixedFloater(){
   return java.util.Set.of("abra","porygon","kakuna","metapod","geodude").contains(this.getSpeciesSlug());
  }
@@ -59,6 +64,10 @@ public final class MinemonFlyingCreature extends MinemonCreature {
  }
  @Override protected PathNavigation createNavigation(Level level){FlyingPathNavigation n=new FlyingPathNavigation(this,level);n.setCanOpenDoors(false);n.setCanFloat(true);n.setCanPassDoors(true);return n;}
  @Override public void travel(net.minecraft.world.phys.Vec3 input){
+  var opponent=this.getTarget();
+  boolean combatFlight=!this.level.isClientSide&&this.isFlyingSpecies()&&!this.isOrderedToSit()
+      &&!this.isSleeping()&&!this.isNightResting()&&!this.isDefeated()
+      &&opponent!=null&&opponent.isAlive()&&this.canAttack(opponent);
   boolean alakazamCycle=this.getSpeciesSlug().equals("alakazam")&&this.naturalBehaviorActive()
       &&(this.naturalCycle().phase()==BehaviorCycle.Phase.TAKEOFF||this.naturalCycle().phase()==BehaviorCycle.Phase.AIR
       ||this.naturalCycle().phase()==BehaviorCycle.Phase.LANDING);
@@ -78,7 +87,7 @@ public final class MinemonFlyingCreature extends MinemonCreature {
    this.setDeltaMovement(0.0D,0.0D,0.0D);this.fallDistance=0.0F;
    return;
   }
-  if(!this.fixedFloater()&&this.isFlyingSpecies()&&!this.level.isClientSide&&!this.wantsNaturalLanding()
+  if(!combatFlight&&!this.fixedFloater()&&this.isFlyingSpecies()&&!this.level.isClientSide&&!this.wantsNaturalLanding()
       &&!this.isSleeping()&&!this.isNightResting()&&!this.isOrderedToSit()&&!this.isDefeated()){
    double support=this.naturalSurface();
    double clearance=this.getY()-support;
@@ -112,7 +121,31 @@ public final class MinemonFlyingCreature extends MinemonCreature {
    this.setYya(0);input=new net.minecraft.world.phys.Vec3(input.x,0,input.z);
    this.setDeltaMovement(this.getDeltaMovement().x,net.minecraft.util.Mth.clamp(error*.25D,-.08D,.08D),this.getDeltaMovement().z);
   }
-  super.travel(input);
+  if(combatFlight){
+   // Keep the combat band independent of a path's old natural-flight Y.
+   double error=this.naturalSurface()+this.combatFlightHeight()-this.getY();
+   this.setYya(0);input=new net.minecraft.world.phys.Vec3(input.x,0,input.z);
+   this.setDeltaMovement(this.getDeltaMovement().x,net.minecraft.util.Mth.clamp(error*.25D,-.12D,.12D),this.getDeltaMovement().z);
+  }
+  double safeDistance=Math.max(1.0D,Math.min(7.0D,this.attackRange()-1.0D));
+  boolean retreat=combatFlight&&this.isTame()&&CombatGeometry.horizontalCenterDistanceSquared(this,opponent)<safeDistance*safeDistance;
+  boolean wasGrounded=this.isOnGround();float groundFriction=.6F;
+  if(retreat){
+   var support=new BlockPos(this.getX(),this.naturalSurface()-.01D,this.getZ());
+   groundFriction=this.level.getBlockState(support).getBlock().getFriction();
+   // Vanilla walking uses speed as both movement input and ground acceleration.
+   // Copy that 0.23 reference and the support friction, rather than multiplying
+   // a flying-speed attribute through air's much smaller 0.02 acceleration.
+   defensiveAcceleration=.23F*(.21600002F/(groundFriction*groundFriction*groundFriction));
+   var horizontal=new net.minecraft.world.phys.Vec3(input.x,0,input.z);
+   if(horizontal.lengthSqr()>1.0E-8D)input=horizontal.normalize().scale(.23D*.98D);
+  }
+  defensiveTravel=retreat;
+  try{super.travel(input);}finally{defensiveTravel=false;}
+  if(retreat&&!wasGrounded){
+   var velocity=this.getDeltaMovement();
+   this.setDeltaMovement(velocity.x*groundFriction,velocity.y,velocity.z*groundFriction);
+  }
   // FlyingMoveControl can replace the pre-travel lift with a downward input
   // while an entity is waking from a landed sleep pose. Reassert the active
   // cycle's floor after travel so the entity actually resumes its flight band.

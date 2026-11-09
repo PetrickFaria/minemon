@@ -214,6 +214,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     public double followAltitude(){return new BehaviorCycle(SpeciesBehaviorProfiles.profile(getSpeciesSlug()),getSpeciesSlug()).minimumAltitude();}
     public double flightMinimum(){return isFollowingOwner()?followAltitude():naturalCycle.minimumAltitude();}
     public double flightMaximum(){return isFollowingOwner()?followAltitude():naturalCycle.maximumAltitude();}
+    public double combatFlightHeight(){return Math.min(1.0D,Math.max(0.0D,this.naturalCycle.minimumAltitude()));}
     void setFollowingRun(boolean value) { this.entityData.set(FOLLOWING_RUN, value); }
     public boolean isFollowingRun() { return this.entityData.get(FOLLOWING_RUN); }
     public boolean isSpontaneouslyRunning() { return this.entityData.get(SPONTANEOUS_RUN); }
@@ -921,9 +922,11 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
                 sitAnchorX = getX(); sitAnchorZ = getZ();
             }
             if (isFlyingSpecies()) {
+                double anchorY=getTarget()!=null&&getTarget().isAlive()&&canAttack(getTarget())
+                        ?naturalSurface()+combatFlightHeight():sitAnchorY;
                 if (horizontalDistanceToSqr(sitAnchorX, sitAnchorZ) > 1.0E-8D
-                        || Math.abs(getY() - sitAnchorY) > 1.0E-8D)
-                    setPos(sitAnchorX, sitAnchorY, sitAnchorZ);
+                        || Math.abs(getY() - anchorY) > 1.0E-8D)
+                    setPos(sitAnchorX, anchorY, sitAnchorZ);
                 setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
             } else {
                 if (horizontalDistanceToSqr(sitAnchorX, sitAnchorZ) > 1.0E-8D)
@@ -1567,7 +1570,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         boolean flying=this.isFlyingSpecies();
         double altitude=flying?this.getY()-this.naturalSurface():0.0D;
         if (flying && this.getTarget() != null && canAttack(this.getTarget())) {
-            double allowedAltitude = Math.min(1.0D, Math.max(0.0D, this.naturalCycle.minimumAltitude()));
+            double allowedAltitude = combatFlightHeight();
             double excess = altitude - allowedAltitude;
             if (excess > 0.01D) {
                 double step = Math.min(0.08D, excess);

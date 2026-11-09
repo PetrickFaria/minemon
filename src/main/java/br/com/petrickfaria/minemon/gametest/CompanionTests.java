@@ -195,10 +195,18 @@ public final class CompanionTests {
  }
  @GameTest(template="test_arena",timeoutTicks=100)
  public static void retreatCoversTheSameDistanceAsVanillaZombie(GameTestHelper h) {
+  compareRetreatToZombie(h,false);
+ }
+ @GameTest(template="test_arena",timeoutTicks=100)
+ public static void flyingRetreatCoversTheSameDistanceAsVanillaZombie(GameTestHelper h) {
+  compareRetreatToZombie(h,true);
+ }
+ private static void compareRetreatToZombie(GameTestHelper h,boolean airborne) {
   floor(h);ServerPlayer owner=player(h);
+  owner.setGameMode(GameType.CREATIVE);
   BlockPos ownerPosition=h.absolutePos(new BlockPos(1,1,1));
   owner.moveTo(ownerPosition.getX()+.5D,ownerPosition.getY(),ownerPosition.getZ()+.5D,0,0);
-  MinemonCreature pokemon=h.spawn(ModEntities.SPECIES.get("pikachu").get(),new BlockPos(5,1,4));
+  MinemonCreature pokemon=h.spawn(ModEntities.SPECIES.get(airborne?"pidgey":"pikachu").get(),new BlockPos(5,airborne?2:1,4));
   pokemon.tame(owner);pokemon.setPokemonLevel(10);
   pokemon.setBlackListOverride(new net.minecraft.resources.ResourceLocation("minecraft","zombie"),false);
   Cow target=h.spawn(EntityType.COW,new BlockPos(3,1,4));
@@ -216,13 +224,36 @@ public final class CompanionTests {
    h.runAfterDelay(20,()->{
     double retreat=pokemon.position().subtract(pokemonStart).horizontalDistance();
     double zombie=reference.position().subtract(zombieStart).horizontalDistance();
-    String measured="; 20 ticks: companion="+retreat+" blocks, zombie="+zombie+" blocks";
+    String measured="; species="+pokemon.getSpeciesSlug()+"; 20 ticks: companion="+retreat+" blocks, zombie="+zombie+" blocks";
     check(h,zombie>1.0D,"The reference zombie must actually walk"+measured);
     check(h,retreat>=zombie*.85D&&retreat<=zombie*1.15D,
         "Defensive retreat must match vanilla zombie displacement within 15%"+measured);
+    if(airborne)check(h,Math.abs(pokemon.getY()-pokemon.naturalSurface()-pokemon.combatFlightHeight())<.15D,
+        "Flying retreat must retain its capped combat flight band"+measured);
     com.mojang.logging.LogUtils.getLogger().info("MINEMON RETREAT SPEED"+measured);
     owner.discard();reference.discard();h.succeed();
    });
+  });
+ }
+ @GameTest(template="test_arena",timeoutTicks=120)
+ public static void seatedAbraRetainsItsLowerNaturalCombatHover(GameTestHelper h){
+  floor(h);ServerPlayer owner=player(h);owner.setGameMode(GameType.CREATIVE);
+  var pokemon=h.spawn(ModEntities.SPECIES.get("abra").get(),new BlockPos(5,2,5));
+  pokemon.tame(owner);pokemon.setPokemonLevel(10);pokemon.setOrderedToSit(true);
+  pokemon.setBlackListOverride(new net.minecraft.resources.ResourceLocation("minecraft","cow"),true);
+  var target=h.spawn(EntityType.COW,new BlockPos(8,1,5));target.setNoAi(true);keepCombatTargetAlive(target);
+  float health=target.getHealth();var start=pokemon.position();
+  pokemon.focusTrainerDefenseTarget(target);
+  h.runAfterDelay(40,()->{
+   double natural=Math.min(1.0D,pokemon.naturalCycle().minimumAltitude());
+   check(h,natural<1.0D,"Abra fixture must have a natural hover below one block");
+   check(h,Math.abs(pokemon.getY()-pokemon.naturalSurface()-natural)<.1D,
+       "Seated Abra must retain its lower natural combat hover; altitude="+(pokemon.getY()-pokemon.naturalSurface())+", natural="+natural);
+   check(h,pokemon.position().subtract(start).horizontalDistanceSqr()<1.0E-6D,
+       "Seated Abra must not chase or retreat horizontally");
+   check(h,pokemon.isCombatPose()&&pokemon.isOrderedToSit()&&target.getHealth()<health,
+       "Seated Abra must attack with a stable combat pose while preserving Sentar");
+   owner.discard();h.succeed();
   });
  }
  private static void awaitPidgeyCombat(GameTestHelper h,MinemonCreature pidgey,ServerPlayer owner,Cow target,float initialHealth,int elapsed){
