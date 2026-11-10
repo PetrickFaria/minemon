@@ -25,6 +25,7 @@ public final class MinemonFlyingCreature extends MinemonCreature {
  private boolean defensiveTravel;
  private boolean defensiveAirRetreat;
  private float defensiveAcceleration;
+ private double defensiveAirSpeedLimit;
  @Override public void moveRelative(float acceleration,net.minecraft.world.phys.Vec3 input){
   super.moveRelative(defensiveTravel?defensiveAcceleration:acceleration,input);
  }
@@ -34,7 +35,7 @@ public final class MinemonFlyingCreature extends MinemonCreature {
    // produce a one-tick displacement far beyond the species' normal pace.
    // Use the entity's configured movement speed as the physical upper bound;
    // this preserves per-species balance and does not impose a test-only value.
-   double speed=Math.max(0.0D,this.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED));
+   double speed=Math.max(0.0D,Math.min(this.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED),defensiveAirSpeedLimit));
    double horizontal=Math.sqrt(movement.x*movement.x+movement.z*movement.z);
    if(horizontal>speed&&horizontal>1.0E-8D){
     double scale=speed/horizontal;
@@ -44,7 +45,7 @@ public final class MinemonFlyingCreature extends MinemonCreature {
   super.move(type,movement);
   if(defensiveAirRetreat&&type==net.minecraft.world.entity.MoverType.SELF){
    var velocity=this.getDeltaMovement();
-   double speed=Math.max(0.0D,this.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED));
+   double speed=Math.max(0.0D,Math.min(this.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED),defensiveAirSpeedLimit));
    double horizontal=Math.sqrt(velocity.x*velocity.x+velocity.z*velocity.z);
    if(horizontal>speed&&horizontal>1.0E-8D){
     double scale=speed/horizontal;
@@ -162,6 +163,12 @@ public final class MinemonFlyingCreature extends MinemonCreature {
    // Copy the Spider's 0.30 reference and the support friction, rather than multiplying
    // a flying-speed attribute through air's much smaller 0.02 acceleration.
    defensiveAcceleration=.30F*(.21600002F/(groundFriction*groundFriction*groundFriction));
+   // The same vanilla ground speed and support friction used to derive the
+   // Spider-matched retreat acceleration also define the airborne step bound.
+   // This prevents air control from turning that ground-calibrated input into
+   // a faster flight pace; retain a lower species attribute when configured.
+   defensiveAirSpeedLimit=Math.min(this.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED),
+       defensiveAcceleration*groundFriction);
    var horizontal=new net.minecraft.world.phys.Vec3(input.x,0,input.z);
    // Keep this as a direction vector. defensiveAcceleration already supplies
    // the Spider's 0.30 movement speed; scaling the vector by 0.30 as well
@@ -171,7 +178,7 @@ public final class MinemonFlyingCreature extends MinemonCreature {
   }
   defensiveTravel=retreat;
   defensiveAirRetreat=retreat&&this.isFlyingSpecies();
-  try{super.travel(input);}finally{defensiveTravel=false;defensiveAirRetreat=false;}
+  try{super.travel(input);}finally{defensiveTravel=false;defensiveAirRetreat=false;defensiveAirSpeedLimit=0.0D;}
   // FlyingMoveControl can replace the pre-travel lift with a downward input
   // while an entity is waking from a landed sleep pose. Reassert the active
   // cycle's floor after travel so the entity actually resumes its flight band.
