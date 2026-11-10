@@ -66,7 +66,9 @@ public final class ElementalProjectile extends ThrowableProjectile {
                 discard();
             }
         }
-        if(!level.isClientSide && tickCount>40)discard();
+        // Level 10 companions reach 23 blocks without changing projectile speed;
+        // keep the projectile alive long enough to cover that configured range.
+        if(!level.isClientSide && tickCount>60)discard();
     }
     @Override protected void addAdditionalSaveData(CompoundTag tag){
         super.addAdditionalSaveData(tag);tag.putInt("ElementColor",color());tag.putFloat("Damage",damage);

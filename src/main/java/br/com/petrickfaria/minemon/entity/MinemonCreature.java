@@ -1329,9 +1329,10 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     public boolean projectileReady(){return !isDefeated();}
     public boolean canFireAt(LivingEntity target){
         var start=new net.minecraft.world.phys.Vec3(getX(),getEyeY()-.1,getZ());
-        if(!canAttack(target)||!target.isAlive()
-                ||CombatGeometry.pointToBoxDistanceSquared(start,target.getBoundingBox())>attackRange()*attackRange()
-                ||!getSensing().hasLineOfSight(target))return false;
+        if(!canAttack(target)||!target.isAlive()||!getSensing().hasLineOfSight(target))return false;
+        var box=target.getBoundingBox();
+        double travelDistance=CombatGeometry.rayDistanceToBox(start,box.getCenter().subtract(start),box);
+        if(travelDistance>attackRange())return false;
         return level.clip(new net.minecraft.world.level.ClipContext(start,target.getBoundingBox().getCenter(),net.minecraft.world.level.ClipContext.Block.COLLIDER,net.minecraft.world.level.ClipContext.Fluid.NONE,this)).getType()==net.minecraft.world.phys.HitResult.Type.MISS;
     }
     public boolean combatReady(){return !isDefeated() && !isSleeping() && level.getGameTime()>=nextCombatTick;}

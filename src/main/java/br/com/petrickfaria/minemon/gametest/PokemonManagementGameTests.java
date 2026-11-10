@@ -259,15 +259,22 @@ public final class PokemonManagementGameTests {
         pokemon.setPokemonLevel(1);
         pokemon.setOrderedToSit(true);
         pokemon.setBlackListOverride(new net.minecraft.resources.ResourceLocation("minecraft", "zombie"), true);
-        Zombie zombie = h.spawn(EntityType.ZOMBIE, new BlockPos(10, 1, 5)); // exactly five block positions ahead
-        check(h, pokemon.isOrderedToSit() && pokemon.canAttack(zombie) && pokemon.canFireAt(zombie),
-                "A seated level 1 Charmander must be able to fire at an authorized zombie in the fifth block"
-                        + " [origin=" + pokemon.position() + ", target=" + zombie.position()
-                        + ", boxDistance=" + Math.sqrt(br.com.petrickfaria.minemon.entity.CombatGeometry
-                        .pointToBoxDistanceSquared(new net.minecraft.world.phys.Vec3(pokemon.getX(), pokemon.getEyeY()-.1D, pokemon.getZ()), zombie.getBoundingBox())) + "]");
-        zombie.setPos(pokemon.getX() + 6.5D, pokemon.getY(), pokemon.getZ());
-        check(h, !pokemon.canFireAt(zombie), "The same level 1 Charmander must not fire at a zombie in the sixth block");
-        owner.discard(); pokemon.discard(); zombie.discard(); h.succeed();
+        Zombie zombie = h.spawn(EntityType.ZOMBIE, new BlockPos(10, 1, 5));
+        zombie.setNoAi(true);
+        float initialHealth=zombie.getHealth();
+        for(int block=1;block<=5;block++){
+            zombie.setPos(pokemon.getX()+block,pokemon.getY(),pokemon.getZ());
+            check(h, pokemon.isOrderedToSit() && pokemon.canAttack(zombie) && pokemon.canFireAt(zombie),
+                    "A seated level 1 Charmander must be able to fire at an authorized zombie in block "+block
+                            +" [origin="+pokemon.position()+", target="+zombie.position()+"]");
+        }
+        check(h,pokemon.fireElementalProjectile(zombie),"A seated level 1 Charmander must launch its shot in the fifth block");
+        h.runAfterDelay(20,()->{
+            check(h,zombie.getHealth()<initialHealth,"The fifth-block projectile must reach and damage the zombie");
+            zombie.setPos(pokemon.getX()+6.0D,pokemon.getY(),pokemon.getZ());
+            check(h,!pokemon.canFireAt(zombie),"The same level 1 Charmander must not fire at a zombie in the sixth block");
+            owner.discard(); pokemon.discard(); zombie.discard(); h.succeed();
+        });
     }
 
     @GameTest(template = "test_arena", timeoutTicks = 760)
