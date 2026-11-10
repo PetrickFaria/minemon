@@ -81,6 +81,8 @@ final class ElementalCombatGoal extends Goal {
             // continue firing. Repositioning here made healthy companions circle
             // a safe enemy and could replace a retreat route immediately after a shot.
             pokemon.getNavigation().stop();
+            Vec3 motion = pokemon.getDeltaMovement();
+            pokemon.setDeltaMovement(0.0D, motion.y, 0.0D);
             repositionCooldown = 0;
         } else {
             reposition(target, false);
