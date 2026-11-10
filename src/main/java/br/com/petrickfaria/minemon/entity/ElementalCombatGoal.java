@@ -80,28 +80,11 @@ final class ElementalCombatGoal extends Goal {
         }
     }
 
-    private boolean keepsSafeDistance(net.minecraft.world.level.pathfinder.Path path, LivingEntity target, double minimumDistance) {
-        if (path == null) return false;
-        Vec3 targetCenter = target.getBoundingBox().getCenter();
-        double previousDistance = horizontalDistance(pokemon.position(), targetCenter);
-        for (int i = 0; i < path.getNodeCount(); i++) {
-            var node = path.getNode(i);
-            Vec3 end = new Vec3(node.x + 0.5D, node.y, node.z + 0.5D);
-            Vec3 start = i == 0 ? pokemon.position() : new Vec3(
-                    path.getNode(i - 1).x + 0.5D, path.getNode(i - 1).y, path.getNode(i - 1).z + 0.5D);
-            int samples = Math.max(1, (int)Math.ceil(end.distanceTo(start) * 2.0D));
-            for (int sample = 1; sample <= samples; sample++) {
-                Vec3 point = start.lerp(end, sample / (double)samples);
-                double distance = horizontalDistance(point, targetCenter);
-                // A path's first node can be the block center already occupied
-                // by the creature. Equal-distance samples are harmless; rejecting
-                // them discards every valid escape before its first actual step.
-                if (distance + 1.0E-6D < minimumDistance
-                        && (previousDistance >= minimumDistance || distance + 1.0E-6D < previousDistance)) return false;
-                previousDistance = distance;
-            }
-        }
-        return path.getNodeCount() > 0;
+    private boolean endsAtSafeDistance(net.minecraft.world.level.pathfinder.Path path, LivingEntity target, double minimumDistance) {
+        if (path == null || path.getNodeCount() == 0) return false;
+        var last = path.getNode(path.getNodeCount() - 1);
+        Vec3 destination = new Vec3(last.x + 0.5D, last.y, last.z + 0.5D);
+        return horizontalDistance(destination, target.getBoundingBox().getCenter()) >= minimumDistance;
     }
 
     private void reposition(LivingEntity target, boolean retreat) {
@@ -148,7 +131,7 @@ final class ElementalCombatGoal extends Goal {
                 BlockPos destination = new BlockPos((int)Math.floor(destinationX),
                         (int)Math.floor(pokemon.getY()), (int)Math.floor(destinationZ));
                 var path = navigation.createPath(destination, 0);
-                if (path != null && path.canReach() && keepsSafeDistance(path, target, safeDistance)) {
+                if (path != null && path.canReach() && endsAtSafeDistance(path, target, safeDistance)) {
                     // Spider's natural movement-speed attribute is 0.30. The
                     // GameTests compare actual distance traveled against a live
                     // vanilla Spider to validate controller-specific movement.
