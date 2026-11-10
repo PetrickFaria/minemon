@@ -360,12 +360,13 @@ public final class CompanionTests {
   Cow target=h.spawn(EntityType.COW,new BlockPos(4,1,4));
   target.setNoAi(true);target.setNoGravity(true);keepCombatTargetAlive(target);
   var reference=h.spawn(EntityType.SPIDER,new BlockPos(5,1,8));
-  BlockPos spiderDestination=h.absolutePos(new BlockPos(14,1,8));
-  // Let the real Spider and its ordinary ground navigation walk an unobstructed
-  // straight path for the full window. Navigating to a moving entity target
-  // caused the reference to recalculate around its hitbox and nearby fixtures.
-  if(!reference.getNavigation().moveTo(spiderDestination.getX()+.5D,spiderDestination.getY(),spiderDestination.getZ()+.5D,1.0D))
-   h.fail("Vanilla spider could not create a real path to the stationary reference target");
+  Cow spiderTarget=h.spawn(EntityType.COW,new BlockPos(14,1,8));
+  spiderTarget.setNoAi(true);spiderTarget.setNoGravity(true);keepCombatTargetAlive(spiderTarget);
+  // Keep a real, stationary target on the same heading as the retreat. A
+  // block-coordinate path is rejected for a newly spawned Spider in this
+  // GameTest world, while its ordinary entity path is valid and active.
+  reference.targetSelector.removeAllGoals();
+  reference.setTarget(spiderTarget);
   h.runAfterDelay(5,()->{
    // Both subjects start at rest facing the measured +X direction. Without
    // this, the companion follows its owner during setup and the flying turn
@@ -379,6 +380,8 @@ public final class CompanionTests {
    // Level 10 perception spans neighboring GameTest structures. Preserve the
    // explicitly focused target while preventing fixtures from stealing it.
    pokemon.targetSelector.removeAllGoals();
+   if(!reference.getNavigation().moveTo(spiderTarget,1.0D))
+    h.fail("Vanilla spider could not create its normal entity path; spider="+reference.position()+" target="+spiderTarget.position());
    awaitRetreatPath(h,pokemon,target,reference,owner,airborne,0);
   });
  }

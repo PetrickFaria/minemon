@@ -108,7 +108,11 @@ jobs:
         if: ${{ !cancelled() && steps.compile.outcome == 'success' }}
         run: |
           python3 tools/prepare_client_world.py
-          ALSOFT_DRIVERS=null timeout --kill-after=30s 600s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokePokemonManagement
+          set +e
+          ALSOFT_DRIVERS=null timeout --kill-after=30s 600s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokePokemonManagement 2>&1 | tee run/client-management-command.txt
+          client_status=${PIPESTATUS[0]}
+          set -e
+          if [ "$client_status" -ne 0 ]; then tail -n 100 run/client-management-command.txt; exit "$client_status"; fi
           grep -F 'PASS: owned Pokémon status screen, Pokédex header, XP level sync, Seguir/Sentar controls, and registry-backed Black List defaults' run/client-validation-pokemon-management.txt
           grep -F 'PASS BLACKLIST SCROLLBAR:' run/client-validation-pokemon-management.txt
       - name: Validate PokéC preview orientation and species framing on the real client
@@ -363,6 +367,7 @@ jobs:
           path: |
             run/logs/
             run/client-validation*.txt
+            run/client-management-command.txt
             run/screenshots/
             build/test-results/
             build/diagnostics/
