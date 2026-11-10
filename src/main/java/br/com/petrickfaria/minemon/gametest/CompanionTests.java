@@ -355,7 +355,7 @@ public final class CompanionTests {
   MinemonCreature pokemon=h.spawn(ModEntities.SPECIES.get(airborne?"pidgey":"pikachu").get(),new BlockPos(5,airborne?2:1,4));
   pokemon.tame(owner);pokemon.setPokemonLevel(10);pokemon.setNoAi(true);
   pokemon.setBlackListOverride(new net.minecraft.resources.ResourceLocation("minecraft","zombie"),false);
-  Cow target=h.spawn(EntityType.COW,new BlockPos(3,1,4));
+  Cow target=h.spawn(EntityType.COW,new BlockPos(4,1,4));
   target.setNoAi(true);target.setNoGravity(true);keepCombatTargetAlive(target);
   var reference=h.spawn(EntityType.SPIDER,new BlockPos(5,1,12));
   Cow spiderTarget=h.spawn(EntityType.COW,new BlockPos(14,1,12));
@@ -560,12 +560,16 @@ public final class CompanionTests {
  @GameTest(template="test_arena",timeoutTicks=300)
  public static void followsOwner(GameTestHelper h) {
   MinemonCreature b=h.spawn(ModEntities.BULBASAUR.get(),new BlockPos(2,1,5));ServerPlayer p=player(h);
-  BlockPos pos=h.absolutePos(new BlockPos(14,1,5));p.moveTo(pos.getX()+.5,pos.getY(),pos.getZ()+.5,0,0);b.tame(p);b.setOrderedToSit(false);
+  BlockPos pos=h.absolutePos(new BlockPos(14,1,5));p.moveTo(pos.getX()+.5,pos.getY(),pos.getZ()+.5,0,0);
+  // Anchor the follow fixture relative to the actual player coordinates. This
+  // keeps both entities on this structure's floor and inside level-1 range.
+  b.setPos(p.getX()-11.0D,p.getY(),p.getZ());b.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
+  b.tame(p);b.setOrderedToSit(false);b.targetSelector.removeAllGoals();
   b.setBlackListOverride(net.minecraftforge.registries.ForgeRegistries.ENTITY_TYPES.getKey(net.minecraft.world.entity.EntityType.ZOMBIE),false);
   float initial=b.distanceTo(p);
+  check(h,initial>10.0D&&initial<15.0D,"Owner follow fixture must start inside level-1 perception and outside its approach threshold; distance="+initial);
   h.runAfterDelay(100,()->{check(h,b.distanceTo(p)<initial-2,"Companion must approach its owner"+state(b,p));p.discard();h.succeed();});
  }
-
  @GameTest(template="test_arena",timeoutTicks=100)
  public static void creativePlayersRemainProtected(GameTestHelper h) {
   MinemonCreature b=spawn(h);ServerPlayer p=player(h);p.setGameMode(GameType.CREATIVE);
