@@ -105,6 +105,10 @@ public final class CompanionTests {
  @GameTest(template="test_arena",timeoutTicks=300)
  public static void ownerDefenseReachesFollowingSittingFreeAndSleepingCompanions(GameTestHelper h) {
   ServerPlayer p=player(h);Cow aggressor=h.spawn(EntityType.COW,new BlockPos(14,1,5));aggressor.setNoAi(true);
+  // Several defenders can now land real shots while this fixture is measuring
+  // target acquisition; keep the attacker alive for the full focus assertion.
+  aggressor.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).setBaseValue(1000.0D);
+  aggressor.setHealth(1000.0F);
   MinemonCreature[] team=new MinemonCreature[4];
   BlockPos[] positions={new BlockPos(6,1,3),new BlockPos(10,1,5),new BlockPos(6,1,7),new BlockPos(5,1,5)};
   for(int i=0;i<team.length;i++){
