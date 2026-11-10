@@ -366,7 +366,7 @@ public final class CompanionTests {
   pokemon.setDeltaMovement(0,0,0);
   pokemon.setYRot(-90);pokemon.yRotO=-90;pokemon.yBodyRot=pokemon.yBodyRotO=-90;
    var pokemonStart=pokemon.position();var spiderStart=reference.position();
-  reference.getMoveControl().setWantedPosition(reference.getX()+8.0D,reference.getY(),reference.getZ(),1.0D);
+  reference.getMoveControl().setWantedPosition(reference.getX()+8.0D,reference.getY(),reference.getZ(),0.6D);
   h.runAfterDelay(20,()->{
     double retreat=pokemon.position().subtract(pokemonStart).horizontalDistance();
     double spider=reference.position().subtract(spiderStart).horizontalDistance();
