@@ -433,6 +433,9 @@ public final class CompanionTests {
        "An active Abra must preserve its natural sub-block combat hover; altitude="+during+" natural="+natural);
    check(h,target.getHealth()<initialHealth,"Abra must continue attacking while retaining its lower natural combat height");
    target.discard();abra.setTarget(null);
+   // The expanded level 10 perception can see neighboring GameTest fixtures;
+   // freeze target acquisition while checking the completed flight reset.
+   abra.setNoAi(true);
    h.runAfterDelay(45,()->{
     double after=abra.getY()-abra.naturalSurface();
     check(h,abra.getTarget()==null&&after<=1.0D&&after>=abra.flightMinimum()-.15D,
