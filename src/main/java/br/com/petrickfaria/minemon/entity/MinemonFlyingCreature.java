@@ -23,24 +23,9 @@ public final class MinemonFlyingCreature extends MinemonCreature {
  private int recoveryNotLandingSamples;
  private int recoveryBelowMinimumSamples;
  private boolean defensiveTravel;
- private boolean defensiveAirRetreat;
  private float defensiveAcceleration;
  @Override public void moveRelative(float acceleration,net.minecraft.world.phys.Vec3 input){
   super.moveRelative(defensiveTravel?defensiveAcceleration:acceleration,input);
- }
- @Override public void move(net.minecraft.world.entity.MoverType type,net.minecraft.world.phys.Vec3 movement){
-  net.minecraft.world.entity.LivingEntity target=this.getTarget();
-  boolean combatFlight=this.isFlyingSpecies()&&target!=null&&target.isAlive()&&this.canAttack(target);
-  if((defensiveAirRetreat||combatFlight)&&type==net.minecraft.world.entity.MoverType.SELF){
-   double horizontalSpeed=Math.sqrt(movement.x*movement.x+movement.z*movement.z);
-   // FlyingMoveControl's horizontal acceleration differs from ground path
-   // navigation, so validate and cap the actual displacement against the
-   // vanilla Spider GameTest reference instead of assuming equal attributes
-   // produce equal travel distance.
-   double spiderPace=0.12D;
-   if(horizontalSpeed>spiderPace){double scale=spiderPace/horizontalSpeed;movement=new net.minecraft.world.phys.Vec3(movement.x*scale,movement.y,movement.z*scale);}
-  }
-  super.move(type,movement);
  }
  private boolean fixedFloater(){
   return java.util.Set.of("abra","porygon","kakuna","metapod","geodude").contains(this.getSpeciesSlug());
@@ -144,7 +129,7 @@ public final class MinemonFlyingCreature extends MinemonCreature {
   }
   double safeDistance=Math.max(1.0D,Math.min(7.0D,this.attackRange()-1.0D));
   boolean retreat=combatFlight&&CombatGeometry.horizontalCenterDistanceSquared(this,opponent)<safeDistance*safeDistance;
-  boolean wasGrounded=this.isOnGround();float groundFriction=.6F;
+  float groundFriction=.6F;
   if(retreat){
    var support=new BlockPos(this.getX(),this.naturalSurface()-.01D,this.getZ());
    groundFriction=this.level.getBlockState(support).getBlock().getFriction();
@@ -160,8 +145,7 @@ public final class MinemonFlyingCreature extends MinemonCreature {
    if(horizontal.lengthSqr()>1.0E-8D)input=horizontal.normalize();
   }
   defensiveTravel=retreat;
-  defensiveAirRetreat=retreat&&!wasGrounded;
-  try{super.travel(input);}finally{defensiveTravel=false;defensiveAirRetreat=false;}
+  try{super.travel(input);}finally{defensiveTravel=false;}
   // FlyingMoveControl can replace the pre-travel lift with a downward input
   // while an entity is waking from a landed sleep pose. Reassert the active
   // cycle's floor after travel so the entity actually resumes its flight band.
