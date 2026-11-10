@@ -307,13 +307,9 @@ public final class CompanionTests {
   h.runAfterDelay(45,()->{
    check(h,Math.abs(pidgey.getY()-pidgey.naturalSurface()-1.5D)<.15D,"Pidgey must reach the 1.5-block combat band before combat ends");
    target.discard();pidgey.setTarget(null);
-   // This test uses level 10 perception. Isolate post-combat recovery from
-   // hostiles belonging to adjacent GameTest fixtures.
-   for(var nearby:h.getLevel().getEntitiesOfClass(net.minecraft.world.entity.Mob.class,
-       pidgey.getBoundingBox().inflate(25.0D)))if(nearby!=pidgey&&nearby instanceof net.minecraft.world.entity.monster.Enemy){
-    var type=net.minecraftforge.registries.ForgeRegistries.ENTITY_TYPES.getKey(nearby.getType());
-    if(type!=null)pidgey.setBlackListOverride(type,true);
-   }
+   // The level 10 perception can reacquire hostiles from neighboring
+   // GameTests. Disable only target goals while the natural-flight reset runs.
+   pidgey.targetSelector.removeAllGoals();
    h.runAfterDelay(50,()->{
     double altitude=pidgey.getY()-pidgey.naturalSurface();
     check(h,pidgey.getTarget()==null&&altitude>=pidgey.flightMinimum()-.1D&&altitude<=pidgey.flightMaximum()+.1D,
@@ -362,38 +358,39 @@ public final class CompanionTests {
   Cow target=h.spawn(EntityType.COW,new BlockPos(3,1,4));
   target.setNoAi(true);target.setNoGravity(true);keepCombatTargetAlive(target);
   var reference=h.spawn(EntityType.SPIDER,new BlockPos(5,1,12));
-  reference.setTarget(target);
+  // Keep the ordinary ground goals and gravity. Only disable target selection
+  // so a nearby player or fixture cannot interrupt the measured path.
+  reference.targetSelector.removeAllGoals();
   h.runAfterDelay(5,()->{
    // Both subjects start at rest facing the measured +X direction. Without
    // this, the companion follows its owner during setup and the flying turn
    // controller spends the measurement reversing inherited momentum.
    pokemon.getNavigation().stop();pokemon.setDeltaMovement(0,0,0);
-   reference.getNavigation().stop();reference.setTarget(target);reference.setDeltaMovement(0,0,0);
+   reference.getNavigation().stop();reference.setDeltaMovement(0,0,0);
    pokemon.setYRot(-90);pokemon.yRotO=-90;pokemon.yBodyRot=pokemon.yBodyRotO=-90;
    reference.setYRot(-90);reference.yRotO=-90;reference.yBodyRot=reference.yBodyRotO=-90;
    pokemon.setNoAi(false);
    pokemon.focusTrainerDefenseTarget(target);
+   reference.getNavigation().moveTo(reference.getX()+4.0D,reference.getY(),reference.getZ(),1.0D);
    awaitRetreatPath(h,pokemon,target,reference,owner,airborne,0);
   });
  }
  private static void awaitRetreatPath(GameTestHelper h,MinemonCreature pokemon,Cow target,Spider reference,
                                       ServerPlayer owner,boolean airborne,int elapsed) {
   if((pokemon.getTarget()!=target||pokemon.getNavigation().isDone()
-      ||reference.getTarget()!=target||reference.getNavigation().isDone())&&elapsed<40){
+      ||reference.getNavigation().isDone())&&elapsed<40){
    h.runAfterDelay(1,()->awaitRetreatPath(h,pokemon,target,reference,owner,airborne,elapsed+1));return;
   }
-  if(pokemon.getTarget()!=target||pokemon.getNavigation().isDone()
-      ||reference.getTarget()!=target||reference.getNavigation().isDone()){
+  if(pokemon.getTarget()!=target||pokemon.getNavigation().isDone()||reference.getNavigation().isDone()){
    h.fail("Companion and vanilla spider must both enter active paths before speed measurement; companionTarget="+pokemon.getTarget()
-       +" companionNav="+pokemon.getNavigation().getTargetPos()+" spiderTarget="+reference.getTarget()
-       +" spiderNav="+reference.getNavigation().getTargetPos());
+       +" companionNav="+pokemon.getNavigation().getTargetPos()+" spiderNav="+reference.getNavigation().getTargetPos());
    owner.discard();reference.discard();return;
   }
   pokemon.setDeltaMovement(0,0,0);
   pokemon.setYRot(-90);pokemon.yRotO=-90;pokemon.yBodyRot=pokemon.yBodyRotO=-90;
    var pokemonStart=pokemon.position();var spiderStart=reference.position();
-   // The spider's native melee goal drives ordinary ground navigation toward
-   // the stationary Cow; no synthetic movement or speed modifiers are used.
+   // Compare real ground-path displacement with real companion retreat; neither
+   // entity receives a velocity or movement-speed modifier.
   h.runAfterDelay(20,()->{
     double retreat=pokemon.position().subtract(pokemonStart).horizontalDistance();
     double spider=reference.position().subtract(spiderStart).horizontalDistance();
