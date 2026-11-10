@@ -69,16 +69,19 @@ final class ElementalCombatGoal extends Goal {
         }
         retreating = false;
 
-        if (distance > pokemon.attackRange() || !pokemon.getSensing().hasLineOfSight(target)) {
-            reposition(target, false);
+        if (distance <= pokemon.attackRange() && pokemon.getSensing().hasLineOfSight(target)) {
+            // Once the target is outside the danger radius, hold position and
+            // continue firing. Repositioning here made healthy companions circle
+            // a safe enemy and could replace a retreat route immediately after a shot.
+            pokemon.getNavigation().stop();
+            repositionCooldown = 0;
         } else {
-            // Being within firing range is not a reason to stand still.
-            // Keep circling the target, including while the shot recharges.
             reposition(target, false);
         }
     }
 
     private boolean keepsSafeDistance(net.minecraft.world.level.pathfinder.Path path, LivingEntity target, double minimumDistance) {
+        if (path == null) return false;
         Vec3 targetCenter = target.getBoundingBox().getCenter();
         double previousDistance = horizontalDistance(pokemon.position(), targetCenter);
         for (int i = 0; i < path.getNodeCount(); i++) {
@@ -102,17 +105,25 @@ final class ElementalCombatGoal extends Goal {
     }
 
     private void reposition(LivingEntity target, boolean retreat) {
-        // Do not interrupt a valid circling route every ten ticks; select a
-        // fresh route once the previous route has actually completed.
-        if (!retreat && !pokemon.getNavigation().isDone()) return;
+        PathNavigation navigation = pokemon.getNavigation();
+        double safeDistance = Math.max(1.0D, Math.min(7.0D, pokemon.attackRange() - 1.0D));
+        // Keep a retreat route while it remains safe relative to the moving
+        // target. When a route ends short of safety, replan on the next tick;
+        // a fixed cooldown here let an advancing attacker land free hits.
+        if (retreat && !navigation.isDone()) {
+            if (keepsSafeDistance(navigation.getPath(), target, safeDistance)) return;
+            repositionCooldown = 0;
+        }
+        // Keep approach route selection stable, and briefly throttle failed
+        // escape searches when the terrain offers no valid path.
+        if (!retreat && !navigation.isDone()) return;
         if (repositionCooldown-- > 0) return;
-        repositionCooldown = 10;
+        repositionCooldown = retreat ? 2 : 10;
         Vec3 away = pokemon.position().subtract(target.position());
         away = new Vec3(away.x, 0.0D, away.z);
         if (away.lengthSqr() < 1.0E-6D) away = new Vec3(1.0D, 0.0D, 0.0D);
         away = away.normalize();
 
-        double safeDistance = Math.max(1.0D, Math.min(7.0D, pokemon.attackRange() - 1.0D));
         double desired = retreat ? safeDistance + 1.0D : Math.min(pokemon.attackRange() - 1.0D, safeDistance + 1.5D);
         // Prefer the nearest safe point on the desired radius, then try both
         // sides of it so ordinary pathfinding can work around obstacles.
@@ -135,10 +146,12 @@ final class ElementalCombatGoal extends Goal {
                         (int)Math.floor(pokemon.getY()), (int)Math.floor(destinationZ));
                 var path = navigation.createPath(destination, 0);
                 if (path != null && path.canReach() && keepsSafeDistance(path, target, safeDistance)) {
-                    // Match the vanilla zombie's 0.23 movement-speed reference
+                    // Spider's natural movement-speed attribute is 0.30. The
+                    // GameTests compare actual distance traveled against a live
+                    // vanilla Spider to validate controller-specific movement.
                     // without changing the Pokémon's natural movement attribute.
                     double actualSpeed = pokemon.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED);
-                    double speedModifier = retreat ? 0.23D / Math.max(0.01D, actualSpeed) : 1.0D;
+                    double speedModifier = retreat ? 0.30D / Math.max(0.01D, actualSpeed) : 1.0D;
                     navigation.moveTo(path, speedModifier);
                     return;
                 }

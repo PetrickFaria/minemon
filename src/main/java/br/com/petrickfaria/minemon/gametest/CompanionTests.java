@@ -194,6 +194,105 @@ public final class CompanionTests {
    });
   });
  }
+ @GameTest(template="test_arena",timeoutTicks=180)
+ public static void charmanderRetreatsAndAttacksWhileAnAdvancingZombiePressuresIt(GameTestHelper h) {
+  floor(h);ServerPlayer owner=player(h);owner.setGameMode(GameType.CREATIVE);
+  BlockPos ownerPosition=h.absolutePos(new BlockPos(1,1,1));owner.moveTo(ownerPosition.getX()+.5D,ownerPosition.getY(),ownerPosition.getZ()+.5D,0,0);
+  MinemonCreature pokemon=h.spawn(ModEntities.SPECIES.get("charmander").get(),new BlockPos(7,1,8));
+  pokemon.tame(owner);pokemon.setPokemonLevel(10);pokemon.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).setBaseValue(200.0D);pokemon.setHealth(200.0F);
+  pokemon.setBlackListOverride(new net.minecraft.resources.ResourceLocation("minecraft","zombie"),false);
+  Zombie target=h.spawn(EntityType.ZOMBIE,new BlockPos(9,1,8));keepCombatTargetAlive(target);target.setTarget(pokemon);
+  pokemon.focusTrainerDefenseTarget(target);
+  var pokemonStart=pokemon.position();var targetStart=target.position();float targetHealth=target.getHealth();
+  h.runAfterDelay(100,()->{
+   double pokemonTravel=pokemon.position().subtract(pokemonStart).horizontalDistance();
+   double targetTravel=target.position().subtract(targetStart).horizontalDistance();
+   check(h,pokemonTravel>2.0D,"Charmander must keep moving defensively while the zombie advances; travel="+pokemonTravel+" distance="+pokemon.distanceTo(target)+" navDone="+pokemon.getNavigation().isDone());
+   check(h,targetTravel>1.0D,"The escape test must use a zombie that actually advanced; travel="+targetTravel);
+   check(h,target.getHealth()<targetHealth,"Charmander must continue attacking during defensive movement; health="+target.getHealth());
+   owner.discard();target.discard();h.succeed();
+  });
+ }
+ @GameTest(template="test_arena",timeoutTicks=180)
+ public static void charmanderStopsAtSafetyAndResumesWhenZombieCloses(GameTestHelper h) {
+  floor(h);ServerPlayer owner=player(h);owner.setGameMode(GameType.CREATIVE);
+  BlockPos ownerPosition=h.absolutePos(new BlockPos(1,1,1));owner.moveTo(ownerPosition.getX()+.5D,ownerPosition.getY(),ownerPosition.getZ()+.5D,0,0);
+  MinemonCreature pokemon=h.spawn(ModEntities.SPECIES.get("charmander").get(),new BlockPos(7,1,8));
+  pokemon.tame(owner);pokemon.setPokemonLevel(10);pokemon.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).setBaseValue(200.0D);pokemon.setHealth(200.0F);
+  pokemon.setBlackListOverride(new net.minecraft.resources.ResourceLocation("minecraft","zombie"),false);
+  Zombie target=h.spawn(EntityType.ZOMBIE,new BlockPos(9,1,8));keepCombatTargetAlive(target);target.setTarget(pokemon);pokemon.focusTrainerDefenseTarget(target);
+  h.runAfterDelay(65,()->{
+   double safeDistance=Math.max(1.0D,Math.min(7.0D,pokemon.attackRange()-1.0D));
+   double distance=pokemon.distanceTo(target);
+   check(h,distance>=safeDistance,"Charmander must first recover a safe distance from an advancing zombie; distance="+distance+" safe="+safeDistance);
+   target.setNoAi(true);target.getNavigation().stop();target.setDeltaMovement(0,0,0);
+   var safePosition=pokemon.position();
+   h.runAfterDelay(12,()->{
+    double drift=pokemon.position().subtract(safePosition).horizontalDistance();
+    check(h,pokemon.getNavigation().isDone()&&drift<.35D,"Charmander should stop retreating after safety is restored; drift="+drift+" navDone="+pokemon.getNavigation().isDone());
+    double dx=pokemon.getX()-target.getX(),dz=pokemon.getZ()-target.getZ(),length=Math.sqrt(dx*dx+dz*dz);
+    target.moveTo(pokemon.getX()-dx/length*2.5D,pokemon.getY(),pokemon.getZ()-dz/length*2.5D,0,0);
+    target.setNoAi(false);target.setTarget(pokemon);
+    var beforeResume=pokemon.position();
+    h.runAfterDelay(15,()->{
+     double resumed=pokemon.position().subtract(beforeResume).horizontalDistance();
+     check(h,resumed>.5D,"Charmander must immediately resume fleeing when the zombie enters the danger radius; moved="+resumed+" distance="+pokemon.distanceTo(target));
+     owner.discard();target.discard();h.succeed();
+    });
+   });
+  });
+ }
+ @GameTest(template="test_arena",timeoutTicks=180)
+ public static void pidgeyRetreatsAfterAttackingWithoutAFlightDash(GameTestHelper h) {
+  checkAirRetreatHasNoDash(h,"pidgey",3.0D);
+ }
+ @GameTest(template="test_arena",timeoutTicks=180)
+ public static void gastlyRetreatsAfterAttackingWithoutAFlightDash(GameTestHelper h) {
+  checkAirRetreatHasNoDash(h,"gastly",1.0D);
+ }
+ private static void checkAirRetreatHasNoDash(GameTestHelper h,String slug,double altitude) {
+  floor(h);ServerPlayer owner=player(h);owner.setGameMode(GameType.CREATIVE);
+  BlockPos ownerPosition=h.absolutePos(new BlockPos(1,1,1));owner.moveTo(ownerPosition.getX()+.5D,ownerPosition.getY(),ownerPosition.getZ()+.5D,0,0);
+  MinemonCreature pokemon=h.spawn(ModEntities.SPECIES.get(slug).get(),new BlockPos(5,1+(int)altitude,8));
+  pokemon.tame(owner);pokemon.setPokemonLevel(10);pokemon.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).setBaseValue(200.0D);pokemon.setHealth(200.0F);
+  pokemon.setBlackListOverride(new net.minecraft.resources.ResourceLocation("minecraft","zombie"),false);
+  Zombie target=h.spawn(EntityType.ZOMBIE,new BlockPos(8,1,8));keepCombatTargetAlive(target);target.setTarget(pokemon);
+  pokemon.setPos(pokemon.getX(),pokemon.naturalSurface()+altitude,pokemon.getZ());
+  pokemon.focusTrainerDefenseTarget(target);
+  double health=target.getHealth();
+  sampleAirRetreat(h,pokemon,target,owner,pokemon.position(),0.0D,0,130,health);
+ }
+ private static void sampleAirRetreat(GameTestHelper h,MinemonCreature pokemon,Zombie target,ServerPlayer owner,
+                                     net.minecraft.world.phys.Vec3 previous,double maxStep,int elapsed,int duration,double initialHealth) {
+  if(elapsed>=duration) {
+   double distance=pokemon.position().subtract(previous).horizontalDistance();
+   check(h,target.getHealth()<initialHealth,""+pokemon.getSpeciesSlug()+" must attack during the retreat test; health="+target.getHealth());
+   check(h,maxStep<1.0D,""+pokemon.getSpeciesSlug()+" must not make an excessive one-tick flight dash; max step="+maxStep+" final step="+distance);
+   owner.discard();target.discard();h.succeed();return;
+  }
+  h.runAfterDelay(1,()->{
+   double step=pokemon.position().subtract(previous).horizontalDistance();
+   sampleAirRetreat(h,pokemon,target,owner,pokemon.position(),Math.max(maxStep,step),elapsed+1,duration,initialHealth);
+  });
+ }
+ @GameTest(template="test_arena",timeoutTicks=180)
+ public static void pidgeyReturnsToItsNaturalFlightBandAfterCombat(GameTestHelper h) {
+  floor(h);ServerPlayer owner=player(h);owner.setGameMode(GameType.CREATIVE);
+  BlockPos ownerPosition=h.absolutePos(new BlockPos(1,1,1));owner.moveTo(ownerPosition.getX()+.5D,ownerPosition.getY(),ownerPosition.getZ()+.5D,0,0);
+  MinemonCreature pidgey=h.spawn(ModEntities.SPECIES.get("pidgey").get(),new BlockPos(5,4,8));
+  pidgey.tame(owner);pidgey.setPokemonLevel(10);pidgey.setBlackListOverride(new net.minecraft.resources.ResourceLocation("minecraft","zombie"),false);
+  Zombie target=h.spawn(EntityType.ZOMBIE,new BlockPos(8,1,8));target.setNoAi(true);keepCombatTargetAlive(target);pidgey.focusTrainerDefenseTarget(target);
+  h.runAfterDelay(45,()->{
+   check(h,Math.abs(pidgey.getY()-pidgey.naturalSurface()-1.5D)<.15D,"Pidgey must reach the 1.5-block combat band before combat ends");
+   target.discard();pidgey.setTarget(null);
+   h.runAfterDelay(50,()->{
+    double altitude=pidgey.getY()-pidgey.naturalSurface();
+    check(h,pidgey.getTarget()==null&&altitude>=pidgey.flightMinimum()-.1D&&altitude<=pidgey.flightMaximum()+.1D,
+        "Pidgey must resume its natural flight band after combat; altitude="+altitude+" natural="+pidgey.flightMinimum()+".."+pidgey.flightMaximum());
+    owner.discard();h.succeed();
+   });
+  });
+ }
  @GameTest(template="test_arena",timeoutTicks=160)
  public static void rangedCompanionAttacksAuthorizedSpiderWithinRange(GameTestHelper h) {
   floor(h);ServerPlayer owner=player(h);owner.setGameMode(GameType.CREATIVE);
@@ -213,14 +312,14 @@ public final class CompanionTests {
   });
  }
  @GameTest(template="test_arena",timeoutTicks=100)
- public static void retreatCoversTheSameDistanceAsVanillaZombie(GameTestHelper h) {
-  compareRetreatToZombie(h,false);
+ public static void retreatMatchesVanillaSpiderDisplacement(GameTestHelper h) {
+  compareRetreatToSpider(h,false);
  }
  @GameTest(template="test_arena",timeoutTicks=100)
- public static void flyingRetreatCoversTheSameDistanceAsVanillaZombie(GameTestHelper h) {
-  compareRetreatToZombie(h,true);
+ public static void flyingRetreatMatchesVanillaSpiderDisplacement(GameTestHelper h) {
+  compareRetreatToSpider(h,true);
  }
- private static void compareRetreatToZombie(GameTestHelper h,boolean airborne) {
+ private static void compareRetreatToSpider(GameTestHelper h,boolean airborne) {
   floor(h);ServerPlayer owner=player(h);
   owner.setGameMode(GameType.CREATIVE);
   BlockPos ownerPosition=h.absolutePos(new BlockPos(1,1,1));
@@ -230,17 +329,14 @@ public final class CompanionTests {
   pokemon.setBlackListOverride(new net.minecraft.resources.ResourceLocation("minecraft","zombie"),false);
   Cow target=h.spawn(EntityType.COW,new BlockPos(3,1,4));
   target.setNoAi(true);target.setNoGravity(true);keepCombatTargetAlive(target);
-  var reference=h.spawn(EntityType.ZOMBIE,new BlockPos(5,1,12));
+  var reference=h.spawn(EntityType.SPIDER,new BlockPos(5,1,12));
   reference.goalSelector.removeAllGoals();
   reference.targetSelector.removeAllGoals();
-  reference.setItemSlot(net.minecraft.world.entity.EquipmentSlot.HEAD,
-      new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.LEATHER_HELMET));
-  reference.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED).setBaseValue(.23D);
   h.runAfterDelay(5,()->{
    // Both subjects start at rest facing the measured +X direction. Without
    // this, the companion follows its owner during setup and the flying turn
    // controller spends the measurement reversing inherited momentum, while
-   // the reference zombie starts with no goals or velocity.
+   // the reference spider starts with no goals or velocity.
    pokemon.getNavigation().stop();pokemon.setDeltaMovement(0,0,0);
    reference.getNavigation().stop();reference.setDeltaMovement(0,0,0);
    pokemon.setYRot(-90);pokemon.yRotO=-90;pokemon.yBodyRot=pokemon.yBodyRotO=-90;
@@ -250,7 +346,7 @@ public final class CompanionTests {
    awaitRetreatPath(h,pokemon,target,reference,owner,airborne,0);
   });
  }
- private static void awaitRetreatPath(GameTestHelper h,MinemonCreature pokemon,Cow target,Zombie reference,
+ private static void awaitRetreatPath(GameTestHelper h,MinemonCreature pokemon,Cow target,Spider reference,
                                       ServerPlayer owner,boolean airborne,int elapsed) {
   if((pokemon.getTarget()!=target||pokemon.getNavigation().isDone())&&elapsed<40){
    h.runAfterDelay(1,()->awaitRetreatPath(h,pokemon,target,reference,owner,airborne,elapsed+1));return;
@@ -261,18 +357,18 @@ public final class CompanionTests {
   }
   pokemon.setDeltaMovement(0,0,0);
   pokemon.setYRot(-90);pokemon.yRotO=-90;pokemon.yBodyRot=pokemon.yBodyRotO=-90;
-  var pokemonStart=pokemon.position();var zombieStart=reference.position();
+   var pokemonStart=pokemon.position();var spiderStart=reference.position();
   reference.getNavigation().moveTo(reference.getX()+8.0D,reference.getY(),reference.getZ(),1.0D);
   h.runAfterDelay(20,()->{
     double retreat=pokemon.position().subtract(pokemonStart).horizontalDistance();
-    double zombie=reference.position().subtract(zombieStart).horizontalDistance();
-    String measured="; species="+pokemon.getSpeciesSlug()+"; 20 ticks: companion="+retreat+" blocks, zombie="+zombie+" blocks";
-    check(h,zombie>1.0D,"The reference zombie must actually walk"+measured);
-    check(h,retreat>=zombie*.85D&&retreat<=zombie*1.15D,
-        "Defensive retreat must match vanilla zombie displacement within 15%"+measured);
+    double spider=reference.position().subtract(spiderStart).horizontalDistance();
+    String measured="; species="+pokemon.getSpeciesSlug()+"; 20 ticks: companion="+retreat+" blocks, spider="+spider+" blocks";
+    check(h,spider>1.0D,"The reference spider must actually walk"+measured);
+    check(h,retreat>=spider*.85D&&retreat<=spider*1.15D,
+        "Defensive retreat must match vanilla spider displacement within 15%"+measured);
     if(airborne)check(h,Math.abs(pokemon.getY()-pokemon.naturalSurface()-pokemon.combatFlightHeight())<.15D,
         "Flying retreat must retain its capped combat flight band"+measured);
-    com.mojang.logging.LogUtils.getLogger().info("MINEMON RETREAT SPEED"+measured);
+    com.mojang.logging.LogUtils.getLogger().info("MINEMON SPIDER RETREAT SPEED"+measured);
     owner.discard();reference.discard();h.succeed();
   });
  }
@@ -305,7 +401,7 @@ public final class CompanionTests {
    double distance=CombatGeometry.horizontalCenterDistanceSquared(pidgey,target);
    check(h,pidgey.getTarget()==target&&target.getHealth()<initialHealth,
        "Pidgey must damage a zombie while retaining focus; target="+pidgey.getTarget()+" health="+target.getHealth()+" position="+pidgey.position());
-   check(h,altitude<=1.1D,"A flying combatant must descend to at most one block above its natural surface after 40 combat ticks; altitude="+altitude+" target="+pidgey.getTarget()+" navDone="+pidgey.getNavigation().isDone());
+   check(h,Math.abs(altitude-1.5D)<.15D,"A flying combatant must hold 1.5 blocks above its natural surface after 40 combat ticks; altitude="+altitude+" target="+pidgey.getTarget()+" navDone="+pidgey.getNavigation().isDone());
    check(h,distance>initialDistance&&!pidgey.combatReady(),"Pidgey must retreat from the zombie while recharging; initialDistanceSquared="+initialDistance+", currentDistanceSquared="+distance);
    owner.discard();h.succeed();
   });

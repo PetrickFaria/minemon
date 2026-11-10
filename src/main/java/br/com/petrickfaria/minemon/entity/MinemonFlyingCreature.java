@@ -31,12 +31,12 @@ public final class MinemonFlyingCreature extends MinemonCreature {
  @Override public void move(net.minecraft.world.entity.MoverType type,net.minecraft.world.phys.Vec3 movement){
   if(defensiveAirRetreat&&type==net.minecraft.world.entity.MoverType.SELF){
    double horizontalSpeed=Math.sqrt(movement.x*movement.x+movement.z*movement.z);
-   // A vanilla zombie displaces about 0.103 blocks per tick on the measured
-   // 20-tick path. The flight controller otherwise sustains roughly twice
-   // that horizontal pace, so cap actual movement here rather than relying
-   // on the flying-speed attribute alone.
-   double zombiePace=0.1035D;
-   if(horizontalSpeed>zombiePace){double scale=zombiePace/horizontalSpeed;movement=new net.minecraft.world.phys.Vec3(movement.x*scale,movement.y,movement.z*scale);}
+   // FlyingMoveControl's horizontal acceleration differs from ground path
+   // navigation, so validate and cap the actual displacement against the
+   // vanilla Spider GameTest reference instead of assuming equal attributes
+   // produce equal travel distance.
+   double spiderPace=0.14D;
+   if(horizontalSpeed>spiderPace){double scale=spiderPace/horizontalSpeed;movement=new net.minecraft.world.phys.Vec3(movement.x*scale,movement.y,movement.z*scale);}
   }
   super.move(type,movement);
  }
@@ -147,19 +147,12 @@ public final class MinemonFlyingCreature extends MinemonCreature {
    var support=new BlockPos(this.getX(),this.naturalSurface()-.01D,this.getZ());
    groundFriction=this.level.getBlockState(support).getBlock().getFriction();
    // Vanilla walking uses speed as both movement input and ground acceleration.
-   // Copy that 0.23 reference and the support friction, rather than multiplying
+   // Copy the Spider's 0.30 reference and the support friction, rather than multiplying
    // a flying-speed attribute through air's much smaller 0.02 acceleration.
-   defensiveAcceleration=.23F*(.21600002F/(groundFriction*groundFriction*groundFriction));
-   if(!wasGrounded){
-    // Latest server GameTest measured 1.653 blocks in 20 ticks versus the
-    // zombie's 2.146. Scale the movement input by their measured ratio so the
-    // effective displacement, rather than only the configured attribute,
-    // matches the vanilla reference.
-    defensiveAcceleration*=.952F;
-   }
+   defensiveAcceleration=.30F*(.21600002F/(groundFriction*groundFriction*groundFriction));
    var horizontal=new net.minecraft.world.phys.Vec3(input.x,0,input.z);
    // Keep this as a direction vector. defensiveAcceleration already supplies
-   // the zombie's 0.23 movement speed; scaling the vector by 0.23 as well
+   // the Spider's 0.30 movement speed; scaling the vector by 0.30 as well
    // applies that speed twice and cuts the measured retreat distance roughly
    // in half.
    if(horizontal.lengthSqr()>1.0E-8D)input=horizontal.normalize();
