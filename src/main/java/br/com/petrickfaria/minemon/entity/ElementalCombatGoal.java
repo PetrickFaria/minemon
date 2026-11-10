@@ -52,6 +52,13 @@ final class ElementalCombatGoal extends Goal {
 
         double distance = Math.sqrt(CombatGeometry.horizontalCenterDistanceSquared(pokemon, target));
         double safeDistance = Math.max(1.0D, Math.min(7.0D, pokemon.attackRange() - 1.0D));
+        Vec3 towardPokemon = new Vec3(pokemon.getX() - target.getX(), 0.0D, pokemon.getZ() - target.getZ());
+        double closingSpeed = towardPokemon.lengthSqr() < 1.0E-6D ? 0.0D
+                : Math.max(0.0D, target.getDeltaMovement().dot(towardPokemon.normalize()));
+        // Start moving early enough to account for an advancing target while a
+        // new retreat route is being calculated and followed. Static threats
+        // retain the exact safe-distance threshold.
+        double retreatTriggerDistance = safeDistance + Math.min(1.5D, closingSpeed * 20.0D);
 
         // Projectile eligibility is independent of the preferred defensive distance.
         // Never suppress a ready shot merely because the target entered the danger zone.
@@ -61,7 +68,7 @@ final class ElementalCombatGoal extends Goal {
 
         // Movement is independent of the attack cooldown. Retreat first even while
         // recharging, then resume normal positioning once the threat is far enough.
-        if (distance < safeDistance) {
+        if (distance < retreatTriggerDistance) {
             if (!retreating) repositionCooldown = 0;
             retreating = true;
             reposition(target, true);
