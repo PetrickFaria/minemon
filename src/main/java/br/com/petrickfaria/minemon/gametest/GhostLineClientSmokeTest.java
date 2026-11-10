@@ -31,6 +31,7 @@ final class GhostLineClientSmokeTest {
  private static boolean screenshotInFlight,nativeSmokeFixtureInjected;
  private static final Set<String> writtenScreenshots=new HashSet<>();
  private static int ticks;
+ private static int blinkScreenshotDeadline=705;
  private static volatile UUID gastlyId,secondGastlyId,haunterId,gengarId;
  private static double movingGastlyStartX=Double.NaN,floatingGastlyStartY=Double.NaN;
  private static final Set<String> captures=new HashSet<>();
@@ -366,7 +367,7 @@ final class GhostLineClientSmokeTest {
     throw new IllegalStateException("Gengar walking screenshot was not captured during ground_walk: "+readClip(gengar));
    // Keep each ghost in the render view while waiting for its intermittent blink.
    // Do not steal the camera from the Gengar gait check before its screenshot.
-   if(ticks>=145&&ticks<705&&!cameraMatrixActive()&&captures.contains("gengar-walk")&&(!captures.contains("haunter-blink")||!captures.contains("gengar-blink"))){
+   if(ticks>=145&&ticks<blinkScreenshotDeadline&&!cameraMatrixActive()&&captures.contains("gengar-walk")&&(!captures.contains("haunter-blink")||!captures.contains("gengar-blink"))){
     boolean needHaunterBlink=!captures.contains("haunter-blink");
     boolean needGengarBlink=!captures.contains("gengar-blink");
     if(needHaunterBlink&&needGengarBlink)face(mc,((ticks/20)%2==0)?haunter:gengar);
@@ -402,8 +403,15 @@ final class GhostLineClientSmokeTest {
     if(haunterBlink<2||gengarBlink<2||haunter.lastBlinkIntervalForValidation()<100||haunter.lastBlinkIntervalForValidation()>300
         ||gengar.lastBlinkIntervalForValidation()<100||gengar.lastBlinkIntervalForValidation()>300)
      throw new IllegalStateException("Ghost blink interval check failed: Haunter events="+haunterBlink+" interval="+haunter.lastBlinkIntervalForValidation()+" Gengar events="+gengarBlink+" interval="+gengar.lastBlinkIntervalForValidation());
+    // Blink screenshots require a real natural blink, a clear screenshot slot,
+    // and one following rendered frame. If the camera sweep overlaps those
+    // events, allow one measured next interval for both natural blink cycles.
+    blinkScreenshotDeadline=ticks+Math.max(haunter.lastBlinkIntervalForValidation(),gengar.lastBlinkIntervalForValidation())+10;
    }
    if(ticks>=800&&!validationComplete){
+    if((!captures.contains("haunter-blink")||!captures.contains("gengar-blink"))&&ticks<=blinkScreenshotDeadline)return;
+    if(!captures.contains("haunter-blink")||!captures.contains("gengar-blink"))
+     throw new IllegalStateException("Natural blink screenshots were not captured before their measured next blink interval; Haunter="+captures.contains("haunter-blink")+" Gengar="+captures.contains("gengar-blink")+" deadline="+blinkScreenshotDeadline);
     if(!cameraMatrixComplete||cameraMatrixPasses!=24)
      throw new IllegalStateException("Gastly camera acceptance matrix incomplete: "+cameraMatrixPasses+"/24 views");
     if(br.com.petrickfaria.minemon.client.GastlyCoreRenderHook.auraFramesForValidation()==0)
@@ -533,8 +541,10 @@ final class GhostLineClientSmokeTest {
    if(reopenTicks<30)return;
    if(!reopenPositioned){
     UUID playerId=mc.player.getUUID();
-    mc.getSingleplayerServer().execute(()->{
-     var serverPlayer=mc.getSingleplayerServer().getPlayerList().getPlayer(playerId);
+    var server=mc.getSingleplayerServer();
+    if(server==null)return;
+    server.execute(()->{
+     var serverPlayer=server.getPlayerList().getPlayer(playerId);
      if(serverPlayer!=null)serverPlayer.setGameMode(GameType.SPECTATOR);
     });
     face(mc,gastly);

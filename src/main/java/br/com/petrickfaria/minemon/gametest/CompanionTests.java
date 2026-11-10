@@ -389,7 +389,10 @@ public final class CompanionTests {
        +" companionNav="+pokemon.getNavigation().getTargetPos()+" spiderTarget="+reference.getTarget()+" spiderNav="+reference.getNavigation().getTargetPos());
    owner.discard();reference.discard();return;
   }
-  pokemon.setDeltaMovement(0,0,0);
+  // The Spider's melee goal can take a few ticks to establish its path while
+  // the companion's ranged goal starts sooner. Measure both from rest once
+  // both paths are active so setup momentum is not counted as speed.
+  pokemon.setDeltaMovement(0,0,0);reference.setDeltaMovement(0,0,0);
   pokemon.setYRot(-90);pokemon.yRotO=-90;pokemon.yBodyRot=pokemon.yBodyRotO=-90;
    var pokemonStart=pokemon.position();var spiderStart=reference.position();
    // Compare real ground-path displacement with real companion retreat; neither
