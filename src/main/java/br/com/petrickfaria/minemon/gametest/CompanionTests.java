@@ -366,7 +366,9 @@ public final class CompanionTests {
   pokemon.setDeltaMovement(0,0,0);
   pokemon.setYRot(-90);pokemon.yRotO=-90;pokemon.yBodyRot=pokemon.yBodyRotO=-90;
    var pokemonStart=pokemon.position();var spiderStart=reference.position();
-  reference.getMoveControl().setWantedPosition(reference.getX()+8.0D,reference.getY(),reference.getZ(),1.0D);
+   // Use the spider's normal ground navigation so its movement is measured
+   // under the same kind of path-following conditions as the companion.
+   reference.getNavigation().moveTo(reference.getX()+8.0D,reference.getY(),reference.getZ(),1.0D);
   h.runAfterDelay(20,()->{
     double retreat=pokemon.position().subtract(pokemonStart).horizontalDistance();
     double spider=reference.position().subtract(spiderStart).horizontalDistance();
@@ -399,6 +401,30 @@ public final class CompanionTests {
    check(h,pokemon.isCombatPose()&&pokemon.isOrderedToSit()&&target.getHealth()<health,
        "Seated Abra must attack with a stable combat pose while preserving Sentar");
    owner.discard();h.succeed();
+  });
+ }
+ @GameTest(template="test_arena",timeoutTicks=180)
+ public static void abraRetainsNaturalSubBlockHoverDuringAndAfterCombat(GameTestHelper h){
+  floor(h);ServerPlayer owner=player(h);owner.setGameMode(GameType.CREATIVE);
+  MinemonCreature abra=h.spawn(ModEntities.SPECIES.get("abra").get(),new BlockPos(5,2,5));
+  abra.tame(owner);abra.setPokemonLevel(10);
+  abra.setBlackListOverride(new net.minecraft.resources.ResourceLocation("minecraft","cow"),false);
+  Cow target=h.spawn(EntityType.COW,new BlockPos(8,1,5));target.setNoAi(true);keepCombatTargetAlive(target);
+  double natural=Math.min(1.0D,abra.naturalCycle().minimumAltitude());
+  abra.setPos(abra.getX(),abra.naturalSurface()+natural,abra.getZ());
+  float initialHealth=target.getHealth();abra.focusTrainerDefenseTarget(target);
+  h.runAfterDelay(55,()->{
+   double during=abra.getY()-abra.naturalSurface();
+   check(h,natural<1.0D&&Math.abs(during-natural)<.12D,
+       "An active Abra must preserve its natural sub-block combat hover; altitude="+during+" natural="+natural);
+   check(h,target.getHealth()<initialHealth,"Abra must continue attacking while retaining its lower natural combat height");
+   target.discard();abra.setTarget(null);
+   h.runAfterDelay(45,()->{
+    double after=abra.getY()-abra.naturalSurface();
+    check(h,abra.getTarget()==null&&after<=1.0D&&after>=abra.flightMinimum()-.15D,
+        "Abra must return to its natural low hover after combat; altitude="+after+" naturalMinimum="+abra.flightMinimum());
+    owner.discard();h.succeed();
+   });
   });
  }
  private static void awaitPidgeyCombat(GameTestHelper h,MinemonCreature pidgey,ServerPlayer owner,Zombie target,float initialHealth,double initialDistance,int elapsed){

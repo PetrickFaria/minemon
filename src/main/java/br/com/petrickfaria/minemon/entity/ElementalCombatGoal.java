@@ -124,7 +124,10 @@ final class ElementalCombatGoal extends Goal {
         // Prefer the nearest safe point on the desired radius, then try both
         // sides of it so ordinary pathfinding can work around obstacles.
         // Retreat points directly away first, then tests nearby alternatives.
-        double[] angles = retreat ? new double[]{0.0D, 0.65D, -0.65D, 1.3D, -1.3D, Math.PI}
+        // Retreat directly away from the attacker. Give pathfinding the
+        // opposite-side endpoint and let it route around terrain; selecting
+        // lateral endpoints made a defending Pokémon circle around its target.
+        double[] angles = retreat ? new double[]{0.0D}
                 : new double[]{0.75D, -0.75D, 1.3D, -1.3D, Math.PI};
         double nearestSafeRadius = retreat ? safeDistance : desired;
         for (double radius = desired; radius + 1.0E-6D >= nearestSafeRadius; radius -= 0.5D) {
@@ -146,10 +149,10 @@ final class ElementalCombatGoal extends Goal {
                     // vanilla Spider to validate controller-specific movement.
                     // without changing the Pokémon's natural movement attribute.
                     double actualSpeed = pokemon.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED);
-                    // Slightly exceed the spider baseline so a companion can
-                    // keep opening distance from a mob that is actively chasing.
-                    // The measured-speed GameTest allows a 15% variance.
-                    double speedModifier = retreat ? 0.32D / Math.max(0.01D, actualSpeed) : 1.0D;
+                    // Match the spider's native movement-speed attribute. The
+                    // measured displacement test validates the path controller
+                    // rather than applying an extra speed boost to the Pokémon.
+                    double speedModifier = retreat ? 0.30D / Math.max(0.01D, actualSpeed) : 1.0D;
                     navigation.moveTo(path, speedModifier);
                     return;
                 }

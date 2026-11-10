@@ -677,7 +677,7 @@ public final class ClientSmokeTest {
       throw new IllegalStateException("Bulbasaur spawn egg did not create a wild combat target");
      var spawned=level.getEntitiesOfClass(MinemonCreature.class,new net.minecraft.world.phys.AABB(eggFloor).inflate(4),m->m.getSpeciesSlug().equals("bulbasaur")&&!m.isTame());
      if(spawned.isEmpty())throw new IllegalStateException("Bulbasaur spawned by egg was not available for player attack");
-     var wild=spawned.get(0);wild.moveTo(0.0D,101.0D,10.0D,0.0F,0.0F);combatTargetEntity=wild.getUUID();
+     var wild=spawned.get(0);wild.moveTo(0.0D,101.0D,4.0D,0.0F,0.0F);combatTargetEntity=wild.getUUID();
      var companion=ModEntities.SPECIES.get("pikachu").get().create(level);companion.moveTo(0,101,0.75,180,0);companion.tame(player);companion.setOwnerUUID(player.getUUID());companion.setOrderedToSit(false);level.addFreshEntity(companion);testEntity=companion.getUUID();
      companion.focusPlayerTarget(wild);
      if(companion.getTarget()!=wild)throw new IllegalStateException("Companion did not retain the player's explicitly focused wild target");
