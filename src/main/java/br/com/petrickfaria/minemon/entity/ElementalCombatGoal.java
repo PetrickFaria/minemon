@@ -148,11 +148,12 @@ final class ElementalCombatGoal extends Goal {
                     // GameTests compare actual distance traveled against a live
                     // vanilla Spider to validate controller-specific movement.
                     // without changing the Pokémon's natural movement attribute.
+                    // Match the live vanilla Spider's observed retreat pace.
+                    // With a 0.30 attribute-equivalent, the normal melee goal
+                    // covers about 20% more horizontal ground than this ranged
+                    // path controller, so compensate only while retreating.
                     double actualSpeed = pokemon.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED);
-                    // Match the spider's native movement-speed attribute. The
-                    // measured displacement test validates the path controller
-                    // rather than applying an extra speed boost to the Pokémon.
-                    double speedModifier = retreat ? 0.30D / Math.max(0.01D, actualSpeed) : 1.0D;
+                    double speedModifier = retreat ? 0.36D / Math.max(0.01D, actualSpeed) : 1.0D;
                     navigation.moveTo(path, speedModifier);
                     return;
                 }

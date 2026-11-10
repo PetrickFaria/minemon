@@ -148,10 +148,10 @@ public final class MinemonFlyingCreature extends MinemonCreature {
   if(retreat){
    var support=new BlockPos(this.getX(),this.naturalSurface()-.01D,this.getZ());
    groundFriction=this.level.getBlockState(support).getBlock().getFriction();
-   // Vanilla walking uses speed as both movement input and ground acceleration.
-   // Copy the Spider's 0.30 reference and the support friction, rather than multiplying
-   // a flying-speed attribute through air's much smaller 0.02 acceleration.
-   defensiveAcceleration=.30F*(.21600002F/(groundFriction*groundFriction*groundFriction));
+   // Air path steering loses more horizontal ground than the Spider's normal
+   // melee navigation. Calibrate its retreat input against the live Spider
+   // displacement test while leaving ordinary flight speed untouched.
+   defensiveAcceleration=.42F*(.21600002F/(groundFriction*groundFriction*groundFriction));
    var horizontal=new net.minecraft.world.phys.Vec3(input.x,0,input.z);
    // Keep this as a direction vector. defensiveAcceleration already supplies
    // the Spider's 0.30 movement speed; scaling the vector by 0.30 as well
