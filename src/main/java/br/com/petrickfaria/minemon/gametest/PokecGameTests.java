@@ -179,10 +179,22 @@ public final class PokecGameTests {
 
         MinemonCreature clickRouted=h.spawn(ModEntities.SPECIES.get("pikachu").get(),new BlockPos(6,1,6));
         clickRouted.tame(owner);
+        Zombie activeEnemy=h.spawn(net.minecraft.world.entity.EntityType.ZOMBIE,new BlockPos(9,1,6));
+        clickRouted.setTarget(activeEnemy);
+        clickRouted.setDeltaMovement(0.2D,0.0D,0.0D);
+        clickRouted.setInLove(owner);
+        clickRouted.handleEntityEvent((byte)61); // active attack animation
         ItemStack clickBall=new ItemStack(ModItems.POKEBALL.get());owner.setItemInHand(InteractionHand.OFF_HAND,clickBall);
         var routedResult=clickRouted.mobInteract(owner,InteractionHand.OFF_HAND);
         check(routedResult.consumesAction()&&PokeballItem.isOccupied(owner.getOffhandItem())&&!clickRouted.isAlive(),
-                "Pokémon mob interaction must route a Pokébola click to the existing capture handler");
+                "A valid empty Pokébola must take priority and store its owner’s Pokémon during movement, combat, attack animation, and breeding state");
+        check(PokeballItem.readStoredEntity(owner.getOffhandItem())!=null,
+                "Combat interruption must finish storing complete entity data before removing the Pokémon");
+        var storedToken=PokeballItem.readStoredEntity(owner.getOffhandItem()).token();
+        var repeated=ModItems.POKEBALL.get().interactLivingEntity(owner.getOffhandItem(),owner,clickRouted,InteractionHand.OFF_HAND);
+        check(!repeated.consumesAction() && PokeballItem.readStoredEntity(owner.getOffhandItem()).token().equals(storedToken)
+                        && PokeballItem.isOccupied(owner.getOffhandItem()),
+                "Repeated immediate use cannot duplicate a Pokémon or overwrite its stored token");
 
         MinemonCreature wild=h.spawn(ModEntities.SPECIES.get("squirtle").get(),new BlockPos(6,1,5));
         ItemStack empty=new ItemStack(ModItems.POKEBALL.get());owner.setItemInHand(InteractionHand.OFF_HAND,empty);

@@ -508,11 +508,9 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     public void setRocketSpecial(boolean special) { this.entityData.set(ROCKET_SPECIAL, special); }
     public void setRocketVillager(UUID villager) { this.getPersistentData().putUUID("RocketVillager", villager); }
 
-    /** Capture is blocked during breeding or active combat, but sleep and defeat do not block storage. */
+    /** Combat, movement, rest, and animation state must never make an owned companion un-storable. */
     public boolean canBeStoredInPokeball() {
-        return (!this.isDeadOrDying() || this.isDefeated())
-                && !this.isInLove() && (this.isDefeated() || this.getTarget() == null && this.attackAnimationTicks <= 0)
-                && !this.isPassenger();
+        return (!this.isDeadOrDying() || this.isDefeated()) && !this.isPassenger();
     }
 
     @Override
@@ -730,18 +728,20 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         return ownerId != null && ownerId.equals(target.getUUID());
     }
 
-    /** Target acquisition radius is fixed for every domesticated Pokémon. */
-    public double perceptionRange() { return isTame() ? 15.0D : 24.0D; }
+    /** Target acquisition radius is level-based for companions and unchanged for wild Pokémon. */
+    public double perceptionRange() {
+        return isTame() && getPokemonLevel() >= 6 ? 25.0D : isTame() ? 15.0D : 24.0D;
+    }
     public boolean canPerceive(LivingEntity target) {
         return target != null && target.isAlive() && target.level == level
                 && CombatGeometry.centerDistanceSquared(this, target) <= perceptionRange() * perceptionRange();
     }
 
-    /** Maximum projectile travel distance: tame levels 1..10 scale 5..20, wild is 10. */
+    /** Maximum projectile reach: tame levels 1..10 scale 5..23, wild is 10. */
     public double attackRange() {
         if (!isTame()) return 10.0D;
         int level=Math.max(1,Math.min(10,getPokemonLevel()));
-        return 5.0D+(level-1)*(15.0D/9.0D);
+        return 5.0D+(level-1)*2.0D;
     }
     /** Compatibility name retained for existing combat callers. */
     public double combatRange() { return attackRange(); }
@@ -794,16 +794,13 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
                 return InteractionResult.sidedSuccess(br.com.petrickfaria.minemon.pokec.WildEncounterManager.loot(this, serverPlayer));
             return InteractionResult.sidedSuccess(this.level.isClientSide);
         }
-        // A capture item in either hand owns the interaction. Failed, occupied, and
-        // foreign-owner attempts must not fall through into the Pokémon screen.
-        for (InteractionHand ballHand : InteractionHand.values()) {
-            ItemStack ball = player.getItemInHand(ballHand);
-            if (!br.com.petrickfaria.minemon.item.PokeballItem.isOccupied(ball)
-                    && ball.getItem() instanceof br.com.petrickfaria.minemon.item.PokeballItem pokeball) {
-                InteractionResult result = pokeball.interactLivingEntity(ball, player, this, ballHand);
-                return result == InteractionResult.PASS || result == InteractionResult.FAIL
-                        ? InteractionResult.CONSUME : result;
-            }
+        // The hand that initiated this entity click owns the transaction. Route
+        // it before sit, info-screen, or other Pokémon interactions can consume it.
+        if (!br.com.petrickfaria.minemon.item.PokeballItem.isOccupied(held)
+                && held.getItem() instanceof br.com.petrickfaria.minemon.item.PokeballItem pokeball) {
+            InteractionResult result = pokeball.interactLivingEntity(held, player, this, hand);
+            return result == InteractionResult.PASS || result == InteractionResult.FAIL
+                    ? InteractionResult.CONSUME : result;
         }
         if (held.getItem() instanceof PokemonTreatItem treat) {
             boolean compatible = PokemonTreatTypes.accepts(this.getSpeciesSlug(), treat.getTreatType().pokemonType());
@@ -1327,9 +1324,10 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     @Override public boolean doHurtTarget(net.minecraft.world.entity.Entity target) { return false; }
     public boolean projectileReady(){return !isDefeated();}
     public boolean canFireAt(LivingEntity target){
-        if(!canAttack(target)||!target.isAlive()||CombatGeometry.centerDistanceSquared(this,target)>attackRange()*attackRange()
-                ||!getSensing().hasLineOfSight(target))return false;
         var start=new net.minecraft.world.phys.Vec3(getX(),getEyeY()-.1,getZ());
+        if(!canAttack(target)||!target.isAlive()
+                ||CombatGeometry.pointToBoxDistanceSquared(start,target.getBoundingBox())>attackRange()*attackRange()
+                ||!getSensing().hasLineOfSight(target))return false;
         return level.clip(new net.minecraft.world.level.ClipContext(start,target.getBoundingBox().getCenter(),net.minecraft.world.level.ClipContext.Block.COLLIDER,net.minecraft.world.level.ClipContext.Fluid.NONE,this)).getType()==net.minecraft.world.phys.HitResult.Type.MISS;
     }
     public boolean combatReady(){return !isDefeated() && !isSleeping() && level.getGameTime()>=nextCombatTick;}

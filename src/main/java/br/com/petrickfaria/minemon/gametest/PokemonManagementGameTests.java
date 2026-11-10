@@ -210,32 +210,64 @@ public final class PokemonManagementGameTests {
                 h.getLevel().setBlockAndUpdate(new BlockPos(x,y,laneZ),net.minecraft.world.level.block.Blocks.AIR.defaultBlockState());
         for(int level=1;level<=10;level++){
             pokemon.setPokemonProgress(level,0);
-            double expected=5.0D+(level-1)*(15.0D/9.0D);
+            double expected=5.0D+(level-1)*2.0D;
             check(h,Math.abs(pokemon.attackRange()-expected)<1.0E-6D,
                     "Companion projectile range must follow the linear level progression at level "+level);
             double targetY=pokemon.getY();
-            rangeTarget.setPos(pokemon.getX()+expected-0.1D,targetY,pokemon.getZ());
+            rangeTarget.setPos(pokemon.getX()+expected+0.4D,targetY,pokemon.getZ());
             check(h,pokemon.canAttack(rangeTarget)&&pokemon.canFireAt(rangeTarget),
                     "An authorized target inside the level "+level+" projectile range must be hittable"
                             +" [canAttack="+pokemon.canAttack(rangeTarget)+", canFireAt="+pokemon.canFireAt(rangeTarget)
                             +", range="+expected+", distance="+pokemon.distanceTo(rangeTarget)
                             +", level="+pokemon.getPokemonLevel()+", targetPos="+rangeTarget.position()
                             +", mobTarget="+pokemon.getTarget()+"]");
-            rangeTarget.setPos(pokemon.getX()+expected+0.1D,targetY,pokemon.getZ());
+            rangeTarget.setPos(pokemon.getX()+expected+0.6D,targetY,pokemon.getZ());
             check(h,pokemon.canAttack(rangeTarget)&&!pokemon.canFireAt(rangeTarget),
                     "A perceived target beyond the level "+level+" projectile range must remain authorized but not be hittable");
-            rangeTarget.setPos(pokemon.getX()+14.9D,targetY,pokemon.getZ());
-            check(h,pokemon.canPerceive(rangeTarget),"Every domesticated Pokémon must perceive targets within 15 blocks");
-            rangeTarget.setPos(pokemon.getX()+15.1D,targetY,pokemon.getZ());
-            check(h,!pokemon.canPerceive(rangeTarget),"Domesticated perception must stop beyond 15 blocks");
+            double perception=level>=6?25.0D:15.0D;
+            check(h,Math.abs(pokemon.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.FOLLOW_RANGE)-perception)<1.0E-6D,
+                    "FOLLOW_RANGE must match level-based perception at level "+level);
+            double centeredY=pokemon.getY()+(pokemon.getBbHeight()-rangeTarget.getBbHeight())/2.0D;
+            rangeTarget.setPos(pokemon.getX()+perception-0.1D,centeredY,pokemon.getZ());
+            check(h,pokemon.canPerceive(rangeTarget),"Perception must include targets inside the level "+level+" limit");
+            rangeTarget.setPos(pokemon.getX()+perception+0.1D,centeredY,pokemon.getZ());
+            check(h,!pokemon.canPerceive(rangeTarget),"Perception must exclude targets beyond the level "+level+" limit");
         }
+        pokemon.setPokemonProgress(5,0);
+        check(h,Math.abs(pokemon.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.FOLLOW_RANGE)-15.0D)<1.0E-6D,
+                "Perception must remain 15 at level 5");
+        pokemon.setPokemonProgress(6,0);
+        check(h,Math.abs(pokemon.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.FOLLOW_RANGE)-25.0D)<1.0E-6D,
+                "Perception must update immediately when leveling from 5 to 6");
+        pokemon.setPokemonProgress(10,0);
+        check(h,Math.abs(pokemon.attackRange()-23.0D)<1.0E-6D,"Level 10 attack range must be 23 blocks");
         pokemon.setPokemonProgress(11,0);
-        check(h,Math.abs(pokemon.attackRange()-20.0D)<1.0E-6D,"Attack range must remain capped at 20 blocks after level 10");
+        check(h,Math.abs(pokemon.attackRange()-23.0D)<1.0E-6D,"Attack range must remain capped at 23 blocks after level 10");
         MinemonCreature wild=h.spawn(ModEntities.SPECIES.get("pikachu").get(),new BlockPos(11,1,11));
         check(h,Math.abs(wild.attackRange()-10.0D)<1.0E-6D,"All wild Pokémon must use 10-block projectile range");
         net.minecraft.world.entity.animal.Cow contact=h.spawn(EntityType.COW,new BlockPos(5,1,5));
         check(h,!pokemon.doHurtTarget(contact),"Pokémon must never deal melee damage, even on direct contact");
         pokemon.discard();wild.discard();rangeTarget.discard();contact.discard();owner.discard();h.succeed();
+    }
+
+    @GameTest(template = "test_arena", timeoutTicks = 100)
+    public static void seatedLevelOneCharmanderCanFireThroughItsFifthBlockOnly(GameTestHelper h) {
+        floor(h);
+        ServerPlayer owner = player(h, h.absolutePos(new BlockPos(7, 1, 5)));
+        MinemonCreature pokemon = h.spawn(ModEntities.SPECIES.get("charmander").get(), new BlockPos(5, 1, 5));
+        pokemon.tame(owner);
+        pokemon.setPokemonLevel(1);
+        pokemon.setOrderedToSit(true);
+        pokemon.setBlackListOverride(new net.minecraft.resources.ResourceLocation("minecraft", "zombie"), true);
+        Zombie zombie = h.spawn(EntityType.ZOMBIE, new BlockPos(10, 1, 5)); // exactly five block positions ahead
+        check(h, pokemon.isOrderedToSit() && pokemon.canAttack(zombie) && pokemon.canFireAt(zombie),
+                "A seated level 1 Charmander must be able to fire at an authorized zombie in the fifth block"
+                        + " [origin=" + pokemon.position() + ", target=" + zombie.position()
+                        + ", boxDistance=" + Math.sqrt(br.com.petrickfaria.minemon.entity.CombatGeometry
+                        .pointToBoxDistanceSquared(new net.minecraft.world.phys.Vec3(pokemon.getX(), pokemon.getEyeY()-.1D, pokemon.getZ()), zombie.getBoundingBox())) + "]");
+        zombie.setPos(pokemon.getX() + 6.5D, pokemon.getY(), pokemon.getZ());
+        check(h, !pokemon.canFireAt(zombie), "The same level 1 Charmander must not fire at a zombie in the sixth block");
+        owner.discard(); pokemon.discard(); zombie.discard(); h.succeed();
     }
 
     @GameTest(template = "test_arena", timeoutTicks = 760)
