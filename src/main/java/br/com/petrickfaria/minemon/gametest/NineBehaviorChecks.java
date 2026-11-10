@@ -90,7 +90,7 @@ final class NineBehaviorChecks {
   // Slimes can spawn in the GameTest dimension independent of light levels.
   var arena=new net.minecraft.world.phys.AABB(h.absolutePos(new BlockPos(0,0,0)),
       h.absolutePos(new BlockPos(16,12,16)));
-  h.onEachTick(()->level.getEntitiesOfClass(net.minecraft.world.entity.monster.Slime.class,arena)
+  h.onEachTick(()->level.getEntitiesOfClass(net.minecraft.world.entity.monster.Monster.class,arena)
       .forEach(net.minecraft.world.entity.Entity::discard));
   var owners=new ArrayList<net.minecraft.server.level.ServerPlayer>();var mobs=new ArrayList<MinemonCreature>();
   for(int i=0;i<species.size();i++){

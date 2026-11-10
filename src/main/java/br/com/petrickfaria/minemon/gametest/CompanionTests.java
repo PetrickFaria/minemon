@@ -256,7 +256,7 @@ public final class CompanionTests {
   MinemonCreature pokemon=h.spawn(ModEntities.SPECIES.get(slug).get(),new BlockPos(5,1+(int)altitude,8));
   pokemon.tame(owner);pokemon.setPokemonLevel(10);pokemon.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).setBaseValue(200.0D);pokemon.setHealth(200.0F);
   pokemon.setBlackListOverride(new net.minecraft.resources.ResourceLocation("minecraft","zombie"),false);
-  Zombie target=h.spawn(EntityType.ZOMBIE,new BlockPos(8,1,8));keepCombatTargetAlive(target);target.setTarget(pokemon);
+  Zombie target=h.spawn(EntityType.ZOMBIE,new BlockPos(8,1,8));target.setNoAi(true);keepCombatTargetAlive(target);target.setTarget(pokemon);
   pokemon.setPos(pokemon.getX(),pokemon.naturalSurface()+altitude,pokemon.getZ());
   pokemon.focusTrainerDefenseTarget(target);
   double health=target.getHealth();

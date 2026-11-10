@@ -111,8 +111,12 @@ final class ElementalCombatGoal extends Goal {
         // target. When a route ends short of safety, replan on the next tick;
         // a fixed cooldown here let an advancing attacker land free hits.
         if (retreat && !navigation.isDone()) {
-            if (keepsSafeDistance(navigation.getPath(), target, safeDistance)) return;
-            repositionCooldown = 0;
+            // The route was checked against the target's position when it was
+            // selected. Rechecking every tick against an advancing target made
+            // it invalid almost immediately and repeatedly stopped the Pokémon.
+            // Let it finish; the next tick after completion selects a fresh
+            // escape route if the threat is still inside the safety radius.
+            return;
         }
         // Keep approach route selection stable, and briefly throttle failed
         // escape searches when the terrain offers no valid path.

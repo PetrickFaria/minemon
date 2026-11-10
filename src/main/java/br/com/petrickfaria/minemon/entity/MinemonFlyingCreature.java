@@ -29,7 +29,9 @@ public final class MinemonFlyingCreature extends MinemonCreature {
   super.moveRelative(defensiveTravel?defensiveAcceleration:acceleration,input);
  }
  @Override public void move(net.minecraft.world.entity.MoverType type,net.minecraft.world.phys.Vec3 movement){
-  if(defensiveAirRetreat&&type==net.minecraft.world.entity.MoverType.SELF){
+  net.minecraft.world.entity.LivingEntity target=this.getTarget();
+  boolean combatFlight=this.isFlyingSpecies()&&target!=null&&target.isAlive()&&this.canAttack(target);
+  if((defensiveAirRetreat||combatFlight)&&type==net.minecraft.world.entity.MoverType.SELF){
    double horizontalSpeed=Math.sqrt(movement.x*movement.x+movement.z*movement.z);
    // FlyingMoveControl's horizontal acceleration differs from ground path
    // navigation, so validate and cap the actual displacement against the

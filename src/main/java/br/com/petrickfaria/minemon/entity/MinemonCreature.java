@@ -215,7 +215,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     public double flightMinimum(){return isFollowingOwner()?followAltitude():naturalCycle.minimumAltitude();}
     public double flightMaximum(){return isFollowingOwner()?followAltitude():naturalCycle.maximumAltitude();}
     public double combatFlightHeight(){
-        double naturalHeight=Math.max(0.0D,this.naturalCycle.minimumAltitude());
+        double naturalHeight=Math.max(0.0D,this.followAltitude());
         // Low floaters retain their approved natural position. Other flying
         // species hold a 1.5-block combat band above the supporting surface.
         return naturalHeight<=1.0D?naturalHeight:1.5D;
