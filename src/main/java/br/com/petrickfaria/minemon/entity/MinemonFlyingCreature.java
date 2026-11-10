@@ -84,7 +84,7 @@ public final class MinemonFlyingCreature extends MinemonCreature {
   boolean alakazamCycle=this.getSpeciesSlug().equals("alakazam")&&this.naturalBehaviorActive()
       &&(this.naturalCycle().phase()==BehaviorCycle.Phase.TAKEOFF||this.naturalCycle().phase()==BehaviorCycle.Phase.AIR
       ||this.naturalCycle().phase()==BehaviorCycle.Phase.LANDING);
-  if(alakazamCycle){
+  if(alakazamCycle&&!combatFlight){
    double anchorX=this.getX(),anchorZ=this.getZ();
    this.getNavigation().stop();this.setNoGravity(true);this.setDeltaMovement(0.0D,0.0D,0.0D);
    input=net.minecraft.world.phys.Vec3.ZERO;
@@ -141,7 +141,7 @@ public final class MinemonFlyingCreature extends MinemonCreature {
    this.setDeltaMovement(this.getDeltaMovement().x,net.minecraft.util.Mth.clamp(error*.25D,-.12D,.12D),this.getDeltaMovement().z);
   }
   double safeDistance=Math.max(1.0D,Math.min(7.0D,this.attackRange()-1.0D));
-  boolean retreat=combatFlight&&this.isTame()&&CombatGeometry.horizontalCenterDistanceSquared(this,opponent)<safeDistance*safeDistance;
+  boolean retreat=combatFlight&&CombatGeometry.horizontalCenterDistanceSquared(this,opponent)<safeDistance*safeDistance;
   boolean wasGrounded=this.isOnGround();float groundFriction=.6F;
   if(retreat){
    var support=new BlockPos(this.getX(),this.naturalSurface()-.01D,this.getZ());
@@ -249,10 +249,10 @@ public final class MinemonFlyingCreature extends MinemonCreature {
    // Correct only excursions outside the natural band; normal navigation remains
    // responsible for smooth altitude changes and collision avoidance.
    boolean combat=this.getTarget()!=null&&this.getTarget().isAlive();
-   if(combat&&altitude<flightMinimum()){
-    // Ranged combat never pulls a flyer down into melee range. Preserve its
-    // normal safe flight band while horizontal pathfinding finds a firing lane.
-    double lift=net.minecraft.util.Mth.clamp((flightMinimum()-altitude)*0.1D,0.02D,0.10D);
+   if(combat&&altitude<combatFlightHeight()){
+    // Combat altitude takes precedence over the species' patrol altitude;
+    // low floaters keep their approved height instead of being raised.
+    double lift=net.minecraft.util.Mth.clamp((combatFlightHeight()-altitude)*0.1D,0.02D,0.10D);
     this.setDeltaMovement(this.getDeltaMovement().x,Math.max(this.getDeltaMovement().y,lift),this.getDeltaMovement().z);
    }else if(!this.fixedFloater()&&!combat&&!this.followingObstacle()
        &&(this.naturalBehaviorActive()||this.isFollowingOwner())
