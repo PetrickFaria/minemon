@@ -365,6 +365,11 @@ public final class CompanionTests {
   // measurements exercise ordinary, active path-following movement.
   reference.targetSelector.removeAllGoals();
   reference.setTarget(spiderTarget);
+  // Explicitly request the Spider's ordinary entity path at vanilla's normal
+  // navigation multiplier. A manually assigned target alone does not guarantee
+  // that its melee goal has started navigation before the measurement window.
+  if(!reference.getNavigation().moveTo(spiderTarget,1.0D))
+   h.fail("Vanilla spider could not create a real path to the stationary reference target");
   h.runAfterDelay(5,()->{
    // Both subjects start at rest facing the measured +X direction. Without
    // this, the companion follows its owner during setup and the flying turn

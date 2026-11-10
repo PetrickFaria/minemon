@@ -77,7 +77,8 @@ jobs:
           mkdir -p run
           echo eula=true > run/eula.txt
           python3 tools/prepare_gametest_world.py
-          timeout 600s ./gradlew --no-daemon runGameTestServer
+          set -o pipefail
+          timeout 600s ./gradlew --no-daemon runGameTestServer 2>&1 | tee run/server-behavior-tests.log
       - name: Validate Rocket villager profession and uniform on the real client
         if: ${{ !cancelled() && steps.compile.outcome == 'success' }}
         run: |
@@ -162,6 +163,8 @@ jobs:
           name: minemon-server-tests
           path: |
             run/logs/
+            run/server-behavior-tests.log
+            run/client-validation-ghost-line.txt
             build/diagnostics/
           if-no-files-found: ignore
           retention-days: 7
