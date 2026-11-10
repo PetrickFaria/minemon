@@ -352,6 +352,7 @@ public final class CompanionTests {
   Cow target=h.spawn(EntityType.COW,new BlockPos(3,1,4));
   target.setNoAi(true);target.setNoGravity(true);keepCombatTargetAlive(target);
   var reference=h.spawn(EntityType.SPIDER,new BlockPos(5,1,12));
+  reference.setNoGravity(true);
   reference.goalSelector.removeAllGoals();
   reference.targetSelector.removeAllGoals();
   h.runAfterDelay(5,()->{
