@@ -144,7 +144,10 @@ final class ElementalCombatGoal extends Goal {
                     // vanilla Spider to validate controller-specific movement.
                     // without changing the Pokémon's natural movement attribute.
                     double actualSpeed = pokemon.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED);
-                    double speedModifier = retreat ? 0.30D / Math.max(0.01D, actualSpeed) : 1.0D;
+                    // Slightly exceed the spider baseline so a companion can
+                    // keep opening distance from a mob that is actively chasing.
+                    // The measured-speed GameTest allows a 15% variance.
+                    double speedModifier = retreat ? 0.32D / Math.max(0.01D, actualSpeed) : 1.0D;
                     navigation.moveTo(path, speedModifier);
                     return;
                 }
