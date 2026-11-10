@@ -794,13 +794,17 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
                 return InteractionResult.sidedSuccess(br.com.petrickfaria.minemon.pokec.WildEncounterManager.loot(this, serverPlayer));
             return InteractionResult.sidedSuccess(this.level.isClientSide);
         }
-        // The hand that initiated this entity click owns the transaction. Route
-        // it before sit, info-screen, or other Pokémon interactions can consume it.
-        if (!br.com.petrickfaria.minemon.item.PokeballItem.isOccupied(held)
-                && held.getItem() instanceof br.com.petrickfaria.minemon.item.PokeballItem pokeball) {
-            InteractionResult result = pokeball.interactLivingEntity(held, player, this, hand);
-            return result == InteractionResult.PASS || result == InteractionResult.FAIL
-                    ? InteractionResult.CONSUME : result;
+        // A Pokébola in either hand owns this entity interaction. Route it before
+        // sit, info-screen, or other Pokémon interactions can consume the click.
+        for (InteractionHand ballHand : new InteractionHand[]{hand,
+                hand == InteractionHand.MAIN_HAND ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND}) {
+            ItemStack ball = player.getItemInHand(ballHand);
+            if (!br.com.petrickfaria.minemon.item.PokeballItem.isOccupied(ball)
+                    && ball.getItem() instanceof br.com.petrickfaria.minemon.item.PokeballItem pokeball) {
+                InteractionResult result = pokeball.interactLivingEntity(ball, player, this, ballHand);
+                return result == InteractionResult.PASS || result == InteractionResult.FAIL
+                        ? InteractionResult.CONSUME : result;
+            }
         }
         if (held.getItem() instanceof PokemonTreatItem treat) {
             boolean compatible = PokemonTreatTypes.accepts(this.getSpeciesSlug(), treat.getTreatType().pokemonType());

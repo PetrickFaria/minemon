@@ -205,7 +205,7 @@ public final class PokemonManagementGameTests {
         int laneY=new BlockPos(pokemon.getX(),pokemon.getY(),pokemon.getZ()).getY();
         int laneZ=new BlockPos(pokemon.getX(),pokemon.getY(),pokemon.getZ()).getZ();
         for(int x=new BlockPos(pokemon.getX(),0,pokemon.getZ()).getX()+1;
-                x<=new BlockPos(pokemon.getX()+21.0D,0,pokemon.getZ()).getX();x++)
+                x<=new BlockPos(pokemon.getX()+26.0D,0,pokemon.getZ()).getX();x++)
             for(int y=laneY;y<=laneY+3;y++)
                 h.getLevel().setBlockAndUpdate(new BlockPos(x,y,laneZ),net.minecraft.world.level.block.Blocks.AIR.defaultBlockState());
         for(int level=1;level<=10;level++){
