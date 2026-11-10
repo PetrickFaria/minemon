@@ -127,10 +127,9 @@ final class ElementalCombatGoal extends Goal {
         double desired = retreat ? safeDistance + 1.0D : Math.min(pokemon.attackRange() - 1.0D, safeDistance + 1.5D);
         // Prefer the nearest safe point on the desired radius, then try both
         // sides of it so ordinary pathfinding can work around obstacles.
-        // Circle tangentially when in range; retreat along the safest escape.
+        // Retreat points directly away first, then tests nearby alternatives.
         double[] angles = retreat ? new double[]{0.0D, 0.65D, -0.65D, 1.3D, -1.3D, Math.PI}
                 : new double[]{0.75D, -0.75D, 1.3D, -1.3D, Math.PI};
-        PathNavigation navigation = pokemon.getNavigation();
         double nearestSafeRadius = retreat ? safeDistance : desired;
         for (double radius = desired; radius + 1.0E-6D >= nearestSafeRadius; radius -= 0.5D) {
             for (double angle : angles) {
