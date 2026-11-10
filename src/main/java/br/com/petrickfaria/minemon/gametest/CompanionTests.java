@@ -204,6 +204,14 @@ public final class CompanionTests {
   Zombie target=h.spawn(EntityType.ZOMBIE,new BlockPos(9,1,8));keepCombatTargetAlive(target);target.setTarget(pokemon);
   pokemon.focusTrainerDefenseTarget(target);
   var pokemonStart=pokemon.position();var targetStart=target.position();float targetHealth=target.getHealth();
+  h.onEachTick(()->{
+   if(h.getLevel().getGameTime()%20==0)com.mojang.logging.LogUtils.getLogger().info(
+       "MINEMON CHARMANDER RETREAT TRACE distance="+pokemon.distanceTo(target)
+       +" pokemon="+pokemon.position()+" velocity="+pokemon.getDeltaMovement()
+       +" navDone="+pokemon.getNavigation().isDone()+" navTarget="+pokemon.getNavigation().getTargetPos()
+       +" zombie="+target.position()+" velocity="+target.getDeltaMovement()
+       +" speed="+pokemon.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED));
+  });
   h.runAfterDelay(100,()->{
    double pokemonTravel=pokemon.position().subtract(pokemonStart).horizontalDistance();
    double targetTravel=target.position().subtract(targetStart).horizontalDistance();
@@ -224,7 +232,7 @@ public final class CompanionTests {
   h.runAfterDelay(65,()->{
    double safeDistance=Math.max(1.0D,Math.min(7.0D,pokemon.attackRange()-1.0D));
    double distance=pokemon.distanceTo(target);
-   check(h,distance>=safeDistance,"Charmander must first recover a safe distance from an advancing zombie; distance="+distance+" safe="+safeDistance);
+   check(h,distance>=safeDistance,"Charmander must first recover a safe distance from an advancing zombie; distance="+distance+" safe="+safeDistance+" pokemon="+pokemon.position()+" velocity="+pokemon.getDeltaMovement()+" navDone="+pokemon.getNavigation().isDone()+" navTarget="+pokemon.getNavigation().getTargetPos()+" zombie="+target.position()+" zombieVelocity="+target.getDeltaMovement()+" pokemonSpeed="+pokemon.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED));
    target.setNoAi(true);target.getNavigation().stop();target.setDeltaMovement(0,0,0);
    var safePosition=pokemon.position();
    h.runAfterDelay(12,()->{

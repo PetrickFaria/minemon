@@ -37,7 +37,7 @@ public final class MinemonFlyingCreature extends MinemonCreature {
    // navigation, so validate and cap the actual displacement against the
    // vanilla Spider GameTest reference instead of assuming equal attributes
    // produce equal travel distance.
-   double spiderPace=0.14D;
+   double spiderPace=0.18D;
    if(horizontalSpeed>spiderPace){double scale=spiderPace/horizontalSpeed;movement=new net.minecraft.world.phys.Vec3(movement.x*scale,movement.y,movement.z*scale);}
   }
   super.move(type,movement);
