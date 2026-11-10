@@ -1369,6 +1369,15 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     @Override public boolean isPushable(){return !isDefeated() && super.isPushable();}
     @Override public boolean isAlive(){return isDefeated()?!isRemoved():super.isAlive();}
     @Override public boolean isDeadOrDying(){return !isDefeated() && super.isDeadOrDying();}
+    @Override public void tickDeath(){
+        if(isDefeated()){
+            // Defeat intentionally retains zero HP in saved data, but the
+            // client must not run vanilla death removal for a storable Pokémon.
+            this.deathTime=0;
+            return;
+        }
+        super.tickDeath();
+    }
     @Override public void heal(float amount){if(!isDefeated())super.heal(amount);}
     @Override public void die(DamageSource source){
         if (br.com.petrickfaria.minemon.pokec.WildEncounterManager.isEncounter(this)) {
