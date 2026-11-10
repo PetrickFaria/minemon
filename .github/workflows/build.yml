@@ -245,6 +245,8 @@ jobs:
             cp run/client-validation.txt "run/client-validation-$scenario.txt"
           done
       - name: Verify executable mod JAR contents
+        id: verify_jar
+        if: ${{ !cancelled() && steps.compile.outcome == 'success' }}
         shell: bash
         run: |
           set -euo pipefail
@@ -335,6 +337,7 @@ jobs:
           unzip -p "$jar_file" assets/minemon_gen1/lang/pt_br.json | grep -F '"block.minemon_gen1.rocket_block": "Bloco Rocket"'
           unzip -p "$jar_file" pack.mcmeta | grep -F '"pack_format": 9'
       - name: Upload Minemon JAR
+        if: ${{ !cancelled() && steps.verify_jar.outcome == 'success' }}
         uses: actions/upload-artifact@v4
         with:
           name: minemon-${{ env.MINEMON_VERSION }}
