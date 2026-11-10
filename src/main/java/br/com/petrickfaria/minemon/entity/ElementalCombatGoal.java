@@ -71,8 +71,10 @@ final class ElementalCombatGoal extends Goal {
 
         if (distance > pokemon.attackRange() || !pokemon.getSensing().hasLineOfSight(target)) {
             reposition(target, false);
-        } else if (pokemon.getNavigation().isDone()) {
-            pokemon.getNavigation().stop();
+        } else {
+            // Being within firing range is not a reason to stand still.
+            // Keep circling the target, including while the shot recharges.
+            reposition(target, false);
         }
     }
 
@@ -100,6 +102,9 @@ final class ElementalCombatGoal extends Goal {
     }
 
     private void reposition(LivingEntity target, boolean retreat) {
+        // Do not interrupt a valid circling route every ten ticks; select a
+        // fresh route once the previous route has actually completed.
+        if (!retreat && !pokemon.getNavigation().isDone()) return;
         if (repositionCooldown-- > 0) return;
         repositionCooldown = 10;
         Vec3 away = pokemon.position().subtract(target.position());
@@ -108,10 +113,12 @@ final class ElementalCombatGoal extends Goal {
         away = away.normalize();
 
         double safeDistance = Math.max(1.0D, Math.min(7.0D, pokemon.attackRange() - 1.0D));
-        double desired = retreat ? safeDistance + 1.0D : Math.min(pokemon.attackRange() - 1.0D, 12.0D);
+        double desired = retreat ? safeDistance + 1.0D : Math.min(pokemon.attackRange() - 1.0D, safeDistance + 1.5D);
         // Prefer the nearest safe point on the desired radius, then try both
         // sides of it so ordinary pathfinding can work around obstacles.
-        double[] angles = {0.0D, 0.65D, -0.65D, 1.3D, -1.3D, Math.PI};
+        // Circle tangentially when in range; retreat along the safest escape.
+        double[] angles = retreat ? new double[]{0.0D, 0.65D, -0.65D, 1.3D, -1.3D, Math.PI}
+                : new double[]{0.75D, -0.75D, 1.3D, -1.3D, Math.PI};
         PathNavigation navigation = pokemon.getNavigation();
         double nearestSafeRadius = retreat ? safeDistance : desired;
         for (double radius = desired; radius + 1.0E-6D >= nearestSafeRadius; radius -= 0.5D) {
