@@ -375,6 +375,9 @@ public final class CompanionTests {
    reference.setYRot(-90);reference.yRotO=-90;reference.yBodyRot=reference.yBodyRotO=-90;
    pokemon.setNoAi(false);
    pokemon.focusTrainerDefenseTarget(target);
+   // Level 10 perception spans neighboring GameTest structures. Preserve the
+   // explicitly focused target while preventing fixtures from stealing it.
+   pokemon.targetSelector.removeAllGoals();
    awaitRetreatPath(h,pokemon,target,reference,owner,airborne,0);
   });
  }
@@ -400,7 +403,9 @@ public final class CompanionTests {
   h.runAfterDelay(20,()->{
     double retreat=pokemon.position().subtract(pokemonStart).horizontalDistance();
     double spider=reference.position().subtract(spiderStart).horizontalDistance();
-    String measured="; species="+pokemon.getSpeciesSlug()+"; 20 ticks: companion="+retreat+" blocks, spider="+spider+" blocks";
+    String measured="; species="+pokemon.getSpeciesSlug()+"; 20 ticks: companion="+retreat+" blocks, spider="+spider+" blocks"
+        +"; pokemonTarget="+pokemon.getTarget()+" start="+pokemonStart+" end="+pokemon.position()+" velocity="+pokemon.getDeltaMovement()+" navDone="+pokemon.getNavigation().isDone()+" navTarget="+pokemon.getNavigation().getTargetPos()
+        +"; spiderTarget="+reference.getTarget()+" start="+spiderStart+" end="+reference.position()+" velocity="+reference.getDeltaMovement()+" navDone="+reference.getNavigation().isDone()+" navTarget="+reference.getNavigation().getTargetPos();
     check(h,spider>1.0D,"The reference spider must actually walk"+measured+" spiderTarget="+reference.getTarget()+" start="+spiderStart+" end="+reference.position()+" velocity="+reference.getDeltaMovement()+" navDone="+reference.getNavigation().isDone()+" navTarget="+reference.getNavigation().getTargetPos());
     check(h,retreat>=spider*.85D&&retreat<=spider*1.15D,
         "Defensive retreat must match vanilla spider displacement within 15%"+measured);
