@@ -282,19 +282,21 @@ public final class CompanionTests {
   pokemon.setPos(pokemon.getX(),pokemon.naturalSurface()+altitude,pokemon.getZ());
   pokemon.focusTrainerDefenseTarget(target);
   double health=target.getHealth();
-  sampleAirRetreat(h,pokemon,target,owner,pokemon.position(),0.0D,0,130,health);
+  sampleAirRetreat(h,pokemon,target,owner,pokemon.position(),0.0D,-1,0,130,health);
  }
  private static void sampleAirRetreat(GameTestHelper h,MinemonCreature pokemon,Zombie target,ServerPlayer owner,
-                                     net.minecraft.world.phys.Vec3 previous,double maxStep,int elapsed,int duration,double initialHealth) {
+                                     net.minecraft.world.phys.Vec3 previous,double maxStep,int maxStepTick,int elapsed,int duration,double initialHealth) {
   if(elapsed>=duration) {
    double distance=pokemon.position().subtract(previous).horizontalDistance();
    check(h,target.getHealth()<initialHealth,""+pokemon.getSpeciesSlug()+" must attack during the retreat test; health="+target.getHealth());
-   check(h,maxStep<1.0D,""+pokemon.getSpeciesSlug()+" must not make an excessive one-tick flight dash; max step="+maxStep+" final step="+distance);
+   double normalPace=pokemon.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED);
+   check(h,maxStep<=normalPace+.02D,""+pokemon.getSpeciesSlug()+" must keep each defensive flight step within its configured movement pace; max step="+maxStep+" at tick="+maxStepTick+" pace="+normalPace+" final step="+distance+" velocity="+pokemon.getDeltaMovement()+" target="+pokemon.getTarget()+" nav="+pokemon.getNavigation().getTargetPos());
    owner.discard();target.discard();h.succeed();return;
   }
   h.runAfterDelay(1,()->{
    double step=pokemon.position().subtract(previous).horizontalDistance();
-   sampleAirRetreat(h,pokemon,target,owner,pokemon.position(),Math.max(maxStep,step),elapsed+1,duration,initialHealth);
+   boolean newMaximum=step>maxStep;
+   sampleAirRetreat(h,pokemon,target,owner,pokemon.position(),Math.max(maxStep,step),newMaximum?elapsed+1:maxStepTick,elapsed+1,duration,initialHealth);
   });
  }
  @GameTest(template="test_arena",timeoutTicks=180)
@@ -358,24 +360,18 @@ public final class CompanionTests {
   Cow target=h.spawn(EntityType.COW,new BlockPos(4,1,4));
   target.setNoAi(true);target.setNoGravity(true);keepCombatTargetAlive(target);
   var reference=h.spawn(EntityType.SPIDER,new BlockPos(5,1,8));
-  Cow spiderTarget=h.spawn(EntityType.COW,new BlockPos(14,1,8));
-  spiderTarget.setNoAi(true);spiderTarget.setNoGravity(true);keepCombatTargetAlive(spiderTarget);
-  // Retain the Spider's normal movement and melee goals. Pin its target to a
-  // stationary cow on the same heading as the companion's retreat so both
-  // measurements exercise ordinary, active path-following movement.
-  reference.targetSelector.removeAllGoals();
-  reference.setTarget(spiderTarget);
-  // Explicitly request the Spider's ordinary entity path at vanilla's normal
-  // navigation multiplier. A manually assigned target alone does not guarantee
-  // that its melee goal has started navigation before the measurement window.
-  if(!reference.getNavigation().moveTo(spiderTarget,1.0D))
+  BlockPos spiderDestination=h.absolutePos(new BlockPos(14,1,8));
+  // Let the real Spider and its ordinary ground navigation walk an unobstructed
+  // straight path for the full window. Navigating to a moving entity target
+  // caused the reference to recalculate around its hitbox and nearby fixtures.
+  if(!reference.getNavigation().moveTo(spiderDestination.getX()+.5D,spiderDestination.getY(),spiderDestination.getZ()+.5D,1.0D))
    h.fail("Vanilla spider could not create a real path to the stationary reference target");
   h.runAfterDelay(5,()->{
    // Both subjects start at rest facing the measured +X direction. Without
    // this, the companion follows its owner during setup and the flying turn
    // controller spends the measurement reversing inherited momentum.
    pokemon.getNavigation().stop();pokemon.setDeltaMovement(0,0,0);
-   reference.getNavigation().stop();reference.setDeltaMovement(0,0,0);
+   reference.setDeltaMovement(0,0,0);
    pokemon.setYRot(-90);pokemon.yRotO=-90;pokemon.yBodyRot=pokemon.yBodyRotO=-90;
    reference.setYRot(-90);reference.yRotO=-90;reference.yBodyRot=reference.yBodyRotO=-90;
    pokemon.setNoAi(false);
@@ -388,13 +384,12 @@ public final class CompanionTests {
  }
  private static void awaitRetreatPath(GameTestHelper h,MinemonCreature pokemon,Cow target,Spider reference,
                                       ServerPlayer owner,boolean airborne,int elapsed) {
-  if((pokemon.getTarget()!=target||pokemon.getNavigation().isDone()||reference.getTarget()==null
-      ||reference.getNavigation().isDone())&&elapsed<40){
+  if((pokemon.getTarget()!=target||pokemon.getNavigation().isDone()||reference.getNavigation().isDone())&&elapsed<40){
    h.runAfterDelay(1,()->awaitRetreatPath(h,pokemon,target,reference,owner,airborne,elapsed+1));return;
   }
-  if(pokemon.getTarget()!=target||pokemon.getNavigation().isDone()||reference.getTarget()==null||reference.getNavigation().isDone()){
+  if(pokemon.getTarget()!=target||pokemon.getNavigation().isDone()||reference.getNavigation().isDone()){
    h.fail("Companion and vanilla spider must both enter active paths before speed measurement; companionTarget="+pokemon.getTarget()
-       +" companionNav="+pokemon.getNavigation().getTargetPos()+" spiderTarget="+reference.getTarget()+" spiderNav="+reference.getNavigation().getTargetPos());
+       +" companionNav="+pokemon.getNavigation().getTargetPos()+" spiderNav="+reference.getNavigation().getTargetPos());
    owner.discard();reference.discard();return;
   }
   // The Spider's melee goal can take a few ticks to establish its path while
@@ -410,8 +405,8 @@ public final class CompanionTests {
     double spider=reference.position().subtract(spiderStart).horizontalDistance();
     String measured="; species="+pokemon.getSpeciesSlug()+"; 20 ticks: companion="+retreat+" blocks, spider="+spider+" blocks"
         +"; pokemonTarget="+pokemon.getTarget()+" start="+pokemonStart+" end="+pokemon.position()+" velocity="+pokemon.getDeltaMovement()+" navDone="+pokemon.getNavigation().isDone()+" navTarget="+pokemon.getNavigation().getTargetPos()
-        +"; spiderTarget="+reference.getTarget()+" start="+spiderStart+" end="+reference.position()+" velocity="+reference.getDeltaMovement()+" navDone="+reference.getNavigation().isDone()+" navTarget="+reference.getNavigation().getTargetPos();
-    check(h,spider>1.0D,"The reference spider must actually walk"+measured+" spiderTarget="+reference.getTarget()+" start="+spiderStart+" end="+reference.position()+" velocity="+reference.getDeltaMovement()+" navDone="+reference.getNavigation().isDone()+" navTarget="+reference.getNavigation().getTargetPos());
+        +"; spiderStart="+spiderStart+" spiderEnd="+reference.position()+" spiderVelocity="+reference.getDeltaMovement()+" navDone="+reference.getNavigation().isDone()+" navTarget="+reference.getNavigation().getTargetPos();
+    check(h,spider>1.0D,"The reference spider must actually walk"+measured);
     check(h,retreat>=spider*.85D&&retreat<=spider*1.15D,
         "Defensive retreat must match vanilla spider displacement within 15%"+measured);
     if(airborne)check(h,Math.abs(pokemon.getY()-pokemon.naturalSurface()-pokemon.combatFlightHeight())<.15D,

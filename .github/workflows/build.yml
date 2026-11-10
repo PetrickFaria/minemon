@@ -122,7 +122,12 @@ jobs:
         if: ${{ !cancelled() && steps.compile.outcome == 'success' && ((github.event_name == 'workflow_dispatch' && inputs.full_suite) || (github.event_name == 'push' && github.ref == 'refs/heads/fix/minemon-pending-eight-corrections')) }}
         run: |
           python3 tools/prepare_client_world.py
+          set +e
           ALSOFT_DRIVERS=null timeout --kill-after=30s 600s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeAir -PclientSmokeSpecies=pidgey,spearow,fearow,gastly,haunter,gengar
+          client_status=$?
+          set -e
+          cp run/client-validation.txt run/client-validation-flight.txt 2>/dev/null || true
+          if [ "$client_status" -ne 0 ]; then exit "$client_status"; fi
           grep -F 'PASS ROSTER' run/client-validation.txt
           grep -F 'ARTICULATION PROFILES:' run/client-validation.txt
       - name: Validate Gastly core and aura occlusion on the real client

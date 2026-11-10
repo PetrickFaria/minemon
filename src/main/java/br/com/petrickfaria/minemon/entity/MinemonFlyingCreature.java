@@ -23,9 +23,34 @@ public final class MinemonFlyingCreature extends MinemonCreature {
  private int recoveryNotLandingSamples;
  private int recoveryBelowMinimumSamples;
  private boolean defensiveTravel;
+ private boolean defensiveAirRetreat;
  private float defensiveAcceleration;
  @Override public void moveRelative(float acceleration,net.minecraft.world.phys.Vec3 input){
   super.moveRelative(defensiveTravel?defensiveAcceleration:acceleration,input);
+ }
+ @Override public void move(net.minecraft.world.entity.MoverType type,net.minecraft.world.phys.Vec3 movement){
+  if(defensiveAirRetreat&&type==net.minecraft.world.entity.MoverType.SELF){
+   // FlyingMoveControl can carry a stale path velocity into a retreat and
+   // produce a one-tick displacement far beyond the species' normal pace.
+   // Use the entity's configured movement speed as the physical upper bound;
+   // this preserves per-species balance and does not impose a test-only value.
+   double speed=Math.max(0.0D,this.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED));
+   double horizontal=Math.sqrt(movement.x*movement.x+movement.z*movement.z);
+   if(horizontal>speed&&horizontal>1.0E-8D){
+    double scale=speed/horizontal;
+    movement=new net.minecraft.world.phys.Vec3(movement.x*scale,movement.y,movement.z*scale);
+   }
+  }
+  super.move(type,movement);
+  if(defensiveAirRetreat&&type==net.minecraft.world.entity.MoverType.SELF){
+   var velocity=this.getDeltaMovement();
+   double speed=Math.max(0.0D,this.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED));
+   double horizontal=Math.sqrt(velocity.x*velocity.x+velocity.z*velocity.z);
+   if(horizontal>speed&&horizontal>1.0E-8D){
+    double scale=speed/horizontal;
+    this.setDeltaMovement(velocity.x*scale,velocity.y,velocity.z*scale);
+   }
+  }
  }
  private boolean fixedFloater(){
   return java.util.Set.of("abra","porygon","kakuna","metapod","geodude").contains(this.getSpeciesSlug());
@@ -145,7 +170,8 @@ public final class MinemonFlyingCreature extends MinemonCreature {
    if(horizontal.lengthSqr()>1.0E-8D)input=horizontal.normalize();
   }
   defensiveTravel=retreat;
-  try{super.travel(input);}finally{defensiveTravel=false;}
+  defensiveAirRetreat=retreat&&this.isFlyingSpecies();
+  try{super.travel(input);}finally{defensiveTravel=false;defensiveAirRetreat=false;}
   // FlyingMoveControl can replace the pre-travel lift with a downward input
   // while an entity is waking from a landed sleep pose. Reassert the active
   // cycle's floor after travel so the entity actually resumes its flight band.
