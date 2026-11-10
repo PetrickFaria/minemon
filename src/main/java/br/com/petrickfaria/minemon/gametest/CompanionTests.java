@@ -357,8 +357,8 @@ public final class CompanionTests {
   pokemon.setBlackListOverride(new net.minecraft.resources.ResourceLocation("minecraft","zombie"),false);
   Cow target=h.spawn(EntityType.COW,new BlockPos(4,1,4));
   target.setNoAi(true);target.setNoGravity(true);keepCombatTargetAlive(target);
-  var reference=h.spawn(EntityType.SPIDER,new BlockPos(5,1,12));
-  Cow spiderTarget=h.spawn(EntityType.COW,new BlockPos(14,1,12));
+  var reference=h.spawn(EntityType.SPIDER,new BlockPos(5,1,8));
+  Cow spiderTarget=h.spawn(EntityType.COW,new BlockPos(14,1,8));
   spiderTarget.setNoAi(true);spiderTarget.setNoGravity(true);keepCombatTargetAlive(spiderTarget);
   // Retain the Spider's normal movement and melee goals. Pin its target to a
   // stationary cow on the same heading as the companion's retreat so both
