@@ -122,7 +122,7 @@ public final class BlackListScreen {
         boolean released = mouseReleased(x, y, 0);
         return clicked && released && !draggingScrollbar && firstRow >= 0
                 && firstRow <= Math.max(0, visible().size() - visibleRows)
-                && (visible().size() <= visibleRows || firstRow != before);
+                && (visible().size() <= visibleRows || firstRow != before || firstRow != afterClick);
     }
 
     public void initializeOverlay(Minecraft minecraft, int width, int height) {
