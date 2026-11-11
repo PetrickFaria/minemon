@@ -75,7 +75,14 @@ public final class ActivePokemonData extends SavedData {
 
     private void applyStoredBehavior(br.com.petrickfaria.minemon.entity.MinemonCreature pokemon) {
         String behavior = record(pokemon.getOwnerUUID(), pokemon.getUUID()).getString("behavior");
-        if (!behavior.isEmpty()) pokemon.applyManagedBehavior(behavior);
+        if (!behavior.isEmpty()) {
+            // Entity join and tame events can register the same live Pokémon more
+            // than once. Applying the saved follow/sit/free command may wake it,
+            // so preserve its live sleep state across this bookkeeping pass.
+            boolean sleeping = pokemon.isSleeping();
+            pokemon.applyManagedBehavior(behavior);
+            if (sleeping && !pokemon.isSleeping()) pokemon.setSleeping(true);
+        }
     }
 
     public List<Entry> entries(UUID owner) {

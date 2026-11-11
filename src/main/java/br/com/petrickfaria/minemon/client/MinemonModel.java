@@ -17,8 +17,6 @@ public class MinemonModel extends AnimatedGeoModel<MinemonCreature> {
     public static boolean gengarTeethMouthForValidation(MinemonCreature entity){return GENGAR_TEETH_MOUTH_FOR_VALIDATION.contains(entity.getUUID());}
     public static float gengarSleepBobForValidation(MinemonCreature entity){return GENGAR_SLEEP_BOB_FOR_VALIDATION.getOrDefault(entity.getUUID(),Float.NaN);}
 
-    private static final java.util.Map<MinemonCreature, Boolean> DEWGONG_SLEEPING =
-            java.util.Collections.synchronizedMap(new java.util.WeakHashMap<>());
     @Override
     public ResourceLocation getModelResource(MinemonCreature entity) {
         return location(entity, "models", "geo/" + entity.getSpeciesSlug() + "/" + entity.getSpeciesSlug() + ".geo.json");
@@ -90,7 +88,6 @@ public class MinemonModel extends AnimatedGeoModel<MinemonCreature> {
     private void applyDewgongEyeVisibility(MinemonCreature entity) {
         if (!entity.getSpeciesSlug().equals("dewgong")) return;
         boolean sleeping = entity.isSleeping() || entity.isDefeated();
-        boolean wasSleeping = DEWGONG_SLEEPING.getOrDefault(entity, true);
         for (String side : java.util.List.of("left", "right")) {
             // The eyelid is parented below the eye bone in the approved source rig.
             // Keep that parent rendered so the closed-lid mesh remains visible over it.
@@ -103,10 +100,12 @@ public class MinemonModel extends AnimatedGeoModel<MinemonCreature> {
             var lid = getAnimationProcessor().getBone("eyelid_" + side);
             if (lid != null) {
                 lid.setHidden(false, false);
-                if (sleeping || wasSleeping) lid.setPositionZ(sleeping ? 0.0F : -0.1F);
+                // Animation state is rebuilt every frame; always set both lids
+                // explicitly so an initially awake model cannot inherit the
+                // closed default pose and both sides stay in sync while asleep.
+                lid.setPositionZ(sleeping ? 0.0F : -0.1F);
             }
         }
-        DEWGONG_SLEEPING.put(entity, sleeping);
     }
 
     /** Uses each imported aquatic rig's existing eyelid/closed-eye bones. */
