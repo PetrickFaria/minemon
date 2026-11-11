@@ -87,7 +87,7 @@ public final class MinemonNetwork {
         }
         static void handle(PokemonManagerState m,Supplier<NetworkEvent.Context> s) {
             var c=s.get(); c.enqueueWork(() -> net.minecraftforge.fml.DistExecutor.unsafeRunWhenOn(net.minecraftforge.api.distmarker.Dist.CLIENT,
-                    () -> () -> net.minecraft.client.Minecraft.getInstance().setScreen(new br.com.petrickfaria.minemon.menu.PokemonManagerScreen(m.entries)))); c.setPacketHandled(true);
+                    () -> () -> br.com.petrickfaria.minemon.client.PokemonManagementClient.open(m.entries))); c.setPacketHandled(true);
         }
     }
 
