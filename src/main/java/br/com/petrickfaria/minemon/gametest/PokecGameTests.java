@@ -221,15 +221,31 @@ public final class PokecGameTests {
         floor(h);ServerPlayer owner=player(h,h.absolutePos(new BlockPos(7,1,5)));
         MinemonCreature sleeper=h.spawn(ModEntities.SPECIES.get("pikachu").get(),new BlockPos(5,1,5));
         sleeper.tame(owner);sleeper.setOwnerUUID(owner.getUUID());sleeper.setHealth(sleeper.getMaxHealth()-4);sleeper.setSleeping(true);
+        float expectedSleepHealth=sleeper.getHealth();
         ActivePokemonData.register(sleeper);
         owner.setItemInHand(InteractionHand.MAIN_HAND,new ItemStack(ModItems.POKEBALL.get()));
         var sleepResult=ModItems.POKEBALL.get().interactLivingEntity(owner.getMainHandItem(),owner,sleeper,InteractionHand.MAIN_HAND);
+        check(sleepResult.consumesAction()&&PokeballItem.isOccupied(owner.getMainHandItem()),"An owned sleeping Pokémon should be stored directly");
+        // ItemStack NBT is the representation written into player/world saves. Round-trip it
+        // before reading or releasing so both the stored payload and entity restoration are covered.
+        owner.setItemInHand(InteractionHand.MAIN_HAND,
+                ItemStack.of(owner.getMainHandItem().save(new net.minecraft.nbt.CompoundTag())));
         var sleepStored=PokeballItem.readStoredEntity(owner.getMainHandItem());
-        check(sleepResult.consumesAction()&&sleepStored!=null,"An owned sleeping Pokémon should be stored directly");
-        check(sleepStored.entityData().getBoolean("MinemonSleeping")&&sleepStored.entityData().getFloat("Health")==sleeper.getMaxHealth()-4,
-                "Storage must retain sleep and current health without healing");
+        check(sleepStored!=null,"Saved occupied Pokébola should remain readable after an NBT reload");
+        check(sleepStored.entityData().getBoolean("MinemonSleeping"),"Stored sleep state must survive an NBT reload");
+        check(sleepStored.entityData().getFloat("Health")==expectedSleepHealth,"Stored current health must survive without healing");
         check(sleeper.isRemoved()&&ActivePokemonData.get(h.getLevel()).count(owner.getUUID())==0,
                 "Storage must remove the original and release the active slot");
+        BlockPos releaseFloor=h.absolutePos(new BlockPos(4,0,4));
+        var releaseHit=new BlockHitResult(Vec3.atCenterOf(releaseFloor),net.minecraft.core.Direction.UP,releaseFloor,false);
+        var sleepRelease=ModItems.POKEBALL.get().useOn(new net.minecraft.world.item.context.UseOnContext(owner,InteractionHand.MAIN_HAND,releaseHit));
+        var releasedSleeping=h.getLevel().getEntitiesOfClass(MinemonCreature.class,
+                new net.minecraft.world.phys.AABB(h.absolutePos(new BlockPos(2,1,2)),h.absolutePos(new BlockPos(9,5,9))),
+                pokemon->pokemon.getSpeciesSlug().equals("pikachu")&&owner.getUUID().equals(pokemon.getOwnerUUID()));
+        check(sleepRelease.consumesAction()&&releasedSleeping.size()==1,"Saved sleeping Pokémon should release exactly once");
+        check(releasedSleeping.get(0).getHealth()==expectedSleepHealth,"Pokébola release must restore current health without healing");
+        check(releasedSleeping.get(0).isSleeping(),"Pokébola release must restore the saved sleeping state");
+        releasedSleeping.get(0).discard();ActivePokemonData.unregister(releasedSleeping.get(0));
 
         MinemonCreature defeated=h.spawn(ModEntities.SPECIES.get("charmander").get(),new BlockPos(6,1,5));
         defeated.tame(owner);defeated.setOwnerUUID(owner.getUUID());defeated.setPokemonProgress(4,3);ActivePokemonData.register(defeated);

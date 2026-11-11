@@ -87,6 +87,13 @@ public final class PokeballItem extends Item {
     public static void store(ItemStack ball, Mob creature, ServerPlayer owner) {
         CompoundTag entityData = new CompoundTag();
         creature.saveWithoutId(entityData);
+        // Keep the live state authoritative in the stored payload. In particular,
+        // do not let an earlier NBT snapshot restore full health or wake a sleeper.
+        entityData.putFloat("Health", creature.getHealth());
+        if (creature instanceof MinemonCreature pokemon) {
+            entityData.putBoolean("MinemonSleeping", pokemon.isSleeping());
+            entityData.putBoolean("MinemonDefeated", pokemon.isDefeated());
+        }
         var typeId = ForgeRegistries.ENTITY_TYPES.getKey(creature.getType());
         if (typeId == null) throw new IllegalStateException("Minemon entity has no registered type");
         entityData.putString("id", typeId.toString());

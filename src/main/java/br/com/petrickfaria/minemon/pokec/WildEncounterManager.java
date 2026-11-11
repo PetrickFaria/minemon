@@ -291,6 +291,10 @@ public final class WildEncounterManager {
             if (legacy != null && legacy.isTame() && !legacy.isDefeated()) {
                 recordCompanionHit(defeated, legacy);
                 participants = data.getList(COMPANION_HITS, net.minecraft.nbt.Tag.TAG_STRING);
+                // getCompound returns a detached empty tag when the key did not exist.
+                // recordCompanionHit inserts a new tag into entity data, so refresh this
+                // snapshot before validating timestamps and sharing the reward.
+                hitTimes = data.getCompound(COMPANION_HIT_TIMES);
                 finalHitter = legacy;
             }
         }
