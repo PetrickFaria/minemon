@@ -21,16 +21,21 @@ public final class PokemonManagementClientSmokeTest {
     private static boolean blacklistPreparationRequested;
     private static volatile int dewgongId=-1,gastlyId=-1;
     private static volatile boolean closedEyesSeen,openEyesSeen,awakeBlinkSeen;
+    private static volatile int dewgongRenderObservations;
+    private static volatile String lastDewgongEyeObservation="not rendered";
     private static int auraState,auraLarge,auraSmall,auraFrames;
     private static void nineFixtures(Minecraft minecraft){
         minecraft.player.closeContainer();minecraft.setScreen(null);minecraft.player.setYRot(0);minecraft.player.setXRot(10);
         br.com.petrickfaria.minemon.client.MinemonRenderer.validationObserver=(entity,model)->{
             if(!entity.getSpeciesSlug().equals("dewgong"))return;
+            dewgongRenderObservations++;
             var left=model.getAnimationProcessor().getBone("eyelid_left");var right=model.getAnimationProcessor().getBone("eyelid_right");
             var leftEye=model.getAnimationProcessor().getBone("eye_left");var rightEye=model.getAnimationProcessor().getBone("eye_right");
             if(left==null||right==null||leftEye==null||rightEye==null)throw new IllegalStateException("Dewgong eye bones missing");
             // The eyelid cubes are children of the eye bones in this rig, so the
             // parents must stay rendered; their closed-lid meshes cover the open-eye planes.
+            lastDewgongEyeObservation="sleep="+entity.isSleeping()+", eyeHidden="+leftEye.isHidden()+"/"+rightEye.isHidden()
+                    +", lidHidden="+left.isHidden()+"/"+right.isHidden()+", lidZ="+left.getPositionZ()+"/"+right.getPositionZ();
             boolean closed=!leftEye.isHidden()&&!rightEye.isHidden()&&!left.isHidden()&&!right.isHidden()
                     &&Math.abs(left.getPositionZ())<.001&&Math.abs(right.getPositionZ())<.001;
             boolean open=!leftEye.isHidden()&&!rightEye.isHidden()&&!left.isHidden()&&!right.isHidden()
@@ -257,7 +262,7 @@ public final class PokemonManagementClientSmokeTest {
                 nineFixtures(minecraft);phase=8;ticks=0;return;
             }
             if(phase==8){
-                if(!closedEyesSeen){if(++ticks>240)throw new IllegalStateException("Rendered sleeping Dewgong did not close both eyes");return;}
+                if(!closedEyesSeen){if(++ticks>240)throw new IllegalStateException("Rendered sleeping Dewgong did not close both eyes; renders="+dewgongRenderObservations+"; "+lastDewgongEyeObservation);return;}
                 minecraft.getSingleplayerServer().execute(()->{var e=minecraft.getSingleplayerServer().overworld().getEntity(dewgongId);if(e instanceof br.com.petrickfaria.minemon.entity.MinemonCreature p)p.setSleeping(false);});
                 phase=9;ticks=0;return;
             }

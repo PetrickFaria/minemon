@@ -226,13 +226,20 @@ public final class PokecGameTests {
         owner.setItemInHand(InteractionHand.MAIN_HAND,new ItemStack(ModItems.POKEBALL.get()));
         var sleepResult=ModItems.POKEBALL.get().interactLivingEntity(owner.getMainHandItem(),owner,sleeper,InteractionHand.MAIN_HAND);
         check(sleepResult.consumesAction()&&PokeballItem.isOccupied(owner.getMainHandItem()),"An owned sleeping Pokémon should be stored directly");
+        var capturedSleep=PokeballItem.readStoredEntity(owner.getMainHandItem());
+        check(capturedSleep!=null&&capturedSleep.entityData().getBoolean("MinemonSleeping"),
+                "Pokébola capture must record the fixture's active sleep state");
+        check(capturedSleep.entityData().getFloat("Health")==expectedSleepHealth,
+                "Pokébola capture must record the fixture's current health");
         // ItemStack NBT is the representation written into player/world saves. Round-trip it
-        // before reading or releasing so both the stored payload and entity restoration are covered.
+        // before releasing so the actual saved item payload and entity restoration are covered.
         owner.setItemInHand(InteractionHand.MAIN_HAND,
                 ItemStack.of(owner.getMainHandItem().save(new net.minecraft.nbt.CompoundTag())));
         var sleepStored=PokeballItem.readStoredEntity(owner.getMainHandItem());
         check(sleepStored!=null,"Saved occupied Pokébola should remain readable after an NBT reload");
-        check(sleepStored.entityData().getBoolean("MinemonSleeping"),"Stored sleep state must survive an NBT reload");
+        var persistedBallData=owner.getMainHandItem().getTag().getCompound("MinemonStoredPokemon");
+        check(sleepStored.entityData().getBoolean("MinemonSleeping"),
+                "Stored sleep state must survive an NBT reload; item="+persistedBallData+", entity="+sleepStored.entityData());
         check(sleepStored.entityData().getFloat("Health")==expectedSleepHealth,"Stored current health must survive without healing");
         check(sleeper.isRemoved()&&ActivePokemonData.get(h.getLevel()).count(owner.getUUID())==0,
                 "Storage must remove the original and release the active slot");
