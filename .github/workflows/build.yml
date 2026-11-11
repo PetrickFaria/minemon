@@ -113,8 +113,9 @@ jobs:
           client_status=${PIPESTATUS[0]}
           set -e
           if [ "$client_status" -ne 0 ]; then tail -n 100 run/client-management-command.txt; exit "$client_status"; fi
-          grep -F 'PASS: owned Pokémon status screen, Pokédex header, XP level sync, Seguir/Sentar controls, and registry-backed Black List defaults' run/client-validation-pokemon-management.txt
+          grep -F 'PASS: owned Pokémon status screen, Pokédex header, XP level sync, Seguir/Sentar controls; combined behavior/source filters, N/A ordering, settings preservation, modal click/wheel capture, close and input restoration.' run/client-validation-pokemon-management.txt
           grep -F 'PASS BLACKLIST SCROLLBAR:' run/client-validation-pokemon-management.txt
+          grep -F 'PASS POKÉC SCROLLBAR:' run/client-validation-pokemon-management.txt
       - name: Validate PokéC preview orientation and species framing on the real client
         if: ${{ !cancelled() && steps.compile.outcome == 'success' }}
         run: |

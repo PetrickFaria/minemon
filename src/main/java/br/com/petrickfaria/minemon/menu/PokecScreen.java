@@ -21,6 +21,8 @@ import java.util.*;
 public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
     private static final int LOGICAL_WIDTH = 640, TOP_HEIGHT = 210, INVENTORY_HEIGHT = 100;
     private static final int LIST_X = 8, LIST_Y = 27, LIST_W = 136, LIST_H = 133, ROW_H = 11;
+    static final int LIST_SCROLLBAR_X = LIST_X + LIST_W - 8, LIST_SCROLLBAR_WIDTH = 2;
+    static final int LIST_SCROLLBAR_Y = LIST_Y + 13;
     private static final int INVENTORY_SLOT_WIDTH = 9 * 18, INVENTORY_LABEL_Y = 4;
     private static final int INVENTORY_MAIN_Y = 18, INVENTORY_HOTBAR_Y = 76;
     private static volatile int syncedCoins;
@@ -213,22 +215,29 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
     }
     public int listScrollOffsetForSmokeTest(){return scrollOffset;}
     public int listScrollMaxForSmokeTest(){return Math.max(0,ordered.size()-visibleRows());}
+    public float listUiScaleForSmokeTest(){return uiScale;}
     public boolean scrollListForSmokeTest(double delta){
         return mouseScrolled(leftPos+(LIST_X+20)*uiScale,topPos+(LIST_Y+25)*uiScale,delta);
     }
+    static boolean containsScaledPoint(double mouseX,double mouseY,double originX,double originY,float scale,
+                                       int logicalX,int logicalY,int logicalWidth,int logicalHeight){
+        return scale>0&&mouseX>=originX+logicalX*scale&&mouseX<originX+(logicalX+logicalWidth)*scale
+                &&mouseY>=originY+logicalY*scale&&mouseY<originY+(logicalY+logicalHeight)*scale;
+    }
     public float[] previewOrientationForSmokeTest(){return new float[]{previewYaw,previewPitch};}
     public boolean dragListScrollbarForSmokeTest(boolean clickTrack,boolean dragPastTrack){
-        int trackX=LIST_X+LIST_W-7,trackY=LIST_Y+13,trackHeight=visibleRows()*ROW_H;
+        int trackX=LIST_SCROLLBAR_X,trackY=LIST_SCROLLBAR_Y,trackHeight=visibleRows()*ROW_H;
         int thumbHeight=listThumbHeight(),thumbY=listThumbTop(trackY,trackHeight,thumbHeight);
         double x=leftPos+(trackX+1)*uiScale;
         double y=topPos+(clickTrack?trackY+trackHeight-1:thumbY+Math.max(0,thumbHeight/2))*uiScale;
-        int before=scrollOffset;
+        int before=scrollOffset;String selectedBefore=selectedSlug;
         boolean clicked=mouseClicked(x,y,0);
         int afterClick=scrollOffset;
         if(draggingListScrollbar)mouseDragged(x,topPos+(trackY+(dragPastTrack?-30:trackHeight+30))*uiScale,0,0,0);
         boolean released=mouseReleased(x,y,0);
         return clicked&&released&&!draggingListScrollbar&&scrollOffset>=0
                 &&scrollOffset<=Math.max(0,ordered.size()-visibleRows())
+                &&selectedSlug.equals(selectedBefore)
                 &&(ordered.size()<=visibleRows()||scrollOffset!=afterClick||scrollOffset!=before);
     }
 
@@ -283,7 +292,7 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
             font.draw(pose, fitText(String.format(Locale.ROOT, "%03d %s", species.number(), species.name()), LIST_W - 20), LIST_X + 9, y + 1, color);
         }
         int maxScroll = Math.max(0, ordered.size() - visible);
-        int trackX = LIST_X + LIST_W - 8, trackY = LIST_Y + 13;
+        int trackX = LIST_SCROLLBAR_X, trackY = LIST_SCROLLBAR_Y;
         GuiComponent.fill(pose, trackX, trackY, trackX + 2, trackY + visible * ROW_H, 0xFFC6C6C6);
         int thumbHeight = listThumbHeight();
         int thumbY = listThumbTop(trackY,visible*ROW_H,thumbHeight);
@@ -624,8 +633,10 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
     @Override public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (button != 0) return super.mouseClicked(mouseX, mouseY, button);
         int x = (int) ((mouseX - leftPos) / uiScale), y = (int) ((mouseY - topPos) / uiScale);
-        int trackX=LIST_X+LIST_W-7,trackY=LIST_Y+13,trackHeight=visibleRows()*ROW_H;
-        if(x>=trackX&&x<trackX+4&&y>=trackY&&y<trackY+trackHeight){
+        int trackX=LIST_SCROLLBAR_X,trackY=LIST_SCROLLBAR_Y,trackHeight=visibleRows()*ROW_H;
+        // Match the two logical pixels drawn for the track and handle it before
+        // the wider row hitbox so scrollbar clicks never select a species.
+        if(containsScaledPoint(mouseX,mouseY,leftPos,topPos,uiScale,trackX,trackY,LIST_SCROLLBAR_WIDTH,trackHeight)){
             int thumbHeight=listThumbHeight(),thumbTop=listThumbTop(trackY,trackHeight,thumbHeight);
             draggingListScrollbar=true;
             listScrollbarGrabOffset=(y>=thumbTop&&y<thumbTop+thumbHeight)?y-thumbTop:thumbHeight/2;

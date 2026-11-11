@@ -3,12 +3,19 @@ package br.com.petrickfaria.minemon.gametest;
 import br.com.petrickfaria.minemon.menu.BlackListScreen;
 import br.com.petrickfaria.minemon.menu.PokemonInfoMenu;
 import br.com.petrickfaria.minemon.menu.PokemonInfoScreen;
+import br.com.petrickfaria.minemon.menu.PokecMenu;
+import br.com.petrickfaria.minemon.menu.PokecScreen;
+import br.com.petrickfaria.minemon.entity.MobTargetCategories;
 import br.com.petrickfaria.minemon.registry.ModEntities;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.event.TickEvent;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 /** Focused real-client check for the Pokémon status and registry-backed Black List screens. */
@@ -65,6 +72,73 @@ public final class PokemonManagementClientSmokeTest {
                 else if(state==3)gas.die(net.minecraft.world.damagesource.DamageSource.GENERIC);
             }
         });
+    }
+
+    private static void validateBlacklistFilters(PokemonInfoScreen parent,BlackListScreen screen,Minecraft minecraft)throws Exception{
+        ResourceLocation zombie=net.minecraftforge.registries.ForgeRegistries.ENTITY_TYPES.getKey(net.minecraft.world.entity.EntityType.ZOMBIE);
+        ResourceLocation cow=net.minecraftforge.registries.ForgeRegistries.ENTITY_TYPES.getKey(net.minecraft.world.entity.EntityType.COW);
+        var creeper=new ResourceLocation("minecraft","creeper");
+        if(screen.rowCountForSmokeTest()==0||!screen.containsTypeForSmokeTest(zombie)||!screen.containsTypeForSmokeTest(cow)
+                ||!screen.selectedForSmokeTest(zombie)||screen.selectedForSmokeTest(cow)||screen.selectedForSmokeTest(creeper))
+            throw new IllegalStateException("Blacklist did not load registered hostile/passive defaults");
+
+        // Click the Sentar button underneath the overlay. The click may reach a
+        // Blacklist row, but must never change the Pokémon's sit mode.
+        if(parent.pokemonForSmokeTest()==null||!parent.pokemonForSmokeTest().isOrderedToSit())
+            throw new IllegalStateException("Fixture is not seated before modal-input check");
+        boolean consumed=parent.mouseClicked(parent.getGuiLeft()+120,parent.getGuiTop()+184,0);
+        if(!consumed||!parent.pokemonForSmokeTest().isOrderedToSit()||!parent.hasBlackListOverlay())
+            throw new IllegalStateException("Blacklist click leaked into the status screen behind it");
+
+        Set<ResourceLocation> all=new HashSet<>();
+        for(MobTargetCategories.Origin source:MobTargetCategories.Origin.values()){
+            if(!screen.selectOriginForSmokeTest(source)||screen.originForSmokeTest()!=source)
+                throw new IllegalStateException("Source filter did not update immediately: "+source);
+            Set<ResourceLocation> bySource=new HashSet<>();
+            for(MobTargetCategories.Category behavior:MobTargetCategories.Category.values()){
+                if(!screen.selectCategoryForSmokeTest(behavior)||screen.categoryForSmokeTest()!=behavior)
+                    throw new IllegalStateException("Behavior filter did not update immediately: "+behavior);
+                if(screen.firstRowForSmokeTest()!=0)throw new IllegalStateException("Changing a filter did not reset the scroll position");
+                for(ResourceLocation id:screen.visibleIdsForSmokeTest()){
+                    var type=net.minecraftforge.registries.ForgeRegistries.ENTITY_TYPES.getValue(id);
+                    if(type==null||MobTargetCategories.origin(id)!=source||MobTargetCategories.category(id,type)!=behavior)
+                        throw new IllegalStateException("Combined source/behavior filter admitted an invalid mob: "+id);
+                    if(!all.add(id)||!bySource.add(id))throw new IllegalStateException("Mob appeared in multiple filter partitions: "+id);
+                }
+            }
+            long expected=screen.allIdsForSmokeTest().stream().filter(id->MobTargetCategories.origin(id)==source).count();
+            if(bySource.size()!=expected)
+                throw new IllegalStateException("Source filter did not retain its complete behavior partition: "+source);
+        }
+        if(all.size()!=screen.rowCountForSmokeTest()||!all.contains(cow)||!all.contains(zombie)||!all.contains(creeper))
+            throw new IllegalStateException("Combined Blacklist filters did not partition every registered mob");
+
+        // Preserve per-mob choices while changing filters and sort modes.
+        boolean zombieSelected=screen.selectedForSmokeTest(zombie),cowSelected=screen.selectedForSmokeTest(cow);
+        screen.selectOriginForSmokeTest(MobTargetCategories.Origin.MINEMON);
+        screen.selectCategoryForSmokeTest(MobTargetCategories.Category.PASSIVE);
+        screen.selectOrderingForSmokeTest(BlackListScreen.Ordering.ALPHABETICAL);
+        List<String> names=screen.visibleNamesForSmokeTest();
+        List<String> sortedNames=new ArrayList<>(names);
+        sortedNames.sort(String.CASE_INSENSITIVE_ORDER);
+        if(screen.orderingForSmokeTest()!=BlackListScreen.Ordering.ALPHABETICAL||!names.equals(sortedNames))
+            throw new IllegalStateException("A ordering is not alphabetical by displayed translated name");
+        screen.selectOrderingForSmokeTest(BlackListScreen.Ordering.NUMERIC);
+        List<ResourceLocation> numeric=screen.visibleIdsForSmokeTest();
+        int previous=0;
+        for(ResourceLocation id:numeric){
+            int number=MobTargetCategories.nationalDexNumber(id);
+            if(number<0||number<=previous)throw new IllegalStateException("N ordering is not strictly Pokédex numeric: "+id+" #"+number);
+            previous=number;
+        }
+        if(numeric.size()!=151||!numeric.get(0).getPath().equals("bulbasaur")||!numeric.get(numeric.size()-1).getPath().equals("mew"))
+            throw new IllegalStateException("Minemon N ordering did not retain the complete 001–151 sequence");
+        if(screen.selectedForSmokeTest(zombie)!=zombieSelected||screen.selectedForSmokeTest(cow)!=cowSelected)
+            throw new IllegalStateException("Changing filters or ordering altered mob permissions");
+        // N without a published number uses deterministic registry-ID order.
+        var stable=MobTargetCategories.numericIdOrder();
+        if(stable.compare(new ResourceLocation("alpha","mob"),new ResourceLocation("zeta","mob"))>=0)
+            throw new IllegalStateException("Numeric ordering fallback is not stable by registry ID");
     }
 
 
@@ -231,34 +305,22 @@ public final class PokemonManagementClientSmokeTest {
                     throw new IllegalStateException("Black List overlay closed the Pokémon status menu on the client: menu="
                             + minecraft.player.containerMenu.getClass().getSimpleName() + " screen="
                             + minecraft.screen.getClass().getSimpleName());
-                ResourceLocation zombie = net.minecraftforge.registries.ForgeRegistries.ENTITY_TYPES.getKey(net.minecraft.world.entity.EntityType.ZOMBIE);
-                ResourceLocation cow = net.minecraftforge.registries.ForgeRegistries.ENTITY_TYPES.getKey(net.minecraft.world.entity.EntityType.COW);
-                if (screen.rowCountForSmokeTest() == 0 || !screen.containsTypeForSmokeTest(zombie)
-                        || !screen.containsTypeForSmokeTest(cow) || !screen.selectedForSmokeTest(zombie)
-                        || screen.selectedForSmokeTest(cow))
-                    throw new IllegalStateException("Black List did not load registered hostile/passive mob defaults");
-                var creeper=new ResourceLocation("minecraft","creeper");
-                if(screen.selectedForSmokeTest(creeper))throw new IllegalStateException("Creeper was selected by default");
-                java.util.Set<ResourceLocation> all=new java.util.HashSet<>();
-                int panelWidth=Math.min(430,minecraft.getWindow().getGuiScaledWidth()-12);
-                int panelHeight=Math.min(390,minecraft.getWindow().getGuiScaledHeight()-12);
-                int left=(minecraft.getWindow().getGuiScaledWidth()-panelWidth)/2;
-                int top=(minecraft.getWindow().getGuiScaledHeight()-panelHeight)/2;
-                for(int tab=0;tab<3;tab++){
-                    screen.mouseClicked(left+14+(tab+.5)*(panelWidth-28)/3.0,top+35,0);
-                    if(screen.firstRowForSmokeTest()!=0)throw new IllegalStateException("Filter did not reset scroll");
-                    for(var id:screen.visibleIdsForSmokeTest())if(!all.add(id))throw new IllegalStateException("Mob duplicated between tabs: "+id);
-                    screen.mouseScrolled(left+20,top+60,-1);
-                }
-                if(all.size()!=screen.rowCountForSmokeTest() || !all.contains(cow) || !all.contains(zombie) || !all.contains(creeper))
-                    throw new IllegalStateException("Blacklist tabs discarded registered mobs");
+                validateBlacklistFilters(parent,screen,minecraft);
+                screen.selectOriginForSmokeTest(MobTargetCategories.Origin.VANILLA);
+                screen.selectCategoryForSmokeTest(MobTargetCategories.Category.HOSTILE);
+                if(screen.maxFirstRowForSmokeTest()<1)throw new IllegalStateException("Blacklist fixture did not contain a large enough list");
                 if(!screen.dragScrollbarForSmokeTest(true,true)||screen.firstRowForSmokeTest()!=0
                         ||!screen.dragScrollbarForSmokeTest(true,false)||screen.firstRowForSmokeTest()!=screen.maxFirstRowForSmokeTest())
                     throw new IllegalStateException("Blacklist scrollbar click-and-drag did not clamp and release correctly");
-                if(!screen.selectedForSmokeTest(zombie) || screen.selectedForSmokeTest(cow))throw new IllegalStateException("Filter changed selections");
+                if(!parent.mouseScrolled(parent.getGuiLeft()+120,parent.getGuiTop()+184,-1)||!parent.hasBlackListOverlay())
+                    throw new IllegalStateException("Blacklist did not capture wheel input over the screen behind it");
+                if(!parent.keyPressed(256,0,0)||parent.hasBlackListOverlay())
+                    throw new IllegalStateException("Escape did not close the Blacklist overlay");
+                if(!parent.mouseClicked(parent.getGuiLeft()+45,parent.getGuiTop()+184,0))
+                    throw new IllegalStateException("The status screen did not regain button input after closing the Blacklist");
                 Files.writeString(Path.of("client-validation-pokemon-management.txt"),
-                        "PASS: owned Pokémon status screen, Pokédex header, XP level sync, Seguir/Sentar controls, and registry-backed Black List defaults; all three filter tabs clicked, complete disjoint mob partition, mouse wheel and scrollbar drag/track click, preserved selections and unselected Creeper\n"
-                                + "PASS BLACKLIST SCROLLBAR: dragging outside the track, clamped limits, release, and no accidental list toggle.\n");
+                        "PASS: owned Pokémon status screen, Pokédex header, XP level sync, Seguir/Sentar controls; combined behavior/source filters, N/A ordering, settings preservation, modal click/wheel capture, close and input restoration.\n"
+                                + "PASS BLACKLIST SCROLLBAR: large registry list, clamped limits, release, and preserved mob permissions.\n");
                 nineFixtures(minecraft);phase=8;ticks=0;return;
             }
             if(phase==8){
@@ -289,8 +351,32 @@ public final class PokemonManagementClientSmokeTest {
                     if(auraState<4){changeAuraState(minecraft,auraState);return;}
                     Files.writeString(Path.of("client-validation-pokemon-management.txt"),"PASS NINE VISUAL CONTRACTS: rendered Dewgong eyes closed asleep, open and blinking awake; real Gastly aura rendered exactly five large and seven small particles per rendered frame while awake, sleeping, sitting and defeated. Aesthetic comparison with the historical reference remains manual.\n",java.nio.file.StandardOpenOption.APPEND);
                     br.com.petrickfaria.minemon.client.MinemonRenderer.validationObserver=null;
-                    done=true;System.out.println("[POKEMON MANAGEMENT CLIENT] PASS: status, filters, rendered Dewgong eyes, and restored Gastly smoke");minecraft.execute(minecraft::stop);
+                    var pokecMenu=new PokecMenu(-100,minecraft.player.getInventory(),net.minecraft.core.BlockPos.ZERO);
+                    minecraft.setScreen(new PokecScreen(pokecMenu,minecraft.player.getInventory(),net.minecraft.network.chat.Component.literal("PokéC")));
+                    phase=12;ticks=0;return;
                 }
+            }
+            if(phase==12){
+                if(!(minecraft.screen instanceof PokecScreen pokec)){
+                    if(++ticks>120)throw new IllegalStateException("PokéC test screen did not open");
+                    return;
+                }
+                if(pokec.catalogSizeForSmokeTest()!=151||pokec.listScrollMaxForSmokeTest()<1)
+                    throw new IllegalStateException("PokéC scrollbar test requires the full 151-species list");
+                if(!pokec.dragListScrollbarForSmokeTest(false,false)
+                        ||pokec.listScrollOffsetForSmokeTest()!=pokec.listScrollMaxForSmokeTest())
+                    throw new IllegalStateException("Clicking and dragging the visible PokéC thumb center did not move the list to the bottom");
+                if(!pokec.dragListScrollbarForSmokeTest(false,true)||pokec.listScrollOffsetForSmokeTest()!=0)
+                    throw new IllegalStateException("Dragging the visible PokéC thumb center did not return to the top");
+                if(!pokec.dragListScrollbarForSmokeTest(true,false)
+                        ||pokec.listScrollOffsetForSmokeTest()!=pokec.listScrollMaxForSmokeTest())
+                    throw new IllegalStateException("Clicking and dragging the PokéC track did not clamp at the bottom");
+                if(!pokec.scrollListForSmokeTest(1)||pokec.listScrollOffsetForSmokeTest()>=pokec.listScrollMaxForSmokeTest())
+                    throw new IllegalStateException("PokéC mouse wheel did not scroll the list back toward the top");
+                Files.writeString(Path.of("client-validation-pokemon-management.txt"),
+                        "PASS POKÉC SCROLLBAR: direct visible-thumb center click, vertical drag, no species selection, top/bottom clamps and mouse-wheel scrolling; GUI scale="
+                                +pokec.listUiScaleForSmokeTest()+".\n",java.nio.file.StandardOpenOption.APPEND);
+                done=true;System.out.println("[POKEMON MANAGEMENT CLIENT] PASS: status, Blacklist filters/modal input, PokéC scrollbar and visual checks");minecraft.execute(minecraft::stop);
             }
         } catch (Exception failure) {
             throw new IllegalStateException("Pokémon management client validation failed", failure);
