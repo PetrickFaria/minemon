@@ -318,11 +318,12 @@ public final class WildEncounterManager {
         data.remove(LAST_COMPANION_HIT);
         data.remove(COMPANION_HIT_TIMES);
         if (trainerShare > 0.0D && trainerId != null && defeated.level instanceof ServerLevel serverLevel) {
-            ServerPlayer trainer = serverLevel.getServer().getPlayerList().getPlayer(trainerId);
+            UUID awardedTrainerId = trainerId;
+            ServerPlayer trainer = serverLevel.getServer().getPlayerList().getPlayer(awardedTrainerId);
             if (trainer == null) trainer = serverLevel.players().stream()
-                    .filter(candidate -> trainerId.equals(candidate.getUUID())).findFirst().orElse(null);
+                    .filter(candidate -> awardedTrainerId.equals(candidate.getUUID())).findFirst().orElse(null);
             if (trainer != null) PokecPlayerData.addTrainerXp(trainer, trainerShare);
-            else TrainerXpLedger.queue(serverLevel, trainerId, trainerShare);
+            else TrainerXpLedger.queue(serverLevel, awardedTrainerId, trainerShare);
         }
     }
 
