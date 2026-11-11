@@ -118,6 +118,7 @@ public final class BlackListScreen {
         double y = clickTrack ? trackTop + trackHeight - 1 : thumbTop + thumbHeight / 2.0;
         int before = firstRow;
         boolean clicked = mouseClicked(x, y, 0);
+        int afterClick = firstRow;
         if (draggingScrollbar) mouseDragged(x, trackTop + (dragOutside ? -24 : trackHeight + 24), 0, 0, 0);
         boolean released = mouseReleased(x, y, 0);
         return clicked && released && !draggingScrollbar && firstRow >= 0
