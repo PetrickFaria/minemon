@@ -32,22 +32,20 @@ public final class PokemonManagerScreen extends Screen {
             addRenderableWidget(modeButton(left + 306, y, pokemon, "free", "Livre"));
         }
         if (entries.size() > VISIBLE_ROWS) {
-            addRenderableWidget(Button.builder(Component.literal("▲"), b -> { firstRow=Math.max(0,firstRow-1); refreshRows(); })
-                    .bounds(left+332, top-21, 24, 18).build());
-            addRenderableWidget(Button.builder(Component.literal("▼"), b -> { firstRow=Math.min(entries.size()-VISIBLE_ROWS,firstRow+1); refreshRows(); })
-                    .bounds(left+332, top+VISIBLE_ROWS*37-3, 24, 18).build());
+            addRenderableWidget(new Button(left+332, top-21, 24, 18, Component.literal("▲"),
+                    b -> { firstRow=Math.max(0,firstRow-1); refreshRows(); }));
+            addRenderableWidget(new Button(left+332, top+VISIBLE_ROWS*37-3, 24, 18, Component.literal("▼"),
+                    b -> { firstRow=Math.min(entries.size()-VISIBLE_ROWS,firstRow+1); refreshRows(); }));
         }
-        addRenderableWidget(Button.builder(Component.literal("Fechar"), b -> onClose())
-                .bounds(left+136, top+VISIBLE_ROWS*37+3, 88, 20).build());
+        addRenderableWidget(new Button(left+136, top+VISIBLE_ROWS*37+3, 88, 20, Component.literal("Fechar"), b -> onClose()));
     }
 
     private void refreshRows() { clearWidgets(); init(); }
 
     private Button modeButton(int x, int y, ActivePokemonData.Entry pokemon, String mode, String label) {
         String text = pokemon.behavior().equals(mode) ? "✓" + label : label;
-        return Button.builder(Component.literal(text), button ->
-                        br.com.petrickfaria.minemon.network.MinemonNetwork.setManagedPokemonBehavior(pokemon.id(), mode))
-                .bounds(x, y, 53, 20).build();
+        return new Button(x, y, 53, 20, Component.literal(text), button ->
+                br.com.petrickfaria.minemon.network.MinemonNetwork.setManagedPokemonBehavior(pokemon.id(), mode));
     }
 
     @Override public void render(PoseStack pose, int mouseX, int mouseY, float partialTick) {

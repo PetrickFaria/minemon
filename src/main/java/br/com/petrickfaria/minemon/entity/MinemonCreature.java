@@ -73,6 +73,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     public int getRangedCharges(){return entityData.get(RANGED_CHARGES);}
     public CombatCharges rangedCharges(){return rangedCharges;}
     private long nextCombatTick;
+    private int nearbyThreatScanTicks;
     private static final EntityDataAccessor<Boolean> SLEEPING = SynchedEntityData.defineId(MinemonCreature.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> ORDERED_SIT = SynchedEntityData.defineId(MinemonCreature.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> SIT_COMBAT_POSE = SynchedEntityData.defineId(MinemonCreature.class, EntityDataSerializers.BOOLEAN);
