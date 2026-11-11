@@ -92,8 +92,10 @@ public class MinemonModel extends AnimatedGeoModel<MinemonCreature> {
         boolean sleeping = entity.isSleeping() || entity.isDefeated();
         boolean wasSleeping = DEWGONG_SLEEPING.getOrDefault(entity, true);
         for (String side : java.util.List.of("left", "right")) {
+            // The eyelid is parented below the eye bone in the approved source rig.
+            // Keep that parent rendered so the closed-lid mesh remains visible over it.
             var eye = getAnimationProcessor().getBone("eye_" + side);
-            if (eye != null) eye.setHidden(sleeping, false);
+            if (eye != null) eye.setHidden(false, false);
             for (String overlay : java.util.List.of("eye_highlight_", "eye_angry_", "eye_sad_", "eye_happy_", "eye_hurt_")) {
                 var expression = getAnimationProcessor().getBone(overlay + side);
                 if (expression != null) expression.setHidden(sleeping, true);
@@ -110,7 +112,9 @@ public class MinemonModel extends AnimatedGeoModel<MinemonCreature> {
     /** Uses each imported aquatic rig's existing eyelid/closed-eye bones. */
     private void applyAquaticSleepEyeVisibility(MinemonCreature entity) {
         String slug=entity.getSpeciesSlug();
-        if(!br.com.petrickfaria.minemon.entity.SpeciesBehaviorProfiles.usesSwimmingSleepAnimation(slug)&&!slug.equals("seel"))return;
+        // Dewgong's imported rig nests each lid under its eye bone; its dedicated
+        // visibility handler must keep that parent visible while the lid covers it.
+        if(slug.equals("dewgong")||(!br.com.petrickfaria.minemon.entity.SpeciesBehaviorProfiles.usesSwimmingSleepAnimation(slug)&&!slug.equals("seel")))return;
         boolean sleeping=entity.isSleeping();
         boolean foundRig=false;
         for(String side:java.util.List.of("left","right")){

@@ -29,7 +29,9 @@ public final class PokemonManagementClientSmokeTest {
             var left=model.getAnimationProcessor().getBone("eyelid_left");var right=model.getAnimationProcessor().getBone("eyelid_right");
             var leftEye=model.getAnimationProcessor().getBone("eye_left");var rightEye=model.getAnimationProcessor().getBone("eye_right");
             if(left==null||right==null||leftEye==null||rightEye==null)throw new IllegalStateException("Dewgong eye bones missing");
-            boolean closed=leftEye.isHidden()&&rightEye.isHidden()&&!left.isHidden()&&!right.isHidden()
+            // The eyelid cubes are children of the eye bones in this rig, so the
+            // parents must stay rendered; their closed-lid meshes cover the open-eye planes.
+            boolean closed=!leftEye.isHidden()&&!rightEye.isHidden()&&!left.isHidden()&&!right.isHidden()
                     &&Math.abs(left.getPositionZ())<.001&&Math.abs(right.getPositionZ())<.001;
             boolean open=!leftEye.isHidden()&&!rightEye.isHidden()&&!left.isHidden()&&!right.isHidden()
                     &&Math.abs(left.getPositionZ()+.1)<.001&&Math.abs(right.getPositionZ()+.1)<.001;
