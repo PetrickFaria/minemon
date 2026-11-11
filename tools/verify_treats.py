@@ -36,9 +36,8 @@ for lang in ('pt_br','en_us'):
 for item in NAMES:
     recipe=json.loads((ROOT/'src/main/resources/data/minemon/recipes'/f'{item}.json').read_text())
     element={'aquatic_treat':'water','frozen_treat':'ice','ghost_treat':'ghost'}.get(item,item.removesuffix('_treat'))
-    assert recipe['type']=='minecraft:crafting_shaped'
-    assert recipe['pattern']==[' S ','SBS',' S ']
-    assert recipe['key']=={'S':{'item':f'minemon_gen1:{element}_soul'},'B':{'item':'minecraft:bone'}}
+    assert recipe['type']=='minecraft:crafting_shapeless'
+    assert recipe['ingredients']==[{'item':'minecraft:bone'},{'item':f'minemon_gen1:{element}_soul'}]
     assert recipe['result']=={'item':f'minemon:{item}','count':1}
 if len(sys.argv)>1:
     jar=Path(sys.argv[1])
