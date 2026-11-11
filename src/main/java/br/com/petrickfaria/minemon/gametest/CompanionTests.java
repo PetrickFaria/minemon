@@ -506,18 +506,18 @@ public final class CompanionTests {
    });
   });
  }
- @GameTest(template="test_arena",timeoutTicks=120)
- public static void rangedAttackCooldownIsExactlyOneHundredTicks(GameTestHelper h) {
+ @GameTest(template="test_arena",timeoutTicks=80)
+ public static void rangedAttackCooldownIsExactlySixtyTicks(GameTestHelper h) {
   floor(h);MinemonCreature b=h.spawn(ModEntities.BULBASAUR.get(),new BlockPos(5,1,5));
   ServerPlayer p=player(h);Cow target=h.spawn(EntityType.COW,new BlockPos(8,1,5));target.setNoAi(true);
   b.tame(p);b.setOrderedToSit(false);b.setNoAi(true);b.focusTrainerDefenseTarget(target);
   check(h,b.combatReady()&&b.canFireAt(target),"Fixture must begin with a valid ready shot");
   check(h,b.fireElementalProjectile(target),"A valid ranged shot must fire immediately");
-  h.runAfterDelay(99,()->{
-   check(h,!b.combatReady(),"The normal five-second cooldown must still be active at tick 99");
+  h.runAfterDelay(59,()->{
+   check(h,!b.combatReady(),"The three-second cooldown must still be active at tick 59");
    b.getNavigation().stop();
    h.runAfterDelay(1,()->{
-    check(h,b.combatReady(),"The next shot must become available at exactly tick 100");
+    check(h,b.combatReady(),"The next shot must become available at exactly tick 60");
     p.discard();h.succeed();
    });
   });

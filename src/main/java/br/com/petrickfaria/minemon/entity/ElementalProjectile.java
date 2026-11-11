@@ -47,11 +47,16 @@ public final class ElementalProjectile extends ThrowableProjectile {
     }
     @Override protected void onHitEntity(EntityHitResult result){
         if(level.isClientSide)return;
-        if(getOwner() instanceof MinemonCreature owner && !owner.isDefeated()
-                && result.getEntity() instanceof LivingEntity target
-                && target.getUUID().equals(targetId) && owner.canAttack(target)
-                &&target.hurt(DamageSource.indirectMobAttack(this,owner),(float)owner.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE)))
-        discard();
+        try {
+            if(getOwner() instanceof MinemonCreature owner && !owner.isDefeated()
+                    && result.getEntity() instanceof LivingEntity target
+                    && target.getUUID().equals(targetId) && owner.canAttack(target)) {
+                target.hurt(DamageSource.indirectMobAttack(this,owner),damage);
+            }
+        } finally {
+            // One projectile represents one attack. A blocked hit cannot be retried later.
+            discard();
+        }
     }
     @Override protected void onHitBlock(BlockHitResult result){if(!level.isClientSide)discard();}
     @Override public void tick(){

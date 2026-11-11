@@ -1,18 +1,13 @@
 {
-  "type": "minecraft:crafting_shaped",
-  "pattern": [
-    " S ",
-    "SBS",
-    " S "
-  ],
-  "key": {
-    "S": {
-      "item": "minemon_gen1:normal_soul"
-    },
-    "B": {
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
       "item": "minecraft:bone"
+    },
+    {
+      "item": "minemon_gen1:normal_soul"
     }
-  },
+  ],
   "result": {
     "item": "minemon:normal_treat",
     "count": 1

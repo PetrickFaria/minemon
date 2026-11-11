@@ -79,8 +79,8 @@ final class TwelveAdjustmentChecks {
     float expected=(float)attacker.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE);
     if(Math.abs(before-cow.getHealth()-expected)>.001||cow.isOnFire())h.fail("Projectile damage changed or ignited target");
     if(blocker.getHealth()!=blockerHealth)h.fail("A creature crossing the shot path must not absorb a projectile aimed at another target");
-    level.getServer().getWorldData().overworldData().setGameTime(level.getGameTime()+99);
-    if(attacker.combatReady())h.fail("Attack cooldown ended before 100 ticks");
+    level.getServer().getWorldData().overworldData().setGameTime(level.getGameTime()+59);
+    if(attacker.combatReady())h.fail("Attack cooldown ended before 60 ticks");
     level.getServer().getWorldData().overworldData().setGameTime(level.getGameTime()+1);
    }
    if(!attacker.projectileReady()||attacker.rangedCharges().charges()!=3)h.fail("Ranged-only attacks must not be gated by or consume finite ammunition charges");
@@ -104,17 +104,21 @@ final class TwelveAdjustmentChecks {
   for(var type:br.com.petrickfaria.minemon.item.PokemonTreatType.values()){
    var id=new net.minecraft.resources.ResourceLocation("minemon",type.itemId());
    var found=h.getLevel().getRecipeManager().byKey(id).orElse(null);
-   if(!(found instanceof net.minecraft.world.item.crafting.ShapedRecipe))h.fail("Missing shaped treat recipe: "+id);
-   var recipe=(net.minecraft.world.item.crafting.ShapedRecipe)found;
+   if(!(found instanceof net.minecraft.world.item.crafting.ShapelessRecipe))h.fail("Missing shapeless treat recipe: "+id);
+   var recipe=(net.minecraft.world.item.crafting.ShapelessRecipe)found;
    var grid=new net.minecraft.world.inventory.CraftingContainer(owner.inventoryMenu,3,3);
    var soul=ModItems.SOULS.get(type.pokemonType()).get();
-   grid.setItem(4,new ItemStack(net.minecraft.world.item.Items.BONE));
-   for(int slot:new int[]{1,3,5,7})grid.setItem(slot,new ItemStack(soul));
+   grid.setItem(0,new ItemStack(net.minecraft.world.item.Items.BONE));
+   grid.setItem(8,new ItemStack(soul));
    if(!recipe.matches(grid,h.getLevel()) || recipe.getResultItem().getItem()!=ModItems.TREATS.get(type).get() || recipe.getResultItem().getCount()!=1)
-    h.fail("Invalid cross-shaped treat recipe: "+id);
+    h.fail("Invalid shapeless treat recipe: "+id);
+   var inventoryGrid=new net.minecraft.world.inventory.CraftingContainer(owner.inventoryMenu,2,2);
+   inventoryGrid.setItem(1,new ItemStack(soul));inventoryGrid.setItem(2,new ItemStack(net.minecraft.world.item.Items.BONE));
+   if(!recipe.matches(inventoryGrid,h.getLevel()))h.fail("Treat recipe must also work in a 2x2 inventory grid: "+id);
    var other=type.pokemonType().equals("fire")?"water":"fire";
-   grid.setItem(1,new ItemStack(ModItems.SOULS.get(other).get()));
-   if(recipe.matches(grid,h.getLevel()))h.fail("Mixed elemental souls accepted: "+id);
+   grid.clearContent();grid.setItem(4,new ItemStack(net.minecraft.world.item.Items.BONE));
+   grid.setItem(0,new ItemStack(ModItems.SOULS.get(other).get()));
+   if(recipe.matches(grid,h.getLevel()))h.fail("Treat recipe accepted a different elemental soul: "+id);
   }
   var ball=(net.minecraft.world.item.crafting.ShapedRecipe)h.getLevel().getRecipeManager().byKey(new net.minecraft.resources.ResourceLocation("minemon","pokeball")).orElseThrow();
   var upgrade=(net.minecraft.world.item.crafting.ShapedRecipe)h.getLevel().getRecipeManager().byKey(new net.minecraft.resources.ResourceLocation("minemon","master_ball")).orElseThrow();

@@ -10,6 +10,7 @@ import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
+import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import br.com.petrickfaria.minemon.entity.MinemonCreature;
 import br.com.petrickfaria.minemon.registry.ModItems;
 import net.minecraft.world.item.ItemStack;
@@ -97,6 +98,11 @@ public final class PokecEvents {
     @SubscribeEvent public static void companionExperience(LivingDeathEvent event) {
         if (event.getEntity() instanceof net.minecraft.world.entity.Mob defeated)
             WildEncounterManager.awardCompanionExperience(defeated, event.getSource());
+    }
+    @SubscribeEvent public static void recordCompanionCombatDamage(LivingDamageEvent event) {
+        if (event.getEntity().level.isClientSide || event.getAmount() <= 0.0F) return;
+        MinemonCreature attacker = WildEncounterManager.pokemonAttacker(event.getSource());
+        if (attacker != null) WildEncounterManager.recordCompanionHit(event.getEntity(), attacker);
     }
     @SubscribeEvent public static void pokemonSoulDrops(LivingDropsEvent event) {
         if (!(event.getEntity() instanceof MinemonCreature pokemon) || event.getEntity().level.isClientSide) return;

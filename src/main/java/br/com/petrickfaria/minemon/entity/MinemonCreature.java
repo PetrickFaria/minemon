@@ -204,6 +204,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         super.tame(player);
         AttributeInstance followRange=getAttribute(Attributes.FOLLOW_RANGE);
         if(followRange!=null)followRange.setBaseValue(perceptionRange());
+        if (!level.isClientSide) br.com.petrickfaria.minemon.pokec.ActivePokemonData.register(this);
     }
     public boolean isFlyingSpecies() { return SpeciesBehaviorProfiles.isAirborne(this.getSpeciesSlug())
             &&!(this.isNightResting()&&SpeciesBehaviorProfiles.landsForNightRest(this.getSpeciesSlug()))
@@ -243,6 +244,17 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
             setSleeping(false);
             entityData.set(NIGHT_REST, false);
         }
+        if (!level.isClientSide && !loadingPokemonData) br.com.petrickfaria.minemon.pokec.ActivePokemonData.updateSnapshot(this);
+    }
+    /** Applies a server-authorized team manager command and persists through ordinary entity NBT. */
+    public void applyManagedBehavior(String behavior) {
+        if (level.isClientSide || !isTame() || isDefeated()) return;
+        switch (behavior) {
+            case "sit" -> setOrderedToSit(true);
+            case "free" -> { setOrderedToSit(false); setFreeMode(true); setFollowingOwner(false); }
+            case "follow" -> { setOrderedToSit(false); setFreeMode(false); setFollowingOwner(true); }
+            default -> { }
+        }
     }
     @Override public void setOrderedToSit(boolean orderedToSit) {
         boolean wasOrderedToSit=isOrderedToSit();
@@ -278,6 +290,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
                 setTarget(null);getNavigation().stop();
             }
         }
+        if (!level.isClientSide && !loadingPokemonData) br.com.petrickfaria.minemon.pokec.ActivePokemonData.updateSnapshot(this);
     }
 
     @Override public void moveTo(double x, double y, double z, float yaw, float pitch) {
@@ -437,6 +450,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
                 ? experienceHalfUnits : Math.min(nextLevelUnits - 1, experienceHalfUnits)));
         this.refreshPokemonXpThreshold();
         this.refreshPokemonAttributes(loadingPokemonData?0:Math.max(0,boundedLevel-oldLevel));
+        if (!loadingPokemonData) br.com.petrickfaria.minemon.pokec.ActivePokemonData.updateSnapshot(this);
     }
     public int awardPokemonExperience(int amount) {
         if (amount <= 0) return 0;
@@ -459,6 +473,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         }
         this.refreshPokemonXpThreshold();
         this.refreshPokemonAttributes(Math.max(0,this.getPokemonLevel()-oldLevel));
+        br.com.petrickfaria.minemon.pokec.ActivePokemonData.updateSnapshot(this);
         return amountHalfUnits - (int)pending;
     }
     private void refreshPokemonAttributes(int gainedLevels) {
@@ -963,11 +978,23 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
             LivingEntity target = getTarget();
             entityData.set(SIT_COMBAT_POSE, isOrderedToSit() && target != null && canAttack(target) && !isDefeated());
         }
-        if (!level.isClientSide && isTame() && playerFocusTarget == null && getTarget() != null
-                && canAttack(getTarget())) {
-            playerFocusTarget = getTarget().getUUID();
-            focusOutsidePerceptionTicks = 0;
-        }
+        // A target acquired by autonomous combat remains replaceable when a closer valid
+        // threat arrives. Explicit trainer commands still use playerFocusTarget below.
+        if (!level.isClientSide && isTame() && playerFocusTarget == null
+                && getTarget() instanceof net.minecraft.world.entity.Mob current && isBlackListTarget(current)
+                && --nearbyThreatScanTicks <= 0) {
+            nearbyThreatScanTicks = 5;
+            double currentDistance = CombatGeometry.centerDistanceSquared(this, current);
+            var nearest = level.getEntitiesOfClass(net.minecraft.world.entity.Mob.class,
+                            getBoundingBox().inflate(perceptionRange()), candidate -> candidate != current
+                                    && isBlackListTarget(candidate) && canPerceive(candidate)).stream()
+                    .min(java.util.Comparator.comparingDouble(candidate -> CombatGeometry.centerDistanceSquared(this, candidate)))
+                    .orElse(null);
+            if (nearest != null && CombatGeometry.centerDistanceSquared(this, nearest) + 9.0D < currentDistance) {
+                setTarget(nearest);
+                getNavigation().stop();
+            }
+        } else if (nearbyThreatScanTicks > 0) nearbyThreatScanTicks--;
         if (!level.isClientSide && playerFocusTarget != null) {
             Entity focused = level instanceof ServerLevel serverLevel ? serverLevel.getEntity(playerFocusTarget) : null;
             if (!(focused instanceof LivingEntity living) || !living.isAlive()
@@ -1341,7 +1368,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
                 || !canFireAt(target))return false;
         ElementalProjectile shot=new ElementalProjectile(this,target);
         if(!level.addFreshEntity(shot))return false;
-        nextCombatTick=level.getGameTime()+100L;
+        nextCombatTick=level.getGameTime()+60L;
         level.broadcastEntityEvent(this,(byte)61);return true;
     }
     public boolean isDefeated(){return entityData.get(DEFEATED);}

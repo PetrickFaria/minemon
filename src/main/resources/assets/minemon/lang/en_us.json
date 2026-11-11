@@ -1,4 +1,6 @@
 {
+  "key.categories.minemon": "Minemon",
+  "key.minemon.pokemon_manager": "Manage Pokémon",
   "block.minemon_gen1.rocket_block": "Rocket Block",
   "entity.minecraft.villager.rocket": "Rocket",
   "entity.minecraft.villager.minemon_gen1.rocket": "Rocket",

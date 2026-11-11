@@ -104,6 +104,9 @@ public final class PokemonManagementGameTests {
         ServerPlayer owner = player(h, h.absolutePos(new BlockPos(7, 1, 5)));
         MinemonCreature pokemon = h.spawn(ModEntities.SPECIES.get("bulbasaur").get(), new BlockPos(5, 1, 5));
         pokemon.tame(owner);
+        var roster = br.com.petrickfaria.minemon.pokec.ActivePokemonData.get((net.minecraft.server.level.ServerLevel) owner.level);
+        check(h, roster.entries(owner.getUUID()).stream().anyMatch(entry -> entry.id().equals(pokemon.getUUID())),
+                "The server roster must index owned Pokémon by their stable entity UUID");
         pokemon.setOrderedToSit(true);
         pokemon.mobInteract(owner, InteractionHand.MAIN_HAND);
         check(h, owner.containerMenu instanceof PokemonInfoMenu,
@@ -114,6 +117,8 @@ public final class PokemonManagementGameTests {
         check(h, menu.clickMenuButton(owner, 1) && pokemon.isOrderedToSit(), "Sentar must hold the Pokémon in place");
         check(h, menu.clickMenuButton(owner, 2) && pokemon.isFreeMode() && !pokemon.isOrderedToSit(),
                 "Livre must release a sitting Pokémon into natural behavior");
+        check(h, roster.entries(owner.getUUID()).stream().anyMatch(entry -> entry.id().equals(pokemon.getUUID()) && entry.behavior().equals("free")),
+                "The saved team manager state must update when the individual Pokémon menu changes its mode");
         var saved = pokemon.saveWithoutId(new net.minecraft.nbt.CompoundTag());
         MinemonCreature restored = ModEntities.SPECIES.get("bulbasaur").get().create(h.getLevel());
         restored.load(saved);
@@ -162,6 +167,25 @@ public final class PokemonManagementGameTests {
                 "companion level progress must survive entity save and load");
         owner.discard();
         h.succeed();
+    }
+
+    @GameTest(template = "test_arena", timeoutTicks = 160)
+    public static void companionXPUsesLastValidHitAndTenPercentParticipationShares(GameTestHelper h) {
+        floor(h);
+        ServerPlayer owner = player(h, h.absolutePos(new BlockPos(7, 1, 5)));
+        MinemonCreature last = h.spawn(ModEntities.SPECIES.get("charmander").get(), new BlockPos(4, 1, 5)); last.tame(owner);
+        MinemonCreature secondaryA = h.spawn(ModEntities.SPECIES.get("bulbasaur").get(), new BlockPos(5, 1, 5)); secondaryA.tame(owner);
+        MinemonCreature secondaryB = h.spawn(ModEntities.SPECIES.get("squirtle").get(), new BlockPos(6, 1, 5)); secondaryB.tame(owner);
+        Zombie zombie = h.spawn(EntityType.ZOMBIE, new BlockPos(9, 1, 5));
+        int base = zombie.getExperienceReward() * 2;
+        br.com.petrickfaria.minemon.pokec.WildEncounterManager.recordCompanionHit(zombie, secondaryA);
+        br.com.petrickfaria.minemon.pokec.WildEncounterManager.recordCompanionHit(zombie, secondaryB);
+        br.com.petrickfaria.minemon.pokec.WildEncounterManager.recordCompanionHit(zombie, last);
+        br.com.petrickfaria.minemon.pokec.WildEncounterManager.awardCompanionExperience(zombie, DamageSource.FALL);
+        check(h, last.getPokemonExperienceHalfUnits() == base, "The latest valid companion hitter must receive 100% XP after environmental death");
+        check(h, secondaryA.getPokemonExperienceHalfUnits() == base / 10 && secondaryB.getPokemonExperienceHalfUnits() == base / 10,
+                "Each other valid participant must receive an individual 10% share");
+        owner.discard(); h.succeed();
     }
 
     @GameTest(template = "test_arena", timeoutTicks = 220)

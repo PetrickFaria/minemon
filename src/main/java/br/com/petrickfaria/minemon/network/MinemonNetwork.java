@@ -19,7 +19,7 @@ import java.util.function.Supplier;
 
 /** Sends only a playback cue; user audio remains local to each client. */
 public final class MinemonNetwork {
-    private static final String VERSION = "5";
+    private static final String VERSION = "6";
     private static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             new ResourceLocation(Minemon.MOD_ID, "main"), () -> VERSION, VERSION::equals, VERSION::equals);
 
@@ -34,6 +34,61 @@ public final class MinemonNetwork {
         CHANNEL.messageBuilder(BlackListState.class,5).encoder(BlackListState::encode).decoder(BlackListState::decode).consumerMainThread(BlackListState::handle).add();
         CHANNEL.messageBuilder(TrainerState.class,6).encoder(TrainerState::encode).decoder(TrainerState::decode).consumerMainThread(TrainerState::handle).add();
         CHANNEL.messageBuilder(BlackListOpenRequest.class,7).encoder(BlackListOpenRequest::encode).decoder(BlackListOpenRequest::decode).consumerMainThread(BlackListOpenRequest::handle).add();
+        CHANNEL.messageBuilder(PokemonManagerRequest.class,8).encoder(PokemonManagerRequest::encode).decoder(PokemonManagerRequest::decode).consumerMainThread(PokemonManagerRequest::handle).add();
+        CHANNEL.messageBuilder(PokemonManagerMode.class,9).encoder(PokemonManagerMode::encode).decoder(PokemonManagerMode::decode).consumerMainThread(PokemonManagerMode::handle).add();
+        CHANNEL.messageBuilder(PokemonManagerState.class,10).encoder(PokemonManagerState::encode).decoder(PokemonManagerState::decode).consumerMainThread(PokemonManagerState::handle).add();
+    }
+
+    public static void requestPokemonManagement() { CHANNEL.sendToServer(new PokemonManagerRequest()); }
+    public static void setManagedPokemonBehavior(UUID pokemon, String behavior) {
+        CHANNEL.sendToServer(new PokemonManagerMode(pokemon, behavior));
+    }
+    private static void syncPokemonManagement(ServerPlayer player) {
+        var data = br.com.petrickfaria.minemon.pokec.ActivePokemonData.get((net.minecraft.server.level.ServerLevel)player.level);
+        CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), new PokemonManagerState(data.entries(player.getUUID())));
+    }
+    private record PokemonManagerRequest() {
+        static void encode(PokemonManagerRequest m, FriendlyByteBuf b) { }
+        static PokemonManagerRequest decode(FriendlyByteBuf b) { return new PokemonManagerRequest(); }
+        static void handle(PokemonManagerRequest m, Supplier<NetworkEvent.Context> s) {
+            var c=s.get(); var player=c.getSender(); c.enqueueWork(() -> { if (player != null) syncPokemonManagement(player); }); c.setPacketHandled(true);
+        }
+    }
+    private record PokemonManagerMode(UUID pokemon, String behavior) {
+        static void encode(PokemonManagerMode m, FriendlyByteBuf b) { b.writeUUID(m.pokemon); b.writeUtf(m.behavior, 16); }
+        static PokemonManagerMode decode(FriendlyByteBuf b) { return new PokemonManagerMode(b.readUUID(), b.readUtf(16)); }
+        static void handle(PokemonManagerMode m, Supplier<NetworkEvent.Context> s) {
+            var c=s.get(); var player=c.getSender(); c.enqueueWork(() -> {
+                if (player == null || !java.util.List.of("follow", "sit", "free").contains(m.behavior)) return;
+                var data = br.com.petrickfaria.minemon.pokec.ActivePokemonData.get((net.minecraft.server.level.ServerLevel)player.level);
+                if (!data.owns(player.getUUID(), m.pokemon) || !data.setBehavior(player.getUUID(), m.pokemon, m.behavior)) return;
+                for (var level : player.getServer().getAllLevels()) {
+                    var entity = level.getEntity(m.pokemon);
+                    if (entity instanceof MinemonCreature pokemon) {
+                        if (!pokemon.isOwnedBy(player)) return;
+                        pokemon.applyManagedBehavior(m.behavior);
+                        break;
+                    }
+                }
+                syncPokemonManagement(player);
+            }); c.setPacketHandled(true);
+        }
+    }
+    public record PokemonManagerRow(UUID id, String species, String name, int level, String behavior) { }
+    private record PokemonManagerState(java.util.List<br.com.petrickfaria.minemon.pokec.ActivePokemonData.Entry> entries) {
+        static void encode(PokemonManagerState m, FriendlyByteBuf b) {
+            int size=Math.min(2048,m.entries.size()); b.writeVarInt(size);
+            for(int i=0;i<size;i++){var e=m.entries.get(i);b.writeUUID(e.id());b.writeUtf(e.species(),64);b.writeUtf(e.name(),128);b.writeVarInt(e.level());b.writeUtf(e.behavior(),16);}
+        }
+        static PokemonManagerState decode(FriendlyByteBuf b) {
+            int size=Math.max(0,Math.min(2048,b.readVarInt())); var rows=new java.util.ArrayList<br.com.petrickfaria.minemon.pokec.ActivePokemonData.Entry>(size);
+            for(int i=0;i<size;i++)rows.add(new br.com.petrickfaria.minemon.pokec.ActivePokemonData.Entry(b.readUUID(),b.readUtf(64),b.readUtf(128),b.readVarInt(),b.readUtf(16)));
+            return new PokemonManagerState(java.util.List.copyOf(rows));
+        }
+        static void handle(PokemonManagerState m,Supplier<NetworkEvent.Context> s) {
+            var c=s.get(); c.enqueueWork(() -> net.minecraftforge.fml.DistExecutor.unsafeRunWhenOn(net.minecraftforge.api.distmarker.Dist.CLIENT,
+                    () -> () -> net.minecraft.client.Minecraft.getInstance().setScreen(new br.com.petrickfaria.minemon.menu.PokemonManagerScreen(m.entries)))); c.setPacketHandled(true);
+        }
     }
 
     public static void syncTrainer(ServerPlayer player) {

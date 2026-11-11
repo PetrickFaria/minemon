@@ -23,6 +23,9 @@ import java.util.UUID;
 
 /** Server authority for player-bound wild encounters. Encounter metadata lives on the Pokémon entity. */
 public final class WildEncounterManager {
+    private static final String COMPANION_HITS = "MinemonCompanionHitParticipants";
+    private static final String LAST_COMPANION_HIT = "MinemonLastCompanionHit";
+    private static final String COMPANION_HIT_TIMES = "MinemonCompanionHitTimes";
     public enum CaptureResult { INVALID, FAILED, EXPIRED, CAPTURED }
     private static final String MARKER = "MinemonWildEncounter";
     private static final String OWNER = "MinemonEncounterOwner";
@@ -246,22 +249,74 @@ public final class WildEncounterManager {
         return null;
     }
 
-    /** Awards one defeat reward to the domestic Minemon responsible for the final hit. */
+    /** Remember only server-confirmed health loss, once per Pokémon and target. */
+    public static void recordCompanionHit(net.minecraft.world.entity.LivingEntity target, MinemonCreature attacker) {
+        if (target == null || attacker == null || target.level.isClientSide || !attacker.isTame()
+                || attacker.isDefeated() || !attacker.isAlive()) return;
+        var data = target.getPersistentData();
+        net.minecraft.nbt.ListTag participants = data.getList(COMPANION_HITS, net.minecraft.nbt.Tag.TAG_STRING);
+        String id = attacker.getUUID().toString();
+        boolean found = false;
+        for (int i = 0; i < participants.size(); i++) if (id.equals(participants.getString(i))) { found = true; break; }
+        if (!found) participants.add(net.minecraft.nbt.StringTag.valueOf(id));
+        data.put(COMPANION_HITS, participants);
+        data.putString(LAST_COMPANION_HIT, id);
+        net.minecraft.nbt.CompoundTag times = data.getCompound(COMPANION_HIT_TIMES);
+        times.putLong(id, target.level.getGameTime());
+        data.put(COMPANION_HIT_TIMES, times);
+    }
+
+    /** Awards one defeat reward to the latest valid hitter and a participation share to the others. */
     public static void awardCompanionExperience(net.minecraft.world.entity.Mob defeated,
                                                  net.minecraft.world.damagesource.DamageSource source) {
         if (defeated.level.isClientSide) return;
-        MinemonCreature attacker = pokemonAttacker(source);
-        if (attacker == null || !attacker.isTame()) return;
         var data = defeated.getPersistentData();
         if (data.getBoolean("MinemonCompanionXpHandled")) return;
+        net.minecraft.nbt.ListTag participants = data.getList(COMPANION_HITS, net.minecraft.nbt.Tag.TAG_STRING);
+        net.minecraft.nbt.CompoundTag hitTimes = data.getCompound(COMPANION_HIT_TIMES);
+        long now = defeated.level.getGameTime();
+        MinemonCreature finalHitter = null;
+        String lastId = data.getString(LAST_COMPANION_HIT);
+        if (defeated.level instanceof ServerLevel serverLevel && !lastId.isEmpty()) {
+            try {
+                var entity = serverLevel.getEntity(UUID.fromString(lastId));
+                if (entity instanceof MinemonCreature pokemon && pokemon.isTame() && !pokemon.isDefeated()
+                        && recentHit(hitTimes, lastId, now)) finalHitter = pokemon;
+            } catch (IllegalArgumentException ignored) { }
+        }
+        // Legacy/direct death callers may not have passed through a projectile (for example
+        // an older saved encounter); retain their real final hitter as a one-participant case.
+        if (participants.isEmpty()) {
+            MinemonCreature legacy = pokemonAttacker(source);
+            if (legacy != null && legacy.isTame() && !legacy.isDefeated()) {
+                recordCompanionHit(defeated, legacy);
+                participants = data.getList(COMPANION_HITS, net.minecraft.nbt.Tag.TAG_STRING);
+                finalHitter = legacy;
+            }
+        }
+        if (participants.isEmpty()) return;
         int rewardHalfUnits = defeated instanceof MinemonCreature wildPokemon
                 ? br.com.petrickfaria.minemon.entity.PokemonProgression.xpRewardHalfUnitsForWildRarity(
                         wildPokemon.getPokemonRarity(), br.com.petrickfaria.minemon.config.MinemonConfig.POKEMON_XP_PER_ZOMBIE.get())
                 : (int)Math.min(Integer.MAX_VALUE, (long)Math.max(0, defeated.getExperienceReward()) * 2L);
         data.putBoolean("MinemonCompanionXpHandled", true);
-        attacker.awardPokemonExperienceHalfUnits(rewardHalfUnits);
-        double trainerShare = TrainerProgression.trainerShareForCompanionXpHalfUnits(rewardHalfUnits);
-        UUID trainerId = attacker.getOwnerUUID();
+        int totalAwarded = 0;
+        UUID trainerId = finalHitter == null ? null : finalHitter.getOwnerUUID();
+        for (int i = 0; i < participants.size(); i++) {
+            try {
+                UUID id = UUID.fromString(participants.getString(i));
+                if (!recentHit(hitTimes, id.toString(), now)) continue;
+                var entity = defeated.level instanceof ServerLevel serverLevel ? serverLevel.getEntity(id) : null;
+                if (!(entity instanceof MinemonCreature participant) || !participant.isTame() || participant.isDefeated()) continue;
+                int share = participant == finalHitter ? rewardHalfUnits : rewardHalfUnits / 10;
+                if (share > 0) totalAwarded += participant.awardPokemonExperienceHalfUnits(share);
+                if (participant == finalHitter) trainerId = participant.getOwnerUUID();
+            } catch (IllegalArgumentException ignored) { }
+        }
+        double trainerShare = TrainerProgression.trainerShareForCompanionXpHalfUnits(totalAwarded);
+        data.remove(COMPANION_HITS);
+        data.remove(LAST_COMPANION_HIT);
+        data.remove(COMPANION_HIT_TIMES);
         if (trainerShare > 0.0D && trainerId != null && defeated.level instanceof ServerLevel serverLevel) {
             ServerPlayer trainer = serverLevel.getServer().getPlayerList().getPlayer(trainerId);
             if (trainer == null) trainer = serverLevel.players().stream()
@@ -269,6 +324,12 @@ public final class WildEncounterManager {
             if (trainer != null) PokecPlayerData.addTrainerXp(trainer, trainerShare);
             else TrainerXpLedger.queue(serverLevel, trainerId, trainerShare);
         }
+    }
+
+    private static boolean recentHit(net.minecraft.nbt.CompoundTag times, String id, long now) {
+        if (id == null || id.isEmpty() || !times.contains(id)) return false;
+        long last = times.getLong(id);
+        return now >= last && now - last <= 600L;
     }
 
     public static boolean canDamage(MinemonCreature wild, net.minecraft.world.damagesource.DamageSource source) {
