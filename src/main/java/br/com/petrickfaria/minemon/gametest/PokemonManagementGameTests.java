@@ -200,11 +200,19 @@ public final class PokemonManagementGameTests {
         check(h, attacker.getPokemonExperienceHalfUnits() == 5 && attacker.getPokemonLevel() == 1,
                 "a common wild Pokémon must award exactly 2.5 XP without rounding or an early level-up");
         var saved = attacker.saveWithoutId(new net.minecraft.nbt.CompoundTag());
+        attacker.discard(); // A reload replaces the old UUID owner; two live copies make the lookup ambiguous.
         MinemonCreature restored = ModEntities.SPECIES.get("rattata").get().create(h.getLevel());
         restored.load(saved);
+        BlockPos restoredPos = h.absolutePos(new BlockPos(12, 1, 5));
+        restored.moveTo(restoredPos.getX() + 0.5D, restoredPos.getY(), restoredPos.getZ() + 0.5D, 0.0F, 0.0F);
+        check(h, h.getLevel().addFreshEntity(restored), "first reloaded companion should enter the server entity index");
         var savedAgain = restored.saveWithoutId(new net.minecraft.nbt.CompoundTag());
+        restored.discard();
         MinemonCreature reopened = ModEntities.SPECIES.get("rattata").get().create(h.getLevel());
         reopened.load(savedAgain);
+        BlockPos reopenedPos = h.absolutePos(new BlockPos(13, 1, 5));
+        reopened.moveTo(reopenedPos.getX() + 0.5D, reopenedPos.getY(), reopenedPos.getZ() + 0.5D, 0.0F, 0.0F);
+        check(h, h.getLevel().addFreshEntity(reopened), "second reloaded companion should enter the server entity index");
         br.com.petrickfaria.minemon.pokec.WildEncounterManager.awardCompanionExperience(second, DamageSource.mobAttack(reopened));
         check(h, reopened.getPokemonExperienceHalfUnits() == 10 && reopened.getPokemonExperienceExact() == 5.0D,
                 "half XP must survive saving and a second common defeat must total exactly 5 XP");

@@ -37,6 +37,7 @@ public final class PokeballItem extends Item {
     private static final String TOKEN_KEY = "Token";
     private static final String HEALTH_KEY = "Health";
     private static final String MAX_HEALTH_KEY = "MaxHealth";
+    private static final String SLEEPING_KEY = "Sleeping";
     private final boolean masterBall;
 
     public record StoredPokemon(String species, UUID owner, String ownerName, UUID token,
@@ -75,7 +76,12 @@ public final class PokeballItem extends Item {
         if (entityType.isBlank() || !data.hasUUID(OWNER_KEY) || !data.hasUUID(TOKEN_KEY) || entityData.isEmpty()) return null;
         ResourceLocation id = ResourceLocation.tryParse(entityType);
         if (id == null || ForgeRegistries.ENTITY_TYPES.getValue(id) == null) return null;
-        return new StoredEntity(entityType, data.getUUID(OWNER_KEY), data.getString(OWNER_NAME_KEY), data.getUUID(TOKEN_KEY), entityData.copy());
+        CompoundTag restoredData = entityData.copy();
+        // The ball record is the durable snapshot. Apply its canonical values after
+        // copying the entity payload so health/sleep survive item-stack NBT reloads.
+        if (data.contains(HEALTH_KEY)) restoredData.putFloat("Health", data.getFloat(HEALTH_KEY));
+        if (data.contains(SLEEPING_KEY)) restoredData.putBoolean("MinemonSleeping", data.getBoolean(SLEEPING_KEY));
+        return new StoredEntity(entityType, data.getUUID(OWNER_KEY), data.getString(OWNER_NAME_KEY), data.getUUID(TOKEN_KEY), restoredData);
     }
 
     public static ItemStack emptyBall() { return new ItemStack(br.com.petrickfaria.minemon.registry.ModItems.POKEBALL.get()); }
@@ -108,6 +114,7 @@ public final class PokeballItem extends Item {
         data.putInt("Level", creature instanceof MinemonCreature pokemon ? pokemon.getPokemonLevel() : 0);
         data.putFloat(HEALTH_KEY, creature.getHealth());
         data.putFloat(MAX_HEALTH_KEY, creature.getMaxHealth());
+        if (creature instanceof MinemonCreature pokemon) data.putBoolean(SLEEPING_KEY, pokemon.isSleeping());
         ball.getOrCreateTag().put(DATA_KEY, data);
     }
 
