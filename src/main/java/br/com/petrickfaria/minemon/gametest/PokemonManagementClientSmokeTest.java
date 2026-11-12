@@ -3,7 +3,14 @@ package br.com.petrickfaria.minemon.gametest;
 import br.com.petrickfaria.minemon.menu.BlackListScreen;
 import br.com.petrickfaria.minemon.menu.PokemonInfoMenu;
 import br.com.petrickfaria.minemon.menu.PokemonInfoScreen;
-import br.com.petrickfaria.minemon.menu.PokecMenu;
+import br.com.petrickfaria.minemon.block.PokecBlock;
+import br.com.petrickfaria.minemon.registry.ModBlocks;
+import net.minecraft.core.Direction;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import br.com.petrickfaria.minemon.menu.PokecScreen;
 import br.com.petrickfaria.minemon.entity.MobTargetCategories;
 import br.com.petrickfaria.minemon.registry.ModEntities;
@@ -368,15 +375,21 @@ public final class PokemonManagementClientSmokeTest {
                     if(auraState<4){changeAuraState(minecraft,auraState);return;}
                     Files.writeString(Path.of("client-validation-pokemon-management.txt"),"PASS NINE VISUAL CONTRACTS: rendered Dewgong eyes closed asleep, open and blinking awake; real Gastly aura rendered exactly five large and seven small particles per rendered frame while awake, sleeping, sitting and defeated. Aesthetic comparison with the historical reference remains manual.\n",java.nio.file.StandardOpenOption.APPEND);
                     br.com.petrickfaria.minemon.client.MinemonRenderer.validationObserver=null;
-                    UUID ownerId=minecraft.player.getUUID();
-                    minecraft.getSingleplayerServer().execute(()->{
-                        var owner=minecraft.getSingleplayerServer().getPlayerList().getPlayer(ownerId);
-                        if(owner!=null)net.minecraftforge.network.NetworkHooks.openScreen(owner,new net.minecraft.world.MenuProvider(){
-                            @Override public net.minecraft.network.chat.Component getDisplayName(){return net.minecraft.network.chat.Component.literal("PokéC");}
-                            @Override public net.minecraft.world.inventory.AbstractContainerMenu createMenu(int id,net.minecraft.world.entity.player.Inventory inventory,net.minecraft.world.entity.player.Player player){
-                                return new PokecMenu(id,inventory,net.minecraft.core.BlockPos.ZERO);
-                            }
-                        },buffer->buffer.writeBlockPos(net.minecraft.core.BlockPos.ZERO));
+                    var server = minecraft.getSingleplayerServer();
+                    UUID ownerId = minecraft.player.getUUID();
+                    server.execute(() -> {
+                        var owner = server.getPlayerList().getPlayer(ownerId);
+                        if (owner == null) throw new IllegalStateException("PokéC test player missing on the server");
+
+                        // The real menu stays open only while its terminal exists and is in reach.
+                        var level = owner.level;
+                        var pos = owner.blockPosition().west(2);
+                        var terminal = ModBlocks.POKEC.get().defaultBlockState();
+                        level.setBlock(pos, terminal, Block.UPDATE_ALL);
+                        level.setBlock(pos.above(), terminal.setValue(PokecBlock.HALF, DoubleBlockHalf.UPPER),
+                                Block.UPDATE_ALL);
+                        terminal.use(level, owner, InteractionHand.MAIN_HAND,
+                                new BlockHitResult(Vec3.atCenterOf(pos), Direction.UP, pos, false));
                     });
                     phase=12;ticks=0;return;
                 }
