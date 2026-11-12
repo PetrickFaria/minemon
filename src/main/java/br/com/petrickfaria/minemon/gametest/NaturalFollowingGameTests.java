@@ -62,6 +62,10 @@ public final class NaturalFollowingGameTests {
     @GameTest(template="test_arena", batch="natural_following", timeoutTicks=180)
     public static void explicitFollowWakesPokemonAndOverridesNightSleep(GameTestHelper h) {
         h.getLevel().setDayTime(13000L);
+        for(int x=0;x<20;x++)for(int z=0;z<11;z++){
+            h.setBlock(new BlockPos(x,0,z),Blocks.STONE);
+            for(int y=1;y<=6;y++)h.setBlock(new BlockPos(x,y,z),Blocks.AIR);
+        }
         ServerPlayer owner=new ServerPlayer(h.getLevel().getServer(),h.getLevel(),
                 new GameProfile(UUID.randomUUID(),"NightFollowOwner"),null);
         owner.connection=new FakePlayer(h.getLevel(),new GameProfile(UUID.randomUUID(),"NightFollowConnection")).connection;
@@ -72,6 +76,12 @@ public final class NaturalFollowingGameTests {
         BlockPos start=h.absolutePos(new BlockPos(5,1,5));
         mob.moveTo(start.getX()+.5D,start.getY(),start.getZ()+.5D,0,0);
         mob.tame(owner);mob.setOwnerUUID(owner.getUUID());mob.setSleeping(true);
+        for(net.minecraft.world.entity.EntityType<?> type:net.minecraftforge.registries.ForgeRegistries.ENTITY_TYPES.getValues()){
+            if(type.getCategory()!=net.minecraft.world.entity.MobCategory.MISC){
+                var id=net.minecraftforge.registries.ForgeRegistries.ENTITY_TYPES.getKey(type);
+                if(id!=null)mob.setBlackListOverride(id,false);
+            }
+        }
         h.getLevel().addFreshEntity(mob);
         mob.applyManagedBehavior("follow");
         if(mob.isSleeping()||!mob.isFollowingOwner())fail(h,owner,mob,"Explicit follow must wake a sleeping Pokémon and activate following");

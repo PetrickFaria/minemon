@@ -168,12 +168,12 @@ public final class PokemonManagementGameTests {
         ServerPlayer owner=player(h,h.absolutePos(new BlockPos(4,1,5)));
         MinemonCreature pokemon=h.spawn(ModEntities.SPECIES.get("bulbasaur").get(),new BlockPos(5,1,5));
         pokemon.tame(owner);pokemon.setNoAi(false);pokemon.setOrderedToSit(true);
-        Cow target=h.spawn(EntityType.COW,new BlockPos(10,1,5));target.setNoAi(true);target.setNoGravity(true);
+        var target=h.spawn(EntityType.IRON_GOLEM,new BlockPos(10,1,5));target.setNoAi(true);target.setNoGravity(true);
         target.setPos(pokemon.getX()+15.4D,pokemon.getY(),pokemon.getZ());
         for(EntityType<?> type:net.minecraftforge.registries.ForgeRegistries.ENTITY_TYPES.getValues()){
             if(type.getCategory()!=net.minecraft.world.entity.MobCategory.MISC){
                 ResourceLocation id=net.minecraftforge.registries.ForgeRegistries.ENTITY_TYPES.getKey(type);
-                if(id!=null)pokemon.setBlackListOverride(id,type==EntityType.COW);
+                if(id!=null)pokemon.setBlackListOverride(id,type==EntityType.IRON_GOLEM);
             }
         }
         h.runAfterDelay(40,()->{
