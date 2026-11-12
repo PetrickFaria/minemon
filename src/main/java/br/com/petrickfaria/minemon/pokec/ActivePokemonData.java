@@ -76,12 +76,12 @@ public final class ActivePokemonData extends SavedData {
     private void applyStoredBehavior(br.com.petrickfaria.minemon.entity.MinemonCreature pokemon) {
         String behavior = record(pokemon.getOwnerUUID(), pokemon.getUUID()).getString("behavior");
         if (!behavior.isEmpty()) {
-            // Entity join and tame events can register the same live Pokémon more
-            // than once. Applying the saved follow/sit/free command may wake it,
-            // so preserve its live sleep state across this bookkeeping pass.
-            boolean sleeping = pokemon.isSleeping();
+            // Duplicate registration must preserve an active sleep state for
+            // stay/free modes. A saved explicit follow command takes priority
+            // over that sleep state and must wake the companion after reload.
+            boolean preserveSleep = pokemon.isSleeping() && !behavior.equals("follow");
             pokemon.applyManagedBehavior(behavior);
-            if (sleeping && !pokemon.isSleeping()) pokemon.setSleeping(true);
+            if (preserveSleep && !pokemon.isSleeping()) pokemon.setSleeping(true);
         }
     }
 

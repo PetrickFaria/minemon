@@ -83,6 +83,10 @@ public final class NaturalFollowingGameTests {
             var roster=br.com.petrickfaria.minemon.pokec.ActivePokemonData.get((net.minecraft.server.level.ServerLevel)owner.level);
             if(roster.entries(owner.getUUID()).stream().noneMatch(e->e.id().equals(mob.getUUID())&&e.behavior().equals("follow")))
                 fail(h,owner,mob,"The explicit follow mode must be saved in the owner's roster");
+            mob.setSleeping(true);
+            br.com.petrickfaria.minemon.pokec.ActivePokemonData.register(mob);
+            if(mob.isSleeping()||!mob.isFollowingOwner())
+                fail(h,owner,mob,"Restoring the saved follow mode must wake the Pokémon even when its sleep flag was saved");
             owner.discard();mob.discard();h.succeed();
         });
     }
