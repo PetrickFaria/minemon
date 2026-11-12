@@ -362,8 +362,16 @@ public final class PokemonManagementClientSmokeTest {
                     if(auraState<4){changeAuraState(minecraft,auraState);return;}
                     Files.writeString(Path.of("client-validation-pokemon-management.txt"),"PASS NINE VISUAL CONTRACTS: rendered Dewgong eyes closed asleep, open and blinking awake; real Gastly aura rendered exactly five large and seven small particles per rendered frame while awake, sleeping, sitting and defeated. Aesthetic comparison with the historical reference remains manual.\n",java.nio.file.StandardOpenOption.APPEND);
                     br.com.petrickfaria.minemon.client.MinemonRenderer.validationObserver=null;
-                    var pokecMenu=new PokecMenu(-100,minecraft.player.getInventory(),net.minecraft.core.BlockPos.ZERO);
-                    minecraft.setScreen(new PokecScreen(pokecMenu,minecraft.player.getInventory(),net.minecraft.network.chat.Component.literal("PokéC")));
+                    UUID ownerId=minecraft.player.getUUID();
+                    minecraft.getSingleplayerServer().execute(()->{
+                        var owner=minecraft.getSingleplayerServer().getPlayerList().getPlayer(ownerId);
+                        if(owner!=null)net.minecraftforge.network.NetworkHooks.openScreen(owner,new net.minecraft.world.MenuProvider(){
+                            @Override public net.minecraft.network.chat.Component getDisplayName(){return net.minecraft.network.chat.Component.literal("PokéC");}
+                            @Override public net.minecraft.world.inventory.AbstractContainerMenu createMenu(int id,net.minecraft.world.entity.player.Inventory inventory,net.minecraft.world.entity.player.Player player){
+                                return new PokecMenu(id,inventory,net.minecraft.core.BlockPos.ZERO);
+                            }
+                        },buffer->buffer.writeBlockPos(net.minecraft.core.BlockPos.ZERO));
+                    });
                     phase=12;ticks=0;return;
                 }
             }
