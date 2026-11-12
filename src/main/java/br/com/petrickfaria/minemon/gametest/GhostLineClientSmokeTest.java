@@ -22,7 +22,7 @@ final class GhostLineClientSmokeTest {
  private static int fixtureWaitTicks;
  private static int cameraMatrixIndex=-1,cameraMatrixDelay,cameraMatrixPasses;
  private static boolean cameraMatrixComplete;
- private static int gengarWalkStartTick=-1;
+ private static int gengarWalkStartTick=-1,gengarSleepStartTick=-1;
  private static final int[] CAMERA_YAWS={0,45,90,135,180,225,270,315};
  private static final int[] CAMERA_PITCHES={-30,0,30};
  private static boolean farViewRequested,farViewApplied;
@@ -384,15 +384,15 @@ final class GhostLineClientSmokeTest {
        &&MinemonModel.gengarTeethMouthForValidation(gengar)){
     face(mc,gengar);snap(mc,"gengar-mouth-teeth-fixed");
    }
-   if(ticks>=705&&!sleepStarted){
+   if(ticks>=705&&!sleepStarted&&captures.contains("haunter-blink")&&captures.contains("gengar-blink")){
     mc.getSingleplayerServer().execute(()->{
      var authoritative=mc.getSingleplayerServer().overworld().getEntity(gengarId);
      if(authoritative instanceof MinemonCreature g)g.setSleeping(true);
     });
-    sleepStarted=true;
+    sleepStarted=true;gengarSleepStartTick=ticks;
    }
-   if(sleepStarted&&ticks>=730&&!cameraMatrixActive()&&!captures.contains("gengar-sleep-half-sunk-a")){face(mc,gengar);snap(mc,"gengar-sleep-half-sunk-a");}
-   if(sleepStarted&&ticks>=760&&!cameraMatrixActive()&&!captures.contains("gengar-sleep-half-sunk-b")){face(mc,gengar);snap(mc,"gengar-sleep-half-sunk-b");}
+   if(sleepStarted&&ticks>=gengarSleepStartTick+25&&!cameraMatrixActive()&&!captures.contains("gengar-sleep-half-sunk-a")){face(mc,gengar);snap(mc,"gengar-sleep-half-sunk-a");}
+   if(sleepStarted&&ticks>=gengarSleepStartTick+55&&!cameraMatrixActive()&&!captures.contains("gengar-sleep-half-sunk-b")){face(mc,gengar);snap(mc,"gengar-sleep-half-sunk-b");}
    if(sleepStarted){
     float bob=MinemonModel.gengarSleepBobForValidation(gengar);
     if(Float.isFinite(bob)){gengarSleepBobMin=Math.min(gengarSleepBobMin,bob);gengarSleepBobMax=Math.max(gengarSleepBobMax,bob);}
@@ -412,6 +412,10 @@ final class GhostLineClientSmokeTest {
     if((!captures.contains("haunter-blink")||!captures.contains("gengar-blink"))&&ticks<=blinkScreenshotDeadline)return;
     if(!captures.contains("haunter-blink")||!captures.contains("gengar-blink"))
      throw new IllegalStateException("Natural blink screenshots were not captured before their measured next blink interval; Haunter="+captures.contains("haunter-blink")+" Gengar="+captures.contains("gengar-blink")+" deadline="+blinkScreenshotDeadline);
+    if(!captures.contains("gengar-sleep-half-sunk-a")||!captures.contains("gengar-sleep-half-sunk-b")){
+     if(ticks<=blinkScreenshotDeadline+75)return;
+     throw new IllegalStateException("Gengar sleep screenshots were not captured after both natural blink views; sleepStart="+gengarSleepStartTick+" deadline="+(blinkScreenshotDeadline+75));
+    }
     if(!cameraMatrixComplete||cameraMatrixPasses!=24)
      throw new IllegalStateException("Gastly camera acceptance matrix incomplete: "+cameraMatrixPasses+"/24 views");
     if(br.com.petrickfaria.minemon.client.GastlyCoreRenderHook.auraFramesForValidation()==0)

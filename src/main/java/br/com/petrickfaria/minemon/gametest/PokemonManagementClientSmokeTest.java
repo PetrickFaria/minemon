@@ -9,6 +9,7 @@ import br.com.petrickfaria.minemon.entity.MobTargetCategories;
 import br.com.petrickfaria.minemon.registry.ModEntities;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.GameType;
 import net.minecraftforge.event.TickEvent;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -189,6 +190,10 @@ public final class PokemonManagementClientSmokeTest {
                 minecraft.getSingleplayerServer().execute(() -> {
                     var owner = minecraft.getSingleplayerServer().getPlayerList().getPlayer(ownerId);
                     if (owner == null || !(owner.level instanceof net.minecraft.server.level.ServerLevel level)) return;
+                    // This real-client UI smoke world also runs ordinary mob
+                    // spawning. Keep the player alive so an incidental slime
+                    // cannot close the container while the PokéC screen is tested.
+                    owner.setGameMode(GameType.CREATIVE);
                     var type = ModEntities.SPECIES.get("pikachu");
                     var pokemon = type == null ? null : type.get().create(level);
                     if (pokemon == null) return;
