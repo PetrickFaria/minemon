@@ -170,12 +170,18 @@ public final class PokemonManagementGameTests {
         pokemon.tame(owner);pokemon.setNoAi(false);pokemon.setOrderedToSit(true);
         Cow target=h.spawn(EntityType.COW,new BlockPos(10,1,5));target.setNoAi(true);target.setNoGravity(true);
         target.setPos(pokemon.getX()+15.4D,pokemon.getY(),pokemon.getZ());
-        pokemon.setBlackListOverride(new ResourceLocation("minecraft","cow"),true);
+        for(EntityType<?> type:net.minecraftforge.registries.ForgeRegistries.ENTITY_TYPES.getValues()){
+            if(type.getCategory()!=net.minecraft.world.entity.MobCategory.MISC){
+                ResourceLocation id=net.minecraftforge.registries.ForgeRegistries.ENTITY_TYPES.getKey(type);
+                if(id!=null)pokemon.setBlackListOverride(id,type==EntityType.COW);
+            }
+        }
         h.runAfterDelay(40,()->{
             check(h,pokemon.getTarget()==target,"Perception must acquire a target whose center is outside 15 blocks while its hitbox remains within 15"
                     +" [canPerceive="+pokemon.canPerceive(target)+", canSeeHitbox="+pokemon.canSeeHitbox(target)
                     +", pokemon="+pokemon.position()+", bounds="+pokemon.getBoundingBox()+", target="+target.position()
-                    +", targetBounds="+target.getBoundingBox()+", targetAlive="+target.isAlive()+"]");
+                    +", targetBounds="+target.getBoundingBox()+", targetAlive="+target.isAlive()
+                    +", targetBlacklisted="+pokemon.isBlackListTarget(target)+", currentTarget="+pokemon.getTarget()+"]");
             check(h,pokemon.canPerceive(target),"The acquired target must satisfy the same hitbox-based perception rule");
             owner.discard();pokemon.discard();target.discard();h.succeed();
         });

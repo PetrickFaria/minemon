@@ -357,6 +357,8 @@ public final class CompanionTests {
  }
  private static void compareRetreatToSpider(GameTestHelper h,boolean airborne) {
   floor(h);ServerPlayer owner=player(h);
+  // Keep the vanilla reference spider's whole 20-tick path over solid ground.
+  for(int x=16;x<=24;x++)for(int z=0;z<16;z++)h.setBlock(new BlockPos(x,0,z),net.minecraft.world.level.block.Blocks.STONE);
   owner.setGameMode(GameType.CREATIVE);
   BlockPos ownerPosition=h.absolutePos(new BlockPos(1,1,1));
   owner.moveTo(ownerPosition.getX()+.5D,ownerPosition.getY(),ownerPosition.getZ()+.5D,0,0);
@@ -366,7 +368,7 @@ public final class CompanionTests {
   Cow target=h.spawn(EntityType.COW,new BlockPos(4,1,4));
   target.setNoAi(true);target.setNoGravity(true);keepCombatTargetAlive(target);
   var reference=h.spawn(EntityType.SPIDER,new BlockPos(5,1,8));
-  Cow spiderTarget=h.spawn(EntityType.COW,new BlockPos(14,1,8));
+  Cow spiderTarget=h.spawn(EntityType.COW,new BlockPos(22,1,8));
   spiderTarget.setNoAi(true);spiderTarget.setNoGravity(true);keepCombatTargetAlive(spiderTarget);
   // Keep a real, stationary target on the same heading as the retreat. A
   // block-coordinate path is rejected for a newly spawned Spider in this
