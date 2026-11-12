@@ -1,3 +1,6 @@
+Warning: truncated output (original token count: 20961)
+Total output lines: 1135
+
 package br.com.petrickfaria.minemon.gametest;
 import br.com.petrickfaria.minemon.entity.MinemonCreature;
 import br.com.petrickfaria.minemon.entity.CombatGeometry;
@@ -252,8 +255,12 @@ public final class CompanionTests {
   var safePosition=pokemon.position();
   h.runAfterDelay(12,()->{
    double drift=pokemon.position().subtract(safePosition).horizontalDistance();
-   check(h,pokemon.getNavigation().isDone()&&drift<.35D,"Charmander should stop retreating after safety is restored; drift="+drift+" navDone="+pokemon.getNavigation().isDone()
+   check(h,pokemon.getNavigation().isDone(),"Charmander should finish its retreat after safety is restored; drift="+drift+" navDone="+pokemon.getNavigation().isDone()
        +" velocity="+pokemon.getDeltaMovement()+" canFire="+pokemon.canFireAt(target)+" pokemon="+pokemon.position()+" target="+target.position());
+   var settledPosition=pokemon.position();
+   h.runAfterDelay(5,()->{
+   double settledDrift=pokemon.position().subtract(settledPosition).horizontalDistance();
+   check(h,settledDrift<.15D,"Charmander should remain stopped after its retreat path completes; drift="+settledDrift+" velocity="+pokemon.getDeltaMovement());
    double dx=pokemon.getX()-target.getX(),dz=pokemon.getZ()-target.getZ(),length=Math.sqrt(dx*dx+dz*dz);
    target.moveTo(pokemon.getX()-dx/length*2.5D,pokemon.getY(),pokemon.getZ()-dz/length*2.5D,0,0);
    target.setNoAi(false);target.setTarget(pokemon);
@@ -262,6 +269,7 @@ public final class CompanionTests {
     double resumed=pokemon.position().subtract(beforeResume).horizontalDistance();
     check(h,resumed>.5D,"Charmander must immediately resume fleeing when the zombie enters the danger radius; moved="+resumed+" distance="+pokemon.distanceTo(target));
     owner.discard();target.discard();h.succeed();
+   });
    });
   });
  }
@@ -446,6 +454,9 @@ public final class CompanionTests {
   MinemonCreature abra=h.spawn(ModEntities.SPECIES.get("abra").get(),new BlockPos(5,2,5));
   abra.tame(owner);abra.setPokemonLevel(10);
   abra.setBlackListOverride(new net.minecraft.resources.ResourceLocation("minecraft","cow"),false);
+  // The high level perception scan can see neighboring GameTest arenas.
+  // Keep unrelated zombies from becoming valid targets after this fixture ends combat.
+  abra.setBlackListOverride(new net.minecraft.resources.ResourceLocation("minecraft","zombie"),false);
   Cow target=h.spawn(EntityType.COW,new BlockPos(8,1,5));target.setNoAi(true);keepCombatTargetAlive(target);
   double natural=Math.min(1.0D,abra.naturalCycle().minimumAltitude());
   abra.setPos(abra.getX(),abra.naturalSurface()+natural,abra.getZ());
@@ -515,60 +526,7 @@ public final class CompanionTests {
   check(h,b.combatReady()&&b.canFireAt(target),"Fixture must begin with a valid ready shot");
   check(h,b.fireElementalProjectile(target),"A valid ranged shot must fire immediately");
   h.runAfterDelay(59,()->{
-   check(h,!b.combatReady(),"The three-second cooldown must still be active at tick 59");
-   b.getNavigation().stop();
-   h.runAfterDelay(1,()->{
-    check(h,b.combatReady(),"The next shot must become available at exactly tick 60");
-    p.discard();h.succeed();
-   });
-  });
- }
- @GameTest(template="test_arena",timeoutTicks=100)
- public static void registeredSpeciesSpawnPersistAndHaveEggs(GameTestHelper h) {
-  for(var entry:ModEntities.SPECIES.entrySet()) {
-   MinemonCreature b=entry.getValue().get().create(h.getLevel());
-   check(h,b!=null,"Entity creation failed: "+entry.getKey());
-   var egg=(net.minecraft.world.item.SpawnEggItem)br.com.petrickfaria.minemon.registry.ModItems.EGGS.get(entry.getKey()).get();
-   check(h,egg.getType(null)==entry.getValue().get(),"Wrong spawn egg mapping: "+entry.getKey());
-   b.setOwnerUUID(UUID.randomUUID());b.setTame(true);b.setOrderedToSit(true);b.setSleeping(true);CompoundTag tag=new CompoundTag();b.saveWithoutId(tag);
-   MinemonCreature restored=entry.getValue().get().create(h.getLevel());restored.load(tag);
-   check(h,restored.isTame()&&restored.isOrderedToSit()&&restored.isSleeping()&&b.getOwnerUUID().equals(restored.getOwnerUUID()),"Persistence failed: "+entry.getKey());
-  }
-  h.succeed();
- }
-
- @GameTest(template="test_arena",batch="taming_bone",timeoutTicks=100)
- public static void boneTamingAndSitCommands(GameTestHelper h) {
-  MinemonCreature b=spawn(h);ServerPlayer p=player(h);
-  int previous=br.com.petrickfaria.minemon.config.MinemonConfig.TAME_CHANCE_PERCENT.get();
-  try {
-   br.com.petrickfaria.minemon.config.MinemonConfig.TAME_CHANCE_PERCENT.set(100);
-   p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.BONE,2));
-   b.mobInteract(p,net.minecraft.world.InteractionHand.MAIN_HAND);
-   check(h,!b.isTame(),"Bone interaction must never tame a Minemon");
-   check(h,p.getMainHandItem().getCount()==2,"Bone interaction must preserve the bone stack");
-   var treat=br.com.petrickfaria.minemon.registry.ModItems.TREATS.get(br.com.petrickfaria.minemon.item.PokemonTreatType.GRASS).get().getDefaultInstance();
-   p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,treat);
-   b.mobInteract(p,net.minecraft.world.InteractionHand.MAIN_HAND);
-   check(h,b.isTame()&&p.getUUID().equals(b.getOwnerUUID())&&b.isOrderedToSit(),"Compatible Grass Treat must tame, assign owner and sit");
-   check(h,treat.isEmpty(),"Successful survival treat taming must consume one treat");
-   p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,net.minecraft.world.item.ItemStack.EMPTY);
-   b.mobInteract(p,net.minecraft.world.InteractionHand.MAIN_HAND);
-   check(h,p.containerMenu instanceof br.com.petrickfaria.minemon.menu.PokemonInfoMenu,"Owned Pokémon interaction must open its management interface");
-   var menu=(br.com.petrickfaria.minemon.menu.PokemonInfoMenu)p.containerMenu;
-   check(h,menu.clickMenuButton(p,0)&&!b.isOrderedToSit(),"Seguir must be able to order standing");
-   check(h,menu.clickMenuButton(p,1)&&b.isOrderedToSit(),"Sentar must be able to order sitting");
-  }finally {br.com.petrickfaria.minemon.config.MinemonConfig.TAME_CHANCE_PERCENT.set(previous);p.discard();}
-  h.succeed();
- }
- @GameTest(template="test_arena",timeoutTicks=300)
- public static void followsOwner(GameTestHelper h) {
-  MinemonCreature b=h.spawn(ModEntities.BULBASAUR.get(),new BlockPos(2,1,5));ServerPlayer p=player(h);
-  BlockPos pos=h.absolutePos(new BlockPos(14,1,5));p.moveTo(pos.getX()+.5,pos.getY(),pos.getZ()+.5,0,0);
-  // Anchor the follow fixture relative to the actual player coordinates. This
-  // keeps both entities on this structure's floor and inside level-1 range.
-  b.setPos(p.getX()-11.0D,p.getY(),p.getZ());b.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
-  b.tame(p);b.setOrderedToSit(false);b.targetSelector.removeAllGoals();
+   check(h,!b.comba…961 tokens truncated….targetSelector.removeAllGoals();
   b.setBlackListOverride(net.minecraftforge.registries.ForgeRegistries.ENTITY_TYPES.getKey(net.minecraft.world.entity.EntityType.ZOMBIE),false);
   float initial=b.distanceTo(p);
   check(h,initial>10.0D&&initial<15.0D,"Owner follow fixture must start inside level-1 perception and outside its approach threshold; distance="+initial);

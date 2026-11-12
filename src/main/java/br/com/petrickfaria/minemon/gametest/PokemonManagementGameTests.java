@@ -167,7 +167,7 @@ public final class PokemonManagementGameTests {
         for(int x=16;x<=22;x++)for(int z=0;z<10;z++)h.setBlock(new BlockPos(x,0,z),Blocks.STONE);
         ServerPlayer owner=player(h,h.absolutePos(new BlockPos(4,1,5)));
         MinemonCreature pokemon=h.spawn(ModEntities.SPECIES.get("bulbasaur").get(),new BlockPos(5,1,5));
-        pokemon.tame(owner);pokemon.setNoAi(false);
+        pokemon.tame(owner);pokemon.setNoAi(false);pokemon.setOrderedToSit(true);
         Cow target=h.spawn(EntityType.COW,new BlockPos(10,1,5));target.setNoAi(true);target.setNoGravity(true);
         target.setPos(pokemon.getX()+15.4D,pokemon.getY(),pokemon.getZ());
         pokemon.setBlackListOverride(new ResourceLocation("minecraft","cow"),true);
