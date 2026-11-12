@@ -316,7 +316,13 @@ public final class CompanionTests {
    check(h,Math.abs(pidgey.getY()-pidgey.naturalSurface()-1.5D)<.15D,"Pidgey must reach the 1.5-block combat band before combat ends");
    target.discard();pidgey.setTarget(null);
    // The level 10 perception can reacquire hostiles from neighboring
-   // GameTests. Disable only target goals while the natural-flight reset runs.
+   // GameTests. Clear blacklist targeting while the natural-flight reset runs.
+   for(net.minecraft.world.entity.EntityType<?> type:net.minecraftforge.registries.ForgeRegistries.ENTITY_TYPES.getValues()){
+    if(type.getCategory()!=net.minecraft.world.entity.MobCategory.MISC){
+     var id=net.minecraftforge.registries.ForgeRegistries.ENTITY_TYPES.getKey(type);
+     if(id!=null)pidgey.setBlackListOverride(id,false);
+    }
+   }
    pidgey.targetSelector.removeAllGoals();
    h.runAfterDelay(50,()->{
     double altitude=pidgey.getY()-pidgey.naturalSurface();
