@@ -60,7 +60,10 @@ public final class PokemonManagementClientSmokeTest {
             // daytime tickNightRest correctly wakes natural sleepers, so use
             // an actual nighttime world clock before adding Dewgong.
             level.setDayTime(13000);
-            var dewgong=ModEntities.SPECIES.get("dewgong").get().create(level);dewgong.tame(owner);dewgong.setNoAi(true);dewgong.setNoGravity(true);
+            var dewgong=ModEntities.SPECIES.get("dewgong").get().create(level);dewgong.tame(owner);
+            // Registration restores the managed mode, whose default is Follow;
+            // use Sentar so that it does not correctly wake this sleep-pose fixture.
+            dewgong.setOrderedToSit(true);dewgong.setNoAi(true);dewgong.setNoGravity(true);
             dewgong.moveTo(owner.getX(),owner.getY(),owner.getZ()+3,180,0);dewgong.setSleeping(true);level.addFreshEntity(dewgong);dewgongId=dewgong.getId();
             var gastly=ModEntities.SPECIES.get("gastly").get().create(level);gastly.tame(owner);gastly.setNoAi(true);gastly.setNoGravity(true);
             gastly.moveTo(owner.getX()+1.5,owner.getY()+1,owner.getZ()+3.5,180,0);level.addFreshEntity(gastly);gastlyId=gastly.getId();

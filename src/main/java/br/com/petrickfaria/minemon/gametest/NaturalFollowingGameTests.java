@@ -80,7 +80,7 @@ public final class NaturalFollowingGameTests {
         h.runAfterDelay(70,()->{
             if(mob.isSleeping()||!mob.isFollowingOwner()||mob.distanceTo(owner)>=initial)
                 fail(h,owner,mob,"Following must remain active through natural bedtime and move toward the owner; initial="+initial+" current="+mob.distanceTo(owner)
-                        +" mob="+mob.position()+" owner="+owner.position()+" ownerAlive="+owner.isAlive()+" ownerGround="+owner.onGround()
+                        +" mob="+mob.position()+" owner="+owner.position()+" ownerAlive="+owner.isAlive()+" ownerGround="+owner.isOnGround()
                         +" sleeping="+mob.isSleeping()+" nightRest="+mob.isNightResting()+" following="+mob.isFollowingOwner()
                         +" navDone="+mob.getNavigation().isDone()+" navTarget="+mob.getNavigation().getTargetPos()+" target="+mob.getTarget());
             var roster=br.com.petrickfaria.minemon.pokec.ActivePokemonData.get((net.minecraft.server.level.ServerLevel)owner.level);
