@@ -376,11 +376,10 @@ public final class CompanionTests {
   var reference=h.spawn(EntityType.SPIDER,new BlockPos(5,1,8));
   Cow spiderTarget=h.spawn(EntityType.COW,new BlockPos(22,1,8));
   spiderTarget.setNoAi(true);spiderTarget.setNoGravity(true);keepCombatTargetAlive(spiderTarget);
-  // Keep a real, stationary target on the same heading as the retreat. A
-  // block-coordinate path is rejected for a newly spawned Spider in this
-  // GameTest world, while its ordinary entity path is valid and active.
+  // Measure vanilla navigation on one fixed path. The spider's melee and
+  // idle goals can otherwise replace the path during the measurement.
   reference.targetSelector.removeAllGoals();
-  reference.setTarget(spiderTarget);
+  reference.goalSelector.removeAllGoals();
   h.runAfterDelay(5,()->{
    // Both subjects start at rest facing the measured +X direction. Without
    // this, the companion follows its owner during setup and the flying turn
@@ -409,9 +408,8 @@ public final class CompanionTests {
        +" companionNav="+pokemon.getNavigation().getTargetPos()+" spiderNav="+reference.getNavigation().getTargetPos());
    owner.discard();reference.discard();return;
   }
-  // The Spider's melee goal can take a few ticks to establish its path while
-  // the companion's ranged goal starts sooner. Measure both from rest once
-  // both paths are active so setup momentum is not counted as speed.
+  // Measure both from rest once both paths are active so setup momentum
+  // is not counted as speed.
   pokemon.setDeltaMovement(0,0,0);reference.setDeltaMovement(0,0,0);
   pokemon.setYRot(-90);pokemon.yRotO=-90;pokemon.yBodyRot=pokemon.yBodyRotO=-90;
    var pokemonStart=pokemon.position();var spiderStart=reference.position();
