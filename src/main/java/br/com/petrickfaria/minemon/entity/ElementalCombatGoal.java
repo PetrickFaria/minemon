@@ -50,7 +50,7 @@ final class ElementalCombatGoal extends Goal {
             return;
         }
 
-        double distance = Math.sqrt(CombatGeometry.horizontalCenterDistanceSquared(pokemon, target));
+        double distance = Math.sqrt(CombatGeometry.horizontalBoxDistanceSquared(pokemon, target));
         double safeDistance = Math.max(1.0D, Math.min(7.0D, pokemon.attackRange() - 1.0D));
         Vec3 towardPokemon = new Vec3(pokemon.getX() - target.getX(), 0.0D, pokemon.getZ() - target.getZ());
         double closingSpeed = towardPokemon.lengthSqr() < 1.0E-6D ? 0.0D
@@ -76,7 +76,7 @@ final class ElementalCombatGoal extends Goal {
         }
         retreating = false;
 
-        if (distance <= pokemon.attackRange() && pokemon.getSensing().hasLineOfSight(target)) {
+        if (distance <= pokemon.attackRange() && pokemon.canFireAt(target)) {
             // Once the target is outside the danger radius, hold position and
             // continue firing. Repositioning here made healthy companions circle
             // a safe enemy and could replace a retreat route immediately after a shot.

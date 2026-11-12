@@ -129,6 +129,36 @@ public final class PokemonManagementGameTests {
         h.succeed();
     }
 
+    @GameTest(template="test_arena", timeoutTicks=140)
+    public static void exposedZombieHitboxCanBeShotOverFenceButNotThroughSolidWall(GameTestHelper h) {
+        floor(h);
+        ServerPlayer owner=player(h,h.absolutePos(new BlockPos(4,1,5)));
+        MinemonCreature pokemon=h.spawn(ModEntities.SPECIES.get("charmander").get(),new BlockPos(5,1,5));
+        pokemon.tame(owner);pokemon.setNoAi(true);pokemon.setOrderedToSit(true);
+        pokemon.setBlackListOverride(new ResourceLocation("minecraft","zombie"),true);
+        h.setBlock(new BlockPos(8,1,5),Blocks.OAK_FENCE);
+        Zombie baby=h.spawn(EntityType.ZOMBIE,new BlockPos(10,1,5));
+        baby.setBaby(true);baby.setNoAi(true);baby.setPos(pokemon.getX()+4.0D,pokemon.getY(),pokemon.getZ());
+        pokemon.focusPlayerTarget(baby);
+        check(h,pokemon.canFireAt(baby),"A baby zombie with hitbox exposed above a fence must remain targetable through an actually clear ray");
+        check(h,pokemon.fireElementalProjectile(baby),"The Pokémon must launch a shot at the visible part of a baby zombie's hitbox");
+        var shots=h.getLevel().getEntitiesOfClass(br.com.petrickfaria.minemon.entity.ElementalProjectile.class,
+                pokemon.getBoundingBox().inflate(12),shot->shot.getOwner()==pokemon);
+        check(h,shots.size()==1,"The exposed-hitbox attack must create one projectile");
+        float health=baby.getHealth();
+        var shot=shots.get(0);for(int tick=0;tick<30&&!shot.isRemoved();tick++)shot.tick();
+        check(h,baby.getHealth()<health,"A projectile aimed at an exposed baby-zombie hitbox must not be consumed by a nearby fence");
+
+        baby.discard();
+        Zombie adult=h.spawn(EntityType.ZOMBIE,new BlockPos(10,1,5));adult.setNoAi(true);
+        adult.setPos(pokemon.getX()+4.0D,pokemon.getY(),pokemon.getZ());pokemon.focusPlayerTarget(adult);
+        check(h,pokemon.canFireAt(adult),"An adult zombie's exposed upper hitbox must also remain targetable over a fence");
+        h.setBlock(new BlockPos(8,1,5),Blocks.STONE);
+        h.setBlock(new BlockPos(8,2,5),Blocks.STONE);h.setBlock(new BlockPos(8,3,5),Blocks.STONE);
+        check(h,!pokemon.canFireAt(adult),"A solid wall that covers every target ray must continue to block attacks");
+        owner.discard();pokemon.discard();adult.discard();h.succeed();
+    }
+
     @GameTest(template = "test_arena", timeoutTicks = 180)
     public static void companionXPUsesMobRewardAndIsGrantedOnlyOnce(GameTestHelper h) {
         floor(h);
@@ -253,7 +283,7 @@ public final class PokemonManagementGameTests {
                             +", range="+expected+", distance="+pokemon.distanceTo(rangeTarget)
                             +", level="+pokemon.getPokemonLevel()+", targetPos="+rangeTarget.position()
                             +", mobTarget="+pokemon.getTarget()+"]");
-            rangeTarget.setPos(pokemon.getX()+expected+0.6D,targetY,pokemon.getZ());
+            rangeTarget.setPos(pokemon.getX()+expected+0.8D,targetY,pokemon.getZ());
             check(h,pokemon.canAttack(rangeTarget)&&!pokemon.canFireAt(rangeTarget),
                     "A perceived target beyond the level "+level+" projectile range must remain authorized but not be hittable");
             double perception=level>=6?25.0D:15.0D;
@@ -262,7 +292,11 @@ public final class PokemonManagementGameTests {
             double centeredY=pokemon.getY()+(pokemon.getBbHeight()-rangeTarget.getBbHeight())/2.0D;
             rangeTarget.setPos(pokemon.getX()+perception-0.1D,centeredY,pokemon.getZ());
             check(h,pokemon.canPerceive(rangeTarget),"Perception must include targets inside the level "+level+" limit");
-            rangeTarget.setPos(pokemon.getX()+perception+0.1D,centeredY,pokemon.getZ());
+            // Center is beyond the configured radius, but the real cow hitbox
+            // still reaches inside it and remains perceptible.
+            rangeTarget.setPos(pokemon.getX()+perception+0.4D,centeredY,pokemon.getZ());
+            check(h,pokemon.canPerceive(rangeTarget),"Perception must include a target whose hitbox remains inside the level "+level+" limit");
+            rangeTarget.setPos(pokemon.getX()+perception+0.8D,centeredY,pokemon.getZ());
             check(h,!pokemon.canPerceive(rangeTarget),"Perception must exclude targets beyond the level "+level+" limit");
         }
         pokemon.setPokemonProgress(5,0);

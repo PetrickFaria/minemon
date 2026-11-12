@@ -58,4 +58,32 @@ public final class NaturalFollowingGameTests {
             owner.discard();mob.discard();NineBehaviorChecks.followingAltitudes(h);
         });
     }
+
+    @GameTest(template="test_arena", batch="natural_following", timeoutTicks=180)
+    public static void explicitFollowWakesPokemonAndOverridesNightSleep(GameTestHelper h) {
+        h.getLevel().setDayTime(13000L);
+        ServerPlayer owner=new ServerPlayer(h.getLevel().getServer(),h.getLevel(),
+                new GameProfile(UUID.randomUUID(),"NightFollowOwner"),null);
+        owner.connection=new FakePlayer(h.getLevel(),new GameProfile(UUID.randomUUID(),"NightFollowConnection")).connection;
+        BlockPos ownerPos=h.absolutePos(new BlockPos(10,1,5));
+        owner.moveTo(ownerPos.getX()+.5D,ownerPos.getY(),ownerPos.getZ()+.5D,0,0);
+        h.getLevel().addNewPlayer(owner);
+        MinemonCreature mob=ModEntities.SPECIES.get("bulbasaur").get().create(h.getLevel());
+        BlockPos start=h.absolutePos(new BlockPos(5,1,5));
+        mob.moveTo(start.getX()+.5D,start.getY(),start.getZ()+.5D,0,0);
+        mob.tame(owner);mob.setOwnerUUID(owner.getUUID());mob.setSleeping(true);
+        h.getLevel().addFreshEntity(mob);
+        mob.applyManagedBehavior("follow");
+        if(mob.isSleeping()||!mob.isFollowingOwner())fail(h,owner,mob,"Explicit follow must wake a sleeping Pokémon and activate following");
+        double initial=mob.distanceTo(owner);
+        owner.moveTo(owner.getX()+4.0D,owner.getY(),owner.getZ(),owner.getYRot(),owner.getXRot());
+        h.runAfterDelay(70,()->{
+            if(mob.isSleeping()||!mob.isFollowingOwner()||mob.distanceTo(owner)>=initial)
+                fail(h,owner,mob,"Following must remain active through natural bedtime and move toward the owner; initial="+initial+" current="+mob.distanceTo(owner));
+            var roster=br.com.petrickfaria.minemon.pokec.ActivePokemonData.get((net.minecraft.server.level.ServerLevel)owner.level);
+            if(roster.entries(owner.getUUID()).stream().noneMatch(e->e.id().equals(mob.getUUID())&&e.behavior().equals("follow")))
+                fail(h,owner,mob,"The explicit follow mode must be saved in the owner's roster");
+            owner.discard();mob.discard();h.succeed();
+        });
+    }
 }

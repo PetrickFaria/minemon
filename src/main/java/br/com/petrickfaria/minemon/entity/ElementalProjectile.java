@@ -27,7 +27,8 @@ public final class ElementalProjectile extends ThrowableProjectile {
         targetId=target.getUUID();
         var types=br.com.petrickfaria.minemon.pokec.PokemonTreatTypes.forSpecies(attacker.getSpeciesSlug());
         entityData.set(COLOR,EggAppearance.color(types.isEmpty()?"normal":types.get(0)));
-        Vec3 direction=target.getBoundingBox().getCenter().subtract(position());
+        Vec3 aim=attacker.attackAimPoint(target);
+        Vec3 direction=(aim==null?target.getBoundingBox().getCenter():aim).subtract(position());
         shoot(direction.x,direction.y,direction.z,.65F,0);
     }
     public int color(){return entityData.get(COLOR);}

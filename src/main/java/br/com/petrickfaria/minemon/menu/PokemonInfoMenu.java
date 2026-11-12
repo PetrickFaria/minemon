@@ -32,8 +32,7 @@ public final class PokemonInfoMenu extends AbstractContainerMenu {
     @Override public boolean clickMenuButton(Player player, int button) {
         if (!(player instanceof ServerPlayer serverPlayer) || !stillValid(player) || pokemon == null) return false;
         if (button == 0) {
-            pokemon.setFreeMode(false);
-            pokemon.setOrderedToSit(false);
+            pokemon.applyManagedBehavior("follow");
             pokemon.setTarget(null);
             pokemon.getNavigation().stop();
             return true;

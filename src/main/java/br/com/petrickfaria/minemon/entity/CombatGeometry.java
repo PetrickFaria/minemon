@@ -43,5 +43,17 @@ public final class CombatGeometry {
   double dx=a.getX()-b.getX(),dz=a.getZ()-b.getZ();
   return dx*dx+dz*dz;
  }
+ /** Horizontal edge-to-edge distance between the actual entity collision boxes. */
+ public static double horizontalBoxDistanceSquared(Entity a,Entity b){
+  var x=a.getBoundingBox();var y=b.getBoundingBox();
+  double dx=Math.max(0.0D,Math.max(x.minX-y.maxX,y.minX-x.maxX));
+  double dz=Math.max(0.0D,Math.max(x.minZ-y.maxZ,y.minZ-x.maxZ));
+  return dx*dx+dz*dz;
+ }
+ /** Closest point on a collision box to an origin, including when it lies inside. */
+ public static Vec3 closestPoint(Vec3 origin,AABB box){
+  return new Vec3(Math.max(box.minX,Math.min(box.maxX,origin.x)),
+      Math.max(box.minY,Math.min(box.maxY,origin.y)),Math.max(box.minZ,Math.min(box.maxZ,origin.z)));
+ }
  private CombatGeometry(){}
 }

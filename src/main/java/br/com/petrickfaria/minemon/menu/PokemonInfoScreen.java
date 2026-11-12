@@ -20,6 +20,8 @@ import java.util.List;
 /** Species-owned status panel for one domesticated Pokémon. */
 public final class PokemonInfoScreen extends AbstractContainerScreen<PokemonInfoMenu> {
     private static final ResourceLocation ICONS = new ResourceLocation("minecraft", "textures/gui/icons.png");
+    static final String PERCEPTION_RANGE_LABEL = "Perc. Alcance";
+    static final String ATTACK_RANGE_LABEL = "Perc. Ataque";
     private boolean choosingEvolution;
     private final List<Button> evolutionButtons = new ArrayList<>();
     private Button followButton;
@@ -129,11 +131,11 @@ public final class PokemonInfoScreen extends AbstractContainerScreen<PokemonInfo
         font.draw(pose, "Dano:", leftPos + 18, damageY+2, 0xFF404040);
         float damageHeight=drawHeartValue(pose,leftPos+53,damageY,pokemon.getAttributeValue(Attributes.ATTACK_DAMAGE),
                 pokemon.getAttributeValue(Attributes.ATTACK_DAMAGE),true,91);
-        font.draw(pose, "Ataque: " + formatRange(pokemon.attackRange()), leftPos + 151, damageY+2, 0xFF404040);
+        font.draw(pose, ATTACK_RANGE_LABEL + ": " + formatRange(pokemon.attackRange()), leftPos + 151, damageY+2, 0xFF404040);
         int detailsY=damageY+Math.max(13,(int)Math.ceil(damageHeight))+4;
         font.draw(pose, "Estágio: " + evolutionStage(pokemon.getSpeciesSlug()), leftPos + 18, detailsY, 0xFF404040);
         font.draw(pose, "Raridade: " + Component.translatable("rarity.minemon_gen1."+br.com.petrickfaria.minemon.entity.PokemonProgression.rarityKey(pokemon.getPokemonRarity())).getString(), leftPos + 151, detailsY, 0xFF404040);
-        font.draw(pose, "Percepção: " + formatRange(pokemon.perceptionRange()), leftPos + 18, detailsY + 10, 0xFF404040);
+        font.draw(pose, PERCEPTION_RANGE_LABEL + ": " + formatRange(pokemon.perceptionRange()), leftPos + 18, detailsY + 10, 0xFF404040);
 
         int barX = leftPos + 37, barY = topPos + Math.max(134,detailsY-topPos+31);
         int needed = pokemon.getPokemonXpToNextLevel();
@@ -166,11 +168,22 @@ public final class PokemonInfoScreen extends AbstractContainerScreen<PokemonInfo
             int u=heartSpriteU(hp);
             int row=i/perRow,column=i%perRow;
             pose.pushPose();pose.translate(x+column*9.0F*scale,y+row*9.0F*scale,0);pose.scale(scale,scale,1.0F);
+            drawBlackHeartContour(pose,u);
+            RenderSystem.setShaderColor(black?0.03F:1.0F,black?0.03F:1.0F,black?0.03F:1.0F,1.0F);
             GuiComponent.blit(pose,0,0,u,0,9,9,256,256);
             pose.popPose();
         }
         RenderSystem.setShaderColor(1,1,1,1);
         return rows*9.0F*scale;
+    }
+
+    /** Reuses the vanilla pixel silhouette as a one-pixel black contour. */
+    private static void drawBlackHeartContour(PoseStack pose,int u){
+        RenderSystem.setShaderColor(0.0F,0.0F,0.0F,1.0F);
+        for(int dy=-1;dy<=1;dy++)for(int dx=-1;dx<=1;dx++){
+            if(dx==0&&dy==0)continue;
+            GuiComponent.blit(pose,dx,dy,u,0,9,9,256,256);
+        }
     }
 
     static int heartSpriteU(double remainingHealthPoints) {

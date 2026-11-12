@@ -55,6 +55,10 @@ public class PokecCatalogTest {
         assertEquals("water",PokecSpecies.get("squirtle").primaryType());
         assertEquals("electric",PokecSpecies.get("pikachu").primaryType());
         assertEquals("normal",PokecSpecies.get("eevee").primaryType());
+        assertEquals("uncommon",PokecSpecies.get("bulbasaur").rarity());
+        assertEquals("uncommon",PokecSpecies.get("charmander").rarity());
+        assertEquals(4.0D,br.com.petrickfaria.minemon.entity.PokemonProgression.damageForRarity(PokecSpecies.get("bulbasaur").rarity(),1),0.0D);
+        assertEquals(4.0D,br.com.petrickfaria.minemon.entity.PokemonProgression.damageForRarity(PokecSpecies.get("charmander").rarity(),1),0.0D);
         assertEquals("eevee",PokecSpecies.get("vaporeon").evolvesFrom());
         assertEquals("eevee",PokecSpecies.get("jolteon").evolvesFrom());
         assertEquals("eevee",PokecSpecies.get("flareon").evolvesFrom());

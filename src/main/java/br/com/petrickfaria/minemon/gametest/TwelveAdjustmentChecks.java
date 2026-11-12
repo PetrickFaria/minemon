@@ -68,7 +68,12 @@ final class TwelveAdjustmentChecks {
   blocker.setNoAi(true);float blockerHealth=blocker.getHealth();level.addFreshEntity(blocker);
   try{
    cow.setPos(attacker.getX()+4,attacker.getY(),attacker.getZ());
-   for(int i=0;i<3;i++){
+   for(int pokemonLevel=1;pokemonLevel<=3;pokemonLevel++){
+    attacker.setPokemonProgress(pokemonLevel,0);
+    float expectedDamage=4.0F+(pokemonLevel-1);
+    if(Math.abs(attacker.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE)-expectedDamage)>.001D)
+     h.fail("Charmander level "+pokemonLevel+" must have deterministic nominal damage "+expectedDamage);
+    for(int i=0;i<3;i++){
     cow.invulnerableTime=0;float before=cow.getHealth();attacker.focusPlayerTarget(cow);
     if(!attacker.fireElementalProjectile(cow))h.fail("A ranged strike inside the level-one projectile limit was cancelled");
     if(attacker.fireElementalProjectile(cow)||attacker.doHurtTarget(cow))h.fail("Physical contact or a second shot bypassed ranged-only cooldown");
@@ -76,13 +81,14 @@ final class TwelveAdjustmentChecks {
     if(shots.size()!=1)h.fail("Projectile absent or duplicated");var shot=shots.get(0);
     if(shot.color()!=EggAppearance.color("fire"))h.fail("Wrong first elemental color");
     for(int tick=0;tick<30&&!shot.isRemoved();tick++)shot.tick();
-    float expected=(float)attacker.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE);
-    if(Math.abs(before-cow.getHealth()-expected)>.001||cow.isOnFire())h.fail("Projectile damage changed or ignited target");
+    if(Math.abs(before-cow.getHealth()-expectedDamage)>.001||cow.isOnFire())h.fail("Charmander level "+pokemonLevel+" attack "+(i+1)+" damage changed or ignited target; expected="+expectedDamage+" actual="+(before-cow.getHealth()));
     if(blocker.getHealth()!=blockerHealth)h.fail("A creature crossing the shot path must not absorb a projectile aimed at another target");
     level.getServer().getWorldData().overworldData().setGameTime(level.getGameTime()+59);
     if(attacker.combatReady())h.fail("Attack cooldown ended before 60 ticks");
     level.getServer().getWorldData().overworldData().setGameTime(level.getGameTime()+1);
+    }
    }
+   verifySpeciesDamageSeries(h,owner,"bulbasaur");
    if(!attacker.projectileReady()||attacker.rangedCharges().charges()!=3)h.fail("Ranged-only attacks must not be gated by or consume finite ammunition charges");
    cow.setPos(attacker.getX()+20,attacker.getEyeY()-.1D,attacker.getZ());
    ElementalProjectile rangeLimitedShot=new ElementalProjectile(attacker,cow);level.addFreshEntity(rangeLimitedShot);
@@ -98,6 +104,32 @@ final class TwelveAdjustmentChecks {
   }finally{
    for(var shot:level.getEntitiesOfClass(ElementalProjectile.class,attacker.getBoundingBox().inflate(16),shot->shot.getOwner()==attacker))shot.discard();
    cow.discard();blocker.discard();level.getServer().getWorldData().overworldData().setGameTime(originalTime);
+  }
+ }
+ private static void verifySpeciesDamageSeries(GameTestHelper h,ServerPlayer owner,String species){
+  var level=h.getLevel();
+  var attacker=ModEntities.SPECIES.get(species).get().create(level);
+  var point=h.absolutePos(new BlockPos(5,2,9));attacker.moveTo(point.getX()+.5D,point.getY(),point.getZ()+.5D,0,0);
+  attacker.tame(owner);attacker.setOwnerUUID(owner.getUUID());attacker.setNoAi(true);level.addFreshEntity(attacker);
+  var cow=EntityType.COW.create(level);cow.moveTo(attacker.getX()+4.0D,attacker.getY(),attacker.getZ(),0,0);
+  cow.setNoAi(true);cow.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).setBaseValue(200.0D);cow.setHealth(200.0F);level.addFreshEntity(cow);
+  try{
+   for(int pokemonLevel=1;pokemonLevel<=3;pokemonLevel++){
+    attacker.setPokemonProgress(pokemonLevel,0);float expected=4.0F+(pokemonLevel-1);
+    for(int hit=1;hit<=3;hit++){
+     cow.invulnerableTime=0;float before=cow.getHealth();attacker.focusPlayerTarget(cow);
+     if(!attacker.fireElementalProjectile(cow))h.fail(species+" level "+pokemonLevel+" failed to launch damage-series shot "+hit);
+     var shots=level.getEntitiesOfClass(ElementalProjectile.class,attacker.getBoundingBox().inflate(12.0D),shot->shot.getOwner()==attacker);
+     if(shots.size()!=1)h.fail(species+" damage-series shot was absent or duplicated");
+     var shot=shots.get(0);for(int tick=0;tick<30&&!shot.isRemoved();tick++)shot.tick();
+     if(Math.abs((before-cow.getHealth())-expected)>.001D)
+      h.fail(species+" level "+pokemonLevel+" hit "+hit+" expected "+expected+" points but applied "+(before-cow.getHealth()));
+     level.getServer().getWorldData().overworldData().setGameTime(level.getGameTime()+60L);
+    }
+   }
+  }finally{
+   for(var shot:level.getEntitiesOfClass(ElementalProjectile.class,attacker.getBoundingBox().inflate(16.0D),shot->shot.getOwner()==attacker))shot.discard();
+   cow.discard();attacker.discard();
   }
  }
  private static void verifyRecipes(GameTestHelper h,net.minecraft.server.level.ServerPlayer owner){

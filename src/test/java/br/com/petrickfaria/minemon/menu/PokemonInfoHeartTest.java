@@ -14,4 +14,9 @@ public class PokemonInfoHeartTest {
         assertEquals(52, PokemonInfoScreen.heartSpriteU(3.0D));
         assertEquals(61, PokemonInfoScreen.heartSpriteU(1.0D));
     }
+
+    @Test public void statusScreenUsesTheRequestedCompactRangeLabels() {
+        assertEquals("Perc. Alcance", PokemonInfoScreen.PERCEPTION_RANGE_LABEL);
+        assertEquals("Perc. Ataque", PokemonInfoScreen.ATTACK_RANGE_LABEL);
+    }
 }
