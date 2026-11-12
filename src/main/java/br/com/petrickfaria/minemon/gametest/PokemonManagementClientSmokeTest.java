@@ -66,6 +66,12 @@ public final class PokemonManagementClientSmokeTest {
             // use Sentar so that it does not correctly wake this sleep-pose fixture.
             dewgong.setOrderedToSit(true);dewgong.setNoAi(true);dewgong.setNoGravity(true);
             dewgong.moveTo(owner.getX(),owner.getY(),owner.getZ()+3,180,0);dewgong.setSleeping(true);level.addFreshEntity(dewgong);dewgongId=dewgong.getId();
+            // Count five large and seven small aura draws per visible Gastly.
+            // Remove naturally spawned Gastlys from this small visual arena so
+            // another entity cannot double the fixture's particle totals.
+            level.getEntitiesOfClass(br.com.petrickfaria.minemon.entity.MinemonCreature.class,
+                    owner.getBoundingBox().inflate(48.0D),candidate->candidate.getSpeciesSlug().equals("gastly"))
+                    .forEach(net.minecraft.world.entity.Entity::discard);
             var gastly=ModEntities.SPECIES.get("gastly").get().create(level);gastly.tame(owner);gastly.setNoAi(true);gastly.setNoGravity(true);
             gastly.moveTo(owner.getX()+1.5,owner.getY()+1,owner.getZ()+3.5,180,0);level.addFreshEntity(gastly);gastlyId=gastly.getId();
         });
