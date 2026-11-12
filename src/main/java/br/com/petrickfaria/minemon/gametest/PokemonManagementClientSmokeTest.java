@@ -56,7 +56,10 @@ public final class PokemonManagementClientSmokeTest {
         var ownerId=minecraft.player.getUUID();
         minecraft.getSingleplayerServer().execute(()->{
             var owner=minecraft.getSingleplayerServer().getPlayerList().getPlayer(ownerId);var level=(net.minecraft.server.level.ServerLevel)owner.level;
-            level.setDayTime(1000);
+            // The fixture is meant to validate the rendered sleep pose. At
+            // daytime tickNightRest correctly wakes natural sleepers, so use
+            // an actual nighttime world clock before adding Dewgong.
+            level.setDayTime(13000);
             var dewgong=ModEntities.SPECIES.get("dewgong").get().create(level);dewgong.tame(owner);dewgong.setNoAi(true);dewgong.setNoGravity(true);
             dewgong.moveTo(owner.getX(),owner.getY(),owner.getZ()+3,180,0);dewgong.setSleeping(true);level.addFreshEntity(dewgong);dewgongId=dewgong.getId();
             var gastly=ModEntities.SPECIES.get("gastly").get().create(level);gastly.tame(owner);gastly.setNoAi(true);gastly.setNoGravity(true);

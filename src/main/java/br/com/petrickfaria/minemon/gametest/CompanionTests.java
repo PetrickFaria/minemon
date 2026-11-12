@@ -252,7 +252,8 @@ public final class CompanionTests {
   var safePosition=pokemon.position();
   h.runAfterDelay(12,()->{
    double drift=pokemon.position().subtract(safePosition).horizontalDistance();
-   check(h,pokemon.getNavigation().isDone()&&drift<.35D,"Charmander should stop retreating after safety is restored; drift="+drift+" navDone="+pokemon.getNavigation().isDone());
+   check(h,pokemon.getNavigation().isDone()&&drift<.35D,"Charmander should stop retreating after safety is restored; drift="+drift+" navDone="+pokemon.getNavigation().isDone()
+       +" velocity="+pokemon.getDeltaMovement()+" canFire="+pokemon.canFireAt(target)+" pokemon="+pokemon.position()+" target="+target.position());
    double dx=pokemon.getX()-target.getX(),dz=pokemon.getZ()-target.getZ(),length=Math.sqrt(dx*dx+dz*dz);
    target.moveTo(pokemon.getX()-dx/length*2.5D,pokemon.getY(),pokemon.getZ()-dz/length*2.5D,0,0);
    target.setNoAi(false);target.setTarget(pokemon);
@@ -461,7 +462,7 @@ public final class CompanionTests {
    h.runAfterDelay(45,()->{
     double after=abra.getY()-abra.naturalSurface();
     check(h,abra.getTarget()==null&&after<=1.0D&&after>=abra.flightMinimum()-.15D,
-        "Abra must return to its natural low hover after combat; altitude="+after+" naturalMinimum="+abra.flightMinimum());
+        "Abra must return to its natural low hover after combat; altitude="+after+" naturalMinimum="+abra.flightMinimum()+" target="+abra.getTarget());
     owner.discard();h.succeed();
    });
   });

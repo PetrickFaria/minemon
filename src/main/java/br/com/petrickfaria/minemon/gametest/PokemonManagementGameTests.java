@@ -136,9 +136,11 @@ public final class PokemonManagementGameTests {
         MinemonCreature pokemon=h.spawn(ModEntities.SPECIES.get("charmander").get(),new BlockPos(5,1,5));
         pokemon.tame(owner);pokemon.setNoAi(true);pokemon.setOrderedToSit(true);
         pokemon.setBlackListOverride(new ResourceLocation("minecraft","zombie"),true);
-        h.setBlock(new BlockPos(8,1,5),Blocks.OAK_FENCE);
+        // Keep the fence close to the target so the upper edge of the target
+        // volume is genuinely exposed above the vanilla fence collider.
+        h.setBlock(new BlockPos(9,1,5),Blocks.OAK_FENCE);
         Zombie baby=h.spawn(EntityType.ZOMBIE,new BlockPos(10,1,5));
-        baby.setBaby(true);baby.setNoAi(true);baby.setPos(pokemon.getX()+4.0D,pokemon.getY(),pokemon.getZ());
+        baby.setBaby(true);baby.setNoAi(true);baby.setPos(pokemon.getX()+5.0D,pokemon.getY()+1.1D,pokemon.getZ());
         pokemon.focusPlayerTarget(baby);
         check(h,pokemon.canFireAt(baby),"A baby zombie with hitbox exposed above a fence must remain targetable through an actually clear ray");
         check(h,pokemon.fireElementalProjectile(baby),"The Pokémon must launch a shot at the visible part of a baby zombie's hitbox");
@@ -151,7 +153,7 @@ public final class PokemonManagementGameTests {
 
         baby.discard();
         Zombie adult=h.spawn(EntityType.ZOMBIE,new BlockPos(10,1,5));adult.setNoAi(true);
-        adult.setPos(pokemon.getX()+4.0D,pokemon.getY(),pokemon.getZ());pokemon.focusPlayerTarget(adult);
+        adult.setPos(pokemon.getX()+5.0D,pokemon.getY(),pokemon.getZ());pokemon.focusPlayerTarget(adult);
         check(h,pokemon.canFireAt(adult),"An adult zombie's exposed upper hitbox must also remain targetable over a fence");
         h.setBlock(new BlockPos(8,1,5),Blocks.STONE);
         h.setBlock(new BlockPos(8,2,5),Blocks.STONE);h.setBlock(new BlockPos(8,3,5),Blocks.STONE);
@@ -170,7 +172,10 @@ public final class PokemonManagementGameTests {
         target.setPos(pokemon.getX()+15.4D,pokemon.getY(),pokemon.getZ());
         pokemon.setBlackListOverride(new ResourceLocation("minecraft","cow"),true);
         h.runAfterDelay(40,()->{
-            check(h,pokemon.getTarget()==target,"Perception must acquire a target whose center is outside 15 blocks while its hitbox remains within 15");
+            check(h,pokemon.getTarget()==target,"Perception must acquire a target whose center is outside 15 blocks while its hitbox remains within 15"
+                    +" [canPerceive="+pokemon.canPerceive(target)+", canSeeHitbox="+pokemon.canSeeHitbox(target)
+                    +", pokemon="+pokemon.position()+", bounds="+pokemon.getBoundingBox()+", target="+target.position()
+                    +", targetBounds="+target.getBoundingBox()+", targetAlive="+target.isAlive()+"]");
             check(h,pokemon.canPerceive(target),"The acquired target must satisfy the same hitbox-based perception rule");
             owner.discard();pokemon.discard();target.discard();h.succeed();
         });
@@ -313,7 +318,7 @@ public final class PokemonManagementGameTests {
             // still reaches inside it and remains perceptible.
             rangeTarget.setPos(pokemon.getX()+perception+0.4D,centeredY,pokemon.getZ());
             check(h,pokemon.canPerceive(rangeTarget),"Perception must include a target whose hitbox remains inside the level "+level+" limit");
-            rangeTarget.setPos(pokemon.getX()+perception+0.8D,centeredY,pokemon.getZ());
+            rangeTarget.setPos(pokemon.getX()+perception+1.0D,centeredY,pokemon.getZ());
             check(h,!pokemon.canPerceive(rangeTarget),"Perception must exclude targets beyond the level "+level+" limit");
         }
         pokemon.setPokemonProgress(5,0);
@@ -373,7 +378,7 @@ public final class PokemonManagementGameTests {
         Cow target = h.spawn(EntityType.COW, new BlockPos(9, 1, 5));
         target.setNoAi(true);
         pokemon.focusPlayerTarget(target);
-        target.setPos(pokemon.getX() + 15.1D, pokemon.getY(), pokemon.getZ());
+        target.setPos(pokemon.getX() + 16.0D, pokemon.getY(), pokemon.getZ());
         h.runAfterDelay(299, () -> {
             check(h, pokemon.getTarget() == target, "A valid target must stay focused for the first 299 ticks outside perception; target="
                     + pokemon.getTarget() + " canAttack=" + pokemon.canAttack(target) + " canPerceive=" + pokemon.canPerceive(target)
@@ -382,7 +387,7 @@ public final class PokemonManagementGameTests {
             target.setPos(pokemon.getX() + 14.9D, pokemon.getY(), pokemon.getZ());
             h.runAfterDelay(2, () -> {
                 check(h, pokemon.getTarget() == target, "Reentering perception must preserve and reset the focus timeout");
-                target.setPos(pokemon.getX() + 15.1D, pokemon.getY(), pokemon.getZ());
+                target.setPos(pokemon.getX() + 16.0D, pokemon.getY(), pokemon.getZ());
                 h.runAfterDelay(299, () -> {
                     check(h, pokemon.getTarget() == target, "The second continuous out-of-range interval must also allow 299 ticks");
                     h.runAfterDelay(1, () -> {

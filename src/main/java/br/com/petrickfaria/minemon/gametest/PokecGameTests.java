@@ -220,7 +220,11 @@ public final class PokecGameTests {
     public static void pokeballsStoreSleepingAndDefeatedOwnedPokemonWithoutHealing(GameTestHelper h){
         floor(h);ServerPlayer owner=player(h,h.absolutePos(new BlockPos(7,1,5)));
         MinemonCreature sleeper=h.spawn(ModEntities.SPECIES.get("pikachu").get(),new BlockPos(5,1,5));
-        sleeper.tame(owner);sleeper.setOwnerUUID(owner.getUUID());sleeper.setHealth(sleeper.getMaxHealth()-4);sleeper.setSleeping(true);
+        sleeper.tame(owner);sleeper.setOwnerUUID(owner.getUUID());sleeper.setHealth(sleeper.getMaxHealth()-4);
+        // The roster restores its saved follow/sit/free mode on registration;
+        // choose Sentar so that the test's explicit sleep state is not woken
+        // by the expected follow-command priority.
+        sleeper.setOrderedToSit(true);sleeper.setSleeping(true);
         float expectedSleepHealth=sleeper.getHealth();
         ActivePokemonData.register(sleeper);
         owner.setItemInHand(InteractionHand.MAIN_HAND,new ItemStack(ModItems.POKEBALL.get()));
