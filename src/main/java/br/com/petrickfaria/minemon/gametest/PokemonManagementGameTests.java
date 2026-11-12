@@ -168,14 +168,16 @@ public final class PokemonManagementGameTests {
         ServerPlayer owner=player(h,h.absolutePos(new BlockPos(4,1,5)));
         MinemonCreature pokemon=h.spawn(ModEntities.SPECIES.get("bulbasaur").get(),new BlockPos(5,1,5));
         pokemon.tame(owner);pokemon.setNoAi(false);pokemon.setOrderedToSit(true);
-        var target=h.spawn(EntityType.IRON_GOLEM,new BlockPos(10,1,5));target.setNoAi(true);target.setNoGravity(true);
+        var target=h.spawn(EntityType.RAVAGER,new BlockPos(10,1,5));target.setNoAi(true);target.setNoGravity(true);
         target.setPos(pokemon.getX()+15.4D,pokemon.getY(),pokemon.getZ());
         for(EntityType<?> type:net.minecraftforge.registries.ForgeRegistries.ENTITY_TYPES.getValues()){
             if(type.getCategory()!=net.minecraft.world.entity.MobCategory.MISC){
                 ResourceLocation id=net.minecraftforge.registries.ForgeRegistries.ENTITY_TYPES.getKey(type);
-                if(id!=null)pokemon.setBlackListOverride(id,type==EntityType.IRON_GOLEM);
+                if(id!=null)pokemon.setBlackListOverride(id,type==EntityType.RAVAGER);
             }
         }
+        check(h,target.distanceTo(pokemon)>15.0D&&pokemon.canPerceive(target)&&pokemon.isBlackListTarget(target),
+                "Range-boundary target must be selectable by hitbox while its center remains outside perception");
         h.runAfterDelay(40,()->{
             check(h,pokemon.getTarget()==target,"Perception must acquire a target whose center is outside 15 blocks while its hitbox remains within 15"
                     +" [canPerceive="+pokemon.canPerceive(target)+", canSeeHitbox="+pokemon.canSeeHitbox(target)
