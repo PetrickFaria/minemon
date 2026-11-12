@@ -989,16 +989,18 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         // A target acquired by autonomous combat remains replaceable when a closer valid
         // threat arrives. Explicit trainer commands still use playerFocusTarget below.
         if (!level.isClientSide && isTame() && playerFocusTarget == null
-                && getTarget() instanceof net.minecraft.world.entity.Mob current && isBlackListTarget(current)
                 && --nearbyThreatScanTicks <= 0) {
-            nearbyThreatScanTicks = 5;
-            double currentDistance = CombatGeometry.centerDistanceSquared(this, current);
+            net.minecraft.world.entity.Mob current=getTarget() instanceof net.minecraft.world.entity.Mob mobTarget
+                    &&isBlackListTarget(mobTarget)?mobTarget:null;
+            nearbyThreatScanTicks = current==null?10:5;
+            double currentDistance=current==null?Double.POSITIVE_INFINITY:CombatGeometry.distanceSquared(this,current);
             var nearest = level.getEntitiesOfClass(net.minecraft.world.entity.Mob.class,
-                            getBoundingBox().inflate(perceptionRange()), candidate -> candidate != current
-                                    && isBlackListTarget(candidate) && canPerceive(candidate)).stream()
-                    .min(java.util.Comparator.comparingDouble(candidate -> CombatGeometry.centerDistanceSquared(this, candidate)))
+                            getBoundingBox().inflate(perceptionRange()+4.0D), candidate -> candidate != current
+                                    && isBlackListTarget(candidate) && canPerceive(candidate)
+                                    && getSensing().hasLineOfSight(candidate)).stream()
+                    .min(java.util.Comparator.comparingDouble(candidate -> CombatGeometry.distanceSquared(this, candidate)))
                     .orElse(null);
-            if (nearest != null && CombatGeometry.centerDistanceSquared(this, nearest) + 9.0D < currentDistance) {
+            if (nearest != null && (current==null||CombatGeometry.distanceSquared(this,nearest)+9.0D<currentDistance)) {
                 setTarget(nearest);
                 getNavigation().stop();
             }
@@ -1009,7 +1011,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
                     || focused.level != level || !canAttack(living)) {
                 clearPlayerFocus();
             } else {
-                if (CombatGeometry.centerDistanceSquared(this, living) > perceptionRange() * perceptionRange())
+                if (CombatGeometry.distanceSquared(this, living) > perceptionRange() * perceptionRange())
                     focusOutsidePerceptionTicks++;
                 else focusOutsidePerceptionTicks = 0;
                 if (focusOutsidePerceptionTicks >= 20 * 15) clearPlayerFocus();

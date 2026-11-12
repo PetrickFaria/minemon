@@ -159,6 +159,23 @@ public final class PokemonManagementGameTests {
         owner.discard();pokemon.discard();adult.discard();h.succeed();
     }
 
+    @GameTest(template="test_arena", timeoutTicks=100)
+    public static void perceptionAcquiresTargetWhoseHitboxCrossesTheRangeBoundary(GameTestHelper h) {
+        floor(h);
+        for(int x=16;x<=22;x++)for(int z=0;z<10;z++)h.setBlock(new BlockPos(x,0,z),Blocks.STONE);
+        ServerPlayer owner=player(h,h.absolutePos(new BlockPos(4,1,5)));
+        MinemonCreature pokemon=h.spawn(ModEntities.SPECIES.get("bulbasaur").get(),new BlockPos(5,1,5));
+        pokemon.tame(owner);pokemon.setNoAi(false);
+        Cow target=h.spawn(EntityType.COW,new BlockPos(10,1,5));target.setNoAi(true);target.setNoGravity(true);
+        target.setPos(pokemon.getX()+15.4D,pokemon.getY(),pokemon.getZ());
+        pokemon.setBlackListOverride(new ResourceLocation("minecraft","cow"),true);
+        h.runAfterDelay(40,()->{
+            check(h,pokemon.getTarget()==target,"Perception must acquire a target whose center is outside 15 blocks while its hitbox remains within 15");
+            check(h,pokemon.canPerceive(target),"The acquired target must satisfy the same hitbox-based perception rule");
+            owner.discard();pokemon.discard();target.discard();h.succeed();
+        });
+    }
+
     @GameTest(template = "test_arena", timeoutTicks = 180)
     public static void companionXPUsesMobRewardAndIsGrantedOnlyOnce(GameTestHelper h) {
         floor(h);
