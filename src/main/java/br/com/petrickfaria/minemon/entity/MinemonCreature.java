@@ -997,7 +997,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
             var nearest = level.getEntitiesOfClass(net.minecraft.world.entity.Mob.class,
                             getBoundingBox().inflate(perceptionRange()+4.0D), candidate -> candidate != current
                                     && isBlackListTarget(candidate) && canPerceive(candidate)
-                                    && getSensing().hasLineOfSight(candidate)).stream()
+                                    && canSeeHitbox(candidate)).stream()
                     .min(java.util.Comparator.comparingDouble(candidate -> CombatGeometry.distanceSquared(this, candidate)))
                     .orElse(null);
             if (nearest != null && (current==null||CombatGeometry.distanceSquared(this,nearest)+9.0D<currentDistance)) {
@@ -1372,12 +1372,19 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     public boolean projectileReady(){return !isDefeated();}
     /** Returns a reachable, unobstructed point inside the target's real hitbox. */
     public net.minecraft.world.phys.Vec3 attackAimPoint(LivingEntity target){
+        return target==null||!target.isAlive()||target.level!=level?null:visibleHitboxPoint(target,attackRange());
+    }
+    /** Tests visibility to the real target volume instead of only its eye point. */
+    public boolean canSeeHitbox(LivingEntity target){
+        return target!=null&&target.isAlive()&&target.level==level
+                &&visibleHitboxPoint(target,Double.POSITIVE_INFINITY)!=null;
+    }
+    private net.minecraft.world.phys.Vec3 visibleHitboxPoint(LivingEntity target,double maxRange){
         if(target==null||!target.isAlive()||target.level!=level)return null;
         var start=new net.minecraft.world.phys.Vec3(getX(),getEyeY()-.1D,getZ());
         var box=target.getBoundingBox();
-        double range=attackRange();
         var nearest=CombatGeometry.closestPoint(start,box);
-        if(start.distanceToSqr(nearest)<=range*range&&clearShot(start,nearest))return nearest;
+        if(start.distanceToSqr(nearest)<=maxRange*maxRange&&clearShot(start,nearest))return nearest;
         // Vanilla sensing typically tests one eye-to-eye ray. A fence can cover
         // that point while leaving another part of a baby or adult hitbox open.
         // Sample the target volume and accept only rays that pass the actual
@@ -1389,7 +1396,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
                     box.minY+(box.maxY-box.minY)*fy,
                     box.minZ+(box.maxZ-box.minZ)*fz);
             double travel=CombatGeometry.rayDistanceToBox(start,point.subtract(start),box);
-            if(travel<=range&&clearShot(start,point))return point;
+            if(travel<=maxRange&&clearShot(start,point))return point;
         }
         return null;
     }
