@@ -234,7 +234,8 @@ public class MinemonRenderer extends GeoEntityRenderer<MinemonCreature> {
   }
   private static void collectRocketEyeBones(software.bernie.geckolib3.geo.render.built.GeoBone bone,java.util.Set<String> selected){
    boolean eye=RocketVisuals.isEyeCubeBone(bone.name);
-   if(eye)selected.add(bone.name);
+   // Ignore named eye containers with no geometry (for example Arbok's `eyes` parent).
+   if(eye&&!bone.childCubes.isEmpty())selected.add(bone.name);
    for(var child:bone.childBones)collectRocketEyeBones(child,selected);
   }
   private void renderSelectedBones(software.bernie.geckolib3.geo.render.built.GeoModel model,java.util.Set<String> selected,
