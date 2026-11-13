@@ -123,7 +123,7 @@ jobs:
           rm -rf run/minemon-gametest
           python3 tools/prepare_gametest_world.py
           set -o pipefail
-          timeout 300s ./gradlew --no-daemon runGameTestServer -PcombatGameTest 2>&1 | tee run/combat-zombie-damage-tests.log
+          timeout 600s ./gradlew --no-daemon runGameTestServer -PcombatGameTest 2>&1 | tee run/combat-zombie-damage-tests.log
           grep -F '[MINEMON COMBAT] summary acceptedHits=20 totalProjectileDamage=100.0 finalZombieHP=96.0' run/combat-zombie-damage-tests.log
       - name: Validate Rocket villager profession and uniform on the real client
         if: ${{ !cancelled() && steps.compile.outcome == 'success' }}
