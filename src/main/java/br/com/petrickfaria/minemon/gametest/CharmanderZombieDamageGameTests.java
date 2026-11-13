@@ -74,10 +74,6 @@ public final class CharmanderZombieDamageGameTests {
         check(h, "uncommon".equals(pokemon.getPokemonRarity()) && pokemon.pokemonAttackDamage() == 4.0D,
                 "Uncommon level 1 Charmander must retain its 4-point base damage");
         pokemon.setPokemonProgress(2, 0);
-        check(h, pokemon.pokemonAttackDamage() == 5.0D
-                        && pokemon.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE).getBaseValue() == 5.0D,
-                "Uncommon level 2 Charmander must configure exactly 5 attack-damage points");
-
         Zombie zombie = h.spawn(EntityType.ZOMBIE, new BlockPos(9, 1, 5));
         zombie.setNoAi(true); // Real vanilla Zombie entity and hurt pipeline, with movement disabled for controlled shots.
         // Other GameTests can change the shared test world's clock while this
@@ -92,23 +88,51 @@ public final class CharmanderZombieDamageGameTests {
         for (var slot : net.minecraft.world.entity.EquipmentSlot.values())
             zombie.setItemSlot(slot, ItemStack.EMPTY);
         for (var effect : new java.util.ArrayList<>(zombie.getActiveEffects())) zombie.removeEffect(effect.getEffect());
-        zombie.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.ARMOR).setBaseValue(0.0D);
-        zombie.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.ARMOR_TOUGHNESS).setBaseValue(0.0D);
+        // Keep the vanilla Zombie's natural armor attribute (2), while clearing
+        // randomized gear and effects so the fixture is reproducible.
         zombie.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).setBaseValue(200.0D);
         zombie.setHealth(200.0F);
-        check(h, zombie.getArmorValue() == 0 && zombie.getActiveEffects().isEmpty(),
-                "Combat target must have no armor or effects (armor=" + zombie.getArmorValue()
+        check(h, zombie.getArmorValue() == 2 && zombie.getActiveEffects().isEmpty(),
+                "Combat target must retain only its vanilla natural armor and no effects (armor=" + zombie.getArmorValue()
                         + ", effects=" + zombie.getActiveEffects() + ")");
         System.out.println("[MINEMON ZOMBIE FIXTURE] controlled armor=" + zombie.getArmorValue()
                 + " effects=" + zombie.getActiveEffects().size() + " gear=" + spawnedGear);
-        runControlledZombieShot(h, owner, pokemon, zombie, 1, -1L, 0.0F, 0);
+
+        // Verify the requested level 1 value through a normal projectile against
+        // the same armored Zombie before running the 20-hit level 2 series.
+        check(h, pokemon.pokemonAttackDamage() == 4.0D, "Uncommon level 1 Charmander must configure 4.0 damage");
+        float levelOneBefore = zombie.getHealth();
+        long levelOneLaunch = h.getLevel().getGameTime();
+        pokemon.focusPlayerTarget(zombie);
+        check(h, pokemon.fireElementalProjectile(zombie), "Uncommon level 1 Charmander failed to launch its projectile");
+        var levelOneShots = h.getLevel().getEntitiesOfClass(br.com.petrickfaria.minemon.entity.ElementalProjectile.class,
+                pokemon.getBoundingBox().inflate(12.0D), shot -> shot.getOwner() == pokemon && shot.getTargetIdForValidation(zombie));
+        check(h, levelOneShots.size() == 1, "Expected exactly one level 1 aimed projectile");
+        if (levelOneShots.size() != 1) return;
+        check(h, levelOneShots.get(0).damageForValidation() == 4.0F,
+                "Uncommon level 1 projectile must carry exactly 4.0 damage");
+        h.runAfterDelay(15, () -> {
+            float applied = levelOneBefore - zombie.getHealth();
+            check(h, applied == 4.0F,
+                    "Armored Zombie received " + applied + " HP from level 1; expected exactly 4.0");
+            check(h, zombie.invulnerableTime > 0,
+                    "Accepted level 1 damage must preserve vanilla invulnerability behavior");
+            System.out.println("[MINEMON COMBAT] level=1 configured=4.0 projectile=4.0 applied=" + applied
+                    + " targetHP=" + zombie.getHealth() + " invulnerableTime=" + zombie.invulnerableTime
+                    + " armor=" + zombie.getArmorValue() + " effects=" + zombie.getActiveEffects().size());
+            pokemon.setPokemonProgress(2, 0);
+            check(h, pokemon.pokemonAttackDamage() == 5.0D
+                            && pokemon.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE).getBaseValue() == 5.0D,
+                    "Uncommon level 2 Charmander must configure exactly 5 attack-damage points");
+            runControlledZombieShot(h, owner, pokemon, zombie, 1, levelOneLaunch, 0.0F, 0);
+        });
     }
 
     private static void runControlledZombieShot(GameTestHelper h, ServerPlayer owner, MinemonCreature pokemon,
                                                   Zombie zombie, int hit, long previousLaunch,
                                                   float totalProjectileDamage, int waitedForTarget) {
         if (!zombie.isAlive()) { h.fail("The high-health zombie died before all controlled hits"); return; }
-        check(h, zombie.getArmorValue() == 0 && zombie.getActiveEffects().isEmpty(),
+        check(h, zombie.getArmorValue() == 2 && zombie.getActiveEffects().isEmpty(),
                 "Target mitigation state changed before shot " + hit);
         if (zombie.invulnerableTime > 0 || !pokemon.combatReady()) {
             if (waitedForTarget == 0 || waitedForTarget % 10 == 0) {
