@@ -177,6 +177,8 @@ if not args.segment:
 source_fire_frames={f'src/main/resources/assets/minemon/textures/pokemon/{slug}_cobblemon_1_8_2/fire/normal/{frame}.png' for slug in ('ponyta','rapidash') for frame in range(1,5)}
 allowed_paths.update(source_fire_frames)
 allowed_paths.update({
+ # Isolated real-Zombie combat GameTest fixture copied from the validated main arena.
+ 'src/main/resources/data/minemon_damage/structures/test_arena.nbt',
  'src/main/resources/assets/minemon/animations/alakazam_cobblemon_1_8_2/alakazam.animation.json',
  # Existing, separately validated feature assets carried by this line:
  # Gengar's requested ground-walk clip and the reviewed 3-D capture-ball item.
