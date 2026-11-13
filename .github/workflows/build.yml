@@ -111,6 +111,7 @@ jobs:
           retention-days: 7
       - name: Run Minecraft server behavior tests
         id: gametests
+        if: ${{ !cancelled() && steps.compile.outcome == 'success' }}
         run: |
           mkdir -p run
           echo eula=true > run/eula.txt
