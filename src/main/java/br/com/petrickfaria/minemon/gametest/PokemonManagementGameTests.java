@@ -376,6 +376,9 @@ public final class PokemonManagementGameTests {
     @GameTest(template = "test_arena", timeoutTicks = 1300)
     public static void uncommonLevelTwoCharmanderAppliesTwentyNormalProjectileHitsToZombie(GameTestHelper h) {
         floor(h);
+        // Keep the real undead target out of daylight so vanilla sunburn cannot
+        // be mistaken for damage dealt by the projectile between measurements.
+        h.getLevel().setDayTime(18000L);
         ServerPlayer owner = player(h, h.absolutePos(new BlockPos(7, 1, 5)));
         MinemonCreature pokemon = h.spawn(ModEntities.SPECIES.get("charmander").get(), new BlockPos(5, 1, 5));
         pokemon.tame(owner);
@@ -435,12 +438,12 @@ public final class PokemonManagementGameTests {
                 + " projectile=" + shot.damageForValidation() + " targetHP=" + healthBefore
                 + " interval=" + (previousLaunch < 0 ? "initial" : (launchedAt - previousLaunch))
                 + " invulnerableTime=" + zombie.invulnerableTime + " armor=" + zombie.getArmorValue()
-                + " effects=" + zombie.getActiveEffects().size());
+                + " effects=" + zombie.getActiveEffects().size() + " fireTicks=" + zombie.getRemainingFireTicks());
         h.runAfterDelay(15, () -> {
             float applied = healthBefore - zombie.getHealth();
             check(h, applied == 5.0F, "Zombie received " + applied + " HP on shot " + hit + "; expected 5.0"
                     + " (health=" + zombie.getHealth() + ", hurtTime=" + zombie.hurtTime
-                    + ", invulnerableTime=" + zombie.invulnerableTime + ")");
+                    + ", invulnerableTime=" + zombie.invulnerableTime + ", fireTicks=" + zombie.getRemainingFireTicks() + ")");
             check(h, zombie.invulnerableTime > 0,
                     "Accepted vanilla damage must enter the normal invulnerability window after shot " + hit);
             check(h, h.getLevel().getGameTime() - launchedAt >= 8,
@@ -448,7 +451,8 @@ public final class PokemonManagementGameTests {
             System.out.println("[MINEMON COMBAT] impact hit=" + hit + " applied=" + applied
                     + " targetHP=" + zombie.getHealth() + " interval=" + (h.getLevel().getGameTime() - launchedAt)
                     + " hurtTime=" + zombie.hurtTime + " invulnerableTime=" + zombie.invulnerableTime
-                    + " armor=" + zombie.getArmorValue() + " effects=" + zombie.getActiveEffects().size());
+                    + " armor=" + zombie.getArmorValue() + " effects=" + zombie.getActiveEffects().size()
+                    + " fireTicks=" + zombie.getRemainingFireTicks());
             if (hit == 20) {
                 check(h, Math.abs(zombie.getHealth() - 100.0F) < 0.001F,
                         "Twenty accepted 5-point hits must leave 100 HP; actual=" + zombie.getHealth());
