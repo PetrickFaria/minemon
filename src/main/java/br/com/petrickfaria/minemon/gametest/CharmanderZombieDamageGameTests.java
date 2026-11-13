@@ -74,7 +74,11 @@ public final class CharmanderZombieDamageGameTests {
         pokemon.setNoAi(true);
         pokemon.setPokemonProgress(1, 0);
         check(h, "uncommon".equals(pokemon.getPokemonRarity()) && pokemon.pokemonAttackDamage() == 4.0D,
-                "Uncommon level 1 Charmander must retain its 4-point base damage");
+                "Expected uncommon level 1 Charmander damage=4.0; species=" + pokemon.getSpeciesSlug()
+                        + ", rarity=" + pokemon.getPokemonRarity() + ", level=" + pokemon.getPokemonLevel()
+                        + ", damage=" + pokemon.pokemonAttackDamage() + ", attribute="
+                        + pokemon.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE).getBaseValue()
+                        + ", catalogRarity=" + br.com.petrickfaria.minemon.pokec.PokecEconomy.get().rarity(pokemon.getSpeciesSlug()));
         pokemon.setPokemonProgress(2, 0);
         Zombie zombie = h.spawn(EntityType.ZOMBIE, new BlockPos(9, 1, 5));
         zombie.setNoAi(true); // Real vanilla Zombie entity and hurt pipeline, with movement disabled for controlled shots.
