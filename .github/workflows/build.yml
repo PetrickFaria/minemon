@@ -97,7 +97,7 @@ jobs:
               details = passed.group(0)
           elif failure_lines:
               details = " | ".join(failure_lines[-6:])
-              slug = re.sub(r"[^A-Za-z0-9_-]+", "-", details).strip("-")[:100]
+              slug = re.sub(r"[^A-Za-z0-9_-]+", "-", details).strip("-")[:200]
               label = "failed-" + (slug or "unparsed")
           else:
               details = "No GameTest result marker found; inspect the workflow log."
