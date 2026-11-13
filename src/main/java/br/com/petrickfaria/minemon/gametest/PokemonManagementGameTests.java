@@ -376,9 +376,6 @@ public final class PokemonManagementGameTests {
     @GameTest(template = "test_arena", timeoutTicks = 1300)
     public static void uncommonLevelTwoCharmanderAppliesTwentyNormalProjectileHitsToZombie(GameTestHelper h) {
         floor(h);
-        // Keep the real undead target out of daylight so vanilla sunburn cannot
-        // be mistaken for damage dealt by the projectile between measurements.
-        h.getLevel().setDayTime(18000L);
         ServerPlayer owner = player(h, h.absolutePos(new BlockPos(7, 1, 5)));
         MinemonCreature pokemon = h.spawn(ModEntities.SPECIES.get("charmander").get(), new BlockPos(5, 1, 5));
         pokemon.tame(owner);
@@ -393,6 +390,9 @@ public final class PokemonManagementGameTests {
 
         Zombie zombie = h.spawn(EntityType.ZOMBIE, new BlockPos(9, 1, 5));
         zombie.setNoAi(true); // Real vanilla Zombie entity and hurt pipeline, with movement disabled for controlled shots.
+        // Other GameTests can change the shared test world's clock while this
+        // series runs; a solid roof keeps daylight burn out of the measurement.
+        h.setBlock(new BlockPos(9, 4, 5), Blocks.STONE);
         String spawnedGear = java.util.Arrays.stream(net.minecraft.world.entity.EquipmentSlot.values())
                 .map(slot -> slot.name() + "=" + zombie.getItemBySlot(slot))
                 .collect(java.util.stream.Collectors.joining(","));
