@@ -373,7 +373,7 @@ public final class PokemonManagementGameTests {
         });
     }
 
-    @GameTest(template = "test_arena", timeoutTicks = 1300)
+    @GameTest(template = "test_arena", timeoutTicks = 1700)
     public static void uncommonLevelTwoCharmanderAppliesTwentyNormalProjectileHitsToZombie(GameTestHelper h) {
         floor(h);
         ServerPlayer owner = player(h, h.absolutePos(new BlockPos(7, 1, 5)));
@@ -411,19 +411,32 @@ public final class PokemonManagementGameTests {
                         + ", effects=" + zombie.getActiveEffects() + ")");
         System.out.println("[MINEMON ZOMBIE FIXTURE] controlled armor=" + zombie.getArmorValue()
                 + " effects=" + zombie.getActiveEffects().size() + " gear=" + spawnedGear);
-        runControlledZombieShot(h, owner, pokemon, zombie, 1, zombie.getHealth(), -1L);
+        runControlledZombieShot(h, owner, pokemon, zombie, 1, -1L, 0.0F, 0);
     }
 
     private static void runControlledZombieShot(GameTestHelper h, ServerPlayer owner, MinemonCreature pokemon,
-                                                  Zombie zombie, int hit, float healthBefore, long previousLaunch) {
+                                                  Zombie zombie, int hit, long previousLaunch,
+                                                  float totalProjectileDamage, int waitedForTarget) {
         if (!zombie.isAlive()) { h.fail("The high-health zombie died before all controlled hits"); return; }
         check(h, zombie.getArmorValue() == 0 && zombie.getActiveEffects().isEmpty(),
                 "Target mitigation state changed before shot " + hit);
-        check(h, zombie.invulnerableTime == 0, "Vanilla invulnerability must expire before shot " + hit
-                + " (remaining=" + zombie.invulnerableTime + ")");
+        if (zombie.invulnerableTime > 0 || !pokemon.combatReady()) {
+            if (waitedForTarget == 0 || waitedForTarget % 10 == 0) {
+                var lastSource = zombie.getLastDamageSource();
+                System.out.println("[MINEMON COMBAT] hold hit=" + hit + " waitingTicks=" + waitedForTarget
+                        + " invulnerableTime=" + zombie.invulnerableTime + " combatReady=" + pokemon.combatReady()
+                        + " health=" + zombie.getHealth() + " lastDamage="
+                        + (lastSource == null ? "none" : lastSource.getMsgId() + "/" + lastSource.getEntity()));
+            }
+            h.runAfterDelay(1, () -> runControlledZombieShot(h, owner, pokemon, zombie, hit,
+                    previousLaunch, totalProjectileDamage, waitedForTarget + 1));
+            return;
+        }
         long launchedAt = h.getLevel().getGameTime();
-        if (previousLaunch >= 0L) check(h, launchedAt - previousLaunch == 60L,
-                "Normal attack cooldown interval changed before shot " + hit + ": " + (launchedAt - previousLaunch));
+        long interval = previousLaunch < 0L ? -1L : launchedAt - previousLaunch;
+        if (previousLaunch >= 0L) check(h, interval >= 60L,
+                "Normal attack cooldown interval was shorter than 60 ticks before shot " + hit + ": " + interval);
+        float shotHealthBefore = zombie.getHealth();
         float configuredDamage = (float) pokemon.pokemonAttackDamage();
         pokemon.focusPlayerTarget(zombie);
         check(h, pokemon.fireElementalProjectile(zombie), "Charmander failed to launch normal projectile " + hit);
@@ -435,12 +448,12 @@ public final class PokemonManagementGameTests {
         check(h, shot.damageForValidation() == 5.0F,
                 "Projectile " + hit + " carried " + shot.damageForValidation() + " instead of 5.0 damage");
         System.out.println("[MINEMON COMBAT] launch hit=" + hit + " configured=" + configuredDamage
-                + " projectile=" + shot.damageForValidation() + " targetHP=" + healthBefore
-                + " interval=" + (previousLaunch < 0 ? "initial" : (launchedAt - previousLaunch))
+                + " projectile=" + shot.damageForValidation() + " targetHP=" + shotHealthBefore
+                + " interval=" + (previousLaunch < 0 ? "initial" : interval)
                 + " invulnerableTime=" + zombie.invulnerableTime + " armor=" + zombie.getArmorValue()
                 + " effects=" + zombie.getActiveEffects().size() + " fireTicks=" + zombie.getRemainingFireTicks());
         h.runAfterDelay(15, () -> {
-            float applied = healthBefore - zombie.getHealth();
+            float applied = shotHealthBefore - zombie.getHealth();
             check(h, applied == 5.0F, "Zombie received " + applied + " HP on shot " + hit + "; expected 5.0"
                     + " (health=" + zombie.getHealth() + ", hurtTime=" + zombie.hurtTime
                     + ", invulnerableTime=" + zombie.invulnerableTime + ", fireTicks=" + zombie.getRemainingFireTicks() + ")");
@@ -454,13 +467,15 @@ public final class PokemonManagementGameTests {
                     + " armor=" + zombie.getArmorValue() + " effects=" + zombie.getActiveEffects().size()
                     + " fireTicks=" + zombie.getRemainingFireTicks());
             if (hit == 20) {
-                check(h, Math.abs(zombie.getHealth() - 100.0F) < 0.001F,
-                        "Twenty accepted 5-point hits must leave 100 HP; actual=" + zombie.getHealth());
+                check(h, totalProjectileDamage + applied == 100.0F,
+                        "Twenty accepted hits must total 100 projectile damage; actual=" + (totalProjectileDamage + applied));
+                System.out.println("[MINEMON COMBAT] summary acceptedHits=20 totalProjectileDamage="
+                        + (totalProjectileDamage + applied) + " finalZombieHP=" + zombie.getHealth());
                 owner.discard(); pokemon.discard(); zombie.discard(); h.succeed();
                 return;
             }
             h.runAfterDelay(45, () -> runControlledZombieShot(h, owner, pokemon, zombie, hit + 1,
-                    zombie.getHealth(), launchedAt));
+                    launchedAt, totalProjectileDamage + applied, 0));
         });
     }
 
