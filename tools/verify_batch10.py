@@ -180,6 +180,7 @@ allowed.add('src/main/resources/assets/minemon/textures/pokemon/arbok_cobblemon_
 allowed.update({'src/main/resources/assets/minemon_gen1/particles/gastly_ghostly_smoke.json',*(f'src/main/resources/assets/minemon_gen1/textures/particle/gastly_ghostly_smoke_{i}.png' for i in range(6))})
 changed=subprocess.check_output(['git','diff','--name-only',BASE,'--','src/main/resources'],cwd=ROOT,text=True).splitlines()
 allowed.update(pokec_resource_paths())
+allowed.add('src/main/resources/data/minemon_damage/structures/test_arena.nbt')
 allowed.add('src/main/resources/assets/minemon_gen1/particles/gastly_small_smoke.json')
 allowed.add('src/main/resources/assets/minemon/textures/emissive/rocket_eye_red.png')
 assert set(changed)<=allowed,set(changed)-allowed

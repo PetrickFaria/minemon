@@ -186,6 +186,7 @@ allowed_resources.update(source_fire_frames)
 allowed_resources.add('src/main/resources/assets/minemon/textures/pokemon/arbok_cobblemon_1_8_2/arbok.png')
 allowed_resources.update({'src/main/resources/assets/minemon_gen1/particles/gastly_ghostly_smoke.json',*(f'src/main/resources/assets/minemon_gen1/textures/particle/gastly_ghostly_smoke_{i}.png' for i in range(6))})
 allowed_resources.update(pokec_resource_paths())
+allowed_resources.add('src/main/resources/data/minemon_damage/structures/test_arena.nbt')
 allowed_resources.add('src/main/resources/assets/minemon_gen1/particles/gastly_small_smoke.json')
 allowed_resources.add('src/main/resources/assets/minemon/textures/emissive/rocket_eye_red.png')
 assert set(changed)<=allowed_resources,set(changed)-allowed_resources

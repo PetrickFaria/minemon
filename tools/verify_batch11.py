@@ -157,6 +157,7 @@ allowed.update({'src/main/resources/assets/minemon_gen1/particles/gastly_ghostly
 changed=subprocess.check_output(['git','diff','--name-only',BASE,'--','src/main/resources'],cwd=ROOT,text=True).splitlines()
 changed+=subprocess.check_output(['git','ls-files','--others','--exclude-standard','--','src/main/resources'],cwd=ROOT,text=True).splitlines()
 allowed.update(pokec_resource_paths())
+allowed.add('src/main/resources/data/minemon_damage/structures/test_arena.nbt')
 allowed.add('src/main/resources/assets/minemon_gen1/particles/gastly_small_smoke.json')
 allowed.add('src/main/resources/assets/minemon/textures/emissive/rocket_eye_red.png')
 assert set(changed)<=allowed,set(changed)-allowed
