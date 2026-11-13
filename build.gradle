@@ -153,6 +153,7 @@ minecraft {
         }
         server { args '--nogui' }
         gameTestServer { property 'forge.enabledGameTestNamespaces', 'minemon_gen1' }
+        combatGameTestServer { property 'forge.enabledGameTestNamespaces', 'minemon_damage' }
     }
 }
 

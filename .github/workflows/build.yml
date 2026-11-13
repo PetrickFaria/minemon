@@ -73,12 +73,21 @@ jobs:
           ./gradlew --no-daemon test
           ./gradlew --no-daemon build -x test
       - name: Run Minecraft server behavior tests
+        id: gametests
         run: |
           mkdir -p run
           echo eula=true > run/eula.txt
           python3 tools/prepare_gametest_world.py
           set -o pipefail
-          timeout 900s ./gradlew --no-daemon runGameTestServer 2>&1 | tee run/server-behavior-tests.log
+          timeout 600s ./gradlew --no-daemon runGameTestServer 2>&1 | tee run/server-behavior-tests.log
+      - name: Run isolated 20-hit Charmander zombie validation
+        if: ${{ !cancelled() && steps.compile.outcome == 'success' && steps.gametests.outcome == 'success' }}
+        run: |
+          rm -rf run/minemon-gametest
+          python3 tools/prepare_gametest_world.py
+          set -o pipefail
+          timeout 300s ./gradlew --no-daemon runCombatGameTestServer 2>&1 | tee run/combat-zombie-damage-tests.log
+          grep -F '[MINEMON COMBAT] summary acceptedHits=20 totalProjectileDamage=100.0 finalZombieHP=100.0' run/combat-zombie-damage-tests.log
       - name: Validate Rocket villager profession and uniform on the real client
         if: ${{ !cancelled() && steps.compile.outcome == 'success' }}
         run: |
