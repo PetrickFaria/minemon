@@ -61,9 +61,9 @@ public final class CharmanderZombieDamageGameTests {
 
     @GameTest(template = "empty", templateNamespace = "minecraft", timeoutTicks = 6600)
     public static void uncommonLevelTwoCharmanderAppliesTwentyNormalProjectileHitsToZombie(GameTestHelper h) {
-        // GameTests share a world and neighboring combat fixtures can otherwise
-        // change this zombie's hurt window. Run the controlled series after them.
-        h.runAfterDelay(4800, () -> setupTwentyShotZombieTest(h));
+        // This GameTest runs in its own enabled namespace and uses an isolated
+        // template, so no delay against the legacy suite is needed.
+        setupTwentyShotZombieTest(h);
     }
 
     private static void setupTwentyShotZombieTest(GameTestHelper h) {
