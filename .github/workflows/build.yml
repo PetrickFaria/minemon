@@ -103,9 +103,9 @@ jobs:
               details = "No GameTest result marker found; inspect the workflow log."
               label = "no-result"
           Path("run").mkdir(exist_ok=True)
-          Path("run/gametest-summary.txt").write_text(details + "\\n")
+          Path("run/gametest-summary.txt").write_text(details + "\n")
           with open(os.environ["GITHUB_OUTPUT"], "a") as output:
-              output.write(f"result={label}\\n")
+              output.write(f"result={label}\n")
           print(f"GameTest summary artifact label: {label}")
           print(details)
           PY
