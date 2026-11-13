@@ -152,8 +152,9 @@ minecraft {
             property 'minemon.clientSmokeSpecies', (findProperty('clientSmokeSpecies') ?: '').toString()
         }
         server { args '--nogui' }
-        gameTestServer { property 'forge.enabledGameTestNamespaces', 'minemon_gen1' }
-        combatGameTestServer { property 'forge.enabledGameTestNamespaces', 'minemon_damage' }
+        gameTestServer {
+            property 'forge.enabledGameTestNamespaces', project.hasProperty('combatGameTest') ? 'minemon_damage' : 'minemon_gen1'
+        }
     }
 }
 
