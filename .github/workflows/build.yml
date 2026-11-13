@@ -89,7 +89,7 @@ jobs:
           from pathlib import Path
           log_path = Path("run/server-behavior-tests.log")
           log = log_path.read_text(errors="replace") if log_path.exists() else ""
-          passed = re.search(r"All (\\d+) required tests passed", log)
+          passed = re.search(r"All (\d+) required tests passed", log)
           failure_lines = [line.strip() for line in log.splitlines()
                            if re.search(r"(?:GameTest.*failed|failed.*GameTest|test.*failed|failed.*test)", line, re.I)]
           if passed:
