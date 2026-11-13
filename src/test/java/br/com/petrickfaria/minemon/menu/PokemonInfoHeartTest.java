@@ -11,12 +11,14 @@ public class PokemonInfoHeartTest {
     }
 
     @Test public void preservesFractionalDamageAcrossMultipleHearts() {
-        assertEquals(52, PokemonInfoScreen.heartSpriteU(3.0D));
-        assertEquals(61, PokemonInfoScreen.heartSpriteU(1.0D));
+        double damage = 5.0D;
+        assertEquals(52, PokemonInfoScreen.heartSpriteU(damage));
+        assertEquals(52, PokemonInfoScreen.heartSpriteU(damage - 2.0D));
+        assertEquals(61, PokemonInfoScreen.heartSpriteU(damage - 4.0D));
     }
 
     @Test public void statusScreenUsesTheRequestedCompactRangeLabels() {
-        assertEquals("Perc. Alcance", PokemonInfoScreen.PERCEPTION_RANGE_LABEL);
-        assertEquals("Perc. Ataque", PokemonInfoScreen.ATTACK_RANGE_LABEL);
+        assertEquals("Alc. Percepção", PokemonInfoScreen.PERCEPTION_RANGE_LABEL);
+        assertEquals("Alc. Ataque", PokemonInfoScreen.ATTACK_RANGE_LABEL);
     }
 }

@@ -235,6 +235,10 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
 
     @Override public boolean isOrderedToSit() { return this.entityData.get(ORDERED_SIT); }
     public boolean isFreeMode() { return this.entityData.get(FREE_MODE); }
+    /** Configured Pokémon damage before target-side Minecraft mitigation. */
+    public double pokemonAttackDamage() {
+        return PokemonProgression.damageForRarity(this.getPokemonRarity(), this.getPokemonLevel());
+    }
     public void setFreeMode(boolean free) {
         if (free && isOrderedToSit()) setOrderedToSit(false);
         entityData.set(FREE_MODE, free);

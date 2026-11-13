@@ -23,7 +23,7 @@ public final class ElementalProjectile extends ThrowableProjectile {
         setOwner(attacker);setPos(attacker.getX(),attacker.getEyeY()-.1,attacker.getZ());
         launchPosition=position();
         maxTravelDistance=attacker.attackRange();
-        damage=(float)attacker.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE);
+        damage=(float)attacker.pokemonAttackDamage();
         targetId=target.getUUID();
         var types=br.com.petrickfaria.minemon.pokec.PokemonTreatTypes.forSpecies(attacker.getSpeciesSlug());
         entityData.set(COLOR,EggAppearance.color(types.isEmpty()?"normal":types.get(0)));

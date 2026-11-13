@@ -51,6 +51,13 @@ public final class PokemonProgressionTest {
             assertEquals("level "+level,expectedPoints[level-1],PokemonProgression.damageForRarity("uncommon",level),0.0D);
     }
 
+    @Test public void uncommonCharmanderLevelOneAndTwoKeepTheConfiguredDamageForRepeatedShots() {
+        for (int hit = 0; hit < 20; hit++) {
+            assertEquals(4.0D, PokemonProgression.damageForRarity("uncommon", 1), 0.0D);
+            assertEquals(5.0D, PokemonProgression.damageForRarity("uncommon", 2), 0.0D);
+        }
+    }
+
     @Test public void chanseyCooldownUsesItsCurrentLevelBand() {
         assertEquals(6000, PokemonProgression.chanseyCooldownTicks(1));
         assertEquals(4800, PokemonProgression.chanseyCooldownTicks(4));

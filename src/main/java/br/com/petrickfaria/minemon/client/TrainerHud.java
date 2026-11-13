@@ -4,6 +4,7 @@ import br.com.petrickfaria.minemon.Minemon;
 import br.com.petrickfaria.minemon.pokec.TrainerProgression;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
@@ -31,8 +32,12 @@ public final class TrainerHud {
         int x = width / 2 - 91, y = height - 48;
         double needed = TrainerProgression.xpToNext(level);
         float progress = Double.isInfinite(needed) ? 1.0F : (float)Math.min(1.0D, xp / needed);
-        GuiComponent.fill(event.getPoseStack(), x, y, x + 182, y + 5, 0xC0000000);
-        GuiComponent.fill(event.getPoseStack(), x + 1, y + 1, x + 1 + Math.round(180 * progress), y + 4, 0xFF38D8D2);
+        RenderSystem.setShaderTexture(0, GuiComponent.GUI_ICONS_LOCATION);
+        GuiComponent.blit(event.getPoseStack(), x, y, 0, 64, 182, 5, 256, 256);
+        RenderSystem.setShaderColor(0.10F, 0.42F, 1.0F, 1.0F);
+        int fill = Math.round(progress * 182.0F);
+        if (fill > 0) GuiComponent.blit(event.getPoseStack(), x, y, 0, 69, fill, 5, 256, 256);
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         String label = "Treinador Pokémon Lv. " + level;
         minecraft.font.draw(event.getPoseStack(), label, width / 2.0F - minecraft.font.width(label) / 2.0F, y - 10.0F, 0xFFFFFFFF);
     }

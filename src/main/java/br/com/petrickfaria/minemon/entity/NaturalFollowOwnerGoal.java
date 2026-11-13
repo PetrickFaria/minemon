@@ -20,7 +20,7 @@ final class NaturalFollowOwnerGoal extends Goal {
 
     private boolean eligible() {
         LivingEntity current = mob.getOwner();
-        if (current == null || !current.isAlive() || current.isSpectator()
+        if (current == null || !current.isAlive() || current.isSpectator() || mob.isFreeMode()
                 || current.level != mob.level || mob.isDefeated() || mob.isOrderedToSit() || mob.isSleeping()
                 || mob.isNightResting() || mob.isPassenger() || mob.getTarget() != null) return false;
         return true;
@@ -37,11 +37,10 @@ final class NaturalFollowOwnerGoal extends Goal {
     }
 
     @Override public boolean canUse() {
-        return eligible() && (!mob.isFreeMode() || mob.distanceToSqr(mob.getOwner()) > 25.0D * 25.0D);
+        return eligible();
     }
     @Override public boolean canContinueToUse() {
-        return eligible() && owner == mob.getOwner()
-                && (!mob.isFreeMode() || mob.distanceToSqr(owner) > 24.0D * 24.0D);
+        return eligible() && owner == mob.getOwner();
     }
     @Override public void start() { owner = mob.getOwner(); mob.setFollowingOwner(true); mob.stopSpontaneousRun(); running = false; moving = mob.distanceToSqr(owner) > 25.0D; speed = 0.8D; recalculate = 0; }
     @Override public boolean requiresUpdateEveryTick() { return true; }
