@@ -118,7 +118,7 @@ jobs:
           if-no-files-found: warn
           retention-days: 7
       - name: Run isolated 20-hit Charmander zombie validation
-        if: ${{ !cancelled() && steps.compile.outcome == 'success' && steps.gametests.outcome == 'success' }}
+        if: ${{ !cancelled() && steps.compile.outcome == 'success' }}
         run: |
           rm -rf run/minemon-gametest
           python3 tools/prepare_gametest_world.py
