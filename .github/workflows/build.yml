@@ -80,6 +80,43 @@ jobs:
           python3 tools/prepare_gametest_world.py
           set -o pipefail
           timeout 600s ./gradlew --no-daemon runGameTestServer 2>&1 | tee run/server-behavior-tests.log
+      - name: Summarize Minecraft GameTest result
+        id: gametest_summary
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import os, re
+          from pathlib import Path
+          log_path = Path("run/server-behavior-tests.log")
+          log = log_path.read_text(errors="replace") if log_path.exists() else ""
+          passed = re.search(r"All (\\d+) required tests passed", log)
+          failure_lines = [line.strip() for line in log.splitlines()
+                           if re.search(r"(?:GameTest.*failed|failed.*GameTest|test.*failed|failed.*test)", line, re.I)]
+          if passed:
+              label = f"passed-{passed.group(1)}"
+              details = passed.group(0)
+          elif failure_lines:
+              details = " | ".join(failure_lines[-6:])
+              slug = re.sub(r"[^A-Za-z0-9_-]+", "-", details).strip("-")[:100]
+              label = "failed-" + (slug or "unparsed")
+          else:
+              details = "No GameTest result marker found; inspect the workflow log."
+              label = "no-result"
+          Path("run").mkdir(exist_ok=True)
+          Path("run/gametest-summary.txt").write_text(details + "\\n")
+          with open(os.environ["GITHUB_OUTPUT"], "a") as output:
+              output.write(f"result={label}\\n")
+          print(f"GameTest summary artifact label: {label}")
+          print(details)
+          PY
+      - name: Upload concise GameTest summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: minemon-gametest-${{ steps.gametest_summary.outputs.result }}
+          path: run/gametest-summary.txt
+          if-no-files-found: warn
+          retention-days: 7
       - name: Run isolated 20-hit Charmander zombie validation
         if: ${{ !cancelled() && steps.compile.outcome == 'success' && steps.gametests.outcome == 'success' }}
         run: |
