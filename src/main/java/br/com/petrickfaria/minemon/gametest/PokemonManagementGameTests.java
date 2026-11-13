@@ -373,8 +373,15 @@ public final class PokemonManagementGameTests {
         });
     }
 
-    @GameTest(template = "test_arena", timeoutTicks = 1700)
+    @GameTest(template = "test_arena", timeoutTicks = 6600)
     public static void uncommonLevelTwoCharmanderAppliesTwentyNormalProjectileHitsToZombie(GameTestHelper h) {
+        // GameTests share a level and may otherwise let neighboring Pokémon
+        // interfere with this zombie's hurt window. Run the controlled damage
+        // series after the standard fixtures finish.
+        h.runAfterDelay(4800, () -> setupTwentyShotZombieTest(h));
+    }
+
+    private static void setupTwentyShotZombieTest(GameTestHelper h) {
         floor(h);
         ServerPlayer owner = player(h, h.absolutePos(new BlockPos(7, 1, 5)));
         MinemonCreature pokemon = h.spawn(ModEntities.SPECIES.get("charmander").get(), new BlockPos(5, 1, 5));
