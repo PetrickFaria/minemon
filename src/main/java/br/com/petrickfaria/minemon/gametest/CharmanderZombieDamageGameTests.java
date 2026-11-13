@@ -59,7 +59,7 @@ public final class CharmanderZombieDamageGameTests {
         if (!condition) h.fail(message);
     }
 
-    @GameTest(template = "test_arena", templateNamespace = "minemon_gen1", timeoutTicks = 6600)
+    @GameTest(template = "empty", templateNamespace = "minecraft", timeoutTicks = 6600)
     public static void uncommonLevelTwoCharmanderAppliesTwentyNormalProjectileHitsToZombie(GameTestHelper h) {
         // GameTests share a world and neighboring combat fixtures can otherwise
         // change this zombie's hurt window. Run the controlled series after them.
