@@ -9,6 +9,7 @@ import net.minecraft.network.syncher.*;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.phys.*;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.IndirectEntityDamageSource;
 
 /** Direct, single-hit damage only: no fire, explosion, terrain edit or area damage. */
 public final class ElementalProjectile extends ThrowableProjectile {
@@ -56,15 +57,21 @@ public final class ElementalProjectile extends ThrowableProjectile {
             if(getOwner() instanceof MinemonCreature owner && !owner.isDefeated()
                     && result.getEntity() instanceof LivingEntity target
                     && target.getUUID().equals(targetId) && owner.canAttack(target)) {
-                // Pokémon attacks use the standard LivingEntity.hurt pipeline and its
-                // invulnerability window, but are elemental energy rather than a
-                // physical strike. Vanilla armor must not turn the same configured
-                // attack into a different amount of health loss.
-                target.hurt(DamageSource.indirectMagic(this,owner),damage);
+                // Keep the normal mob-projectile source and hurt/invulnerability
+                // behavior, while allowing the configured elemental damage to be
+                // independent of target armor.
+                target.hurt(new ArmorBypassingMobProjectile(this,owner),damage);
             }
         } finally {
             // One projectile represents one attack. A blocked hit cannot be retried later.
             discard();
+        }
+    }
+    private static final class ArmorBypassingMobProjectile extends IndirectEntityDamageSource {
+        private ArmorBypassingMobProjectile(ElementalProjectile projectile, MinemonCreature owner) {
+            super("mob",projectile,owner);
+            bypassArmor();
+            setProjectile();
         }
     }
     @Override protected void onHitBlock(BlockHitResult result){if(!level.isClientSide)discard();}
