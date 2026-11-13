@@ -136,12 +136,12 @@ jobs:
           log = path.read_text(errors="replace") if path.exists() else ""
           lines = [line.strip() for line in log.splitlines() if "MINEMON COMBAT" in line or "MINEMON ZOMBIE FIXTURE" in line or "failed" in line.lower() or "error" in line.lower()]
           success = "[MINEMON COMBAT] summary acceptedHits=20 totalProjectileDamage=100.0 finalZombieHP=96.0" in log
-          details = "\\n".join(lines[-24:]) if lines else "No combat test output recorded."
+          details = "\n".join(lines[-24:]) if lines else "No combat test output recorded."
           safe = re.sub(r"[^A-Za-z0-9_-]+", "-", details).strip("-")[:180]
           label = "passed-20" if success else "failed-" + (safe or "no-output")
-          Path("run/combat-summary.txt").write_text(details + "\\n")
+          Path("run/combat-summary.txt").write_text(details + "\n")
           with open(os.environ["GITHUB_OUTPUT"], "a") as output:
-              output.write(f"result={label}\\n")
+              output.write(f"result={label}\n")
           print(details)
           PY
       - name: Upload controlled zombie validation summary
