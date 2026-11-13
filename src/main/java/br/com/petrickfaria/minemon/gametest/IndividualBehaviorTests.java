@@ -147,6 +147,31 @@ public final class IndividualBehaviorTests {
    h.succeed();
   });
  }
+ @GameTest(template="test_arena",batch="daytime_swimming",timeoutTicks=360)
+ public static void freeGoldeenKeepsNaturalSwimmingBesideWildGoldeen(GameTestHelper h){
+  h.getLevel().setDayTime(1000L);arena(h,true);
+  var owner=new net.minecraft.server.level.ServerPlayer(h.getLevel().getServer(),h.getLevel(),
+    new com.mojang.authlib.GameProfile(java.util.UUID.randomUUID(),"FreeGoldeenOwner"),null);
+  owner.connection=new net.minecraftforge.common.util.FakePlayer(h.getLevel(),
+    new com.mojang.authlib.GameProfile(java.util.UUID.randomUUID(),"FreeGoldeenConnection")).connection;
+  var ownerPos=h.absolutePos(new BlockPos(40,9,40));
+  owner.moveTo(ownerPos.getX()+.5D,ownerPos.getY(),ownerPos.getZ()+.5D,0,0);h.getLevel().addNewPlayer(owner);
+  var wild=spawn(h,"goldeen",5,-2,5);
+  var companion=spawn(h,"goldeen",12,-2,11);companion.tame(owner);companion.setOwnerUUID(owner.getUUID());
+  companion.applyManagedBehavior("free");
+  if(!companion.isTame()||!companion.isFreeMode()){owner.discard();h.fail("Goldeen test fixture must be a domesticated Pokémon in Livre mode");return;}
+  Vec3[] wildStart={wild.position()},freeStart={companion.position()};double[] wildTravel={0},freeTravel={0};
+  h.runAfterDelay(40,()->{
+   wildStart[0]=wild.position();freeStart[0]=companion.position();
+   sample(h,wild,wildStart[0],wildTravel,20);sample(h,companion,freeStart[0],freeTravel,20);
+  });
+  h.runAfterDelay(250,()->{
+   check(h,wild.isInWater()&&companion.isInWater(),"Wild and free Goldeen must remain in the same aquatic habitat; wild="+state(wild)+" free="+state(companion));
+   check(h,wildTravel[0]>.25D&&freeTravel[0]>.25D,"Both Goldeen must show autonomous underwater movement; wildTravelSquared="+wildTravel[0]+" freeTravelSquared="+freeTravel[0]+" wild="+state(wild)+" free="+state(companion));
+   check(h,!companion.isFollowingOwner(),"A Goldeen in Livre mode must retain species movement instead of starting owner-follow navigation; "+state(companion));
+   owner.discard();wild.discard();companion.discard();h.succeed();
+  });
+ }
  private static void sample(GameTestHelper h,MinemonCreature m,Vec3 start,double[] farthest,int n){
   farthest[0]=Math.max(farthest[0],m.position().distanceToSqr(start));if(n>0)h.runAfterDelay(10,()->sample(h,m,start,farthest,n-1));
  }
