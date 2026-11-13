@@ -59,7 +59,7 @@ public final class CharmanderZombieDamageGameTests {
         if (!condition) h.fail(message);
     }
 
-    @GameTest(template = "empty", templateNamespace = "minecraft", timeoutTicks = 6600)
+    @GameTest(template = "test_arena", templateNamespace = "minemon_damage", timeoutTicks = 6600)
     public static void uncommonLevelTwoCharmanderAppliesTwentyNormalProjectileHitsToZombie(GameTestHelper h) {
         // This GameTest runs in its own enabled namespace and uses an isolated
         // template, so no delay against the legacy suite is needed.
