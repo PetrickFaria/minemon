@@ -32,6 +32,7 @@ public final class ElementalProjectile extends ThrowableProjectile {
         shoot(direction.x,direction.y,direction.z,.65F,0);
     }
     public int color(){return entityData.get(COLOR);}
+    float configuredDamageForValidation(){return damage;}
     @Override protected void defineSynchedData(){entityData.define(COLOR,0xFFFFFF);}
     @Override protected float getGravity(){return 0;}
     @Override protected boolean canHitEntity(net.minecraft.world.entity.Entity entity){
