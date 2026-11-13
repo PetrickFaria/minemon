@@ -390,10 +390,16 @@ public final class PokemonManagementGameTests {
 
         Zombie zombie = h.spawn(EntityType.ZOMBIE, new BlockPos(9, 1, 5));
         zombie.setNoAi(true); // Real vanilla Zombie entity and hurt pipeline, with movement disabled for controlled shots.
+        for (var slot : net.minecraft.world.entity.EquipmentSlot.values())
+            zombie.setItemSlot(slot, ItemStack.EMPTY);
+        for (var effect : new java.util.ArrayList<>(zombie.getActiveEffects())) zombie.removeEffect(effect.getEffect());
+        zombie.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.ARMOR).setBaseValue(0.0D);
+        zombie.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.ARMOR_TOUGHNESS).setBaseValue(0.0D);
         zombie.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).setBaseValue(200.0D);
         zombie.setHealth(200.0F);
         check(h, zombie.getArmorValue() == 0 && zombie.getActiveEffects().isEmpty(),
-                "Combat target must have no armor or effects");
+                "Combat target must have no armor or effects (armor=" + zombie.getArmorValue()
+                        + ", effects=" + zombie.getActiveEffects() + ")");
         runControlledZombieShot(h, owner, pokemon, zombie, 1, zombie.getHealth(), -1L);
     }
 
