@@ -31,6 +31,7 @@ jobs:
         run: |
           python3 tools/verify_project.py
           python3 -m unittest discover -s tools -p test_model_metrics.py
+          python3 tools/verify_pokec_model_textures.py
       - name: Verify Rocket workstation and villager resources
         run: python3 tools/verify_rocket.py
       - name: Verify Pokémon treat models, textures, and translations

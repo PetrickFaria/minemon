@@ -7,7 +7,11 @@
     "screen": "minemon_gen1:block/pokec_screen",
     "particle": "minemon_gen1:block/pokec_dark",
     "pokeball_red": "minemon_gen1:block/pokec_pokeball_red",
-    "pokeball_white": "minemon_gen1:block/pokec_pokeball_white"
+    "pokeball_white": "minemon_gen1:block/pokec_pokeball_white",
+    "side": "minemon_gen1:block/pokec_side",
+    "vent": "minemon_gen1:block/pokec_vent",
+    "glow": "minemon_gen1:block/pokec_glow",
+    "button": "minemon_gen1:block/pokec_button"
   },
   "elements": [
     {
@@ -280,6 +284,16 @@
             16
           ]
         }
+      },
+      "rotation": {
+        "origin": [
+          8,
+          7,
+          0.5
+        ],
+        "axis": "x",
+        "angle": 22.5,
+        "rescale": true
       }
     },
     {
@@ -348,6 +362,16 @@
             16
           ]
         }
+      },
+      "rotation": {
+        "origin": [
+          8,
+          7,
+          0.5
+        ],
+        "axis": "x",
+        "angle": 22.5,
+        "rescale": true
       }
     },
     {
@@ -824,6 +848,16 @@
             16
           ]
         }
+      },
+      "rotation": {
+        "origin": [
+          8,
+          2,
+          0
+        ],
+        "axis": "x",
+        "angle": 22.5,
+        "rescale": true
       }
     },
     {
@@ -892,6 +926,16 @@
             16
           ]
         }
+      },
+      "rotation": {
+        "origin": [
+          8,
+          2,
+          0
+        ],
+        "axis": "x",
+        "angle": 22.5,
+        "rescale": true
       }
     },
     {
@@ -960,6 +1004,16 @@
             16
           ]
         }
+      },
+      "rotation": {
+        "origin": [
+          8,
+          2,
+          0
+        ],
+        "axis": "x",
+        "angle": 22.5,
+        "rescale": true
       }
     },
     {
@@ -1028,6 +1082,16 @@
             16
           ]
         }
+      },
+      "rotation": {
+        "origin": [
+          8,
+          2,
+          0
+        ],
+        "axis": "x",
+        "angle": 22.5,
+        "rescale": true
       }
     },
     {
@@ -1096,6 +1160,16 @@
             16
           ]
         }
+      },
+      "rotation": {
+        "origin": [
+          8,
+          2,
+          0
+        ],
+        "axis": "x",
+        "angle": 22.5,
+        "rescale": true
       }
     },
     {
