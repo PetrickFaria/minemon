@@ -408,6 +408,7 @@ public final class PokemonManagementGameTests {
         if (previousLaunch >= 0L) check(h, launchedAt - previousLaunch == 60L,
                 "Normal attack cooldown interval changed before shot " + hit + ": " + (launchedAt - previousLaunch));
         float configuredDamage = (float) pokemon.pokemonAttackDamage();
+        pokemon.focusPlayerTarget(zombie);
         check(h, pokemon.fireElementalProjectile(zombie), "Charmander failed to launch normal projectile " + hit);
         var shots = h.getLevel().getEntitiesOfClass(br.com.petrickfaria.minemon.entity.ElementalProjectile.class,
                 pokemon.getBoundingBox().inflate(12.0D), shot -> shot.getOwner() == pokemon && shot.getTargetIdForValidation(zombie));
