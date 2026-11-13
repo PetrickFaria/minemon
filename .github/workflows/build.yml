@@ -115,6 +115,7 @@ jobs:
         run: |
           mkdir -p run
           echo eula=true > run/eula.txt
+          rm -rf run/minemon-gametest
           python3 tools/prepare_gametest_world.py
           set -o pipefail
           timeout 600s ./gradlew --no-daemon runGameTestServer 2>&1 | tee run/server-behavior-tests.log

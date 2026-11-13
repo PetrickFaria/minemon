@@ -79,7 +79,6 @@ public final class CharmanderZombieDamageGameTests {
                         + ", damage=" + pokemon.pokemonAttackDamage() + ", attribute="
                         + pokemon.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE).getBaseValue()
                         + ", catalogRarity=" + br.com.petrickfaria.minemon.pokec.PokecEconomy.get().rarity(pokemon.getSpeciesSlug()));
-        pokemon.setPokemonProgress(2, 0);
         Zombie zombie = h.spawn(EntityType.ZOMBIE, new BlockPos(9, 1, 5));
         zombie.setNoAi(true); // Real vanilla Zombie entity and hurt pipeline, with movement disabled for controlled shots.
         // Other GameTests can change the shared test world's clock while this
