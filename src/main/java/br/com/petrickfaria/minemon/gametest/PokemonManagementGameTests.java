@@ -390,6 +390,12 @@ public final class PokemonManagementGameTests {
 
         Zombie zombie = h.spawn(EntityType.ZOMBIE, new BlockPos(9, 1, 5));
         zombie.setNoAi(true); // Real vanilla Zombie entity and hurt pipeline, with movement disabled for controlled shots.
+        String spawnedGear = java.util.Arrays.stream(net.minecraft.world.entity.EquipmentSlot.values())
+                .map(slot -> slot.name() + "=" + zombie.getItemBySlot(slot))
+                .collect(java.util.stream.Collectors.joining(","));
+        System.out.println("[MINEMON ZOMBIE FIXTURE] spawned armor=" + zombie.getArmorValue()
+                + " armorAttribute=" + zombie.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.ARMOR).getBaseValue()
+                + " effects=" + zombie.getActiveEffects() + " gear=" + spawnedGear);
         for (var slot : net.minecraft.world.entity.EquipmentSlot.values())
             zombie.setItemSlot(slot, ItemStack.EMPTY);
         for (var effect : new java.util.ArrayList<>(zombie.getActiveEffects())) zombie.removeEffect(effect.getEffect());
@@ -400,6 +406,8 @@ public final class PokemonManagementGameTests {
         check(h, zombie.getArmorValue() == 0 && zombie.getActiveEffects().isEmpty(),
                 "Combat target must have no armor or effects (armor=" + zombie.getArmorValue()
                         + ", effects=" + zombie.getActiveEffects() + ")");
+        System.out.println("[MINEMON ZOMBIE FIXTURE] controlled armor=" + zombie.getArmorValue()
+                + " effects=" + zombie.getActiveEffects().size() + " gear=" + spawnedGear);
         runControlledZombieShot(h, owner, pokemon, zombie, 1, zombie.getHealth(), -1L);
     }
 
