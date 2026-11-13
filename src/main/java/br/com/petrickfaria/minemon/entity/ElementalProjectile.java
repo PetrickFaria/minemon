@@ -56,7 +56,11 @@ public final class ElementalProjectile extends ThrowableProjectile {
             if(getOwner() instanceof MinemonCreature owner && !owner.isDefeated()
                     && result.getEntity() instanceof LivingEntity target
                     && target.getUUID().equals(targetId) && owner.canAttack(target)) {
-                target.hurt(DamageSource.indirectMobAttack(this,owner),damage);
+                // Pokémon attacks use the standard LivingEntity.hurt pipeline and its
+                // invulnerability window, but are elemental energy rather than a
+                // physical strike. Vanilla armor must not turn the same configured
+                // attack into a different amount of health loss.
+                target.hurt(DamageSource.indirectMagic(this,owner),damage);
             }
         } finally {
             // One projectile represents one attack. A blocked hit cannot be retried later.
