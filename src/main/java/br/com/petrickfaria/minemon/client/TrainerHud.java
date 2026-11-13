@@ -34,7 +34,8 @@ public final class TrainerHud {
         float progress = Double.isInfinite(needed) ? 1.0F : (float)Math.min(1.0D, xp / needed);
         RenderSystem.setShaderTexture(0, GuiComponent.GUI_ICONS_LOCATION);
         GuiComponent.blit(event.getPoseStack(), x, y, 0, 64, 182, 5, 256, 256);
-        RenderSystem.setShaderColor(0.10F, 0.42F, 1.0F, 1.0F);
+        // Preserve the vanilla XP bar atlas and change only the trainer fill tint.
+        RenderSystem.setShaderColor(0.0F, 0.75F, 1.0F, 1.0F);
         int fill = Math.round(progress * 182.0F);
         if (fill > 0) GuiComponent.blit(event.getPoseStack(), x, y, 0, 69, fill, 5, 256, 256);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);

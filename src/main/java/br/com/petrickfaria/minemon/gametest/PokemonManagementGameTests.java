@@ -373,6 +373,78 @@ public final class PokemonManagementGameTests {
         });
     }
 
+    @GameTest(template = "test_arena", timeoutTicks = 1300)
+    public static void uncommonLevelTwoCharmanderAppliesTwentyNormalProjectileHitsToZombie(GameTestHelper h) {
+        floor(h);
+        ServerPlayer owner = player(h, h.absolutePos(new BlockPos(7, 1, 5)));
+        MinemonCreature pokemon = h.spawn(ModEntities.SPECIES.get("charmander").get(), new BlockPos(5, 1, 5));
+        pokemon.tame(owner);
+        pokemon.setNoAi(true);
+        pokemon.setPokemonProgress(1, 0);
+        check(h, "uncommon".equals(pokemon.getPokemonRarity()) && pokemon.pokemonAttackDamage() == 4.0D,
+                "Uncommon level 1 Charmander must retain its 4-point base damage");
+        pokemon.setPokemonProgress(2, 0);
+        check(h, pokemon.pokemonAttackDamage() == 5.0D
+                        && pokemon.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE).getBaseValue() == 5.0D,
+                "Uncommon level 2 Charmander must configure exactly 5 attack-damage points");
+
+        Zombie zombie = h.spawn(EntityType.ZOMBIE, new BlockPos(9, 1, 5));
+        zombie.setNoAi(true); // Real vanilla Zombie entity and hurt pipeline, with movement disabled for controlled shots.
+        zombie.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).setBaseValue(200.0D);
+        zombie.setHealth(200.0F);
+        check(h, zombie.getArmorValue() == 0 && zombie.getActiveEffects().isEmpty(),
+                "Combat target must have no armor or effects");
+        runControlledZombieShot(h, owner, pokemon, zombie, 1, zombie.getHealth(), -1L);
+    }
+
+    private static void runControlledZombieShot(GameTestHelper h, ServerPlayer owner, MinemonCreature pokemon,
+                                                  Zombie zombie, int hit, float healthBefore, long previousLaunch) {
+        if (!zombie.isAlive()) { h.fail("The high-health zombie died before all controlled hits"); return; }
+        check(h, zombie.getArmorValue() == 0 && zombie.getActiveEffects().isEmpty(),
+                "Target mitigation state changed before shot " + hit);
+        check(h, zombie.invulnerableTime == 0, "Vanilla invulnerability must expire before shot " + hit
+                + " (remaining=" + zombie.invulnerableTime + ")");
+        long launchedAt = h.getLevel().getGameTime();
+        if (previousLaunch >= 0L) check(h, launchedAt - previousLaunch == 60L,
+                "Normal attack cooldown interval changed before shot " + hit + ": " + (launchedAt - previousLaunch));
+        float configuredDamage = (float) pokemon.pokemonAttackDamage();
+        check(h, pokemon.fireElementalProjectile(zombie), "Charmander failed to launch normal projectile " + hit);
+        var shots = h.getLevel().getEntitiesOfClass(br.com.petrickfaria.minemon.entity.ElementalProjectile.class,
+                pokemon.getBoundingBox().inflate(12.0D), shot -> shot.getOwner() == pokemon && shot.getTargetIdForValidation(zombie));
+        check(h, shots.size() == 1, "Expected exactly one aimed projectile for shot " + hit);
+        if (shots.size() != 1) return;
+        var shot = shots.get(0);
+        check(h, shot.damageForValidation() == 5.0F,
+                "Projectile " + hit + " carried " + shot.damageForValidation() + " instead of 5.0 damage");
+        System.out.println("[MINEMON COMBAT] launch hit=" + hit + " configured=" + configuredDamage
+                + " projectile=" + shot.damageForValidation() + " targetHP=" + healthBefore
+                + " interval=" + (previousLaunch < 0 ? "initial" : (launchedAt - previousLaunch))
+                + " invulnerableTime=" + zombie.invulnerableTime + " armor=" + zombie.getArmorValue()
+                + " effects=" + zombie.getActiveEffects().size());
+        h.runAfterDelay(15, () -> {
+            float applied = healthBefore - zombie.getHealth();
+            check(h, applied == 5.0F, "Zombie received " + applied + " HP on shot " + hit + "; expected 5.0"
+                    + " (health=" + zombie.getHealth() + ", hurtTime=" + zombie.hurtTime
+                    + ", invulnerableTime=" + zombie.invulnerableTime + ")");
+            check(h, zombie.invulnerableTime > 0,
+                    "Accepted vanilla damage must enter the normal invulnerability window after shot " + hit);
+            check(h, h.getLevel().getGameTime() - launchedAt >= 8,
+                    "Projectile interval/flight was shorter than the measured normal hit window");
+            System.out.println("[MINEMON COMBAT] impact hit=" + hit + " applied=" + applied
+                    + " targetHP=" + zombie.getHealth() + " interval=" + (h.getLevel().getGameTime() - launchedAt)
+                    + " hurtTime=" + zombie.hurtTime + " invulnerableTime=" + zombie.invulnerableTime
+                    + " armor=" + zombie.getArmorValue() + " effects=" + zombie.getActiveEffects().size());
+            if (hit == 20) {
+                check(h, Math.abs(zombie.getHealth() - 100.0F) < 0.001F,
+                        "Twenty accepted 5-point hits must leave 100 HP; actual=" + zombie.getHealth());
+                owner.discard(); pokemon.discard(); zombie.discard(); h.succeed();
+                return;
+            }
+            h.runAfterDelay(45, () -> runControlledZombieShot(h, owner, pokemon, zombie, hit + 1,
+                    zombie.getHealth(), launchedAt));
+        });
+    }
+
     @GameTest(template = "test_arena", timeoutTicks = 760)
     public static void focusedTargetCanLeaveAndReenterPerceptionBeforeTheFifteenSecondTimeout(GameTestHelper h) {
         floor(h);

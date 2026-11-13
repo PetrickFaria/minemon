@@ -54,7 +54,19 @@ public final class PokecGameTests {
         BlockPos relative=new BlockPos(5,1,5);
         h.assertBlockPresent(ModBlocks.POKEC.get(),relative);h.assertBlockPresent(ModBlocks.POKEC.get(),relative.above());
         h.assertBlockProperty(relative,PokecBlock.HALF,net.minecraft.world.level.block.state.properties.DoubleBlockHalf.LOWER);
-        h.assertBlockProperty(relative.above(),PokecBlock.HALF,net.minecraft.world.level.block.state.properties.DoubleBlockHalf.UPPER);h.succeed();
+        h.assertBlockProperty(relative.above(),PokecBlock.HALF,net.minecraft.world.level.block.state.properties.DoubleBlockHalf.UPPER);
+        var level=h.getLevel();
+        for(var direction:net.minecraft.core.Direction.Plane.HORIZONTAL){
+            var oriented=ModBlocks.POKEC.get().defaultBlockState().setValue(PokecBlock.FACING,direction);
+            check(oriented.getValue(PokecBlock.FACING)==direction,"PokéC must retain the " + direction + " orientation");
+            var box=oriented.getShape(level,p,net.minecraft.world.phys.shapes.CollisionContext.empty()).bounds();
+            check(box.minX==0.0D&&box.minY==0.0D&&box.minZ==0.0D&&box.maxX==1.0D&&box.maxY==1.0D&&box.maxZ==1.0D,
+                    "Each PokéC half must keep a full 1x1 collision box");
+        }
+        level.destroyBlock(p,false,null);
+        check(level.getBlockState(p).isAir()&&level.getBlockState(p.above()).isAir(),
+                "Breaking the lower PokéC half must remove its paired upper half");
+        terminal(h,p);h.assertBlockPresent(ModBlocks.POKEC.get(),relative);h.assertBlockPresent(ModBlocks.POKEC.get(),relative.above());h.succeed();
     }
     @GameTest(template="test_arena",timeoutTicks=200)
     public static void firstSuccessfulStarterPurchaseIsOwnedAndFree(GameTestHelper h){

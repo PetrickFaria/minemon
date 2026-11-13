@@ -93,6 +93,13 @@ jobs:
           ALSOFT_DRIVERS=null timeout --kill-after=30s 600s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeTreats
           grep -F '[TREAT CLIENT] PASS:' run/client-validation-treats.txt
           grep -F 'PokéCoin and Pokébola models, translations, textures, and creative entries loaded' run/client-validation-treats.txt
+      - name: Validate the physical PokéC model on the real client
+        if: ${{ !cancelled() && steps.compile.outcome == 'success' }}
+        run: |
+          python3 tools/prepare_client_world.py
+          ALSOFT_DRIVERS=null timeout --kill-after=30s 600s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokePokecBlock
+          grep -F 'PASS POKÉC BLOCK:' run/client-validation-pokec-block.txt
+          for view in front side back three-quarter; do test -f "run/screenshots/pokec-world-${view}.png"; done
       - name: Upload PokéC client evidence
         if: ${{ !cancelled() && steps.compile.outcome == 'success' }}
         uses: actions/upload-artifact@v4
@@ -100,8 +107,10 @@ jobs:
           name: minemon-pokec-client-evidence
           path: |
             run/screenshots/pokec*.png
+            run/screenshots/pokec-world-*.png
             run/logs/
             run/client-validation-treats.txt
+            run/client-validation-pokec-block.txt
           if-no-files-found: warn
           retention-days: 7
       - name: Validate Pokémon management screens on the real client
