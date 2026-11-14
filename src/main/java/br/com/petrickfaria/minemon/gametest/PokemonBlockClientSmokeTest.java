@@ -75,7 +75,12 @@ final class PokemonBlockClientSmokeTest {
                 player.setHealth(player.getMaxHealth());
                 level.getEntitiesOfClass(net.minecraft.world.entity.monster.Monster.class,
                         new net.minecraft.world.phys.AABB(player.blockPosition()).inflate(96)).forEach(net.minecraft.world.entity.Entity::discard);
-                base = player.blockPosition().offset(0, 0, 5);
+                base = player.blockPosition().offset(0, 12, 5);
+                var floor = net.minecraft.world.level.block.Blocks.SMOOTH_STONE.defaultBlockState();
+                for (int dx = -9; dx <= 9; dx++) {
+                    for (int dz = -9; dz <= 9; dz++)
+                        level.setBlock(base.offset(dx, -1, dz), floor, 3);
+                }
                 level.setBlock(base, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 3);
                 level.setBlock(base.above(), net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 3);
                 level.setBlock(base, ModBlocks.POKEC.get().defaultBlockState().setValue(PokecBlock.HALF, DoubleBlockHalf.LOWER), 3);
