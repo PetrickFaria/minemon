@@ -134,6 +134,15 @@ final class PokemonBlockClientSmokeTest {
             captureRequested = false;
             captureFinished = false;
             stageView(mc);
+            if (view == 1 || view == 2) {
+                var uuid = mc.player.getUUID();
+                double playerZ = base.getZ() + (view == 1 ? 1.8 : .5);
+                server.execute(() -> {
+                    var player = server.getPlayerList().getPlayer(uuid);
+                    if (player == null) throw new IllegalStateException("PokéC screenshot player vanished");
+                    player.connection.teleport(base.getX() + 1.8, base.getY(), playerZ, 180, 0);
+                });
+            }
         } catch (Exception failure) { throw new IllegalStateException("PokéC real-client model validation failed", failure); }
     }
 
