@@ -86,14 +86,14 @@ final class PokemonBlockClientSmokeTest {
             });
             return;
         }
-        if (!viewReady) return;
+        if (!viewReady || mc.screen != null) return;
         if (camera == null) {
             camera = new ArmorStand(mc.level, 0, 0, 0);
             stageView(mc);
             ticks = 0;
             return;
         }
-        if (ticks < 30) return;
+        if (ticks < 75) return;
         try {
             for (String facing : new String[]{"north", "east", "south", "west"}) {
                 for (String half : new String[]{"lower", "upper"}) {
@@ -148,6 +148,8 @@ final class PokemonBlockClientSmokeTest {
                 base.getZ() + .5 + shot.z(), yaw, pitch);
         camera.xRotO = pitch;
         camera.yRotO = yaw;
+        camera.setYHeadRot(yaw);
+        camera.yHeadRotO = yaw;
         mc.setCameraEntity(camera);
     }
 
