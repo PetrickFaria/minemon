@@ -1112,7 +1112,7 @@ public final class ClientSmokeTest {
     if(run!=null) {
      var deceleration=articulationClips.getOrDefault(slug,java.util.Map.of()).getOrDefault("RUN_DECEL",java.util.Set.of());
      boolean observedLowerSpeed=hasVelocitySample(slug,"RUN_DECEL",walk,false)||hasVelocitySample(slug,"RUN_DECEL",idle,false);
-     if(!deceleration.contains(run)||java.util.Collections.disjoint(deceleration,java.util.Set.of(walk,idle))
+     if(!deceleration.contains(run)||java.util.Collections.disjoint(deceleration,java.util.List.of(walk,idle))
         ||!hasVelocitySample(slug,"RUN_DECEL",run,true)||!observedLowerSpeed)
       throw new IllegalStateException("Run deceleration did not transition from run to a lower-speed state for "+slug+" run="+run+" walk="+walk+" idle="+idle+" observed="+deceleration+" measured="+articulationInputs.getOrDefault(slug,java.util.Map.of()).get("RUN_DECEL"));
     }
