@@ -557,9 +557,11 @@ public final class CompanionTests {
  @GameTest(template="test_arena",batch="taming_bone",timeoutTicks=100)
  public static void boneTamingAndSitCommands(GameTestHelper h) {
   MinemonCreature b=spawn(h);ServerPlayer p=player(h);
-  int previous=br.com.petrickfaria.minemon.config.MinemonConfig.TAME_CHANCE_PERCENT.get();
-  try {
+  try (var ignored=GameTestCommonConfig.isolate()) {
    br.com.petrickfaria.minemon.config.MinemonConfig.TAME_CHANCE_PERCENT.set(100);
+   br.com.petrickfaria.minemon.config.MinemonConfig.SPEC.afterReload();
+   check(h,br.com.petrickfaria.minemon.config.MinemonConfig.TAME_CHANCE_PERCENT.get()==100,
+       "Guaranteed taming must retain 100% after a config cache reload");
    p.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.BONE,2));
    b.mobInteract(p,net.minecraft.world.InteractionHand.MAIN_HAND);
    check(h,!b.isTame(),"Bone interaction must never tame a Minemon");
@@ -575,7 +577,7 @@ public final class CompanionTests {
    var menu=(br.com.petrickfaria.minemon.menu.PokemonInfoMenu)p.containerMenu;
    check(h,menu.clickMenuButton(p,0)&&!b.isOrderedToSit(),"Seguir must be able to order standing");
    check(h,menu.clickMenuButton(p,1)&&b.isOrderedToSit(),"Sentar must be able to order sitting");
-  }finally {br.com.petrickfaria.minemon.config.MinemonConfig.TAME_CHANCE_PERCENT.set(previous);p.discard();}
+  }finally {p.discard();}
   h.succeed();
  }
  @GameTest(template="test_arena",timeoutTicks=300)

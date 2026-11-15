@@ -83,9 +83,11 @@ public final class PokemonTreatGameTests {
             .forEach(net.minecraft.world.entity.Entity::discard);
         ServerPlayer owner=player(h,new BlockPos(3,1,3),GameType.SURVIVAL);
         MinemonCreature bulbasaur=spawn(h,"bulbasaur",new BlockPos(5,1,5));
-        int previous=br.com.petrickfaria.minemon.config.MinemonConfig.TAME_CHANCE_PERCENT.get();
-        try {
+        try (var ignored=GameTestCommonConfig.isolate()) {
             br.com.petrickfaria.minemon.config.MinemonConfig.TAME_CHANCE_PERCENT.set(100);
+            br.com.petrickfaria.minemon.config.MinemonConfig.SPEC.afterReload();
+            check(h,br.com.petrickfaria.minemon.config.MinemonConfig.TAME_CHANCE_PERCENT.get()==100,
+                    "The guaranteed-taming fixture must retain 100% after a config cache reload");
             var bone=new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.BONE,2);
             owner.setItemInHand(InteractionHand.MAIN_HAND,bone);
             bulbasaur.mobInteract(owner,InteractionHand.MAIN_HAND);
@@ -100,7 +102,7 @@ public final class PokemonTreatGameTests {
                 +" target="+bulbasaur.getTarget()+" active="+br.com.petrickfaria.minemon.pokec.ActivePokemonData.get(h.getLevel()).count(owner.getUUID())
                 +" health="+bulbasaur.getHealth()+" stack="+grass);
             check(h,grass.isEmpty(),"Successful treat taming consumes one treat");
-        } finally { br.com.petrickfaria.minemon.config.MinemonConfig.TAME_CHANCE_PERCENT.set(previous); }
+        }
         h.succeed();
     }
 
