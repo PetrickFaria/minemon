@@ -17,7 +17,7 @@ final class ShoreTraversal {
  static void tick(MinemonCreature mob){
   State state=STATES.get(mob);
   boolean isExiting=exiting(mob);
-  if(mob.isDefeated()||mob.isSleeping()||mob.isNightResting()||mob.isOrderedToSit()||!isExiting)return;
+  if(mob.isDefeated()||mob.isSleeping()||mob.isNightResting()&&!SpeciesBehaviorProfiles.isVisitor(mob.getSpeciesSlug())||mob.isOrderedToSit()||!isExiting)return;
   var path=mob.getNavigation().getPath();
   Vec3 point=path!=null&&!path.isDone()?path.getNextEntityPos(mob):new Vec3(state.bank.getX()+.5D,state.bank.getY(),state.bank.getZ()+.5D);
   Vec3 shore=state!=null&&state.bank!=null
@@ -25,7 +25,7 @@ final class ShoreTraversal {
   double dy=point.y-mob.getY();
   double top=mob instanceof MinemonAquaticCreature aquatic?aquatic.waterSurface():WaterMovementGoal.restSurfaceAt(mob,mob.blockPosition());
   if(!Double.isFinite(top)||point.y>top+1.5||dy<-.35)return;
-  if(state!=null&&state.bank!=null){
+  if(state!=null&&state.bank!=null&&(path==null||path.isDone())){
    double dx=shore.x-mob.getX(),dz=shore.z-mob.getZ(),distance=Math.sqrt(dx*dx+dz*dz);
    if(distance>1.0D){
     var velocity=mob.getDeltaMovement();
@@ -33,12 +33,15 @@ final class ShoreTraversal {
     mob.setDeltaMovement(velocity.x*.55D+dx/distance*steer,velocity.y,velocity.z*.55D+dz/distance*steer);
    }
   }
-  if(mob.horizontalCollision || shore.subtract(mob.position()).horizontalDistanceSqr()<20.25D){
+  double lipDistance=Math.max(1.0D,mob.getBbWidth()+.5D);
+  if((mob.horizontalCollision || dy>.4D&&shore.subtract(mob.position()).horizontalDistanceSqr()<lipDistance*lipDistance)
+      &&mob.getDeltaMovement().y<=.05D){
    mob.setDeltaMovement(mob.getDeltaMovement().x,Math.max(.42,mob.getDeltaMovement().y),mob.getDeltaMovement().z);
    mob.getJumpControl().jump();
   }
  }
  private static final java.util.Map<MinemonCreature,State> STATES=new java.util.WeakHashMap<>();
+ static void clear(MinemonCreature mob){STATES.remove(mob);}
  private static final class State {BlockPos bank;Vec3 previous;int stalled;final java.util.Map<BlockPos,Integer> blocked=new java.util.HashMap<>();}
   static boolean followWaterline(MinemonCreature mob,net.minecraft.world.entity.LivingEntity owner,double speed){
   if(!mob.isAquaticSpecies()||!mob.isNaturalSurface()||!ownerNearWater(owner))return false;
@@ -67,18 +70,10 @@ final class ShoreTraversal {
   }));
   BlockPos fallback=null;int tried=0;
   for(var feet:candidates){
-   if(clearWaterlineRoute(mob,feet,speed))return true;
    var path=mob.getNavigation().createPath(feet,0);
    if(path!=null&&path.canReach()){mob.getNavigation().moveTo(path,speed);return true;}
    if(fallback==null)fallback=feet;
    if(++tried>=12)break;
-  }
-  if(fallback!=null){
-   mob.getNavigation().stop();
-   double top=WaterMovementGoal.restSurfaceAt(mob,fallback);
-   double y=Double.isFinite(top)?top-WaterMovementGoal.preferredSurfaceDepth(mob):fallback.getY();
-   mob.getMoveControl().setWantedPosition(fallback.getX()+.5D,y,fallback.getZ()+.5D,speed);
-   return true;
   }
   return false;
  }
@@ -122,15 +117,10 @@ static boolean followBank(MinemonCreature mob,net.minecraft.world.entity.LivingE
    // bank. Keep steering toward the already reachability-checked landing
    // point directly; block collision still governs movement and the stalled
    // route check below selects another bank if this line is obstructed.
-   mob.getNavigation().stop();
-   double dx=state.bank.getX()+.5D-mob.getX(),dz=state.bank.getZ()+.5D-mob.getZ();
-   if(state.bank.getY()>mob.getY()+.4D&&dx*dx+dz*dz<36.0D){
-    var velocity=mob.getDeltaMovement();
-    mob.setDeltaMovement(velocity.x,Math.max(.42D,velocity.y),velocity.z);
-    mob.getJumpControl().jump();
-   }
-   mob.getMoveControl().setWantedPosition(state.bank.getX()+.5D,state.bank.getY(),state.bank.getZ()+.5D,speed);
-   return true;
+   if(!mob.getNavigation().isDone()){mob.getNavigation().setSpeedModifier(speed);return true;}
+   var route=mob.getNavigation().createPath(state.bank,0);
+   if(route!=null&&route.canReach()){mob.getNavigation().moveTo(route,speed);return true;}
+   state.blocked.put(state.bank,mob.tickCount+200);state.bank=null;
   }
   double top=mob instanceof MinemonAquaticCreature aquatic?aquatic.waterSurface():WaterMovementGoal.restSurfaceAt(mob,mob.blockPosition());if(!Double.isFinite(top))return false;
   var candidates=new java.util.ArrayList<BlockPos>();
@@ -160,8 +150,7 @@ static boolean followBank(MinemonCreature mob,net.minecraft.world.entity.LivingE
   for(var feet:candidates){
    var path=mob.getNavigation().createPath(feet,0);
    if(path!=null&&path.canReach()){
-    state.bank=feet;mob.getNavigation().stop();
-    mob.getMoveControl().setWantedPosition(feet.getX()+.5D,feet.getY(),feet.getZ()+.5D,speed);
+    state.bank=feet;mob.getNavigation().moveTo(path,speed);
     return true;
    }
    // A one-block bank can be physically jumpable even when an amphibious
@@ -169,11 +158,6 @@ static boolean followBank(MinemonCreature mob,net.minecraft.world.entity.LivingE
    // and the existing stall blacklist decide whether another bank is needed.
    if(physicalFallback==null)physicalFallback=feet;
    if(++tried>=12)break;
-  }
-  if(physicalFallback!=null){
-   state.bank=physicalFallback;mob.getNavigation().stop();
-   mob.getMoveControl().setWantedPosition(physicalFallback.getX()+.5D,physicalFallback.getY(),physicalFallback.getZ()+.5D,speed);
-   return true;
   }
   return false;
  }
