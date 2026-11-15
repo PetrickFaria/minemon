@@ -232,6 +232,15 @@ jobs:
           if [ "$client_status" -ne 0 ]; then exit "$client_status"; fi
           grep -F 'PASS ROSTER' run/client-validation.txt
           grep -F 'ARTICULATION PROFILES:' run/client-validation.txt
+      - name: Validate Geodude locomotion selection on the real client
+        if: ${{ !cancelled() && steps.compile.outcome == 'success' && github.event_name == 'push' && github.ref == 'refs/heads/fix/minemon-pending-eight-corrections' }}
+        run: |
+          python3 tools/prepare_client_world.py
+          ALSOFT_DRIVERS=null timeout --kill-after=30s 600s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeSpecies=geodude
+          grep -F 'PASS ROSTER:' run/client-validation.txt
+          grep -F 'PASS LOCOMOTION:' run/client-validation.txt
+          grep -F 'ARTICULATION PROFILES:' run/client-validation.txt
+          grep -F 'geodude' run/client-validation.txt
       - name: Validate Gastly core and aura occlusion on the real client
         if: ${{ !cancelled() && steps.compile.outcome == 'success' && github.event_name == 'push' && github.ref == 'refs/heads/fix/minemon-pending-eight-corrections' }}
         run: |
@@ -304,7 +313,7 @@ jobs:
           grep -F 'PASS gyarados: idle/walk' run/client-validation.txt
           grep -F 'ARTICULATION PROFILES:' run/client-validation.txt
       - name: Launch Minecraft client and validate GeckoLib cache
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.full_suite && success() && steps.compile.outcome == 'success' }}
+        if: ${{ success() && steps.compile.outcome == 'success' && ((github.event_name == 'workflow_dispatch' && inputs.full_suite) || (github.event_name == 'push' && github.ref == 'refs/heads/fix/minemon-pending-eight-corrections')) }}
         run: |
           python3 tools/prepare_client_world.py
           mkdir -p run/config/minemon/sounds/001_Bulbasaur

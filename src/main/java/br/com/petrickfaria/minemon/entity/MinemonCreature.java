@@ -1556,8 +1556,17 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
                     : firstClip(slug,"water_idle","water_surface_idle","surface_water_idle","surfacewater_idle");
             clip = this.isMoving(event) ? (swim!=null?swim:definition.walk()) : (waterIdle != null ? waterIdle : definition.idle());
         } else if (slug.equals("geodude") && this.isFlyingSpecies()) {
-            clip = firstClip(slug,"air_idle","ground_idle");
-            if(clip == null) clip=definition.idle();
+            // Geodude's FLOAT_LOW profile keeps it hovering while idle, but its
+            // source rig has real ground walk/run clips for horizontal movement.
+            // Do not let the airborne idle fallback mask those locomotion clips.
+            if (this.isMoving(event)) {
+                clip=definition.walk();
+                String run=SpeciesAssetIndex.clip(slug,"ground_run","run");
+                if ((this.isSpontaneouslyRunning() || this.isFollowingRun()) && run!=null) clip=run;
+            } else {
+                clip=firstClip(slug,"air_idle","ground_idle");
+                if(clip == null) clip=definition.idle();
+            }
         } else if (this.isMoving(event)) {
             if (this.isFlyingSpecies()) {
                 String fly = firstClip(slug, "air_fly", "air_glide", "air_idle");
