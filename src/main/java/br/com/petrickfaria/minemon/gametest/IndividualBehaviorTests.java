@@ -150,6 +150,15 @@ public final class IndividualBehaviorTests {
  @GameTest(template="test_arena",batch="daytime_swimming",timeoutTicks=360)
  public static void freeGoldeenKeepsNaturalSwimmingBesideWildGoldeen(GameTestHelper h){
   h.getLevel().setDayTime(1000L);arena(h,true);
+  // Compare quiet, fully aquatic routes. A surface-level bank allows vanilla
+  // step-up movement (0.6 blocks), which is not a swimming or teleport sample.
+  for(int x=3;x<=14;x++)for(int z=2;z<=14;z++)
+   if(x==3||x==14||z==2||z==14)
+    for(int y=9;y<=11;y++)h.setBlock(new BlockPos(x,y,z),Blocks.STONE);
+  var swimArena=new net.minecraft.world.phys.AABB(h.absolutePos(BlockPos.ZERO),h.absolutePos(new BlockPos(16,25,16))).inflate(8);
+  h.onEachTick(()->h.getLevel().getEntitiesOfClass(net.minecraft.world.entity.Mob.class,swimArena,
+      candidate->candidate.getType().getCategory()==net.minecraft.world.entity.MobCategory.MONSTER)
+      .forEach(net.minecraft.world.entity.Entity::discard));
   var owner=new net.minecraft.server.level.ServerPlayer(h.getLevel().getServer(),h.getLevel(),
     new com.mojang.authlib.GameProfile(java.util.UUID.randomUUID(),"FreeGoldeenOwner"),null);
   owner.connection=new net.minecraftforge.common.util.FakePlayer(h.getLevel(),
@@ -189,6 +198,9 @@ public final class IndividualBehaviorTests {
    Vec3 position=mob.position();
    if(previous!=null){
     Vec3 delta=position.subtract(previous);double step=delta.length();distance+=step;maxStep=Math.max(maxStep,step);
+    if(step>=.5D)System.out.println("[MINEMON SWIM STEP] step="+step+" delta="+delta
+        +" previous="+previous+state(mob)+" velocity="+mob.getDeltaMovement()
+        +" hurtTime="+mob.hurtTime+" health="+mob.getHealth()+" collision="+mob.horizontalCollision);
     verticalDistance+=Math.abs(delta.y);if(step>.0025D)movingIntervals++;
     if(step<.001D&&!mob.getNavigation().isDone()&&!mob.horizontalCollision)routeStall++;else routeStall=0;
     maxRouteStall=Math.max(maxRouteStall,routeStall);
