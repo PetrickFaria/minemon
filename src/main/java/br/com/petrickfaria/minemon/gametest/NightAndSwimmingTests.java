@@ -255,6 +255,12 @@ public final class NightAndSwimmingTests {
  @GameTest(template="test_arena",batch="night_mixed",timeoutTicks=1000)
  public static void realNightLandingHoverWakeRetaliationReturnAndDawn(GameTestHelper h){
   arena(h);var level=h.getLevel();level.setDayTime(1000);
+  // Slime and Ghast are hostile-category Mobs without extending Monster.
+  // Keep the timed rest probe quiet; its explicit cow aggressor stays active.
+  var nightArena=new net.minecraft.world.phys.AABB(h.absolutePos(new BlockPos(0,0,0)),h.absolutePos(new BlockPos(32,22,44))).inflate(8);
+  h.onEachTick(()->level.getEntitiesOfClass(net.minecraft.world.entity.Mob.class,nightArena,
+      candidate->candidate.getType().getCategory()==net.minecraft.world.entity.MobCategory.MONSTER)
+      .forEach(net.minecraft.world.entity.Entity::discard));
   // Keep sleepers on a continuous floor while they navigate to rest points;
   // a gap here lets an edge route fall and confounds natural landing checks.
   for(int ax=0;ax<32;ax++)for(int az=24;az<44;az++){
@@ -285,7 +291,9 @@ public final class NightAndSwimmingTests {
     var positions=new HashMap<MinemonCreature,net.minecraft.world.phys.Vec3>();air.forEach(m->positions.put(m,m.position()));
     h.runAfterDelay(30,()->{
      mixed.forEach(m->check(h,m.naturalCycle().ticks()==clocks.get(m),"Night must preserve cycle progress: "+m.getSpeciesSlug()));
-     air.forEach(m->check(h,m.position().subtract(positions.get(m)).horizontalDistanceSqr()<.001,"Sleeping hover must stop horizontal travel"));
+     air.forEach(m->check(h,m.position().subtract(positions.get(m)).horizontalDistanceSqr()<.001,
+         "Sleeping hover must stop horizontal travel: "+m.getSpeciesSlug()+" drift="+m.position().subtract(positions.get(m))
+         +" sleeping="+m.isSleeping()+" night="+m.isNightResting()+" target="+m.getTarget()+" wet="+m.isInWaterOrBubble()));
      var attacker=h.spawn(EntityType.COW,new BlockPos(14,1,3));attacker.setNoAi(true);float health=attacker.getHealth();
      check(h,ground.hurt(DamageSource.mobAttack(attacker),1),"Attack must damage sleeping creature");
      check(h,!ground.isSleeping()&&ground.getTarget()==attacker,"Attack must wake and retain aggressor immediately");

@@ -59,7 +59,8 @@ public final class SixIngameCorrectionGameTests {
     private static void freeReturn(GameTestHelper h,String slug,boolean water,boolean night) {
         h.getLevel().setDayTime(night?13000:1000);
         for(int x=0;x<=36;x++)for(int z=0;z<=12;z++)for(int y=0;y<=12;y++)
-            h.setBlock(new BlockPos(x,y,z),y==0?Blocks.STONE:water&&y<=5?Blocks.WATER:Blocks.AIR);
+            h.setBlock(new BlockPos(x,y,z),y==0||water&&y<=5&&(x==0||x==36||z==0||z==12)
+                ?Blocks.STONE:water&&y<=5?Blocks.WATER:Blocks.AIR);
         var owner=player(h,"FreeReturnOwner");
         var end=h.absolutePos(new BlockPos(28,water?6:1,6));
         owner.moveTo(end.getX()+.5D,end.getY(),end.getZ()+.5D,0,0);h.getLevel().addNewPlayer(owner);
@@ -67,10 +68,23 @@ public final class SixIngameCorrectionGameTests {
         mob.tame(owner);mob.applyManagedBehavior("free");
         if(night)mob.setSleeping(true);
         Vec3[] previous={mob.position()};boolean[] returned={false};
-        h.runAfterDelay(600,()->check(returned[0],"Free return stalled: "+slug+" pos="+mob.position()+" owner="+owner.position()+" following="+mob.isFollowingOwner()+" target="+mob.getNavigation().getTargetPos()+" navDone="+mob.getNavigation().isDone()+" wanted="+mob.getMoveControl().getWantedX()+","+mob.getMoveControl().getWantedY()+","+mob.getMoveControl().getWantedZ()));
+        h.runAfterDelay(600,()->{
+            if(returned[0])return;
+            String state="Free return stalled: "+slug+" pos="+mob.position()+" owner="+owner.position()
+                +" following="+mob.isFollowingOwner()+" combatTarget="+mob.getTarget()+" wet="+mob.isInWater()
+                +" sleeping="+mob.isSleeping()+" target="+mob.getNavigation().getTargetPos()+" navDone="+mob.getNavigation().isDone();
+            owner.discard();mob.discard();check(false,state);
+        });
+        var movementArena=new net.minecraft.world.phys.AABB(h.absolutePos(new BlockPos(0,0,0)),h.absolutePos(new BlockPos(37,14,13))).inflate(8);
         h.onEachTick(()->{
+            // Blacklisted monsters correctly preempt following. This test
+            // isolates movement; the existing combat suite tests that priority.
+            h.getLevel().getEntitiesOfClass(net.minecraft.world.entity.Mob.class,movementArena,
+                    candidate->candidate.getType().getCategory()==net.minecraft.world.entity.MobCategory.MONSTER)
+                .forEach(net.minecraft.world.entity.Entity::discard);
             double step=mob.position().distanceTo(previous[0]);previous[0]=mob.position();
             check(step<1.0D,"Free return must not relocate "+slug+" step="+step);
+            if(water&&mob.tickCount>2)check(mob.isInWaterOrBubble(),"A return in the contained pond must stay aquatic; "+mob.position());
             if(mob.distanceToSqr(owner)<=100.0D)returned[0]=true;
             if(returned[0]&&!mob.isFollowingOwner()){
                 if(night&&(!mob.isSleeping()||!mob.isNightResting()))return;
