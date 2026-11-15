@@ -241,6 +241,19 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         return !isTame() || isFreeMode()
                 ? (isAquaticSpecies() ? 128.0D : 24.0D) : perceptionRange();
     }
+    void wakeForFreeReturn() {
+        if (!isFreeMode()) return;
+        nightRoutine=false;
+        entityData.set(NIGHT_REST,false);
+        setSleeping(false);
+        syncNaturalState();
+    }
+    boolean needsFreeReturn() {
+        LivingEntity owner=getOwner();
+        return isFreeMode()&&owner!=null&&owner.isAlive()&&!owner.isSpectator()&&owner.level==level
+                &&distanceToSqr(owner)>NATURAL_OWNER_DISTANCE_SQR&&!isDefeated()&&!isOrderedToSit()
+                &&!isPassenger()&&getTarget()==null;
+    }
     /** Configured Pokémon damage before target-side Minecraft mitigation. */
     public double pokemonAttackDamage() {
         return PokemonProgression.damageForRarity(this.getPokemonRarity(), this.getPokemonLevel());
@@ -1282,7 +1295,10 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
             boolean hover=SpeciesBehaviorProfiles.hoversDuringNightRest(this.getSpeciesSlug());
             double restHeight=SpeciesBehaviorProfiles.nightRestHoverHeight(this.getSpeciesSlug());
             double waterRestY=waterRest?WaterMovementGoal.waterRestY(this):Double.NaN;
-            boolean settled=waterRest?Math.abs(this.getY()-waterRestY)<0.01D
+            // Position-locked fish finish the precise depth approach. Visitors
+            // retain their approved bottom-rest tolerance after combat.
+            double waterTolerance=SpeciesBehaviorProfiles.locksPositionDuringWaterSleep(this.getSpeciesSlug())?.01D:.18D;
+            boolean settled=waterRest?Math.abs(this.getY()-waterRestY)<waterTolerance
                 :hover?Math.abs(this.getY()-this.naturalSurface()-restHeight)<0.18D
                 :this.isOnGround()&&WaterMovementGoal.safeDryRestingSupport(this,this.blockPosition());
             if(settled&&!this.isSleeping()){

@@ -14,6 +14,7 @@ final class NightRestGoal extends Goal {
  private int shellBottomSearchDelay;
  NightRestGoal(MinemonCreature mob){this.mob=mob;setFlags(EnumSet.of(Flag.MOVE,Flag.LOOK,Flag.JUMP));}
  @Override public boolean canUse(){
+  if(mob.needsFreeReturn())return false;
   boolean resting=mob.isSleeping()||mob.isNightResting();
   boolean waterRest=SpeciesBehaviorProfiles.waterCapable(mob.getSpeciesSlug())&&mob.isInWaterOrBubble();
   // Let SleepLanding own MOVE while a land-resting flyer is still airborne.

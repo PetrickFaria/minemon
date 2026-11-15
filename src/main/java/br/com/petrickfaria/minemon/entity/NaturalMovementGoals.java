@@ -109,6 +109,7 @@ public final class NaturalMovementGoals {
         }
 
         @Override public boolean canUse() {
+            if (this.mob.needsFreeReturn()) return false;
             if (!this.mob.wantsNaturalLanding() || (!this.mob.commandLanding()&&!this.mob.isSleeping()&&!this.mob.isNightResting()&&!this.mob.naturalBehaviorActive()) || this.mob.isOnGround() && !this.mob.isInWaterOrBubble() || this.mob.isPassenger()) return false;
             if (this.retryDelay > 0) {
                 this.retryDelay--;
@@ -125,6 +126,7 @@ public final class NaturalMovementGoals {
         }
 
         @Override public boolean canContinueToUse() {
+            if (this.mob.needsFreeReturn()) return false;
             return this.mob.wantsNaturalLanding() && (this.mob.commandLanding()||this.mob.isSleeping()||this.mob.isNightResting()||this.mob.naturalBehaviorActive()) && (!this.mob.isOnGround() || this.mob.isInWaterOrBubble())
                     && this.pathTicks < 200;
         }

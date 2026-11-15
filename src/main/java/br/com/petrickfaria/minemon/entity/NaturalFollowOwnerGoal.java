@@ -20,9 +20,11 @@ final class NaturalFollowOwnerGoal extends Goal {
 
     private boolean eligible() {
         LivingEntity current = mob.getOwner();
+        boolean freeReturn=mob.needsFreeReturn();
         if (current == null || !current.isAlive() || current.isSpectator()
-                || current.level != mob.level || mob.isDefeated() || mob.isOrderedToSit() || mob.isSleeping()
-                || mob.isNightResting() || mob.isPassenger() || mob.getTarget() != null) return false;
+                || current.level != mob.level || mob.isDefeated() || mob.isOrderedToSit()
+                || (mob.isSleeping() || mob.isNightResting())&&!freeReturn
+                || mob.isPassenger() || mob.getTarget() != null) return false;
         return true;
     }
 
@@ -44,7 +46,7 @@ final class NaturalFollowOwnerGoal extends Goal {
         return eligible() && owner == mob.getOwner() && (!mob.isFreeMode()
                 || mob.distanceToSqr(owner) > MinemonCreature.NATURAL_OWNER_DISTANCE_SQR);
     }
-    @Override public void start() { owner = mob.getOwner(); mob.setFollowingOwner(true); mob.stopSpontaneousRun(); running = false; moving = mob.distanceToSqr(owner) > 25.0D; speed = 0.8D; recalculate = 0; }
+    @Override public void start() { owner = mob.getOwner(); mob.wakeForFreeReturn(); mob.setFollowingOwner(true); mob.stopSpontaneousRun(); running = false; moving = mob.distanceToSqr(owner) > 25.0D; speed = 0.8D; recalculate = 0; }
     @Override public boolean requiresUpdateEveryTick() { return true; }
     @Override public void tick() {
         mob.setFollowingOwner(true);

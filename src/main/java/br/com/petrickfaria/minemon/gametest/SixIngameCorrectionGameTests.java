@@ -51,8 +51,13 @@ public final class SixIngameCorrectionGameTests {
     public static void freeSwimmerReturnsThroughWaterWithoutTeleport(GameTestHelper h){freeReturn(h,"goldeen",true);}
     @GameTest(template="test_arena",batch="six_free_return_air",timeoutTicks=650)
     public static void freeFlyerReturnsThroughAirWithoutTeleport(GameTestHelper h){freeReturn(h,"pidgey",false);}
+    @GameTest(template="test_arena",batch="six_free_return_night",timeoutTicks=900)
+    public static void sleepingFreeSwimmerReturnsOutsideBandThenResumesNightRest(GameTestHelper h){freeReturn(h,"goldeen",true,true);}
     private static void freeReturn(GameTestHelper h,String slug,boolean water) {
-        h.getLevel().setDayTime(1000);
+        freeReturn(h,slug,water,false);
+    }
+    private static void freeReturn(GameTestHelper h,String slug,boolean water,boolean night) {
+        h.getLevel().setDayTime(night?13000:1000);
         for(int x=0;x<=36;x++)for(int z=0;z<=12;z++)for(int y=0;y<=12;y++)
             h.setBlock(new BlockPos(x,y,z),y==0?Blocks.STONE:water&&y<=5?Blocks.WATER:Blocks.AIR);
         var owner=player(h,"FreeReturnOwner");
@@ -60,6 +65,7 @@ public final class SixIngameCorrectionGameTests {
         owner.moveTo(end.getX()+.5D,end.getY(),end.getZ()+.5D,0,0);h.getLevel().addNewPlayer(owner);
         var mob=h.spawn(ModEntities.SPECIES.get(slug).get(),new BlockPos(5,water?3:4,6));
         mob.tame(owner);mob.applyManagedBehavior("free");
+        if(night)mob.setSleeping(true);
         Vec3[] previous={mob.position()};boolean[] returned={false};
         h.runAfterDelay(600,()->check(returned[0],"Free return stalled: "+slug+" pos="+mob.position()+" owner="+owner.position()+" following="+mob.isFollowingOwner()+" target="+mob.getNavigation().getTargetPos()+" navDone="+mob.getNavigation().isDone()+" wanted="+mob.getMoveControl().getWantedX()+","+mob.getMoveControl().getWantedY()+","+mob.getMoveControl().getWantedZ()));
         h.onEachTick(()->{
@@ -67,9 +73,11 @@ public final class SixIngameCorrectionGameTests {
             check(step<1.0D,"Free return must not relocate "+slug+" step="+step);
             if(mob.distanceToSqr(owner)<=100.0D)returned[0]=true;
             if(returned[0]&&!mob.isFollowingOwner()){
+                if(night&&(!mob.isSleeping()||!mob.isNightResting()))return;
                 check(mob.isFreeMode(),"Return must preserve Livre mode");
                 check(mob.navigationRange()==(water?128.0D:24.0D),"Natural pathfinding range must survive return");
                 System.out.println("[MINEMON FREE RETURN] PASS "+slug+" distance="+mob.distanceTo(owner));
+                if(night)h.getLevel().setDayTime(1000);
                 owner.discard();mob.discard();h.succeed();
             }
         });
@@ -91,6 +99,10 @@ public final class SixIngameCorrectionGameTests {
         var mob=h.spawn(ModEntities.SPECIES.get(slug).get(),new BlockPos(5,3,6));
         mob.goalSelector.removeAllGoals();mob.targetSelector.removeAllGoals();
         Vec3[] previous={mob.position()};int[] stage={0};double[] maxStep={0};
+        BlockPos[] routeTarget={null};
+        h.runAfterDelay(600,()->System.out.println("[MINEMON SHORE DIAGNOSTIC] "+slug+" stage="+stage[0]
+            +" pos="+mob.position()+" phase="+mob.naturalCycle().phase()+" wet="+mob.isInWater()
+            +" grounded="+mob.isOnGround()+" navDone="+mob.getNavigation().isDone()+" target="+mob.getNavigation().getTargetPos()));
         h.onEachTick(()->{
             maxStep[0]=Math.max(maxStep[0],mob.position().distanceTo(previous[0]));previous[0]=mob.position();
             check(maxStep[0]<1.0D,"Shore traversal must use continuous physics, not teleport: "+slug+" step="+maxStep[0]);
@@ -99,15 +111,20 @@ public final class SixIngameCorrectionGameTests {
                 check(route!=null&&route.canReach(),"A reachable shore route must be found: "+slug+" target="+target
                     +" position="+mob.position()+" width="+mob.getBbWidth()+" height="+mob.getBbHeight()
                     +" path="+(route==null?"null":route.getNodeCount()+" nodes, end="+route.getEndNode()));
-                mob.getNavigation().moveTo(route,.85D);stage[0]=1;
+                mob.getNavigation().moveTo(route,.85D);routeTarget[0]=target;stage[0]=1;
             } else if(stage[0]==1&&mob.getX()>h.absolutePos(new BlockPos(12,0,0)).getX()&&mob.isOnGround()&&!mob.isInWater()) {
                 var target=h.absolutePos(new BlockPos(4,3,6));var route=mob.getNavigation().createPath(target,0);
                 check(route!=null&&route.canReach(),"Dry amphibian must find the return water route: "+slug);
-                mob.getNavigation().moveTo(route,.85D);stage[0]=2;
+                mob.getNavigation().moveTo(route,.85D);routeTarget[0]=target;stage[0]=2;
             } else if(stage[0]==2&&mob.isInWater()&&mob.getX()<h.absolutePos(new BlockPos(7,0,0)).getX()) {
                 System.out.println("[MINEMON SHORE] PASS "+slug+" raised="+raised+" slab="+slab+" maxStep="+maxStep[0]);
                 mob.discard();h.succeed();
             }
+            // This fixture removes autonomous goals to measure native paths.
+            // The species clock still ends phases and stops navigation; as a
+            // real MOVE goal would, retain ownership of the requested route.
+            if(stage[0]>0&&!mob.isRemoved()&&mob.getNavigation().isDone()&&routeTarget[0]!=null)
+                mob.getNavigation().moveTo(routeTarget[0].getX()+.5D,routeTarget[0].getY(),routeTarget[0].getZ()+.5D,.85D);
         });
     }
 }
