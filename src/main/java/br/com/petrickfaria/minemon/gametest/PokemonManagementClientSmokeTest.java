@@ -64,6 +64,10 @@ public final class PokemonManagementClientSmokeTest {
         var ownerId=minecraft.player.getUUID();
         minecraft.getSingleplayerServer().execute(()->{
             var owner=minecraft.getSingleplayerServer().getPlayerList().getPlayer(ownerId);var level=(net.minecraft.server.level.ServerLevel)owner.level;
+            // This probe measures one Gastly, not a population. Freeze natural
+            // spawning before collecting the fixture's per-frame counters.
+            level.getGameRules().getRule(net.minecraft.world.level.GameRules.RULE_DOMOBSPAWNING)
+                    .set(false,level.getServer());
             // The fixture is meant to validate the rendered sleep pose. At
             // daytime tickNightRest correctly wakes natural sleepers, so use
             // an actual nighttime world clock before adding Dewgong.
@@ -74,11 +78,13 @@ public final class PokemonManagementClientSmokeTest {
             dewgong.setOrderedToSit(true);dewgong.setNoAi(true);dewgong.setNoGravity(true);
             dewgong.moveTo(owner.getX(),owner.getY(),owner.getZ()+3,180,0);dewgong.setSleeping(true);level.addFreshEntity(dewgong);dewgongId=dewgong.getId();
             // Count five large and seven small aura draws per visible Gastly.
-            // Remove naturally spawned Gastlys from this small visual arena so
-            // another entity cannot double the fixture's particle totals.
-            level.getEntitiesOfClass(br.com.petrickfaria.minemon.entity.MinemonCreature.class,
-                    owner.getBoundingBox().inflate(48.0D),candidate->candidate.getSpeciesSlug().equals("gastly"))
-                    .forEach(net.minecraft.world.entity.Entity::discard);
+            // The aura renders up to 50 blocks from the camera/body bounds;
+            // the former 48-block player box missed other tracked Gastlys.
+            var otherGastlys=new java.util.ArrayList<net.minecraft.world.entity.Entity>();
+            for(var entity:level.getAllEntities())
+                if(entity instanceof br.com.petrickfaria.minemon.entity.MinemonCreature candidate
+                        &&candidate.getSpeciesSlug().equals("gastly"))otherGastlys.add(entity);
+            otherGastlys.forEach(net.minecraft.world.entity.Entity::discard);
             var gastly=ModEntities.SPECIES.get("gastly").get().create(level);gastly.tame(owner);gastly.setNoAi(true);gastly.setNoGravity(true);
             gastly.moveTo(owner.getX()+1.5,owner.getY()+1,owner.getZ()+3.5,180,0);level.addFreshEntity(gastly);gastlyId=gastly.getId();
         });
