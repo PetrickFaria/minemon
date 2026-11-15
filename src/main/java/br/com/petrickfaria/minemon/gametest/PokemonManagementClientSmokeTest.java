@@ -380,6 +380,9 @@ public final class PokemonManagementClientSmokeTest {
                     server.execute(() -> {
                         var owner = server.getPlayerList().getPlayer(ownerId);
                         if (owner == null) throw new IllegalStateException("PokéC test player missing on the server");
+                        if(!br.com.petrickfaria.minemon.pokec.PokecPlayerData.starterChosen(owner))
+                            br.com.petrickfaria.minemon.pokec.PokecPlayerData.claimStarter(owner,"bulbasaur");
+                        br.com.petrickfaria.minemon.pokec.PokecPlayerData.finishStarterEgg(owner);
 
                         // The real menu stays open only while its terminal exists and is in reach.
                         var level = owner.level;

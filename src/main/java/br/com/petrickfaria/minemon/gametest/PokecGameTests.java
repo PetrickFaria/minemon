@@ -38,6 +38,9 @@ public final class PokecGameTests {
         if(event.phase!=net.minecraftforge.event.TickEvent.Phase.END)return;TEST_PLAYERS.removeIf(net.minecraft.world.entity.Entity::isRemoved);for(ServerPlayer p:TEST_PLAYERS)p.doTick();
     }
     private static void check(boolean condition,String message){if(!condition)throw new AssertionError(message);}
+    private static int playerSoulCount(ServerPlayer player){return player.getInventory().items.stream()
+            .filter(stack->ModItems.SOULS.values().stream().anyMatch(item->stack.is(item.get())))
+            .mapToInt(ItemStack::getCount).sum();}
     private static void floor(GameTestHelper h){for(int x=0;x<16;x++)for(int z=0;z<16;z++){h.setBlock(new BlockPos(x,0,z),Blocks.STONE);for(int y=1;y<6;y++)h.setBlock(new BlockPos(x,y,z),Blocks.AIR);}}
     private static ServerPlayer player(GameTestHelper h,BlockPos pos){
         ServerPlayer p=new ServerPlayer(h.getLevel().getServer(),h.getLevel(),new GameProfile(UUID.randomUUID(),"PokecTester"),null);
@@ -148,17 +151,17 @@ public final class PokecGameTests {
     @GameTest(template="test_arena",timeoutTicks=200)
     public static void stagedPhysicalCoinsChargeExactPriceAndDoNotDuplicate(GameTestHelper h){
         floor(h);BlockPos p=h.absolutePos(new BlockPos(5,1,5));terminal(h,p);ServerPlayer buyer=player(h,h.absolutePos(new BlockPos(7,1,5)));
-        PokecMenu menu=new PokecMenu(9,buyer.getInventory(),p);buyer.containerMenu=menu;PokecPlayerData.unlock(buyer,"bulbasaur");PokecPlayerData.setCoins(buyer,0);
-        int price=PokecEconomy.get().coins("bulbasaur"), total=price+5;int slot=0;
+        PokecMenu menu=new PokecMenu(9,buyer.getInventory(),p);buyer.containerMenu=menu;PokecPlayerData.unlock(buyer,"oddish");menu.selectSpecies(buyer,"oddish");PokecPlayerData.setCoins(buyer,0);
+        int price=PokecEconomy.get().coins("oddish"), total=price+5;int slot=0;
         while(total>0){int count=Math.min(64,total);buyer.getInventory().setItem(slot++,new net.minecraft.world.item.ItemStack(ModItems.POKE_COIN.get(),count));total-=count;}
-        PokecTransactions.perform(buyer,p,"bulbasaur",PokecTransactions.Action.SELECT,0x700L);
-        check(PokecTransactions.perform(buyer,p,"bulbasaur",PokecTransactions.Action.STAGE_COINS,0x701L),"physical coins should stage from inventory");
+        PokecTransactions.perform(buyer,p,"oddish",PokecTransactions.Action.SELECT,0x700L);
+        check(PokecTransactions.perform(buyer,p,"oddish",PokecTransactions.Action.STAGE_COINS,0x701L),"physical coins should stage from inventory");
         check(menu.stagedCoins()==price,"slot stages only the selected species price");
         check(buyer.getInventory().items.stream().filter(s->s.is(ModItems.POKE_COIN.get())).mapToInt(net.minecraft.world.item.ItemStack::getCount).sum()==5,"coins beyond the price remain with the player");
-        check(PokecTransactions.perform(buyer,p,"bulbasaur",PokecTransactions.Action.PURCHASE,0x702L),"staged coins should complete purchase");
+        check(PokecTransactions.perform(buyer,p,"oddish",PokecTransactions.Action.PURCHASE,0x702L),"staged coins should complete purchase");
         check(menu.stagedCoins()==0,"spent coins must leave escrow exactly once");
         check(buyer.getInventory().items.stream().filter(s->s.is(ModItems.POKE_COIN.get())).mapToInt(net.minecraft.world.item.ItemStack::getCount).sum()==5,"purchase must not consume excess coins");
-        var egg=ModItems.EGGS.get("bulbasaur").get();
+        var egg=ModItems.EGGS.get("oddish").get();
         long ownedEggs=buyer.getInventory().items.stream().filter(stack->stack.is(egg)&&stack.hasTag()
                 &&stack.getTag().hasUUID("MinemonPokecOwner")&&buyer.getUUID().equals(stack.getTag().getUUID("MinemonPokecOwner")))
                 .mapToLong(net.minecraft.world.item.ItemStack::getCount).sum();
@@ -186,11 +189,11 @@ public final class PokecGameTests {
     @GameTest(template="test_arena",timeoutTicks=200)
     public static void stagedCoinsReturnWhenMenuCloses(GameTestHelper h){
         floor(h);BlockPos p=h.absolutePos(new BlockPos(5,1,5));terminal(h,p);ServerPlayer buyer=player(h,h.absolutePos(new BlockPos(7,1,5)));
-        PokecMenu menu=new PokecMenu(11,buyer.getInventory(),p);buyer.containerMenu=menu;PokecPlayerData.unlock(buyer,"bulbasaur");PokecPlayerData.setFreePurchaseUsed(buyer);
+        PokecMenu menu=new PokecMenu(11,buyer.getInventory(),p);buyer.containerMenu=menu;PokecPlayerData.unlock(buyer,"oddish");menu.selectSpecies(buyer,"oddish");
         buyer.getInventory().setItem(0,new net.minecraft.world.item.ItemStack(ModItems.POKE_COIN.get(),12));
-        PokecTransactions.perform(buyer,p,"bulbasaur",PokecTransactions.Action.SELECT,0x900L);
-        check(PokecTransactions.perform(buyer,p,"bulbasaur",PokecTransactions.Action.STAGE_COINS,0x901L),"coins should move into the temporary slot");
-        int staged=Math.min(12,PokecEconomy.get().coins("bulbasaur"));
+        PokecTransactions.perform(buyer,p,"oddish",PokecTransactions.Action.SELECT,0x900L);
+        check(PokecTransactions.perform(buyer,p,"oddish",PokecTransactions.Action.STAGE_COINS,0x901L),"coins should move into the temporary slot");
+        int staged=Math.min(12,PokecEconomy.get().coins("oddish"));
         check(menu.stagedCoins()==staged&&buyer.getInventory().items.stream().filter(s->s.is(ModItems.POKE_COIN.get())).mapToInt(net.minecraft.world.item.ItemStack::getCount).sum()==12-staged,
                 "only coins needed for the configured price leave inventory temporarily");
         menu.removed(buyer);
@@ -471,14 +474,14 @@ public final class PokecGameTests {
     public static void terminalPurchaseResultChargesOnceAndReturnsUnspentPayment(GameTestHelper h){
         floor(h);BlockPos pos=h.absolutePos(new BlockPos(5,1,5));terminal(h,pos);
         ServerPlayer p=player(h,h.absolutePos(new BlockPos(7,1,5)));
-        PokecMenu menu=new PokecMenu(33,p.getInventory(),pos);p.containerMenu=menu;
-        PokecPlayerData.setFreePurchaseUsed(p);int price=PokecEconomy.get().coins("bulbasaur");
+        PokecMenu menu=new PokecMenu(33,p.getInventory(),pos);p.containerMenu=menu;PokecPlayerData.unlock(p,"oddish");menu.selectSpecies(p,"oddish");
+        int price=PokecEconomy.get().coins("oddish");
         p.getInventory().setItem(9,new ItemStack(ModItems.POKE_COIN.get(),64));menu.quickMoveStack(p,0);menu.broadcastChanges();
         check(menu.slots.get(36).getItem().getCount()==price&&p.getInventory().getItem(9).getCount()==64-price,"coin shift click inserts exact purchase cost");
-        check(menu.slots.get(37).getItem().is(ModItems.EGGS.get("bulbasaur").get()),"funded purchase previews selected egg");
+        check(menu.slots.get(37).getItem().is(ModItems.EGGS.get("oddish").get()),"funded purchase previews selected egg");
         check(!menu.slots.get(37).mayPlace(new ItemStack(Blocks.DIRT)),"purchase output rejects inserted items");
         menu.clicked(37,0,net.minecraft.world.inventory.ClickType.PICKUP,p);menu.broadcastChanges();
-        check(menu.getCarried().is(ModItems.EGGS.get("bulbasaur").get())&&menu.getCarried().getCount()==1,"result gives exactly one egg");
+        check(menu.getCarried().is(ModItems.EGGS.get("oddish").get())&&menu.getCarried().getCount()==1,"result gives exactly one egg");
         check(menu.slots.get(36).getItem().isEmpty()&&menu.slots.get(37).getItem().isEmpty(),"taking result spends coins and clears preview");
         menu.clicked(2,0,net.minecraft.world.inventory.ClickType.PICKUP,p);
         menu.clicked(37,0,net.minecraft.world.inventory.ClickType.PICKUP,p);
@@ -501,10 +504,11 @@ public final class PokecGameTests {
             menu.slots.get(38).set(filled);menu.broadcastChanges();
             check(!menu.slots.get(39).hasItem()&&PokeballItem.isOccupied(menu.slots.get(38).getItem()),"insertion previews without releasing");
             var preview=PokemonSoulConversion.preview("charmander",4);
+            int before=playerSoulCount(p);
             check(menu.terminal.release(),"Liberar commits release");
             check(menu.slots.get(38).getItem().is(ballItem)&&!PokeballItem.isOccupied(menu.slots.get(38).getItem()),"original ball remains empty in input");
-            int reward=menu.slots.get(39).getItem().getCount();
-            check(reward>=preview.minimum()&&reward<=preview.maximum(),"reward remains within existing soul yield rules");
+            int reward=playerSoulCount(p)-before;
+            check(reward>=preview.minimum()&&reward<=preview.maximum(),"release gives the configured total soul yield across its rolled types");
             check(!menu.terminal.release(),"repeated release cannot duplicate reward");
             menu.quickMoveStack(p,39);menu.quickMoveStack(p,38);
             menu.slots.get(38).set(filled.copy());

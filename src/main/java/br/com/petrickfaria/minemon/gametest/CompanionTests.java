@@ -641,7 +641,7 @@ public final class CompanionTests {
   var ownedHit=new net.minecraft.world.phys.BlockHitResult(net.minecraft.world.phys.Vec3.atCenterOf(floorPos),net.minecraft.core.Direction.UP,floorPos,false);
   check(h,ownedTemplate.useOn(new net.minecraft.world.item.context.UseOnContext(p,net.minecraft.world.InteractionHand.MAIN_HAND,ownedHit)).consumesAction(),"Owner-tagged eggs should still spawn without slot gating");
   var createdOwned=h.getLevel().getEntitiesOfClass(MinemonCreature.class,new net.minecraft.world.phys.AABB(floorPos).inflate(5),e->e.getSpeciesSlug().equals("charmander"));
-  check(h,!createdOwned.isEmpty()&&createdOwned.stream().noneMatch(MinemonCreature::isTame),"Purchased spawn egg must not assign ownership or active slots");
+  check(h,!createdOwned.isEmpty()&&createdOwned.stream().allMatch(pokemon->pokemon.isTame()&&p.getUUID().equals(pokemon.getOwnerUUID())),"Purchased spawn eggs must hatch already domesticated and owner-bound without requiring active slots");
   createdOwned.forEach(net.minecraft.world.entity.Entity::discard);
   p.discard();h.succeed();
  }

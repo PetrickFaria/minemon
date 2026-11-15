@@ -386,6 +386,14 @@ public final class PokemonTreatClientSmokeTest {
             level.getEntitiesOfClass(net.minecraft.world.entity.monster.Monster.class,validationArea)
                     .forEach(net.minecraft.world.entity.Entity::discard);
             player.getPersistentData().remove("minemon_gen1_pokec");
+            br.com.petrickfaria.minemon.pokec.PokecPlayerData.claimStarter(player,"bulbasaur");
+            br.com.petrickfaria.minemon.pokec.PokecPlayerData.finishStarterEgg(player);
+            for(String starter:br.com.petrickfaria.minemon.pokec.PokecEconomy.STARTERS){
+                if(starter.equals("bulbasaur"))continue;
+                int required=br.com.petrickfaria.minemon.pokec.PokecEconomy.get().souls(starter);
+                for(int deposited=br.com.petrickfaria.minemon.pokec.PokecPlayerData.deposited(player,starter);deposited<required;deposited++)
+                    br.com.petrickfaria.minemon.pokec.PokecPlayerData.addDeposit(player,starter);
+            }
             var pos=player.blockPosition().west(2);
             for(String slug:PREVIEW_SPECIES)br.com.petrickfaria.minemon.pokec.PokecPlayerData.unlock(player,slug);
             var state=br.com.petrickfaria.minemon.registry.ModBlocks.POKEC.get().defaultBlockState();

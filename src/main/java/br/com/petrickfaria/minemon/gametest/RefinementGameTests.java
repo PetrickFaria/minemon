@@ -15,7 +15,7 @@ public class RefinementGameTests {
   var mob=ModEntities.SPECIES.get("charmander").get().create(h.getLevel());
   mob.setPokemonLevel(1);double hp=PokemonProgression.healthForRarity(mob.getPokemonRarity(),1);
   mob.setHealth(3);mob.setPokemonLevel(5);
-  if(mob.getMaxHealth()!=hp+16||mob.getHealth()!=3)h.fail("Level growth must add 16 max HP while preserving current health");
+  if(mob.getMaxHealth()!=hp+4||mob.getHealth()!=3)h.fail("Levels 1 through 5 must add one HP per level while preserving current health");
   double damage=mob.getAttributeValue(Attributes.ATTACK_DAMAGE);
   var data=mob.saveWithoutId(new CompoundTag());var copy=ModEntities.SPECIES.get("charmander").get().create(h.getLevel());copy.load(data);
   if(copy.getMaxHealth()!=mob.getMaxHealth()||copy.getHealth()!=3||copy.getAttributeValue(Attributes.ATTACK_DAMAGE)!=damage)h.fail("Reload duplicated stat growth or healed");
