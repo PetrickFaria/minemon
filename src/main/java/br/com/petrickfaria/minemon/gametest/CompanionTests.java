@@ -232,7 +232,10 @@ public final class CompanionTests {
   MinemonCreature pokemon=h.spawn(ModEntities.SPECIES.get("charmander").get(),new BlockPos(7,1,8));
   pokemon.tame(owner);pokemon.setPokemonLevel(10);pokemon.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH).setBaseValue(200.0D);pokemon.setHealth(200.0F);
   pokemon.setBlackListOverride(new net.minecraft.resources.ResourceLocation("minecraft","zombie"),false);
-  Zombie target=h.spawn(EntityType.ZOMBIE,new BlockPos(9,1,8));keepCombatTargetAlive(target);target.setNoAi(true);target.setTarget(pokemon);pokemon.focusTrainerDefenseTarget(target);\n  // Keep the first retreat phase stationary so this test checks the settle/resume boundary;\n  // the separate advancing-zombie scenario covers a moving threat.\n
+  Zombie target=h.spawn(EntityType.ZOMBIE,new BlockPos(9,1,8));keepCombatTargetAlive(target);target.setNoAi(true);target.setTarget(pokemon);pokemon.focusTrainerDefenseTarget(target);
+  // Keep the first retreat phase stationary so this test checks the settle/resume boundary;
+  // the separate advancing-zombie scenario covers a moving threat.
+
   awaitCharmanderSafety(h,pokemon,target,owner,0);
  }
  private static void awaitCharmanderSafety(GameTestHelper h,MinemonCreature pokemon,Zombie target,ServerPlayer owner,int elapsed){
