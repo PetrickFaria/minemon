@@ -43,6 +43,7 @@ public final class ClientSmokeTest {
  private static float minLeg=Float.MAX_VALUE,maxLeg=-Float.MAX_VALUE,minBody=Float.MAX_VALUE,maxBody=-Float.MAX_VALUE;
  private static volatile boolean combatPassed;
  private static volatile int combatHits;
+ private static volatile long combatStartServerTick=-1,combatObservedServerTick=-1;
  private static final java.util.Map<String,java.util.List<String>> modelBones=new java.util.HashMap<>();
  private static final java.util.Map<String,float[]> motionRanges=new java.util.HashMap<>();
  private static int alakazamMeditationRenderFrames;
@@ -628,6 +629,13 @@ public final class ClientSmokeTest {
      return;
     }
    }
+   // AI/projectiles advance on the integrated server, independently of client
+   // ticks. Preserve the 100-tick combat window even when rendering catches up
+   // faster than the server; do not judge a newly queued fixture prematurely.
+   if(worldTicks==COMBAT_VALIDATION_TICK-1){
+    mc.getSingleplayerServer().execute(()->combatObservedServerTick=mc.getSingleplayerServer().overworld().getGameTime());
+    if(combatStartServerTick<0||combatObservedServerTick-combatStartServerTick<100)return;
+   }
    worldTicks++;
    if(Boolean.getBoolean("minemon.clientSmokeAudio")&&worldTicks>=110&&worldTicks<350&&!customAudioSmokeRequested) {
     var audioEntity=mc.level.getEntity(initialEntityId);
@@ -690,13 +698,19 @@ public final class ClientSmokeTest {
      player.setSprinting(false);player.setDeltaMovement(0.0D,-0.2D,0.0D);player.setOnGround(false);player.fallDistance=2.0F;
      float wildHealth=wild.getHealth();player.attack(wild);
      if(wild.getHealth()!=wildHealth-1.0F)throw new IllegalStateException("Critical Sharpness V Netherite hit with Strength must still deal exactly one HP to a spawn-egg Pokémon: before="+wildHealth+" after="+wild.getHealth());
+     combatStartServerTick=level.getGameTime();
     });
    }
    if(worldTicks==COMBAT_VALIDATION_TICK)mc.getSingleplayerServer().execute(()->{
     var player=mc.getSingleplayerServer().getPlayerList().getPlayers().get(0);var companion=(MinemonCreature)mc.getSingleplayerServer().overworld().getEntity(testEntity);var wild=(MinemonCreature)mc.getSingleplayerServer().overworld().getEntity(combatTargetEntity);
     combatPassed=companion!=null&&wild!=null&&combatHits>0&&wild.getHealth()<wild.getMaxHealth()&&player.getHealth()==20&&player.isAlive();
-    if(!combatPassed)throw new IllegalStateException("Owned companion did not attack the exact focused target or capped player damage incorrectly; hits="+combatHits+" playerHealth="+player.getHealth()+" companionTarget="+(companion==null?null:companion.getTarget())+" wildHealth="+(wild==null?null:wild.getHealth()));
-    try{Files.writeString(Path.of("client-validation.txt"),"PASS COMBAT: direct player melee dealt exactly one HP and the owned companion damaged the focused wild target with ranged attacks; damage events="+combatHits+" playerHealth="+player.getHealth()+"\n",StandardOpenOption.APPEND);}catch(java.io.IOException e){throw new RuntimeException(e);}
+    if(!combatPassed)throw new IllegalStateException("Owned companion did not attack the exact focused target or capped player damage incorrectly; hits="+combatHits+" playerHealth="+player.getHealth()+" companionTarget="+(companion==null?null:companion.getTarget())+" wildHealth="+(wild==null?null:wild.getHealth())
+      +" serverTicks="+(mc.getSingleplayerServer().overworld().getGameTime()-combatStartServerTick)
+      +" companion="+(companion==null?null:companion.position())+" wild="+(wild==null?null:wild.position())
+      +" sight="+(companion!=null&&wild!=null&&companion.getSensing().hasLineOfSight(wild))
+      +" canFire="+(companion!=null&&wild!=null&&companion.canFireAt(wild))
+      +" sleeping="+(companion!=null&&companion.isSleeping())+" noAI="+(companion!=null&&companion.isNoAi()));
+    try{Files.writeString(Path.of("client-validation.txt"),"PASS COMBAT: direct player melee dealt exactly one HP and the owned companion damaged the focused wild target with ranged attacks; damage events="+combatHits+" playerHealth="+player.getHealth()+" serverTicks="+(mc.getSingleplayerServer().overworld().getGameTime()-combatStartServerTick)+"\n",StandardOpenOption.APPEND);}catch(java.io.IOException e){throw new RuntimeException(e);}
     if(companion!=null)companion.discard();if(wild!=null)wild.discard();combatTargetEntity=null;
     player.setGameMode(GameType.CREATIVE);player.setHealth(20);player.teleportTo(mc.getSingleplayerServer().overworld(),0,101,0,0,12);player.fallDistance=0;
    });
