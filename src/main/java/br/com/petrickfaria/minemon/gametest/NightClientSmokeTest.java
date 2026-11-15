@@ -123,7 +123,10 @@ final class NightClientSmokeTest {
       throw new IllegalStateException(mob.getSpeciesSlug()+" remained pitched while asleep: xRot="+mob.getXRot());
      if(swimSleep&&!SpeciesBehaviorProfiles.sleepsAtWaterBottom(mob.getSpeciesSlug())){
       double top=WaterMovementGoal.restSurfaceAt(mob,mob.blockPosition());
-      if(!Double.isFinite(top)||top-mob.getY()<2.9D)
+      boolean shallowShellder=SPECIES.get(index).equals("shellder_shallow");
+      if(shallowShellder&&(!mob.isInWaterOrBubble()||!mob.level.noCollision(mob,mob.getBoundingBox())))
+       throw new IllegalStateException("shellder shallow sleep must remain in water without intersecting blocks");
+      if(!shallowShellder&&(!Double.isFinite(top)||top-mob.getY()<2.9D))
        throw new IllegalStateException(mob.getSpeciesSlug()+" slept less than three blocks below the visible water surface: y="+mob.getY()+" surface="+top);
      }
      if(mob.getSpeciesSlug().equals("gyarados")&&mob.isSleeping()
@@ -319,10 +322,14 @@ final class NightClientSmokeTest {
      double target=WaterMovementGoal.waterRestY(current);
      double error=Math.abs(current.getY()-target);
      if(SpeciesBehaviorProfiles.usesSwimmingSleepAnimation(current.getSpeciesSlug())
-         &&!SpeciesBehaviorProfiles.sleepsAtWaterBottom(current.getSpeciesSlug())
+        &&!SpeciesBehaviorProfiles.sleepsAtWaterBottom(current.getSpeciesSlug())
          &&current.tickCount-sleepingPositionSettleTick>=5
-         &&WaterMovementGoal.restSurfaceAt(current,current.blockPosition())-current.getY()<2.99D)
-      throw new IllegalStateException(current.getSpeciesSlug()+" slept closer than three blocks to the visible water surface after network settle");
+        &&WaterMovementGoal.restSurfaceAt(current,current.blockPosition())-current.getY()<2.99D){
+      if(SPECIES.get(index).equals("shellder_shallow")){
+       if(!current.isInWaterOrBubble()||!current.level.noCollision(current,current.getBoundingBox()))
+        throw new IllegalStateException("shellder shallow sleep must remain in water without intersecting blocks after network settle");
+      }else throw new IllegalStateException(current.getSpeciesSlug()+" slept closer than three blocks to the visible water surface after network settle");
+     }
      if(SpeciesBehaviorProfiles.usesSwimmingSleepAnimation(current.getSpeciesSlug())){
       if(!Set.of("magikarp","shellder","cloyster").contains(current.getSpeciesSlug())&&Math.abs(current.getY()-104.0D)>.25D)
        throw new IllegalStateException(current.getSpeciesSlug()+" did not preserve its already-deep sleep position: y="+current.getY()+" expected=104.0");
