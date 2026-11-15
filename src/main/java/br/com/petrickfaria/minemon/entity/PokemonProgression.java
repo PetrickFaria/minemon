@@ -13,7 +13,7 @@ public final class PokemonProgression {
     }
     public static double healthForRarity(String rarity,int level) {
         double base=switch(rarityKey(rarity)){case "uncommon"->14;case "rare"->18;case "legendary"->22;case "mythic"->26;default->10;};
-        return base+4.0D*(Math.max(1,level)-1);
+        return base+1.0D*(Math.max(1,level)-1);
     }
     public static double damageForRarity(String rarity,int level) {
         double base=switch(rarityKey(rarity)){case "uncommon"->4;case "rare"->8;case "legendary"->14;case "mythic"->18;default->2;};

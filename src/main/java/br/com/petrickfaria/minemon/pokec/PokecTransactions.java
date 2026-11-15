@@ -21,13 +21,13 @@ import java.util.concurrent.ConcurrentHashMap;
 /** All PokéC state changes are validated and committed on the server. */
 public final class PokecTransactions {
     public enum Action { DEPOSIT, PURCHASE, SELECT, STAGE_COINS, STAGE_SOULS, CONFIRM_SOULS,
-        STAGE_POKEBALL, RETURN_POKEBALL, CLAIM_CONVERSION_OUTPUT, REQUEST_CONVERSION, CONFIRM_CONVERSION, CANCEL_CONVERSION, UNLOCK_INPUT, BUY_INPUT, RELEASE_INPUT, TOGGLE_SPAWN }
+        STAGE_POKEBALL, RETURN_POKEBALL, CLAIM_CONVERSION_OUTPUT, REQUEST_CONVERSION, CONFIRM_CONVERSION, CANCEL_CONVERSION, UNLOCK_INPUT, BUY_INPUT, RELEASE_INPUT, TOGGLE_SPAWN, CLAIM_STARTER }
     private static final Map<UUID, Set<Long>> RECENT_IDS = new ConcurrentHashMap<>();
 
     public static boolean perform(ServerPlayer player, BlockPos pos, String slug, Action action, long id) {
         if (!(player.containerMenu instanceof PokecMenu menu) || !menu.pos().equals(pos) || !menu.stillValid(player)) return false;
         if (player.distanceToSqr(pos.getX() + .5, pos.getY() + .5, pos.getZ() + .5) > 64) return false;
-        if (action != Action.STAGE_POKEBALL && action != Action.RETURN_POKEBALL
+            if (action != Action.STAGE_POKEBALL && action != Action.RETURN_POKEBALL
                 && action != Action.CLAIM_CONVERSION_OUTPUT && action != Action.REQUEST_CONVERSION
                 && action != Action.CONFIRM_CONVERSION && action != Action.CANCEL_CONVERSION
                 && !PokecSpecies.ALL.containsKey(slug)) return false;
@@ -37,6 +37,11 @@ public final class PokecTransactions {
             if (action == Action.SELECT) {
                 menu.selectSpecies(player, slug);
                 return true;
+            }
+            if(action==Action.CLAIM_STARTER){
+                boolean claimed=PokecPlayerData.claimStarter(player,slug);
+                if(claimed){menu.selectSpecies(player,slug);menu.terminal.refresh();}
+                return claimed;
             }
             if (action != Action.SELECT && action != Action.STAGE_POKEBALL && action != Action.RETURN_POKEBALL
                     && action != Action.CLAIM_CONVERSION_OUTPUT && action != Action.REQUEST_CONVERSION
@@ -113,13 +118,18 @@ public final class PokecTransactions {
         if (ledger.isConsumed(stored.token())) return false;
         PokemonSoulConversion.Preview preview = PokemonSoulConversion.preview(stored.species(), stored.level());
         if (preview == null || preview.soulType() == null) return false;
-        var soulItem = ModItems.SOULS.get(preview.soulType().id());
-        if (soulItem == null) return false;
-        if (!ledger.consume(stored.token())) return false;
+        if (PokecSpecies.get(stored.species()) == null) return false;
         int result = PokemonSoulConversion.roll(preview, level.getRandom()::nextDouble);
-        int stackLimit = soulItem.get().getMaxStackSize();
-        for (int remaining = result; remaining > 0; remaining -= Math.min(remaining, stackLimit))
-            player.getInventory().placeItemBackInInventory(new ItemStack(soulItem.get(), Math.min(remaining, stackLimit)));
+        var soulAwards=PokemonSoulConversion.rollSoulTypes(stored.species(),result,level.getRandom()::nextDouble);
+        if(soulAwards.keySet().stream().anyMatch(type->ModItems.SOULS.get(type.id())==null))return false;
+        if (!ledger.consume(stored.token())) return false;
+        for (var awarded : soulAwards.entrySet()) {
+            var soulItem=ModItems.SOULS.get(awarded.getKey().id());
+            if(soulItem==null)continue;
+            int stackLimit=soulItem.get().getMaxStackSize();
+            for(int remaining=awarded.getValue();remaining>0;remaining-=Math.min(remaining,stackLimit))
+                player.getInventory().placeItemBackInInventory(new ItemStack(soulItem.get(),Math.min(remaining,stackLimit)));
+        }
         player.getInventory().placeItemBackInInventory(PokeballItem.emptyBall(ball));
         menu.setConversionState(player, ItemStack.EMPTY, ItemStack.EMPTY, result);
         // The token is consumed and the conversion transaction is now committed.
@@ -129,7 +139,6 @@ public final class PokecTransactions {
 
     private static boolean stageCoins(ServerPlayer player, PokecMenu menu, PokecSpecies.Entry species) {
         if (!PokecPlayerData.isUnlocked(player, species.slug())) return false;
-        if (PokecEconomy.get().firstPurchaseFree() && !PokecPlayerData.usedFreePurchase(player)) return false;
         int needed = Math.max(0, PokecEconomy.get().coins(species.slug()) - PokecPlayerData.coins(player) - menu.stagedCoins());
         int taken = takeItems(player, ModItems.POKE_COIN.get(), needed);
         if (taken == 0) return false;
@@ -244,8 +253,8 @@ public final class PokecTransactions {
         if (!PokecPlayerData.isUnlocked(player, species.slug()) || !menu.beginPurchase(player.tickCount)) return false;
         var egg = ModItems.EGGS.get(species.slug());
         if (egg == null) return false;
-        boolean free = PokecEconomy.get().firstPurchaseFree() && !PokecPlayerData.usedFreePurchase(player);
-        int price = free ? 0 : PokecEconomy.get().coins(species.slug());
+        boolean free = false;
+        int price = PokecEconomy.get().coins(species.slug());
         int wallet = PokecPlayerData.coins(player);
         if (wallet + menu.stagedCoins() < price) return false;
 

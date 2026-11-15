@@ -115,10 +115,13 @@ public final class PokecEvents {
         if (preview == null || preview.soulType() == null) return;
         int count = PokemonSoulConversion.rollDeathDrops(pokemon.getSpeciesSlug(), pokemon.getPokemonLevel(), pokemon.getRandom()::nextDouble);
         if (count <= 0) return;
-        var soul = ModItems.SOULS.get(preview.soulType().id());
-        if (soul != null) for(int remaining=count;remaining>0;remaining-=Math.min(remaining,soul.get().getMaxStackSize())) {
-            int stackSize=Math.min(remaining,soul.get().getMaxStackSize());
-            event.getDrops().add(new net.minecraft.world.entity.item.ItemEntity(pokemon.level,pokemon.getX(),pokemon.getY(),pokemon.getZ(),new ItemStack(soul.get(),stackSize)));
+        for(var awarded:PokemonSoulConversion.rollSoulTypes(pokemon.getSpeciesSlug(),count,pokemon.getRandom()::nextDouble).entrySet()){
+            var soul=ModItems.SOULS.get(awarded.getKey().id());
+            if(soul==null)continue;
+            for(int remaining=awarded.getValue();remaining>0;remaining-=Math.min(remaining,soul.get().getMaxStackSize())){
+                int stackSize=Math.min(remaining,soul.get().getMaxStackSize());
+                event.getDrops().add(new net.minecraft.world.entity.item.ItemEntity(pokemon.level,pokemon.getX(),pokemon.getY(),pokemon.getZ(),new ItemStack(soul.get(),stackSize)));
+            }
         }
     }
     @SubscribeEvent public static void clonePlayer(PlayerEvent.Clone event){PokecPlayerData.copyOnRespawn(event.getOriginal(),event.getEntity());if(event.getEntity() instanceof net.minecraft.server.level.ServerPlayer player)PokecTransactions.recoverEscrow(player);}

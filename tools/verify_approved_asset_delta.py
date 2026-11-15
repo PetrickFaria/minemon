@@ -21,6 +21,8 @@ POKEC_RESOURCES = frozenset({
     "src/main/resources/assets/minemon_gen1/models/block/pokec_lower.json",
     "src/main/resources/assets/minemon_gen1/models/block/pokec_upper.json",
     "src/main/resources/assets/minemon_gen1/models/block/pokec_item.json",
+    "src/main/resources/assets/minemon/models/item/pokec.json",
+    "src/main/resources/assets/minemon/textures/item/pokec.png",
     "src/main/resources/assets/minemon_gen1/models/item/bug_soul.json",
     "src/main/resources/assets/minemon_gen1/models/item/dragon_soul.json",
     "src/main/resources/assets/minemon_gen1/models/item/electric_soul.json",

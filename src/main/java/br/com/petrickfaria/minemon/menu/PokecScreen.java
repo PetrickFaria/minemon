@@ -36,6 +36,7 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
     private static volatile int syncedConversionResult = -1, syncedConversionLevel, syncedConversionBase, syncedConversionMinimum, syncedConversionMaximum;
     private static volatile String syncedConversionSpecies = "", syncedConversionRarity = "", syncedConversionStage = "", syncedConversionType = "";
     private static volatile boolean syncedConversionConfirming;
+    private static volatile boolean syncedStarterChosen;
 
     private final Map<net.minecraft.resources.ResourceLocation,net.minecraft.resources.ResourceLocation> ghostTextures=new HashMap<>();
     private float uiScale = 1.0F;
@@ -121,7 +122,7 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
         inventoryLabelY = 10000;
     }
 
-    public static void updateState(int coins, boolean freeAvailable, Set<String> unlocked,
+    public static void updateState(int coins, boolean freeAvailable, boolean starterChosen, Set<String> unlocked,
                                    Map<String, Integer> deposits, Map<String, Integer> prices,
                                    Map<String, Integer> requirements, String selected, int stagedCoins, int stagedSouls,
                                    ItemStack conversionBall, ItemStack conversionOutput, int conversionResult,
@@ -130,6 +131,7 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
                                    int conversionMinimum, int conversionMaximum, boolean conversionConfirming) {
         syncedCoins = coins;
         syncedFreeAvailable = freeAvailable;
+        syncedStarterChosen = starterChosen;
         syncedUnlocked = Set.copyOf(unlocked);
         syncedDeposits = Map.copyOf(deposits);
         syncedPrices = Map.copyOf(prices);
@@ -360,7 +362,9 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
             drawButton(pose,420,114,63,19,"Spawn",true,mouseX,mouseY);
             GuiComponent.fill(pose,423,117,480,130,enabled?0xFF398348:0xFFAB3939);
             drawCentered(pose,"Spawn",451,120,0xFFFFFFFF);
-            font.draw(pose,String.format(Locale.ROOT,"%.2f%%",enabled?menu.terminal.spawnChance()*100:0),491,120,0xFF404040);
+            font.draw(pose,String.format(Locale.ROOT,"%.4f%% / %.4f%% (%d)",
+                    menu.terminal.spawnChance()*100,menu.terminal.currentSpawnChance()*100,
+                    menu.terminal.spawnIncrementCount()),421,135,0xFF404040);
         }else drawButton(pose,420,87,116,19,"Desbloquear",menu.terminal.payment().getCount()>0,mouseX,mouseY);
     }
     private void drawCompactConversion(PoseStack pose){
@@ -626,6 +630,14 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
     @Override public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (button != 0) return super.mouseClicked(mouseX, mouseY, button);
         int x = (int) ((mouseX - leftPos) / uiScale), y = (int) ((mouseY - topPos) / uiScale);
+        if(!syncedStarterChosen){
+            String[] starters={"bulbasaur","charmander","squirtle","pikachu","eevee"};
+            for(int i=0;i<starters.length;i++){
+                int col=i<3?i:i-3,row=i<3?0:1,rx=176+col*98+(row==1?49:0),ry=96+row*35;
+                if(inRect(x,y,rx,ry,90,28)){MinemonNetwork.performPokecAction(menu.pos(),starters[i],PokecTransactions.Action.CLAIM_STARTER);return true;}
+            }
+            return true;
+        }
         int trackX=PokecScrollbarGeometry.X,trackY=PokecScrollbarGeometry.Y,trackHeight=visibleRows()*ROW_H;
         // Match the two logical pixels drawn for the track and handle it before
         // the wider row hitbox so scrollbar clicks never select a species.
@@ -714,6 +726,20 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
     @Override public void render(PoseStack pose, int mouseX, int mouseY, float partialTick) {
         renderBackground(pose);
         super.render(pose, mouseX, mouseY, partialTick);
+        if(!syncedStarterChosen){
+            pose.pushPose();pose.translate(leftPos,topPos,500);pose.scale(uiScale,uiScale,1);
+            GuiComponent.fill(pose,164,66,476,187,0xEE20242A);
+            GuiComponent.fill(pose,166,68,474,185,0xFFF0F0F0);
+            font.draw(pose,"ESCOLHA SEU POKÉMON INICIAL",193,76,0xFF202020);
+            String[] names={"Bulbasaur","Charmander","Squirtle","Pikachu","Eevee"};
+            for(int i=0;i<names.length;i++){
+                int col=i<3?i:i-3,row=i<3?0:1,x=176+col*98+(row==1?49:0),y=96+row*35;
+                boolean hover=mouseX>=leftPos+x*uiScale&&mouseX<leftPos+(x+90)*uiScale&&mouseY>=topPos+y*uiScale&&mouseY<topPos+(y+28)*uiScale;
+                GuiComponent.fill(pose,x,y,x+90,y+28,hover?0xFFB7D6E8:0xFFC8C8C8);
+                font.draw(pose,names[i],x+5,y+10,0xFF202020);
+            }
+            pose.popPose();
+        }
         int tooltipX=(int)((mouseX-leftPos)/uiScale),tooltipY=(int)((mouseY-topPos)/uiScale);
         if(inRect(tooltipX,tooltipY,280,146,116,25))renderTooltip(pose,Component.literal("Dano"),mouseX,mouseY);
         else renderTooltip(pose,mouseX,mouseY);

@@ -18,7 +18,7 @@ public final class PokecTerminalSlots {
     private final Inventory inventory;
     private final SimpleContainer items = new SimpleContainer(4);
     private boolean changing;
-    private final net.minecraft.world.inventory.SimpleContainerData state=new net.minecraft.world.inventory.SimpleContainerData(3);
+    private final net.minecraft.world.inventory.SimpleContainerData state=new net.minecraft.world.inventory.SimpleContainerData(5);
     public PokecTerminalSlots(PokecMenu menu, Inventory inventory) {
         this.menu=menu;this.inventory=inventory;
         if(inventory.player instanceof ServerPlayer player){
@@ -52,6 +52,8 @@ public final class PokecTerminalSlots {
     }
     public boolean spawnEnabled(){return state.get(0)==1;}
     public double spawnChance(){return state.get(1)/10000.0D;}
+    public double currentSpawnChance(){return state.get(3)/10000.0D;}
+    public int spawnIncrementCount(){return state.get(4);}
     public ItemStack payment(){return items.getItem(0);}
     public ItemStack ball(){return items.getItem(2);}
     public void layout(int inputX,int inputY,int outputX,int outputY,int releaseX,int releaseY,int rewardX,int rewardY){
@@ -60,7 +62,8 @@ public final class PokecTerminalSlots {
     }
     private ServerPlayer server(){return inventory.player instanceof ServerPlayer p?p:null;}
     private boolean unlocked(){return server()!=null&&PokecPlayerData.isUnlocked(server(),menu.selectedSlug());}
-    private boolean free(){return server()!=null&&PokecEconomy.get().firstPurchaseFree()&&!PokecPlayerData.usedFreePurchase(server());}
+    private boolean starterEgg(){return server()!=null&&PokecPlayerData.starterEggPending(server())&&PokecPlayerData.pendingStarterEgg(server()).equals(menu.selectedSlug());}
+    private boolean free(){return false;}
     public int remaining(){
         if(server()==null)return 64;
         if(unlocked())return Math.max(0,(free()?0:PokecEconomy.get().coins(menu.selectedSlug()))-PokecPlayerData.coins(server()));
@@ -73,9 +76,10 @@ public final class PokecTerminalSlots {
         return unlocked()?stack.is(ModItems.POKE_COIN.get()):!species.isEvolution()&&stack.getItem() instanceof SoulItem soul
             &&soul.soulType()==SoulType.fromSpeciesType(species.primaryType());
     }
-    private boolean canBuy(){return unlocked()&&ModItems.EGGS.containsKey(menu.selectedSlug())
-        &&(remaining()==0||payment().is(ModItems.POKE_COIN.get())&&payment().getCount()>=remaining());}
+    private boolean canBuy(){return ModItems.EGGS.containsKey(menu.selectedSlug())&&(starterEgg()||unlocked()
+        &&(remaining()==0||payment().is(ModItems.POKE_COIN.get())&&payment().getCount()>=remaining()));}
     private void pay(ServerPlayer player){
+        if(starterEgg()){PokecPlayerData.finishStarterEgg(player);save();return;}
         int cost=free()?0:PokecEconomy.get().coins(menu.selectedSlug());
         int wallet=Math.min(cost,PokecPlayerData.coins(player));
         PokecPlayerData.setCoins(player,PokecPlayerData.coins(player)-wallet);
@@ -88,7 +92,11 @@ public final class PokecTerminalSlots {
         var species=PokecSpecies.get(menu.selectedSlug());
         state.set(2,(species!=null&&(!species.isEvolution()||unlocked())?1:0)|(unlocked()?2:0));
         state.set(0,PokecPlayerData.spawnEnabled(server(),menu.selectedSlug())?1:0);
-        state.set(1,(int)Math.round(WildEncounterManager.configuredSpawnChance(server(),menu.selectedSlug())*10000));
+        double base=WildEncounterManager.configuredSpawnChance(server(),menu.selectedSlug());
+        long ticks=SpawnChanceProgression.elapsedTicks(server().getPersistentData(),menu.selectedSlug());
+        state.set(1,(int)Math.round(base*10000));
+        state.set(3,(int)Math.round(SpawnChanceProgression.chance(base,ticks)*10000));
+        state.set(4,(int)Math.min(32767,SpawnChanceProgression.incrementCount(server().getPersistentData(),menu.selectedSlug())));
         changing=true;
         try{
             ItemStack result=canBuy()?PokecOwnedSpawnEggItem.ownedStack(ModItems.EGGS.get(menu.selectedSlug()).get().getDefaultInstance(),server().getUUID(),server().getGameProfile().getName()):ItemStack.EMPTY;
@@ -110,13 +118,21 @@ public final class PokecTerminalSlots {
         if(stored==null||ball().getCount()!=1||!stored.owner().equals(player.getUUID()))return false;
         var preview=PokemonSoulConversion.preview(stored.species(),stored.level());
         if(preview==null||preview.soulType()==null)return false;
-        var soul=ModItems.SOULS.get(preview.soulType().id());if(soul==null)return false;
+        if(PokecSpecies.get(stored.species())==null)return false;
         var ledger=PokemonBallLedger.get((ServerLevel)player.level);
         if(ledger.isConsumed(stored.token()))return false;
         int count=PokemonSoulConversion.roll(preview,player.getRandom()::nextDouble);
-        if(count>soul.get().getMaxStackSize()||!ledger.consume(stored.token()))return false;
+        var soulAwards=PokemonSoulConversion.rollSoulTypes(stored.species(),count,player.getRandom()::nextDouble);
+        if(soulAwards.keySet().stream().anyMatch(type->ModItems.SOULS.get(type.id())==null))return false;
+        if(!ledger.consume(stored.token()))return false;
+        for(var awarded:soulAwards.entrySet()){
+            var soul=ModItems.SOULS.get(awarded.getKey().id());
+            int stackLimit=soul.get().getMaxStackSize();
+            for(int remaining=awarded.getValue();remaining>0;remaining-=Math.min(remaining,stackLimit))
+                player.getInventory().placeItemBackInInventory(new ItemStack(soul.get(),Math.min(remaining,stackLimit)));
+        }
         items.setItem(2,PokeballItem.emptyBall(ball()));
-        items.setItem(3,new ItemStack(soul.get(),count));
+        items.setItem(3,ItemStack.EMPTY);
         PokecPlayerData.addTrainerXp(player,TrainerProgression.pokemonXp(stored.species(),stored.level())*.5D);
         save();return true;
     }

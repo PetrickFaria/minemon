@@ -12,12 +12,15 @@ public final class PokecPlayerData {
         CompoundTag root=p.getPersistentData();
         CompoundTag d=root.getCompound(KEY);
         CompoundTag unlocked=d.getCompound("unlocked");
-        for(String starter:PokecEconomy.get().starters()) {
-            if(PokecSpecies.get(starter)!=null)unlocked.putBoolean(starter,true);
-        }
+        String chosenStarter=d.getString("chosenStarter");
+        if(d.getBoolean("starterChosen")&&PokecSpecies.get(chosenStarter)!=null)unlocked.putBoolean(chosenStarter,true);
         CompoundTag deposits=d.getCompound("deposits");
         for(var species:PokecSpecies.ALL.values()){
             if(!species.isEvolution()&&deposits.getInt(species.slug())>=PokecEconomy.get().souls(species.slug()))unlocked.putBoolean(species.slug(),true);
+        }
+        for(String starter:PokecEconomy.STARTERS){
+            if(!d.getBoolean("starterChosen")||!starter.equals(chosenStarter))
+                if(deposits.getInt(starter)<PokecEconomy.get().souls(starter))unlocked.remove(starter);
         }
         d.put("unlocked",unlocked);root.put(KEY,d);return d;
     }
@@ -41,6 +44,16 @@ public final class PokecPlayerData {
     public static void toggleSpawn(ServerPlayer p,String slug){CompoundTag d=data(p), disabled=d.getCompound("disabledSpawn");disabled.putBoolean(slug,spawnEnabled(p,slug));d.put("disabledSpawn",disabled);}
     public static boolean usedFreePurchase(ServerPlayer p){return data(p).getBoolean("freePurchaseUsed");}
     public static void setFreePurchaseUsed(ServerPlayer p){data(p).putBoolean("freePurchaseUsed",true);}
+    public static boolean starterChosen(ServerPlayer p){return data(p).getBoolean("starterChosen");}
+    public static String chosenStarter(ServerPlayer p){return data(p).getString("chosenStarter");}
+    public static boolean starterEggPending(ServerPlayer p){return data(p).getBoolean("starterEggPending");}
+    public static String pendingStarterEgg(ServerPlayer p){return starterEggPending(p)?data(p).getString("chosenStarter"):"";}
+    public static boolean claimStarter(ServerPlayer p,String slug){
+        if(starterChosen(p)||!java.util.Set.of(PokecEconomy.STARTERS).contains(slug)||PokecSpecies.get(slug)==null)return false;
+        CompoundTag d=data(p);d.putBoolean("starterChosen",true);d.putString("chosenStarter",slug);d.putBoolean("starterEggPending",true);
+        d.getCompound("unlocked").putBoolean(slug,true);return true;
+    }
+    public static void finishStarterEgg(ServerPlayer p){data(p).putBoolean("starterEggPending",false);}
     public static int stagedCoins(ServerPlayer p){return Math.max(0,data(p).getInt("stagedCoins"));}
     public static int stagedSouls(ServerPlayer p){return Math.max(0,data(p).getInt("stagedSouls"));}
     public static String stagedSoulType(ServerPlayer p){return data(p).getString("stagedSoulType");}

@@ -39,7 +39,7 @@ public final class PokemonProgressionTest {
         assertEquals(18.0D, PokemonProgression.healthForRarity("rare", 1), 0.0D);
         assertEquals(22.0D, PokemonProgression.healthForRarity("legendary", 1), 0.0D);
         assertEquals(26.0D, PokemonProgression.healthForRarity("mythic", 1), 0.0D);
-        assertEquals(4.0D, PokemonProgression.healthForRarity("common", 2)
+        assertEquals(1.0D, PokemonProgression.healthForRarity("common", 2)
                 - PokemonProgression.healthForRarity("common", 1), 0.0D);
         assertEquals(1.0D, PokemonProgression.damageForRarity("common", 2)
                 - PokemonProgression.damageForRarity("common", 1), 0.0D);

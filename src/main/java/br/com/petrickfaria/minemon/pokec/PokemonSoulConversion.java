@@ -1,6 +1,9 @@
 package br.com.petrickfaria.minemon.pokec;
 
 import java.util.function.DoubleSupplier;
+import java.util.EnumMap;
+import java.util.Map;
+import java.util.List;
 
 /** Shared PokéC soul formula and uniform yield rolls for deaths and nature returns. */
 public final class PokemonSoulConversion {
@@ -48,6 +51,20 @@ public final class PokemonSoulConversion {
         minimum=Math.max(0,minimum);int span=maximum-minimum+1;if(span<=1)return minimum;
         double draw=serverRandom.getAsDouble();if(!Double.isFinite(draw)||draw<0.0D||draw>=1.0D)return minimum;
         return minimum+(int)Math.floor(draw*span);
+    }
+    /** Rolls the soul type independently for each awarded soul, preserving total quantity. */
+    public static Map<SoulType,Integer> rollSoulTypes(String slug,int count,DoubleSupplier random){
+        EnumMap<SoulType,Integer> result=new EnumMap<>(SoulType.class);
+        PokecSpecies.Entry species=PokecSpecies.get(slug);
+        if(species==null||count<=0)return result;
+        List<SoulType> types=species.types().stream().map(SoulType::fromSpeciesType).filter(java.util.Objects::nonNull).distinct().toList();
+        if(types.isEmpty())return result;
+        for(int i=0;i<count;i++){
+            double draw=random.getAsDouble();
+            int index=!Double.isFinite(draw)||draw<0||draw>=1?0:(int)Math.floor(draw*types.size());
+            result.merge(types.get(Math.min(types.size()-1,index)),1,Integer::sum);
+        }
+        return result;
     }
     public static int deathDropMaximum(String slug,int level){
         PokecSpecies.Entry species=PokecSpecies.get(slug);if(species==null)return 0;PokecEconomy e=PokecEconomy.get();

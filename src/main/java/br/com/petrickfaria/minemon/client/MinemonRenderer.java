@@ -96,37 +96,28 @@ public class MinemonRenderer extends GeoEntityRenderer<MinemonCreature> {
        &&!br.com.petrickfaria.minemon.item.PokeballItem.isOccupied(stack))return true;
   return false;
  }
- @Override public boolean shouldShowName(MinemonCreature entity){return entity.isTame()||showEncounterChoices(entity);}
+ @Override public boolean shouldShowName(MinemonCreature entity){return true;}
  @Override protected void renderNameTag(MinemonCreature entity,Component name,com.mojang.blaze3d.vertex.PoseStack pose,
       net.minecraft.client.renderer.MultiBufferSource buffers,int packedLight){
-  if(showEncounterChoices(entity)){
-   float wildScale=SpeciesDefinitions.get(entity.getSpeciesSlug()).scale()*(entity.isBaby()?.5F:1);
-   pose.pushPose();
-   try{
-    pose.scale(1/wildScale,1/wildScale,1/wildScale);
-    double top=br.com.petrickfaria.minemon.entity.ModelMetrics.top(entity.getSpeciesSlug(),wildScale);
+  net.minecraft.ChatFormatting ownershipColor=entity.isTame()?net.minecraft.ChatFormatting.BLUE:net.minecraft.ChatFormatting.RED;
+  float scale=SpeciesDefinitions.get(entity.getSpeciesSlug()).scale()*(entity.isBaby()?.5F:1);
+  Component shownName=entity.isTame()&&entity.hasCustomName()?entity.getCustomName():entity.getName();
+  pose.pushPose();
+  try{
+    pose.scale(1/scale,1/scale,1/scale);
+    double top=br.com.petrickfaria.minemon.entity.ModelMetrics.top(entity.getSpeciesSlug(),scale);
     pose.translate(0,Math.max(0,top-entity.getBbHeight()),0);
+    super.renderNameTag(entity,shownName.copy().withStyle(ownershipColor),pose,buffers,packedLight);
+    pose.translate(0,-.22D,0);
+    super.renderNameTag(entity,Component.literal("Nível: "+entity.getPokemonLevel()).withStyle(ownershipColor),pose,buffers,packedLight);
+    if(showEncounterChoices(entity)){
+     pose.translate(0,-.44D,0);
     super.renderNameTag(entity,Component.literal("Capturar - Botão Direito")
         .withStyle(net.minecraft.ChatFormatting.GREEN),pose,buffers,packedLight);
     pose.translate(0,-.22D,0);
     super.renderNameTag(entity,Component.literal("Saquear - Botão Esquerdo")
         .withStyle(net.minecraft.ChatFormatting.RED),pose,buffers,packedLight);
-   }finally{pose.popPose();}
-   return;
-  }
-  if(!entity.isTame()){super.renderNameTag(entity,name,pose,buffers,packedLight);return;}
-  Component shownName=entity.hasCustomName()?entity.getCustomName():entity.getName();
-  float scale=SpeciesDefinitions.get(entity.getSpeciesSlug()).scale()*(entity.isBaby()?.5F:1);
-  pose.pushPose();
-  try{
-   // Name tags are world-sized; cancel the species mesh scale before using
-   // the measured visible top, rather than scaling the hitbox height twice.
-   pose.scale(1/scale,1/scale,1/scale);
-   double top=br.com.petrickfaria.minemon.entity.ModelMetrics.top(entity.getSpeciesSlug(),scale);
-   pose.translate(0,Math.max(0,top-entity.getBbHeight()),0);
-   super.renderNameTag(entity,shownName,pose,buffers,packedLight);
-   pose.translate(0,-.22D,0);
-   super.renderNameTag(entity,Component.literal("Nível: "+entity.getPokemonLevel()),pose,buffers,packedLight);
+    }
   }finally{pose.popPose();}
  }
  @Override public void renderRecursively(software.bernie.geckolib3.geo.render.built.GeoBone bone,

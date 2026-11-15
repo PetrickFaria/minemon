@@ -114,14 +114,13 @@ final class NightRestGoal extends Goal {
  }
  private void holdWaterRest(){
   mob.getNavigation().stop();mob.setJumping(false);mob.setSpeed(0);mob.setXxa(0);mob.setYya(0);mob.setZza(0);
-  if(mob.isSleeping()&&SpeciesBehaviorProfiles.locksPositionDuringWaterSleep(mob.getSpeciesSlug())){
+  if(mob.isSleeping()){
    // Once the rest position is reached, keep the entity at that exact point.
    // The client animation controller continues independently of this motion.
    mob.setNoGravity(true);mob.fallDistance=0;mob.setDeltaMovement(0,0,0);return;
   }
   double target=WaterMovementGoal.waterRestY(mob);
-  if(mob.isSleeping()&&SpeciesBehaviorProfiles.sleepsAtWaterBottom(mob.getSpeciesSlug())
-      &&Double.isFinite(target)&&Math.abs(target-mob.getY())<=0.2D
+  if(mob.isSleeping()&&Double.isFinite(target)&&Math.abs(target-mob.getY())<=0.18D
       &&mob.level.noCollision(mob,mob.getBoundingBox().move(0,target-mob.getY(),0))){
    mob.setPos(mob.getX(),target,mob.getZ());
    mob.setNoGravity(true);mob.fallDistance=0;mob.setDeltaMovement(0,0,0);return;

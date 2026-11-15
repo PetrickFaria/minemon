@@ -14,6 +14,8 @@ MODEL = "assets/minemon/models/item/pokeball.json"
 TEXTURE = "assets/minemon/textures/item/pokeball.png"
 MASTER_MODEL = "assets/minemon/models/item/master_ball.json"
 MASTER_TEXTURE = "assets/minemon/textures/item/master_ball.png"
+POKEC_MODEL = "assets/minemon/models/item/pokec.json"
+POKEC_TEXTURE = "assets/minemon/textures/item/pokec.png"
 
 model = json.loads((ASSETS / "models/item/pokeball.json").read_text(encoding="utf-8"))
 assert model.get("parent") == "minecraft:item/generated", "Pokébola must use its own generated item model"
@@ -25,6 +27,20 @@ def validate_texture(path: Path, label: str) -> bytes:
     width, height = struct.unpack(">II", header[16:24])
     assert (width, height) == (16, 16) and header[25] == 6, f"{label} texture must preserve the supplied 16x16 RGBA sprite"
     return raw
+
+pokec_model = json.loads((ASSETS / "models/item/pokec.json").read_text(encoding="utf-8"))
+assert pokec_model.get("parent") == "minecraft:item/generated", "PokéC must use a dedicated 2D item model"
+assert pokec_model.get("textures", {}).get("layer0") == "minemon:item/pokec", "PokéC model must use its own sprite"
+pokec_png = (ASSETS / "textures/item/pokec.png").read_bytes()
+pokec_header = pokec_png[:26]
+assert pokec_header[:8] == b"\x89PNG\r\n\x1a\n" and pokec_header[12:16] == b"IHDR", "PokéC sprite is not PNG"
+assert struct.unpack(">II", pokec_header[16:24]) == (32, 32) and pokec_header[25] == 6, "PokéC sprite must be 32x32 RGBA"
+
+recipe = json.loads((ROOT / "src/main/resources/data/minemon/recipes/pokeball.json").read_text(encoding="utf-8"))
+assert recipe.get("pattern") == [" R ", "IPI", " I "], "Pokébola recipe pattern changed"
+assert {key: value.get("item") for key, value in recipe.get("key", {}).items()} == {
+    "I": "minecraft:iron_ingot", "P": "minecraft:ender_pearl", "R": "minecraft:red_dye"
+}, "Pokébola recipe ingredients changed"
 
 pokeball_png = validate_texture(ASSETS / "textures/item/pokeball.png", "Pokébola")
 master_model = json.loads((ASSETS / "models/item/master_ball.json").read_text(encoding="utf-8"))
@@ -44,9 +60,10 @@ if len(sys.argv) > 1:
     jar = Path(sys.argv[1])
     with zipfile.ZipFile(jar) as archive:
         names = set(archive.namelist())
-        for path in (MODEL, TEXTURE, MASTER_MODEL, MASTER_TEXTURE, "assets/minemon/lang/pt_br.json", "assets/minemon/lang/en_us.json"):
+        for path in (MODEL, TEXTURE, MASTER_MODEL, MASTER_TEXTURE, POKEC_MODEL, POKEC_TEXTURE, "assets/minemon/lang/pt_br.json", "assets/minemon/lang/en_us.json"):
             assert path in names, f"Poké Ball JAR is missing {path}"
         assert archive.read(TEXTURE) == pokeball_png, "JAR Pokébola sprite differs from the exact source PNG"
+        assert archive.read(POKEC_TEXTURE) == pokec_png, "JAR PokéC sprite differs from its source PNG"
         assert archive.read(MASTER_TEXTURE) == master_ball_png, "JAR Master Ball sprite differs from the exact source PNG"
         for path in (
             "br/com/petrickfaria/minemon/registry/ModItems.class",
@@ -62,4 +79,4 @@ if len(sys.argv) > 1:
         translations = json.loads(archive.read("assets/minemon/lang/pt_br.json"))
         assert translations.get("item.minemon.pokeball") == "Pokébola", "JAR has no Portuguese Pokébola name"
 
-print("PASS: Pokébola and Master Ball exact 16x16 RGBA sprites, models, registration, translations" + (" and JAR contents verified" if len(sys.argv) > 1 else " verified"))
+print("PASS: Pokébola recipe, PokéC sprite, Pokébola and Master Ball sprites/models, registration, translations" + (" and JAR contents verified" if len(sys.argv) > 1 else " verified"))

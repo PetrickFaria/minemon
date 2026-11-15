@@ -40,7 +40,7 @@ public final class WildEncounterManager {
     public static final int MAX_ACTIVE = 25, MAX_DOWNED = 10;
     private static final List<String> RARITIES = List.of("common", "uncommon", "rare", "legendary", "mythic");
     private static volatile java.util.Map<String, Double> rarityChances = java.util.Map.of(
-            "common", .04D, "uncommon", .015D, "rare", .005D, "legendary", .001D, "mythic", .0003D);
+            "common", .02D, "uncommon", .0075D, "rare", .0025D, "legendary", .0005D, "mythic", .00015D);
 
     private static volatile java.util.Map<String, Double> speciesChances = java.util.Map.of();
     private static volatile boolean configLoaded;
@@ -51,15 +51,17 @@ public final class WildEncounterManager {
         try {
             Files.createDirectories(file.getParent());
             if (!Files.exists(file)) {
-                var lines = List.of("# Chance per 30-second player check before environment modifiers.",
+                var lines = List.of("version=2", "# Base chance per 30-second player check before modifiers; increased every minute after a miss.",
                         "# Values are probabilities from 0 to 1; species can override with species.<slug>=value.",
-                        "rarity.common=0.04", "rarity.uncommon=0.015", "rarity.rare=0.005",
-                        "rarity.legendary=0.001", "rarity.mythic=0.0003");
+                        "rarity.common=0.02", "rarity.uncommon=0.0075", "rarity.rare=0.0025",
+                        "rarity.legendary=0.0005", "rarity.mythic=0.00015");
                 Files.write(file, lines);
             }
+            var sourceLines=Files.readAllLines(file);
+            boolean migrate=sourceLines.stream().map(String::strip).noneMatch(line->line.equals("version=2"));
             var rarity = new java.util.HashMap<String, Double>();
             var species = new java.util.HashMap<String, Double>();
-            for (String line : Files.readAllLines(file)) {
+            for (String line : sourceLines) {
                 String trimmed = line.strip();
                 if (trimmed.isEmpty() || trimmed.startsWith("#") || !trimmed.contains("=")) continue;
                 String[] pair = trimmed.split("=", 2);
@@ -67,6 +69,7 @@ public final class WildEncounterManager {
                     double value = Double.parseDouble(pair[1].strip());
                     if (!Double.isFinite(value) || value < 0 || value > 1) continue;
                     String key = pair[0].strip().toLowerCase(Locale.ROOT);
+                    if(migrate&&(key.startsWith("rarity.")||key.startsWith("species.")))value*=0.5D;
                     if (key.startsWith("rarity.")) rarity.put(key.substring(7), value);
                     else if (key.startsWith("species.") && PokecSpecies.get(key.substring(8)) != null) species.put(key.substring(8), value);
                 } catch (NumberFormatException ignored) { }
@@ -74,6 +77,21 @@ public final class WildEncounterManager {
             for (String key : RARITIES) values.put(key, rarity.getOrDefault(key, values.get(key)));
             rarityChances = java.util.Map.copyOf(values);
             speciesChances = java.util.Map.copyOf(species);
+            if(migrate){
+                var migrated=new java.util.ArrayList<String>();migrated.add("version=2");
+                for(String line:sourceLines){
+                    String trimmed=line.strip();
+                    if(trimmed.isEmpty()||trimmed.startsWith("#")||!trimmed.contains("="))migrated.add(line);
+                    else if(!trimmed.startsWith("version=")){
+                        String[] pair=trimmed.split("=",2);String key=pair[0].strip().toLowerCase(Locale.ROOT);
+                        if(key.startsWith("rarity.")||key.startsWith("species.")){
+                            try{migrated.add(pair[0].strip()+"="+Double.parseDouble(pair[1].strip())*0.5D);}
+                            catch(NumberFormatException ignored){migrated.add(line);}
+                        }else migrated.add(line);
+                    }
+                }
+                Files.write(file,migrated);
+            }
             configLoaded = true;
         } catch (IOException error) {
             throw new IllegalStateException("Unable to load wild-spawn config " + file, error);
@@ -127,11 +145,12 @@ public final class WildEncounterManager {
     public static double configuredSpawnChance(ServerPlayer player,String slug) {
         if(player.level instanceof ServerLevel level&&!configLoaded)loadConfig(level);
         var species=PokecSpecies.get(slug);if(species==null)return 0;
-        return speciesChances.getOrDefault(slug,rarityChances.getOrDefault(PokecEconomy.resolveRarity(species.rarity(),"common"),.05D));
+        return speciesChances.getOrDefault(slug,rarityChances.getOrDefault(PokecEconomy.resolveRarity(species.rarity(),"common"),.02D));
     }
     public static void tickPlayer(ServerPlayer player) {
         if (!(player.level instanceof ServerLevel level)) return;
         if (!configLoaded) loadConfig(level);
+        if(player.containerMenu instanceof br.com.petrickfaria.minemon.menu.PokecMenu menu)menu.terminal.refresh();
         long now = level.getGameTime();
         WildEncounterData encounterData = WildEncounterData.get(level);
         int active = encounterData.count(player.getUUID(), "active");
@@ -165,7 +184,7 @@ public final class WildEncounterManager {
             if (!(created instanceof MinemonCreature pokemon)) { if (created != null) created.discard(); continue; }
             pokemon.moveTo(pos.getX() + .5D, pos.getY(), pos.getZ() + .5D, player.getRandom().nextFloat() * 360, 0);
             if (!level.noCollision(pokemon) || !safeEntityVolume(level, pokemon)) { pokemon.discard(); continue; }
-            pokemon.setPokemonLevel(spawnLevel(species, player.getRandom()));
+            pokemon.setPokemonLevel(spawnLevel(species, player));
             var data = pokemon.getPersistentData();
             data.putBoolean(MARKER, true); data.putUUID(OWNER, player.getUUID()); data.putString(STATE, "active");
             pokemon.setWildEncounter(true);
@@ -227,10 +246,26 @@ public final class WildEncounterManager {
         return level.getBlockState(pos.below()).isSolidRender(level, pos.below());
     }
 
-    private static int spawnLevel(PokecSpecies.Entry species, net.minecraft.util.RandomSource random) {
+    public static int averageOwnedPokemonLevel(ServerPlayer player){
+        if(player==null||!(player.level instanceof ServerLevel level))return 1;
+        var index=ActivePokemonData.get(level);
+        java.util.List<Integer> levels=new java.util.ArrayList<>();
+        java.util.Set<UUID> seen=new java.util.HashSet<>();
+        for(var entry:index.entries(player.getUUID())){levels.add(entry.level());seen.add(entry.id());}
+        for(int slot=0;slot<player.getInventory().getContainerSize();slot++){
+            net.minecraft.world.item.ItemStack stack=player.getInventory().getItem(slot);
+            var stored=br.com.petrickfaria.minemon.item.PokeballItem.readStored(stack);
+            if(stored==null||!stored.owner().equals(player.getUUID()))continue;
+            net.minecraft.nbt.CompoundTag entity=stored.entityData();
+            UUID entityId=entity.hasUUID("UUID")?entity.getUUID("UUID"):stored.token();
+            if(seen.add(entityId))levels.add(stored.level());
+        }
+        return PokemonTeamAverage.floorAverage(levels,1);
+    }
+    private static int spawnLevel(PokecSpecies.Entry species,ServerPlayer player) {
         int min = WildCaptureRules.minimumSpawnLevel(species.slug());
-        int max = Math.max(min, Math.min(30, min + 15));
-        return min + random.nextInt(max - min + 1);
+        int average=averageOwnedPokemonLevel(player);
+        return Math.max(min,Math.min(30,average));
     }
 
     public static boolean canDefeat(MinemonCreature wild, MinemonCreature attacker) {

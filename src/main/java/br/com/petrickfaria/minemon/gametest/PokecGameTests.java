@@ -69,27 +69,71 @@ public final class PokecGameTests {
         terminal(h,p);h.assertBlockPresent(ModBlocks.POKEC.get(),relative);h.assertBlockPresent(ModBlocks.POKEC.get(),relative.above());h.succeed();
     }
     @GameTest(template="test_arena",timeoutTicks=200)
-    public static void firstSuccessfulStarterPurchaseIsOwnedAndFree(GameTestHelper h){
+    public static void firstPokecUseOffersOnePersistentStarterEgg(GameTestHelper h){
         floor(h);BlockPos p=h.absolutePos(new BlockPos(5,1,5));terminal(h,p);ServerPlayer buyer=player(h,h.absolutePos(new BlockPos(7,1,5)));
-        buyer.containerMenu=new PokecMenu(7,buyer.getInventory(),p);PokecPlayerData.unlock(buyer,"bulbasaur");PokecPlayerData.setCoins(buyer,0);
-        PokecTransactions.perform(buyer,p,"bulbasaur",PokecTransactions.Action.SELECT,0x500L);
-        boolean ok=PokecTransactions.perform(buyer,p,"bulbasaur",PokecTransactions.Action.PURCHASE,0x501L);
+        var menu=new PokecMenu(7,buyer.getInventory(),p);buyer.containerMenu=menu;PokecPlayerData.setCoins(buyer,0);
+        boolean ok=PokecTransactions.perform(buyer,p,"eevee",PokecTransactions.Action.CLAIM_STARTER,0x500L);
+        menu.terminal.refresh();
         h.runAfterDelay(2,()->{
-            var egg=ModItems.EGGS.get("bulbasaur").get();
-            long delivered=buyer.getInventory().items.stream().filter(stack->stack.is(egg)&&stack.hasTag()
+            var egg=ModItems.EGGS.get("eevee").get();
+            var output=menu.slots.get(37).getItem();
+            boolean outputBound=output.is(egg)&&output.hasTag()
+                    &&output.getTag().hasUUID("MinemonPokecOwner")&&buyer.getUUID().equals(output.getTag().getUUID("MinemonPokecOwner"));
+            check(ok&&PokecPlayerData.starterChosen(buyer)&&PokecPlayerData.starterEggPending(buyer),"the first PokéC use must grant exactly one starter claim");
+            check(PokecPlayerData.isUnlocked(buyer,"eevee")&&!PokecPlayerData.isUnlocked(buyer,"bulbasaur")
+                    &&!PokecPlayerData.isUnlocked(buyer,"charmander")&&!PokecPlayerData.isUnlocked(buyer,"squirtle")
+                    &&!PokecPlayerData.isUnlocked(buyer,"pikachu"),"only the chosen starter may be unlocked for free");
+            check(outputBound,"the selected starter egg must be held in the PokéC output and bound to its claimant");
+            var delivered=menu.slots.get(37).remove(1);menu.slots.get(37).onTake(buyer,delivered);
+            check(delivered.getCount()==1&&!PokecPlayerData.starterEggPending(buyer),"collecting the output must finish the pending, one-time egg delivery");
+            check(!PokecTransactions.perform(buyer,p,"pikachu",PokecTransactions.Action.CLAIM_STARTER,0x501L),"a second starter selection must be rejected");
+            check(!PokecPlayerData.usedFreePurchase(buyer),"the starter entitlement must not create another free purchase");
+            PokecPlayerData.setCoins(buyer,0);
+            check(!PokecTransactions.perform(buyer,p,"eevee",PokecTransactions.Action.PURCHASE,0x502L),"later PokéC purchases remain paid");
+            PokecPlayerData.setCoins(buyer,PokecEconomy.get().coins("eevee"));buyer.tickCount+=4;
+            check(PokecTransactions.perform(buyer,p,"eevee",PokecTransactions.Action.PURCHASE,0x503L),"a later purchase should debit PokéCoins");
+            check(PokecPlayerData.coins(buyer)==0,"successful paid purchase must debit PokéCoins once");
+            long ownedEggs=buyer.getInventory().items.stream().filter(stack->stack.is(egg)&&stack.hasTag()
                     &&stack.getTag().hasUUID("MinemonPokecOwner")&&buyer.getUUID().equals(stack.getTag().getUUID("MinemonPokecOwner")))
                     .mapToLong(net.minecraft.world.item.ItemStack::getCount).sum();
-            check(ok,"first purchase should succeed without coins");check(PokecPlayerData.usedFreePurchase(buyer),"free purchase flag must persist");check(delivered==1,"free purchase delivers one spawn egg bound to the buyer");
-            check(!PokecTransactions.perform(buyer,p,"bulbasaur",PokecTransactions.Action.PURCHASE,0x501L),"duplicate transaction id must not deliver twice");
-            PokecPlayerData.setCoins(buyer,0);check(!PokecTransactions.perform(buyer,p,"bulbasaur",PokecTransactions.Action.PURCHASE,0x502L),"second purchase cannot reuse the free acquisition");
-            PokecPlayerData.setCoins(buyer,PokecEconomy.get().coins("bulbasaur"));buyer.tickCount+=4;check(PokecTransactions.perform(buyer,p,"bulbasaur",PokecTransactions.Action.PURCHASE,0x503L),"later acquisition should charge the configured price");
-            check(PokecPlayerData.coins(buyer)==0,"successful purchase must debit PokéCoins once");
-            long afterSecond=buyer.getInventory().items.stream().filter(stack->stack.is(egg)&&stack.hasTag()
-                    &&stack.getTag().hasUUID("MinemonPokecOwner")&&buyer.getUUID().equals(stack.getTag().getUUID("MinemonPokecOwner")))
-                    .mapToLong(net.minecraft.world.item.ItemStack::getCount).sum();
-            check(afterSecond==2,"free and paid purchases deliver exactly two owned spawn eggs without spawning Pokémon");
+            check(ownedEggs==1,"a later paid acquisition creates one additional owned egg");
             buyer.discard();h.succeed();
         });
+    }
+    @GameTest(template="test_arena",timeoutTicks=120)
+    public static void starterEggHatchesAsAnOwnedPokemon(GameTestHelper h){
+        floor(h);BlockPos base=h.absolutePos(new BlockPos(5,0,5));
+        ServerPlayer owner=player(h,h.absolutePos(new BlockPos(8,1,5)));
+        ItemStack egg=br.com.petrickfaria.minemon.item.PokecOwnedSpawnEggItem.ownedStack(
+                ModItems.EGGS.get("charmander").get().getDefaultInstance(),owner.getUUID(),owner.getGameProfile().getName());
+        owner.setItemInHand(InteractionHand.MAIN_HAND,egg);
+        var hit=new BlockHitResult(Vec3.atCenterOf(base),net.minecraft.core.Direction.UP,base,false);
+        var result=ModItems.EGGS.get("charmander").get().useOn(new net.minecraft.world.item.context.UseOnContext(owner,InteractionHand.MAIN_HAND,hit));
+        var spawned=h.getLevel().getEntitiesOfClass(MinemonCreature.class,new net.minecraft.world.phys.AABB(base).inflate(4),pokemon->pokemon.getSpeciesSlug().equals("charmander"));
+        check(result.consumesAction()&&spawned.size()==1,"using an owned PokéC egg should spawn exactly one Pokémon");
+        MinemonCreature pokemon=spawned.get(0);
+        check(pokemon.isTame()&&owner.getUUID().equals(pokemon.getOwnerUUID()),"PokéC eggs must spawn already domesticated and linked to their owner");
+        check(!br.com.petrickfaria.minemon.pokec.WildEncounterManager.isEncounter(pokemon),"owned eggs must not enter the wild encounter lifecycle");
+        owner.discard();h.succeed();
+    }
+
+    @GameTest(template="test_arena",timeoutTicks=180)
+    public static void wildLevelUsesTheAverageOfActiveAndStoredPokemon(){
+        floor(h);ServerPlayer owner=player(h,h.absolutePos(new BlockPos(14,1,14)));
+        var low=h.spawn(ModEntities.SPECIES.get("bulbasaur").get(),new BlockPos(3,1,3));low.tame(owner);low.setOwnerUUID(owner.getUUID());low.applyManagedBehavior("free");low.setPokemonLevel(1);
+        var firstHigh=h.spawn(ModEntities.SPECIES.get("bulbasaur").get(),new BlockPos(5,1,3));firstHigh.tame(owner);firstHigh.setOwnerUUID(owner.getUUID());firstHigh.applyManagedBehavior("free");firstHigh.setPokemonLevel(10);
+        check(br.com.petrickfaria.minemon.pokec.WildEncounterManager.averageOwnedPokemonLevel(owner)==5,"levels 1 and 10 must average to 5 after rounding down");
+        var otherHigh=new java.util.ArrayList<MinemonCreature>();
+        for(BlockPos pos:java.util.List.of(new BlockPos(7,1,3),new BlockPos(9,1,3),new BlockPos(11,1,3),new BlockPos(13,1,3))){
+            var pokemon=h.spawn(ModEntities.SPECIES.get("bulbasaur").get(),pos);pokemon.tame(owner);pokemon.setOwnerUUID(owner.getUUID());pokemon.applyManagedBehavior("free");pokemon.setPokemonLevel(10);otherHigh.add(pokemon);
+        }
+        check(br.com.petrickfaria.minemon.pokec.WildEncounterManager.averageOwnedPokemonLevel(owner)==8,"one level 1 plus five level 10 Pokémon must average to 8");
+        owner.setItemInHand(InteractionHand.MAIN_HAND,new ItemStack(ModItems.POKEBALL.get()));
+        var capture=ModItems.POKEBALL.get().interactLivingEntity(owner.getMainHandItem(),owner,firstHigh,InteractionHand.MAIN_HAND);
+        check(capture.consumesAction(),"a team member stored in a Pokébola must remain part of the average");
+        owner.getInventory().setItem(9,owner.getMainHandItem().copy());
+        check(br.com.petrickfaria.minemon.pokec.WildEncounterManager.averageOwnedPokemonLevel(owner)==8,"a stored Pokémon must be counted once even if the ball record is duplicated");
+        owner.discard();low.discard();for(var pokemon:otherHigh)if(pokemon.isAlive())pokemon.discard();h.succeed();
     }
     @GameTest(template="test_arena",timeoutTicks=200)
     public static void correctSoulTypeUnlocksBaseSpecies(GameTestHelper h){
@@ -104,7 +148,7 @@ public final class PokecGameTests {
     @GameTest(template="test_arena",timeoutTicks=200)
     public static void stagedPhysicalCoinsChargeExactPriceAndDoNotDuplicate(GameTestHelper h){
         floor(h);BlockPos p=h.absolutePos(new BlockPos(5,1,5));terminal(h,p);ServerPlayer buyer=player(h,h.absolutePos(new BlockPos(7,1,5)));
-        PokecMenu menu=new PokecMenu(9,buyer.getInventory(),p);buyer.containerMenu=menu;PokecPlayerData.unlock(buyer,"bulbasaur");PokecPlayerData.setCoins(buyer,0);PokecPlayerData.setFreePurchaseUsed(buyer);
+        PokecMenu menu=new PokecMenu(9,buyer.getInventory(),p);buyer.containerMenu=menu;PokecPlayerData.unlock(buyer,"bulbasaur");PokecPlayerData.setCoins(buyer,0);
         int price=PokecEconomy.get().coins("bulbasaur"), total=price+5;int slot=0;
         while(total>0){int count=Math.min(64,total);buyer.getInventory().setItem(slot++,new net.minecraft.world.item.ItemStack(ModItems.POKE_COIN.get(),count));total-=count;}
         PokecTransactions.perform(buyer,p,"bulbasaur",PokecTransactions.Action.SELECT,0x700L);

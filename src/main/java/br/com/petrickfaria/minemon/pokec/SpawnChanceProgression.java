@@ -4,8 +4,8 @@ import net.minecraft.nbt.CompoundTag;
 
 /** Per-player, per-species additive wild encounter chance progression. */
 public final class SpawnChanceProgression {
-    public static final long PERIOD_TICKS = 20L * 60L * 5L;
-    public static final double MAX_CHANCE = 0.50D;
+    public static final long PERIOD_TICKS = 20L * 60L;
+    public static final double MAX_CHANCE = 1.0D;
     private static final String ROOT = "MinemonWildSpawnProgress";
 
     private SpawnChanceProgression() {}
@@ -26,12 +26,15 @@ public final class SpawnChanceProgression {
         progress.putLong(species, 0L);
         playerData.put(ROOT, progress);
     }
+    public static long incrementCount(CompoundTag playerData,String species){
+        return elapsedTicks(playerData,species)/PERIOD_TICKS;
+    }
 
     public static double chance(double baseChance, long elapsedTicks) {
         if (!Double.isFinite(baseChance) || baseChance <= 0.0D) return 0.0D;
         double base = Math.min(MAX_CHANCE, baseChance);
         long periods = Math.max(0L, elapsedTicks) / PERIOD_TICKS;
         if (periods >= (long)Math.ceil(MAX_CHANCE / base)) return MAX_CHANCE;
-        return Math.min(MAX_CHANCE, base * (1.0D + periods));
+        return Math.min(MAX_CHANCE, base * (1.0D + 0.5D * periods));
     }
 }

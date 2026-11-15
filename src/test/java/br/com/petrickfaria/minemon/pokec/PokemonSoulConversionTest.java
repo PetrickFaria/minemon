@@ -55,4 +55,12 @@ public class PokemonSoulConversionTest {
         assertEquals(0,PokemonSoulConversion.rollBetween(4,2,()->0.0));
         assertEquals(0,PokemonSoulConversion.rollDeathDrops("not-a-pokemon",1,()->0.5));
     }
+
+    @Test public void eachDualTypeSoulRollSelectsItsOwnElementalType(){
+        double[] draws={0.1D,0.9D,0.2D,0.8D};java.util.concurrent.atomic.AtomicInteger i=new java.util.concurrent.atomic.AtomicInteger();
+        var types=PokemonSoulConversion.rollSoulTypes("bulbasaur",4,()->draws[i.getAndIncrement()]);
+        assertEquals(Integer.valueOf(2),types.get(SoulType.GRASS));
+        assertEquals(Integer.valueOf(2),types.get(SoulType.POISON));
+        assertEquals(Integer.valueOf(3),PokemonSoulConversion.rollSoulTypes("charmander",3,()->0.99D).get(SoulType.FIRE));
+    }
 }

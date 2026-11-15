@@ -33,6 +33,9 @@ public final class PokecOwnedSpawnEggItem extends ForgeSpawnEggItem {
     @Override public InteractionResult useOn(UseOnContext context) {
         if (!(context.getLevel() instanceof ServerLevel level)
                 || !(context.getPlayer() instanceof ServerPlayer player)) return super.useOn(context);
+        CompoundTag eggTag=context.getItemInHand().getTag();
+        UUID eggOwner=eggTag!=null&&eggTag.hasUUID("MinemonPokecOwner")?eggTag.getUUID("MinemonPokecOwner"):null;
+        if(eggOwner!=null&&!eggOwner.equals(player.getUUID()))return InteractionResult.FAIL;
         EntityType<?> type = getType(context.getItemInHand().getTag());
         AABB area = new AABB(context.getClickedPos()).inflate(4.0D);
         Set<UUID> existing = level.getEntitiesOfClass(MinemonCreature.class, area,
@@ -45,7 +48,13 @@ public final class PokecOwnedSpawnEggItem extends ForgeSpawnEggItem {
                 .stream().min(java.util.Comparator.comparingDouble(pokemon -> pokemon.distanceToSqr(
                         context.getClickedPos().getX() + .5D, context.getClickedPos().getY() + .5D,
                         context.getClickedPos().getZ() + .5D)));
-        spawned.ifPresent(pokemon -> WildEncounterManager.registerSpawnEggEncounter(pokemon, player));
+        if(eggOwner==null)spawned.ifPresent(pokemon -> WildEncounterManager.registerSpawnEggEncounter(pokemon, player));
+        else spawned.ifPresent(pokemon->{
+            pokemon.tame(player);
+            pokemon.setOwnerUUID(player.getUUID());
+            pokemon.setFollowingOwner(true);
+            pokemon.setFreeMode(false);
+        });
         return result;
     }
 }

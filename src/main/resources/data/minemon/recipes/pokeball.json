@@ -1,9 +1,9 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    "III",
+    " R ",
     "IPI",
-    "III"
+    " I "
   ],
   "key": {
     "I": {
@@ -11,6 +11,9 @@
     },
     "P": {
       "item": "minecraft:ender_pearl"
+    },
+    "R": {
+      "item": "minecraft:red_dye"
     }
   },
   "result": {
