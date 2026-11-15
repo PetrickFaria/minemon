@@ -235,11 +235,18 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
 
     @Override public boolean isOrderedToSit() { return this.entityData.get(ORDERED_SIT); }
     public boolean isFreeMode() { return this.entityData.get(FREE_MODE); }
+    /** Existing ten-block natural-activity band around the trainer. */
+    static final double NATURAL_OWNER_DISTANCE_SQR = 100.0D;
+    public double navigationRange() {
+        return !isTame() || isFreeMode()
+                ? (isAquaticSpecies() ? 128.0D : 24.0D) : perceptionRange();
+    }
     /** Configured Pokémon damage before target-side Minecraft mitigation. */
     public double pokemonAttackDamage() {
         return PokemonProgression.damageForRarity(this.getPokemonRarity(), this.getPokemonLevel());
     }
     public void setFreeMode(boolean free) {
+        if (free == isFreeMode()) return;
         if (free && isOrderedToSit()) setOrderedToSit(false);
         entityData.set(FREE_MODE, free);
         if (free) {
@@ -257,7 +264,11 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         if (level.isClientSide || !isTame() || isDefeated()) return;
         switch (behavior) {
             case "sit" -> setOrderedToSit(true);
-            case "free" -> { setOrderedToSit(false); setFreeMode(true); setFollowingOwner(false); }
+            case "free" -> {
+                // Reapplying a persisted command must not stop a route or wake a sleeper.
+                if (!isFreeMode()) { setOrderedToSit(false); setFreeMode(true); }
+                setFollowingOwner(false);
+            }
             case "follow" -> {
                 setOrderedToSit(false); setFreeMode(false); setFollowingOwner(true);
                 nightRoutine=false; entityData.set(NIGHT_REST,false);
@@ -497,8 +508,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(PokemonProgression.healthForRarity(rarity,this.getPokemonLevel()));
         this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(PokemonProgression.damageForRarity(rarity,this.getPokemonLevel()));
         AttributeInstance followRange=this.getAttribute(Attributes.FOLLOW_RANGE);
-        if(followRange!=null)followRange.setBaseValue(isTame()?perceptionRange():
-                (SpeciesBehaviorProfiles.waterCapable(this.getSpeciesSlug())?128.0D:24.0D));
+        if(followRange!=null)followRange.setBaseValue(navigationRange());
         this.setHealth(Math.min(this.getMaxHealth(),health));
     }
     private void refreshPokemonXpThreshold() {
@@ -946,8 +956,8 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         super.tick();
         if(!level.isClientSide&&isTame()){
             AttributeInstance followRange=getAttribute(Attributes.FOLLOW_RANGE);
-            if(followRange!=null&&Math.abs(followRange.getBaseValue()-perceptionRange())>1.0E-4D)
-                followRange.setBaseValue(perceptionRange());
+            if(followRange!=null&&Math.abs(followRange.getBaseValue()-navigationRange())>1.0E-4D)
+                followRange.setBaseValue(navigationRange());
         }
         if (isOrderedToSit() && !isNightResting() && !isSleeping()
                 && Double.isFinite(sitAnchorX) && Double.isFinite(sitAnchorZ)) {
@@ -1272,7 +1282,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
             boolean hover=SpeciesBehaviorProfiles.hoversDuringNightRest(this.getSpeciesSlug());
             double restHeight=SpeciesBehaviorProfiles.nightRestHoverHeight(this.getSpeciesSlug());
             double waterRestY=waterRest?WaterMovementGoal.waterRestY(this):Double.NaN;
-            boolean settled=waterRest?Math.abs(this.getY()-waterRestY)<0.18D
+            boolean settled=waterRest?Math.abs(this.getY()-waterRestY)<0.01D
                 :hover?Math.abs(this.getY()-this.naturalSurface()-restHeight)<0.18D
                 :this.isOnGround()&&WaterMovementGoal.safeDryRestingSupport(this,this.blockPosition());
             if(settled&&!this.isSleeping()){
@@ -1649,7 +1659,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     public boolean naturalBehaviorActive(){
         return this.naturalStartDelay==0&&(!this.isInWater()||this.isAquaticSpecies())&&!this.isNightResting()&&!this.isSleeping()&&!this.isOrderedToSit()&&!this.isPassenger()&&!this.isNoAi()
             &&!this.isDeadOrDying()&&this.getTarget()==null&&this.attackAnimationTicks<=0
-            &&(this.getOwner()==null||this.isFreeMode()||this.distanceToSqr(this.getOwner())<100.0D)
+            &&(this.getOwner()==null||this.isFreeMode()||this.distanceToSqr(this.getOwner())<NATURAL_OWNER_DISTANCE_SQR)
             &&this.goalSelector.getAvailableGoals().stream().noneMatch(goal->goal.isRunning()
                 &&goal.getGoal() instanceof NaturalFollowOwnerGoal);
     }

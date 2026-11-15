@@ -154,7 +154,7 @@ public final class IndividualBehaviorTests {
     new com.mojang.authlib.GameProfile(java.util.UUID.randomUUID(),"FreeGoldeenOwner"),null);
   owner.connection=new net.minecraftforge.common.util.FakePlayer(h.getLevel(),
     new com.mojang.authlib.GameProfile(java.util.UUID.randomUUID(),"FreeGoldeenConnection")).connection;
-  var ownerPos=h.absolutePos(new BlockPos(40,9,40));
+  var ownerPos=h.absolutePos(new BlockPos(8,9,8));
   owner.moveTo(ownerPos.getX()+.5D,ownerPos.getY(),ownerPos.getZ()+.5D,0,0);h.getLevel().addNewPlayer(owner);
   var wild=spawn(h,"goldeen",5,-2,5);
   var companion=spawn(h,"goldeen",12,-2,11);companion.tame(owner);companion.setOwnerUUID(owner.getUUID());
@@ -162,7 +162,7 @@ public final class IndividualBehaviorTests {
   if(!companion.isTame()||!companion.isFreeMode()){owner.discard();h.fail("Goldeen test fixture must be a domesticated Pokémon in Livre mode");return;}
   MovementMeasure wildMotion=new MovementMeasure(),freeMotion=new MovementMeasure();
   h.runAfterDelay(40,()->{
-   sampleMovement(h,wild,wildMotion,20);sampleMovement(h,companion,freeMotion,20);
+   sampleMovement(h,wild,wildMotion,200);sampleMovement(h,companion,freeMotion,200);
   });
   h.runAfterDelay(250,()->{
    check(h,wild.isInWater()&&companion.isInWater(),"Wild and free Goldeen must remain in the same aquatic habitat; wild="+state(wild)+" free="+state(companion));
@@ -170,20 +170,35 @@ public final class IndividualBehaviorTests {
    double activityRatio=(double)Math.max(wildMotion.movingIntervals,freeMotion.movingIntervals)/Math.max(1,Math.min(wildMotion.movingIntervals,freeMotion.movingIntervals));
    double distanceRatio=Math.max(wildMotion.distance,freeMotion.distance)/Math.max(.001D,Math.min(wildMotion.distance,freeMotion.distance));
    check(h,activityRatio<=3.0D&&distanceRatio<=4.0D,"Free-mode Goldeen must retain swimming fluency comparable to the wild reference; activityRatio="+activityRatio+" distanceRatio="+distanceRatio+" wildMotion="+wildMotion+" freeMotion="+freeMotion);
+   check(h,freeMotion.maxStep<.5D&&wildMotion.maxStep<.5D,"Neither reference may relocate artificially: wild="+wildMotion+" free="+freeMotion);
+   check(h,freeMotion.maxRouteStall<=Math.max(20,wildMotion.maxRouteStall+10),"Livre must not freeze an active swim route: wild="+wildMotion+" free="+freeMotion);
+   check(h,companion.navigationRange()==wild.navigationRange(),"Domestication must not shrink natural navigation range");
+   System.out.println("[MINEMON FREE GOLDEEN] wild="+wildMotion+" free="+freeMotion);
    check(h,!companion.isFollowingOwner(),"A Goldeen in Livre mode must retain species movement instead of starting owner-follow navigation; "+state(companion));
    owner.discard();wild.discard();companion.discard();h.succeed();
   });
  }
  private static final class MovementMeasure {
-  Vec3 previous; double distance; int movingIntervals;
-  void observe(Vec3 position){
-   if(previous!=null){double step=position.distanceTo(previous);distance+=step;if(step>.025D)movingIntervals++;}
+  Vec3 previous,previousStep; double distance,verticalDistance,maxStep; int movingIntervals,routeStall,maxRouteStall,stops,turns;
+  void observe(MinemonCreature mob){
+   Vec3 position=mob.position();
+   if(previous!=null){
+    Vec3 delta=position.subtract(previous);double step=delta.length();distance+=step;maxStep=Math.max(maxStep,step);
+    verticalDistance+=Math.abs(delta.y);if(step>.0025D)movingIntervals++;
+    if(step<.001D&&!mob.getNavigation().isDone()&&!mob.horizontalCollision)routeStall++;else routeStall=0;
+    maxRouteStall=Math.max(maxRouteStall,routeStall);
+    if(previousStep!=null){
+     if(previousStep.length()>.01D&&step<.001D)stops++;
+     if(step>.0025D&&previousStep.length()>.0025D&&delta.normalize().dot(previousStep.normalize())<.8D)turns++;
+    }
+    previousStep=delta;
+   }
    previous=position;
   }
-  @Override public String toString(){return "distance="+distance+",movingIntervals="+movingIntervals;}
+  @Override public String toString(){return "distance="+distance+",movingTicks="+movingIntervals+",vertical="+verticalDistance+",maxStep="+maxStep+",maxRouteStall="+maxRouteStall+",abruptStops="+stops+",turns="+turns;}
  }
  private static void sampleMovement(GameTestHelper h,MinemonCreature mob,MovementMeasure measure,int remaining){
-  measure.observe(mob.position());if(remaining>0)h.runAfterDelay(10,()->sampleMovement(h,mob,measure,remaining-1));
+  measure.observe(mob);if(remaining>0)h.runAfterDelay(1,()->sampleMovement(h,mob,measure,remaining-1));
  }
  @GameTest(template="test_arena",batch="night_aquatic_rest",timeoutTicks=220)
  public static void sleepingGoldeenRemainsStableInWater(GameTestHelper h){
@@ -192,11 +207,14 @@ public final class IndividualBehaviorTests {
     new com.mojang.authlib.GameProfile(java.util.UUID.randomUUID(),"SleepingGoldeenOwner"),null);
   owner.connection=new net.minecraftforge.common.util.FakePlayer(h.getLevel(),
     new com.mojang.authlib.GameProfile(java.util.UUID.randomUUID(),"SleepingGoldeenConnection")).connection;
-  var ownerPos=h.absolutePos(new BlockPos(40,9,40));owner.moveTo(ownerPos.getX()+.5D,ownerPos.getY(),ownerPos.getZ()+.5D,0,0);h.getLevel().addNewPlayer(owner);
+  var ownerPos=h.absolutePos(new BlockPos(8,9,8));owner.moveTo(ownerPos.getX()+.5D,ownerPos.getY(),ownerPos.getZ()+.5D,0,0);h.getLevel().addNewPlayer(owner);
   var wild=spawn(h,"goldeen",5,-2,5);var companion=spawn(h,"goldeen",12,-2,11);
   companion.tame(owner);companion.setOwnerUUID(owner.getUUID());companion.applyManagedBehavior("free");
   await(h,()->wild.isSleeping()&&companion.isSleeping()&&wild.isNightResting()&&companion.isNightResting(),()->{
    Vec3 wildStart=wild.position(),freeStart=companion.position();
+   var saved=new CompoundTag();companion.addAdditionalSaveData(saved);companion.readAdditionalSaveData(saved);
+   companion.applyManagedBehavior("free");
+   check(h,companion.isSleeping()&&companion.isNightResting(),"Reload and duplicate Livre commands must preserve aquatic sleep");
    h.runAfterDelay(40,()->{
     double wildDrift=wild.position().distanceTo(wildStart),freeDrift=companion.position().distanceTo(freeStart);
     check(h,wild.isSleeping()&&companion.isSleeping(),"Both Goldeen must remain asleep through the observation window; wild="+state(wild)+" free="+state(companion));
