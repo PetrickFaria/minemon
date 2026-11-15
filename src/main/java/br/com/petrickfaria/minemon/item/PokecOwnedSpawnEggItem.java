@@ -52,8 +52,7 @@ public final class PokecOwnedSpawnEggItem extends ForgeSpawnEggItem {
         else spawned.ifPresent(pokemon->{
             pokemon.tame(player);
             pokemon.setOwnerUUID(player.getUUID());
-            pokemon.setFollowingOwner(true);
-            pokemon.setFreeMode(false);
+            pokemon.applyManagedBehavior("follow");
         });
         return result;
     }

@@ -118,7 +118,7 @@ public final class PokecGameTests {
     }
 
     @GameTest(template="test_arena",timeoutTicks=180)
-    public static void wildLevelUsesTheAverageOfActiveAndStoredPokemon(){
+    public static void wildLevelUsesTheAverageOfActiveAndStoredPokemon(GameTestHelper h){
         floor(h);ServerPlayer owner=player(h,h.absolutePos(new BlockPos(14,1,14)));
         var low=h.spawn(ModEntities.SPECIES.get("bulbasaur").get(),new BlockPos(3,1,3));low.tame(owner);low.setOwnerUUID(owner.getUUID());low.applyManagedBehavior("free");low.setPokemonLevel(1);
         var firstHigh=h.spawn(ModEntities.SPECIES.get("bulbasaur").get(),new BlockPos(5,1,3));firstHigh.tame(owner);firstHigh.setOwnerUUID(owner.getUUID());firstHigh.applyManagedBehavior("free");firstHigh.setPokemonLevel(10);
