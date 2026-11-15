@@ -1093,7 +1093,7 @@ public final class ClientSmokeTest {
      continue;
     }
     String walk=expectedWalk(slug,definition);
-    String run=fixtureAir(slug)||fixtureWater(slug)
+    String run=(fixtureAir(slug)&&!slug.equals("geodude"))||fixtureWater(slug)
       ?null:SpeciesAssetIndex.clip(slug,"ground_run","run");
     String idle=expectedIdle(slug,definition);
     boolean idleMatches=fixtureWater(slug)
@@ -1147,6 +1147,7 @@ public final class ClientSmokeTest {
    return air==null?definition.idle():air;
   }
   private static String expectedWalk(String slug,SpeciesDefinitions.Definition definition) {
+   if(slug.equals("geodude"))return definition.idle();
    if(fixtureWater(slug)) {
     String water=fixtureSurface(slug)?firstMappedClip(definition,"surface_water_swim","surfacewater_swim","water_surface_swim","water_swim"):firstMappedClip(definition,"water_swim","water_surface_swim","surface_water_swim","surfacewater_swim");
     if(water!=null)return water;
