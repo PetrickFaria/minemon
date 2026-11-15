@@ -17,7 +17,12 @@ public final class MinemonAquaticCreature extends MinemonCreature {
         this.lookControl = new net.minecraft.world.entity.ai.control.LookControl(this) {
     @Override public void tick(){
                 float swimmingPitch=MinemonAquaticCreature.this.getXRot();super.tick();
-                if(SpeciesBehaviorProfiles.isVisitor(getSpeciesSlug()) && MinemonAquaticCreature.this.isInWater() && !getNavigation().isDone())MinemonAquaticCreature.this.setXRot(swimmingPitch);
+                // Explicit LookAtPlayer/owner requests also change XRot, even
+                // when resetXRotOnTick is false. The body pitch belongs to the
+                // swim route for every species, including Goldeen, not only visitors.
+                if(MinemonAquaticCreature.this.isInWater()
+                        && (!getNavigation().isDone()||ShoreTraversal.directSteering(MinemonAquaticCreature.this)))
+                    MinemonAquaticCreature.this.setXRot(swimmingPitch);
             }
             @Override protected boolean resetXRotOnTick() {
                 // LookControl ticks after MoveControl. Its land default resets
@@ -48,7 +53,23 @@ public final class MinemonAquaticCreature extends MinemonCreature {
                 // Swimming control alone does not perform ordinary land jumps.
                 // Use Minecraft's land controller on shores/steps and smooth
                 // three-dimensional steering after entering the water.
-                if (MinemonAquaticCreature.this.isInWater()) super.tick();
+                if (MinemonAquaticCreature.this.isInWater()
+                        && this.operation == Operation.MOVE_TO
+                        && getNavigation().isDone() && ShoreTraversal.directSteering(MinemonAquaticCreature.this)) {
+                    // A validated final shore approach can outlive its rounded
+                    // path endpoint. Keep native swim steering active for that
+                    // explicit route owner; never revive a stale idle waypoint.
+                    double dx=wantedX-getX(),dy=wantedY-getY(),dz=wantedZ-getZ();
+                    float yaw=(float)(net.minecraft.util.Mth.atan2(dz,dx)*180/Math.PI)-90;
+                    setYRot(rotlerp(getYRot(),yaw,10));
+                    yBodyRot=getYRot();yHeadRot=getYRot();
+                    float speed=(float)(speedModifier*getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED));
+                    float pitch=net.minecraft.util.Mth.clamp((float)(-net.minecraft.util.Mth.atan2(dy,Math.hypot(dx,dz))*180/Math.PI),-85,85);
+                    setXRot(rotlerp(getXRot(),pitch,5));
+                    setSpeed(speed*.1F);setXxa(0);
+                    setZza(net.minecraft.util.Mth.cos(getXRot()*(float)Math.PI/180)*speed);
+                    setYya(-net.minecraft.util.Mth.sin(getXRot()*(float)Math.PI/180)*speed);
+                } else if (MinemonAquaticCreature.this.isInWater()) super.tick();
                 else this.land.tick();
             }
         };

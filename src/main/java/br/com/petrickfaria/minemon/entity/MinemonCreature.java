@@ -1290,7 +1290,8 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
                         &&Double.isFinite(waterRestY)){
                     // Enter sleep exactly at the chosen safe anchor, so the
                     // two-block minimum is not lost to the final eased swim step.
-                    this.setPos(this.getX(),waterRestY,this.getZ());
+                    this.move(net.minecraft.world.entity.MoverType.SELF,
+                            new net.minecraft.world.phys.Vec3(0,waterRestY-this.getY(),0));
                     this.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
                 }
                 this.setSleeping(true);

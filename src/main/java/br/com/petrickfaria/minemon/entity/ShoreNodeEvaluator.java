@@ -6,7 +6,8 @@ final class ShoreNodeEvaluator extends AmphibiousNodeEvaluator {
  ShoreNodeEvaluator(){super(false);}
  @Override public int getNeighbors(Node[] neighbors,Node node){
   int count=super.getNeighbors(neighbors,node);
-  if(!(mob instanceof MinemonCreature pokemon)||!pokemon.isInWater()||node.type!=BlockPathTypes.WATER)return count;
+  if(!(mob instanceof MinemonCreature pokemon)||!pokemon.isInWater()
+      ||node.type!=BlockPathTypes.WATER&&node.type!=BlockPathTypes.WATER_BORDER)return count;
   double top=WaterMovementGoal.surfaceAt(pokemon,new BlockPos(node.x,node.y,node.z));
   if(!Double.isFinite(top))return count;
   // Amphibious path nodes can sit at any depth. Plan the bank node from the

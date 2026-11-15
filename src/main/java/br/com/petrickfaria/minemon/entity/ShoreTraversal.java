@@ -25,14 +25,6 @@ final class ShoreTraversal {
   double dy=point.y-mob.getY();
   double top=mob instanceof MinemonAquaticCreature aquatic?aquatic.waterSurface():WaterMovementGoal.restSurfaceAt(mob,mob.blockPosition());
   if(!Double.isFinite(top)||point.y>top+1.5||dy<-.35)return;
-  if(state!=null&&state.bank!=null&&(path==null||path.isDone())){
-   double dx=shore.x-mob.getX(),dz=shore.z-mob.getZ(),distance=Math.sqrt(dx*dx+dz*dz);
-   if(distance>1.0D){
-    var velocity=mob.getDeltaMovement();
-    double steer=Math.min(.12D,.035D+distance*.008D);
-    mob.setDeltaMovement(velocity.x*.55D+dx/distance*steer,velocity.y,velocity.z*.55D+dz/distance*steer);
-   }
-  }
   double lipDistance=Math.max(1.0D,mob.getBbWidth()+.5D);
   if((mob.horizontalCollision || dy>.4D&&shore.subtract(mob.position()).horizontalDistanceSqr()<lipDistance*lipDistance)
       &&mob.getDeltaMovement().y<=.05D){
@@ -42,9 +34,10 @@ final class ShoreTraversal {
  }
  private static final java.util.Map<MinemonCreature,State> STATES=new java.util.WeakHashMap<>();
  static void clear(MinemonCreature mob){STATES.remove(mob);}
- private static final class State {BlockPos bank;Vec3 previous;int stalled;final java.util.Map<BlockPos,Integer> blocked=new java.util.HashMap<>();}
+ static boolean directSteering(MinemonCreature mob){var state=STATES.get(mob);return state!=null&&state.direct&&!mob.isSleeping()&&!mob.isOrderedToSit()&&!mob.isDefeated();}
+ private static final class State {BlockPos bank;Vec3 previous;int stalled;boolean direct;final java.util.Map<BlockPos,Integer> blocked=new java.util.HashMap<>();}
   static boolean followWaterline(MinemonCreature mob,net.minecraft.world.entity.LivingEntity owner,double speed){
-  if(!mob.isAquaticSpecies()||!mob.isNaturalSurface()||!ownerNearWater(owner))return false;
+  if(!mob.isAquaticSpecies()||!ownerNearWater(owner))return false;
   double towardX=owner.getX()-mob.getX(),towardZ=owner.getZ()-mob.getZ();
   double ownerDistance=towardX*towardX+towardZ*towardZ;
   var candidates=new java.util.ArrayList<BlockPos>();
@@ -52,9 +45,11 @@ final class ShoreTraversal {
    var column=new BlockPos(mob.blockPosition().getX()+dx,mob.getY(),mob.blockPosition().getZ()+dz);
    if(!mob.level.hasChunkAt(column))continue;
    double top=WaterMovementGoal.restSurfaceAt(mob,column);if(!Double.isFinite(top))continue;
-   double feetY=top-WaterMovementGoal.preferredSurfaceDepth(mob);
+   boolean submerged=!mob.isNaturalSurface();
+   double feetY=submerged?Math.min(mob.getY(),top-mob.getBbHeight()-.3D)
+       :top-WaterMovementGoal.preferredSurfaceDepth(mob);
    var feet=new BlockPos(column.getX(),Math.floor(feetY),column.getZ());
-   if(!WaterMovementGoal.waterFits(mob,feet,false))continue;
+   if(!WaterMovementGoal.waterFits(mob,feet,submerged))continue;
    double x=feet.getX()+.5D-mob.getX(),z=feet.getZ()+.5D-mob.getZ();
    double distance=x*x+z*z,dot=towardX*x+towardZ*z;
    double cross=towardX*z-towardZ*x;
@@ -68,11 +63,22 @@ final class ShoreTraversal {
    double mx=p.getX()+.5D-mob.getX(),mz=p.getZ()+.5D-mob.getZ();
    return ox*ox+oz*oz+.1D*(mx*mx+mz*mz);
   }));
-  int tried=0;
+  int tried=0;BlockPos fallback=null;
   for(var feet:candidates){
    var path=mob.getNavigation().createPath(feet,0);
-   if(path!=null&&path.canReach()){mob.getNavigation().moveTo(path,speed);return true;}
+   if(path!=null&&path.canReach()){clear(mob);mob.getNavigation().moveTo(path,speed);return true;}
+   if(fallback==null)fallback=feet;
    if(++tried>=12)break;
+  }
+  if(fallback!=null){
+   var end=Vec3.atCenterOf(fallback);var start=mob.position();boolean clear=true;
+   for(int i=1;i<=24;i++){
+    var at=start.lerp(end,i/24.0D);
+    if(!mob.level.getFluidState(new BlockPos(at)).is(FluidTags.WATER)
+        ||!mob.level.noCollision(mob,mob.getBoundingBox().move(at.subtract(start)))){clear=false;break;}
+   }
+   if(clear){var state=STATES.computeIfAbsent(mob,key->new State());state.bank=fallback;state.direct=true;
+    mob.getNavigation().stop();mob.getMoveControl().setWantedPosition(end.x,fallback.getY(),end.z,speed);return true;}
   }
   return false;
  }
@@ -94,6 +100,9 @@ static boolean followBank(MinemonCreature mob,net.minecraft.world.entity.LivingE
    if(dx*dx+dz*dz<=arrivalRadius*arrivalRadius){STATES.remove(mob);return false;}
   }
   if(state==null){state=new State();STATES.put(mob,state);}
+  if(state.bank!=null&&!mob.level.getFluidState(state.bank).isEmpty()){
+   state.bank=null;state.direct=false;
+  }
   state.blocked.entrySet().removeIf(e->e.getValue()<mob.tickCount);
   if(state.previous!=null && mob.position().distanceToSqr(state.previous)<.015)state.stalled+=10;else state.stalled=0;state.previous=mob.position();
   if(state.stalled>=40 && state.bank!=null){state.blocked.put(state.bank,mob.tickCount+200);state.bank=null;mob.getNavigation().stop();state.stalled=0;}
@@ -102,8 +111,9 @@ static boolean followBank(MinemonCreature mob,net.minecraft.world.entity.LivingE
    // commands when navigation is stopped. Replan or reject stalled banks.
    if(!mob.getNavigation().isDone()){mob.getNavigation().setSpeedModifier(speed);return true;}
    var route=mob.getNavigation().createPath(state.bank,0);
-   if(route!=null&&route.canReach()){mob.getNavigation().moveTo(route,speed);return true;}
-   state.blocked.put(state.bank,mob.tickCount+200);state.bank=null;
+   if(route!=null&&route.canReach()){state.direct=false;mob.getNavigation().moveTo(route,speed);return true;}
+   state.direct=true;
+   mob.getMoveControl().setWantedPosition(state.bank.getX()+.5D,state.bank.getY(),state.bank.getZ()+.5D,speed);return true;
   }
   double top=mob instanceof MinemonAquaticCreature aquatic?aquatic.waterSurface():WaterMovementGoal.restSurfaceAt(mob,mob.blockPosition());if(!Double.isFinite(top))return false;
   var candidates=new java.util.ArrayList<BlockPos>();
@@ -129,15 +139,18 @@ static boolean followBank(MinemonCreature mob,net.minecraft.world.entity.LivingE
   // nearby path-reachable landing; once on land the normal follow goal closes
   // the remaining distance safely.
   candidates.sort(java.util.Comparator.comparingDouble(p->p.distSqr(mob.blockPosition())+.25*p.distSqr(owner.blockPosition())));
-  int tried=0;
+  int tried=0;BlockPos fallback=null;
   for(var feet:candidates){
    var path=mob.getNavigation().createPath(feet,0);
    if(path!=null&&path.canReach()){
-    state.bank=feet;mob.getNavigation().moveTo(path,speed);
+    state.bank=feet;state.direct=false;mob.getNavigation().moveTo(path,speed);
     return true;
    }
+   if(fallback==null)fallback=feet;
    if(++tried>=12)break;
   }
+  if(fallback!=null){state.bank=fallback;state.direct=true;mob.getNavigation().stop();
+   mob.getMoveControl().setWantedPosition(fallback.getX()+.5D,fallback.getY(),fallback.getZ()+.5D,speed);return true;}
   return false;
  }
  private ShoreTraversal(){}

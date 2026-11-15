@@ -17,7 +17,7 @@ import net.minecraftforge.gametest.*;
 @GameTestHolder(Minemon.MOD_ID)
 @PrefixGameTestTemplate(false)
 public final class SixIngameCorrectionGameTests {
-    private static void check(boolean ok,String message) { if(!ok)throw new AssertionError(message); }
+    private static void check(boolean ok,String message) { if(!ok)throw new GameTestAssertException(message); }
     private static ServerPlayer player(GameTestHelper h,String name) {
         var p=new ServerPlayer(h.getLevel().getServer(),h.getLevel(),new GameProfile(UUID.randomUUID(),name),null);
         p.connection=new FakePlayer(h.getLevel(),new GameProfile(UUID.randomUUID(),"Connection")).connection;
@@ -45,11 +45,11 @@ public final class SixIngameCorrectionGameTests {
         check(SpawnChanceProgression.elapsedTicks(first.getPersistentData(),slug)==0,"Success reset removes this species' progress");
         first.discard();second.discard();h.succeed();
     }
-    @GameTest(template="test_arena",batch="six_free_return",timeoutTicks=650)
+    @GameTest(template="test_arena",batch="six_free_return_land",timeoutTicks=650)
     public static void freeLandCompanionReturnsThenReleasesNaturalMovement(GameTestHelper h){freeReturn(h,"bulbasaur",false);}
-    @GameTest(template="test_arena",batch="six_free_return",timeoutTicks=650)
+    @GameTest(template="test_arena",batch="six_free_return_water",timeoutTicks=650)
     public static void freeSwimmerReturnsThroughWaterWithoutTeleport(GameTestHelper h){freeReturn(h,"goldeen",true);}
-    @GameTest(template="test_arena",batch="six_free_return",timeoutTicks=650)
+    @GameTest(template="test_arena",batch="six_free_return_air",timeoutTicks=650)
     public static void freeFlyerReturnsThroughAirWithoutTeleport(GameTestHelper h){freeReturn(h,"pidgey",false);}
     private static void freeReturn(GameTestHelper h,String slug,boolean water) {
         h.getLevel().setDayTime(1000);
@@ -61,6 +61,7 @@ public final class SixIngameCorrectionGameTests {
         var mob=h.spawn(ModEntities.SPECIES.get(slug).get(),new BlockPos(5,water?3:4,6));
         mob.tame(owner);mob.applyManagedBehavior("free");
         Vec3[] previous={mob.position()};boolean[] returned={false};
+        h.runAfterDelay(600,()->check(returned[0],"Free return stalled: "+slug+" pos="+mob.position()+" owner="+owner.position()+" following="+mob.isFollowingOwner()+" target="+mob.getNavigation().getTargetPos()+" navDone="+mob.getNavigation().isDone()+" wanted="+mob.getMoveControl().getWantedX()+","+mob.getMoveControl().getWantedY()+","+mob.getMoveControl().getWantedZ()));
         h.onEachTick(()->{
             double step=mob.position().distanceTo(previous[0]);previous[0]=mob.position();
             check(step<1.0D,"Free return must not relocate "+slug+" step="+step);
@@ -95,7 +96,9 @@ public final class SixIngameCorrectionGameTests {
             check(maxStep[0]<1.0D,"Shore traversal must use continuous physics, not teleport: "+slug+" step="+maxStep[0]);
             if(stage[0]==0&&mob.isInWater()) {
                 var target=h.absolutePos(new BlockPos(15,5+raised,6));var route=mob.getNavigation().createPath(target,0);
-                check(route!=null&&route.canReach(),"A reachable shore route must be found: "+slug+" target="+target);
+                check(route!=null&&route.canReach(),"A reachable shore route must be found: "+slug+" target="+target
+                    +" position="+mob.position()+" width="+mob.getBbWidth()+" height="+mob.getBbHeight()
+                    +" path="+(route==null?"null":route.getNodeCount()+" nodes, end="+route.getEndNode()));
                 mob.getNavigation().moveTo(route,.85D);stage[0]=1;
             } else if(stage[0]==1&&mob.getX()>h.absolutePos(new BlockPos(12,0,0)).getX()&&mob.isOnGround()&&!mob.isInWater()) {
                 var target=h.absolutePos(new BlockPos(4,3,6));var route=mob.getNavigation().createPath(target,0);
