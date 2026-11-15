@@ -217,14 +217,27 @@ public final class IndividualBehaviorTests {
   companion.tame(owner);companion.setOwnerUUID(owner.getUUID());companion.applyManagedBehavior("free");
   await(h,()->wild.isSleeping()&&companion.isSleeping()&&wild.isNightResting()&&companion.isNightResting(),()->{
    Vec3 wildStart=wild.position(),freeStart=companion.position();
-   var saved=new CompoundTag();companion.addAdditionalSaveData(saved);companion.readAdditionalSaveData(saved);
-   companion.applyManagedBehavior("free");
-   check(h,companion.isSleeping()&&companion.isNightResting(),"Reload and duplicate Livre commands must preserve aquatic sleep");
-   h.runAfterDelay(40,()->{
-    double wildDrift=wild.position().distanceTo(wildStart),freeDrift=companion.position().distanceTo(freeStart);
-    check(h,wild.isSleeping()&&companion.isSleeping(),"Both Goldeen must remain asleep through the observation window; wild="+state(wild)+" free="+state(companion));
-    check(h,wildDrift<.01D&&freeDrift<.01D,"Aquatic night rest must suppress sleep tremors for wild and free-mode Goldeen; wildDrift="+wildDrift+" freeDrift="+freeDrift+" wildVelocity="+wild.getDeltaMovement()+" freeVelocity="+companion.getDeltaMovement());
-    owner.discard();wild.discard();companion.discard();h.succeed();
+   var saved=companion.saveWithoutId(new CompoundTag());
+   var savedId=companion.getUUID();
+   // Preserve the manager entry exactly as chunk unload/world reopening does.
+   companion.remove(net.minecraft.world.entity.Entity.RemovalReason.UNLOADED_TO_CHUNK);
+   h.runAfterDelay(2,()->{
+    var loaded=ModEntities.SPECIES.get("goldeen").get().create(h.getLevel());
+    loaded.load(saved);
+    check(h,br.com.petrickfaria.minemon.pokec.ActivePokemonData.get(h.getLevel()).entries(owner.getUUID())
+       .stream().anyMatch(entry->entry.id().equals(savedId)&&entry.behavior().equals("free")),
+       "Entity deserialization must not overwrite the saved Livre manager command");
+    check(h,h.getLevel().addFreshEntity(loaded),"Saved Goldeen must rejoin the world with its original UUID");
+    loaded.applyManagedBehavior("free");
+    check(h,loaded.getUUID().equals(savedId)&&loaded.isFreeMode()&&loaded.isSleeping(),
+       "A fresh entity load, manager registration and duplicate Livre command must preserve mode, UUID and sleep");
+    h.runAfterDelay(40,()->{
+     double wildDrift=wild.position().distanceTo(wildStart),freeDrift=loaded.position().distanceTo(freeStart);
+     check(h,wild.isSleeping()&&loaded.isSleeping()&&loaded.isNightResting(),"Both Goldeen must remain asleep after world rejoin; wild="+state(wild)+" free="+state(loaded));
+     check(h,wildDrift<.01D&&freeDrift<.01D,"Aquatic night rest must suppress sleep tremors for wild and reloaded free Goldeen; wildDrift="+wildDrift+" freeDrift="+freeDrift+" wildVelocity="+wild.getDeltaMovement()+" freeVelocity="+loaded.getDeltaMovement());
+     System.out.println("[MINEMON FREE RELOAD] PASS original UUID, owner, Livre mode and sleep preserved; wildDrift="+wildDrift+" freeDrift="+freeDrift);
+     owner.discard();wild.discard();loaded.discard();h.succeed();
+    });
    });
   },150,"Wild and free Goldeen must both enter night rest in water");
  }
