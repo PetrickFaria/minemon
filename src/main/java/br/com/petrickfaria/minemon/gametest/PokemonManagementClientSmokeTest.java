@@ -404,6 +404,10 @@ public final class PokemonManagementClientSmokeTest {
                 }
                 if(pokec.catalogSizeForSmokeTest()!=151||pokec.listScrollMaxForSmokeTest()<1)
                     throw new IllegalStateException("PokéC scrollbar test requires the full 151-species list");
+                if(!pokec.starterChosenForSmokeTest()){
+                    if(++ticks>120)throw new IllegalStateException("PokéC did not receive the server's starter-selection state");
+                    return;
+                }
                 if(!pokec.dragListScrollbarForSmokeTest(false,false)
                         ||pokec.listScrollOffsetForSmokeTest()!=pokec.listScrollMaxForSmokeTest())
                     throw new IllegalStateException("Clicking and dragging the visible PokéC thumb center did not move the list to the bottom");

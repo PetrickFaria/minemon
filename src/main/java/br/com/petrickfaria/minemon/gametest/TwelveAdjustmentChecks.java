@@ -155,7 +155,11 @@ final class TwelveAdjustmentChecks {
   var ball=(net.minecraft.world.item.crafting.ShapedRecipe)h.getLevel().getRecipeManager().byKey(new net.minecraft.resources.ResourceLocation("minemon","pokeball")).orElseThrow();
   var upgrade=(net.minecraft.world.item.crafting.ShapedRecipe)h.getLevel().getRecipeManager().byKey(new net.minecraft.resources.ResourceLocation("minemon","master_ball")).orElseThrow();
   var grid=new net.minecraft.world.inventory.CraftingContainer(owner.inventoryMenu,3,3);
-  for(int i=0;i<9;i++)grid.setItem(i,new ItemStack(i==4?net.minecraft.world.item.Items.ENDER_PEARL:net.minecraft.world.item.Items.IRON_INGOT));
+  grid.setItem(1,new ItemStack(net.minecraft.world.item.Items.RED_DYE));
+  grid.setItem(3,new ItemStack(net.minecraft.world.item.Items.IRON_INGOT));
+  grid.setItem(4,new ItemStack(net.minecraft.world.item.Items.ENDER_PEARL));
+  grid.setItem(5,new ItemStack(net.minecraft.world.item.Items.IRON_INGOT));
+  grid.setItem(7,new ItemStack(net.minecraft.world.item.Items.IRON_INGOT));
   if(!ball.matches(grid,h.getLevel())||ball.getResultItem().getItem()!=ModItems.POKEBALL.get()||ball.getResultItem().getCount()!=1)h.fail("Pokeball recipe mismatch");
   grid.clearContent();for(int i:new int[]{1,3,5,7})grid.setItem(i,new ItemStack(net.minecraft.world.item.Items.DIAMOND));
   grid.setItem(4,new ItemStack(ModItems.POKEBALL.get()));

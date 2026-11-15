@@ -216,6 +216,7 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
     public int listScrollOffsetForSmokeTest(){return scrollOffset;}
     public int listScrollMaxForSmokeTest(){return Math.max(0,ordered.size()-visibleRows());}
     public float listUiScaleForSmokeTest(){return uiScale;}
+    public boolean starterChosenForSmokeTest(){return syncedStarterChosen;}
     public boolean scrollListForSmokeTest(double delta){
         return mouseScrolled(leftPos+(LIST_X+20)*uiScale,topPos+(LIST_Y+25)*uiScale,delta);
     }
