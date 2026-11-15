@@ -340,7 +340,12 @@ public final class NightAndSwimmingTests {
   if(index>=sleepers.size()){done.run();return;}
   var mob=sleepers.get(index);var origin=h.absolutePos(BlockPos.ZERO);
   int x=(int)Math.floor(mob.getX()-origin.getX()),z=(int)Math.floor(mob.getZ()-origin.getZ());
-  var attacker=h.spawn(EntityType.COW,new BlockPos(x+9,1,z));attacker.setNoAi(true);float health=attacker.getHealth();
+  // Flareon sleeps near x=22: x+9 puts its attacker inside the sealed x=31
+  // wall. Keep the same nine-block ranged encounter on the open side instead.
+  int attackerX=x<=16?x+9:x-9;
+  var attacker=h.spawn(EntityType.COW,new BlockPos(attackerX,1,z));attacker.setNoAi(true);float health=attacker.getHealth();
+  check(h,h.getLevel().noCollision(attacker,attacker.getBoundingBox()),
+      "The ranged attacker must spawn in open space inside the arena: "+attacker.position());
   check(h,mob.hurt(DamageSource.mobAttack(attacker),1)&&!mob.isSleeping()&&mob.getTarget()==attacker,
       mob.getSpeciesSlug()+" must wake and retain its attacker");
   await(h,()->attacker.getHealth()<health,()->{
