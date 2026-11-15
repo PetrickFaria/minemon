@@ -68,28 +68,13 @@ final class ShoreTraversal {
    double mx=p.getX()+.5D-mob.getX(),mz=p.getZ()+.5D-mob.getZ();
    return ox*ox+oz*oz+.1D*(mx*mx+mz*mz);
   }));
-  BlockPos fallback=null;int tried=0;
+  int tried=0;
   for(var feet:candidates){
    var path=mob.getNavigation().createPath(feet,0);
    if(path!=null&&path.canReach()){mob.getNavigation().moveTo(path,speed);return true;}
-   if(fallback==null)fallback=feet;
    if(++tried>=12)break;
   }
   return false;
- }
- private static boolean clearWaterlineRoute(MinemonCreature mob,BlockPos feet,double speed){
-  double top=WaterMovementGoal.restSurfaceAt(mob,feet);
-  if(!Double.isFinite(top))return false;
-  double y=top-WaterMovementGoal.preferredSurfaceDepth(mob);
-  var start=mob.position();
-  var end=new Vec3(feet.getX()+.5D,y,feet.getZ()+.5D);
-  for(int step=1;step<=16;step++){
-   var point=start.lerp(end,step/16.0D);
-   if(!mob.level.noCollision(mob,mob.getBoundingBox().move(point.subtract(start))))return false;
-  }
-  mob.getNavigation().stop();
-  mob.getMoveControl().setWantedPosition(end.x,end.y,end.z,speed);
-  return true;
  }
  private static boolean ownerNearWater(net.minecraft.world.entity.LivingEntity owner){
   var origin=owner.blockPosition();
@@ -113,10 +98,8 @@ static boolean followBank(MinemonCreature mob,net.minecraft.world.entity.LivingE
   if(state.previous!=null && mob.position().distanceToSqr(state.previous)<.015)state.stalled+=10;else state.stalled=0;state.previous=mob.position();
   if(state.stalled>=40 && state.bank!=null){state.blocked.put(state.bank,mob.tickCount+200);state.bank=null;mob.getNavigation().stop();state.stalled=0;}
   if(state.bank!=null){
-   // Amphibious path nodes can complete on the water side of a one-block
-   // bank. Keep steering toward the already reachability-checked landing
-   // point directly; block collision still governs movement and the stalled
-   // route check below selects another bank if this line is obstructed.
+   // Keep an active route: SmoothSwimmingMoveControl ignores direct MOVE_TO
+   // commands when navigation is stopped. Replan or reject stalled banks.
    if(!mob.getNavigation().isDone()){mob.getNavigation().setSpeedModifier(speed);return true;}
    var route=mob.getNavigation().createPath(state.bank,0);
    if(route!=null&&route.canReach()){mob.getNavigation().moveTo(route,speed);return true;}
@@ -146,17 +129,13 @@ static boolean followBank(MinemonCreature mob,net.minecraft.world.entity.LivingE
   // nearby path-reachable landing; once on land the normal follow goal closes
   // the remaining distance safely.
   candidates.sort(java.util.Comparator.comparingDouble(p->p.distSqr(mob.blockPosition())+.25*p.distSqr(owner.blockPosition())));
-  int tried=0;BlockPos physicalFallback=null;
+  int tried=0;
   for(var feet:candidates){
    var path=mob.getNavigation().createPath(feet,0);
    if(path!=null&&path.canReach()){
     state.bank=feet;mob.getNavigation().moveTo(path,speed);
     return true;
    }
-   // A one-block bank can be physically jumpable even when an amphibious
-   // path reports it unreachable. Try one safe landing directly; collision
-   // and the existing stall blacklist decide whether another bank is needed.
-   if(physicalFallback==null)physicalFallback=feet;
    if(++tried>=12)break;
   }
   return false;

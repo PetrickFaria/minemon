@@ -164,6 +164,11 @@ public final class IndividualBehaviorTests {
   h.runAfterDelay(40,()->{
    sampleMovement(h,wild,wildMotion,200);sampleMovement(h,companion,freeMotion,200);
   });
+  h.runAfterDelay(100,()->{
+   var route=companion.getNavigation().getPath();
+   companion.applyManagedBehavior("free");
+   check(h,route==companion.getNavigation().getPath(),"Duplicate Livre command must not replace or stop the swim route");
+  });
   h.runAfterDelay(250,()->{
    check(h,wild.isInWater()&&companion.isInWater(),"Wild and free Goldeen must remain in the same aquatic habitat; wild="+state(wild)+" free="+state(companion));
    check(h,wildMotion.distance>1.0D&&freeMotion.distance>1.0D,"Both Goldeen must show sustained autonomous swimming; wildMotion="+wildMotion+" freeMotion="+freeMotion+" wild="+state(wild)+" free="+state(companion));

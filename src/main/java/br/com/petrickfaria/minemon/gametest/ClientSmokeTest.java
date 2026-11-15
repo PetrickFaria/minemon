@@ -234,6 +234,7 @@ public final class ClientSmokeTest {
    "wartortle",java.util.List.of("arm_left","arm_right","torso")
   );
   private static java.util.List<String> profileJoints(String slug,String state) {
+   if(slug.equals("geodude"))return java.util.List.of("arm_left","arm_right","body","torso");
    if(java.util.Set.of("pidgey","pidgeotto","pidgeot").contains(slug)) {
     if(fixtureAir(slug))return java.util.List.of("wing_open_left","wing_open_right");
     String idleJoint=switch(slug){case "pidgey"->"tail2";case "pidgeotto"->"tail";default->"hair5";};
@@ -1116,6 +1117,17 @@ public final class ClientSmokeTest {
       throw new IllegalStateException("Run deceleration did not transition from run to a lower-speed state for "+slug+" run="+run+" walk="+walk+" idle="+idle+" observed="+deceleration+" measured="+articulationInputs.getOrDefault(slug,java.util.Map.of()).get("RUN_DECEL"));
     }
     int walkJoints=movingJointCount(slug,"WALK_STEADY");
+    if(slug.equals("geodude")) {
+     for(String state:java.util.List.of("WALK_STEADY","IDLE_FINAL")) {
+      float[] torso=articulationRanges.getOrDefault(slug,java.util.Map.of()).get(state+":torso");
+      if(torso==null||Math.abs(torso[0])>.2F||Math.abs(torso[6])>.2F)
+       throw new IllegalStateException("Geodude must hover without torso rolling in "+state);
+     }
+     float[] torso=articulationRanges.getOrDefault(slug,java.util.Map.of()).get("RUN_STEADY:torso");
+     if(torso==null||torso[6]-torso[0]<1.0F)
+      throw new IllegalStateException("Geodude running must visibly roll its rendered torso");
+     report.append("GEODUDE: rendered idle and normal travel hover without rolling; running alone rolls.\n");
+    }
     int runJoints=run==null?0:movingJointCount(slug,"RUN_STEADY");
     int minimum=slug.equals("charmander")?2:1;
     int idleJoints=movingJointCount(slug,"IDLE_FINAL");

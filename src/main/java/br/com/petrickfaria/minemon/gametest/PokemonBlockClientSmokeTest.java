@@ -73,6 +73,8 @@ final class PokemonBlockClientSmokeTest {
                 var level = (net.minecraft.server.level.ServerLevel) player.level;
                 player.setGameMode(net.minecraft.world.level.GameType.CREATIVE);
                 player.setHealth(player.getMaxHealth());
+                player.getInventory().setItem(0,br.com.petrickfaria.minemon.registry.ModItems.POKEC.get().getDefaultInstance());
+                player.inventoryMenu.broadcastChanges();
                 level.getEntitiesOfClass(net.minecraft.world.entity.monster.Monster.class,
                         new net.minecraft.world.phys.AABB(player.blockPosition()).inflate(96)).forEach(net.minecraft.world.entity.Entity::discard);
                 base = player.blockPosition().offset(0, 12, 5);
@@ -89,6 +91,32 @@ final class PokemonBlockClientSmokeTest {
                 player.connection.teleport(base.getX() + 1.8, base.getY(), base.getZ() + .5, 180, 0);
                 viewReady = true;
             });
+            return;
+        }
+        if (view >= VIEWS.length) {
+            if (!(mc.screen instanceof net.minecraft.client.gui.screens.inventory.InventoryScreen)) {
+                mc.options.hideGui=false;
+                mc.setCameraEntity(mc.player);
+                mc.setScreen(new net.minecraft.client.gui.screens.inventory.InventoryScreen(mc.player));
+                ticks=0;
+                return;
+            }
+            if(ticks<30)return;
+            try {
+                String filename="pokec-inventory-sprite.png";
+                if(!captureRequested){
+                    captureRequested=true;
+                    net.minecraft.client.Screenshot.grab(mc.gameDirectory,filename,mc.getMainRenderTarget(),message->captureFinished=true);
+                    return;
+                }
+                if(!captureFinished)return;
+                if(!java.nio.file.Files.isRegularFile(mc.gameDirectory.toPath().resolve("screenshots").resolve(filename)))
+                    throw new IllegalStateException("Inventory screenshot was not saved");
+                java.nio.file.Files.writeString(java.nio.file.Path.of("client-validation-pokec-block.txt"),
+                    "PASS POKÉC BLOCK: seven in-world screenshots, eight baked models and twelve textures.\n"
+                    +"PASS POKÉC INVENTORY: registered item baked with 2D sprite and rendered in inventory screenshot.\n");
+                done=true;mc.execute(mc::stop);
+            }catch(Exception failure){throw new IllegalStateException("PokéC inventory capture failed",failure);}
             return;
         }
         if (!viewReady || mc.screen != null) return;
@@ -136,11 +164,8 @@ final class PokemonBlockClientSmokeTest {
                 throw new IllegalStateException("Missing PokéC screenshot: " + filename);
             System.out.println("[POKÉC BLOCK CLIENT] captured " + filename);
             if (++view >= VIEWS.length) {
-                java.nio.file.Files.writeString(java.nio.file.Path.of("client-validation-pokec-block.txt"),
-                        "PASS POKÉC BLOCK: seven in-world screenshots, eight baked models and twelve textures.\n");
-                done = true;
+                ticks=0;captureRequested=false;captureFinished=false;
                 mc.setCameraEntity(mc.player);
-                mc.execute(mc::stop);
                 return;
             }
             ticks = 0;

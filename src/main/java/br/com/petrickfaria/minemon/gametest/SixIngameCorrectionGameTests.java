@@ -45,6 +45,34 @@ public final class SixIngameCorrectionGameTests {
         check(SpawnChanceProgression.elapsedTicks(first.getPersistentData(),slug)==0,"Success reset removes this species' progress");
         first.discard();second.discard();h.succeed();
     }
+    @GameTest(template="test_arena",batch="six_free_return",timeoutTicks=650)
+    public static void freeLandCompanionReturnsThenReleasesNaturalMovement(GameTestHelper h){freeReturn(h,"bulbasaur",false);}
+    @GameTest(template="test_arena",batch="six_free_return",timeoutTicks=650)
+    public static void freeSwimmerReturnsThroughWaterWithoutTeleport(GameTestHelper h){freeReturn(h,"goldeen",true);}
+    @GameTest(template="test_arena",batch="six_free_return",timeoutTicks=650)
+    public static void freeFlyerReturnsThroughAirWithoutTeleport(GameTestHelper h){freeReturn(h,"pidgey",false);}
+    private static void freeReturn(GameTestHelper h,String slug,boolean water) {
+        h.getLevel().setDayTime(1000);
+        for(int x=0;x<=36;x++)for(int z=0;z<=12;z++)for(int y=0;y<=12;y++)
+            h.setBlock(new BlockPos(x,y,z),y==0?Blocks.STONE:water&&y<=5?Blocks.WATER:Blocks.AIR);
+        var owner=player(h,"FreeReturnOwner");
+        var end=h.absolutePos(new BlockPos(28,water?6:1,6));
+        owner.moveTo(end.getX()+.5D,end.getY(),end.getZ()+.5D,0,0);h.getLevel().addNewPlayer(owner);
+        var mob=h.spawn(ModEntities.SPECIES.get(slug).get(),new BlockPos(5,water?3:4,6));
+        mob.tame(owner);mob.applyManagedBehavior("free");
+        Vec3[] previous={mob.position()};boolean[] returned={false};
+        h.onEachTick(()->{
+            double step=mob.position().distanceTo(previous[0]);previous[0]=mob.position();
+            check(step<1.0D,"Free return must not relocate "+slug+" step="+step);
+            if(mob.distanceToSqr(owner)<=100.0D)returned[0]=true;
+            if(returned[0]&&!mob.isFollowingOwner()){
+                check(mob.isFreeMode(),"Return must preserve Livre mode");
+                check(mob.navigationRange()==(water?128.0D:24.0D),"Natural pathfinding range must survive return");
+                System.out.println("[MINEMON FREE RETURN] PASS "+slug+" distance="+mob.distanceTo(owner));
+                owner.discard();mob.discard();h.succeed();
+            }
+        });
+    }
     @GameTest(template="test_arena",batch="six_shore",timeoutTicks=650)
     public static void amphibianCrossesFlushBankInBothDirections(GameTestHelper h){shore(h,0,false,"squirtle");}
     @GameTest(template="test_arena",batch="six_shore",timeoutTicks=650)
