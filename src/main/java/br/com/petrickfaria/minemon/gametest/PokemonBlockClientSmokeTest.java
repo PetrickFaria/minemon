@@ -94,7 +94,8 @@ final class PokemonBlockClientSmokeTest {
             return;
         }
         if (view >= VIEWS.length) {
-            if (!(mc.screen instanceof net.minecraft.client.gui.screens.inventory.InventoryScreen)) {
+            if (!(mc.screen instanceof net.minecraft.client.gui.screens.inventory.InventoryScreen)
+                    && !(mc.screen instanceof net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen)) {
                 mc.options.hideGui=false;
                 mc.setCameraEntity(mc.player);
                 mc.setScreen(new net.minecraft.client.gui.screens.inventory.InventoryScreen(mc.player));
