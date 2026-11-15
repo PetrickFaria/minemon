@@ -100,6 +100,14 @@ final class PokemonBlockClientSmokeTest {
         }
         if (ticks < 75) return;
         try {
+            var stack = br.com.petrickfaria.minemon.registry.ModItems.POKEC.get().getDefaultInstance();
+            var itemModel = mc.getItemRenderer().getModel(stack, mc.level, mc.player, 0);
+            if (itemModel == mc.getModelManager().getMissingModel() || itemModel.isGui3d())
+                throw new IllegalStateException("Registered PokéC inventory item must bake as a flat sprite");
+            var quads = itemModel.getQuads(null, null, net.minecraft.util.RandomSource.create(0));
+            if (quads.isEmpty() || quads.stream().anyMatch(q -> !q.getSprite().getName()
+                    .equals(new ResourceLocation("minemon", "item/pokec"))))
+                throw new IllegalStateException("PokéC inventory quads must use the intended sprite, never missingno");
             for (String facing : new String[]{"north", "east", "south", "west"}) {
                 for (String half : new String[]{"lower", "upper"}) {
                     var modelId = new ModelResourceLocation(new ResourceLocation("minemon_gen1", "pokec"),
