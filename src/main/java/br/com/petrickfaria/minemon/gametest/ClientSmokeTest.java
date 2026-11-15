@@ -869,8 +869,10 @@ public final class ClientSmokeTest {
     var current=(MinemonCreature)mc.getSingleplayerServer().overworld().getEntity(testEntity);
      if(current!=null){
      setValidationPhase(current,phase);
-     if(java.util.Set.of("charmander","charmeleon","charizard","moltres","ponyta","rapidash").contains(current.getSpeciesSlug()))
-      mc.getSingleplayerServer().overworld().setDayTime(phase>=27&&phase<54?18000L:1000L);
+     boolean emberFixture=java.util.Set.of("charmander","charmeleon","charizard","moltres","ponyta","rapidash").contains(current.getSpeciesSlug());
+     // The ember fixtures need nighttime for their flame checks, then restore
+     // daytime for every following species so natural run eligibility remains valid.
+     mc.getSingleplayerServer().overworld().setDayTime(emberFixture&&phase>=27&&phase<54?18000L:1000L);
      // Keep the fixture's movement deterministic while still exercising its real travel
      // and render path. The goals are removed at spawn, so no pathfinding competes with
      // the controlled velocity used to select the locomotion clips.

@@ -349,7 +349,7 @@ jobs:
           grep -F 'PASS SOURCE PITCH: mew source q.pitch_tilt input moves the body bone:' run/client-validation.txt
           grep -F 'ARTICULATION PROFILES:' run/client-validation.txt
       - name: Validate mixed flight and Vaporeon swimming on the real client
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.full_suite }}
+        if: ${{ !cancelled() && steps.compile.outcome == 'success' && ((github.event_name == 'workflow_dispatch' && inputs.full_suite) || (github.event_name == 'push' && github.ref == 'refs/heads/fix/minemon-pending-eight-corrections')) }}
         run: |
           cp run/client-validation.txt run/client-validation-full.txt
           for scenario in air water; do
