@@ -272,6 +272,7 @@ public final class ClientSmokeTest {
   private static final java.util.Map<String,java.util.Set<String>> tailFlameClips=new java.util.HashMap<>();
  @SubscribeEvent public static void tick(TickEvent.ClientTickEvent event) {
   if(!Boolean.getBoolean("minemon.clientSmokeTest")||event.phase!=TickEvent.Phase.END)return;
+  if(Boolean.getBoolean("minemon.clientSmokeFollowup")){MovementSleepClientSmokeTest.tick();return;}
   if(Boolean.getBoolean("minemon.clientSmokeWildCapture")
       ||Boolean.getBoolean("minemon.clientSmokeWildCaptureReopen")){
    WildCaptureClientSmokeTest.tick(event);return;
