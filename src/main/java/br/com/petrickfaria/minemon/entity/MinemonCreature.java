@@ -169,7 +169,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     @Override public void travel(net.minecraft.world.phys.Vec3 input){
         if(!this.level.isClientSide&&!this.isAquaticSpecies()&&!SpeciesBehaviorProfiles.canFly(this.getSpeciesSlug()))
             this.setNoGravity(this.isInWater());
-        if (isDefeated() || this.isOrderedToSit()) {
+        if (isDefeated() || this.isOrderedToSit() && !(isNightResting()&&getSpeciesSlug().equals("gyarados"))) {
             input=net.minecraft.world.phys.Vec3.ZERO;
             this.setSpeed(0); this.setXxa(0); this.setYya(0); this.setZza(0); this.setJumping(false);
         }
@@ -227,7 +227,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     public boolean isSpontaneouslyRunning() { return this.entityData.get(SPONTANEOUS_RUN); }
     public void setSpontaneousRunForValidation(boolean running) {
         if (Boolean.getBoolean("minemon.clientSmokeTest") && !this.level.isClientSide
-                && !this.isFlyingSpecies() && !SpeciesBehaviorProfiles.isAquatic(this.getSpeciesSlug())) {
+                && (!this.isFlyingSpecies() || this.getSpeciesSlug().equals("geodude")) && !SpeciesBehaviorProfiles.isAquatic(this.getSpeciesSlug())) {
             this.entityData.set(SPONTANEOUS_RUN, running);
             this.spontaneousRunTicks = running ? 100 : 0;
         }
@@ -235,11 +235,37 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
 
     @Override public boolean isOrderedToSit() { return this.entityData.get(ORDERED_SIT); }
     public boolean isFreeMode() { return this.entityData.get(FREE_MODE); }
+    /** Existing ten-block natural-activity band around the trainer. */
+    static final double NATURAL_OWNER_DISTANCE_SQR = 100.0D;
+    static final double FREE_RETURN_RELEASE_DISTANCE_SQR = 81.0D;
+    /** A submerged companion shares the trainer's shore region, not their air height. */
+    public double freeOwnerDistanceSqr(LivingEntity owner) {
+        return isAquaticSpecies() && isInWaterOrBubble()
+                ? horizontalDistanceToSqr(owner.getX(),owner.getZ()) : distanceToSqr(owner);
+    }
+    public double navigationRange() {
+        return !isTame() || isFreeMode()
+                ? (isAquaticSpecies() ? 128.0D : 24.0D) : perceptionRange();
+    }
+    void wakeForFreeReturn() {
+        if (!isFreeMode()) return;
+        nightRoutine=false;
+        entityData.set(NIGHT_REST,false);
+        setSleeping(false);
+        syncNaturalState();
+    }
+    boolean needsFreeReturn() {
+        LivingEntity owner=getOwner();
+        return isFreeMode()&&owner!=null&&owner.isAlive()&&!owner.isSpectator()&&owner.level==level
+                &&freeOwnerDistanceSqr(owner)>NATURAL_OWNER_DISTANCE_SQR&&!isDefeated()&&!isOrderedToSit()
+                &&!isPassenger()&&getTarget()==null;
+    }
     /** Configured Pokémon damage before target-side Minecraft mitigation. */
     public double pokemonAttackDamage() {
         return PokemonProgression.damageForRarity(this.getPokemonRarity(), this.getPokemonLevel());
     }
     public void setFreeMode(boolean free) {
+        if (free == isFreeMode()) return;
         if (free && isOrderedToSit()) setOrderedToSit(false);
         entityData.set(FREE_MODE, free);
         if (free) {
@@ -257,7 +283,10 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         if (level.isClientSide || !isTame() || isDefeated()) return;
         switch (behavior) {
             case "sit" -> setOrderedToSit(true);
-            case "free" -> { setOrderedToSit(false); setFreeMode(true); setFollowingOwner(false); }
+            case "free" -> {
+                // Reapplying a persisted command must not stop a route or wake a sleeper.
+                if (!isFreeMode()) { setOrderedToSit(false); setFreeMode(true); }
+            }
             case "follow" -> {
                 setOrderedToSit(false); setFreeMode(false); setFollowingOwner(true);
                 nightRoutine=false; entityData.set(NIGHT_REST,false);
@@ -271,6 +300,9 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     }
     @Override public void setOrderedToSit(boolean orderedToSit) {
         boolean wasOrderedToSit=isOrderedToSit();
+        // Chunk registration and team-menu refreshes may repeat this command.
+        // They must not wake or lift an already seated night sleeper.
+        if(orderedToSit&&wasOrderedToSit)return;
         super.setOrderedToSit(orderedToSit);
         this.entityData.set(ORDERED_SIT, orderedToSit);
         if (orderedToSit) {
@@ -497,8 +529,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(PokemonProgression.healthForRarity(rarity,this.getPokemonLevel()));
         this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(PokemonProgression.damageForRarity(rarity,this.getPokemonLevel()));
         AttributeInstance followRange=this.getAttribute(Attributes.FOLLOW_RANGE);
-        if(followRange!=null)followRange.setBaseValue(isTame()?perceptionRange():
-                (SpeciesBehaviorProfiles.waterCapable(this.getSpeciesSlug())?128.0D:24.0D));
+        if(followRange!=null)followRange.setBaseValue(navigationRange());
         this.setHealth(Math.min(this.getMaxHealth(),health));
     }
     private void refreshPokemonXpThreshold() {
@@ -946,8 +977,8 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         super.tick();
         if(!level.isClientSide&&isTame()){
             AttributeInstance followRange=getAttribute(Attributes.FOLLOW_RANGE);
-            if(followRange!=null&&Math.abs(followRange.getBaseValue()-perceptionRange())>1.0E-4D)
-                followRange.setBaseValue(perceptionRange());
+            if(followRange!=null&&Math.abs(followRange.getBaseValue()-navigationRange())>1.0E-4D)
+                followRange.setBaseValue(navigationRange());
         }
         if (isOrderedToSit() && !isNightResting() && !isSleeping()
                 && Double.isFinite(sitAnchorX) && Double.isFinite(sitAnchorZ)) {
@@ -962,8 +993,12 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
                 // flight band or otherwise move it from that anchor.
                 double anchorY=sitAnchorY;
                 if (horizontalDistanceToSqr(sitAnchorX, sitAnchorZ) > 1.0E-8D
-                        || Math.abs(getY() - anchorY) > 1.0E-8D)
-                    setPos(sitAnchorX, anchorY, sitAnchorZ);
+                        || Math.abs(getY() - anchorY) > 1.0E-8D){
+                    if(SpeciesBehaviorProfiles.landsForNightRest(getSpeciesSlug()))
+                        move(net.minecraft.world.entity.MoverType.SELF,new net.minecraft.world.phys.Vec3(
+                                sitAnchorX-getX(),net.minecraft.util.Mth.clamp(anchorY-getY(),-.1D,.1D),sitAnchorZ-getZ()));
+                    else setPos(sitAnchorX, anchorY, sitAnchorZ);
+                }
                 setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
             } else {
                 if (horizontalDistanceToSqr(sitAnchorX, sitAnchorZ) > 1.0E-8D)
@@ -1250,7 +1285,8 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         boolean waterRest=SpeciesBehaviorProfiles.waterCapable(this.getSpeciesSlug())&&this.isInWaterOrBubble();
         boolean restingEnvironment=SpeciesBehaviorProfiles.canFly(this.getSpeciesSlug())||waterRest||!SpeciesBehaviorProfiles.isAquatic(this.getSpeciesSlug())&&!this.isInWaterOrBubble();
         boolean allowSittingFlyerToRest=this.isOrderedToSit()&&SpeciesBehaviorProfiles.canFly(this.getSpeciesSlug());
-        boolean eligible=restingEnvironment&&(!this.isOrderedToSit()||allowSittingFlyerToRest)
+        boolean allowSittingGyaradosToRest=this.isOrderedToSit()&&waterRest&&getSpeciesSlug().equals("gyarados");
+        boolean eligible=restingEnvironment&&(!this.isOrderedToSit()||allowSittingFlyerToRest||allowSittingGyaradosToRest)
             &&!this.isFollowingOwner()&&!this.isNoAi()
             &&!this.isPassenger()&&!this.isDeadOrDying()
             &&target==null&&this.wakeGraceTicks==0;
@@ -1272,15 +1308,21 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
             boolean hover=SpeciesBehaviorProfiles.hoversDuringNightRest(this.getSpeciesSlug());
             double restHeight=SpeciesBehaviorProfiles.nightRestHoverHeight(this.getSpeciesSlug());
             double waterRestY=waterRest?WaterMovementGoal.waterRestY(this):Double.NaN;
-            boolean settled=waterRest?Math.abs(this.getY()-waterRestY)<0.18D
+            // Position-locked fish finish the precise depth approach. Visitors
+            // retain their approved bottom-rest tolerance after combat.
+            double waterTolerance=SpeciesBehaviorProfiles.locksPositionDuringWaterSleep(this.getSpeciesSlug())?.01D:.18D;
+            boolean settled=waterRest?Math.abs(this.getY()-waterRestY)<waterTolerance
                 :hover?Math.abs(this.getY()-this.naturalSurface()-restHeight)<0.18D
                 :this.isOnGround()&&WaterMovementGoal.safeDryRestingSupport(this,this.blockPosition());
+            if(settled&&!this.isSleeping()&&waterRest&&getSpeciesSlug().equals("gyarados"))
+                settled=WaterMovementGoal.gyaradosRestPositionClear(this,new net.minecraft.world.phys.Vec3(getX(),waterRestY,getZ()));
             if(settled&&!this.isSleeping()){
                 if(waterRest&&SpeciesBehaviorProfiles.locksPositionDuringWaterSleep(this.getSpeciesSlug())
                         &&Double.isFinite(waterRestY)){
                     // Enter sleep exactly at the chosen safe anchor, so the
                     // two-block minimum is not lost to the final eased swim step.
-                    this.setPos(this.getX(),waterRestY,this.getZ());
+                    this.move(net.minecraft.world.entity.MoverType.SELF,
+                            new net.minecraft.world.phys.Vec3(0,waterRestY-this.getY(),0));
                     this.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
                 }
                 this.setSleeping(true);
@@ -1556,17 +1598,11 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
                     : firstClip(slug,"water_idle","water_surface_idle","surface_water_idle","surfacewater_idle");
             clip = this.isMoving(event) ? (swim!=null?swim:definition.walk()) : (waterIdle != null ? waterIdle : definition.idle());
         } else if (slug.equals("geodude") && this.isFlyingSpecies()) {
-            // Geodude's FLOAT_LOW profile keeps it hovering while idle, but its
-            // source rig has real ground walk/run clips for horizontal movement.
-            // Do not let the airborne idle fallback mask those locomotion clips.
-            if (this.isMoving(event)) {
-                clip=definition.walk();
-                String run=SpeciesAssetIndex.clip(slug,"ground_run","run");
-                if ((this.isSpontaneouslyRunning() || this.isFollowingRun()) && run!=null) clip=run;
-            } else {
-                clip=firstClip(slug,"air_idle","ground_idle");
-                if(clip == null) clip=definition.idle();
-            }
+            // Both source ground gaits rotate the torso through 360 degrees.
+            // The source idle is the hovering pose, also during ordinary travel.
+            String key=GeodudeLocomotion.clipKey(this.isMoving(event),
+                    this.isSpontaneouslyRunning() || this.isFollowingRun());
+            clip=SpeciesAssetIndex.clip(slug,key,key);
         } else if (this.isMoving(event)) {
             if (this.isFlyingSpecies()) {
                 String fly = firstClip(slug, "air_fly", "air_glide", "air_idle");
@@ -1647,7 +1683,8 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         this.syncNaturalState();
     }
     public boolean isNightResting(){return this.entityData.get(NIGHT_REST);}
-    public boolean commandLanding(){return this.isOrderedToSit() && SpeciesBehaviorProfiles.landsForNightRest(this.getSpeciesSlug());}
+    public boolean commandLanding(){return this.isOrderedToSit() && SpeciesBehaviorProfiles.landsForNightRest(this.getSpeciesSlug())
+            && (this.isNightResting() || this.isSleeping());}
     public boolean wantsNaturalLanding(){return this.commandLanding() || (SpeciesBehaviorProfiles.landsForNightRest(this.getSpeciesSlug())
             ||!SpeciesBehaviorProfiles.hoversDuringNightRest(this.getSpeciesSlug()))&&(this.isSleeping()||this.isNightResting())
             ||this.entityData.get(NATURAL_LANDING); }
@@ -1655,7 +1692,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     public boolean naturalBehaviorActive(){
         return this.naturalStartDelay==0&&(!this.isInWater()||this.isAquaticSpecies())&&!this.isNightResting()&&!this.isSleeping()&&!this.isOrderedToSit()&&!this.isPassenger()&&!this.isNoAi()
             &&!this.isDeadOrDying()&&this.getTarget()==null&&this.attackAnimationTicks<=0
-            &&(this.getOwner()==null||this.isFreeMode()||this.distanceToSqr(this.getOwner())<100.0D)
+            &&(this.getOwner()==null||this.isFreeMode()||this.distanceToSqr(this.getOwner())<NATURAL_OWNER_DISTANCE_SQR)
             &&this.goalSelector.getAvailableGoals().stream().noneMatch(goal->goal.isRunning()
                 &&goal.getGoal() instanceof NaturalFollowOwnerGoal);
     }

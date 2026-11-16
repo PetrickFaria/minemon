@@ -6,6 +6,10 @@ from pathlib import Path
 ASSETS = Path("src/main/resources/assets/minemon_gen1")
 MODELS = ("pokec_lower", "pokec_upper")
 errors = []
+item = json.loads((ASSETS / "models/item/pokec.json").read_text(encoding="utf-8"))
+assert item.get("parent") == "minecraft:item/generated", "Registered PokéC item must use the 2D model"
+assert item.get("textures", {}).get("layer0") == "minemon:item/pokec"
+assert Path("src/main/resources/assets/minemon/textures/item/pokec.png").is_file()
 for name in MODELS:
     path = ASSETS / "models" / "block" / f"{name}.json"
     model = json.loads(path.read_text(encoding="utf-8"))

@@ -99,7 +99,6 @@ public class MinemonRenderer extends GeoEntityRenderer<MinemonCreature> {
  @Override public boolean shouldShowName(MinemonCreature entity){return true;}
  @Override protected void renderNameTag(MinemonCreature entity,Component name,com.mojang.blaze3d.vertex.PoseStack pose,
       net.minecraft.client.renderer.MultiBufferSource buffers,int packedLight){
-  net.minecraft.ChatFormatting ownershipColor=entity.isTame()?net.minecraft.ChatFormatting.BLUE:net.minecraft.ChatFormatting.RED;
   float scale=SpeciesDefinitions.get(entity.getSpeciesSlug()).scale()*(entity.isBaby()?.5F:1);
   Component shownName=entity.isTame()&&entity.hasCustomName()?entity.getCustomName():entity.getName();
   pose.pushPose();
@@ -107,9 +106,9 @@ public class MinemonRenderer extends GeoEntityRenderer<MinemonCreature> {
     pose.scale(1/scale,1/scale,1/scale);
     double top=br.com.petrickfaria.minemon.entity.ModelMetrics.top(entity.getSpeciesSlug(),scale);
     pose.translate(0,Math.max(0,top-entity.getBbHeight()),0);
-    super.renderNameTag(entity,shownName.copy().withStyle(ownershipColor),pose,buffers,packedLight);
+    super.renderNameTag(entity,OwnershipNameplate.tint(shownName,entity.isTame()),pose,buffers,packedLight);
     pose.translate(0,-.22D,0);
-    super.renderNameTag(entity,Component.literal("Nível: "+entity.getPokemonLevel()).withStyle(ownershipColor),pose,buffers,packedLight);
+    super.renderNameTag(entity,OwnershipNameplate.tint(Component.literal("Nível: "+entity.getPokemonLevel()),entity.isTame()),pose,buffers,packedLight);
     if(showEncounterChoices(entity)){
      pose.translate(0,-.44D,0);
     super.renderNameTag(entity,Component.literal("Capturar - Botão Direito")

@@ -1,3 +1,6 @@
 {
-  "parent": "minemon_gen1:block/pokec_item"
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "minemon:item/pokec"
+  }
 }

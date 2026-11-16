@@ -76,21 +76,33 @@ public final class PokemonTreatGameTests {
 
     @GameTest(template="test_arena", batch="taming_treat", timeoutTicks=100)
     public static void compatibleGrassTreatTamesAndBoneDoesNot(GameTestHelper h) {
-        floor(h); ServerPlayer owner=player(h,new BlockPos(3,1,3),GameType.SURVIVAL);
+        floor(h);
+        var tameArena=new net.minecraft.world.phys.AABB(h.absolutePos(BlockPos.ZERO),h.absolutePos(new BlockPos(16,12,16))).inflate(16);
+        h.getLevel().getEntitiesOfClass(net.minecraft.world.entity.Mob.class,tameArena,
+            candidate->candidate.getType().getCategory()==net.minecraft.world.entity.MobCategory.MONSTER)
+            .forEach(net.minecraft.world.entity.Entity::discard);
+        ServerPlayer owner=player(h,new BlockPos(3,1,3),GameType.SURVIVAL);
         MinemonCreature bulbasaur=spawn(h,"bulbasaur",new BlockPos(5,1,5));
-        int previous=br.com.petrickfaria.minemon.config.MinemonConfig.TAME_CHANCE_PERCENT.get();
-        try {
+        try (var ignored=GameTestCommonConfig.isolate()) {
             br.com.petrickfaria.minemon.config.MinemonConfig.TAME_CHANCE_PERCENT.set(100);
+            br.com.petrickfaria.minemon.config.MinemonConfig.SPEC.afterReload();
+            check(h,br.com.petrickfaria.minemon.config.MinemonConfig.TAME_CHANCE_PERCENT.get()==100,
+                    "The guaranteed-taming fixture must retain 100% after a config cache reload");
             var bone=new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.BONE,2);
             owner.setItemInHand(InteractionHand.MAIN_HAND,bone);
             bulbasaur.mobInteract(owner,InteractionHand.MAIN_HAND);
             check(h,!bulbasaur.isTame()&&bone.getCount()==2,"Bone must not tame or be consumed");
             var grass=ModItems.TREATS.get(PokemonTreatType.GRASS).get().getDefaultInstance();
             owner.setItemInHand(InteractionHand.MAIN_HAND,grass);
+            int configuredChance=br.com.petrickfaria.minemon.config.MinemonConfig.TAME_CHANCE_PERCENT.get();
             bulbasaur.mobInteract(owner,InteractionHand.MAIN_HAND);
-            check(h,bulbasaur.isTame()&&owner.getUUID().equals(bulbasaur.getOwnerUUID()),"Compatible grass treat must tame and assign owner");
+            check(h,bulbasaur.isTame()&&owner.getUUID().equals(bulbasaur.getOwnerUUID()),
+                "Compatible grass treat must tame and assign owner; chanceBefore="+configuredChance
+                +" chanceAfter="+br.com.petrickfaria.minemon.config.MinemonConfig.TAME_CHANCE_PERCENT.get()
+                +" target="+bulbasaur.getTarget()+" active="+br.com.petrickfaria.minemon.pokec.ActivePokemonData.get(h.getLevel()).count(owner.getUUID())
+                +" health="+bulbasaur.getHealth()+" stack="+grass);
             check(h,grass.isEmpty(),"Successful treat taming consumes one treat");
-        } finally { br.com.petrickfaria.minemon.config.MinemonConfig.TAME_CHANCE_PERCENT.set(previous); }
+        }
         h.succeed();
     }
 

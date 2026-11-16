@@ -363,9 +363,9 @@ public final class PokecScreen extends AbstractContainerScreen<PokecMenu> {
             drawButton(pose,420,114,63,19,"Spawn",true,mouseX,mouseY);
             GuiComponent.fill(pose,423,117,480,130,enabled?0xFF398348:0xFFAB3939);
             drawCentered(pose,"Spawn",451,120,0xFFFFFFFF);
-            font.draw(pose,String.format(Locale.ROOT,"%.4f%% / %.4f%% (%d)",
-                    menu.terminal.spawnChance()*100,menu.terminal.currentSpawnChance()*100,
-                    menu.terminal.spawnIncrementCount()),421,135,0xFF404040);
+            Locale locale=Locale.forLanguageTag(minecraft.options.languageCode.replace('_','-'));
+            font.draw(pose,SpawnChanceLabel.format(menu.terminal.currentSpawnChance(),
+                    menu.terminal.spawnIncrementCount(),enabled,locale),488,120,0xFF404040);
         }else drawButton(pose,420,87,116,19,"Desbloquear",menu.terminal.payment().getCount()>0,mouseX,mouseY);
     }
     private void drawCompactConversion(PoseStack pose){

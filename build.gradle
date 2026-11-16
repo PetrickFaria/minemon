@@ -131,6 +131,10 @@ minecraft {
         client {
             property 'forge.enabledGameTestNamespaces', 'minemon_gen1'
             property 'minemon.clientSmokeTest', project.hasProperty('clientSmokeTest').toString()
+            property 'minemon.clientSmokeFollowup', project.hasProperty('clientSmokeFollowup').toString()
+            property 'minemon.followupReopen', project.hasProperty('followupReopen').toString()
+            property 'minemon.followupShallow', project.hasProperty('followupShallow').toString()
+            property 'minemon.followupClientDelay', project.hasProperty('followupClientDelay').toString()
             property 'minemon.clientSmokeGhostLine', project.hasProperty('clientSmokeGhostLine').toString()
             property 'minemon.clientSmokeGhostLinePersistence', project.hasProperty('clientSmokeGhostLinePersistence').toString()
             property 'minemon.gastlyReopenIndex', (findProperty('gastlyReopenIndex') ?: '1').toString()
@@ -153,7 +157,8 @@ minecraft {
         }
         server { args '--nogui' }
         gameTestServer {
-            property 'forge.enabledGameTestNamespaces', project.hasProperty('combatGameTest') ? 'minemon_damage' : 'minemon_gen1'
+            def group = (findProperty('followupGameTest') ?: '').toString()
+            property 'forge.enabledGameTestNamespaces', project.hasProperty('combatGameTest') ? 'minemon_damage' : project.hasProperty('followupGameTest') ? (group == 'bottom' ? 'minemon_bottom' : group == 'regression' ? 'minemon_navigation' : group == 'shore' ? 'minemon_shore' : group == 'movement' ? 'minemon_followup' : 'minemon_followup,minemon_shore,minemon_navigation,minemon_bottom') : 'minemon_gen1,minemon_followup,minemon_shore,minemon_navigation,minemon_bottom'
         }
     }
 }
@@ -183,7 +188,27 @@ dependencies {
     testRuntimeOnly "org.lwjgl:lwjgl-stb:3.3.1:${lwjglNatives}"
 }
 
+tasks.named('processResources') {
+    from('src/main/resources/data/minemon_gen1/structures/test_arena.nbt') {
+        into 'data/minemon_bottom/structures'
+    }
+    from('src/main/resources/data/minemon_gen1/structures/test_arena.nbt') {
+        into 'data/minemon_navigation/structures'
+    }
+    from('src/main/resources/data/minemon_gen1/structures/test_arena.nbt') {
+        into 'data/minemon_shore/structures'
+    }
+    from('src/main/resources/data/minemon_gen1/structures/test_arena.nbt') {
+        into 'data/minemon_followup/structures'
+    }
+}
+
 jar {
+    exclude 'data/minemon_followup/**'
+    exclude 'data/minemon_shore/**'
+    exclude 'data/minemon_navigation/**'
+    exclude 'data/minemon_bottom/**'
+    exclude 'data/minemon_damage/**'
     exclude 'br/com/petrickfaria/minemon/gametest/**'
     exclude 'data/minemon_gen1/structures/test_arena.nbt'
     from('ASSET_LICENSES.md') {
@@ -207,6 +232,11 @@ jar.finalizedBy('reobfJar')
 // ForgeGradle produces the executable Jar-in-Jar artifact as a separate task.
 // Include it in assemble so build outputs the JLayer-bearing production JAR.
 tasks.named('jarJar') {
+    exclude 'data/minemon_followup/**'
+    exclude 'data/minemon_shore/**'
+    exclude 'data/minemon_navigation/**'
+    exclude 'data/minemon_bottom/**'
+    exclude 'data/minemon_damage/**'
     archiveFileName = "minemon-${project.version}.jar"
     finalizedBy('reobfJarJar')
     exclude 'br/com/petrickfaria/minemon/gametest/**'

@@ -43,6 +43,7 @@ public final class ClientSmokeTest {
  private static float minLeg=Float.MAX_VALUE,maxLeg=-Float.MAX_VALUE,minBody=Float.MAX_VALUE,maxBody=-Float.MAX_VALUE;
  private static volatile boolean combatPassed;
  private static volatile int combatHits;
+ private static volatile long combatStartServerTick=-1,combatObservedServerTick=-1;
  private static final java.util.Map<String,java.util.List<String>> modelBones=new java.util.HashMap<>();
  private static final java.util.Map<String,float[]> motionRanges=new java.util.HashMap<>();
  private static int alakazamMeditationRenderFrames;
@@ -234,6 +235,7 @@ public final class ClientSmokeTest {
    "wartortle",java.util.List.of("arm_left","arm_right","torso")
   );
   private static java.util.List<String> profileJoints(String slug,String state) {
+   if(slug.equals("geodude"))return java.util.List.of("arm_left","arm_right","body","torso");
    if(java.util.Set.of("pidgey","pidgeotto","pidgeot").contains(slug)) {
     if(fixtureAir(slug))return java.util.List.of("wing_open_left","wing_open_right");
     String idleJoint=switch(slug){case "pidgey"->"tail2";case "pidgeotto"->"tail";default->"hair5";};
@@ -270,6 +272,7 @@ public final class ClientSmokeTest {
   private static final java.util.Map<String,java.util.Set<String>> tailFlameClips=new java.util.HashMap<>();
  @SubscribeEvent public static void tick(TickEvent.ClientTickEvent event) {
   if(!Boolean.getBoolean("minemon.clientSmokeTest")||event.phase!=TickEvent.Phase.END)return;
+  if(Boolean.getBoolean("minemon.clientSmokeFollowup")){MovementSleepClientSmokeTest.tick();return;}
   if(Boolean.getBoolean("minemon.clientSmokeWildCapture")
       ||Boolean.getBoolean("minemon.clientSmokeWildCaptureReopen")){
    WildCaptureClientSmokeTest.tick(event);return;
@@ -627,6 +630,13 @@ public final class ClientSmokeTest {
      return;
     }
    }
+   // AI/projectiles advance on the integrated server, independently of client
+   // ticks. Preserve the 100-tick combat window even when rendering catches up
+   // faster than the server; do not judge a newly queued fixture prematurely.
+   if(worldTicks==COMBAT_VALIDATION_TICK-1){
+    mc.getSingleplayerServer().execute(()->combatObservedServerTick=mc.getSingleplayerServer().overworld().getGameTime());
+    if(combatStartServerTick<0||combatObservedServerTick-combatStartServerTick<100)return;
+   }
    worldTicks++;
    if(Boolean.getBoolean("minemon.clientSmokeAudio")&&worldTicks>=110&&worldTicks<350&&!customAudioSmokeRequested) {
     var audioEntity=mc.level.getEntity(initialEntityId);
@@ -689,13 +699,19 @@ public final class ClientSmokeTest {
      player.setSprinting(false);player.setDeltaMovement(0.0D,-0.2D,0.0D);player.setOnGround(false);player.fallDistance=2.0F;
      float wildHealth=wild.getHealth();player.attack(wild);
      if(wild.getHealth()!=wildHealth-1.0F)throw new IllegalStateException("Critical Sharpness V Netherite hit with Strength must still deal exactly one HP to a spawn-egg Pokémon: before="+wildHealth+" after="+wild.getHealth());
+     combatStartServerTick=level.getGameTime();
     });
    }
    if(worldTicks==COMBAT_VALIDATION_TICK)mc.getSingleplayerServer().execute(()->{
     var player=mc.getSingleplayerServer().getPlayerList().getPlayers().get(0);var companion=(MinemonCreature)mc.getSingleplayerServer().overworld().getEntity(testEntity);var wild=(MinemonCreature)mc.getSingleplayerServer().overworld().getEntity(combatTargetEntity);
     combatPassed=companion!=null&&wild!=null&&combatHits>0&&wild.getHealth()<wild.getMaxHealth()&&player.getHealth()==20&&player.isAlive();
-    if(!combatPassed)throw new IllegalStateException("Owned companion did not attack the exact focused target or capped player damage incorrectly; hits="+combatHits+" playerHealth="+player.getHealth()+" companionTarget="+(companion==null?null:companion.getTarget())+" wildHealth="+(wild==null?null:wild.getHealth()));
-    try{Files.writeString(Path.of("client-validation.txt"),"PASS COMBAT: direct player melee dealt exactly one HP and the owned companion damaged the focused wild target with ranged attacks; damage events="+combatHits+" playerHealth="+player.getHealth()+"\n",StandardOpenOption.APPEND);}catch(java.io.IOException e){throw new RuntimeException(e);}
+    if(!combatPassed)throw new IllegalStateException("Owned companion did not attack the exact focused target or capped player damage incorrectly; hits="+combatHits+" playerHealth="+player.getHealth()+" companionTarget="+(companion==null?null:companion.getTarget())+" wildHealth="+(wild==null?null:wild.getHealth())
+      +" serverTicks="+(mc.getSingleplayerServer().overworld().getGameTime()-combatStartServerTick)
+      +" companion="+(companion==null?null:companion.position())+" wild="+(wild==null?null:wild.position())
+      +" sight="+(companion!=null&&wild!=null&&companion.getSensing().hasLineOfSight(wild))
+      +" canFire="+(companion!=null&&wild!=null&&companion.canFireAt(wild))
+      +" sleeping="+(companion!=null&&companion.isSleeping())+" noAI="+(companion!=null&&companion.isNoAi()));
+    try{Files.writeString(Path.of("client-validation.txt"),"PASS COMBAT: direct player melee dealt exactly one HP and the owned companion damaged the focused wild target with ranged attacks; damage events="+combatHits+" playerHealth="+player.getHealth()+" serverTicks="+(mc.getSingleplayerServer().overworld().getGameTime()-combatStartServerTick)+"\n",StandardOpenOption.APPEND);}catch(java.io.IOException e){throw new RuntimeException(e);}
     if(companion!=null)companion.discard();if(wild!=null)wild.discard();combatTargetEntity=null;
     player.setGameMode(GameType.CREATIVE);player.setHealth(20);player.teleportTo(mc.getSingleplayerServer().overworld(),0,101,0,0,12);player.fallDistance=0;
    });
@@ -919,6 +935,17 @@ public final class ClientSmokeTest {
    boolean phaseChanged=entity.getCustomName()==null||!marker.equals(entity.getCustomName().getString());
    entity.setCustomName(net.minecraft.network.chat.Component.literal(marker));
    entity.setCustomNameVisible(false);
+   if(!entity.level.isClientSide&&phase>=34&&phase<50
+       &&!entity.isFlyingSpecies()&&!SpeciesBehaviorProfiles.isAquatic(entity.getSpeciesSlug())
+       &&!(entity.getSpeciesSlug().equals("alakazam")&&Boolean.getBoolean("minemon.clientSmokeAlakazamPose"))) {
+    // This fixture scripts velocities and removes movement goals. Its run
+    // prerequisite must also be scripted: an unrelated random gait pause
+    // otherwise cancels SPONTANEOUS_RUN between server metadata packets.
+    // Preserve the natural phase/depth counters and every rendered assertion.
+    var cycle=new net.minecraft.nbt.CompoundTag();entity.naturalCycle().save(cycle);
+    cycle.putBoolean("NaturalGaitWalking",true);cycle.putInt("NaturalGaitTicks",100);
+    entity.naturalCycle().restore(cycle);
+   }
    entity.setSpontaneousRunForValidation(phase>=34&&phase<50);
    if(phaseChanged&&entity.level instanceof net.minecraft.server.level.ServerLevel level) {
     // Each of the 80 fixture phases still waits for two real rendered samples.
@@ -1093,7 +1120,7 @@ public final class ClientSmokeTest {
      continue;
     }
     String walk=expectedWalk(slug,definition);
-    String run=fixtureAir(slug)||fixtureWater(slug)
+    String run=(fixtureAir(slug)&&!slug.equals("geodude"))||fixtureWater(slug)
       ?null:SpeciesAssetIndex.clip(slug,"ground_run","run");
     String idle=expectedIdle(slug,definition);
     boolean idleMatches=fixtureWater(slug)
@@ -1111,11 +1138,22 @@ public final class ClientSmokeTest {
     if(run!=null) {
      var deceleration=articulationClips.getOrDefault(slug,java.util.Map.of()).getOrDefault("RUN_DECEL",java.util.Set.of());
      boolean observedLowerSpeed=hasVelocitySample(slug,"RUN_DECEL",walk,false)||hasVelocitySample(slug,"RUN_DECEL",idle,false);
-     if(!deceleration.contains(run)||java.util.Collections.disjoint(deceleration,java.util.Set.of(walk,idle))
+     if(!deceleration.contains(run)||java.util.Collections.disjoint(deceleration,java.util.List.of(walk,idle))
         ||!hasVelocitySample(slug,"RUN_DECEL",run,true)||!observedLowerSpeed)
       throw new IllegalStateException("Run deceleration did not transition from run to a lower-speed state for "+slug+" run="+run+" walk="+walk+" idle="+idle+" observed="+deceleration+" measured="+articulationInputs.getOrDefault(slug,java.util.Map.of()).get("RUN_DECEL"));
     }
     int walkJoints=movingJointCount(slug,"WALK_STEADY");
+    if(slug.equals("geodude")) {
+     for(String state:java.util.List.of("WALK_STEADY","IDLE_FINAL")) {
+      float[] torso=articulationRanges.getOrDefault(slug,java.util.Map.of()).get(state+":torso");
+      if(torso==null||Math.abs(torso[0])>.2F||Math.abs(torso[6])>.2F)
+       throw new IllegalStateException("Geodude must hover without torso rolling in "+state);
+     }
+     float[] torso=articulationRanges.getOrDefault(slug,java.util.Map.of()).get("RUN_STEADY:torso");
+     if(torso==null||torso[6]-torso[0]<1.0F)
+      throw new IllegalStateException("Geodude running must visibly roll its rendered torso");
+     report.append("GEODUDE: rendered idle and normal travel hover without rolling; running alone rolls.\n");
+    }
     int runJoints=run==null?0:movingJointCount(slug,"RUN_STEADY");
     int minimum=slug.equals("charmander")?2:1;
     int idleJoints=movingJointCount(slug,"IDLE_FINAL");
@@ -1147,6 +1185,7 @@ public final class ClientSmokeTest {
    return air==null?definition.idle():air;
   }
   private static String expectedWalk(String slug,SpeciesDefinitions.Definition definition) {
+   if(slug.equals("geodude"))return definition.idle();
    if(fixtureWater(slug)) {
     String water=fixtureSurface(slug)?firstMappedClip(definition,"surface_water_swim","surfacewater_swim","water_surface_swim","water_swim"):firstMappedClip(definition,"water_swim","water_surface_swim","surface_water_swim","surfacewater_swim");
     if(water!=null)return water;

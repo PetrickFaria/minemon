@@ -9,20 +9,21 @@ final class NightRestGoal extends Goal {
  private final MinemonCreature mob;
  private int unsafeLandingSearchDelay;
  private net.minecraft.core.BlockPos gyaradosBottomTarget;
- private int gyaradosBottomSearchDelay;
+ private int gyaradosBottomSearchDelay,gyaradosEntityCheckDelay;
  private net.minecraft.core.BlockPos shellBottomTarget;
  private int shellBottomSearchDelay;
  NightRestGoal(MinemonCreature mob){this.mob=mob;setFlags(EnumSet.of(Flag.MOVE,Flag.LOOK,Flag.JUMP));}
  @Override public boolean canUse(){
+  if(mob.needsFreeReturn())return false;
   boolean resting=mob.isSleeping()||mob.isNightResting();
   boolean waterRest=SpeciesBehaviorProfiles.waterCapable(mob.getSpeciesSlug())&&mob.isInWaterOrBubble();
   // Let SleepLanding own MOVE while a land-resting flyer is still airborne.
   // A resting airborne species that never lands remains eligible to hover.
-  return resting&&(waterRest||mob.isOnGround() && !mob.isInWaterOrBubble()||!mob.wantsNaturalLanding());
+  return resting&&mob.getTarget()==null&&(waterRest||mob.isOnGround() && !mob.isInWaterOrBubble()||!mob.wantsNaturalLanding());
  }
  @Override public boolean canContinueToUse(){return canUse()&&mob.getTarget()==null;}
- @Override public void start(){mob.getNavigation().stop();mob.getMoveControl().setWantedPosition(mob.getX(),mob.getY(),mob.getZ(),0);gyaradosBottomTarget=null;gyaradosBottomSearchDelay=0;shellBottomTarget=null;shellBottomSearchDelay=0;}
- @Override public void stop(){mob.getNavigation().stop();gyaradosBottomTarget=null;gyaradosBottomSearchDelay=0;shellBottomTarget=null;shellBottomSearchDelay=0;}
+ @Override public void start(){mob.getNavigation().stop();mob.getMoveControl().setWantedPosition(mob.getX(),mob.getY(),mob.getZ(),0);gyaradosBottomTarget=null;gyaradosBottomSearchDelay=0;gyaradosEntityCheckDelay=0;shellBottomTarget=null;shellBottomSearchDelay=0;}
+ @Override public void stop(){mob.getNavigation().stop();gyaradosBottomTarget=null;gyaradosBottomSearchDelay=0;gyaradosEntityCheckDelay=0;shellBottomTarget=null;shellBottomSearchDelay=0;}
  @Override public void tick(){
   if(mob.isInWaterOrBubble()&&SpeciesBehaviorProfiles.waterCapable(mob.getSpeciesSlug())){
    if(mob.isSleeping()&&java.util.Set.of("seadra","tentacool","tentacruel","magikarp","goldeen","seaking").contains(mob.getSpeciesSlug())){
@@ -72,21 +73,46 @@ final class NightRestGoal extends Goal {
   }
   var target=gyaradosBottomTarget;
   double dx=target.getX()+.5D-mob.getX(),dz=target.getZ()+.5D-mob.getZ();
-  double restY=WaterMovementGoal.waterRestY(mob);
+  double restY=WaterMovementGoal.bottomRestYAt(mob,target);
+  // Living bodies are absent from vanilla path costs. A sleeping fish must
+  // not keep a large swimmer pressing against the same occupied water node.
+  if(!WaterMovementGoal.gyaradosRestDestinationClear(mob,target)){
+   mob.getNavigation().stop();gyaradosBottomTarget=null;gyaradosBottomSearchDelay=0;return true;
+  }
   // GroundPathNavigation nodes use integer feet coordinates while the safe
   // bed anchor is 0.30 above the water block; allow that node offset, then
   // let the rest controller ease to the exact collision-safe anchor.
   if(dx*dx+dz*dz<2.25D&&Double.isFinite(restY)&&Math.abs(mob.getY()-restY)<1.0D){
    // Path navigation can finish within a block of its integer water node;
    // settle at that validated waypoint and floor anchor before sleep begins.
-   mob.getNavigation().stop();mob.setPos(target.getX()+.5D,restY,target.getZ()+.5D);
+   mob.getNavigation().stop();
+   var endpoint=new net.minecraft.world.phys.Vec3(target.getX()+.5D,restY,target.getZ()+.5D);
+   if(!WaterMovementGoal.gyaradosRestApproachClear(mob,endpoint)){
+    gyaradosBottomTarget=null;gyaradosBottomSearchDelay=0;return true;
+   }
+   var remaining=new net.minecraft.world.phys.Vec3(dx,restY-mob.getY(),dz);
+   // Finish the fractional path endpoint through collision resolution, never
+   // snap a large swimmer sideways/down through a floor or wall.
+   if(remaining.length()>.008D){
+    mob.move(net.minecraft.world.entity.MoverType.SELF,remaining.normalize().scale(Math.min(.08D,remaining.length())));
+    mob.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);return true;
+   }
    mob.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
    gyaradosBottomTarget=null;return false;
   }
-  if(!mob.getNavigation().isDone())return true;
+  if(!mob.getNavigation().isDone()){
+   if(--gyaradosEntityCheckDelay<=0){
+    gyaradosEntityCheckDelay=10;
+    if(!WaterMovementGoal.gyaradosRestPathClear(mob,mob.getNavigation().getPath(),target)){
+     mob.getNavigation().stop();gyaradosBottomTarget=null;gyaradosBottomSearchDelay=0;
+    }
+   }
+   return true;
+  }
   var path=mob.getNavigation().createPath(target,0);
-  if(path!=null&&path.canReach())mob.getNavigation().moveTo(path,.65D);
-  else gyaradosBottomTarget=null;
+  if(path!=null&&path.canReach()&&WaterMovementGoal.gyaradosRestPathClear(mob,path,target)){
+   mob.getNavigation().moveTo(path,.65D);gyaradosEntityCheckDelay=10;
+  }else gyaradosBottomTarget=null;
   return true;
  }
  /** Shellder and Cloyster descend to a reachable safe floor point before sleeping. */

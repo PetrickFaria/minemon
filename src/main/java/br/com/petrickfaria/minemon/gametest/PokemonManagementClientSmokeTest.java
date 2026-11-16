@@ -33,6 +33,9 @@ public final class PokemonManagementClientSmokeTest {
     private static boolean done;
     private static volatile int entityId = -1;
     private static int phase;
+    private static volatile long interactionSpawnTick;
+    private static volatile boolean interactionReady,readinessQueued;
+    private static volatile String interactionServerState="not sampled";
     private static boolean blacklistPreparationRequested;
     private static volatile int dewgongId=-1,gastlyId=-1;
     private static volatile boolean closedEyesSeen,openEyesSeen,awakeBlinkSeen;
@@ -64,6 +67,10 @@ public final class PokemonManagementClientSmokeTest {
         var ownerId=minecraft.player.getUUID();
         minecraft.getSingleplayerServer().execute(()->{
             var owner=minecraft.getSingleplayerServer().getPlayerList().getPlayer(ownerId);var level=(net.minecraft.server.level.ServerLevel)owner.level;
+            // This probe measures one Gastly, not a population. Freeze natural
+            // spawning before collecting the fixture's per-frame counters.
+            level.getGameRules().getRule(net.minecraft.world.level.GameRules.RULE_DOMOBSPAWNING)
+                    .set(false,level.getServer());
             // The fixture is meant to validate the rendered sleep pose. At
             // daytime tickNightRest correctly wakes natural sleepers, so use
             // an actual nighttime world clock before adding Dewgong.
@@ -74,11 +81,13 @@ public final class PokemonManagementClientSmokeTest {
             dewgong.setOrderedToSit(true);dewgong.setNoAi(true);dewgong.setNoGravity(true);
             dewgong.moveTo(owner.getX(),owner.getY(),owner.getZ()+3,180,0);dewgong.setSleeping(true);level.addFreshEntity(dewgong);dewgongId=dewgong.getId();
             // Count five large and seven small aura draws per visible Gastly.
-            // Remove naturally spawned Gastlys from this small visual arena so
-            // another entity cannot double the fixture's particle totals.
-            level.getEntitiesOfClass(br.com.petrickfaria.minemon.entity.MinemonCreature.class,
-                    owner.getBoundingBox().inflate(48.0D),candidate->candidate.getSpeciesSlug().equals("gastly"))
-                    .forEach(net.minecraft.world.entity.Entity::discard);
+            // The aura renders up to 50 blocks from the camera/body bounds;
+            // the former 48-block player box missed other tracked Gastlys.
+            var otherGastlys=new java.util.ArrayList<net.minecraft.world.entity.Entity>();
+            for(var entity:level.getAllEntities())
+                if(entity instanceof br.com.petrickfaria.minemon.entity.MinemonCreature candidate
+                        &&candidate.getSpeciesSlug().equals("gastly"))otherGastlys.add(entity);
+            otherGastlys.forEach(net.minecraft.world.entity.Entity::discard);
             var gastly=ModEntities.SPECIES.get("gastly").get().create(level);gastly.tame(owner);gastly.setNoAi(true);gastly.setNoGravity(true);
             gastly.moveTo(owner.getX()+1.5,owner.getY()+1,owner.getZ()+3.5,180,0);level.addFreshEntity(gastly);gastlyId=gastly.getId();
         });
@@ -207,6 +216,15 @@ public final class PokemonManagementClientSmokeTest {
                     // spawning. Keep the player alive so an incidental slime
                     // cannot close the container while the PokéC screen is tested.
                     owner.setGameMode(GameType.CREATIVE);
+                    // The source world contains the completed server fixtures.
+                    // Give this empty-hand interaction its own supported stage,
+                    // independent of the randomized spawn and nearby structures.
+                    for(int x=0;x<24;x++)for(int z=0;z<24;z++)for(int y=100;y<=108;y++)
+                        level.setBlock(new net.minecraft.core.BlockPos(x,y,z),
+                                (y==100?net.minecraft.world.level.block.Blocks.STONE:net.minecraft.world.level.block.Blocks.AIR).defaultBlockState(),3);
+                    owner.teleportTo(level,8.5,101,8.5,0,0);
+                    owner.setItemInHand(InteractionHand.MAIN_HAND,net.minecraft.world.item.ItemStack.EMPTY);
+                    owner.setItemInHand(InteractionHand.OFF_HAND,net.minecraft.world.item.ItemStack.EMPTY);
                     var type = ModEntities.SPECIES.get("pikachu");
                     var pokemon = type == null ? null : type.get().create(level);
                     if (pokemon == null) return;
@@ -214,7 +232,9 @@ public final class PokemonManagementClientSmokeTest {
                     pokemon.setNoGravity(true);
                     pokemon.tame(owner);
                     pokemon.moveTo(owner.getX() + 2.0D, owner.getY(), owner.getZ(), owner.getYRot(), 0.0F);
-                    if (level.addFreshEntity(pokemon)) entityId = pokemon.getId();
+                    if (level.addFreshEntity(pokemon)) {
+                        interactionSpawnTick=level.getGameTime();entityId=pokemon.getId();
+                    }
                 });
                 return;
             }
@@ -225,7 +245,32 @@ public final class PokemonManagementClientSmokeTest {
                     if (++ticks > 300) throw new IllegalStateException("Owned Pikachu was not tracked by the client");
                     return;
                 }
-                minecraft.setScreen(null);
+                if(!readinessQueued){
+                    readinessQueued=true;
+                    var ownerId=minecraft.player.getUUID();
+                    minecraft.getSingleplayerServer().execute(()->{
+                        try{
+                            var level=minecraft.getSingleplayerServer().overworld();
+                            var owner=minecraft.getSingleplayerServer().getPlayerList().getPlayer(ownerId);
+                            var entity=level.getEntity(entityId);
+                            if(owner!=null&&entity instanceof br.com.petrickfaria.minemon.entity.MinemonCreature pokemon){
+                                interactionServerState="owner="+owner.position()+" pokemon="+pokemon.position()
+                                        +" alive="+pokemon.isAlive()+" owned="+pokemon.isOwnedBy(owner)
+                                        +" distance="+owner.distanceToSqr(pokemon)+" collisionFree="+level.noCollision(pokemon,pokemon.getBoundingBox());
+                                interactionReady=pokemon.isAlive()&&pokemon.isOwnedBy(owner)&&owner.distanceToSqr(pokemon)<=9
+                                        &&level.getGameTime()-interactionSpawnTick>=5&&level.noCollision(pokemon,pokemon.getBoundingBox());
+                            }
+                        }finally{readinessQueued=false;}
+                    });
+                }
+                if(!interactionReady||!((br.com.petrickfaria.minemon.entity.MinemonCreature)target).isOwnedBy(minecraft.player)
+                        ||minecraft.player.distanceToSqr(target)>9||minecraft.player.position().distanceToSqr(8.5,101,8.5)>.04
+                        ||!minecraft.player.getMainHandItem().isEmpty()||!minecraft.player.getOffhandItem().isEmpty()
+                        ||minecraft.screen!=null||minecraft.getOverlay()!=null){
+                    if(++ticks>300)throw new IllegalStateException("Owned Pokémon interaction was not ready: "+interactionServerState+" screen="+minecraft.screen);
+                    return;
+                }
+                System.out.println("[POKEMON MANAGEMENT INTERACT] "+interactionServerState);
                 minecraft.gameMode.interact(minecraft.player, target, net.minecraft.world.InteractionHand.MAIN_HAND);
                 phase = 3;
                 ticks = 0;
@@ -233,7 +278,7 @@ public final class PokemonManagementClientSmokeTest {
             }
             if (phase == 3) {
                 if (!(minecraft.screen instanceof PokemonInfoScreen screen)) {
-                    if (++ticks > 180) throw new IllegalStateException("Right-clicking the owned Pokémon did not open PokemonInfoScreen");
+                    if (++ticks > 180) throw new IllegalStateException("Right-clicking the owned Pokémon did not open PokemonInfoScreen; "+interactionServerState+" screen="+minecraft.screen+" menu="+minecraft.player.containerMenu+" client="+minecraft.player.position());
                     return;
                 }
                 if (!(minecraft.player.containerMenu instanceof PokemonInfoMenu)

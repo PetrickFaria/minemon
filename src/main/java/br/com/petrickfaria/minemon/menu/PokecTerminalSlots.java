@@ -91,11 +91,12 @@ public final class PokecTerminalSlots {
         if(server()==null||changing)return;
         var species=PokecSpecies.get(menu.selectedSlug());
         state.set(2,(species!=null&&(!species.isEvolution()||unlocked())?1:0)|(unlocked()?2:0));
-        state.set(0,PokecPlayerData.spawnEnabled(server(),menu.selectedSlug())?1:0);
+        boolean enabled=unlocked()&&PokecPlayerData.spawnEnabled(server(),menu.selectedSlug());
+        state.set(0,enabled?1:0);
         double base=WildEncounterManager.configuredSpawnChance(server(),menu.selectedSlug());
         long ticks=SpawnChanceProgression.elapsedTicks(server().getPersistentData(),menu.selectedSlug());
         state.set(1,(int)Math.round(base*10000));
-        state.set(3,(int)Math.round(SpawnChanceProgression.chance(base,ticks)*10000));
+        state.set(3,enabled?(int)Math.round(SpawnChanceProgression.chance(base,ticks)*10000):0);
         state.set(4,(int)Math.min(32767,SpawnChanceProgression.incrementCount(server().getPersistentData(),menu.selectedSlug())));
         changing=true;
         try{

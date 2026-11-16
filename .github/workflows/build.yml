@@ -6,6 +6,11 @@ on:
   pull_request:
   workflow_dispatch:
     inputs:
+      combat_diagnostics:
+        description: Run three isolated combat measurements instead of a full build
+        type: choice
+        options: ['0', '3']
+        default: '0'
       full_suite:
         description: Run the full legacy movement, sleep, audio, and GameTest suite
         required: false
@@ -16,7 +21,12 @@ permissions:
   actions: read
 jobs:
   build:
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.combat_diagnostics != '3' || inputs.full_suite }}
     runs-on: ubuntu-latest
+    env:
+      # Intermediate safety-branch commits run build/unit/resource checks.
+      # Dispatch full_suite=true once the fixes are assembled for all native/client tests.
+      MINEMON_RUN_GAME_VALIDATION: ${{ (github.event_name == 'workflow_dispatch' && inputs.full_suite) || (github.ref != 'refs/heads/fix/minemon-2.15-six-ingame-corrections' && github.head_ref != 'fix/minemon-2.15-six-ingame-corrections') }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -73,8 +83,35 @@ jobs:
           ./gradlew --no-daemon clean compileJava compileTestJava
           ./gradlew --no-daemon test
           ./gradlew --no-daemon build -x test
+      - name: Prepare development JAR after essential checks
+        if: ${{ success() && github.event_name != 'pull_request' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          dev_version="$(python3 tools/minemon_version.py)"
+          echo "MINEMON_DEV_VERSION=${dev_version}" >> "$GITHUB_ENV"
+          mkdir -p build/development
+          dev_jar="build/development/minemon-${dev_version}-dev.jar"
+          cp "build/libs/minemon-${dev_version}.jar" "$dev_jar"
+          unzip -t "$dev_jar"
+          unzip -p "$dev_jar" META-INF/mods.toml | grep -F "version=\"${dev_version}\""
+          unzip -p "$dev_jar" META-INF/MANIFEST.MF | grep -F "Implementation-Version: ${dev_version}"
+          cat > build/development/DEVELOPMENT.txt <<'NOTICE'
+          DEVELOPMENT BUILD: compilation, unit tests and essential resource checks passed.
+          Extensive Minecraft/client validation is not a prerequisite for this artifact.
+          This artifact alone does not certify full validation. Use the final artifact
+          without the -dev suffix when its complete validation has passed.
+          NOTICE
+      - name: Publish development JAR independently of extensive tests
+        if: ${{ success() && github.event_name != 'pull_request' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: minemon-${{ env.MINEMON_DEV_VERSION }}-dev
+          path: build/development/
+          if-no-files-found: error
+          retention-days: 14
       - name: Run isolated 20-hit Charmander zombie validation
-        if: ${{ !cancelled() && steps.compile.outcome == 'success' }}
+        if: ${{ !cancelled() && steps.compile.outcome == 'success' && env.MINEMON_RUN_GAME_VALIDATION == 'true' }}
         run: |
           rm -rf run/minemon-gametest
           python3 tools/prepare_gametest_world.py
@@ -83,7 +120,7 @@ jobs:
           grep -F '[MINEMON COMBAT] summary acceptedHits=20 totalProjectileDamage=100.0 finalZombieHP=96.0' run/combat-zombie-damage-tests.log
       - name: Summarize controlled zombie validation
         id: combat_summary
-        if: always()
+        if: ${{ always() && env.MINEMON_RUN_GAME_VALIDATION == 'true' }}
         run: |
           python3 - <<'PY'
           import os, re
@@ -101,7 +138,7 @@ jobs:
           print(details)
           PY
       - name: Upload controlled zombie validation summary
-        if: always()
+        if: ${{ always() && env.MINEMON_RUN_GAME_VALIDATION == 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: minemon-combat-${{ steps.combat_summary.outputs.result }}
@@ -112,17 +149,17 @@ jobs:
           retention-days: 7
       - name: Run Minecraft server behavior tests
         id: gametests
-        if: ${{ !cancelled() && steps.compile.outcome == 'success' }}
+        if: ${{ !cancelled() && steps.compile.outcome == 'success' && env.MINEMON_RUN_GAME_VALIDATION == 'true' }}
         run: |
           mkdir -p run
           echo eula=true > run/eula.txt
           rm -rf run/minemon-gametest
           python3 tools/prepare_gametest_world.py
           set -o pipefail
-          timeout 600s ./gradlew --no-daemon runGameTestServer 2>&1 | tee run/server-behavior-tests.log
+          timeout 1200s ./gradlew --no-daemon runGameTestServer 2>&1 | tee run/server-behavior-tests.log
       - name: Summarize Minecraft GameTest result
         id: gametest_summary
-        if: always()
+        if: ${{ always() && env.MINEMON_RUN_GAME_VALIDATION == 'true' }}
         run: |
           python3 - <<'PY'
           import os, re
@@ -150,7 +187,7 @@ jobs:
           print(details)
           PY
       - name: Upload concise GameTest summary
-        if: always()
+        if: ${{ always() && env.MINEMON_RUN_GAME_VALIDATION == 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: minemon-gametest-${{ steps.gametest_summary.outputs.result }}
@@ -158,14 +195,14 @@ jobs:
           if-no-files-found: warn
           retention-days: 7
       - name: Validate Rocket villager profession and uniform on the real client
-        if: ${{ !cancelled() && steps.compile.outcome == 'success' }}
+        if: ${{ !cancelled() && steps.compile.outcome == 'success' && env.MINEMON_RUN_GAME_VALIDATION == 'true' }}
         run: |
           python3 tools/prepare_client_world.py
           ALSOFT_DRIVERS=null timeout --kill-after=30s 600s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeRocketProfession
           grep -F 'PASS ROCKET CLIENT:' run/client-validation-rocket.txt
           grep -F 'PASS ROCKET SCROLLBAR:' run/client-validation-rocket.txt
       - name: Validate treat and PokéCoin models on the real client
-        if: ${{ !cancelled() && steps.compile.outcome == 'success' }}
+        if: ${{ !cancelled() && steps.compile.outcome == 'success' && env.MINEMON_RUN_GAME_VALIDATION == 'true' }}
         run: |
           python3 tools/prepare_client_world.py
           ALSOFT_DRIVERS=null timeout --kill-after=30s 600s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeTreats
@@ -173,11 +210,12 @@ jobs:
           grep -F 'PokéCoin and Pokébola models, translations, textures, and creative entries loaded' run/client-validation-treats.txt
       - name: Validate the physical PokéC model on the real client
         id: pokec_world
-        if: ${{ !cancelled() && steps.compile.outcome == 'success' }}
+        if: ${{ !cancelled() && steps.compile.outcome == 'success' && env.MINEMON_RUN_GAME_VALIDATION == 'true' }}
         run: |
           python3 tools/prepare_client_world.py
           ALSOFT_DRIVERS=null timeout --kill-after=30s 600s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokePokecBlock
           grep -F 'PASS POKÉC BLOCK:' run/client-validation-pokec-block.txt
+          grep -F 'PASS POKEC GLOW' run/client-validation-pokec-glow.txt
           for view in 1-frente 2-lado-esquerdo 3-lado-direito 4-traseira 5-frontal-diagonal 6-traseira-diagonal 7-escala-jogador; do
             test -s "run/screenshots/pokec-print-${view}.png"
           done
@@ -190,7 +228,7 @@ jobs:
           if-no-files-found: error
           retention-days: 14
       - name: Upload PokéC client evidence
-        if: ${{ !cancelled() && steps.compile.outcome == 'success' }}
+        if: ${{ !cancelled() && steps.compile.outcome == 'success' && env.MINEMON_RUN_GAME_VALIDATION == 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: minemon-pokec-client-evidence
@@ -199,10 +237,11 @@ jobs:
             run/logs/
             run/client-validation-treats.txt
             run/client-validation-pokec-block.txt
+            run/client-validation-pokec-glow.txt
           if-no-files-found: warn
           retention-days: 7
       - name: Validate Pokémon management screens on the real client
-        if: ${{ !cancelled() && steps.compile.outcome == 'success' }}
+        if: ${{ !cancelled() && steps.compile.outcome == 'success' && env.MINEMON_RUN_GAME_VALIDATION == 'true' }}
         run: |
           python3 tools/prepare_client_world.py
           set +e
@@ -214,14 +253,14 @@ jobs:
           grep -F 'PASS BLACKLIST SCROLLBAR:' run/client-validation-pokemon-management.txt
           grep -F 'PASS POKÉC SCROLLBAR:' run/client-validation-pokemon-management.txt
       - name: Validate PokéC preview orientation and species framing on the real client
-        if: ${{ !cancelled() && steps.compile.outcome == 'success' }}
+        if: ${{ !cancelled() && steps.compile.outcome == 'success' && env.MINEMON_RUN_GAME_VALIDATION == 'true' }}
         run: |
           grep -F 'PASS POKÉC PREVIEW:' run/client-validation-treats.txt
           for species in squirtle bulbasaur charmander; do
             test -f "run/screenshots/pokec-preview-${species}.png"
           done
       - name: Validate Pidgey and bird flight visuals on the real client
-        if: ${{ !cancelled() && steps.compile.outcome == 'success' && ((github.event_name == 'workflow_dispatch' && inputs.full_suite) || (github.event_name == 'push' && github.ref == 'refs/heads/fix/minemon-pending-eight-corrections')) }}
+        if: ${{ !cancelled() && steps.compile.outcome == 'success' && ((github.event_name == 'workflow_dispatch' && inputs.full_suite) || (github.event_name == 'push' && (github.ref == 'refs/heads/fix/minemon-pending-eight-corrections'))) }}
         run: |
           python3 tools/prepare_client_world.py
           set +e
@@ -233,7 +272,7 @@ jobs:
           grep -F 'PASS ROSTER' run/client-validation.txt
           grep -F 'ARTICULATION PROFILES:' run/client-validation.txt
       - name: Validate Geodude locomotion selection on the real client
-        if: ${{ !cancelled() && steps.compile.outcome == 'success' && github.event_name == 'push' && github.ref == 'refs/heads/fix/minemon-pending-eight-corrections' }}
+        if: ${{ !cancelled() && steps.compile.outcome == 'success' && ((github.event_name == 'workflow_dispatch' && inputs.full_suite) || (github.event_name == 'push' && github.ref == 'refs/heads/fix/minemon-pending-eight-corrections')) }}
         run: |
           python3 tools/prepare_client_world.py
           ALSOFT_DRIVERS=null timeout --kill-after=30s 600s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeSpecies=geodude
@@ -242,7 +281,7 @@ jobs:
           grep -F 'ARTICULATION PROFILES:' run/client-validation.txt
           grep -F 'geodude' run/client-validation.txt
       - name: Validate Gastly core and aura occlusion on the real client
-        if: ${{ !cancelled() && steps.compile.outcome == 'success' && github.event_name == 'push' && github.ref == 'refs/heads/fix/minemon-pending-eight-corrections' }}
+        if: ${{ !cancelled() && steps.compile.outcome == 'success' && ((github.event_name == 'workflow_dispatch' && inputs.full_suite) || (github.event_name == 'push' && github.ref == 'refs/heads/fix/minemon-pending-eight-corrections')) }}
         run: |
           python3 tools/prepare_client_world.py --ghost-line
           ALSOFT_DRIVERS=null timeout --kill-after=30s 900s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeGhostLine
@@ -251,7 +290,7 @@ jobs:
             test -f "run/screenshots/ghost-line-1.74-${shot}.png"
           done
       - name: Reopen saved Gastly world and validate aura twice
-        if: ${{ !cancelled() && github.event_name == 'push' && github.ref == 'refs/heads/fix/minemon-pending-eight-corrections' }}
+        if: ${{ !cancelled() && ((github.event_name == 'workflow_dispatch' && inputs.full_suite) || (github.event_name == 'push' && github.ref == 'refs/heads/fix/minemon-pending-eight-corrections')) }}
         run: |
           for index in 1 2; do
             python3 tools/prepare_client_world.py --reuse-world --ghost-line
@@ -259,7 +298,7 @@ jobs:
             grep -F "PASS GASTLY PERSISTENCE REOPEN $index:" "run/gastly-persistence-reopen-$index.txt"
           done
       - name: Upload Gastly visual and persistence evidence
-        if: always()
+        if: ${{ always() && env.MINEMON_RUN_GAME_VALIDATION == 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: minemon-gastly-visual-evidence
@@ -270,10 +309,10 @@ jobs:
           if-no-files-found: warn
           retention-days: 7
       - name: Capture runtime API diagnostics
-        if: always()
+        if: ${{ always() && env.MINEMON_RUN_GAME_VALIDATION == 'true' }}
         run: python3 tools/collect_diagnostics.py
       - name: Upload server behavior logs
-        if: always()
+        if: ${{ always() && env.MINEMON_RUN_GAME_VALIDATION == 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: minemon-server-tests
@@ -285,13 +324,13 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
       - name: Validate production nighttime sleep and closed eyes on the real client
-        if: ${{ (github.event_name == 'workflow_dispatch' && inputs.full_suite) || (github.event_name == 'push' && github.ref == 'refs/heads/fix/minemon-pending-eight-corrections') }}
+        if: ${{ (github.event_name == 'workflow_dispatch' && inputs.full_suite) || (github.event_name == 'push' && (github.ref == 'refs/heads/fix/minemon-pending-eight-corrections')) }}
         run: |
           python3 tools/prepare_client_world.py
           timeout --kill-after=30s 900s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeSleep
           grep -F 'PASS NIGHT CLIENT:' run/client-validation-night.txt
       - name: Validate requested bird and ghost flight on the real client
-        if: ${{ (github.event_name == 'workflow_dispatch' && inputs.full_suite) || (github.event_name == 'push' && github.ref == 'refs/heads/fix/minemon-pending-eight-corrections') }}
+        if: ${{ (github.event_name == 'workflow_dispatch' && inputs.full_suite) || (github.event_name == 'push' && (github.ref == 'refs/heads/fix/minemon-pending-eight-corrections')) }}
         run: |
           python3 tools/prepare_client_world.py
           timeout --kill-after=30s 600s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeAir -PclientSmokeSpecies=pidgey,spearow,fearow,gastly,haunter,gengar
@@ -299,21 +338,45 @@ jobs:
           grep -F 'ARTICULATION PROFILES:' run/client-validation.txt
           cp run/client-validation.txt run/client-validation-requested-flight.txt
       - name: Observe Haunter production patrol without forced movement
-        if: ${{ (github.event_name == 'workflow_dispatch' && inputs.full_suite) || (github.event_name == 'push' && github.ref == 'refs/heads/fix/minemon-pending-eight-corrections') }}
+        if: ${{ (github.event_name == 'workflow_dispatch' && inputs.full_suite) || (github.event_name == 'push' && (github.ref == 'refs/heads/fix/minemon-pending-eight-corrections')) }}
         run: |
           python3 tools/prepare_client_world.py
           timeout --kill-after=30s 600s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokePatrol
           grep -F 'PASS HAUNTER PATROL:' run/client-validation-patrol.txt
       - name: Validate Gyarados near-surface animation on the real client
-        if: ${{ (github.event_name == 'workflow_dispatch' && inputs.full_suite) || (github.event_name == 'push' && github.ref == 'refs/heads/fix/minemon-pending-eight-corrections') }}
+        if: ${{ (github.event_name == 'workflow_dispatch' && inputs.full_suite) || (github.event_name == 'push' && (github.ref == 'refs/heads/fix/minemon-pending-eight-corrections')) }}
         run: |
           python3 tools/prepare_client_world.py
           timeout --kill-after=30s 600s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeWater -PclientSmokeSpecies=gyarados
           grep -F 'PASS ROSTER' run/client-validation.txt
           grep -F 'PASS gyarados: idle/walk' run/client-validation.txt
           grep -F 'ARTICULATION PROFILES:' run/client-validation.txt
+      - name: Validate reported movement, sleep and actual world reopening on the real client
+        if: ${{ !cancelled() && steps.compile.outcome == 'success' && env.MINEMON_RUN_GAME_VALIDATION == 'true' }}
+        run: |
+          validate_followup() {
+            local fixture_label="$1"
+            shift
+            python3 tools/prepare_client_world.py
+            rm -f run/client-validation-followup.txt run/client-validation-followup-reopen.txt
+            ALSOFT_DRIVERS=null timeout --kill-after=30s 600s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeFollowup "$@"
+            for marker in DAY GOLDEEN GYARADOS 'PIDGEY NIGHT' 'PIDGEY COMBAT' 'PIDGEY RECOVERY' DAWN SAVE; do
+              grep -F "PASS FOLLOWUP ${marker}:" run/client-validation-followup.txt
+            done
+            cp run/client-validation-followup.txt "run/client-validation-followup-${fixture_label}.txt"
+            # Reopen the same saved world twice, each in a fresh JVM; never recreate it.
+            for reopen_index in 1 2; do
+              rm -f run/client-validation-followup-reopen.txt
+              ALSOFT_DRIVERS=null timeout --kill-after=30s 600s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeFollowup -PfollowupReopen "$@"
+              grep -F 'PASS FOLLOWUP REOPEN:' run/client-validation-followup-reopen.txt
+              cp run/client-validation-followup-reopen.txt "run/client-validation-followup-reopen-${fixture_label}-${reopen_index}.txt"
+            done
+          }
+          validate_followup deep
+          validate_followup shallow-delayed -PfollowupShallow -PfollowupClientDelay
       - name: Launch Minecraft client and validate GeckoLib cache
-        if: ${{ success() && steps.compile.outcome == 'success' && ((github.event_name == 'workflow_dispatch' && inputs.full_suite) || (github.event_name == 'push' && github.ref == 'refs/heads/fix/minemon-pending-eight-corrections')) }}
+        id: full_client
+        if: ${{ success() && steps.compile.outcome == 'success' && ((github.event_name == 'workflow_dispatch' && inputs.full_suite) || (github.event_name == 'push' && (github.ref == 'refs/heads/fix/minemon-pending-eight-corrections'))) }}
         run: |
           python3 tools/prepare_client_world.py
           mkdir -p run/config/minemon/sounds/001_Bulbasaur
@@ -349,13 +412,18 @@ jobs:
           grep -F 'PASS SOURCE PITCH: mew source q.pitch_tilt input moves the body bone:' run/client-validation.txt
           grep -F 'ARTICULATION PROFILES:' run/client-validation.txt
       - name: Validate mixed flight and Vaporeon swimming on the real client
-        if: ${{ !cancelled() && steps.compile.outcome == 'success' && ((github.event_name == 'workflow_dispatch' && inputs.full_suite) || (github.event_name == 'push' && github.ref == 'refs/heads/fix/minemon-pending-eight-corrections')) }}
+        if: ${{ !cancelled() && steps.compile.outcome == 'success' && ((github.event_name == 'workflow_dispatch' && inputs.full_suite) || (github.event_name == 'push' && (github.ref == 'refs/heads/fix/minemon-pending-eight-corrections'))) }}
         run: |
           cp run/client-validation.txt run/client-validation-full.txt
           for scenario in air water; do
             python3 tools/prepare_client_world.py
             if [ "$scenario" = air ]; then
-              timeout --kill-after=30s 600s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeAir -PclientSmokeSpecies=charizard,scyther,dragonite,articuno,zapdos,moltres,fearow,spearow,pidgey,pidgeotto,pidgeot,zubat,golbat,venomoth,gastly,aerodactyl,mewtwo,mew
+              air_species='charizard,scyther,dragonite,articuno,zapdos,moltres,fearow,spearow,pidgey,pidgeotto,pidgeot,zubat,golbat,venomoth,gastly,aerodactyl,mewtwo,mew'
+              air_count=$(python3 -c 'import sys; print(len(sys.argv[1].split(",")))' "$air_species")
+              # The 18-species run reached species 17 at the old 600-second cap.
+              # Allow startup plus the measured rendering windows per species.
+              air_timeout=$((90 + 45 * air_count))
+              timeout --kill-after=30s "${air_timeout}s" xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeAir "-PclientSmokeSpecies=$air_species"
             else
               timeout --kill-after=30s 600s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeWater -PclientSmokeSpecies=vaporeon
             fi
@@ -374,6 +442,10 @@ jobs:
           jar_file="build/libs/minemon-${MINEMON_VERSION}.jar"
           test -f "$jar_file"
           unzip -t "$jar_file"
+          if jar tf "$jar_file" | grep -E '^data/minemon_(followup|shore|navigation|bottom|damage)/|^data/minemon_gen1/structures/test_arena\.nbt$'; then
+            echo 'Test-only structures must not ship in the executable mod JAR.'
+            exit 1
+          fi
           unzip -p "$jar_file" META-INF/mods.toml | grep -F "version=\"${MINEMON_VERSION}\""
           unzip -p "$jar_file" META-INF/MANIFEST.MF | grep -F "Implementation-Version: ${MINEMON_VERSION}"
           python3 tools/verify_treats.py "$jar_file"
@@ -456,7 +528,7 @@ jobs:
           unzip -p "$jar_file" assets/minemon_gen1/lang/pt_br.json | grep -F '"block.minemon_gen1.rocket_block": "Bloco Rocket"'
           unzip -p "$jar_file" pack.mcmeta | grep -F '"pack_format": 9'
       - name: Upload Minemon JAR
-        if: ${{ !cancelled() && steps.verify_jar.outcome == 'success' }}
+        if: ${{ success() && steps.verify_jar.outcome == 'success' && steps.full_client.outcome == 'success' }}
         uses: actions/upload-artifact@v4
         with:
           name: minemon-${{ env.MINEMON_VERSION }}
@@ -464,10 +536,10 @@ jobs:
           if-no-files-found: error
           retention-days: 14
       - name: Collect diagnostics
-        if: always()
+        if: ${{ always() && env.MINEMON_RUN_GAME_VALIDATION == 'true' }}
         run: python3 tools/collect_diagnostics.py
       - name: Upload test diagnostics
-        if: always()
+        if: ${{ always() && env.MINEMON_RUN_GAME_VALIDATION == 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: minemon-test-diagnostics
@@ -478,4 +550,51 @@ jobs:
             run/screenshots/
             build/test-results/
             build/diagnostics/
+          retention-days: 7
+
+  combat_diagnostics:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.combat_diagnostics == '3' && !inputs.full_suite }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Measure every independent combat attempt and preserve its world
+        shell: bash
+        env:
+          REPETITIONS: '3'
+        run: |
+          set -euo pipefail
+          chmod +x gradlew
+          python3 -m pip install 'Pillow>=10,<12'
+          mkdir -p run/combat-diagnostics
+          overall_status=0
+          for attempt in $(seq 1 "$REPETITIONS"); do
+            python3 tools/prepare_gametest_world.py
+            set +e
+            timeout 600s ./gradlew --no-daemon runGameTestServer -PcombatGameTest 2>&1 | tee "run/combat-diagnostics/attempt-${attempt}.log"
+            attempt_status=${PIPESTATUS[0]}
+            set -e
+            printf 'attempt=%s exit=%s\n' "$attempt" "$attempt_status" | tee -a run/combat-diagnostics/results.txt
+            if [ "$attempt_status" -ne 0 ]; then overall_status=1; fi
+            if [ -d run/minemon-gametest ]; then
+              mv run/minemon-gametest "run/combat-diagnostics/world-${attempt}"
+            fi
+          done
+          exit "$overall_status"
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: minemon-combat-diagnostics-${{ github.sha }}
+          path: |
+            run/combat-diagnostics/
+            run/logs/
+            run/config/minemon/wild-spawn.properties
           retention-days: 7

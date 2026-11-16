@@ -5,7 +5,6 @@ import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.control.SmoothSwimmingMoveControl;
 import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
-import net.minecraft.world.level.pathfinder.AmphibiousNodeEvaluator;
 import net.minecraft.world.level.pathfinder.PathFinder;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.level.Level;
@@ -17,7 +16,12 @@ public final class MinemonAquaticCreature extends MinemonCreature {
         this.lookControl = new net.minecraft.world.entity.ai.control.LookControl(this) {
     @Override public void tick(){
                 float swimmingPitch=MinemonAquaticCreature.this.getXRot();super.tick();
-                if(SpeciesBehaviorProfiles.isVisitor(getSpeciesSlug()) && MinemonAquaticCreature.this.isInWater() && !getNavigation().isDone())MinemonAquaticCreature.this.setXRot(swimmingPitch);
+                // Explicit LookAtPlayer/owner requests also change XRot, even
+                // when resetXRotOnTick is false. The body pitch belongs to the
+                // swim route for every species, including Goldeen, not only visitors.
+                if(MinemonAquaticCreature.this.isInWater()
+                        && (!getNavigation().isDone()||ShoreTraversal.directSteering(MinemonAquaticCreature.this)))
+                    MinemonAquaticCreature.this.setXRot(swimmingPitch);
             }
             @Override protected boolean resetXRotOnTick() {
                 // LookControl ticks after MoveControl. Its land default resets
@@ -48,7 +52,23 @@ public final class MinemonAquaticCreature extends MinemonCreature {
                 // Swimming control alone does not perform ordinary land jumps.
                 // Use Minecraft's land controller on shores/steps and smooth
                 // three-dimensional steering after entering the water.
-                if (MinemonAquaticCreature.this.isInWater()) super.tick();
+                if (MinemonAquaticCreature.this.isInWater()
+                        && this.operation == Operation.MOVE_TO
+                        && getNavigation().isDone() && ShoreTraversal.directSteering(MinemonAquaticCreature.this)) {
+                    // A validated final shore approach can outlive its rounded
+                    // path endpoint. Keep native swim steering active for that
+                    // explicit route owner; never revive a stale idle waypoint.
+                    double dx=wantedX-getX(),dy=wantedY-getY(),dz=wantedZ-getZ();
+                    float yaw=(float)(net.minecraft.util.Mth.atan2(dz,dx)*180/Math.PI)-90;
+                    setYRot(rotlerp(getYRot(),yaw,10));
+                    yBodyRot=getYRot();yHeadRot=getYRot();
+                    float speed=(float)(speedModifier*getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED));
+                    float pitch=net.minecraft.util.Mth.clamp((float)(-net.minecraft.util.Mth.atan2(dy,Math.hypot(dx,dz))*180/Math.PI),-85,85);
+                    setXRot(rotlerp(getXRot(),pitch,5));
+                    setSpeed(speed*.1F);setXxa(0);
+                    setZza(net.minecraft.util.Mth.cos(getXRot()*(float)Math.PI/180)*speed);
+                    setYya(-net.minecraft.util.Mth.sin(getXRot()*(float)Math.PI/180)*speed);
+                } else if (MinemonAquaticCreature.this.isInWater()) super.tick();
                 else this.land.tick();
             }
         };
@@ -73,8 +93,8 @@ public final class MinemonAquaticCreature extends MinemonCreature {
         // tick. Neutral buoyancy lets the swimming controller reach higher
         // nodes; ordinary land gravity is restored immediately on shore.
         if(!this.level.isClientSide)this.setNoGravity(this.isInWater());
-        if(!this.level.isClientSide&&this.isSleeping()&&this.isInWaterOrBubble()){
-            // Stop movement before LivingEntity applies water travel. Clearing
+        if(this.isSleeping()&&this.isInWaterOrBubble()){
+            // Stop movement on BOTH sides before LivingEntity applies water travel. Clearing
             // velocity after tick is too late on the transition into sleep and
             // can leave one residual vertical step in the saved rest pose.
             this.setNoGravity(true);this.fallDistance=0;
@@ -139,6 +159,10 @@ public final class MinemonAquaticCreature extends MinemonCreature {
         if(this.isSleeping()&&SpeciesBehaviorProfiles.usesSwimmingSleepAnimation(this.getSpeciesSlug())){
             this.setXRot(0.0F);this.xRotO=0.0F;
         }
+        if(this.isSleeping()&&this.isInWaterOrBubble()){
+            this.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
+            this.setNoGravity(true);this.fallDistance=0;
+        }
         if(this.isDefeated()||this.level.isClientSide)return;
         if(this.isSleeping()&&this.isInWaterOrBubble()
                 &&SpeciesBehaviorProfiles.usesSwimmingSleepAnimation(this.getSpeciesSlug())){
@@ -170,18 +194,8 @@ public final class MinemonAquaticCreature extends MinemonCreature {
         double top=this.waterSurface();
         if(!Double.isFinite(top))return;
         if(this.isSleeping()||this.isNightResting()){
-            // Night rest has its own species-specific depth. Ease toward it
-            // before the settled check marks the creature asleep, then keep
-            // holding that depth for the duration of sleep. In particular,
-            // visitors that entered the water during their land cooldown are
-            // marked EXIT_WATER (a surface phase), but must remain asleep at
-            // the safe bottom until dawn rather than being pulled upward.
-            double restY=WaterMovementGoal.waterRestY(this);
-            if(Double.isFinite(restY)){
-                var velocity=this.getDeltaMovement();
-                double vy=net.minecraft.util.Mth.clamp(velocity.y*0.5D+(restY-this.getY())*0.05D,-0.09D,0.09D);
-                this.setDeltaMovement(velocity.x*0.5D,vy,velocity.z*0.5D);
-            }
+            // NightRestGoal owns the approach and settled depth. A second
+            // post-travel controller must not damp or reverse its swimming route.
             return;
         }
         // Awake swimmers follow the surface in their own column. A stale
@@ -206,6 +220,14 @@ public final class MinemonAquaticCreature extends MinemonCreature {
         // nodes, as the stock amphibious navigation does for water/shore paths.
         return new GroundPathNavigation(this, level) {
             @Override public net.minecraft.world.level.pathfinder.Path createPath(net.minecraft.core.BlockPos destination,int reach){
+                // A seated companion has a short combat perception range. Night
+                // descent needs its own bounded route budget for a deep bed and
+                // a detour around sleeping bodies; perception stays unchanged.
+                if(getSpeciesSlug().equals("gyarados")&&isNightResting()&&!isSleeping()){
+                    this.setMaxVisitedNodesMultiplier(4.0F);
+                    try{return super.createPath(destination,reach,Math.max(48,(int)this.mob.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.FOLLOW_RANGE)));}
+                    finally{this.resetMaxVisitedNodesMultiplier();}
+                }
                 // The native path-length limit can reject a valid distant
                 // amphibious route even inside the geometric search radius.
                 // Only distant water searches use the larger bounded budget;
@@ -229,7 +251,7 @@ public final class MinemonAquaticCreature extends MinemonCreature {
                 super.doStuckDetection(position);
             }
             @Override protected PathFinder createPathFinder(int maxVisitedNodes) {
-                this.nodeEvaluator = SpeciesBehaviorProfiles.isVisitor(getSpeciesSlug())?new ShoreNodeEvaluator():new AmphibiousNodeEvaluator(false);
+                this.nodeEvaluator = SpeciesBehaviorProfiles.isVisitor(getSpeciesSlug())?new ShoreNodeEvaluator():new GyaradosRestNodeEvaluator();
                 this.nodeEvaluator.setCanPassDoors(true);
                 return new PathFinder(this.nodeEvaluator, maxVisitedNodes);
             }
@@ -249,6 +271,18 @@ public final class MinemonAquaticCreature extends MinemonCreature {
                     this.doStuckDetection(this.getTempMobPos());
                     return;
                 }
+                if(this.path!=null&&!this.path.isDone()&&this.path.getNextNodeIndex()<this.path.getNodeCount()-1){
+                    var point=this.path.getNextEntityPos(this.mob);
+                    // The first wet node can be one rounded block below the
+                    // bank. Land steering ignores Y and otherwise stops over
+                    // that node while the body still overlaps dry support.
+                    // Advance only a reached descending water node; collision
+                    // and ordinary gravity still perform the actual entry.
+                    if(level.getFluidState(new net.minecraft.core.BlockPos(point)).is(net.minecraft.tags.FluidTags.WATER)
+                            &&Math.abs(this.mob.getX()-point.x)<.35D&&Math.abs(this.mob.getZ()-point.z)<.35D
+                            &&this.mob.getY()>=point.y&&this.mob.getY()-point.y<=1.5D)
+                        this.path.advance();
+                }
                 super.followThePath();
             }
 
@@ -262,17 +296,17 @@ public final class MinemonAquaticCreature extends MinemonCreature {
                 // has no collision floor: that projection lowers an ascending
                 // node onto the current Y and prevents any vertical progress.
                 if (MinemonAquaticCreature.this.isInWater()) {
-                    if (MinemonAquaticCreature.this.naturalBehaviorActive()
+                    if (!MinemonAquaticCreature.this.isNightResting()&&!MinemonAquaticCreature.this.isSleeping()
                             && MinemonAquaticCreature.this.isNaturalSurface()
-                            && (!SpeciesBehaviorProfiles.isVisitor(getSpeciesSlug()) || level.getFluidState(new net.minecraft.core.BlockPos(waypoint)).is(net.minecraft.tags.FluidTags.WATER)
-                            && !ShoreTraversal.exiting(MinemonAquaticCreature.this))) {
+                            && (level.getFluidState(new net.minecraft.core.BlockPos(waypoint)).is(net.minecraft.tags.FluidTags.WATER)
+                                ||level.getFluidState(new net.minecraft.core.BlockPos(waypoint).below()).is(net.minecraft.tags.FluidTags.WATER))
+                            && !ShoreTraversal.exiting(MinemonAquaticCreature.this)) {
                         double surface=WaterMovementGoal.surfaceAt(MinemonAquaticCreature.this,
                                 new net.minecraft.core.BlockPos(waypoint));
                         // Surface depth is fractional and model-sized. Steering
                         // toward a rounded path Y must not fight the existing
                         // continuous surface-depth correction.
-                        if (Double.isFinite(surface)) return surface
-                                - WaterMovementGoal.preferredSurfaceDepth(MinemonAquaticCreature.this);
+                        if (Double.isFinite(surface)) return WaterMovementGoal.surfaceSwimY(MinemonAquaticCreature.this,surface);
                     }
                     return waypoint.y;
                 }
