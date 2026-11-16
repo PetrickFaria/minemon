@@ -277,17 +277,17 @@ public final class MinemonAquaticCreature extends MinemonCreature {
                 // has no collision floor: that projection lowers an ascending
                 // node onto the current Y and prevents any vertical progress.
                 if (MinemonAquaticCreature.this.isInWater()) {
-                    if (MinemonAquaticCreature.this.naturalBehaviorActive()
+                    if (!MinemonAquaticCreature.this.isNightResting()&&!MinemonAquaticCreature.this.isSleeping()
                             && MinemonAquaticCreature.this.isNaturalSurface()
-                            && (!SpeciesBehaviorProfiles.isVisitor(getSpeciesSlug()) || level.getFluidState(new net.minecraft.core.BlockPos(waypoint)).is(net.minecraft.tags.FluidTags.WATER)
-                            && !ShoreTraversal.exiting(MinemonAquaticCreature.this))) {
+                            && (level.getFluidState(new net.minecraft.core.BlockPos(waypoint)).is(net.minecraft.tags.FluidTags.WATER)
+                                ||level.getFluidState(new net.minecraft.core.BlockPos(waypoint).below()).is(net.minecraft.tags.FluidTags.WATER))
+                            && !ShoreTraversal.exiting(MinemonAquaticCreature.this)) {
                         double surface=WaterMovementGoal.surfaceAt(MinemonAquaticCreature.this,
                                 new net.minecraft.core.BlockPos(waypoint));
                         // Surface depth is fractional and model-sized. Steering
                         // toward a rounded path Y must not fight the existing
                         // continuous surface-depth correction.
-                        if (Double.isFinite(surface)) return surface
-                                - WaterMovementGoal.preferredSurfaceDepth(MinemonAquaticCreature.this);
+                        if (Double.isFinite(surface)) return WaterMovementGoal.surfaceSwimY(MinemonAquaticCreature.this,surface);
                     }
                     return waypoint.y;
                 }

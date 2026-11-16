@@ -169,7 +169,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     @Override public void travel(net.minecraft.world.phys.Vec3 input){
         if(!this.level.isClientSide&&!this.isAquaticSpecies()&&!SpeciesBehaviorProfiles.canFly(this.getSpeciesSlug()))
             this.setNoGravity(this.isInWater());
-        if (isDefeated() || this.isOrderedToSit()) {
+        if (isDefeated() || this.isOrderedToSit() && !(isNightResting()&&getSpeciesSlug().equals("gyarados"))) {
             input=net.minecraft.world.phys.Vec3.ZERO;
             this.setSpeed(0); this.setXxa(0); this.setYya(0); this.setZza(0); this.setJumping(false);
         }
@@ -993,8 +993,12 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
                 // flight band or otherwise move it from that anchor.
                 double anchorY=sitAnchorY;
                 if (horizontalDistanceToSqr(sitAnchorX, sitAnchorZ) > 1.0E-8D
-                        || Math.abs(getY() - anchorY) > 1.0E-8D)
-                    setPos(sitAnchorX, anchorY, sitAnchorZ);
+                        || Math.abs(getY() - anchorY) > 1.0E-8D){
+                    if(SpeciesBehaviorProfiles.landsForNightRest(getSpeciesSlug()))
+                        move(net.minecraft.world.entity.MoverType.SELF,new net.minecraft.world.phys.Vec3(
+                                sitAnchorX-getX(),net.minecraft.util.Mth.clamp(anchorY-getY(),-.1D,.1D),sitAnchorZ-getZ()));
+                    else setPos(sitAnchorX, anchorY, sitAnchorZ);
+                }
                 setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
             } else {
                 if (horizontalDistanceToSqr(sitAnchorX, sitAnchorZ) > 1.0E-8D)
@@ -1281,7 +1285,8 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         boolean waterRest=SpeciesBehaviorProfiles.waterCapable(this.getSpeciesSlug())&&this.isInWaterOrBubble();
         boolean restingEnvironment=SpeciesBehaviorProfiles.canFly(this.getSpeciesSlug())||waterRest||!SpeciesBehaviorProfiles.isAquatic(this.getSpeciesSlug())&&!this.isInWaterOrBubble();
         boolean allowSittingFlyerToRest=this.isOrderedToSit()&&SpeciesBehaviorProfiles.canFly(this.getSpeciesSlug());
-        boolean eligible=restingEnvironment&&(!this.isOrderedToSit()||allowSittingFlyerToRest)
+        boolean allowSittingGyaradosToRest=this.isOrderedToSit()&&waterRest&&getSpeciesSlug().equals("gyarados");
+        boolean eligible=restingEnvironment&&(!this.isOrderedToSit()||allowSittingFlyerToRest||allowSittingGyaradosToRest)
             &&!this.isFollowingOwner()&&!this.isNoAi()
             &&!this.isPassenger()&&!this.isDeadOrDying()
             &&target==null&&this.wakeGraceTicks==0;

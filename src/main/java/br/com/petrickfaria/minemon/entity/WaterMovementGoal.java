@@ -13,6 +13,7 @@ public final class WaterMovementGoal extends Goal {
  public static final double WALL_PREFERENCE_DISTANCE=5.0D;
  private final MinemonCreature mob;
  private int scanIndex,scanYIndex,delay,stalled;
+ private int failedExitScans,exitRetryAt;
  private Vec3 lastPosition;
  private boolean scanDepth;
  private Boolean lastDryScan;
@@ -37,7 +38,17 @@ public final class WaterMovementGoal extends Goal {
   if(!mob.isInWater()){
    if(needsExit()||SpeciesBehaviorProfiles.isVisitor(mob.getSpeciesSlug())&&mob.naturalCycle().phase()==BehaviorCycle.Phase.COOLDOWN)return false;
    destination=scan(false);
-  }else if(needsExit())destination=scan(true);
+  }else if(needsExit()){
+   // A sealed aquarium has no dry route. Keep using ordinary species swim
+   // destinations during a bounded retry interval instead of freezing in an
+   // endless EXIT_WATER search. Wild and free visitors share this fallback.
+   if(mob.tickCount<exitRetryAt||ShoreTraversal.coolingDown(mob))destination=swimDestination();
+   else{
+    destination=scan(true);
+    if(destination!=null)failedExitScans=0;
+    else if(++failedExitScans>=4){failedExitScans=0;exitRetryAt=mob.tickCount+200;destination=swimDestination();}
+   }
+  }
   else {
    destination=swimDestination();
   }
@@ -332,7 +343,9 @@ public final class WaterMovementGoal extends Goal {
   if(SpeciesBehaviorProfiles.sleepsAtWaterBottom(mob.getSpeciesSlug())){
    double target=preferredBottomY(mob,mob.blockPosition(),top);
    if(Double.isFinite(target))return target;
-   if(mob.getSpeciesSlug().equals("gyarados"))return deepestSafeWaterRestY(mob,top);
+   // A collision-free midwater point is not a safe floor. Gyarados must keep
+   // searching/waiting if this column has a hazardous or inaccessible bed.
+   if(mob.getSpeciesSlug().equals("gyarados"))return Double.NaN;
    return Double.isFinite(mob.aquaticSleepY())?mob.aquaticSleepY():mob.getY();
   }
   return Double.isFinite(mob.aquaticSleepY())?mob.aquaticSleepY():mob.getY();
@@ -467,14 +480,21 @@ public final class WaterMovementGoal extends Goal {
  private static boolean waterRegion(MinemonCreature mob,BlockPos center){
   double top=surfaceAt(mob,center);
   if(!Double.isFinite(top))return false;
-  int verticalCenter=SpeciesBehaviorProfiles.prefersBottom(mob.getSpeciesSlug())
-      ||SpeciesBehaviorProfiles.restsAtWaterBottom(mob.getSpeciesSlug())
-      ?Math.max(center.getY(),bottomWaterBlock(mob,center,top)+1)
-      :Math.min(center.getY(),(int)Math.ceil(top)-2);
+  // A visitor's bottom-sleep profile does not place a daytime surface probe
+  // above the water. Keep the SAME 3x3x3 requirement, centered between the bed
+  // and the highest submerged layer; otherwise every surface route includes
+  // an air block and is rejected even in an open, deep-enough pond.
+  var selected=navigableVolumeCenterY(center.getY(),bottomWaterBlock(mob,center,top),(int)Math.ceil(top));
+  if(selected.isEmpty())return false;
+  int verticalCenter=selected.getAsInt();
   BlockPos volume=new BlockPos(center.getX(),verticalCenter,center.getZ());
   return isNavigableWaterRegion(volume,cell->mob.level.hasChunkAt(cell)
       &&mob.level.getFluidState(cell).is(FluidTags.WATER)
       &&mob.level.getBlockState(cell).getCollisionShape(mob.level,cell).isEmpty());
+ }
+ public static java.util.OptionalInt navigableVolumeCenterY(int requestedY,int firstWaterY,int surfaceCeilingY){
+  int lowest=firstWaterY+1,highest=surfaceCeilingY-2;
+  return highest<lowest?java.util.OptionalInt.empty():java.util.OptionalInt.of(net.minecraft.util.Mth.clamp(requestedY,lowest,highest));
  }
  public static boolean canDive(MinemonCreature mob,BlockPos p){
   if(!mob.level.getFluidState(p).is(FluidTags.WATER))return false;

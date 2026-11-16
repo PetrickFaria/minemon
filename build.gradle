@@ -131,6 +131,8 @@ minecraft {
         client {
             property 'forge.enabledGameTestNamespaces', 'minemon_gen1'
             property 'minemon.clientSmokeTest', project.hasProperty('clientSmokeTest').toString()
+            property 'minemon.clientSmokeFollowup', project.hasProperty('clientSmokeFollowup').toString()
+            property 'minemon.followupReopen', project.hasProperty('followupReopen').toString()
             property 'minemon.clientSmokeGhostLine', project.hasProperty('clientSmokeGhostLine').toString()
             property 'minemon.clientSmokeGhostLinePersistence', project.hasProperty('clientSmokeGhostLinePersistence').toString()
             property 'minemon.gastlyReopenIndex', (findProperty('gastlyReopenIndex') ?: '1').toString()
@@ -153,7 +155,8 @@ minecraft {
         }
         server { args '--nogui' }
         gameTestServer {
-            property 'forge.enabledGameTestNamespaces', project.hasProperty('combatGameTest') ? 'minemon_damage' : project.hasProperty('followupGameTest') ? 'minemon_followup' : 'minemon_gen1,minemon_followup'
+            def group = (findProperty('followupGameTest') ?: '').toString()
+            property 'forge.enabledGameTestNamespaces', project.hasProperty('combatGameTest') ? 'minemon_damage' : project.hasProperty('followupGameTest') ? (group == 'shore' ? 'minemon_shore' : group == 'movement' ? 'minemon_followup' : 'minemon_followup,minemon_shore') : 'minemon_gen1,minemon_followup,minemon_shore'
         }
     }
 }
@@ -185,12 +188,16 @@ dependencies {
 
 tasks.named('processResources') {
     from('src/main/resources/data/minemon_gen1/structures/test_arena.nbt') {
+        into 'data/minemon_shore/structures'
+    }
+    from('src/main/resources/data/minemon_gen1/structures/test_arena.nbt') {
         into 'data/minemon_followup/structures'
     }
 }
 
 jar {
     exclude 'data/minemon_followup/**'
+    exclude 'data/minemon_shore/**'
     exclude 'br/com/petrickfaria/minemon/gametest/**'
     exclude 'data/minemon_gen1/structures/test_arena.nbt'
     from('ASSET_LICENSES.md') {
@@ -215,6 +222,7 @@ jar.finalizedBy('reobfJar')
 // Include it in assemble so build outputs the JLayer-bearing production JAR.
 tasks.named('jarJar') {
     exclude 'data/minemon_followup/**'
+    exclude 'data/minemon_shore/**'
     archiveFileName = "minemon-${project.version}.jar"
     finalizedBy('reobfJarJar')
     exclude 'br/com/petrickfaria/minemon/gametest/**'

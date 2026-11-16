@@ -19,6 +19,7 @@ final class NaturalFollowOwnerGoal extends Goal {
     }
 
     private boolean eligible() {
+        if(ShoreTraversal.coolingDown(mob))return false;
         LivingEntity current = mob.getOwner();
         boolean freeReturn=mob.needsFreeReturn();
         if (current == null || !current.isAlive() || current.isSpectator()
@@ -73,5 +74,5 @@ final class NaturalFollowOwnerGoal extends Goal {
             }else mob.getNavigation().moveTo(owner, speed);
         }
     }
-    @Override public void stop() { mob.getNavigation().stop(); ShoreTraversal.clear(mob); mob.setFollowingRun(false); mob.setFollowingOwner(false); owner = null; }
+    @Override public void stop() { mob.getNavigation().stop(); ShoreTraversal.release(mob); mob.setFollowingRun(false); mob.setFollowingOwner(false); owner = null; }
 }
