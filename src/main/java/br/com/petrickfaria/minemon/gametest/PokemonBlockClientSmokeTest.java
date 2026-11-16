@@ -94,6 +94,11 @@ final class PokemonBlockClientSmokeTest {
             return;
         }
         if (view >= VIEWS.length) {
+            if(inventoryVerified){
+                try{if(PokecGlowClientSmokeTest.tick(mc,base)){done=true;mc.execute(mc::stop);}}
+                catch(Exception failure){throw new IllegalStateException("Pokec selective glow validation failed",failure);}
+                return;
+            }
             if (!(mc.screen instanceof net.minecraft.client.gui.screens.inventory.InventoryScreen)
                     && !(mc.screen instanceof net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen)) {
                 mc.options.hideGui=false;
@@ -116,7 +121,7 @@ final class PokemonBlockClientSmokeTest {
                 java.nio.file.Files.writeString(java.nio.file.Path.of("client-validation-pokec-block.txt"),
                     "PASS POKÉC BLOCK: seven in-world screenshots, eight baked models and twelve textures.\n"
                     +"PASS POKÉC INVENTORY: registered item baked with 2D sprite and rendered in inventory screenshot.\n");
-                done=true;mc.execute(mc::stop);
+                inventoryVerified=true;mc.setScreen(null);
             }catch(Exception failure){throw new IllegalStateException("PokéC inventory capture failed",failure);}
             return;
         }
@@ -184,6 +189,8 @@ final class PokemonBlockClientSmokeTest {
             }
         } catch (Exception failure) { throw new IllegalStateException("PokéC real-client model validation failed", failure); }
     }
+
+    private static boolean inventoryVerified;
 
     private static void stageView(Minecraft mc) {
         View shot = VIEWS[view];
