@@ -391,7 +391,12 @@ jobs:
           for scenario in air water; do
             python3 tools/prepare_client_world.py
             if [ "$scenario" = air ]; then
-              timeout --kill-after=30s 600s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeAir -PclientSmokeSpecies=charizard,scyther,dragonite,articuno,zapdos,moltres,fearow,spearow,pidgey,pidgeotto,pidgeot,zubat,golbat,venomoth,gastly,aerodactyl,mewtwo,mew
+              air_species='charizard,scyther,dragonite,articuno,zapdos,moltres,fearow,spearow,pidgey,pidgeotto,pidgeot,zubat,golbat,venomoth,gastly,aerodactyl,mewtwo,mew'
+              air_count=$(python3 -c 'import sys; print(len(sys.argv[1].split(",")))' "$air_species")
+              # The 18-species run reached species 17 at the old 600-second cap.
+              # Allow startup plus the measured rendering windows per species.
+              air_timeout=$((90 + 45 * air_count))
+              timeout --kill-after=30s "${air_timeout}s" xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeAir "-PclientSmokeSpecies=$air_species"
             else
               timeout --kill-after=30s 600s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeWater -PclientSmokeSpecies=vaporeon
             fi
