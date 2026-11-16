@@ -935,6 +935,17 @@ public final class ClientSmokeTest {
    boolean phaseChanged=entity.getCustomName()==null||!marker.equals(entity.getCustomName().getString());
    entity.setCustomName(net.minecraft.network.chat.Component.literal(marker));
    entity.setCustomNameVisible(false);
+   if(!entity.level.isClientSide&&phase>=34&&phase<50
+       &&!entity.isFlyingSpecies()&&!SpeciesBehaviorProfiles.isAquatic(entity.getSpeciesSlug())
+       &&!(entity.getSpeciesSlug().equals("alakazam")&&Boolean.getBoolean("minemon.clientSmokeAlakazamPose"))) {
+    // This fixture scripts velocities and removes movement goals. Its run
+    // prerequisite must also be scripted: an unrelated random gait pause
+    // otherwise cancels SPONTANEOUS_RUN between server metadata packets.
+    // Preserve the natural phase/depth counters and every rendered assertion.
+    var cycle=new net.minecraft.nbt.CompoundTag();entity.naturalCycle().save(cycle);
+    cycle.putBoolean("NaturalGaitWalking",true);cycle.putInt("NaturalGaitTicks",100);
+    entity.naturalCycle().restore(cycle);
+   }
    entity.setSpontaneousRunForValidation(phase>=34&&phase<50);
    if(phaseChanged&&entity.level instanceof net.minecraft.server.level.ServerLevel level) {
     // Each of the 80 fixture phases still waits for two real rendered samples.
