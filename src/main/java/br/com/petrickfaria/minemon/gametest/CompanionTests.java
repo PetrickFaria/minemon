@@ -463,6 +463,9 @@ public final class CompanionTests {
   // The high level perception scan can see neighboring GameTest arenas.
   // Keep unrelated zombies from becoming valid targets after this fixture ends combat.
   abra.setBlackListOverride(new net.minecraft.resources.ResourceLocation("minecraft","zombie"),false);
+  // This fixture explicitly fights a cow; incidental slimes in adjacent arenas
+  // must not start another fight during the post-combat hover measurement.
+  abra.setBlackListOverride(new net.minecraft.resources.ResourceLocation("minecraft","slime"),false);
   Cow target=h.spawn(EntityType.COW,new BlockPos(8,1,5));target.setNoAi(true);keepCombatTargetAlive(target);
   double natural=Math.min(1.0D,abra.naturalCycle().minimumAltitude());
   abra.setPos(abra.getX(),abra.naturalSurface()+natural,abra.getZ());

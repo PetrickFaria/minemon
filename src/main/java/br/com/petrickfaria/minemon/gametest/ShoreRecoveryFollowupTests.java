@@ -85,7 +85,7 @@ public final class ShoreRecoveryFollowupTests {
                 System.out.println("[FOLLOWUP SHORE] PASS "+slug+" raised="+raised+" slab="+slab+" wall="+wall+" ticks="+tick+" maxStep="+maxStep[0]);
                 p.discard();mob.discard();h.succeed();
             }
-            if(tick%100==0)System.out.println("[FOLLOWUP SHORE TRACE] "+slug+" wall="+wall+" stage="+stage[0]+" pos="+mob.position()+" wet="+mob.isInWater()+" following="+mob.isFollowingOwner()+" nav="+mob.getNavigation().getTargetPos());
+            if(tick%100==0)System.out.println("[FOLLOWUP SHORE TRACE] "+slug+" wall="+wall+" stage="+stage[0]+" pos="+mob.position()+" wet="+mob.isInWater()+" following="+mob.isFollowingOwner()+" nav="+mob.getNavigation().getTargetPos()+" done="+mob.getNavigation().isDone()+" next="+(mob.getNavigation().getPath()==null||mob.getNavigation().getPath().isDone()?null:mob.getNavigation().getPath().getNextEntityPos(mob))+" wanted="+mob.getMoveControl().getWantedX()+","+mob.getMoveControl().getWantedY()+","+mob.getMoveControl().getWantedZ()+" motion="+mob.getDeltaMovement());
         });
     }
 }

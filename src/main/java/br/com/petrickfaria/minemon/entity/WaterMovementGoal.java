@@ -125,7 +125,19 @@ public final class WaterMovementGoal extends Goal {
    var path=mob.getNavigation().createPath(p,0);
    if(path!=null&&path.canReach())return p;
    blocked.put(p.immutable(),mob.tickCount+200);
-   if(paths>=2)return null;
+   if(!dry){
+    // Adjacent cells in the same unreachable pool are not independent routes.
+    // Suppress only this small wet patch, temporarily; openings can be retried.
+    for(int dx=-2;dx<=2;dx++)for(int dz=-2;dz<=2;dz++){
+     var neighbor=p.offset(dx,0,dz);
+     if(mob.level.hasChunkAt(neighbor)&&mob.level.getFluidState(neighbor).is(FluidTags.WATER))
+      blocked.put(neighbor.immutable(),mob.tickCount+200);
+    }
+   }
+   // A nearby but unreachable reservoir must not consume the entire
+   // search cycle one water cell at a time. Keep a bounded per-scan budget,
+   // with more probes when seeking water than when merely leaving a shore.
+   if(paths>=(dry?2:8))return null;
   }
   return null;
  }

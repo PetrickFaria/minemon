@@ -147,6 +147,10 @@ final class MovementSleepClientSmokeTest {
             check(fish.isOwnedBy(owner)&&bird.isOwnedBy(owner)&&gyarados.isOwnedBy(owner),"Actual world reopening lost Pokémon ownership");
             check(fish.isFreeMode()&&fish.isSleeping()&&bird.isOrderedToSit()&&bird.isSleeping(),"Saved managed mode or sleep was lost on actual world reopening");
             check(gyarados.isSleeping()&&wildGyarados.isSleeping()&&seatedGyarados.isSleeping(),"Saved Gyarados bottom sleep was lost");
+            check(gyarados.isFreeMode()&&!wildGyarados.isTame()&&seatedGyarados.isOrderedToSit()
+                    &&seatedGyarados.isOwnedBy(owner),"Saved wild/free/seated Gyarados modes or ownership changed");
+            for(var g:List.of(gyarados,wildGyarados,seatedGyarados))
+                check(Math.abs(g.getY()-101)<.1&&level.noCollision(g,g.getBoundingBox()),"Reopened Gyarados lost its safe bottom anchor: "+g.position());
             if(elapsed>30){
                 if(previousFish!=null)fishDrift=Math.max(fishDrift,fish.position().distanceTo(previousFish));previousFish=fish.position();
                 if(previousBird!=null)birdDrift=Math.max(birdDrift,bird.position().distanceTo(previousBird));previousBird=bird.position();

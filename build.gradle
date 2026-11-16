@@ -156,7 +156,7 @@ minecraft {
         server { args '--nogui' }
         gameTestServer {
             def group = (findProperty('followupGameTest') ?: '').toString()
-            property 'forge.enabledGameTestNamespaces', project.hasProperty('combatGameTest') ? 'minemon_damage' : project.hasProperty('followupGameTest') ? (group == 'shore' ? 'minemon_shore' : group == 'movement' ? 'minemon_followup' : 'minemon_followup,minemon_shore') : 'minemon_gen1,minemon_followup,minemon_shore'
+            property 'forge.enabledGameTestNamespaces', project.hasProperty('combatGameTest') ? 'minemon_damage' : project.hasProperty('followupGameTest') ? (group == 'regression' ? 'minemon_navigation' : group == 'shore' ? 'minemon_shore' : group == 'movement' ? 'minemon_followup' : 'minemon_followup,minemon_shore,minemon_navigation') : 'minemon_gen1,minemon_followup,minemon_shore,minemon_navigation'
         }
     }
 }
@@ -188,6 +188,9 @@ dependencies {
 
 tasks.named('processResources') {
     from('src/main/resources/data/minemon_gen1/structures/test_arena.nbt') {
+        into 'data/minemon_navigation/structures'
+    }
+    from('src/main/resources/data/minemon_gen1/structures/test_arena.nbt') {
         into 'data/minemon_shore/structures'
     }
     from('src/main/resources/data/minemon_gen1/structures/test_arena.nbt') {
@@ -198,6 +201,7 @@ tasks.named('processResources') {
 jar {
     exclude 'data/minemon_followup/**'
     exclude 'data/minemon_shore/**'
+    exclude 'data/minemon_navigation/**'
     exclude 'br/com/petrickfaria/minemon/gametest/**'
     exclude 'data/minemon_gen1/structures/test_arena.nbt'
     from('ASSET_LICENSES.md') {
@@ -223,6 +227,7 @@ jar.finalizedBy('reobfJar')
 tasks.named('jarJar') {
     exclude 'data/minemon_followup/**'
     exclude 'data/minemon_shore/**'
+    exclude 'data/minemon_navigation/**'
     archiveFileName = "minemon-${project.version}.jar"
     finalizedBy('reobfJarJar')
     exclude 'br/com/petrickfaria/minemon/gametest/**'

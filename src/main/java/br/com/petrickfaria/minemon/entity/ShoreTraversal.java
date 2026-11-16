@@ -12,7 +12,12 @@ final class ShoreTraversal {
   if(state!=null&&state.bank!=null&&mob.level.getFluidState(state.bank).isEmpty())return true;
   var path=mob.getNavigation().getPath();if(path==null||path.isDone())return false;
   var point=path.getNextEntityPos(mob);
-  return point.y>=mob.getY()-.2 && WaterMovementGoal.safeDry(mob,new BlockPos(point));
+  // Rounded paths may first climb through air over the last wet column,
+  // especially beside a slab. Require an actual dry supported destination,
+  // rather than treating every air-over-water swim waypoint as a shore.
+  boolean dryRoute=WaterMovementGoal.safeDry(mob,new BlockPos(point))
+      ||WaterMovementGoal.safeDry(mob,path.getNodePos(path.getNodeCount()-1));
+  return point.y>=mob.getY()-.2 && dryRoute;
  }
  static void tick(MinemonCreature mob){
   State state=STATES.get(mob);
@@ -22,9 +27,13 @@ final class ShoreTraversal {
   Vec3 point=path!=null&&!path.isDone()?path.getNextEntityPos(mob):new Vec3(state.bank.getX()+.5D,state.bank.getY(),state.bank.getZ()+.5D);
   Vec3 shore=state!=null&&state.bank!=null
       ?new Vec3(state.bank.getX()+.5D,state.bank.getY(),state.bank.getZ()+.5D):point;
-  double dy=point.y-mob.getY();
+  double pointY=point.y;
+  var supportPos=new BlockPos(point).below();
+  var support=mob.level.getBlockState(supportPos).getCollisionShape(mob.level,supportPos);
+  if(!support.isEmpty())pointY=supportPos.getY()+support.max(net.minecraft.core.Direction.Axis.Y);
+  double dy=pointY-mob.getY();
   double top=mob instanceof MinemonAquaticCreature aquatic?aquatic.waterSurface():WaterMovementGoal.restSurfaceAt(mob,mob.blockPosition());
-  if(!Double.isFinite(top)||point.y>top+1.5||dy<-.35)return;
+  if(!Double.isFinite(top)||pointY>top+1.5||dy<-.35)return;
   double lipDistance=Math.max(1.0D,mob.getBbWidth()+.5D);
   if((mob.horizontalCollision || dy>.4D&&shore.subtract(mob.position()).horizontalDistanceSqr()<lipDistance*lipDistance)
       &&mob.getDeltaMovement().y<=.05D){
@@ -111,7 +120,8 @@ static boolean followBank(MinemonCreature mob,net.minecraft.world.entity.LivingE
   if(!SpeciesBehaviorProfiles.isVisitor(mob.getSpeciesSlug())){defer(mob);return true;}
   var state=STATES.get(mob);
   if(!mob.isInWater()&&(state==null||state.bank==null)){STATES.remove(mob);return false;}
-  if(state!=null&&state.bank!=null&&!mob.isInWater()&&mob.isOnGround()){
+  if(state!=null&&state.bank!=null&&!mob.isInWater()&&mob.isOnGround()
+      &&WaterMovementGoal.safeDry(mob,mob.blockPosition())){
    double dx=state.bank.getX()+.5D-mob.getX(),dz=state.bank.getZ()+.5D-mob.getZ();
    double arrivalRadius=.75D+mob.getBbWidth()*.5D;
    if(dx*dx+dz*dz<=arrivalRadius*arrivalRadius){STATES.remove(mob);return false;}
@@ -124,6 +134,12 @@ static boolean followBank(MinemonCreature mob,net.minecraft.world.entity.LivingE
   if(state.previous!=null && mob.position().distanceToSqr(state.previous)<.015)state.stalled+=10;else state.stalled=0;state.previous=mob.position();
   if(state.stalled>=40 && state.bank!=null){state.blocked.put(state.bank,mob.tickCount+200);state.bank=null;mob.getNavigation().stop();state.stalled=0;}
   if(state.bank!=null){
+   // Keep the already checked short approach while the body leaves the water.
+   // Its feet can be above the local water column before its center reaches
+   // supported land; losing that column must not cancel a legitimate jump.
+   if(state.direct&&!mob.isInWater()){
+    mob.getMoveControl().setWantedPosition(state.bank.getX()+.5D,state.bank.getY(),state.bank.getZ()+.5D,speed);return true;
+   }
    // Keep an active route: SmoothSwimmingMoveControl ignores direct MOVE_TO
    // commands when navigation is stopped. Replan or reject stalled banks.
    if(!mob.getNavigation().isDone()){mob.getNavigation().setSpeedModifier(speed);return true;}
@@ -153,14 +169,19 @@ static boolean followBank(MinemonCreature mob,net.minecraft.world.entity.LivingE
   // nearby path-reachable landing; once on land the normal follow goal closes
   // the remaining distance safely.
   candidates.sort(java.util.Comparator.comparingDouble(p->p.distSqr(mob.blockPosition())+.25*p.distSqr(owner.blockPosition())));
-  int tried=0;
+  int tried=0;BlockPos clearApproach=null;
   for(var feet:candidates){
    var path=mob.getNavigation().createPath(feet,0);
    if(path!=null&&path.canReach()){
     state.bank=feet;state.direct=false;mob.getNavigation().moveTo(path,speed);
     return true;
    }
+   if(clearApproach==null&&clearBankApproach(mob,feet))clearApproach=feet;
    if(++tried>=48)break;
+  }
+  if(clearApproach!=null){
+   state.bank=clearApproach;state.direct=true;
+   mob.getNavigation().stop();mob.getMoveControl().setWantedPosition(clearApproach.getX()+.5D,clearApproach.getY(),clearApproach.getZ()+.5D,speed);return true;
   }
   defer(mob);return true;
  }
@@ -168,7 +189,12 @@ static boolean followBank(MinemonCreature mob,net.minecraft.world.entity.LivingE
   if(!WaterMovementGoal.safeDry(mob,target))return false;
   var end=new Vec3(target.getX()+.5D,target.getY(),target.getZ()+.5D);
   var delta=end.subtract(mob.position());
-  if(delta.horizontalDistanceSqr()>6.25D||delta.y>1.5D||delta.y<-.5D)return false;
+  // Wide bodies must clear their leading edge before the center can land.
+  // The climb limit is measured from the waterline, not a submerged start.
+  double reach=2.5D+mob.getBbWidth();
+  double surface=WaterMovementGoal.restSurfaceAt(mob,mob.blockPosition());
+  if(delta.horizontalDistanceSqr()>reach*reach||!Double.isFinite(surface)
+      ||end.y>surface+1.5D||delta.y<-.5D)return false;
   double rise=Math.max(0,delta.y);
   for(int i=1;i<=8;i++){
    if(!mob.level.noCollision(mob,mob.getBoundingBox().move(0,rise*i/8.0D,0)))return false;

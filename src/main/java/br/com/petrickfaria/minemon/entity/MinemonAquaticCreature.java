@@ -264,6 +264,18 @@ public final class MinemonAquaticCreature extends MinemonCreature {
                     this.doStuckDetection(this.getTempMobPos());
                     return;
                 }
+                if(this.path!=null&&!this.path.isDone()&&this.path.getNextNodeIndex()<this.path.getNodeCount()-1){
+                    var point=this.path.getNextEntityPos(this.mob);
+                    // The first wet node can be one rounded block below the
+                    // bank. Land steering ignores Y and otherwise stops over
+                    // that node while the body still overlaps dry support.
+                    // Advance only a reached descending water node; collision
+                    // and ordinary gravity still perform the actual entry.
+                    if(level.getFluidState(new net.minecraft.core.BlockPos(point)).is(net.minecraft.tags.FluidTags.WATER)
+                            &&Math.abs(this.mob.getX()-point.x)<.35D&&Math.abs(this.mob.getZ()-point.z)<.35D
+                            &&this.mob.getY()>=point.y&&this.mob.getY()-point.y<=1.5D)
+                        this.path.advance();
+                }
                 super.followThePath();
             }
 
