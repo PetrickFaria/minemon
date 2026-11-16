@@ -28,6 +28,17 @@ import net.minecraftforge.gametest.PrefixGameTestTemplate;
 @PrefixGameTestTemplate(false)
 public final class CharmanderZombieDamageGameTests {
     private static final Set<ServerPlayer> TEST_PLAYERS = new HashSet<>();
+    private static final Set<UUID> DIAGNOSTIC_SHOTS = new HashSet<>();
+
+    @SubscribeEvent
+    public static void traceProjectileImpact(net.minecraftforge.event.entity.ProjectileImpactEvent event) {
+        var projectile=event.getProjectile();
+        if(!DIAGNOSTIC_SHOTS.remove(projectile.getUUID()))return;
+        var result=event.getRayTraceResult();
+        System.out.println("[COMBAT COLLISION] type="+result.getType()+" location="+result.getLocation()
+                +" flightTicks="+projectile.tickCount+" owner="+projectile.getOwner()
+                +" hit="+(result instanceof net.minecraft.world.phys.EntityHitResult hit?hit.getEntity():result));
+    }
 
     @SubscribeEvent
     public static void tickPlayers(net.minecraftforge.event.TickEvent.ServerTickEvent event) {
@@ -114,6 +125,7 @@ public final class CharmanderZombieDamageGameTests {
                 pokemon.getBoundingBox().inflate(12.0D), shot -> shot.getOwner() == pokemon && shot.getTargetIdForValidation(zombie));
         check(h, levelOneShots.size() == 1, "Expected exactly one level 1 aimed projectile");
         if (levelOneShots.size() != 1) return;
+        DIAGNOSTIC_SHOTS.add(levelOneShots.get(0).getUUID());
         check(h, levelOneShots.get(0).damageForValidation() == 4.0F,
                 "Uncommon level 1 projectile must carry exactly 4.0 damage");
         h.runAfterDelay(15, () -> {
@@ -164,6 +176,7 @@ public final class CharmanderZombieDamageGameTests {
         check(h, shots.size() == 1, "Expected exactly one aimed projectile for shot " + hit);
         if (shots.size() != 1) return;
         var shot = shots.get(0);
+        DIAGNOSTIC_SHOTS.add(shot.getUUID());
         check(h, shot.damageForValidation() == 5.0F,
                 "Projectile " + hit + " carried " + shot.damageForValidation() + " instead of 5.0 damage");
         System.out.println("[MINEMON COMBAT] launch hit=" + hit + " configured=" + configuredDamage
@@ -171,8 +184,10 @@ public final class CharmanderZombieDamageGameTests {
                 + " interval=" + (previousLaunch < 0 ? "initial" : interval)
                 + " invulnerableTime=" + zombie.invulnerableTime + " armor=" + zombie.getArmorValue()
                 + " effects=" + zombie.getActiveEffects().size() + " fireTicks=" + zombie.getRemainingFireTicks());
+        System.out.println("[COMBAT GEOMETRY] hit="+hit+" attacker="+pokemon.position()+" target="+zombie.position()+" owner="+owner.position()+" ownerHP="+owner.getHealth()+" attackerHP="+pokemon.getHealth()+" range="+pokemon.attackRange()+" projectile="+shot.position()+" motion="+shot.getDeltaMovement());
         h.runAfterDelay(15, () -> {
             float applied = shotHealthBefore - zombie.getHealth();
+            if(applied!=5.0F)System.out.println("[COMBAT MISS] hit="+hit+" attacker="+pokemon.position()+" defeated="+pokemon.isDefeated()+" attackerRemoved="+pokemon.isRemoved()+" ownerHP="+owner.getHealth()+" projectileOwner="+shot.getOwner()+" targetRemoved="+zombie.isRemoved()+" targetBox="+zombie.getBoundingBox()+" sleeping="+pokemon.isSleeping()+" canAttack="+pokemon.canAttack(zombie)+" target="+zombie.position()+" shot="+shot.position()+" flightTicks="+shot.tickCount+" removed="+shot.isRemoved()+" motion="+shot.getDeltaMovement()+" neighbors="+h.getLevel().getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class,pokemon.getBoundingBox().inflate(16)).stream().map(e->e+" hp="+e.getHealth()).toList());
             check(h, applied == 5.0F, "Zombie received " + applied + " HP on shot " + hit + "; expected 5.0"
                     + " (health=" + zombie.getHealth() + ", hurtTime=" + zombie.hurtTime
                     + ", invulnerableTime=" + zombie.invulnerableTime + ", fireTicks=" + zombie.getRemainingFireTicks() + ")");
