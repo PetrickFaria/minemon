@@ -50,7 +50,10 @@ public final class CharmanderZombieDamageGameTests {
     private static void floor(GameTestHelper h) {
         for (int x = 0; x < 16; x++) for (int z = 0; z < 16; z++) {
             h.setBlock(new BlockPos(x, 0, z), Blocks.STONE);
-            for (int y = 1; y < 6; y++) h.setBlock(new BlockPos(x, y, z), Blocks.AIR);
+            for (int y = 1; y < 6; y++) {
+                boolean enclosure=y<=4&&(y==4||x==0||x==15||z==0||z==15);
+                h.setBlock(new BlockPos(x,y,z),enclosure?Blocks.STONE:Blocks.AIR);
+            }
         }
     }
 
@@ -78,6 +81,16 @@ public final class CharmanderZombieDamageGameTests {
     }
 
     private static void setupTwentyShotZombieTest(GameTestHelper h) {
+        // Forge's prepared flat world can retain doMobSpawning=true. Ambient
+        // Slimes can hit the trainer and legitimately replace the companion's
+        // focus while a measured shot is in flight. Isolate this damage assay;
+        // trainer-defense behavior is covered by the normal behavior suite.
+        h.getLevel().getGameRules().getRule(net.minecraft.world.level.GameRules.RULE_DOMOBSPAWNING)
+                .set(false,h.getLevel().getServer());
+        var arena=new net.minecraft.world.phys.AABB(h.absolutePos(BlockPos.ZERO),
+                h.absolutePos(new BlockPos(16,6,16)));
+        h.getLevel().getEntitiesOfClass(net.minecraft.world.entity.Mob.class,arena)
+                .forEach(net.minecraft.world.entity.Entity::discard);
         floor(h);
         ServerPlayer owner = player(h, h.absolutePos(new BlockPos(7, 1, 5)));
         MinemonCreature pokemon = h.spawn(ModEntities.SPECIES.get("charmander").get(), new BlockPos(5, 1, 5));
@@ -149,6 +162,8 @@ public final class CharmanderZombieDamageGameTests {
                                                   Zombie zombie, int hit, long previousLaunch,
                                                   float totalProjectileDamage, int waitedForTarget) {
         if (!zombie.isAlive()) { h.fail("The high-health zombie died before all controlled hits"); return; }
+        check(h,owner.isAlive()&&owner.getHealth()==owner.getMaxHealth(),
+                "Controlled trainer was attacked before shot "+hit+"; last attacker="+owner.getLastHurtByMob());
         check(h, zombie.getArmorValue() == 2 && zombie.getActiveEffects().isEmpty(),
                 "Target mitigation state changed before shot " + hit);
         if (zombie.invulnerableTime > 0 || !pokemon.combatReady()) {
@@ -187,6 +202,8 @@ public final class CharmanderZombieDamageGameTests {
         System.out.println("[COMBAT GEOMETRY] hit="+hit+" attacker="+pokemon.position()+" target="+zombie.position()+" owner="+owner.position()+" ownerHP="+owner.getHealth()+" attackerHP="+pokemon.getHealth()+" range="+pokemon.attackRange()+" projectile="+shot.position()+" motion="+shot.getDeltaMovement());
         h.runAfterDelay(15, () -> {
             float applied = shotHealthBefore - zombie.getHealth();
+            check(h,owner.isAlive()&&owner.getHealth()==owner.getMaxHealth(),
+                    "Controlled trainer was attacked during shot "+hit+"; last attacker="+owner.getLastHurtByMob());
             if(applied!=5.0F)System.out.println("[COMBAT MISS] hit="+hit+" attacker="+pokemon.position()+" defeated="+pokemon.isDefeated()+" attackerRemoved="+pokemon.isRemoved()+" ownerHP="+owner.getHealth()+" projectileOwner="+shot.getOwner()+" targetRemoved="+zombie.isRemoved()+" targetBox="+zombie.getBoundingBox()+" sleeping="+pokemon.isSleeping()+" canAttack="+pokemon.canAttack(zombie)+" target="+zombie.position()+" shot="+shot.position()+" flightTicks="+shot.tickCount+" removed="+shot.isRemoved()+" motion="+shot.getDeltaMovement()+" neighbors="+h.getLevel().getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class,pokemon.getBoundingBox().inflate(16)).stream().map(e->e+" hp="+e.getHealth()).toList());
             check(h, applied == 5.0F, "Zombie received " + applied + " HP on shot " + hit + "; expected 5.0"
                     + " (health=" + zombie.getHealth() + ", hurtTime=" + zombie.hurtTime

@@ -348,6 +348,7 @@ jobs:
           validate_followup deep
           validate_followup shallow-delayed -PfollowupShallow -PfollowupClientDelay
       - name: Launch Minecraft client and validate GeckoLib cache
+        id: full_client
         if: ${{ success() && steps.compile.outcome == 'success' && ((github.event_name == 'workflow_dispatch' && inputs.full_suite) || (github.event_name == 'push' && (github.ref == 'refs/heads/fix/minemon-pending-eight-corrections'))) }}
         run: |
           python3 tools/prepare_client_world.py
@@ -495,7 +496,7 @@ jobs:
           unzip -p "$jar_file" assets/minemon_gen1/lang/pt_br.json | grep -F '"block.minemon_gen1.rocket_block": "Bloco Rocket"'
           unzip -p "$jar_file" pack.mcmeta | grep -F '"pack_format": 9'
       - name: Upload Minemon JAR
-        if: ${{ !cancelled() && steps.verify_jar.outcome == 'success' }}
+        if: ${{ success() && steps.verify_jar.outcome == 'success' && steps.full_client.outcome == 'success' }}
         uses: actions/upload-artifact@v4
         with:
           name: minemon-${{ env.MINEMON_VERSION }}
