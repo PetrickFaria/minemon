@@ -153,7 +153,7 @@ minecraft {
         }
         server { args '--nogui' }
         gameTestServer {
-            property 'forge.enabledGameTestNamespaces', project.hasProperty('combatGameTest') ? 'minemon_damage' : 'minemon_gen1'
+            property 'forge.enabledGameTestNamespaces', project.hasProperty('combatGameTest') ? 'minemon_damage' : project.hasProperty('followupGameTest') ? 'minemon_followup' : 'minemon_gen1,minemon_followup'
         }
     }
 }
@@ -183,7 +183,14 @@ dependencies {
     testRuntimeOnly "org.lwjgl:lwjgl-stb:3.3.1:${lwjglNatives}"
 }
 
+tasks.named('processResources') {
+    from('src/main/resources/data/minemon_gen1/structures/test_arena.nbt') {
+        into 'data/minemon_followup/structures'
+    }
+}
+
 jar {
+    exclude 'data/minemon_followup/**'
     exclude 'br/com/petrickfaria/minemon/gametest/**'
     exclude 'data/minemon_gen1/structures/test_arena.nbt'
     from('ASSET_LICENSES.md') {
@@ -207,6 +214,7 @@ jar.finalizedBy('reobfJar')
 // ForgeGradle produces the executable Jar-in-Jar artifact as a separate task.
 // Include it in assemble so build outputs the JLayer-bearing production JAR.
 tasks.named('jarJar') {
+    exclude 'data/minemon_followup/**'
     archiveFileName = "minemon-${project.version}.jar"
     finalizedBy('reobfJarJar')
     exclude 'br/com/petrickfaria/minemon/gametest/**'
