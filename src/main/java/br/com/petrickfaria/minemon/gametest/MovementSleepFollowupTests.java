@@ -139,9 +139,16 @@ public final class MovementSleepFollowupTests {
     public static void wildGyaradosReachesSafeBottom(GameTestHelper h){bottomGyarados(h,"wild");}
     @GameTest(template="test_arena",templateNamespace="minemon_followup",batch="followup_gyarados_sit",timeoutTicks=1000)
     public static void seatedGyaradosReachesSafeBottom(GameTestHelper h){bottomGyarados(h,"sit");}
-    private static void bottomGyarados(GameTestHelper h,String mode){
+    private static void bottomGyarados(GameTestHelper h,String mode){bottomGyarados(h,mode,13);}
+    static void bottomGyarados(GameTestHelper h,String mode,double initialY){
         arena(h,true);h.getLevel().setDayTime(18000);var p=owner(h,8,19,8);
-        var fish=spawn(h,"gyarados",8,13,8);
+        var fish=spawn(h,"gyarados",8,(int)Math.floor(initialY),8);
+        // Fractional fixture placement occurs before the first entity tick.
+        fish.moveTo(fish.getX(),h.absolutePos(BlockPos.ZERO).getY()+initialY,fish.getZ(),fish.getYRot(),0);
+        // The full Gyarados box is taller than six blocks. A fixed observer at
+        // y=19 overlapped its head and physically pushed the approaching swimmer.
+        p.moveTo(p.getX(),Math.max(p.getY(),fish.getBoundingBox().maxY+.05D),p.getZ(),0,0);
+        check(!fish.getBoundingBox().intersects(p.getBoundingBox()),"Bottom observer intersects the Gyarados fixture");
         if(!mode.equals("wild")){fish.tame(p);fish.applyManagedBehavior(mode);}
         var previous=new net.minecraft.world.phys.Vec3[]{fish.position()};double[] maxStep={0};
         h.onEachTick(()->{
@@ -149,6 +156,12 @@ public final class MovementSleepFollowupTests {
             maxStep[0]=Math.max(maxStep[0],fish.position().distanceTo(previous[0]));previous[0]=fish.position();
             check(maxStep[0]<.6,"Gyarados descent used a discontinuous position correction: "+mode+" step="+maxStep[0]);
             check(h.getLevel().noCollision(fish,fish.getBoundingBox()),"Gyarados descent entered a block");
+            if(fish.tickCount%100==0)System.out.println("[FOLLOWUP GYARADOS TRACE] mode="+mode
+                    +" tick="+fish.tickCount+" position="+fish.position()+" sleeping="+fish.isSleeping()+" resting="+fish.isNightResting()
+                    +" time="+h.getLevel().getDayTime()+" wet="+fish.isInWater()+" target="+fish.getTarget()+" following="+fish.isFollowingOwner()
+                    +" restY="+WaterMovementGoal.waterRestY(fish)+" navDone="+fish.getNavigation().isDone()+" nav="+fish.getNavigation().getTargetPos()
+                    +" next="+(fish.getNavigation().getPath()==null||fish.getNavigation().getPath().isDone()?null:fish.getNavigation().getPath().getNextEntityPos(fish))
+                    +" velocity="+fish.getDeltaMovement()+" wanted="+fish.getMoveControl().getWantedX()+","+fish.getMoveControl().getWantedY()+","+fish.getMoveControl().getWantedZ());
         });
         await(h,fish::isSleeping,()->{
             double floor=h.absolutePos(BlockPos.ZERO).getY()+1;

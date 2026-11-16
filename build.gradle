@@ -156,7 +156,7 @@ minecraft {
         server { args '--nogui' }
         gameTestServer {
             def group = (findProperty('followupGameTest') ?: '').toString()
-            property 'forge.enabledGameTestNamespaces', project.hasProperty('combatGameTest') ? 'minemon_damage' : project.hasProperty('followupGameTest') ? (group == 'regression' ? 'minemon_navigation' : group == 'shore' ? 'minemon_shore' : group == 'movement' ? 'minemon_followup' : 'minemon_followup,minemon_shore,minemon_navigation') : 'minemon_gen1,minemon_followup,minemon_shore,minemon_navigation'
+            property 'forge.enabledGameTestNamespaces', project.hasProperty('combatGameTest') ? 'minemon_damage' : project.hasProperty('followupGameTest') ? (group == 'bottom' ? 'minemon_bottom' : group == 'regression' ? 'minemon_navigation' : group == 'shore' ? 'minemon_shore' : group == 'movement' ? 'minemon_followup' : 'minemon_followup,minemon_shore,minemon_navigation,minemon_bottom') : 'minemon_gen1,minemon_followup,minemon_shore,minemon_navigation,minemon_bottom'
         }
     }
 }
@@ -188,6 +188,9 @@ dependencies {
 
 tasks.named('processResources') {
     from('src/main/resources/data/minemon_gen1/structures/test_arena.nbt') {
+        into 'data/minemon_bottom/structures'
+    }
+    from('src/main/resources/data/minemon_gen1/structures/test_arena.nbt') {
         into 'data/minemon_navigation/structures'
     }
     from('src/main/resources/data/minemon_gen1/structures/test_arena.nbt') {
@@ -202,6 +205,7 @@ jar {
     exclude 'data/minemon_followup/**'
     exclude 'data/minemon_shore/**'
     exclude 'data/minemon_navigation/**'
+    exclude 'data/minemon_bottom/**'
     exclude 'br/com/petrickfaria/minemon/gametest/**'
     exclude 'data/minemon_gen1/structures/test_arena.nbt'
     from('ASSET_LICENSES.md') {
@@ -228,6 +232,7 @@ tasks.named('jarJar') {
     exclude 'data/minemon_followup/**'
     exclude 'data/minemon_shore/**'
     exclude 'data/minemon_navigation/**'
+    exclude 'data/minemon_bottom/**'
     archiveFileName = "minemon-${project.version}.jar"
     finalizedBy('reobfJarJar')
     exclude 'br/com/petrickfaria/minemon/gametest/**'
