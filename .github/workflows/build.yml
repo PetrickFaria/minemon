@@ -83,6 +83,33 @@ jobs:
           ./gradlew --no-daemon clean compileJava compileTestJava
           ./gradlew --no-daemon test
           ./gradlew --no-daemon build -x test
+      - name: Prepare development JAR after essential checks
+        if: ${{ success() && github.event_name != 'pull_request' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          dev_version="$(python3 tools/minemon_version.py)"
+          echo "MINEMON_DEV_VERSION=${dev_version}" >> "$GITHUB_ENV"
+          mkdir -p build/development
+          dev_jar="build/development/minemon-${dev_version}-dev.jar"
+          cp "build/libs/minemon-${dev_version}.jar" "$dev_jar"
+          unzip -t "$dev_jar"
+          unzip -p "$dev_jar" META-INF/mods.toml | grep -F "version=\"${dev_version}\""
+          unzip -p "$dev_jar" META-INF/MANIFEST.MF | grep -F "Implementation-Version: ${dev_version}"
+          cat > build/development/DEVELOPMENT.txt <<'NOTICE'
+          DEVELOPMENT BUILD: compilation, unit tests and essential resource checks passed.
+          Extensive Minecraft/client validation is not a prerequisite for this artifact.
+          This artifact alone does not certify full validation. Use the final artifact
+          without the -dev suffix when its complete validation has passed.
+          NOTICE
+      - name: Publish development JAR independently of extensive tests
+        if: ${{ success() && github.event_name != 'pull_request' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: minemon-${{ env.MINEMON_DEV_VERSION }}-dev
+          path: build/development/
+          if-no-files-found: error
+          retention-days: 14
       - name: Run isolated 20-hit Charmander zombie validation
         if: ${{ !cancelled() && steps.compile.outcome == 'success' && env.MINEMON_RUN_GAME_VALIDATION == 'true' }}
         run: |
