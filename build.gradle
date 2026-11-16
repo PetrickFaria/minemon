@@ -133,6 +133,8 @@ minecraft {
             property 'minemon.clientSmokeTest', project.hasProperty('clientSmokeTest').toString()
             property 'minemon.clientSmokeFollowup', project.hasProperty('clientSmokeFollowup').toString()
             property 'minemon.followupReopen', project.hasProperty('followupReopen').toString()
+            property 'minemon.followupShallow', project.hasProperty('followupShallow').toString()
+            property 'minemon.followupClientDelay', project.hasProperty('followupClientDelay').toString()
             property 'minemon.clientSmokeGhostLine', project.hasProperty('clientSmokeGhostLine').toString()
             property 'minemon.clientSmokeGhostLinePersistence', project.hasProperty('clientSmokeGhostLinePersistence').toString()
             property 'minemon.gastlyReopenIndex', (findProperty('gastlyReopenIndex') ?: '1').toString()
@@ -206,6 +208,7 @@ jar {
     exclude 'data/minemon_shore/**'
     exclude 'data/minemon_navigation/**'
     exclude 'data/minemon_bottom/**'
+    exclude 'data/minemon_damage/**'
     exclude 'br/com/petrickfaria/minemon/gametest/**'
     exclude 'data/minemon_gen1/structures/test_arena.nbt'
     from('ASSET_LICENSES.md') {
@@ -233,6 +236,7 @@ tasks.named('jarJar') {
     exclude 'data/minemon_shore/**'
     exclude 'data/minemon_navigation/**'
     exclude 'data/minemon_bottom/**'
+    exclude 'data/minemon_damage/**'
     archiveFileName = "minemon-${project.version}.jar"
     finalizedBy('reobfJarJar')
     exclude 'br/com/petrickfaria/minemon/gametest/**'

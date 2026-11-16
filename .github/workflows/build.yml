@@ -321,18 +321,26 @@ jobs:
       - name: Validate reported movement, sleep and actual world reopening on the real client
         if: ${{ !cancelled() && steps.compile.outcome == 'success' && env.MINEMON_RUN_GAME_VALIDATION == 'true' }}
         run: |
-          python3 tools/prepare_client_world.py
-          ALSOFT_DRIVERS=null timeout --kill-after=30s 600s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeFollowup
-          grep -F 'PASS FOLLOWUP GOLDEEN:' run/client-validation-followup.txt
-          grep -F 'PASS FOLLOWUP GYARADOS:' run/client-validation-followup.txt
-          grep -F 'PASS FOLLOWUP PIDGEY NIGHT:' run/client-validation-followup.txt
-          grep -F 'PASS FOLLOWUP PIDGEY COMBAT:' run/client-validation-followup.txt
-          grep -F 'PASS FOLLOWUP PIDGEY RECOVERY:' run/client-validation-followup.txt
-          grep -F 'PASS FOLLOWUP DAWN:' run/client-validation-followup.txt
-          grep -F 'PASS FOLLOWUP SAVE:' run/client-validation-followup.txt
-          # Reopen the saved world in a separate JVM; do not recreate it here.
-          ALSOFT_DRIVERS=null timeout --kill-after=30s 600s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeFollowup -PfollowupReopen
-          grep -F 'PASS FOLLOWUP REOPEN:' run/client-validation-followup-reopen.txt
+          validate_followup() {
+            local fixture_label="$1"
+            shift
+            python3 tools/prepare_client_world.py
+            rm -f run/client-validation-followup.txt run/client-validation-followup-reopen.txt
+            ALSOFT_DRIVERS=null timeout --kill-after=30s 600s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeFollowup "$@"
+            for marker in DAY GOLDEEN GYARADOS 'PIDGEY NIGHT' 'PIDGEY COMBAT' 'PIDGEY RECOVERY' DAWN SAVE; do
+              grep -F "PASS FOLLOWUP ${marker}:" run/client-validation-followup.txt
+            done
+            cp run/client-validation-followup.txt "run/client-validation-followup-${fixture_label}.txt"
+            # Reopen the same saved world twice, each in a fresh JVM; never recreate it.
+            for reopen_index in 1 2; do
+              rm -f run/client-validation-followup-reopen.txt
+              ALSOFT_DRIVERS=null timeout --kill-after=30s 600s xvfb-run -a ./gradlew --no-daemon -Dorg.gradle.jvmargs=-Xmx1G runClient -PclientSmokeTest -PclientSmokeFollowup -PfollowupReopen "$@"
+              grep -F 'PASS FOLLOWUP REOPEN:' run/client-validation-followup-reopen.txt
+              cp run/client-validation-followup-reopen.txt "run/client-validation-followup-reopen-${fixture_label}-${reopen_index}.txt"
+            done
+          }
+          validate_followup deep
+          validate_followup shallow-delayed -PfollowupShallow -PfollowupClientDelay
       - name: Launch Minecraft client and validate GeckoLib cache
         if: ${{ success() && steps.compile.outcome == 'success' && ((github.event_name == 'workflow_dispatch' && inputs.full_suite) || (github.event_name == 'push' && (github.ref == 'refs/heads/fix/minemon-pending-eight-corrections'))) }}
         run: |
@@ -395,6 +403,10 @@ jobs:
           jar_file="build/libs/minemon-${MINEMON_VERSION}.jar"
           test -f "$jar_file"
           unzip -t "$jar_file"
+          if jar tf "$jar_file" | grep -E '^data/minemon_(followup|shore|navigation|bottom|damage)/|^data/minemon_gen1/structures/test_arena\.nbt$'; then
+            echo 'Test-only structures must not ship in the executable mod JAR.'
+            exit 1
+          fi
           unzip -p "$jar_file" META-INF/mods.toml | grep -F "version=\"${MINEMON_VERSION}\""
           unzip -p "$jar_file" META-INF/MANIFEST.MF | grep -F "Implementation-Version: ${MINEMON_VERSION}"
           python3 tools/verify_treats.py "$jar_file"

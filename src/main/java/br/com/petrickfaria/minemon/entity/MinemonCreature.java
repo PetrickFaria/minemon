@@ -1314,6 +1314,8 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
             boolean settled=waterRest?Math.abs(this.getY()-waterRestY)<waterTolerance
                 :hover?Math.abs(this.getY()-this.naturalSurface()-restHeight)<0.18D
                 :this.isOnGround()&&WaterMovementGoal.safeDryRestingSupport(this,this.blockPosition());
+            if(settled&&!this.isSleeping()&&waterRest&&getSpeciesSlug().equals("gyarados"))
+                settled=WaterMovementGoal.gyaradosRestPositionClear(this,new net.minecraft.world.phys.Vec3(getX(),waterRestY,getZ()));
             if(settled&&!this.isSleeping()){
                 if(waterRest&&SpeciesBehaviorProfiles.locksPositionDuringWaterSleep(this.getSpeciesSlug())
                         &&Double.isFinite(waterRestY)){

@@ -19,7 +19,12 @@ import net.minecraft.world.phys.Vec3;
 /** Real integrated-server/client transitions; a second launch reopens the saved world. */
 final class MovementSleepClientSmokeTest {
     private static final boolean REOPEN=Boolean.getBoolean("minemon.followupReopen");
+    private static final boolean SHALLOW=Boolean.getBoolean("minemon.followupShallow");
+    private static final boolean CLIENT_DELAY=Boolean.getBoolean("minemon.followupClientDelay");
+    // Entity tracking and vanilla position interpolation complete before measuring rest.
+    private static final int CLIENT_ARRIVAL_TICKS=8;
     private static boolean opening,setup,done,photoRequested;
+    private static volatile boolean reopenReady;
     private static int ticks,cameraPhase=-1;
     private static volatile int phase,elapsed;
     private static volatile Throwable failure;
@@ -27,7 +32,12 @@ final class MovementSleepClientSmokeTest {
     private static volatile boolean goldeenEyes,pidgeyEyes,gyaradosEyes;
     private static volatile boolean combatFlightRendered;
     private static boolean combatHoverSeen;
+    private static boolean clientDelayInjected;
     private static volatile double maxClientSleepStep;
+    private static volatile int observedClientSleepTicks,stableClientSleepSamples,serverSleepSamples;
+    private static volatile Vec3 serverSleepAnchor;
+    private static boolean clientSleepStarted;
+    private static volatile double maxClientArrivalStep,maxClientAnchorError;
     private static volatile double maxClientBirdSleepStep;
     private static long lastTick=-1,start,settled=-1;
     private static volatile MinemonCreature fish,wildFish,bird,rock,awakeRock,gyarados,wildGyarados,seatedGyarados;
@@ -79,7 +89,12 @@ final class MovementSleepClientSmokeTest {
                 };
             }
             mc.getSingleplayerServer().execute(()->{try{serverTick(mc);}catch(Throwable problem){failure=problem;}});
-            if(fish==null||bird==null)return;
+            if(fish==null||bird==null||REOPEN&&!reopenReady)return;
+            if(CLIENT_DELAY&&!REOPEN&&phase==1&&!clientDelayInjected){
+                clientDelayInjected=true;
+                System.out.println("[FOLLOWUP CLIENT DELAY] phase="+phase+" elapsed="+elapsed+" serverSleep="+fish.isSleeping());
+                Thread.sleep(4000);
+            }
             MinemonCreature subject=phase==0||phase>=3&&phase<=5?bird:phase==2||phase==6?gyarados:fish;
             if(REOPEN)subject=elapsed<70?fish:elapsed<140?bird:gyarados;
             var client=mc.level.getEntity(subject.getId());
@@ -92,9 +107,28 @@ final class MovementSleepClientSmokeTest {
                 camera.yRotO=yaw;camera.xRotO=pitch;camera.setYHeadRot(yaw);camera.yHeadRotO=yaw;mc.setCameraEntity(camera);mc.options.hideGui=true;
             }
             var clientFish=mc.level.getEntity(fish.getId());
-            if(clientFish instanceof MinemonCreature c&&c.isSleeping()&&(phase==1&&elapsed>70||REOPEN&&elapsed>30)){
-                if(previousClientFish!=null)maxClientSleepStep=Math.max(maxClientSleepStep,c.position().distanceTo(previousClientFish));
-                previousClientFish=c.position();
+            if(phase==1||REOPEN){
+                if(clientFish instanceof MinemonCreature c){
+                    if(!c.isSleeping()){
+                        check(!clientSleepStarted,"Client sleep restarted or woke during a quiet resting window");
+                        previousClientFish=null;
+                    }else{
+                        clientSleepStarted=true;observedClientSleepTicks++;
+                        double step=previousClientFish==null?0:c.position().distanceTo(previousClientFish);
+                        if(observedClientSleepTicks<=CLIENT_ARRIVAL_TICKS){
+                            maxClientArrivalStep=Math.max(maxClientArrivalStep,step);
+                            check(step<.6,"Client arrival used a discontinuous position correction: "+step);
+                        }else{
+                            check(serverSleepAnchor!=null,"Sleeping client has no stable server anchor");
+                            double error=c.position().distanceTo(serverSleepAnchor);
+                            maxClientAnchorError=Math.max(maxClientAnchorError,error);
+                            check(error<.02,"Client failed to converge to the sleeping server within eight client ticks: "+error);
+                            maxClientSleepStep=Math.max(maxClientSleepStep,step);stableClientSleepSamples++;
+                        }
+                        if(step>.002||observedClientSleepTicks<=12)System.out.println("[FOLLOWUP CLIENT SLEEP TRACE] age="+observedClientSleepTicks+" stableSamples="+stableClientSleepSamples+" elapsed="+elapsed+" client="+c.position()+" anchor="+serverSleepAnchor+" step="+step+" motion="+c.getDeltaMovement());
+                        previousClientFish=c.position();
+                    }
+                }else check(!clientSleepStarted,"Resting Goldeen disappeared from client tracking");
             }else previousClientFish=null;
             var clientBird=mc.level.getEntity(bird.getId());
             if(clientBird instanceof MinemonCreature c&&c.isSleeping()&&(phase==3&&elapsed>40||phase==5&&elapsed>80||REOPEN&&elapsed>30)){
@@ -116,7 +150,8 @@ final class MovementSleepClientSmokeTest {
         return null;
     }
     private static void next(ServerLevel level,int value){phase=value;start=level.getGameTime();settled=-1;photo=null;}
-    private static boolean photograph(String name){if(photo==null)photo=name;return name.equals(photoDone);}
+    private static String photoName(String name){return SHALLOW?name+"-shallow":name;}
+    private static boolean photograph(String name){String key=photoName(name);if(photo==null)photo=key;return key.equals(photoDone);}
     private static void serverTick(Minecraft mc)throws Exception{
         var server=mc.getSingleplayerServer();var level=server.overworld();long now=level.getGameTime();if(now==lastTick)return;lastTick=now;
         var owner=server.getPlayerList().getPlayers().get(0);
@@ -125,7 +160,8 @@ final class MovementSleepClientSmokeTest {
                 fish=find(level,"followup-free-fish");wildFish=find(level,"followup-wild-fish");bird=find(level,"followup-bird");
                 gyarados=find(level,"followup-free-gyarados");wildGyarados=find(level,"followup-wild-gyarados");seatedGyarados=find(level,"followup-seated-gyarados");
                 if(fish==null||bird==null||gyarados==null||wildGyarados==null||seatedGyarados==null){fish=null;return;}
-                next(level,8);return;
+                serverSleepAnchor=fish.position();
+                next(level,8);reopenReady=true;return;
             }
             level.getGameRules().getRule(GameRules.RULE_DOMOBSPAWNING).set(false,server);
             level.getGameRules().getRule(GameRules.RULE_DAYLIGHT).set(false,server);level.setDayTime(1000);
@@ -135,14 +171,24 @@ final class MovementSleepClientSmokeTest {
             }
             for(int x=40;x<=58;x++)for(int z=0;z<=18;z++)for(int y=100;y<=113;y++)level.setBlock(new BlockPos(x,y,z),(y==100?Blocks.STONE:Blocks.AIR).defaultBlockState(),3);
             owner.setGameMode(GameType.CREATIVE);owner.getAbilities().flying=true;owner.onUpdateAbilities();owner.teleportTo(level,8.5,120,8.5,0,0);
-            fish=create(level,"goldeen","followup-free-fish",6.5,104,8.5,owner,"free");
-            wildFish=create(level,"goldeen","followup-wild-fish",6.5,104,14.5,null,"");
+            fish=create(level,"goldeen","followup-free-fish",6.5,SHALLOW?117:104,8.5,owner,"free");
+            wildFish=create(level,"goldeen","followup-wild-fish",6.5,SHALLOW?117:104,14.5,null,"");
             bird=create(level,"pidgey","followup-bird",48.5,103,8.5,owner,"sit");
             rock=create(level,"geodude","followup-rock",52.5,101,8.5,null,"");
             awakeRock=create(level,"geodude","followup-awake-rock",54.5,101,10.5,null,"");awakeRock.setNoAi(true);
             start=now;return;
         }
-        elapsed=(int)(now-start);check(elapsed<1600,"Scenario timed out: phase="+phase+" fish="+fish.position()+" bird="+bird.position()+" birdTarget="+bird.getTarget());
+        elapsed=(int)(now-start);check(elapsed<1600,"Scenario timed out: phase="+phase+" fish="+actorState(fish)+" bird="+actorState(bird)+" freeGyarados="+actorState(gyarados)+" wildGyarados="+actorState(wildGyarados)+" seatedGyarados="+actorState(seatedGyarados));
+        if((phase==2||phase==7)&&elapsed%100==0)System.out.println("[FOLLOWUP REST TRACE] phase="+phase+" elapsed="+elapsed+" free="+actorState(gyarados)+" wild="+actorState(wildGyarados)+" seated="+actorState(seatedGyarados));
+        if(phase==1||REOPEN){
+            if(fish.isSleeping()){
+                if(serverSleepAnchor==null)serverSleepAnchor=fish.position();
+                check(fish.position().distanceTo(serverSleepAnchor)<.002,"Sleeping server Goldeen drifted from its anchor");
+                check(!fish.isFollowingOwner()&&fish.getNavigation().isDone()
+                        &&fish.getDeltaMovement().lengthSqr()<1.0E-8,"A movement goal or residual velocity resumed during server sleep");
+                serverSleepSamples++;
+            }else check(serverSleepSamples==0,"Server Goldeen woke during the quiet sleep window");
+        }
         if(REOPEN){
             check(fish.isOwnedBy(owner)&&bird.isOwnedBy(owner)&&gyarados.isOwnedBy(owner),"Actual world reopening lost Pokémon ownership");
             check(fish.isFreeMode()&&fish.isSleeping()&&bird.isOrderedToSit()&&bird.isSleeping(),"Saved managed mode or sleep was lost on actual world reopening");
@@ -155,7 +201,7 @@ final class MovementSleepClientSmokeTest {
                 if(previousFish!=null)fishDrift=Math.max(fishDrift,fish.position().distanceTo(previousFish));previousFish=fish.position();
                 if(previousBird!=null)birdDrift=Math.max(birdDrift,bird.position().distanceTo(previousBird));previousBird=bird.position();
             }
-            if(elapsed>220&&goldeenEyes&&pidgeyEyes&&gyaradosEyes){
+            if(elapsed>220&&stableClientSleepSamples>=100&&serverSleepSamples>=100&&goldeenEyes&&pidgeyEyes&&gyaradosEyes){
                 check(fishDrift<.002&&birdDrift<.002&&maxClientSleepStep<.002&&maxClientBirdSleepStep<.002,"Reopened sleepers oscillated: fish="+fishDrift+" bird="+birdDrift+" client="+maxClientSleepStep+" clientBird="+maxClientBirdSleepStep);
                 report("PASS FOLLOWUP REOPEN: actual saved world preserved free Goldeen, seated Pidgey, wild/free/seated Gyarados bottom sleep; rendered closed eyes and server/client stability.");finish(mc);
             }
@@ -165,11 +211,13 @@ final class MovementSleepClientSmokeTest {
             check(bird.isOrderedToSit()&&!bird.isSleeping()&&Math.abs(bird.getY()-102)<.15,"Daytime seated Pidgey did not hover one block above support");
             check(bird.getTarget()==null,"Unprovoked awake Geodude caused daytime combat");
             if(!photograph("followup-pidgey-day-hover"))return;
+            if(fish.getNavigation().isDone()||fish.getDeltaMovement().lengthSqr()<.0004D||fish.isFollowingOwner()
+                    ||fish.position().distanceToSqr(new Vec3(owner.getX(),fish.getY(),owner.getZ()))>81)return;
             report("PASS FOLLOWUP DAY: seated Pidgey hovers one block above support beside unprovoked wild Geodude.");level.setDayTime(18000);next(level,1);
-        }else if(phase==1&&fish.isSleeping()&&wildFish.isSleeping()&&elapsed>150&&goldeenEyes){
+        }else if(phase==1&&fish.isSleeping()&&wildFish.isSleeping()&&elapsed>150&&goldeenEyes&&stableClientSleepSamples>=100&&serverSleepSamples>=100){
             check(!fish.isFollowingOwner()&&maxClientSleepStep<.002,"Goldeen sleep jitter/following under nearby shore owner; clientStep="+maxClientSleepStep);
             if(!photograph("followup-goldeen-sleep-underwater"))return;
-            report("PASS FOLLOWUP GOLDEEN: wild/free underwater sleep, nearby elevated owner, closed rendered lids; maximum client sleep step="+maxClientSleepStep);
+            report("PASS FOLLOWUP GOLDEEN: wild/free underwater sleep, nearby elevated owner, closed rendered lids; stable client step="+maxClientSleepStep+" arrival step="+maxClientArrivalStep+" anchor error="+maxClientAnchorError+" stable client/server samples="+stableClientSleepSamples+"/"+serverSleepSamples+" shallow="+SHALLOW+" delayed="+CLIENT_DELAY);
             gyarados=create(level,"gyarados","followup-free-gyarados",12.5,113,8.5,owner,"free");
             wildGyarados=create(level,"gyarados","followup-wild-gyarados",22.5,113,22.5,null,"");
             seatedGyarados=create(level,"gyarados","followup-seated-gyarados",22.5,113,8.5,owner,"sit");next(level,2);
@@ -188,7 +236,7 @@ final class MovementSleepClientSmokeTest {
         }else if(phase==4){
             check(bird.isOrderedToSit(),"Combat discarded the Pidgey's seated command");
             if(!bird.isSleeping()&&bird.getTarget()==zombie&&bird.getY()>101.7)combatHoverSeen=true;
-            if(combatHoverSeen&&photo==null)photo="followup-pidgey-combat-hover";
+            if(combatHoverSeen&&photo==null)photo=photoName("followup-pidgey-combat-hover");
             if(zombie.isAlive()){
                 if(elapsed>80)check(!bird.isSleeping()&&bird.getTarget()==zombie&&bird.getY()>101.7,"Pidgey did not wake, hover and retain the real hostile target");
             }else{
@@ -209,6 +257,9 @@ final class MovementSleepClientSmokeTest {
         }else if(phase==7&&elapsed>150&&fish.isSleeping()&&bird.isSleeping()&&gyarados.isSleeping()&&wildGyarados.isSleeping()&&seatedGyarados.isSleeping()){
             report("PASS FOLLOWUP SAVE: natural night states restored; saving the real world for a separate process reopen.");finish(mc);
         }
+    }
+    private static String actorState(MinemonCreature entity){
+        return entity==null?"missing":entity.getSpeciesSlug()+" pos="+entity.position()+" sleeping="+entity.isSleeping()+" resting="+entity.isNightResting()+" following="+entity.isFollowingOwner()+" target="+entity.getTarget()+" nav="+entity.getNavigation().getTargetPos()+" navDone="+entity.getNavigation().isDone();
     }
     private static void finish(Minecraft mc){done=true;MinemonRenderer.validationObserver=null;mc.execute(mc::stop);}
 }

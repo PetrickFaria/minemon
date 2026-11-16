@@ -321,6 +321,7 @@ public final class WaterMovementGoal extends Goal {
    }
    var path=mob.getNavigation().createPath(p,0);
    if(path==null||!path.canReach()){blocked.put(p.immutable(),mob.tickCount+200);continue;}
+   if(!gyaradosRestDestinationClear(mob,p)||!gyaradosRestPathClear(mob,path,p))continue;
    double clearance=SpeciesBehaviorProfiles.isAquatic(mob.getSpeciesSlug())?wallClearanceAlongPath(path,new HashMap<>()):Double.POSITIVE_INFINITY;
    if(clearance>=WALL_PREFERENCE_DISTANCE)return p;
    if(clearance>bestClearance){best=p;bestClearance=clearance;}
@@ -395,6 +396,56 @@ public final class WaterMovementGoal extends Goal {
  }
  /** Finds a reachable local floor target for a species-specific night descent. */
  static BlockPos bottomRestDestination(MinemonCreature mob){return new WaterMovementGoal(mob).nearbyBottomDestination();}
+ private static boolean checksOccupiedGyaradosRest(MinemonCreature mob){
+  return mob.getSpeciesSlug().equals("gyarados")&&mob.isNightResting();
+ }
+ private static boolean restObstacle(MinemonCreature mob,net.minecraft.world.entity.LivingEntity other){
+  return other!=mob&&other.isAlive()&&!other.isSpectator()&&!other.noPhysics;
+ }
+ static boolean gyaradosRestDestinationClear(MinemonCreature mob,BlockPos target){
+  if(!checksOccupiedGyaradosRest(mob))return true;
+  double y=bottomRestYAt(mob,target);if(!Double.isFinite(y))return false;
+  return gyaradosRestPositionClear(mob,new Vec3(target.getX()+.5D,y,target.getZ()+.5D));
+ }
+ static boolean gyaradosRestPositionClear(MinemonCreature mob,Vec3 position){
+  if(!checksOccupiedGyaradosRest(mob))return true;
+  var box=mob.getBoundingBox().move(position.subtract(mob.position()));
+  return mob.level.getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class,box.inflate(.02D),other->restObstacle(mob,other)).isEmpty();
+ }
+ static boolean gyaradosRestPathClear(MinemonCreature mob,net.minecraft.world.level.pathfinder.Path path,BlockPos target){
+  if(!checksOccupiedGyaradosRest(mob))return true;
+  if(path==null)return false;
+  var points=new ArrayList<Vec3>();
+  for(int i=path.getNextNodeIndex();i<path.getNodeCount();i++){
+   var point=path.getEntityPosAtNode(mob,i);
+   // Native navigation already advances an exactly reached rounded start node.
+   if(i==path.getNextNodeIndex()&&Math.abs(point.x-mob.getX())<.35D
+       &&Math.abs(point.z-mob.getZ())<.35D&&Math.abs(point.y-mob.getY())<.30D)continue;
+   points.add(point);
+  }
+  double y=bottomRestYAt(mob,target);if(!Double.isFinite(y))return false;
+  points.add(new Vec3(target.getX()+.5D,y,target.getZ()+.5D));
+  return unoccupiedRestRoute(mob,points);
+ }
+ static boolean gyaradosRestApproachClear(MinemonCreature mob,Vec3 target){
+  return !checksOccupiedGyaradosRest(mob)||unoccupiedRestRoute(mob,List.of(target));
+ }
+ private static boolean unoccupiedRestRoute(MinemonCreature mob,List<Vec3> points){
+  var original=mob.getBoundingBox();var bounds=original;
+  for(var point:points)bounds=bounds.minmax(original.move(point.subtract(mob.position())));
+  var obstacles=mob.level.getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class,bounds.inflate(.02D),other->restObstacle(mob,other));
+  if(obstacles.isEmpty())return true;
+  Vec3 previous=mob.position();
+  for(var point:points){
+   int steps=Math.max(1,(int)Math.ceil(previous.distanceTo(point)/.5D));
+   for(int i=1;i<=steps;i++){
+    var box=original.move(previous.lerp(point,i/(double)steps).subtract(mob.position()));
+    for(var other:obstacles)if(box.intersects(other.getBoundingBox().inflate(.02D)))return false;
+   }
+   previous=point;
+  }
+  return true;
+ }
  static double shallowAquaticSleepY(double currentY,double surfaceY){
   // Leave a small settling margin so interpolation and fractional fluid-surface
   // heights cannot leave the rendered body less than three blocks submerged.

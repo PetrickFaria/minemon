@@ -5,7 +5,6 @@ import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.control.SmoothSwimmingMoveControl;
 import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
-import net.minecraft.world.level.pathfinder.AmphibiousNodeEvaluator;
 import net.minecraft.world.level.pathfinder.PathFinder;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.level.Level;
@@ -221,6 +220,14 @@ public final class MinemonAquaticCreature extends MinemonCreature {
         // nodes, as the stock amphibious navigation does for water/shore paths.
         return new GroundPathNavigation(this, level) {
             @Override public net.minecraft.world.level.pathfinder.Path createPath(net.minecraft.core.BlockPos destination,int reach){
+                // A seated companion has a short combat perception range. Night
+                // descent needs its own bounded route budget for a deep bed and
+                // a detour around sleeping bodies; perception stays unchanged.
+                if(getSpeciesSlug().equals("gyarados")&&isNightResting()&&!isSleeping()){
+                    this.setMaxVisitedNodesMultiplier(4.0F);
+                    try{return super.createPath(destination,reach,Math.max(48,(int)this.mob.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.FOLLOW_RANGE)));}
+                    finally{this.resetMaxVisitedNodesMultiplier();}
+                }
                 // The native path-length limit can reject a valid distant
                 // amphibious route even inside the geometric search radius.
                 // Only distant water searches use the larger bounded budget;
@@ -244,7 +251,7 @@ public final class MinemonAquaticCreature extends MinemonCreature {
                 super.doStuckDetection(position);
             }
             @Override protected PathFinder createPathFinder(int maxVisitedNodes) {
-                this.nodeEvaluator = SpeciesBehaviorProfiles.isVisitor(getSpeciesSlug())?new ShoreNodeEvaluator():new AmphibiousNodeEvaluator(false);
+                this.nodeEvaluator = SpeciesBehaviorProfiles.isVisitor(getSpeciesSlug())?new ShoreNodeEvaluator():new GyaradosRestNodeEvaluator();
                 this.nodeEvaluator.setCanPassDoors(true);
                 return new PathFinder(this.nodeEvaluator, maxVisitedNodes);
             }

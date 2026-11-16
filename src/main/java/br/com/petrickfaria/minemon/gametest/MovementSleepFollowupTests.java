@@ -147,7 +147,7 @@ public final class MovementSleepFollowupTests {
         fish.moveTo(fish.getX(),h.absolutePos(BlockPos.ZERO).getY()+initialY,fish.getZ(),fish.getYRot(),0);
         // The full Gyarados box is taller than six blocks. A fixed observer at
         // y=19 overlapped its head and physically pushed the approaching swimmer.
-        p.moveTo(p.getX(),Math.max(p.getY(),fish.getBoundingBox().maxY+.05D),p.getZ(),0,0);
+        p.moveTo(p.getX(),Math.max(p.getY(),h.absolutePos(new BlockPos(0,19,0)).getY()+fish.getBbHeight()+1),p.getZ(),0,0);
         check(!fish.getBoundingBox().intersects(p.getBoundingBox()),"Bottom observer intersects the Gyarados fixture");
         if(!mode.equals("wild")){fish.tame(p);fish.applyManagedBehavior(mode);}
         var previous=new net.minecraft.world.phys.Vec3[]{fish.position()};double[] maxStep={0};
