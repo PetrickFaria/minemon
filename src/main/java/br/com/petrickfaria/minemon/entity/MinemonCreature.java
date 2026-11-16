@@ -237,6 +237,12 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     public boolean isFreeMode() { return this.entityData.get(FREE_MODE); }
     /** Existing ten-block natural-activity band around the trainer. */
     static final double NATURAL_OWNER_DISTANCE_SQR = 100.0D;
+    static final double FREE_RETURN_RELEASE_DISTANCE_SQR = 81.0D;
+    /** A submerged companion shares the trainer's shore region, not their air height. */
+    public double freeOwnerDistanceSqr(LivingEntity owner) {
+        return isAquaticSpecies() && isInWaterOrBubble()
+                ? horizontalDistanceToSqr(owner.getX(),owner.getZ()) : distanceToSqr(owner);
+    }
     public double navigationRange() {
         return !isTame() || isFreeMode()
                 ? (isAquaticSpecies() ? 128.0D : 24.0D) : perceptionRange();
@@ -251,7 +257,7 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     boolean needsFreeReturn() {
         LivingEntity owner=getOwner();
         return isFreeMode()&&owner!=null&&owner.isAlive()&&!owner.isSpectator()&&owner.level==level
-                &&distanceToSqr(owner)>NATURAL_OWNER_DISTANCE_SQR&&!isDefeated()&&!isOrderedToSit()
+                &&freeOwnerDistanceSqr(owner)>NATURAL_OWNER_DISTANCE_SQR&&!isDefeated()&&!isOrderedToSit()
                 &&!isPassenger()&&getTarget()==null;
     }
     /** Configured Pokémon damage before target-side Minecraft mitigation. */
@@ -280,7 +286,6 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
             case "free" -> {
                 // Reapplying a persisted command must not stop a route or wake a sleeper.
                 if (!isFreeMode()) { setOrderedToSit(false); setFreeMode(true); }
-                setFollowingOwner(false);
             }
             case "follow" -> {
                 setOrderedToSit(false); setFreeMode(false); setFollowingOwner(true);
@@ -295,6 +300,9 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
     }
     @Override public void setOrderedToSit(boolean orderedToSit) {
         boolean wasOrderedToSit=isOrderedToSit();
+        // Chunk registration and team-menu refreshes may repeat this command.
+        // They must not wake or lift an already seated night sleeper.
+        if(orderedToSit&&wasOrderedToSit)return;
         super.setOrderedToSit(orderedToSit);
         this.entityData.set(ORDERED_SIT, orderedToSit);
         if (orderedToSit) {
@@ -1668,7 +1676,8 @@ public class MinemonCreature extends TamableAnimal implements IAnimatable {
         this.syncNaturalState();
     }
     public boolean isNightResting(){return this.entityData.get(NIGHT_REST);}
-    public boolean commandLanding(){return this.isOrderedToSit() && SpeciesBehaviorProfiles.landsForNightRest(this.getSpeciesSlug());}
+    public boolean commandLanding(){return this.isOrderedToSit() && SpeciesBehaviorProfiles.landsForNightRest(this.getSpeciesSlug())
+            && (this.isNightResting() || this.isSleeping());}
     public boolean wantsNaturalLanding(){return this.commandLanding() || (SpeciesBehaviorProfiles.landsForNightRest(this.getSpeciesSlug())
             ||!SpeciesBehaviorProfiles.hoversDuringNightRest(this.getSpeciesSlug()))&&(this.isSleeping()||this.isNightResting())
             ||this.entityData.get(NATURAL_LANDING); }

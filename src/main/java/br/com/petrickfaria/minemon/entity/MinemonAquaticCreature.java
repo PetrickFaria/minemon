@@ -94,8 +94,8 @@ public final class MinemonAquaticCreature extends MinemonCreature {
         // tick. Neutral buoyancy lets the swimming controller reach higher
         // nodes; ordinary land gravity is restored immediately on shore.
         if(!this.level.isClientSide)this.setNoGravity(this.isInWater());
-        if(!this.level.isClientSide&&this.isSleeping()&&this.isInWaterOrBubble()){
-            // Stop movement before LivingEntity applies water travel. Clearing
+        if(this.isSleeping()&&this.isInWaterOrBubble()){
+            // Stop movement on BOTH sides before LivingEntity applies water travel. Clearing
             // velocity after tick is too late on the transition into sleep and
             // can leave one residual vertical step in the saved rest pose.
             this.setNoGravity(true);this.fallDistance=0;
@@ -159,6 +159,10 @@ public final class MinemonAquaticCreature extends MinemonCreature {
         // must not retain that locomotion pitch in the resting pose.
         if(this.isSleeping()&&SpeciesBehaviorProfiles.usesSwimmingSleepAnimation(this.getSpeciesSlug())){
             this.setXRot(0.0F);this.xRotO=0.0F;
+        }
+        if(this.isSleeping()&&this.isInWaterOrBubble()){
+            this.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
+            this.setNoGravity(true);this.fallDistance=0;
         }
         if(this.isDefeated()||this.level.isClientSide)return;
         if(this.isSleeping()&&this.isInWaterOrBubble()

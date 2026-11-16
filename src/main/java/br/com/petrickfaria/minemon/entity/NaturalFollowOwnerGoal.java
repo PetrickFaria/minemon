@@ -40,17 +40,17 @@ final class NaturalFollowOwnerGoal extends Goal {
 
     @Override public boolean canUse() {
         return eligible() && (!mob.isFreeMode()
-                || mob.distanceToSqr(mob.getOwner()) > MinemonCreature.NATURAL_OWNER_DISTANCE_SQR);
+                || mob.freeOwnerDistanceSqr(mob.getOwner()) > MinemonCreature.NATURAL_OWNER_DISTANCE_SQR);
     }
     @Override public boolean canContinueToUse() {
         return eligible() && owner == mob.getOwner() && (!mob.isFreeMode()
-                || mob.distanceToSqr(owner) > MinemonCreature.NATURAL_OWNER_DISTANCE_SQR);
+                || mob.freeOwnerDistanceSqr(owner) > MinemonCreature.FREE_RETURN_RELEASE_DISTANCE_SQR);
     }
     @Override public void start() { owner = mob.getOwner(); mob.wakeForFreeReturn(); mob.setFollowingOwner(true); mob.stopSpontaneousRun(); running = false; moving = mob.distanceToSqr(owner) > 25.0D; speed = 0.8D; recalculate = 0; }
     @Override public boolean requiresUpdateEveryTick() { return true; }
     @Override public void tick() {
         mob.setFollowingOwner(true);
-        double distance = mob.distanceToSqr(owner);
+        double distance = mob.isFreeMode()?mob.freeOwnerDistanceSqr(owner):mob.distanceToSqr(owner);
         if (moving && distance <= 20.25D) moving = false;
         else if (!moving && distance > 25.0D) moving = true;
         if (!moving) {
