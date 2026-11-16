@@ -6,6 +6,11 @@ on:
   pull_request:
   workflow_dispatch:
     inputs:
+      combat_diagnostics:
+        description: Run three isolated combat measurements instead of a full build
+        type: choice
+        options: ['0', '3']
+        default: '0'
       full_suite:
         description: Run the full legacy movement, sleep, audio, and GameTest suite
         required: false
@@ -16,6 +21,7 @@ permissions:
   actions: read
 jobs:
   build:
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.combat_diagnostics != '3' || inputs.full_suite }}
     runs-on: ubuntu-latest
     env:
       # Intermediate safety-branch commits run build/unit/resource checks.
@@ -511,4 +517,51 @@ jobs:
             run/screenshots/
             build/test-results/
             build/diagnostics/
+          retention-days: 7
+
+  combat_diagnostics:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.combat_diagnostics == '3' && !inputs.full_suite }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Measure every independent combat attempt and preserve its world
+        shell: bash
+        env:
+          REPETITIONS: '3'
+        run: |
+          set -euo pipefail
+          chmod +x gradlew
+          python3 -m pip install 'Pillow>=10,<12'
+          mkdir -p run/combat-diagnostics
+          overall_status=0
+          for attempt in $(seq 1 "$REPETITIONS"); do
+            python3 tools/prepare_gametest_world.py
+            set +e
+            timeout 600s ./gradlew --no-daemon runGameTestServer -PcombatGameTest 2>&1 | tee "run/combat-diagnostics/attempt-${attempt}.log"
+            attempt_status=${PIPESTATUS[0]}
+            set -e
+            printf 'attempt=%s exit=%s\n' "$attempt" "$attempt_status" | tee -a run/combat-diagnostics/results.txt
+            if [ "$attempt_status" -ne 0 ]; then overall_status=1; fi
+            if [ -d run/minemon-gametest ]; then
+              mv run/minemon-gametest "run/combat-diagnostics/world-${attempt}"
+            fi
+          done
+          exit "$overall_status"
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: minemon-combat-diagnostics-${{ github.sha }}
+          path: |
+            run/combat-diagnostics/
+            run/logs/
+            run/config/minemon/wild-spawn.properties
           retention-days: 7
